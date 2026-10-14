@@ -1,0 +1,19 @@
+{
+  "name": "the-last-lantern",
+  "private": true,
+  "version": "1.0.0",
+  "description": "The Last Lantern — Khu Rừng Ánh Sáng: 2D Top-Down Cozy Mystery & Light Puzzle Adventure (Phaser 3 + TypeScript + Vite)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "phaser": "^3.80.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  }
+}
