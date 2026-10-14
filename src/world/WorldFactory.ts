@@ -77,6 +77,10 @@ export class WorldFactory {
       bg.fillStyle(pathHex, 0.9);
       bg.fillRect(284, 36, 62, 324);
       bg.fillRect(315, 176, 325, 38);
+      // Stone edging so walkways read against the dark ground
+      bg.lineStyle(2, isDawn ? 0x9a917a : 0x4e5a58, 0.9);
+      bg.strokeRect(284, 36, 62, 324);
+      bg.strokeRect(315, 176, 325, 38);
 
       // Hooded Guardian Statues flanking the Sanctuary Plaza (06_Heart_Tree_Sanctuary.png)
       const leftStatue = scene.add.image(226, 152, 'guardian_statue');
@@ -94,6 +98,16 @@ export class WorldFactory {
       bg.closePath();
       bg.fillPath();
 
+      // Brook banks
+      bg.lineStyle(2, 0x2e6b80, 0.85);
+      bg.beginPath();
+      bg.moveTo(415, 180);
+      bg.lineTo(465, 180);
+      bg.lineTo(440, 360);
+      bg.lineTo(385, 360);
+      bg.closePath();
+      bg.strokePath();
+
       // Flagged forest paths leading to the 3 runestones & Circular Sun-Gate
       bg.fillStyle(pathHex, 0.92);
       bg.beginPath();
@@ -106,6 +120,18 @@ export class WorldFactory {
       bg.lineTo(385, 360);
       bg.closePath();
       bg.fillPath();
+      // Path edging
+      bg.lineStyle(1.5, 0x2c463e, 0.9);
+      bg.beginPath();
+      bg.moveTo(255, 360);
+      bg.lineTo(275, 235);
+      bg.lineTo(162, 204);
+      bg.lineTo(265, 128);
+      bg.lineTo(370, 145);
+      bg.lineTo(520, 204);
+      bg.lineTo(385, 360);
+      bg.closePath();
+      bg.strokePath();
 
       // Wooden plank bridge detail across the brook
       bg.fillStyle(0x6e472b, 1);
@@ -116,6 +142,8 @@ export class WorldFactory {
       // Stone terraces on West & East banks + diagonal Moonlit Creek (04_Moonlit_Creek.png)
       bg.fillStyle(pathHex, 0.82);
       bg.fillRect(40, 80, 240, 220);
+      bg.lineStyle(2, 0x34566a, 0.9);
+      bg.strokeRect(40, 80, 240, 220);
 
       bg.fillStyle(0x163f5e, 1);
       bg.beginPath();
@@ -143,8 +171,20 @@ export class WorldFactory {
       bg.lineTo(210, 345);
       bg.closePath();
       bg.fillPath();
+      // Courtyard masonry outline
+      bg.lineStyle(2, 0x565668, 0.9);
+      bg.beginPath();
+      bg.moveTo(155, 205);
+      bg.lineTo(345, 110);
+      bg.lineTo(545, 195);
+      bg.lineTo(450, 345);
+      bg.lineTo(210, 345);
+      bg.closePath();
+      bg.strokePath();
 
       bg.fillRect(292, 0, 56, 145);
+      bg.lineStyle(1.5, 0x565668, 0.9);
+      bg.strokeRect(292, 0, 56, 145);
 
       // Carved floor Sun & Moon emblem rings matching 05_Silent_Ruins.png
       bg.lineStyle(1.5, 0xd9a84e, 0.55);
