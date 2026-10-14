@@ -44,9 +44,27 @@ export class WorldFactory {
     // 2. Zone-specific architecture matching Redesigned Art Pack (03..07)
     if (zoneId === 'hub') {
       // Sanctuary lily ponds on lower-left and lower-right (06_Heart_Tree_Sanctuary.png)
-      bg.fillStyle(isDawn ? 0x3b8c9e : 0x133b4a, 0.9);
-      bg.fillCircle(125, 285, 46);
-      bg.fillCircle(505, 285, 46);
+      // Stone rim + deep water + moon glint so they read as ponds, not flat discs.
+      for (const [px, py] of [[125, 285], [505, 285]] as Array<[number, number]>) {
+        bg.fillStyle(isDawn ? 0x6b7a72 : 0x3a4a4c, 0.95);
+        bg.fillCircle(px, py, 50);
+        bg.fillStyle(isDawn ? 0x3b8c9e : 0x133b4a, 0.95);
+        bg.fillCircle(px, py, 45);
+        bg.fillStyle(isDawn ? 0x54aec2 : 0x1d5568, 0.9);
+        bg.fillCircle(px - 8, py - 9, 26);
+        // pale moon-glint arc on the water
+        bg.lineStyle(2, isDawn ? 0xd9f2ff : 0x9ad9ea, 0.55);
+        bg.beginPath();
+        bg.arc(px - 6, py - 6, 30, Math.PI * 1.15, Math.PI * 1.55);
+        bg.strokePath();
+        // lily pads
+        bg.fillStyle(isDawn ? 0x5da24a : 0x3f7d44, 0.95);
+        bg.fillCircle(px - 18, py + 12, 7);
+        bg.fillCircle(px + 16, py + 8, 6);
+        bg.fillCircle(px + 2, py + 20, 5);
+        bg.fillStyle(isDawn ? 0xfff9e6 : 0xf2f5e6, 0.95);
+        bg.fillCircle(px + 16, py + 8, 2);
+      }
 
       // Concentric circular stone sanctuary plaza around the Heart Tree
       bg.fillStyle(isDawn ? 0x7d8570 : 0x384547, 0.92);

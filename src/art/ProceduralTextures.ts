@@ -301,34 +301,129 @@ export class ProceduralTextures {
         }
 
         // 3. Gnarled ancient trunk & spreading roots (06_Heart_Tree_Sanctuary.png)
-        const barkDark = v.dawn ? '#6e4e2e' : '#4a4238';
-        const barkLight = v.dawn ? '#9c7144' : v.stage >= 1 ? '#78654e' : '#5c5346';
+        const barkBase = v.dawn ? '#6e4e2e' : '#5a4632';
+        const barkDark = v.dawn ? '#4e3520' : '#3d2f22';
+        const barkLight = v.dawn ? '#9c7144' : '#7a5f42';
+        const barkHi = v.dawn ? '#c09a5e' : '#9a7a52';
+        const mossC = v.dawn ? '#5da24a' : '#4c7d40';
 
-        ctx.fillStyle = barkDark;
+        // Trunk body (warm brown, wider + more tapered than before)
+        ctx.fillStyle = barkBase;
         ctx.beginPath();
-        ctx.moveTo(74, 34);
-        ctx.lineTo(146, 34);
-        ctx.lineTo(158, 148);
-        ctx.lineTo(62, 148);
+        ctx.moveTo(70, 34);
+        ctx.lineTo(150, 34);
+        ctx.lineTo(160, 148);
+        ctx.lineTo(60, 148);
         ctx.closePath();
         ctx.fill();
 
-        // Spreading roots left and right
-        ctx.strokeStyle = barkDark;
-        ctx.lineWidth = 8;
-        const roots = [
-          [78, 110, 28, 174],
-          [84, 118, 52, 178],
-          [92, 124, 74, 180],
-          [128, 124, 146, 180],
-          [136, 118, 168, 178],
-          [142, 110, 192, 174],
+        // Vertical bark plates: alternating ridge / groove / highlight
+        const ridges = [66, 78, 90, 102, 114, 126, 138];
+        for (let ri = 0; ri < ridges.length; ri++) {
+          const rx = ridges[ri];
+          const spread = (rx - 110) * 0.12;
+          // groove shadow on the right side of each plate
+          ctx.fillStyle = barkDark;
+          ctx.fillRect(rx + 7 + spread, 36, 3, 108);
+          // plate face
+          ctx.fillStyle = ri % 2 === 0 ? barkBase : barkLight;
+          ctx.fillRect(rx + spread, 36, 7, 108);
+          // 1px rim light on the left edge of each plate
+          ctx.fillStyle = barkHi;
+          ctx.fillRect(rx + spread, 36, 1, 108);
+        }
+
+        // Bark knots (dark oval + lighter ring)
+        const knots: Array<[number, number, number]> = [
+          [84, 66, 5],
+          [136, 96, 6],
+          [102, 122, 4],
         ];
-        for (const [x1, y1, x2, y2] of roots) {
+        for (const [kx, ky, kr] of knots) {
+          ctx.fillStyle = barkDark;
           ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
+          ctx.ellipse(kx, ky, kr + 1.5, kr + 2.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = barkLight;
+          ctx.beginPath();
+          ctx.ellipse(kx, ky, kr - 1, kr, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = barkDark;
+          ctx.beginPath();
+          ctx.ellipse(kx, ky, 1.8, 2.6, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Moss patches creeping up the trunk edges + root crowns
+        ctx.fillStyle = mossC;
+        const mossBlobs: Array<[number, number, number, number]> = [
+          [64, 120, 9, 6],
+          [70, 140, 12, 7],
+          [156, 118, 9, 6],
+          [150, 142, 12, 7],
+          [76, 52, 7, 5],
+          [144, 58, 8, 5],
+          [110, 146, 16, 7],
+        ];
+        for (const [mx, my, mrw, mrh] of mossBlobs) {
+          ctx.beginPath();
+          ctx.ellipse(mx, my, mrw, mrh, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Thick tapered surface roots (filled quads, not strokes)
+        const rootQuads: Array<[number, number, number, number, number, number, number, number]> = [
+          [72, 118, 86, 118, 44, 182, 28, 184],
+          [86, 126, 98, 126, 62, 184, 50, 184],
+          [96, 132, 106, 132, 82, 184, 72, 184],
+          [114, 132, 124, 132, 148, 184, 138, 184],
+          [122, 126, 134, 126, 170, 184, 158, 184],
+          [134, 118, 148, 118, 192, 182, 178, 184],
+        ];
+        for (const [ax, ay, bx, by, cx, cy, dx, dy] of rootQuads) {
+          ctx.fillStyle = barkBase;
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.lineTo(cx, cy);
+          ctx.lineTo(dx, dy);
+          ctx.closePath();
+          ctx.fill();
+          // center ridge highlight along each root
+          ctx.strokeStyle = barkHi;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo((ax + bx) / 2, ay);
+          ctx.lineTo((cx + dx) / 2, cy);
           ctx.stroke();
+          // moss cap on each root tip
+          ctx.fillStyle = mossC;
+          ctx.beginPath();
+          ctx.ellipse((cx + dx) / 2, cy - 1, 7, 3.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Hanging vines + leaves from the canopy rim
+        ctx.strokeStyle = mossC;
+        ctx.lineWidth = 1.6;
+        const vines: Array<[number, number, number, number]> = [
+          [56, 44, 52, 78],
+          [164, 44, 168, 80],
+          [96, 36, 94, 62],
+          [126, 36, 128, 64],
+        ];
+        for (const [vx1, vy1, vx2, vy2] of vines) {
+          ctx.beginPath();
+          ctx.moveTo(vx1, vy1);
+          ctx.quadraticCurveTo(vx1 + 3, (vy1 + vy2) / 2, vx2, vy2);
+          ctx.stroke();
+          ctx.fillStyle = mossC;
+          ctx.beginPath();
+          ctx.ellipse(vx2 - 2, vy2, 3, 2, -0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.ellipse(vx2 + 2, vy2 - 6, 2.5, 1.8, 0.4, 0, Math.PI * 2);
+          ctx.fill();
         }
 
         // Glowing golden bark veins (06 & 07 reference art)
