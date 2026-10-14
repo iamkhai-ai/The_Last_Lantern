@@ -443,5 +443,25 @@
         "w":  36,
         "key":  "lock_moon_off",
         "h":  44
+    },
+    {
+        "key":  "tile_grass",
+        "w":  94,
+        "h":  97
+    },
+    {
+        "key":  "tile_dirt",
+        "w":  94,
+        "h":  100
+    },
+    {
+        "key":  "tile_stone",
+        "w":  94,
+        "h":  101
+    },
+    {
+        "key":  "tile_water",
+        "w":  89,
+        "h":  90
     }
 ]

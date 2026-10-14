@@ -24,32 +24,64 @@ export class WorldFactory {
     const treeSprites: Phaser.GameObjects.Image[] = [];
     const bushSprites: Phaser.GameObjects.Image[] = [];
 
-    // 1. Ground backdrop with subtle pixel noise & winding paths matching Redesigned Art Pack
-    const bg = scene.add.graphics();
-    bg.setDepth(1);
+    // 1. Ground layers (same depth, creation order = draw order):
+    //    bgBase (flat safety color) -> atlas tileSprite textures -> bg (detail strokes).
+    // Shapes keep the EXACT legacy coordinates so collisions/spawns never move.
+    const bgBase = scene.add.graphics();
+    bgBase.setDepth(1);
     const groundHex = isDawn && def.dawnBgColor ? def.dawnBgColor : def.bgColor;
-    bg.fillStyle(groundHex, 1);
-    bg.fillRect(0, 0, 640, 360);
+    bgBase.fillStyle(groundHex, 1);
+    bgBase.fillRect(0, 0, 640, 360);
 
-    const patchColor = isDawn ? 0x5c9654 : zoneId === 'ruins' ? 0x252240 : 0x173934;
-    bg.fillStyle(patchColor, 0.45);
-    for (let i = 0; i < 95; i++) {
-      const px = ((i * 73) % 620) + 10;
-      const py = ((i * 47) % 340) + 10;
-      bg.fillRect(px, py, 6, 4);
+    const addTiles = (
+      tex: string,
+      tint: number | null,
+      shape: (g: Phaser.GameObjects.Graphics) => void
+    ): void => {
+      const ts = scene.add.tileSprite(0, 0, 640, 360, tex);
+      ts.setOrigin(0, 0);
+      ts.setDepth(1);
+      if (tint !== null) ts.setTint(tint);
+      const mg = scene.make.graphics({ x: 0, y: 0 }, false);
+      mg.fillStyle(0xffffff, 1);
+      shape(mg);
+      ts.setMask(mg.createGeometryMask());
+    };
+
+    const WARM = 0xffe2b8;
+    // Night tints pull bright daytime atlas art into the night mood;
+    // the lantern overlay + dawn wash do the rest.
+    const NIGHT_GRASS = 0x5f7a5f;
+    const NIGHT_CREEK_GRASS = 0x5a7a8c;
+    // Full-screen textured base per zone (ruins sits on dark stone, creek on moonlit grass)
+    if (zoneId === 'ruins') {
+      addTiles('tile_stone', isDawn ? WARM : 0x5f5f76, (g) => {
+        g.fillRect(0, 0, 640, 360);
+      });
+    } else if (zoneId === 'creek') {
+      addTiles('tile_grass', isDawn ? WARM : NIGHT_CREEK_GRASS, (g) => {
+        g.fillRect(0, 0, 640, 360);
+      });
+    } else {
+      addTiles('tile_grass', isDawn ? WARM : NIGHT_GRASS, (g) => {
+        g.fillRect(0, 0, 640, 360);
+      });
     }
 
-    const pathHex = isDawn && def.dawnPathColor ? def.dawnPathColor : def.pathColor;
+    // Detail graphics drawn ON TOP of the tiles.
+    const bg = scene.add.graphics();
+    bg.setDepth(1);
 
     // 2. Zone-specific architecture matching Redesigned Art Pack (03..07)
     if (zoneId === 'hub') {
-      // Sanctuary lily ponds on lower-left and lower-right (06_Heart_Tree_Sanctuary.png)
-      // Stone rim + deep water + moon glint so they read as ponds, not flat discs.
+      // Sanctuary lily ponds: atlas water texture + stone rim + moon glint + lily pads.
+      addTiles('tile_water', null, (g) => {
+        g.fillCircle(125, 285, 45);
+        g.fillCircle(505, 285, 45);
+      });
       for (const [px, py] of [[125, 285], [505, 285]] as Array<[number, number]>) {
-        bg.fillStyle(isDawn ? 0x6b7a72 : 0x3a4a4c, 0.95);
-        bg.fillCircle(px, py, 50);
-        bg.fillStyle(isDawn ? 0x3b8c9e : 0x133b4a, 0.95);
-        bg.fillCircle(px, py, 45);
+        bg.lineStyle(4, isDawn ? 0x8a8578 : 0x3a4a4c, 0.95);
+        bg.strokeCircle(px, py, 47);
         bg.fillStyle(isDawn ? 0x54aec2 : 0x1d5568, 0.9);
         bg.fillCircle(px - 8, py - 9, 26);
         // pale moon-glint arc on the water
@@ -67,17 +99,16 @@ export class WorldFactory {
       }
 
       // Concentric circular stone sanctuary plaza around the Heart Tree
-      bg.fillStyle(isDawn ? 0x7d8570 : 0x384547, 0.92);
-      bg.fillCircle(315, 175, 84);
+      addTiles('tile_stone', isDawn ? WARM : 0xb0b0bc, (g) => {
+        g.fillCircle(315, 175, 84);
+        g.fillRect(284, 36, 62, 324);
+        g.fillRect(315, 176, 325, 38);
+      });
       bg.lineStyle(2, isDawn ? 0xd9c27e : 0x56686b, 0.85);
       bg.strokeCircle(315, 175, 82);
       bg.strokeCircle(315, 175, 64);
 
-      // North-South & East stone walkways
-      bg.fillStyle(pathHex, 0.9);
-      bg.fillRect(284, 36, 62, 324);
-      bg.fillRect(315, 176, 325, 38);
-      // Stone edging so walkways read against the dark ground
+      // North-South & East stone walkways (texture above, edging below)
       bg.lineStyle(2, isDawn ? 0x9a917a : 0x4e5a58, 0.9);
       bg.strokeRect(284, 36, 62, 324);
       bg.strokeRect(315, 176, 325, 38);
@@ -89,15 +120,15 @@ export class WorldFactory {
       rightStatue.setDepth(15);
     } else if (zoneId === 'woods') {
       // Cascading forest brook & wooden plank bridge (03_Whispering_Woods.png)
-      bg.fillStyle(0x1b5263, 0.9);
-      bg.beginPath();
-      bg.moveTo(415, 180);
-      bg.lineTo(465, 180);
-      bg.lineTo(440, 360);
-      bg.lineTo(385, 360);
-      bg.closePath();
-      bg.fillPath();
-
+      addTiles('tile_water', null, (g) => {
+        g.beginPath();
+        g.moveTo(415, 180);
+        g.lineTo(465, 180);
+        g.lineTo(440, 360);
+        g.lineTo(385, 360);
+        g.closePath();
+        g.fillPath();
+      });
       // Brook banks
       bg.lineStyle(2, 0x2e6b80, 0.85);
       bg.beginPath();
@@ -109,17 +140,18 @@ export class WorldFactory {
       bg.strokePath();
 
       // Flagged forest paths leading to the 3 runestones & Circular Sun-Gate
-      bg.fillStyle(pathHex, 0.92);
-      bg.beginPath();
-      bg.moveTo(255, 360);
-      bg.lineTo(275, 235);
-      bg.lineTo(162, 204);
-      bg.lineTo(265, 128);
-      bg.lineTo(370, 145);
-      bg.lineTo(520, 204);
-      bg.lineTo(385, 360);
-      bg.closePath();
-      bg.fillPath();
+      addTiles('tile_dirt', isDawn ? WARM : 0x9a938a, (g) => {
+        g.beginPath();
+        g.moveTo(255, 360);
+        g.lineTo(275, 235);
+        g.lineTo(162, 204);
+        g.lineTo(265, 128);
+        g.lineTo(370, 145);
+        g.lineTo(520, 204);
+        g.lineTo(385, 360);
+        g.closePath();
+        g.fillPath();
+      });
       // Path edging
       bg.lineStyle(1.5, 0x2c463e, 0.9);
       bg.beginPath();
@@ -140,20 +172,22 @@ export class WorldFactory {
       bg.strokeRect(402, 206, 52, 20);
     } else if (zoneId === 'creek') {
       // Stone terraces on West & East banks + diagonal Moonlit Creek (04_Moonlit_Creek.png)
-      bg.fillStyle(pathHex, 0.82);
-      bg.fillRect(40, 80, 240, 220);
+      addTiles('tile_stone', isDawn ? WARM : 0x8a98a8, (g) => {
+        g.fillRect(40, 80, 240, 220);
+      });
       bg.lineStyle(2, 0x34566a, 0.9);
       bg.strokeRect(40, 80, 240, 220);
 
-      bg.fillStyle(0x163f5e, 1);
-      bg.beginPath();
-      bg.moveTo(450, 0);
-      bg.lineTo(640, 0);
-      bg.lineTo(640, 175);
-      bg.lineTo(360, 360);
-      bg.lineTo(185, 360);
-      bg.closePath();
-      bg.fillPath();
+      addTiles('tile_water', null, (g) => {
+        g.beginPath();
+        g.moveTo(450, 0);
+        g.lineTo(640, 0);
+        g.lineTo(640, 175);
+        g.lineTo(360, 360);
+        g.lineTo(185, 360);
+        g.closePath();
+        g.fillPath();
+      });
 
       bg.lineStyle(2, 0x4ba3c7, 0.75);
       bg.beginPath();
@@ -162,15 +196,18 @@ export class WorldFactory {
       bg.strokePath();
     } else if (zoneId === 'ruins') {
       // Ancient elevated stone masonry courtyard (05_Silent_Ruins.png)
-      bg.fillStyle(pathHex, 0.94);
-      bg.beginPath();
-      bg.moveTo(155, 205);
-      bg.lineTo(345, 110);
-      bg.lineTo(545, 195);
-      bg.lineTo(450, 345);
-      bg.lineTo(210, 345);
-      bg.closePath();
-      bg.fillPath();
+      // Lighter slab texture so the courtyard lifts off the dark stone base.
+      addTiles('tile_stone', isDawn ? WARM : 0xffffff, (g) => {
+        g.beginPath();
+        g.moveTo(155, 205);
+        g.lineTo(345, 110);
+        g.lineTo(545, 195);
+        g.lineTo(450, 345);
+        g.lineTo(210, 345);
+        g.closePath();
+        g.fillPath();
+        g.fillRect(292, 0, 56, 145);
+      });
       // Courtyard masonry outline
       bg.lineStyle(2, 0x565668, 0.9);
       bg.beginPath();

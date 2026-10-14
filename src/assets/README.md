@@ -1,13 +1,13 @@
-# ART ASSET MANIFEST — The Last Lantern
+﻿# ART ASSET MANIFEST â€” The Last Lantern
 
 Tong cong: **82 file PNG**.
 
 ## Cach dung
 
-1. Xuat moi sprite thanh `public/assets/<ten>.png` — **nen trong suot**, **dung ten file**
+1. Xuat moi sprite thanh `src/assets/<ten>.png` â€” **nen trong suot**, **dung ten file**
 2. Kich thuoc cua mang chinh la xa. Game tu scale theo phoi canh, nen dung noi dung nao cung duoc,
    nhung danh sach nay giup ban bo cuc dung cho hien thi. **Dinh huong toan bo nen TRANH SUOT.**
-3. `public/assets/index.json` la danh sach file can co. **File thieu -> game tu dung ban ve Canvas, khong vo.**
+3. `src/assets/index.json` la danh sach file can co. **File thieu -> game tu dung ban ve Canvas, khong vo.**
 4. Sau khi them file: khong can sua code, chi can reload trinh duyet (Ctrl+F5).
 
 ## Bao cao tai
@@ -19,41 +19,41 @@ Tong cong: **82 file PNG**.
 | Bo cuc game | 640x360, Scale.FIT, top-down |
 | Mau sac | Bam theo bang mau trong `Art_References/01_Character_Style_Guide.png` |
 
-## NHÂN VẬT — Linh (36 file)
+## NHÃ‚N Váº¬T â€” Linh (36 file)
 
 4 huong x 3 trang thai den x 3 frame. Frame 0 = dung, 1/2 = buoc chan.
 | ten file | kich thuoc |
 |---|---|
 | `player_{down\|up\|left\|right}_{lit\|unlit\|nolamp}_{0\|1\|2}.png` | 36x42 |
 
-**Dinh nghia mau:** `lit` = dang co den thap sang · `unlit` = co den nhung tat · `nolamp` = khong co den.
+**Dinh nghia mau:** `lit` = dang co den thap sang Â· `unlit` = co den nhung tat Â· `nolamp` = khong co den.
 **Pivot:** cham giua, chan sprite phai khop duoi chan nhan vat. Sprite 36x42, chan o ~y=40.
 
 ## Lumo (2 file)
 
 | `lumo_0.png` / `lumo_1.png` | 24x24 |
 
-## CÂY VIỀN (5 file)
+## CÃ‚Y VIá»€N (5 file)
 
 | `tree_{hub\|woods\|creek\|ruins\|dawn}.png` | 76x76 |
 
-## BỤI CỎ (5 file)
+## Bá»¤I Cá»Ž (5 file)
 
 | `bush_{hub\|woods\|creek\|ruins\|dawn}.png` | 44x32 |
 
-## CỔ TỰ WOODS (7 file)
+## Cá»” Tá»° WOODS (7 file)
 
 | `runestone_hidden.png` | 34x46 |
 | `runestone_{moon\|leaf\|star}_lit.png` | 34x46 |
 | `runestone_{moon\|leaf\|star}_rev.png` | 34x46 |
 
-## GƯƠNG CREEK (4 file)
+## GÆ¯Æ NG CREEK (4 file)
 
 | `mirror_0.png` .. `mirror_3.png` | 36x48 |
 
-4 huong xoay. 0 = /, 1 = \, 2 = —, 3 = |
+4 huong xoay. 0 = /, 1 = \, 2 = â€”, 3 = |
 
-## CÁC THÀNH PHẦN KHÁC
+## CÃC THÃ€NH PHáº¦N KHÃC
 
 | ten file | kich thuoc |
 |---|---|
@@ -144,18 +144,19 @@ Tong cong: **82 file PNG**.
 
 3 key duoc tao bang gradient nen giu nguyen thu cong, khong can file:
 
-`light_radial` 256x256 · `particle_firefly` 8x8 · `particle_mist` 96x40
+`light_radial` 256x256 Â· `particle_firefly` 8x8 Â· `particle_mist` 96x40
 
 ## Bang mau can khop
 
 Lay mau cap o cuoi cua tung panel trong `Art_References/01` va `Art_References/02`:
 
-- **Cloth (Linh):** kem `#f0e2c8` · **khăn đỏ `#b5443c`** · tóc nâu `#4a3324`
-- **Leather:** `#8a5a2b` · `#6b4420` · `#4a2f18`
-- **Lantern:** kim loại `#c9a227` · kính `#ffe9a0`
-- **Crystal:** mint `#a8e6d0` · ngọc `#5cd6b8` · lam `#4daee6`
-- **Glowing mushroom:** `#7df2d4` · `#38d9c8` · `#e6fffc`
-- **Mossy stone:** xam `#687478` · rêu `#568543`
+- **Cloth (Linh):** kem `#f0e2c8` Â· **khÄƒn Ä‘á» `#b5443c`** Â· tÃ³c nÃ¢u `#4a3324`
+- **Leather:** `#8a5a2b` Â· `#6b4420` Â· `#4a2f18`
+- **Lantern:** kim loáº¡i `#c9a227` Â· kÃ­nh `#ffe9a0`
+- **Crystal:** mint `#a8e6d0` Â· ngá»c `#5cd6b8` Â· lam `#4daee6`
+- **Glowing mushroom:** `#7df2d4` Â· `#38d9c8` Â· `#e6fffc`
+- **Mossy stone:** xam `#687478` Â· rÃªu `#568543`
 
 > Luu y: nen zone hien tai **rat toi** (hub `#132e2b`). Anh nen sprite **phai duoc sang hon nen**
 > it nhat 2:1 tuong phan moi thay. Hay test tren nen nen, khong phai nen trang.
+
