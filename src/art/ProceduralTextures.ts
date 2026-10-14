@@ -28,6 +28,10 @@ export class ProceduralTextures {
   }
 
   private static createPlayerTextures(scene: Phaser.Scene): void {
+    // Matches 01_Character_Style_Guide.png:
+    // Cream-ivory hood & cloak (#e8dec8), dark chestnut hair (#3a251c),
+    // flowing crimson-red scarf (#b8322c), brown leather boots (#734829),
+    // and ornate bronze/gold lantern (#ffbe42).
     const dirs: Array<'down' | 'up' | 'left' | 'right'> = ['down', 'up', 'left', 'right'];
     const states: Array<'lit' | 'unlit' | 'nolamp'> = ['lit', 'unlit', 'nolamp'];
 
@@ -35,117 +39,156 @@ export class ProceduralTextures {
       for (const lampState of states) {
         for (let frame = 0; frame < 3; frame++) {
           const key = `player_${dir}_${lampState}_${frame}`;
-          this.createCanvas(scene, key, 36, 42, (ctx) => {
+          this.createCanvas(scene, key, 40, 44, (ctx) => {
             const bobY = frame === 0 ? 0 : frame === 1 ? -1 : 1;
             const stride = frame === 0 ? 0 : frame === 1 ? -2 : 2;
 
-            // Shadow oval at feet (matching reference art)
-            ctx.fillStyle = 'rgba(6, 14, 16, 0.72)';
+            // Ground shadow ellipse
+            ctx.fillStyle = 'rgba(5, 11, 15, 0.72)';
             ctx.beginPath();
-            ctx.ellipse(16, 37, 10, 3.5, 0, 0, Math.PI * 2);
+            ctx.ellipse(18, 39, 10, 3.5, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Boots
-            ctx.fillStyle = '#38251c';
-            ctx.fillRect(11 + (stride > 0 ? 1 : 0), 31 + bobY, 4, 5);
-            ctx.fillRect(17 + (stride < 0 ? -1 : 0), 31 + bobY, 4, 5);
-
-            // Cloak body (warm ochre-brown from reference)
-            ctx.fillStyle = '#8b5129';
+            // Flowing crimson scarf tail behind cloak
+            ctx.fillStyle = '#8f2420';
+            const tailOffsetX = dir === 'right' ? -6 : dir === 'left' ? 6 : -5;
             ctx.beginPath();
-            ctx.moveTo(10, 17 + bobY);
-            ctx.lineTo(22, 17 + bobY);
+            ctx.moveTo(18, 19 + bobY);
+            ctx.lineTo(18 + tailOffsetX - 4, 23 + bobY + (frame === 1 ? -1 : 1));
+            ctx.lineTo(18 + tailOffsetX - 2, 27 + bobY);
+            ctx.lineTo(18, 23 + bobY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Brown leather boots (#734829 & #4d2e18)
+            ctx.fillStyle = '#4d2e18';
+            ctx.fillRect(13 + (stride > 0 ? 1 : 0), 32 + bobY, 4, 6);
+            ctx.fillRect(19 + (stride < 0 ? -1 : 0), 32 + bobY, 4, 6);
+            ctx.fillStyle = '#8c5832';
+            ctx.fillRect(13 + (stride > 0 ? 1 : 0), 33 + bobY, 4, 3);
+            ctx.fillRect(19 + (stride < 0 ? -1 : 0), 33 + bobY, 4, 3);
+
+            // Cream-ivory cloak body (#d6c6ac outer, #ede3cf highlight)
+            ctx.fillStyle = '#bfb097';
+            ctx.beginPath();
+            ctx.moveTo(11, 18 + bobY);
+            ctx.lineTo(25, 18 + bobY);
+            ctx.lineTo(27, 33 + bobY);
+            ctx.lineTo(9, 33 + bobY);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#e8dec8';
+            ctx.beginPath();
+            ctx.moveTo(12, 19 + bobY);
+            ctx.lineTo(24, 19 + bobY);
             ctx.lineTo(25, 32 + bobY);
-            ctx.lineTo(7, 32 + bobY);
+            ctx.lineTo(11, 32 + bobY);
             ctx.closePath();
             ctx.fill();
 
-            // Cloak highlight fold
-            ctx.fillStyle = '#a46334';
+            // Leather side satchel
+            ctx.fillStyle = '#6e4526';
+            ctx.fillRect(14, 27 + bobY, 5, 4);
+
+            // Cream hood base & shadow
+            ctx.fillStyle = '#cfc0a6';
             ctx.beginPath();
-            ctx.moveTo(12, 18 + bobY);
-            ctx.lineTo(20, 18 + bobY);
-            ctx.lineTo(22, 31 + bobY);
-            ctx.lineTo(10, 31 + bobY);
-            ctx.closePath();
+            ctx.arc(18, 12 + bobY, 8.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Soft red-ochre scarf
-            ctx.fillStyle = '#a3483c';
-            ctx.fillRect(11, 16 + bobY, 10, 3);
-
-            // Hood & head (reddish-brown hood matching 01_heart_tree_night.png)
-            ctx.fillStyle = '#693b36';
+            ctx.fillStyle = '#efe6d5';
             ctx.beginPath();
-            ctx.moveTo(9, 10 + bobY);
-            ctx.lineTo(16, 6 + bobY);
-            ctx.lineTo(24, 11 + bobY);
-            ctx.lineTo(25, 16 + bobY);
-            ctx.lineTo(9, 17 + bobY);
+            ctx.arc(18, 11.5 + bobY, 7.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hood pointed tip
+            ctx.beginPath();
+            ctx.moveTo(11, 9 + bobY);
+            ctx.lineTo(8, 12 + bobY);
+            ctx.lineTo(13, 14 + bobY);
             ctx.closePath();
             ctx.fill();
 
-            // Face & eye detail depending on direction
+            // Dark chestnut hair & face peeking under hood (except when facing up)
             if (dir !== 'up') {
-              ctx.fillStyle = '#e2b994';
+              const faceShift = dir === 'left' ? -2 : dir === 'right' ? 2 : 0;
+              // Dark brown hair (#3a251c)
+              ctx.fillStyle = '#3a251c';
+              ctx.fillRect(13 + faceShift, 9 + bobY, 10, 5);
+
+              // Warm skin face
+              ctx.fillStyle = '#f0c4a0';
+              ctx.fillRect(14 + faceShift, 12 + bobY, 8, 5);
+
+              // Expressive dark brown eyes
+              ctx.fillStyle = '#24140e';
               if (dir === 'left') {
-                ctx.fillRect(10, 13 + bobY, 5, 4);
-                ctx.fillStyle = '#1d1412';
-                ctx.fillRect(11, 14 + bobY, 1, 1);
+                ctx.fillRect(14 + faceShift, 14 + bobY, 1.5, 2);
               } else if (dir === 'right') {
-                ctx.fillRect(17, 13 + bobY, 5, 4);
-                ctx.fillStyle = '#1d1412';
-                ctx.fillRect(20, 14 + bobY, 1, 1);
+                ctx.fillRect(20 + faceShift, 14 + bobY, 1.5, 2);
               } else {
-                ctx.fillRect(14, 13 + bobY, 6, 4);
-                ctx.fillStyle = '#1d1412';
-                ctx.fillRect(17, 14 + bobY, 1, 1);
+                ctx.fillRect(15, 14 + bobY, 1.5, 2);
+                ctx.fillRect(19.5, 14 + bobY, 1.5, 2);
               }
+            } else {
+              // Back of cream hood fold
+              ctx.strokeStyle = '#b8a88e';
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.arc(18, 12 + bobY, 5, 0.3, Math.PI - 0.3);
+              ctx.stroke();
             }
 
-            // Lantern arm & lantern (if carrying lantern)
+            // Crimson-red scarf wrapped around neck (#b8322c & #d9463e)
+            ctx.fillStyle = '#a82b25';
+            ctx.fillRect(11, 17 + bobY, 14, 4);
+            ctx.fillStyle = '#cf3e36';
+            ctx.fillRect(12, 17 + bobY, 12, 2.5);
+
+            // Lantern arm & ornate bronze lantern
             if (lampState !== 'nolamp') {
-              const armX = dir === 'left' ? 4 : 23;
+              const armX = dir === 'left' ? 4 : 26;
               const armY = 22 + bobY;
 
-              // Arm extending out
-              ctx.strokeStyle = '#d9ae89';
-              ctx.lineWidth = 2;
+              // Sleeve in cream cloth
+              ctx.strokeStyle = '#e8dec8';
+              ctx.lineWidth = 2.5;
               ctx.beginPath();
-              ctx.moveTo(dir === 'left' ? 11 : 21, 21 + bobY);
+              ctx.moveTo(dir === 'left' ? 12 : 24, 21 + bobY);
               ctx.lineTo(armX + 3, armY + 2);
               ctx.stroke();
 
-              // Lantern handle
-              ctx.fillStyle = '#5e4934';
-              ctx.fillRect(armX + 1, armY + 2, 5, 2);
+              // Bronze lantern ring & cap
+              ctx.fillStyle = '#4a3319';
+              ctx.fillRect(armX + 1, armY + 2, 6, 2);
 
               if (lampState === 'lit') {
-                // Soft warm glow halo around the hand lantern
                 const grad = ctx.createRadialGradient(
-                  armX + 3.5,
+                  armX + 4,
                   armY + 7,
                   1,
-                  armX + 3.5,
+                  armX + 4,
                   armY + 7,
-                  10
+                  11
                 );
-                grad.addColorStop(0, 'rgba(255, 226, 128, 0.85)');
-                grad.addColorStop(1, 'rgba(255, 180, 60, 0)');
+                grad.addColorStop(0, 'rgba(255, 238, 158, 0.92)');
+                grad.addColorStop(0.55, 'rgba(255, 185, 64, 0.45)');
+                grad.addColorStop(1, 'rgba(255, 160, 40, 0)');
                 ctx.fillStyle = grad;
-                ctx.fillRect(armX - 7, armY - 3, 21, 21);
+                ctx.fillRect(armX - 7, armY - 4, 22, 22);
 
-                // Lantern body
-                ctx.fillStyle = '#d98a2b';
-                ctx.fillRect(armX + 1, armY + 4, 5, 7);
-                ctx.fillStyle = '#fff0a6';
-                ctx.fillRect(armX + 2, armY + 5, 3, 5);
+                // Bronze lantern frame
+                ctx.fillStyle = '#6e4920';
+                ctx.fillRect(armX + 1, armY + 4, 6, 8);
+                // Glowing golden glass core
+                ctx.fillStyle = '#fff5b8';
+                ctx.fillRect(armX + 2, armY + 5, 4, 6);
               } else {
-                // Unlit lantern body
-                ctx.fillStyle = '#4a524f';
-                ctx.fillRect(armX + 1, armY + 4, 5, 7);
-                ctx.fillStyle = '#737d79';
-                ctx.fillRect(armX + 2, armY + 5, 3, 5);
+                ctx.fillStyle = '#3d4547';
+                ctx.fillRect(armX + 1, armY + 4, 6, 8);
+                ctx.fillStyle = '#687478';
+                ctx.fillRect(armX + 2, armY + 5, 4, 6);
               }
             }
           });
@@ -155,31 +198,61 @@ export class ProceduralTextures {
   }
 
   private static createLumoTextures(scene: Phaser.Scene): void {
+    // Matches 01_Character_Style_Guide.png:
+    // Long translucent cyan-mint fairy ears/wings (#7df2d4) with golden tips,
+    // glowing golden-cream body (#fff3b0), and two dark oval eyes.
     for (let f = 0; f < 2; f++) {
-      this.createCanvas(scene, `lumo_${f}`, 24, 24, (ctx) => {
-        const r = f === 0 ? 5 : 5.5;
-        const grad = ctx.createRadialGradient(12, 12, 2, 12, 12, 11);
-        grad.addColorStop(0, 'rgba(242, 247, 175, 0.95)');
-        grad.addColorStop(0.5, 'rgba(232, 240, 168, 0.45)');
-        grad.addColorStop(1, 'rgba(232, 240, 168, 0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 24, 24);
+      this.createCanvas(scene, `lumo_${f}`, 28, 28, (ctx) => {
+        const wingLift = f === 0 ? 0 : -1.5;
 
-        // Wisp body
-        ctx.fillStyle = '#e8f0a8';
+        const grad = ctx.createRadialGradient(14, 16, 2, 14, 16, 12);
+        grad.addColorStop(0, 'rgba(255, 245, 176, 0.95)');
+        grad.addColorStop(0.55, 'rgba(125, 242, 212, 0.45)');
+        grad.addColorStop(1, 'rgba(125, 242, 212, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 28, 28);
+
+        // Long fairy ears/wings in glowing cyan-mint (#7df2d4)
+        ctx.fillStyle = '#7df2d4';
+        // Left ear/wing
         ctx.beginPath();
-        ctx.arc(12, 12, r, 0, Math.PI * 2);
+        ctx.moveTo(12, 13);
+        ctx.lineTo(5, 4 + wingLift);
+        ctx.lineTo(9, 14);
+        ctx.closePath();
         ctx.fill();
 
-        // Two tiny dark eyes matching reference art
-        ctx.fillStyle = '#1b2c28';
-        ctx.fillRect(10, 12, 1, 1.5);
-        ctx.fillRect(13, 12, 1, 1.5);
+        // Right ear/wing
+        ctx.beginPath();
+        ctx.moveTo(16, 13);
+        ctx.lineTo(23, 4 + wingLift);
+        ctx.lineTo(19, 14);
+        ctx.closePath();
+        ctx.fill();
+
+        // Golden wing tips
+        ctx.fillStyle = '#ffe680';
+        ctx.fillRect(5, 4 + wingLift, 2, 2);
+        ctx.fillRect(21, 4 + wingLift, 2, 2);
+
+        // Glowing golden-cream head/body
+        ctx.fillStyle = '#fff3b0';
+        ctx.beginPath();
+        ctx.arc(14, 16, 5.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Two expressive dark oval eyes
+        ctx.fillStyle = '#1b2624';
+        ctx.fillRect(11.5, 15, 1.5, 2.2);
+        ctx.fillRect(15, 15, 1.5, 2.2);
       });
     }
   }
 
   private static createHeartTreeTextures(scene: Phaser.Scene): void {
+    // Matches 06_Heart_Tree_Sanctuary.png & 07_The_Last_Dawn.png:
+    // Colossal ancient tree with spreading branches, glowing golden light-veins,
+    // carved stone Sanctuary Shrine Altar at the roots, and a glowing Golden Heart in Dawn mode!
     const variants: Array<{ key: string; stage: number; dawn: boolean }> = [
       { key: 'heart_tree_0', stage: 0, dawn: false },
       { key: 'heart_tree_1', stage: 1, dawn: false },
@@ -189,74 +262,67 @@ export class ProceduralTextures {
     ];
 
     for (const v of variants) {
-      this.createCanvas(scene, v.key, 200, 210, (ctx) => {
-        // Canopy top clusters
-        const canopyColors = v.dawn
-          ? ['#4c8554', '#669e68', '#87b26e']
-          : v.stage >= 1
-          ? ['#143d35', '#1f5448', '#2c6e5c']
-          : ['#0e2b27', '#163b35', '#1d4740'];
+      this.createCanvas(scene, v.key, 220, 210, (ctx) => {
+        // 1. Background aura
+        if (v.dawn || v.stage >= 1) {
+          const auraRadius = v.dawn ? 105 : 55 + v.stage * 12;
+          const auraGrad = ctx.createRadialGradient(110, 105, 10, 110, 105, auraRadius);
+          if (v.dawn) {
+            auraGrad.addColorStop(0, 'rgba(255, 238, 165, 0.85)');
+            auraGrad.addColorStop(0.55, 'rgba(255, 205, 105, 0.35)');
+            auraGrad.addColorStop(1, 'rgba(255, 200, 90, 0)');
+          } else {
+            auraGrad.addColorStop(0, 'rgba(255, 215, 120, 0.38)');
+            auraGrad.addColorStop(1, 'rgba(92, 214, 184, 0)');
+          }
+          ctx.fillStyle = auraGrad;
+          ctx.fillRect(0, 0, 220, 210);
+        }
 
-        const circles = [
-          { x: 100, y: 26, rx: 68, ry: 24, c: canopyColors[0] },
-          { x: 56, y: 38, rx: 42, ry: 20, c: canopyColors[1] },
-          { x: 144, y: 36, rx: 44, ry: 20, c: canopyColors[1] },
-          { x: 100, y: 20, rx: 46, ry: 18, c: canopyColors[2] },
+        // 2.Lush spreading canopy clusters
+        const canopyColors = v.dawn
+          ? ['#3f7836', '#5c9e49', '#88c964']
+          : v.stage >= 1
+          ? ['#18382e', '#2c5943', '#4a7d58']
+          : ['#112624', '#1b3833', '#264a42'];
+
+        const canopyBlobs = [
+          { x: 110, y: 28, rx: 86, ry: 26, c: canopyColors[0] },
+          { x: 52, y: 40, rx: 48, ry: 22, c: canopyColors[1] },
+          { x: 168, y: 40, rx: 48, ry: 22, c: canopyColors[1] },
+          { x: 82, y: 24, rx: 46, ry: 18, c: canopyColors[2] },
+          { x: 138, y: 24, rx: 46, ry: 18, c: canopyColors[2] },
         ];
-        for (const c of circles) {
-          ctx.fillStyle = c.c;
+        for (const b of canopyBlobs) {
+          ctx.fillStyle = b.c;
           ctx.beginPath();
-          ctx.ellipse(c.x, c.y, c.rx, c.ry, 0, 0, Math.PI * 2);
+          ctx.ellipse(b.x, b.y, b.rx, b.ry, 0, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Stage 2+ water stream glow beneath roots
-        if (v.stage >= 2 && !v.dawn) {
-          const waterGrad = ctx.createRadialGradient(100, 165, 8, 100, 165, 58);
-          waterGrad.addColorStop(0, 'rgba(92, 214, 184, 0.32)');
-          waterGrad.addColorStop(1, 'rgba(40, 128, 200, 0)');
-          ctx.fillStyle = waterGrad;
-          ctx.fillRect(30, 120, 140, 80);
-        }
+        // 3. Gnarled ancient trunk & spreading roots (06_Heart_Tree_Sanctuary.png)
+        const barkDark = v.dawn ? '#6e4e2e' : '#4a4238';
+        const barkLight = v.dawn ? '#9c7144' : v.stage >= 1 ? '#78654e' : '#5c5346';
 
-        // Dawn golden sunlight aura
-        if (v.dawn) {
-          const sunGrad = ctx.createRadialGradient(100, 110, 12, 100, 110, 95);
-          sunGrad.addColorStop(0, 'rgba(255, 235, 165, 0.65)');
-          sunGrad.addColorStop(0.6, 'rgba(242, 213, 139, 0.28)');
-          sunGrad.addColorStop(1, 'rgba(242, 213, 139, 0)');
-          ctx.fillStyle = sunGrad;
-          ctx.fillRect(0, 0, 200, 210);
-        }
-
-        // Main trunk (matching 01_heart_tree_night.png & 05_final_dawn.png)
-        const trunkColor = v.dawn ? '#856542' : '#4a534f';
-        const trunkHighlight = v.dawn ? '#9c7a54' : '#5b6661';
-
-        ctx.fillStyle = trunkColor;
+        ctx.fillStyle = barkDark;
         ctx.beginPath();
-        ctx.moveTo(82, 34);
-        ctx.lineTo(114, 34);
-        ctx.lineTo(118, 145);
-        ctx.lineTo(80, 145);
+        ctx.moveTo(74, 34);
+        ctx.lineTo(146, 34);
+        ctx.lineTo(158, 148);
+        ctx.lineTo(62, 148);
         ctx.closePath();
         ctx.fill();
 
-        // Trunk bark vertical lines
-        ctx.fillStyle = trunkHighlight;
-        ctx.fillRect(101, 40, 3, 95);
-        ctx.fillRect(92, 65, 2, 70);
-
-        // Dramatic flared diagonal roots (3 left, 3 right matching reference art)
-        ctx.strokeStyle = trunkColor;
-        ctx.lineWidth = 6;
+        // Spreading roots left and right
+        ctx.strokeStyle = barkDark;
+        ctx.lineWidth = 8;
         const roots = [
-          [85, 105, 36, 178],
-          [88, 112, 58, 178],
-          [92, 120, 78, 178],
-          [106, 120, 116, 178],
-          [110, 112, 138, 178],
-          [114, 105, 162, 178],
+          [78, 110, 28, 174],
+          [84, 118, 52, 178],
+          [92, 124, 74, 180],
+          [128, 124, 146, 180],
+          [136, 118, 168, 178],
+          [142, 110, 192, 174],
         ];
         for (const [x1, y1, x2, y2] of roots) {
           ctx.beginPath();
@@ -265,79 +331,102 @@ export class ProceduralTextures {
           ctx.stroke();
         }
 
-        // Upper Heart Core (Oval + Diamond inside trunk)
-        const coreCenterY = 98;
-        ctx.fillStyle = v.dawn ? '#f2c879' : '#4ebaa3';
-        ctx.beginPath();
-        ctx.ellipse(100, coreCenterY, 13, 20, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = v.dawn ? '#ffe89e' : '#7df2d4';
-        ctx.beginPath();
-        ctx.moveTo(100, coreCenterY - 16);
-        ctx.lineTo(111, coreCenterY);
-        ctx.lineTo(100, coreCenterY + 16);
-        ctx.lineTo(89, coreCenterY);
-        ctx.closePath();
-        ctx.fill();
-
-        // Stage 1+ fresh sprouting leaves on branches
-        if (v.stage >= 1) {
-          ctx.fillStyle = v.dawn ? '#87b26e' : '#4ba88a';
-          const leafSpots = [
-            [72, 48],
-            [126, 50],
-            [62, 34],
-            [138, 36],
-            [100, 30],
+        // Glowing golden bark veins (06 & 07 reference art)
+        if (v.stage >= 1 || v.dawn) {
+          ctx.strokeStyle = v.dawn ? '#fff0a6' : '#f2c86b';
+          ctx.lineWidth = v.dawn ? 2.5 : 1.6;
+          const veins = [
+            [110, 42, 95, 90, 42, 168],
+            [110, 42, 125, 90, 178, 168],
+            [92, 50, 84, 108, 60, 172],
+            [128, 50, 136, 108, 160, 172],
           ];
-          for (const [lx, ly] of leafSpots) {
+          for (const [x1, y1, x2, y2, x3, y3] of veins) {
             ctx.beginPath();
-            ctx.arc(lx, ly, 7, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(x3, y3);
+            ctx.stroke();
           }
+        } else {
+          ctx.fillStyle = barkLight;
+          ctx.fillRect(96, 42, 5, 92);
+          ctx.fillRect(118, 48, 4, 86);
         }
 
-        // Three Crystal Sockets near the base of the trunk (Gold, Blue, Purple diamonds)
-        const sockets = [
-          { x: 80, y: 150, lit: v.stage >= 1, dimColor: '#8c6918', litColor: '#ffd966' },
-          { x: 100, y: 150, lit: v.stage >= 2, dimColor: '#195a94', litColor: '#6ccff6' },
-          { x: 120, y: 150, lit: v.stage >= 3, dimColor: '#6c3494', litColor: '#d28cff' },
-        ];
-
-        for (const s of sockets) {
-          if (s.lit) {
-            const g = ctx.createRadialGradient(s.x, s.y, 1, s.x, s.y, 14);
-            g.addColorStop(0, s.litColor);
-            g.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = g;
-            ctx.fillRect(s.x - 14, s.y - 14, 28, 28);
-          }
-          ctx.fillStyle = s.lit ? s.litColor : s.dimColor;
+        // 4. Glowing Heart Core in upper trunk (Heart-shaped in Dawn matching 07_The_Last_Dawn.png!)
+        if (v.dawn) {
+          ctx.fillStyle = '#fff5ba';
           ctx.beginPath();
-          ctx.moveTo(s.x, s.y - 11);
-          ctx.lineTo(s.x + 6, s.y);
-          ctx.lineTo(s.x, s.y + 11);
-          ctx.lineTo(s.x - 6, s.y);
+          ctx.moveTo(110, 106);
+          ctx.bezierCurveTo(92, 92, 94, 74, 110, 84);
+          ctx.bezierCurveTo(126, 74, 128, 92, 110, 106);
+          ctx.fill();
+        } else {
+          ctx.fillStyle = v.stage >= 2 ? '#ffe694' : '#5cd6b8';
+          ctx.beginPath();
+          ctx.moveTo(110, 74);
+          ctx.lineTo(121, 90);
+          ctx.lineTo(110, 106);
+          ctx.lineTo(99, 90);
           ctx.closePath();
           ctx.fill();
         }
 
-        // Dawn blooming flowers around roots
-        if (v.dawn) {
-          const blossoms = [
-            { x: 52, y: 162, c: '#f28b78' },
-            { x: 68, y: 142, c: '#ffe699' },
-            { x: 132, y: 144, c: '#f28b78' },
-            { x: 148, y: 165, c: '#ffe699' },
-            { x: 92, y: 132, c: '#ffe699' },
-            { x: 112, y: 130, c: '#f28b78' },
-          ];
-          for (const b of blossoms) {
-            ctx.fillStyle = b.c;
+        // 5. Carved Stone Sanctuary Altar & Stepped Dais at base of roots (06_Heart_Tree_Sanctuary.png)
+        ctx.fillStyle = '#586366';
+        ctx.fillRect(88, 116, 44, 46);
+        ctx.fillStyle = '#738082';
+        ctx.fillRect(92, 120, 36, 38);
+        // Stepped stone stairs in front of altar
+        ctx.fillStyle = '#626e70';
+        ctx.fillRect(80, 162, 60, 6);
+        ctx.fillRect(74, 168, 72, 6);
+        ctx.fillRect(68, 174, 84, 6);
+
+        // Moss cap on shrine altar
+        ctx.fillStyle = '#4c7d40';
+        ctx.beginPath();
+        ctx.ellipse(110, 116, 24, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Three Crystal Sockets embedded in the Sanctuary Altar (Gold, Blue, Purple)
+        const sockets = [
+          { x: 90, y: 148, lit: v.stage >= 1, dimColor: '#7a5c18', litColor: '#ffd966' },
+          { x: 110, y: 142, lit: v.stage >= 2, dimColor: '#195a94', litColor: '#6ccff6' },
+          { x: 130, y: 148, lit: v.stage >= 3, dimColor: '#6c3494', litColor: '#d28cff' },
+        ];
+
+        for (const s of sockets) {
+          if (s.lit) {
+            const g = ctx.createRadialGradient(s.x, s.y, 1, s.x, s.y, 13);
+            g.addColorStop(0, s.litColor);
+            g.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = g;
+            ctx.fillRect(s.x - 13, s.y - 13, 26, 26);
+          }
+          ctx.fillStyle = s.lit ? s.litColor : s.dimColor;
+          ctx.beginPath();
+          ctx.moveTo(s.x, s.y - 9);
+          ctx.lineTo(s.x + 5.5, s.y);
+          ctx.lineTo(s.x, s.y + 9);
+          ctx.lineTo(s.x - 5.5, s.y);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // 6. White woodland blossoms across canopy & roots in Dawn / Stage 1+
+        if (v.dawn || v.stage >= 1) {
+          const flowerCount = v.dawn ? 28 : v.stage * 6;
+          for (let i = 0; i < flowerCount; i++) {
+            const fx = 36 + ((i * 53) % 148);
+            const fy = i < flowerCount / 2 ? 14 + ((i * 19) % 34) : 138 + ((i * 23) % 36);
+            ctx.fillStyle = '#fff9e6';
             ctx.beginPath();
-            ctx.arc(b.x, b.y, 3.5, 0, Math.PI * 2);
+            ctx.arc(fx, fy, 3, 0, Math.PI * 2);
             ctx.fill();
+            ctx.fillStyle = '#f2b84b';
+            ctx.fillRect(fx - 1, fy - 1, 2, 2);
           }
         }
       });
@@ -345,13 +434,13 @@ export class ProceduralTextures {
   }
 
   private static createEnvironmentTextures(scene: Phaser.Scene): void {
-    // Border canopy trees for each zone
+    // Border canopy trees with rich pixel-art leaf clusters
     const treePalettes: Record<string, [string, string, string]> = {
-      tree_hub: ['#071b21', '#123630', '#1f4f45'],
-      tree_woods: ['#072222', '#134237', '#236652'],
-      tree_creek: ['#071c30', '#133447', '#23536b'],
-      tree_ruins: ['#0e1124', '#1d1c38', '#332e54'],
-      tree_dawn: ['#2e5942', '#467a53', '#689e6b'],
+      tree_hub: ['#071921', '#133330', '#235246'],
+      tree_woods: ['#061d21', '#113b35', '#216352'],
+      tree_creek: ['#071b2e', '#143752', '#265878'],
+      tree_ruins: ['#0d1024', '#1c1d3b', '#32315c'],
+      tree_dawn: ['#2a5738', '#46824b', '#76ba62'],
     };
 
     for (const [key, [shadow, mid, top]] of Object.entries(treePalettes)) {
@@ -368,9 +457,24 @@ export class ProceduralTextures {
 
         ctx.fillStyle = top;
         ctx.beginPath();
-        ctx.ellipse(34, 30, 19, 14, 0, 0, Math.PI * 2);
-        ctx.ellipse(46, 34, 16, 12, 0, 0, Math.PI * 2);
+        ctx.ellipse(32, 29, 18, 13, 0, 0, Math.PI * 2);
+        ctx.ellipse(46, 33, 16, 12, 0, 0, Math.PI * 2);
         ctx.fill();
+
+        if (key === 'tree_dawn') {
+          // White canopy blossoms matching 07_The_Last_Dawn.png
+          for (const [bx, by] of [
+            [24, 26],
+            [42, 22],
+            [52, 34],
+            [30, 38],
+          ]) {
+            ctx.fillStyle = '#fff9e6';
+            ctx.beginPath();
+            ctx.arc(bx, by, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
       });
     }
 
@@ -404,7 +508,7 @@ export class ProceduralTextures {
       });
     }
 
-    // Decorative tufts & mushrooms matching reference images
+    // Decorative grass tufts
     this.createCanvas(scene, 'tuft_grass', 12, 10, (ctx) => {
       ctx.fillStyle = '#3d705e';
       ctx.fillRect(2, 5, 1, 3);
@@ -413,282 +517,376 @@ export class ProceduralTextures {
       ctx.fillRect(8, 5, 1, 3);
     });
 
-    this.createCanvas(scene, 'mushroom_warm', 10, 10, (ctx) => {
-      ctx.fillStyle = '#a39c62';
-      ctx.fillRect(4, 5, 2, 4);
-      ctx.fillStyle = '#e0d472';
-      ctx.fillRect(2, 3, 6, 2);
-      ctx.fillRect(3, 2, 4, 1);
+    // White 5-petal Forest Flower (matching 01 & 02 reference sheets)
+    this.createCanvas(scene, 'mushroom_warm', 14, 14, (ctx) => {
+      ctx.fillStyle = '#3d6e38';
+      ctx.fillRect(6, 8, 2, 5);
+      ctx.fillStyle = '#fff9e6';
+      for (const [dx, dy] of [
+        [0, -3],
+        [3, -1],
+        [2, 2],
+        [-2, 2],
+        [-3, -1],
+      ]) {
+        ctx.beginPath();
+        ctx.arc(7 + dx, 6 + dy, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#f2b749';
+      ctx.fillRect(6, 5, 2, 2);
     });
 
-    this.createCanvas(scene, 'mushroom_cyan', 10, 10, (ctx) => {
-      ctx.fillStyle = '#628a9c';
-      ctx.fillRect(4, 5, 2, 4);
-      ctx.fillStyle = '#8cc3da';
-      ctx.fillRect(2, 3, 6, 2);
-      ctx.fillRect(3, 2, 4, 1);
+    // Bioluminescent Spotted Cyan Mushroom cluster (matching 01, 02, 03 reference sheets)
+    this.createCanvas(scene, 'mushroom_cyan', 22, 22, (ctx) => {
+      const g = ctx.createRadialGradient(11, 10, 1, 11, 10, 10);
+      g.addColorStop(0, 'rgba(76, 230, 212, 0.55)');
+      g.addColorStop(1, 'rgba(76, 230, 212, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 22, 22);
+
+      // Stems
+      ctx.fillStyle = '#a8e6cf';
+      ctx.fillRect(9, 11, 3, 8);
+      ctx.fillRect(15, 14, 2, 5);
+
+      // Main turquoise mushroom cap (#38d9c8)
+      ctx.fillStyle = '#26b8a8';
+      ctx.beginPath();
+      ctx.ellipse(10.5, 10, 7.5, 4.5, 0, Math.PI, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#52f2e0';
+      ctx.beginPath();
+      ctx.ellipse(10.5, 9.5, 6, 3.2, 0, Math.PI, Math.PI * 2);
+      ctx.fill();
+
+      // White glowing spots on cap
+      ctx.fillStyle = '#e6fffc';
+      ctx.fillRect(8, 6, 2, 1.5);
+      ctx.fillRect(12, 7, 1.5, 1.5);
+      ctx.fillRect(6, 8, 1.5, 1);
+
+      // Secondary small mushroom cap
+      ctx.fillStyle = '#38d9c8';
+      ctx.beginPath();
+      ctx.ellipse(16, 13.5, 4, 2.5, 0, Math.PI, Math.PI * 2);
+      ctx.fill();
     });
 
-    // Ruins glowing purple night flower (matching 04_silent_ruins.png)
-    this.createCanvas(scene, 'ruins_flower', 20, 20, (ctx) => {
+    // Ruins glowing violet lotus flower (matching 05_Silent_Ruins.png)
+    this.createCanvas(scene, 'ruins_flower', 22, 22, (ctx) => {
+      const g = ctx.createRadialGradient(11, 10, 1, 11, 10, 10);
+      g.addColorStop(0, 'rgba(196, 120, 255, 0.65)');
+      g.addColorStop(1, 'rgba(196, 120, 255, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 22, 22);
+
       ctx.fillStyle = '#2d4742';
-      ctx.fillRect(9, 13, 2, 5);
-      ctx.fillStyle = '#6d589c';
+      ctx.fillRect(10, 14, 2, 5);
+
+      ctx.fillStyle = '#a356e6';
       ctx.beginPath();
-      ctx.arc(10, 10, 6.5, 0, Math.PI * 2);
+      ctx.moveTo(11, 4);
+      ctx.lineTo(16, 11);
+      ctx.lineTo(11, 15);
+      ctx.lineTo(6, 11);
+      ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = '#dfd0f5';
+
+      ctx.fillStyle = '#f3d9ff';
       ctx.beginPath();
-      ctx.arc(10, 10, 2.2, 0, Math.PI * 2);
+      ctx.arc(11, 10, 2.5, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    // Rock blocker
-    this.createCanvas(scene, 'rock_blocker', 36, 30, (ctx) => {
-      ctx.fillStyle = 'rgba(6, 14, 18, 0.55)';
+    // Mossy stone boulder (matching 01 & 02 reference sheets)
+    this.createCanvas(scene, 'rock_blocker', 38, 32, (ctx) => {
+      ctx.fillStyle = '#434d4f';
       ctx.beginPath();
-      ctx.ellipse(18, 24, 15, 5, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#4e5d5a';
-      ctx.beginPath();
-      ctx.moveTo(5, 22);
-      ctx.lineTo(9, 10);
-      ctx.lineTo(22, 7);
-      ctx.lineTo(31, 14);
-      ctx.lineTo(32, 23);
+      ctx.moveTo(4, 26);
+      ctx.lineTo(8, 10);
+      ctx.lineTo(24, 6);
+      ctx.lineTo(34, 15);
+      ctx.lineTo(35, 26);
       ctx.closePath();
       ctx.fill();
 
-      ctx.fillStyle = '#687a76';
+      ctx.fillStyle = '#687478';
       ctx.beginPath();
-      ctx.moveTo(9, 10);
-      ctx.lineTo(22, 7);
-      ctx.lineTo(25, 15);
-      ctx.lineTo(11, 17);
+      ctx.moveTo(8, 10);
+      ctx.lineTo(24, 6);
+      ctx.lineTo(27, 18);
+      ctx.lineTo(10, 20);
       ctx.closePath();
+      ctx.fill();
+
+      // Lush green moss cap (#568543)
+      ctx.fillStyle = '#568543';
+      ctx.beginPath();
+      ctx.ellipse(18, 9, 11, 4, 0, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    // Guide signpost / intro beacon stone
-    this.createCanvas(scene, 'beacon_stone', 28, 38, (ctx) => {
-      ctx.fillStyle = '#566662';
-      ctx.fillRect(6, 8, 16, 26);
-      ctx.fillStyle = '#738580';
-      ctx.fillRect(8, 6, 12, 4);
-      ctx.fillStyle = '#7df2d4';
+    // Travel Marker stone pillar with red cloth tie & hanging lantern (matching 02_Environment_Props_and_Puzzles.png)
+    this.createCanvas(scene, 'beacon_stone', 34, 46, (ctx) => {
+      ctx.fillStyle = '#586366';
+      ctx.fillRect(8, 8, 14, 34);
+      ctx.fillStyle = '#758285';
+      ctx.fillRect(6, 5, 18, 5);
+      // Moss on top
+      ctx.fillStyle = '#568543';
+      ctx.fillRect(8, 4, 14, 3);
+      // Red cloth banner tie (#a8322d)
+      ctx.fillStyle = '#a8322d';
+      ctx.fillRect(7, 13, 16, 4);
+      // Hanging mini lantern on right arm
+      ctx.fillStyle = '#5e4227';
+      ctx.fillRect(22, 14, 7, 2);
+      ctx.fillStyle = '#ffe680';
+      ctx.fillRect(25, 16, 4, 6);
+    });
+
+    // Hooded Guardian Statue holding lantern (matching 06_Heart_Tree_Sanctuary.png)
+    this.createCanvas(scene, 'guardian_statue', 32, 46, (ctx) => {
+      ctx.fillStyle = '#4f5859';
       ctx.beginPath();
-      ctx.moveTo(14, 13);
-      ctx.lineTo(19, 20);
-      ctx.lineTo(14, 27);
-      ctx.lineTo(9, 20);
+      ctx.moveTo(8, 42);
+      ctx.lineTo(10, 14);
+      ctx.lineTo(16, 7);
+      ctx.lineTo(22, 14);
+      ctx.lineTo(24, 42);
       ctx.closePath();
       ctx.fill();
+
+      ctx.fillStyle = '#6c7678';
+      ctx.beginPath();
+      ctx.arc(16, 13, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Warm mini-lantern held by statue
+      ctx.fillStyle = '#ffcf5c';
+      ctx.fillRect(20, 24, 4, 6);
     });
   }
 
   private static createPuzzleTextures(scene: Phaser.Scene): void {
-    // 1. WOODS ARCH GATE (locked & open, matching 02_whispering_woods.png)
+    // 1. WOODS CIRCULAR SUN-GATE (matching 03_Whispering_Woods.png)
     for (const open of [false, true]) {
       this.createCanvas(
         scene,
         open ? 'woods_arch_open' : 'woods_arch_locked',
-        116,
-        124,
+        128,
+        126,
         (ctx) => {
-          // Stepped base
-          ctx.fillStyle = '#6f7d78';
-          ctx.fillRect(8, 106, 100, 12);
-          ctx.fillStyle = '#82918c';
-          ctx.fillRect(12, 100, 92, 6);
+          // Stepped mossy stone stairs
+          ctx.fillStyle = '#596366';
+          ctx.fillRect(20, 104, 88, 16);
+          ctx.fillStyle = '#717d80';
+          ctx.fillRect(28, 98, 72, 6);
 
-          // Left & right pillars
-          ctx.fillStyle = '#677570';
-          ctx.fillRect(14, 28, 18, 72);
-          ctx.fillRect(84, 28, 18, 72);
+          // Left & right carved rune pillars flanking the circular gate
+          ctx.fillStyle = '#4e5759';
+          ctx.fillRect(10, 34, 18, 70);
+          ctx.fillRect(100, 34, 18, 70);
+          ctx.strokeStyle = open ? '#ffcf5c' : '#7b8a84';
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(14, 42, 10, 52);
+          ctx.strokeRect(104, 42, 10, 52);
 
-          // Inner arch dark frame & portal oval
-          ctx.fillStyle = '#0b1e1c';
+          // Outer mossy stone ring of the Circular Gate
+          ctx.fillStyle = '#5c6669';
           ctx.beginPath();
-          ctx.ellipse(58, 66, 28, 34, 0, 0, Math.PI * 2);
+          ctx.arc(64, 58, 38, 0, Math.PI * 2);
           ctx.fill();
 
-          const portalGrad = ctx.createRadialGradient(58, 62, 4, 58, 66, 28);
+          // Inner stone recess
+          ctx.fillStyle = open ? '#2e2210' : '#182424';
+          ctx.beginPath();
+          ctx.arc(64, 58, 30, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Moss drapes over the top arch
+          ctx.fillStyle = '#4c7d40';
+          ctx.beginPath();
+          ctx.ellipse(44, 24, 16, 6, -0.2, 0, Math.PI * 2);
+          ctx.ellipse(84, 24, 16, 6, 0.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Central Sun-Wheel Seal inside Circular Gate (blazing gold when open/active!)
           if (open) {
-            portalGrad.addColorStop(0, '#ffe694');
-            portalGrad.addColorStop(0.55, '#3b8c73');
-            portalGrad.addColorStop(1, '#12382f');
-          } else {
-            portalGrad.addColorStop(0, '#2e6355');
-            portalGrad.addColorStop(1, '#0d2622');
-          }
-          ctx.fillStyle = portalGrad;
-          ctx.beginPath();
-          ctx.ellipse(58, 62, 22, 28, 0, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Pitched gable roof
-          ctx.fillStyle = '#6b7873';
-          ctx.beginPath();
-          ctx.moveTo(10, 32);
-          ctx.lineTo(58, 6);
-          ctx.lineTo(106, 32);
-          ctx.lineTo(98, 42);
-          ctx.lineTo(58, 20);
-          ctx.lineTo(18, 42);
-          ctx.closePath();
-          ctx.fill();
-
-          // Three golden lock lights on arch (left, top, right)
-          const orbs = [
-            { x: 24, y: 48 },
-            { x: 58, y: 18 },
-            { x: 92, y: 48 },
-          ];
-          for (const o of orbs) {
-            ctx.fillStyle = open ? '#ffe885' : '#d6b256';
+            const g = ctx.createRadialGradient(64, 58, 4, 64, 58, 30);
+            g.addColorStop(0, 'rgba(255, 240, 160, 0.95)');
+            g.addColorStop(0.55, 'rgba(255, 180, 50, 0.55)');
+            g.addColorStop(1, 'rgba(255, 140, 20, 0)');
+            ctx.fillStyle = g;
             ctx.beginPath();
-            ctx.arc(o.x, o.y, 4, 0, Math.PI * 2);
+            ctx.arc(64, 58, 30, 0, Math.PI * 2);
             ctx.fill();
           }
+
+          ctx.strokeStyle = open ? '#ffe680' : '#6c7874';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(64, 58, 16, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Crosshair spokes of the Sun-Gate
+          for (let a = 0; a < 4; a++) {
+            const rad = (a * Math.PI) / 2;
+            ctx.beginPath();
+            ctx.moveTo(64 + Math.cos(rad) * 8, 58 + Math.sin(rad) * 8);
+            ctx.lineTo(64 + Math.cos(rad) * 26, 58 + Math.sin(rad) * 26);
+            ctx.stroke();
+          }
+
+          ctx.fillStyle = open ? '#fff5b8' : '#7b8a84';
+          ctx.beginPath();
+          ctx.arc(64, 58, 7, 0, Math.PI * 2);
+          ctx.fill();
         }
       );
     }
 
-    // 2. WOODS RUNESTONES (hidden, revealed, and activated for moon, leaf, star)
+    // 2. WOODS RUNESTONES (matching 02 & 03 reference sheets: mossy stone stelae with cyan/gold glyphs)
     const runes: Array<'moon' | 'leaf' | 'star'> = ['moon', 'leaf', 'star'];
-    this.createCanvas(scene, 'runestone_hidden', 34, 46, (ctx) => {
-      this.drawRunestoneBase(ctx);
-      // Faint sleeping diamond outline
-      ctx.fillStyle = 'rgba(130, 150, 142, 0.35)';
-      ctx.beginPath();
-      ctx.moveTo(17, 15);
-      ctx.lineTo(22, 23);
-      ctx.lineTo(17, 31);
-      ctx.lineTo(12, 23);
-      ctx.closePath();
-      ctx.fill();
+    this.createCanvas(scene, 'runestone_hidden', 38, 50, (ctx) => {
+      this.drawMossyRunestoneBase(ctx);
+      ctx.strokeStyle = 'rgba(130, 155, 150, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(13, 18, 12, 16);
     });
 
     for (const r of runes) {
       for (const lit of [false, true]) {
         const key = `runestone_${r}_${lit ? 'lit' : 'rev'}`;
-        this.createCanvas(scene, key, 34, 46, (ctx) => {
-          this.drawRunestoneBase(ctx);
-          const glowColor = lit ? '#ffe680' : '#85e6b8';
-          const g = ctx.createRadialGradient(17, 23, 2, 17, 23, 14);
+        this.createCanvas(scene, key, 38, 50, (ctx) => {
+          this.drawMossyRunestoneBase(ctx);
+          const glowColor = lit ? '#ffb838' : '#4ce6e6';
+          const g = ctx.createRadialGradient(19, 26, 2, 19, 26, 15);
           g.addColorStop(0, glowColor);
           g.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = g;
-          ctx.fillRect(3, 9, 28, 28);
+          ctx.fillRect(4, 11, 30, 30);
 
-          ctx.fillStyle = lit ? '#fff3b0' : '#b8f5d4';
+          ctx.fillStyle = lit ? '#fff3b0' : '#8cffff';
+          ctx.strokeStyle = lit ? '#fff3b0' : '#8cffff';
+          ctx.lineWidth = 2;
+
           if (r === 'moon') {
-            // Crescent Moon glyph
             ctx.beginPath();
-            ctx.arc(17, 23, 6.5, 0, Math.PI * 2);
+            ctx.arc(19, 26, 7, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#68736e';
+            ctx.fillStyle = '#5b6466';
             ctx.beginPath();
-            ctx.arc(20, 21, 5.5, 0, Math.PI * 2);
+            ctx.arc(22.5, 24, 6, 0, Math.PI * 2);
             ctx.fill();
           } else if (r === 'leaf') {
-            // Diamond Leaf glyph
+            // Sprouting 3-leaf motif from 03_Whispering_Woods.png
+            ctx.fillRect(18, 20, 2, 13);
             ctx.beginPath();
-            ctx.moveTo(17, 14);
-            ctx.lineTo(23, 23);
-            ctx.lineTo(17, 32);
-            ctx.lineTo(11, 23);
-            ctx.closePath();
+            ctx.ellipse(19, 19, 3, 5, 0, 0, Math.PI * 2);
+            ctx.ellipse(14, 25, 4, 2.5, -0.5, 0, Math.PI * 2);
+            ctx.ellipse(24, 25, 4, 2.5, 0.5, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#436e5b';
-            ctx.fillRect(16.5, 17, 1, 12);
           } else {
-            // 4-point Star glyph
+            // 8-point Sunburst/Star motif from 03_Whispering_Woods.png
             ctx.beginPath();
-            ctx.moveTo(17, 13);
-            ctx.lineTo(19.5, 20.5);
-            ctx.lineTo(27, 23);
-            ctx.lineTo(19.5, 25.5);
-            ctx.lineTo(17, 33);
-            ctx.lineTo(14.5, 25.5);
-            ctx.lineTo(7, 23);
-            ctx.lineTo(14.5, 20.5);
-            ctx.closePath();
+            ctx.arc(19, 26, 4.5, 0, Math.PI * 2);
             ctx.fill();
+            for (let a = 0; a < 8; a++) {
+              const rad = (a * Math.PI) / 4;
+              ctx.beginPath();
+              ctx.moveTo(19 + Math.cos(rad) * 6, 26 + Math.sin(rad) * 6);
+              ctx.lineTo(19 + Math.cos(rad) * 10, 26 + Math.sin(rad) * 10);
+              ctx.stroke();
+            }
           }
         });
       }
     }
 
-    // 3. CREEK MIRROR PUZZLE ASSETS (matching 03_moonlit_creek.png)
+    // 3. CREEK CIRCULAR BRONZE MIRRORS & LIGHT BRIDGE (matching 02 & 04_Moonlit_Creek.png)
     for (const lit of [false, true]) {
       this.createCanvas(
         scene,
         lit ? 'pedestal_lit' : 'pedestal_empty',
-        34,
-        44,
+        36,
+        46,
         (ctx) => {
-          ctx.fillStyle = '#5e6e73';
-          ctx.fillRect(5, 14, 24, 26);
-          ctx.fillStyle = '#798b91';
-          ctx.fillRect(3, 10, 28, 6);
+          ctx.fillStyle = '#566266';
+          ctx.fillRect(6, 16, 24, 26);
+          ctx.fillStyle = '#738287';
+          ctx.fillRect(4, 12, 28, 5);
+          ctx.fillStyle = '#4c7d40';
+          ctx.fillRect(6, 11, 10, 3);
+
           if (lit) {
-            const g = ctx.createRadialGradient(17, 8, 2, 17, 8, 15);
-            g.addColorStop(0, 'rgba(255, 230, 128, 0.95)');
+            const g = ctx.createRadialGradient(18, 8, 2, 18, 8, 15);
+            g.addColorStop(0, 'rgba(255, 238, 150, 0.95)');
             g.addColorStop(1, 'rgba(255, 190, 70, 0)');
             ctx.fillStyle = g;
-            ctx.fillRect(0, 0, 34, 26);
+            ctx.fillRect(2, 0, 32, 24);
 
-            ctx.fillStyle = '#d98a2b';
-            ctx.fillRect(13, 3, 8, 10);
-            ctx.fillStyle = '#fff3b0';
-            ctx.fillRect(14, 5, 6, 6);
+            ctx.fillStyle = '#6e4920';
+            ctx.fillRect(14, 3, 8, 10);
+            ctx.fillStyle = '#fff5b8';
+            ctx.fillRect(15, 5, 6, 6);
           }
         }
       );
     }
 
-    // Four mirror orientations (0..3)
+    // Ornate Circular Bronze/Gold Standing Mirrors (02 & 04_Moonlit_Creek.png)
     for (let rot = 0; rot < 4; rot++) {
-      this.createCanvas(scene, `mirror_${rot}`, 36, 48, (ctx) => {
-        ctx.fillStyle = '#68767a';
-        ctx.fillRect(4, 6, 28, 38);
-        ctx.fillStyle = '#7e8e94';
-        ctx.fillRect(6, 4, 24, 4);
+      this.createCanvas(scene, `mirror_${rot}`, 40, 50, (ctx) => {
+        // Mossy stone pedestal base
+        ctx.fillStyle = '#525d61';
+        ctx.fillRect(8, 32, 24, 14);
+        ctx.fillStyle = '#6d7a7d';
+        ctx.fillRect(6, 30, 28, 4);
+        ctx.fillStyle = '#4c7d40';
+        ctx.fillRect(8, 30, 9, 3);
 
-        // Reflective crystal bar inside pillar
-        ctx.strokeStyle = '#9ad9ea';
-        ctx.lineWidth = 3.5;
+        // Circular bronze/gold outer frame (#c79546, #f0c878)
+        ctx.fillStyle = '#9c6e2b';
         ctx.beginPath();
-        if (rot === 0) {
-          // 0: Slash / reflecting Bottom <-> Right or Top <-> Left (we also draw direction notch)
-          ctx.moveTo(10, 16);
-          ctx.lineTo(26, 32);
-        } else if (rot === 1) {
-          // 1: Backslash \ reflecting Bottom -> Top-Right / Right
-          ctx.moveTo(10, 32);
-          ctx.lineTo(26, 16);
-        } else if (rot === 2) {
-          // 2: Horizontal —
-          ctx.moveTo(9, 24);
-          ctx.lineTo(27, 24);
-        } else {
-          // 3: Vertical |
-          ctx.moveTo(18, 14);
-          ctx.lineTo(18, 34);
-        }
+        ctx.arc(20, 19, 13, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#e8be70';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(20, 19, 11.5, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Orientation indicator dot on pillar top
-        const dots = [
-          [18, 10],
-          [26, 24],
-          [18, 38],
-          [10, 24],
-        ];
-        ctx.fillStyle = '#fce38a';
-        ctx.fillRect(dots[rot][0] - 1.5, dots[rot][1] - 1.5, 3, 3);
+        // Shimmering cyan-silver mirror lens (#8ce0f5, #e6fcff)
+        const lensGrad = ctx.createLinearGradient(10, 9, 30, 29);
+        lensGrad.addColorStop(0, '#dcfaff');
+        lensGrad.addColorStop(0.5, '#7cd4eb');
+        lensGrad.addColorStop(1, '#3b8da8');
+        ctx.fillStyle = lensGrad;
+        ctx.beginPath();
+        ctx.arc(20, 19, 9.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Orientation reflection angle bar inside the circular lens
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        if (rot === 0) {
+          ctx.moveTo(14, 13);
+          ctx.lineTo(26, 25);
+        } else if (rot === 1) {
+          ctx.moveTo(14, 25);
+          ctx.lineTo(26, 13);
+        } else if (rot === 2) {
+          ctx.moveTo(12, 19);
+          ctx.lineTo(28, 19);
+        } else {
+          ctx.moveTo(20, 11);
+          ctx.lineTo(20, 27);
+        }
+        ctx.stroke();
       });
     }
 
@@ -696,79 +894,81 @@ export class ProceduralTextures {
       this.createCanvas(
         scene,
         active ? 'receiver_on' : 'receiver_off',
-        34,
-        42,
+        40,
+        48,
         (ctx) => {
-          ctx.fillStyle = '#536878';
-          ctx.fillRect(5, 10, 24, 28);
-          ctx.fillStyle = active ? '#7df2ff' : '#324a5e';
+          ctx.fillStyle = '#525d61';
+          ctx.fillRect(8, 30, 24, 14);
+          ctx.fillStyle = '#9c6e2b';
           ctx.beginPath();
-          ctx.moveTo(17, 13);
-          ctx.lineTo(25, 24);
-          ctx.lineTo(17, 35);
-          ctx.lineTo(9, 24);
-          ctx.closePath();
+          ctx.arc(20, 18, 12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = active ? '#b8fcff' : '#2d4959';
+          ctx.beginPath();
+          ctx.arc(20, 18, 9, 0, Math.PI * 2);
           ctx.fill();
         }
       );
     }
 
-    this.createCanvas(scene, 'stepping_stone', 32, 22, (ctx) => {
-      ctx.fillStyle = '#4c616b';
+    // Translucent Glowing Crystalline Light-Bridge Square (matching 04_Moonlit_Creek.png!)
+    this.createCanvas(scene, 'stepping_stone', 34, 24, (ctx) => {
+      ctx.fillStyle = 'rgba(120, 232, 255, 0.38)';
+      ctx.strokeStyle = '#d9fcff';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(4, 12);
-      ctx.lineTo(11, 5);
-      ctx.lineTo(24, 5);
-      ctx.lineTo(29, 12);
-      ctx.lineTo(23, 19);
-      ctx.lineTo(9, 19);
+      ctx.moveTo(17, 3);
+      ctx.lineTo(31, 11);
+      ctx.lineTo(17, 19);
+      ctx.lineTo(3, 11);
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
 
-      ctx.fillStyle = '#738b96';
-      ctx.beginPath();
-      ctx.moveTo(6, 11);
-      ctx.lineTo(12, 6);
-      ctx.lineTo(23, 6);
-      ctx.lineTo(27, 11);
-      ctx.lineTo(22, 16);
-      ctx.lineTo(10, 16);
-      ctx.closePath();
-      ctx.fill();
+      // Inner crystalline grid & sparkles
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(16, 7, 2, 2);
+      ctx.fillRect(10, 11, 1.5, 1.5);
+      ctx.fillRect(23, 10, 1.5, 1.5);
     });
 
-    this.createCanvas(scene, 'mural_tablet', 46, 44, (ctx) => {
+    this.createCanvas(scene, 'mural_tablet', 46, 46, (ctx) => {
       ctx.fillStyle = '#4b5e6b';
-      ctx.fillRect(4, 6, 38, 34);
+      ctx.fillRect(4, 6, 38, 36);
       ctx.fillStyle = '#657c8c';
-      ctx.fillRect(7, 9, 32, 28);
-      // Engraved lantern & shattered heart symbol
+      ctx.fillRect(7, 9, 32, 30);
+      ctx.fillStyle = '#4c7d40';
+      ctx.fillRect(6, 5, 16, 4);
       ctx.fillStyle = '#fce38a';
       ctx.beginPath();
-      ctx.arc(23, 21, 6, 0, Math.PI * 2);
+      ctx.arc(23, 22, 6.5, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#8cc3da';
       ctx.lineWidth = 1.5;
       ctx.strokeRect(12, 13, 22, 18);
     });
 
-    // 4. RUINS BALANCE PUZZLE & SHADOW (matching 04_silent_ruins.png)
-    this.createCanvas(scene, 'ruin_pillar', 32, 54, (ctx) => {
-      ctx.fillStyle = '#6c7a78';
-      ctx.fillRect(4, 8, 24, 44);
-      ctx.fillStyle = '#5e5078';
-      ctx.beginPath();
-      ctx.ellipse(16, 8, 12, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
+    // 4. RUINS SUN/MOON PEDESTALS, ARCHES & ANTLERED SHADOW (matching 05_Silent_Ruins.png)
+    this.createCanvas(scene, 'ruin_pillar', 32, 56, (ctx) => {
+      ctx.fillStyle = '#45485c';
+      ctx.fillRect(4, 8, 24, 46);
+      ctx.fillStyle = '#5e627a';
+      ctx.fillRect(2, 5, 28, 5);
+      ctx.fillStyle = '#3f6942';
+      ctx.fillRect(5, 5, 10, 4);
     });
 
-    this.createCanvas(scene, 'ruins_altar', 92, 46, (ctx) => {
-      ctx.fillStyle = '#687675';
-      ctx.fillRect(6, 6, 26, 36);
-      ctx.fillRect(32, 20, 54, 22);
-      ctx.fillStyle = '#81918f';
-      ctx.fillRect(8, 6, 22, 4);
-      ctx.fillRect(34, 20, 50, 4);
+    this.createCanvas(scene, 'ruins_altar', 104, 52, (ctx) => {
+      ctx.fillStyle = '#444659';
+      ctx.fillRect(8, 12, 88, 36);
+      ctx.fillStyle = '#5c5f78';
+      ctx.fillRect(14, 6, 76, 8);
+      // Eclipse Sun/Moon emblem carved on altar front
+      ctx.strokeStyle = '#c8a6ff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(52, 30, 9, 0, Math.PI * 2);
+      ctx.stroke();
     });
 
     for (const sym of ['sun', 'moon'] as const) {
@@ -776,37 +976,45 @@ export class ProceduralTextures {
         this.createCanvas(
           scene,
           `lock_${sym}_${lit ? 'on' : 'off'}`,
-          34,
-          46,
+          36,
+          44,
           (ctx) => {
-            ctx.fillStyle = '#5d6673';
-            ctx.fillRect(5, 8, 24, 34);
-            ctx.fillStyle = '#788291';
-            ctx.fillRect(7, 5, 20, 4);
+            // Square carved dark-stone pedestal block matching 05_Silent_Ruins.png
+            ctx.fillStyle = '#323547';
+            ctx.fillRect(4, 8, 28, 32);
+            ctx.fillStyle = '#4b4f66';
+            ctx.fillRect(2, 5, 32, 5);
+            ctx.strokeStyle = lit
+              ? sym === 'sun'
+                ? '#ffd266'
+                : '#a6c8ff'
+              : '#595e75';
+            ctx.lineWidth = 1.2;
+            ctx.strokeRect(6, 12, 24, 24);
 
             const color = lit
               ? sym === 'sun'
                 ? '#ffe07d'
-                : '#c8a6ff'
-              : '#373b4d';
+                : '#b8d4ff'
+              : '#5c6178';
 
             if (lit) {
-              const g = ctx.createRadialGradient(17, 24, 2, 17, 24, 14);
+              const g = ctx.createRadialGradient(18, 24, 2, 18, 24, 14);
               g.addColorStop(0, color);
               g.addColorStop(1, 'rgba(0,0,0,0)');
               ctx.fillStyle = g;
-              ctx.fillRect(3, 10, 28, 28);
+              ctx.fillRect(4, 10, 28, 28);
             }
 
             ctx.fillStyle = color;
             if (sym === 'sun') {
               ctx.beginPath();
-              ctx.arc(17, 24, 6, 0, Math.PI * 2);
+              ctx.arc(18, 24, 5.5, 0, Math.PI * 2);
               ctx.fill();
               for (let a = 0; a < 8; a++) {
                 const rad = (a * Math.PI) / 4;
                 ctx.fillRect(
-                  17 + Math.cos(rad) * 8 - 1,
+                  18 + Math.cos(rad) * 8 - 1,
                   24 + Math.sin(rad) * 8 - 1,
                   2,
                   2
@@ -814,11 +1022,11 @@ export class ProceduralTextures {
               }
             } else {
               ctx.beginPath();
-              ctx.arc(17, 24, 6.5, 0, Math.PI * 2);
+              ctx.arc(18, 24, 6.5, 0, Math.PI * 2);
               ctx.fill();
-              ctx.fillStyle = '#5d6673';
+              ctx.fillStyle = '#323547';
               ctx.beginPath();
-              ctx.arc(20, 22, 5.5, 0, Math.PI * 2);
+              ctx.arc(21, 22, 5.5, 0, Math.PI * 2);
               ctx.fill();
             }
           }
@@ -826,21 +1034,36 @@ export class ProceduralTextures {
       }
     }
 
-    // The Shadow Apparition
-    this.createCanvas(scene, 'shadow_npc', 36, 48, (ctx) => {
-      const g = ctx.createRadialGradient(18, 24, 2, 18, 24, 18);
-      g.addColorStop(0, 'rgba(165, 138, 191, 0.45)');
+    // Antlered/Crowned Shadow Guardian Apparition (matching 05_Silent_Ruins.png!)
+    this.createCanvas(scene, 'shadow_npc', 44, 56, (ctx) => {
+      const g = ctx.createRadialGradient(22, 28, 2, 22, 28, 22);
+      g.addColorStop(0, 'rgba(175, 140, 225, 0.55)');
       g.addColorStop(1, 'rgba(18, 23, 45, 0)');
       ctx.fillStyle = g;
-      ctx.fillRect(0, 0, 36, 48);
+      ctx.fillRect(0, 0, 44, 56);
 
-      ctx.fillStyle = '#181429';
+      // Antlers / branches silhouette on head
+      ctx.strokeStyle = '#292242';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(11, 14);
-      ctx.lineTo(18, 7);
-      ctx.lineTo(25, 14);
-      ctx.lineTo(28, 40);
-      ctx.lineTo(8, 40);
+      ctx.moveTo(18, 14);
+      ctx.lineTo(10, 4);
+      ctx.moveTo(14, 8);
+      ctx.lineTo(18, 4);
+      ctx.moveTo(26, 14);
+      ctx.lineTo(34, 4);
+      ctx.moveTo(30, 8);
+      ctx.lineTo(26, 4);
+      ctx.stroke();
+
+      // Cloaked shadow form
+      ctx.fillStyle = '#151226';
+      ctx.beginPath();
+      ctx.moveTo(15, 16);
+      ctx.lineTo(22, 10);
+      ctx.lineTo(29, 16);
+      ctx.lineTo(33, 48);
+      ctx.lineTo(11, 48);
       ctx.closePath();
       ctx.fill();
 
@@ -848,80 +1071,115 @@ export class ProceduralTextures {
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Subtle starry eyes
-      ctx.fillStyle = '#dbb8ef';
-      ctx.fillRect(15, 16, 2, 2);
-      ctx.fillRect(19, 16, 2, 2);
+      // Glowing starry eyes
+      ctx.fillStyle = '#e5ccff';
+      ctx.fillRect(19, 18, 2, 2);
+      ctx.fillRect(23, 18, 2, 2);
     });
 
-    // 5. THREE CRYSTALS (Memory Gold, Hope Blue, Balance Purple)
+    // 5. THREE MULTI-FACETED CRYSTALS ON MOSSY BASES (matching 02_Environment_Props_and_Puzzles.png)
     const crystals: Array<{ key: string; outer: string; inner: string }> = [
-      { key: 'crystal_memory', outer: '#e6b842', inner: '#fff1a8' },
-      { key: 'crystal_hope', outer: '#4daee6', inner: '#b8edff' },
-      { key: 'crystal_balance', outer: '#b96ce6', inner: '#eabfff' },
+      { key: 'crystal_memory', outer: '#f2a62c', inner: '#fff3a8' },
+      { key: 'crystal_hope', outer: '#38b6ff', inner: '#c4f5ff' },
+      { key: 'crystal_balance', outer: '#b96ce6', inner: '#f0d4ff' },
     ];
 
     for (const c of crystals) {
-      this.createCanvas(scene, c.key, 38, 48, (ctx) => {
-        const g = ctx.createRadialGradient(19, 24, 2, 19, 24, 18);
+      this.createCanvas(scene, c.key, 42, 50, (ctx) => {
+        const g = ctx.createRadialGradient(21, 24, 2, 21, 24, 20);
         g.addColorStop(0, c.inner);
         g.addColorStop(0.5, c.outer);
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, 38, 48);
+        ctx.fillRect(0, 0, 42, 50);
 
+        // Side crystal shards
         ctx.fillStyle = c.outer;
         ctx.beginPath();
-        ctx.moveTo(19, 6);
-        ctx.lineTo(31, 24);
-        ctx.lineTo(19, 42);
-        ctx.lineTo(7, 24);
+        ctx.moveTo(11, 18);
+        ctx.lineTo(17, 26);
+        ctx.lineTo(13, 38);
+        ctx.lineTo(7, 28);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(31, 18);
+        ctx.lineTo(35, 28);
+        ctx.lineTo(29, 38);
+        ctx.lineTo(25, 26);
+        ctx.closePath();
+        ctx.fill();
+
+        // Main center crystal spire
+        ctx.fillStyle = c.outer;
+        ctx.beginPath();
+        ctx.moveTo(21, 5);
+        ctx.lineTo(30, 22);
+        ctx.lineTo(25, 40);
+        ctx.lineTo(17, 40);
+        ctx.lineTo(12, 22);
         ctx.closePath();
         ctx.fill();
 
         ctx.fillStyle = c.inner;
         ctx.beginPath();
-        ctx.moveTo(19, 12);
-        ctx.lineTo(25, 24);
-        ctx.lineTo(19, 36);
-        ctx.lineTo(13, 24);
+        ctx.moveTo(21, 9);
+        ctx.lineTo(26, 22);
+        ctx.lineTo(21, 37);
+        ctx.lineTo(16, 22);
         ctx.closePath();
         ctx.fill();
       });
     }
   }
 
-  private static drawRunestoneBase(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = '#68736e';
-    ctx.fillRect(4, 8, 26, 34);
-    ctx.fillStyle = '#7d8a84';
-    ctx.fillRect(7, 5, 20, 4);
+  private static drawMossyRunestoneBase(ctx: CanvasRenderingContext2D): void {
+    // Weathered stone slab with green moss cap matching 02_Environment_Props_and_Puzzles.png
+    ctx.fillStyle = '#4e5759';
+    ctx.beginPath();
+    ctx.moveTo(6, 44);
+    ctx.lineTo(7, 10);
+    ctx.lineTo(14, 5);
+    ctx.lineTo(25, 5);
+    ctx.lineTo(31, 10);
+    ctx.lineTo(32, 44);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#687375';
+    ctx.fillRect(9, 9, 20, 33);
+
+    // Moss cap on top of runestone
+    ctx.fillStyle = '#568543';
+    ctx.beginPath();
+    ctx.ellipse(19, 8, 11, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   private static createLightingAndParticles(scene: Phaser.Scene): void {
-    // Soft radial light mask texture
     this.createCanvas(scene, 'light_radial', 256, 256, (ctx) => {
       const g = ctx.createRadialGradient(128, 128, 6, 128, 128, 126);
-      g.addColorStop(0, 'rgba(255, 232, 156, 0.46)');
-      g.addColorStop(0.45, 'rgba(255, 206, 110, 0.22)');
-      g.addColorStop(0.75, 'rgba(255, 185, 85, 0.07)');
-      g.addColorStop(1, 'rgba(255, 180, 70, 0)');
+      g.addColorStop(0, 'rgba(255, 234, 158, 0.48)');
+      g.addColorStop(0.45, 'rgba(255, 204, 102, 0.24)');
+      g.addColorStop(0.75, 'rgba(255, 180, 75, 0.08)');
+      g.addColorStop(1, 'rgba(255, 175, 65, 0)');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, 256, 256);
     });
 
     this.createCanvas(scene, 'particle_firefly', 8, 8, (ctx) => {
       const g = ctx.createRadialGradient(4, 4, 0.5, 4, 4, 4);
-      g.addColorStop(0, 'rgba(255, 242, 160, 1)');
-      g.addColorStop(1, 'rgba(255, 215, 90, 0)');
+      g.addColorStop(0, 'rgba(255, 245, 175, 1)');
+      g.addColorStop(1, 'rgba(125, 242, 212, 0)');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, 8, 8);
     });
 
     this.createCanvas(scene, 'particle_mist', 96, 40, (ctx) => {
       const g = ctx.createRadialGradient(48, 20, 6, 48, 20, 46);
-      g.addColorStop(0, 'rgba(180, 220, 230, 0.14)');
-      g.addColorStop(1, 'rgba(180, 220, 230, 0)');
+      g.addColorStop(0, 'rgba(180, 225, 235, 0.14)');
+      g.addColorStop(1, 'rgba(180, 225, 235, 0)');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, 96, 40);
     });

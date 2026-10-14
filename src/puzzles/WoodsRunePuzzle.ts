@@ -30,6 +30,7 @@ export class WoodsRunePuzzle {
   private hud: HUD;
 
   public archSprite!: Phaser.GameObjects.Sprite;
+  private beamGraphics!: Phaser.GameObjects.Graphics;
   private crystalSprite?: Phaser.GameObjects.Sprite;
   private nodes: RuneNode[] = [];
   private revealRemainingMs = 0;
@@ -62,7 +63,10 @@ export class WoodsRunePuzzle {
       this.questSystem.progress.woodsRuneSequence >= 3 ||
       this.questSystem.progress.crystals.memory;
 
-    // Ancient Stone Arch Gate (matching 02_whispering_woods.png)
+    this.beamGraphics = this.scene.add.graphics();
+    this.beamGraphics.setDepth(16);
+
+    // Circular Stone Sun-Gate (matching 03_Whispering_Woods.png)
     this.archSprite = this.scene.add.sprite(
       370,
       126,
@@ -82,7 +86,7 @@ export class WoodsRunePuzzle {
       },
     });
 
-    // Three Runestones matching 02_whispering_woods.png layout with clean top clearance
+    // Three Mossy Runestones matching 03_Whispering_Woods.png
     const defs: Array<{ id: RuneId; labelVi: string; x: number; y: number }> = [
       { id: 'moon', labelVi: 'Cổ tự Mặt Trăng', x: 162, y: 196 },
       { id: 'leaf', labelVi: 'Cổ tự Chiếc Lá', x: 265, y: 120 },
@@ -145,6 +149,8 @@ export class WoodsRunePuzzle {
       this.hud.showToast('Các cổ tự ẩn trên bia đá đã lộ diện trong 5 giây!', 2200);
     });
 
+    this.refreshNodeTextures();
+
     if (solved && !this.questSystem.progress.crystals.memory) {
       this.spawnMemoryCrystal();
     }
@@ -196,7 +202,7 @@ export class WoodsRunePuzzle {
     this.questSystem.save();
     this.archSprite.setTexture('woods_arch_open');
     SoundSystem.playPuzzleSolved();
-    this.effectsSystem.spawnBurst(370, 136, 0xffe680, 22);
+    this.effectsSystem.spawnBurst(370, 120, 0xffe680, 24);
     this.hud.showToast('Cổng đá cổ đã mở! Tinh thể Ký Ức xuất hiện!');
     this.spawnMemoryCrystal();
   }
@@ -240,10 +246,24 @@ export class WoodsRunePuzzle {
       this.questSystem.progress.crystals.memory;
     const revealed = this.revealRemainingMs > 0;
 
+    this.beamGraphics.clear();
+
     for (const n of this.nodes) {
       if (solved || n.activated) {
         n.sprite.setTexture(`runestone_${n.id}_lit`);
         n.labelText.setVisible(true);
+        // Project golden light beam into the Circular Sun-Gate (matching 03_Whispering_Woods.png!)
+        this.beamGraphics.lineStyle(3.5, 0xffb838, 0.28);
+        this.beamGraphics.beginPath();
+        this.beamGraphics.moveTo(n.x, n.y - 4);
+        this.beamGraphics.lineTo(370, 120);
+        this.beamGraphics.strokePath();
+
+        this.beamGraphics.lineStyle(1.5, 0xfff3b0, 0.88);
+        this.beamGraphics.beginPath();
+        this.beamGraphics.moveTo(n.x, n.y - 4);
+        this.beamGraphics.lineTo(370, 120);
+        this.beamGraphics.strokePath();
       } else if (revealed) {
         n.sprite.setTexture(`runestone_${n.id}_rev`);
         n.labelText.setVisible(true);
