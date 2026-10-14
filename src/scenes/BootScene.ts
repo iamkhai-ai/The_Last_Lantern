@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { AssetLoader } from '../art/AssetLoader';
 import { ProceduralTextures } from '../art/ProceduralTextures';
 
 export class BootScene extends Phaser.Scene {
@@ -7,7 +8,25 @@ export class BootScene extends Phaser.Scene {
   }
 
   public create(): void {
+    void this.boot();
+  }
+
+  private async boot(): Promise<void> {
+    const report = await AssetLoader.load(this);
+
+    // Fills in anything the asset pack did not provide, so the game always runs.
     ProceduralTextures.generateAll(this);
+
+    if (report.loaded.length > 0 || report.missing.length > 0) {
+      console.info(
+        `[BootScene] Art assets: ${report.loaded.length} loaded, ` +
+          `${report.missing.length} fell back to procedural.`
+      );
+      if (report.missing.length > 0 && report.missing.length <= 12) {
+        console.info('[BootScene] Still procedural:', report.missing.join(', '));
+      }
+    }
+
     this.scene.start('MenuScene');
   }
 }

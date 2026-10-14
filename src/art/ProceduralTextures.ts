@@ -283,8 +283,8 @@ export class ProceduralTextures {
         const canopyColors = v.dawn
           ? ['#3f7836', '#5c9e49', '#88c964']
           : v.stage >= 1
-          ? ['#18382e', '#2c5943', '#4a7d58']
-          : ['#112624', '#1b3833', '#264a42'];
+          ? ['#245a48', '#3a7d60', '#5fa87e']
+          : ['#1e4d40', '#31705a', '#529a72'];
 
         const canopyBlobs = [
           { x: 110, y: 28, rx: 86, ry: 26, c: canopyColors[0] },
