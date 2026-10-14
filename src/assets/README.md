@@ -1,4 +1,4 @@
-﻿# ART ASSET MANIFEST â€” The Last Lantern
+# ART ASSET MANIFEST â€” The Last Lantern
 
 Tong cong: **82 file PNG**.
 
@@ -24,7 +24,7 @@ Tong cong: **82 file PNG**.
 4 huong x 3 trang thai den x 3 frame. Frame 0 = dung, 1/2 = buoc chan.
 | ten file | kich thuoc |
 |---|---|
-| `player_{down\|up\|left\|right}_{lit\|unlit\|nolamp}_{0\|1\|2}.png` | 36x42 |
+| `player_{down\|downleft\|downright\|left\|right\|up\|upleft\|upright}_{lit\|unlit\|nolamp}_{0\|1\|2}.png` | 36x42 (72 file) |
 
 **Dinh nghia mau:** `lit` = dang co den thap sang Â· `unlit` = co den nhung tat Â· `nolamp` = khong co den.
 **Pivot:** cham giua, chan sprite phai khop duoi chan nhan vat. Sprite 36x42, chan o ~y=40.
@@ -93,6 +93,42 @@ Tong cong: **82 file PNG**.
 | `player_right_nolamp_0.png` | 36x42 |
 | `player_right_nolamp_1.png` | 36x42 |
 | `player_right_nolamp_2.png` | 36x42 |
+| `player_downleft_lit_0.png` | 36x42 |
+| `player_downleft_lit_1.png` | 36x42 |
+| `player_downleft_lit_2.png` | 36x42 |
+| `player_downleft_unlit_0.png` | 36x42 |
+| `player_downleft_unlit_1.png` | 36x42 |
+| `player_downleft_unlit_2.png` | 36x42 |
+| `player_downleft_nolamp_0.png` | 36x42 |
+| `player_downleft_nolamp_1.png` | 36x42 |
+| `player_downleft_nolamp_2.png` | 36x42 |
+| `player_downright_lit_0.png` | 36x42 |
+| `player_downright_lit_1.png` | 36x42 |
+| `player_downright_lit_2.png` | 36x42 |
+| `player_downright_unlit_0.png` | 36x42 |
+| `player_downright_unlit_1.png` | 36x42 |
+| `player_downright_unlit_2.png` | 36x42 |
+| `player_downright_nolamp_0.png` | 36x42 |
+| `player_downright_nolamp_1.png` | 36x42 |
+| `player_downright_nolamp_2.png` | 36x42 |
+| `player_upleft_lit_0.png` | 36x42 |
+| `player_upleft_lit_1.png` | 36x42 |
+| `player_upleft_lit_2.png` | 36x42 |
+| `player_upleft_unlit_0.png` | 36x42 |
+| `player_upleft_unlit_1.png` | 36x42 |
+| `player_upleft_unlit_2.png` | 36x42 |
+| `player_upleft_nolamp_0.png` | 36x42 |
+| `player_upleft_nolamp_1.png` | 36x42 |
+| `player_upleft_nolamp_2.png` | 36x42 |
+| `player_upright_lit_0.png` | 36x42 |
+| `player_upright_lit_1.png` | 36x42 |
+| `player_upright_lit_2.png` | 36x42 |
+| `player_upright_unlit_0.png` | 36x42 |
+| `player_upright_unlit_1.png` | 36x42 |
+| `player_upright_unlit_2.png` | 36x42 |
+| `player_upright_nolamp_0.png` | 36x42 |
+| `player_upright_nolamp_1.png` | 36x42 |
+| `player_upright_nolamp_2.png` | 36x42 |
 | `lumo_0.png` | 24x24 |
 | `lumo_1.png` | 24x24 |
 | `tree_hub.png` | 76x76 |

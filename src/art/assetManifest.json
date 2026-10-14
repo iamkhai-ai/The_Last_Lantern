@@ -1,512 +1,692 @@
-﻿[
-    {
-        "key":  "player_down_lit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_lit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_lit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_unlit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_unlit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_unlit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_nolamp_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_nolamp_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_down_nolamp_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_lit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_lit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_lit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_unlit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_unlit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_unlit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_nolamp_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_nolamp_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_up_nolamp_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_lit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_lit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_lit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_unlit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_unlit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_unlit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_nolamp_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_nolamp_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_left_nolamp_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_lit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_lit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_lit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_unlit_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_unlit_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_unlit_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_nolamp_0",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_nolamp_1",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "player_right_nolamp_2",
-        "w":  36,
-        "h":  42
-    },
-    {
-        "key":  "lumo_0",
-        "w":  24,
-        "h":  24
-    },
-    {
-        "key":  "lumo_1",
-        "w":  24,
-        "h":  24
-    },
-    {
-        "key":  "tree_hub",
-        "w":  76,
-        "h":  76
-    },
-    {
-        "key":  "tree_woods",
-        "w":  76,
-        "h":  76
-    },
-    {
-        "key":  "tree_creek",
-        "w":  76,
-        "h":  76
-    },
-    {
-        "key":  "tree_ruins",
-        "w":  76,
-        "h":  76
-    },
-    {
-        "key":  "tree_dawn",
-        "w":  76,
-        "h":  76
-    },
-    {
-        "key":  "bush_hub",
-        "w":  44,
-        "h":  32
-    },
-    {
-        "key":  "bush_woods",
-        "w":  44,
-        "h":  32
-    },
-    {
-        "key":  "bush_creek",
-        "w":  44,
-        "h":  32
-    },
-    {
-        "key":  "bush_ruins",
-        "w":  44,
-        "h":  32
-    },
-    {
-        "key":  "bush_dawn",
-        "w":  44,
-        "h":  32
-    },
-    {
-        "key":  "mirror_0",
-        "w":  36,
-        "h":  48
-    },
-    {
-        "key":  "mirror_1",
-        "w":  36,
-        "h":  48
-    },
-    {
-        "key":  "mirror_2",
-        "w":  36,
-        "h":  48
-    },
-    {
-        "key":  "mirror_3",
-        "w":  36,
-        "h":  48
-    },
-    {
-        "key":  "runestone_hidden",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "runestone_moon_lit",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "runestone_moon_rev",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "runestone_leaf_lit",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "runestone_leaf_rev",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "runestone_star_lit",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "runestone_star_rev",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "heart_tree_0",
-        "w":  220,
-        "h":  210
-    },
-    {
-        "key":  "heart_tree_1",
-        "w":  220,
-        "h":  210
-    },
-    {
-        "key":  "heart_tree_2",
-        "w":  220,
-        "h":  210
-    },
-    {
-        "key":  "heart_tree_3",
-        "w":  220,
-        "h":  210
-    },
-    {
-        "key":  "heart_tree_dawn",
-        "w":  220,
-        "h":  210
-    },
-    {
-        "key":  "beacon_stone",
-        "w":  34,
-        "h":  46
-    },
-    {
-        "key":  "guardian_statue",
-        "w":  32,
-        "h":  46
-    },
-    {
-        "key":  "mural_tablet",
-        "w":  46,
-        "h":  46
-    },
-    {
-        "key":  "pedestal_empty",
-        "w":  36,
-        "h":  46
-    },
-    {
-        "key":  "pedestal_lit",
-        "w":  36,
-        "h":  46
-    },
-    {
-        "key":  "receiver_off",
-        "w":  40,
-        "h":  48
-    },
-    {
-        "key":  "receiver_on",
-        "w":  40,
-        "h":  48
-    },
-    {
-        "key":  "rock_blocker",
-        "w":  38,
-        "h":  32
-    },
-    {
-        "key":  "ruin_pillar",
-        "w":  32,
-        "h":  56
-    },
-    {
-        "key":  "ruins_altar",
-        "w":  104,
-        "h":  52
-    },
-    {
-        "key":  "ruins_flower",
-        "w":  22,
-        "h":  22
-    },
-    {
-        "key":  "shadow_npc",
-        "w":  44,
-        "h":  56
-    },
-    {
-        "key":  "stepping_stone",
-        "w":  34,
-        "h":  24
-    },
-    {
-        "key":  "tuft_grass",
-        "w":  12,
-        "h":  10
-    },
-    {
-        "key":  "woods_arch_locked",
-        "w":  128,
-        "h":  126
-    },
-    {
-        "key":  "woods_arch_open",
-        "w":  128,
-        "h":  126
-    },
-    {
-        "key":  "mushroom_cyan",
-        "w":  22,
-        "h":  22
-    },
-    {
-        "key":  "mushroom_warm",
-        "w":  14,
-        "h":  14
-    },
-    {
-        "w":  43,
-        "key":  "crystal_memory",
-        "h":  79
-    },
-    {
-        "w":  41,
-        "key":  "crystal_hope",
-        "h":  72
-    },
-    {
-        "w":  42,
-        "key":  "crystal_balance",
-        "h":  78
-    },
-    {
-        "w":  36,
-        "key":  "lock_sun_on",
-        "h":  44
-    },
-    {
-        "w":  36,
-        "key":  "lock_sun_off",
-        "h":  44
-    },
-    {
-        "w":  36,
-        "key":  "lock_moon_on",
-        "h":  44
-    },
-    {
-        "w":  36,
-        "key":  "lock_moon_off",
-        "h":  44
-    },
-    {
-        "key":  "tile_grass",
-        "w":  94,
-        "h":  97
-    },
-    {
-        "key":  "tile_dirt",
-        "w":  94,
-        "h":  100
-    },
-    {
-        "key":  "tile_stone",
-        "w":  94,
-        "h":  101
-    },
-    {
-        "key":  "tile_water",
-        "w":  89,
-        "h":  90
-    },
-    {
-        "key":  "lumo_2",
-        "w":  30,
-        "h":  30
-    },
-    {
-        "key":  "lumo_3",
-        "w":  28,
-        "h":  30
-    },
-    {
-        "key":  "tile_water_b",
-        "w":  93,
-        "h":  87
-    },
-    {
-        "key":  "tile_water_c",
-        "w":  97,
-        "h":  87
-    },
-    {
-        "key":  "tree_alt",
-        "w":  101,
-        "h":  99
-    },
-    {
-        "key":  "bush_alt",
-        "w":  69,
-        "h":  56
-    },
-    {
-        "key":  "lantern_hang_1",
-        "w":  23,
-        "h":  48
-    },
-    {
-        "key":  "lantern_hang_2",
-        "w":  22,
-        "h":  48
-    },
-    {
-        "key":  "lantern_hang_3",
-        "w":  27,
-        "h":  48
-    }
+[
+  {
+    "key": "lumo_0",
+    "w": 24,
+    "h": 24
+  },
+  {
+    "key": "lumo_1",
+    "w": 24,
+    "h": 24
+  },
+  {
+    "key": "tree_hub",
+    "w": 76,
+    "h": 76
+  },
+  {
+    "key": "tree_woods",
+    "w": 76,
+    "h": 76
+  },
+  {
+    "key": "tree_creek",
+    "w": 76,
+    "h": 76
+  },
+  {
+    "key": "tree_ruins",
+    "w": 76,
+    "h": 76
+  },
+  {
+    "key": "tree_dawn",
+    "w": 76,
+    "h": 76
+  },
+  {
+    "key": "bush_hub",
+    "w": 44,
+    "h": 32
+  },
+  {
+    "key": "bush_woods",
+    "w": 44,
+    "h": 32
+  },
+  {
+    "key": "bush_creek",
+    "w": 44,
+    "h": 32
+  },
+  {
+    "key": "bush_ruins",
+    "w": 44,
+    "h": 32
+  },
+  {
+    "key": "bush_dawn",
+    "w": 44,
+    "h": 32
+  },
+  {
+    "key": "mirror_0",
+    "w": 36,
+    "h": 48
+  },
+  {
+    "key": "mirror_1",
+    "w": 36,
+    "h": 48
+  },
+  {
+    "key": "mirror_2",
+    "w": 36,
+    "h": 48
+  },
+  {
+    "key": "mirror_3",
+    "w": 36,
+    "h": 48
+  },
+  {
+    "key": "runestone_hidden",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "runestone_moon_lit",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "runestone_moon_rev",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "runestone_leaf_lit",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "runestone_leaf_rev",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "runestone_star_lit",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "runestone_star_rev",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "heart_tree_0",
+    "w": 220,
+    "h": 210
+  },
+  {
+    "key": "heart_tree_1",
+    "w": 220,
+    "h": 210
+  },
+  {
+    "key": "heart_tree_2",
+    "w": 220,
+    "h": 210
+  },
+  {
+    "key": "heart_tree_3",
+    "w": 220,
+    "h": 210
+  },
+  {
+    "key": "heart_tree_dawn",
+    "w": 220,
+    "h": 210
+  },
+  {
+    "key": "beacon_stone",
+    "w": 34,
+    "h": 46
+  },
+  {
+    "key": "guardian_statue",
+    "w": 32,
+    "h": 46
+  },
+  {
+    "key": "mural_tablet",
+    "w": 46,
+    "h": 46
+  },
+  {
+    "key": "pedestal_empty",
+    "w": 36,
+    "h": 46
+  },
+  {
+    "key": "pedestal_lit",
+    "w": 36,
+    "h": 46
+  },
+  {
+    "key": "receiver_off",
+    "w": 40,
+    "h": 48
+  },
+  {
+    "key": "receiver_on",
+    "w": 40,
+    "h": 48
+  },
+  {
+    "key": "rock_blocker",
+    "w": 38,
+    "h": 32
+  },
+  {
+    "key": "ruin_pillar",
+    "w": 32,
+    "h": 56
+  },
+  {
+    "key": "ruins_altar",
+    "w": 104,
+    "h": 52
+  },
+  {
+    "key": "ruins_flower",
+    "w": 22,
+    "h": 22
+  },
+  {
+    "key": "shadow_npc",
+    "w": 44,
+    "h": 56
+  },
+  {
+    "key": "stepping_stone",
+    "w": 34,
+    "h": 24
+  },
+  {
+    "key": "tuft_grass",
+    "w": 12,
+    "h": 10
+  },
+  {
+    "key": "woods_arch_locked",
+    "w": 128,
+    "h": 126
+  },
+  {
+    "key": "woods_arch_open",
+    "w": 128,
+    "h": 126
+  },
+  {
+    "key": "mushroom_cyan",
+    "w": 22,
+    "h": 22
+  },
+  {
+    "key": "mushroom_warm",
+    "w": 14,
+    "h": 14
+  },
+  {
+    "w": 43,
+    "key": "crystal_memory",
+    "h": 79
+  },
+  {
+    "w": 41,
+    "key": "crystal_hope",
+    "h": 72
+  },
+  {
+    "w": 42,
+    "key": "crystal_balance",
+    "h": 78
+  },
+  {
+    "w": 36,
+    "key": "lock_sun_on",
+    "h": 44
+  },
+  {
+    "w": 36,
+    "key": "lock_sun_off",
+    "h": 44
+  },
+  {
+    "w": 36,
+    "key": "lock_moon_on",
+    "h": 44
+  },
+  {
+    "w": 36,
+    "key": "lock_moon_off",
+    "h": 44
+  },
+  {
+    "key": "tile_grass",
+    "w": 94,
+    "h": 97
+  },
+  {
+    "key": "tile_dirt",
+    "w": 94,
+    "h": 100
+  },
+  {
+    "key": "tile_stone",
+    "w": 94,
+    "h": 101
+  },
+  {
+    "key": "tile_water",
+    "w": 89,
+    "h": 90
+  },
+  {
+    "key": "lumo_2",
+    "w": 30,
+    "h": 30
+  },
+  {
+    "key": "lumo_3",
+    "w": 28,
+    "h": 30
+  },
+  {
+    "key": "tile_water_b",
+    "w": 93,
+    "h": 87
+  },
+  {
+    "key": "tile_water_c",
+    "w": 97,
+    "h": 87
+  },
+  {
+    "key": "tree_alt",
+    "w": 101,
+    "h": 99
+  },
+  {
+    "key": "bush_alt",
+    "w": 69,
+    "h": 56
+  },
+  {
+    "key": "lantern_hang_1",
+    "w": 23,
+    "h": 48
+  },
+  {
+    "key": "lantern_hang_2",
+    "w": 22,
+    "h": 48
+  },
+  {
+    "key": "lantern_hang_3",
+    "w": 27,
+    "h": 48
+  },
+  {
+    "key": "player_down_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_down_nolamp_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downright_nolamp_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_right_nolamp_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upright_nolamp_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_up_nolamp_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_upleft_nolamp_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_left_nolamp_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_lit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_lit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_lit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_unlit_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_unlit_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_unlit_2",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_nolamp_0",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_nolamp_1",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "player_downleft_nolamp_2",
+    "w": 36,
+    "h": 42
+  }
 ]

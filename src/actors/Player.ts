@@ -1,6 +1,14 @@
 import Phaser from 'phaser';
 
-export type FacingDirection = 'down' | 'up' | 'left' | 'right';
+export type FacingDirection =
+  | 'down'
+  | 'downleft'
+  | 'downright'
+  | 'left'
+  | 'right'
+  | 'up'
+  | 'upleft'
+  | 'upright';
 
 export class Player {
   public sprite: Phaser.Physics.Arcade.Sprite;
@@ -82,7 +90,14 @@ export class Player {
 
       body.setVelocity(vx * speed, vy * speed);
 
-      if (Math.abs(vx) > Math.abs(vy)) {
+      if (vx !== 0 && vy !== 0) {
+        // Diagonal: combine vertical + horizontal (screen +y = down).
+        if (vy < 0) {
+          this.facing = vx < 0 ? 'upleft' : 'upright';
+        } else {
+          this.facing = vx < 0 ? 'downleft' : 'downright';
+        }
+      } else if (Math.abs(vx) > Math.abs(vy)) {
         this.facing = vx < 0 ? 'left' : 'right';
       } else {
         this.facing = vy < 0 ? 'up' : 'down';
@@ -111,7 +126,16 @@ export class Player {
     const state = !hasLanternInHand ? 'nolamp' : lanternOn ? 'lit' : 'unlit';
     const frameMap = [0, 1, 0, 2];
     const frame = isMoving ? frameMap[this.animStep] : 0;
-    const texKey = `player_${this.facing}_${state}_${frame}`;
+    let texKey = `player_${this.facing}_${state}_${frame}`;
+    if (!this.scene.textures.exists(texKey)) {
+      // Fall back to the dominant cardinal direction for incomplete packs.
+      const fallback =
+        this.facing.includes('left') ? 'left'
+        : this.facing.includes('right') ? 'right'
+        : this.facing.includes('up') ? 'up'
+        : 'down';
+      texKey = `player_${fallback}_${state}_${frame}`;
+    }
     if (this.sprite.texture.key !== texKey) {
       this.sprite.setTexture(texKey);
     }
