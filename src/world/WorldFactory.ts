@@ -9,6 +9,7 @@ export interface BuiltZoneObjects {
   introFootprints: Phaser.GameObjects.Image[];
   treeSprites: Phaser.GameObjects.Image[];
   bushSprites: Phaser.GameObjects.Image[];
+  waterTiles: Phaser.GameObjects.TileSprite[];
 }
 
 export class WorldFactory {
@@ -33,6 +34,8 @@ export class WorldFactory {
     bgBase.fillStyle(groundHex, 1);
     bgBase.fillRect(0, 0, 640, 360);
 
+    const waterTiles: Phaser.GameObjects.TileSprite[] = [];
+
     const addTiles = (
       tex: string,
       tint: number | null,
@@ -46,6 +49,9 @@ export class WorldFactory {
       mg.fillStyle(0xffffff, 1);
       shape(mg);
       ts.setMask(mg.createGeometryMask());
+      if (tex === 'tile_water' || tex === 'tile_water_b' || tex === 'tile_water_c') {
+        waterTiles.push(ts);
+      }
     };
 
     const WARM = 0xffe2b8;
@@ -118,6 +124,29 @@ export class WorldFactory {
       leftStatue.setDepth(15);
       const rightStatue = scene.add.image(404, 152, 'guardian_statue');
       rightStatue.setDepth(15);
+
+      // Hanging paper lanterns along the outer grass (atlas variants, gentle sway)
+      const lanternKeys = ['lantern_hang_1', 'lantern_hang_2', 'lantern_hang_3'].filter((k) =>
+        scene.textures.exists(k)
+      );
+      const lanternSpots: Array<[number, number]> = [
+        [258, 190],
+        [372, 150],
+        [540, 250],
+      ];
+      lanternSpots.forEach(([lx, ly], li) => {
+        if (lanternKeys.length === 0) return;
+        const lamp = scene.add.image(lx, ly, lanternKeys[li % lanternKeys.length]);
+        lamp.setDepth(14);
+        scene.tweens.add({
+          targets: lamp,
+          y: ly - 3,
+          duration: 1400 + li * 250,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+      });
     } else if (zoneId === 'woods') {
       // Cascading forest brook & wooden plank bridge (03_Whispering_Woods.png)
       addTiles('tile_water', null, (g) => {
@@ -256,11 +285,18 @@ export class WorldFactory {
     }
 
     // 4. Border canopy trees & bushes with real physics colliders
+    // Alternate primary / alt sprites for variety (deterministic by index).
     const treeKey = isDawn ? 'tree_dawn' : def.treeKey;
     const bushKey = isDawn ? 'bush_dawn' : def.bushKey;
+    const hasTreeAlt = scene.textures.exists('tree_alt');
+    const hasBushAlt = scene.textures.exists('bush_alt');
+    const altTint =
+      zoneId === 'ruins' ? 0xc79ad8 : isDawn ? 0xffe0b0 : null;
 
-    const addTreeBlocker = (tx: number, ty: number) => {
-      const tree = scene.add.image(tx, ty, treeKey);
+    const addTreeBlocker = (tx: number, ty: number, useAlt: boolean) => {
+      const key = useAlt && hasTreeAlt ? 'tree_alt' : treeKey;
+      const tree = scene.add.image(tx, ty, key);
+      if (useAlt && hasTreeAlt && altTint !== null) tree.setTint(altTint);
       tree.setDepth(8 + Math.floor(ty / 12));
       treeSprites.push(tree);
       const block = scene.add.zone(tx, ty + 10, 42, 30);
@@ -282,13 +318,15 @@ export class WorldFactory {
       [530, 24],
     ];
 
+    let treeIdx = 0;
     for (const [tx, ty] of borderTrees) {
       if (zoneId === 'creek' && tx < 60 && ty > 180) continue;
-      addTreeBlocker(tx, ty);
+      addTreeBlocker(tx, ty, treeIdx % 2 === 1);
+      treeIdx++;
     }
 
     if (zoneId !== 'hub') {
-      addTreeBlocker(615, 205);
+      addTreeBlocker(615, 205, false);
     }
 
     const bushCoords: Array<[number, number]> = [
@@ -297,11 +335,13 @@ export class WorldFactory {
       [425, 336],
       [540, 328],
     ];
-    for (const [bx, by] of bushCoords) {
-      const b = scene.add.image(bx, by, bushKey);
+    bushCoords.forEach(([bx, by], idx) => {
+      const useAlt = hasBushAlt && idx % 2 === 1;
+      const b = scene.add.image(bx, by, useAlt ? 'bush_alt' : bushKey);
+      if (useAlt && altTint !== null) b.setTint(altTint);
       b.setDepth(28);
       bushSprites.push(b);
-    }
+    });
 
     let heartTreeSprite: Phaser.GameObjects.Sprite | undefined;
     let bridgeBlocker: Phaser.GameObjects.Zone | undefined;
@@ -332,8 +372,8 @@ export class WorldFactory {
         introFootprints.push(fp);
       }
     } else if (zoneId === 'woods') {
-      addTreeBlocker(92, 105);
-      addTreeBlocker(548, 95);
+      addTreeBlocker(92, 105, true);
+      addTreeBlocker(548, 95, true);
 
       const gateCollider = scene.add.zone(370, 118, 88, 36);
       scene.physics.add.existing(gateCollider, true);
@@ -384,6 +424,7 @@ export class WorldFactory {
       introFootprints,
       treeSprites,
       bushSprites,
+      waterTiles,
     };
   }
 }

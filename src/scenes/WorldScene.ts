@@ -37,6 +37,9 @@ export class WorldScene extends Phaser.Scene {
   private heartTreeSprite?: Phaser.GameObjects.Sprite;
   private treeSprites: Phaser.GameObjects.Image[] = [];
   private bushSprites: Phaser.GameObjects.Image[] = [];
+  private waterTiles: Phaser.GameObjects.TileSprite[] = [];
+  private waterAnimTimer = 0;
+  private waterAnimStep = 0;
   private introBeaconSprite?: Phaser.GameObjects.Sprite;
   private introFootprints: Phaser.GameObjects.Image[] = [];
   private overloadBanner?: Phaser.GameObjects.Text;
@@ -66,6 +69,9 @@ export class WorldScene extends Phaser.Scene {
     this.introFootprints = built.introFootprints;
     this.treeSprites = built.treeSprites;
     this.bushSprites = built.bushSprites;
+    this.waterTiles = built.waterTiles;
+    this.waterAnimTimer = 0;
+    this.waterAnimStep = 0;
 
     const zoneDef = ZONE_DEFINITIONS[zoneId];
     const fromKey = data?.fromZone ?? 'default';
@@ -588,6 +594,7 @@ export class WorldScene extends Phaser.Scene {
     this.lanternSystem.update(delta, this.player.x, this.player.y);
     this.effectsSystem.update(delta);
     this.woodsPuzzle?.update(delta);
+    this.updateWaterAnimation(delta);
 
     this.interactionSystem.update(
       this.player.x,
@@ -601,5 +608,25 @@ export class WorldScene extends Phaser.Scene {
       this.lanternSystem.lanternPlaced,
       this.lanternSystem.getCooldownRatio()
     );
+  }
+
+  private static readonly WATER_FRAMES = ['tile_water', 'tile_water_b', 'tile_water_c'];
+
+  private updateWaterAnimation(dt: number): void {
+    if (this.waterTiles.length === 0) return;
+    // All three frames must exist, otherwise keep the static base frame.
+    for (const key of WorldScene.WATER_FRAMES) {
+      if (!this.textures.exists(key)) return;
+    }
+    this.waterAnimTimer += dt;
+    if (this.waterAnimTimer < 480) return;
+    this.waterAnimTimer = 0;
+    this.waterAnimStep = (this.waterAnimStep + 1) % WorldScene.WATER_FRAMES.length;
+    const next = WorldScene.WATER_FRAMES[this.waterAnimStep];
+    for (const tile of this.waterTiles) {
+      if (tile.texture.key !== next) {
+        tile.setTexture(next);
+      }
+    }
   }
 }

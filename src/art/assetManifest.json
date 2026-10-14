@@ -463,5 +463,50 @@
         "key":  "tile_water",
         "w":  89,
         "h":  90
+    },
+    {
+        "key":  "lumo_2",
+        "w":  30,
+        "h":  30
+    },
+    {
+        "key":  "lumo_3",
+        "w":  28,
+        "h":  30
+    },
+    {
+        "key":  "tile_water_b",
+        "w":  93,
+        "h":  87
+    },
+    {
+        "key":  "tile_water_c",
+        "w":  97,
+        "h":  87
+    },
+    {
+        "key":  "tree_alt",
+        "w":  101,
+        "h":  99
+    },
+    {
+        "key":  "bush_alt",
+        "w":  69,
+        "h":  56
+    },
+    {
+        "key":  "lantern_hang_1",
+        "w":  23,
+        "h":  48
+    },
+    {
+        "key":  "lantern_hang_2",
+        "w":  22,
+        "h":  48
+    },
+    {
+        "key":  "lantern_hang_3",
+        "w":  27,
+        "h":  48
     }
 ]

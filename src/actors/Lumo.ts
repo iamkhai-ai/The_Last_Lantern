@@ -6,11 +6,16 @@ export class Lumo {
   private timeElapsed = 0;
   private trailTimer = 0;
   private visible = true;
+  private frameCount = 2;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
     this.sprite = scene.add.sprite(x, y, 'lumo_0');
     this.sprite.setDepth(55);
+    // Use 4-frame atlas animation when extra poses exist, else classic 2-frame.
+    if (scene.textures.exists('lumo_2') && scene.textures.exists('lumo_3')) {
+      this.frameCount = 4;
+    }
   }
 
   public setVisible(vis: boolean): void {
@@ -29,7 +34,7 @@ export class Lumo {
     this.sprite.x += (desiredX - this.sprite.x) * Math.min(1, dt * 0.008);
     this.sprite.y += (desiredY - this.sprite.y) * Math.min(1, dt * 0.008);
 
-    const frame = Math.floor(this.timeElapsed * 2) % 2;
+    const frame = Math.floor(this.timeElapsed * 2) % this.frameCount;
     this.sprite.setTexture(`lumo_${frame}`);
 
     // Emit subtle glowing dust mote trail
