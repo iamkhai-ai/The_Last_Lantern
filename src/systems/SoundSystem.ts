@@ -110,7 +110,7 @@ export class SoundSystem {
   public static playDialogueTick(speaker: string): void {
     if (speaker === 'Lumo') {
       this.playTone(680, 0.045, 'sine', 0.035, 760);
-    } else if (speaker === 'Shadow') {
+    } else if (speaker === 'Shadow' || speaker === 'The Shadow') {
       this.playTone(175, 0.06, 'triangle', 0.045, 155);
     } else {
       this.playTone(420, 0.045, 'sine', 0.035, 450);

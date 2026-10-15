@@ -223,6 +223,7 @@ export class MenuScene extends Phaser.Scene {
 
   public startNewGame(): void {
     CampaignSaveSystem.clear();
+    SaveSystem.clear();
     SoundSystem.playLanternToggle(true);
     this.scene.start('CampaignScene', { newGame: true });
   }
