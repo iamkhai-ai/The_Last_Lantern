@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SaveSystem } from '../systems/SaveSystem';
+import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
 
@@ -8,12 +9,15 @@ export class EndingScene extends Phaser.Scene {
   private effectsSystem!: EffectsSystem;
   private buttons: Phaser.GameObjects.Text[] = [];
   private selectedIndex = 0;
+  private campaignEnding = false;
 
   constructor() {
     super({ key: 'EndingScene' });
   }
 
-  public create(): void {
+  public create(data?: { showCredits?: boolean; campaign?: boolean }): void {
+    this.campaignEnding = data?.campaign === true;
+    const showCredits = data?.showCredits === true || !this.campaignEnding;
     this.selectedIndex = 0;
     this.buttons = [];
 
@@ -56,7 +60,7 @@ export class EndingScene extends Phaser.Scene {
     const quote = this.add.text(
       320,
       114,
-      '“Even the smallest light can lead us home.”',
+      showCredits ? '“Even the smallest light can lead us home.”' : 'ĐÊM ĐI HẾT CON ĐƯỜNG CỦA NÓ',
       {
         fontFamily: 'Georgia, serif',
         fontSize: '15px',
@@ -70,7 +74,7 @@ export class EndingScene extends Phaser.Scene {
     const body = this.add.text(
       320,
       168,
-      'Ba mảnh trái tim Ký Ức • Hy Vọng • Cân Bằng đã hợp nhất.\nKhi Linh tự tay tắt ngọn đèn lồng, bóng tối và ánh sáng\nđã tìm lại nhịp thở hài hòa trên khắp khu rừng Elaria.\n\nCảm ơn bạn đã hoàn thành The Last Lantern — Khu Rừng Ánh Sáng!',
+      showCredits ? 'Ba mảnh trái tim Ký Ức • Hy Vọng • Cân Bằng đã hợp nhất.\nKhi Nhinh tự tay tắt ngọn đèn lồng, bóng tối và ánh sáng\nđã tìm lại nhịp thở hài hòa trên khắp khu rừng Elaria.\n\nCảm ơn bạn đã hoàn thành The Last Lantern — Khu Rừng Ánh Sáng!' : 'Nhinh tắt đèn. Những tia sáng cũ rút khỏi Cây Mẹ; vòng ngày đêm lại chuyển động.\n\nNhinh: “Lumo?”\n\nMột tiếng dế vang lên. Nước chảy qua suối, lá khẽ lay.\n\nLumo: “Tôi đây.”  Nhinh: “Tôi vẫn thấy cậu.”',
       {
         fontFamily: 'Segoe UI, sans-serif',
         fontSize: '11.5px',
@@ -112,11 +116,31 @@ export class EndingScene extends Phaser.Scene {
         opt.action();
       });
       this.buttons.push(btn);
+      btn.setVisible(showCredits);
     });
+
+    if (!showCredits && this.input.keyboard) {
+      const pages = [
+        'Nhinh tắt đèn. Những tia sáng cũ rút khỏi Cây Mẹ; vòng ngày đêm lại chuyển động.\n\nNhinh: “Lumo?”\n\nMột tiếng dế vang lên. Nước chảy qua suối, lá khẽ lay.\n\nLumo: “Tôi đây.”  Nhinh: “Tôi vẫn thấy cậu.”',
+        'Bình minh đi qua khu vườn, dòng suối và những ô cửa trên tháp.\n\nThe Shadow nhìn về chân trời.\n\nThe Shadow: “Trời sáng rồi.”\n\nLumo: “Lần này, chúng ta đã để đêm đi hết con đường của nó.”',
+        'Lumo đậu lên quai chiếc đèn đã tắt. Một chiếc lá non mắc trên quai.\n\nNhinh: “Trước hết, mình đi xem khu rừng vào ban ngày.”\n\nLumo: “Tôi đi cùng được không?”\n\nNhinh: “Đó là lối đi cho hai người mà.”',
+      ];
+      let page = 0;
+      body.setText(pages[page]);
+      quote.setText('BÌNH MINH TỰ TÌM ĐƯỢC ĐƯỜNG VỀ');
+      const advance = () => {
+        page += 1;
+        if (page < pages.length) body.setText(pages[page]);
+        else this.scene.restart({ showCredits: true, campaign: this.campaignEnding });
+      };
+      this.input.keyboard.on('keydown-E', advance);
+    } else if (showCredits) {
+      quote.setText('“Even the smallest light can lead us home.”');
+    }
 
     this.refreshHighlight();
 
-    if (this.input.keyboard) {
+    if (this.input.keyboard && showCredits) {
       this.input.keyboard.on('keydown-UP', () => this.moveSelection(-1));
       this.input.keyboard.on('keydown-W', () => this.moveSelection(-1));
       this.input.keyboard.on('keydown-DOWN', () => this.moveSelection(1));
@@ -154,6 +178,12 @@ export class EndingScene extends Phaser.Scene {
   }
 
   public playAgain(): void {
+    if (this.campaignEnding) {
+      CampaignSaveSystem.clear();
+      SoundSystem.playLanternToggle(true);
+      this.scene.start('CampaignScene', { newGame: true });
+      return;
+    }
     SaveSystem.clear();
     const fresh = SaveSystem.createDefaultProgress();
     SaveSystem.save(fresh);

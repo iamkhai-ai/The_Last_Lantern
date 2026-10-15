@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { BootScene } from '../scenes/BootScene';
+import { CampaignScene } from '../scenes/CampaignScene';
 import { EndingScene } from '../scenes/EndingScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { WorldScene } from '../scenes/WorldScene';
@@ -22,5 +23,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [BootScene, MenuScene, WorldScene, EndingScene],
+  scene: [BootScene, MenuScene, CampaignScene, WorldScene, EndingScene],
 };
