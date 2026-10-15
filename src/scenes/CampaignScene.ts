@@ -382,14 +382,16 @@ export class CampaignScene extends Phaser.Scene {
 
     if (id === 'g0' || id === 'g1' || id === 'g2') {
       const mirror = id;
+      const counter = `l8-${mirror}`;
       register(
-        () => { this.progress.counters[mirror] = (this.value(mirror) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
-        () => `E · Rotate ${mirror.toUpperCase()} (${this.value(mirror)} · 0 east, 1 south, 2 west, 3 north)`,
+        () => { this.progress.counters[counter] = (this.value(counter) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
+        () => `E · Rotate ${mirror.toUpperCase()} (${this.value(counter)} · 0 east, 1 south, 2 west, 3 north)`,
       );
     } else if (id === 'statue') {
+      const counter = 'l8-statue';
       register(
-        () => { this.progress.counters.statue = (this.value('statue') + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
-        () => `E · Turn statue (${this.value('statue')})`,
+        () => { this.progress.counters[counter] = (this.value(counter) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
+        () => `E · Turn statue (${this.value(counter)})`,
       );
     } else if (id === 'splitter') {
       register(
@@ -684,8 +686,8 @@ export class CampaignScene extends Phaser.Scene {
     const arrived = this.progress.flags['l8-lumo-arrived'];
     const waypointIds: ObservatoryWaypointId[] = ['lantern-source', 'door-a-eye', 'g1', 'g2', 'sun-lock', 'splitter', 'root-branch', 'lumo-tube-entry', 'lumo-seal'];
     return deriveObservatoryState({
-      mirrorRotations: { g0: this.value('g0'), g1: this.value('g1'), g2: this.value('g2') },
-      statueOrientation: this.value('statue'), lanternOn: this.lantern.lanternOn, lanternPlaced: this.lantern.lanternPlaced,
+      mirrorRotations: { g0: this.value('l8-g0'), g1: this.value('l8-g1'), g2: this.value('l8-g2') },
+      statueOrientation: this.value('l8-statue'), lanternOn: this.lantern.lanternOn, lanternPlaced: this.lantern.lanternPlaced,
       doorALatched: this.progress.flags['l8-door-a-latched'] === true,
       lumoPosition: this.getObservatoryLumoRoom() ? { roomId: this.getObservatoryLumoRoom()!, x: this.lumo.sprite.x, y: this.lumo.sprite.y } : null,
       lumoRoute: {
@@ -811,10 +813,10 @@ export class CampaignScene extends Phaser.Scene {
     const state = this.getObservatoryState();
     for (const id of ['g0', 'g1', 'g2']) {
       const mirror = this.observatoryPuzzleVisuals.get(id);
-      if (mirror instanceof Phaser.GameObjects.Image) mirror.setTexture(`mirror_${((this.value(id) % 4) + 4) % 4}`);
+      if (mirror instanceof Phaser.GameObjects.Image) mirror.setTexture(`mirror_${((this.value(`l8-${id}`) % 4) + 4) % 4}`);
     }
     const statue = this.observatoryPuzzleVisuals.get('statue');
-    if (statue instanceof Phaser.GameObjects.Image) statue.setAngle(((this.value('statue') % 4) + 4) % 4 * 90);
+    if (statue instanceof Phaser.GameObjects.Image) statue.setAngle(((this.value('l8-statue') % 4) + 4) % 4 * 90);
     const lock = this.observatoryPuzzleVisuals.get('sun-lock');
     if (lock instanceof Phaser.GameObjects.Image) lock.setTexture(state.sunDoorUnlocked ? 'lock_sun_on' : 'lock_sun_off');
     const pedestal = this.observatoryPuzzleVisuals.get('lantern-pedestal');
