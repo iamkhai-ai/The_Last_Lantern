@@ -55,14 +55,50 @@ export class CampaignSaveSystem {
     if (!value || typeof value !== 'object') return null;
     const data = value as Partial<CampaignProgress>;
     if (data.version !== 1 || !Number.isFinite(data.level)) return null;
+    const validRooms: ObservatoryRoomId[] = ['entrance', 'corridor', 'observatory'];
+    if (data.roomId !== undefined && !validRooms.includes(data.roomId)) return null;
+    if (data.roomSpawn !== undefined && (!data.roomSpawn || typeof data.roomSpawn !== 'object'
+      || !Number.isFinite(data.roomSpawn.x) || !Number.isFinite(data.roomSpawn.y)
+      || data.roomSpawn.x < 0 || data.roomSpawn.x > 640 || data.roomSpawn.y < 0 || data.roomSpawn.y > 360)) return null;
+
+    const rawFlags = data.flags ?? {};
+    const rawCounters = data.counters ?? {};
+    const lumoRoom = rawFlags['l8-lumo-room'];
+    if (lumoRoom !== undefined && !validRooms.includes(lumoRoom as ObservatoryRoomId)) return null;
+    const destination = rawFlags['l8-lumo-destination'];
+    if (destination !== undefined && destination !== '' && destination !== 'lumo-seal' && destination !== 'lantern-source') return null;
+    const arrived = rawFlags['l8-lumo-arrived'];
+    if (arrived !== undefined && arrived !== '' && arrived !== 'lumo-seal' && arrived !== 'lantern-source') return null;
+    const routeValue = rawFlags['l8-lumo-route-json'];
+    let routeLength = 0;
+    if (routeValue !== undefined) {
+      if (typeof routeValue !== 'string') return null;
+      if (routeValue) {
+        try {
+          const route: unknown = JSON.parse(routeValue);
+          if (!Array.isArray(route) || route.some((step) => !step || typeof step !== 'object'
+            || !validRooms.includes((step as { roomId?: ObservatoryRoomId }).roomId as ObservatoryRoomId)
+            || !Number.isFinite((step as { x?: number }).x) || !Number.isFinite((step as { y?: number }).y)
+            || (step as { x: number }).x < 0 || (step as { x: number }).x > 640
+            || (step as { y: number }).y < 0 || (step as { y: number }).y > 360)) return null;
+          routeLength = route.length;
+        } catch { return null; }
+      }
+    }
+    const routeIndex = rawCounters['l8-lumo-route-index'];
+    if (routeIndex !== undefined && (!Number.isInteger(routeIndex) || routeIndex < 0 || routeIndex > routeLength)) return null;
+    for (const key of ['l8-lumo-x', 'l8-lantern-x']) {
+      const coordinate = rawCounters[key];
+      if (coordinate !== undefined && (!Number.isFinite(coordinate) || coordinate < 0 || coordinate > 640)) return null;
+    }
+    for (const key of ['l8-lumo-y', 'l8-lantern-y']) {
+      const coordinate = rawCounters[key];
+      if (coordinate !== undefined && (!Number.isFinite(coordinate) || coordinate < 0 || coordinate > 360)) return null;
+    }
     const flags = Object.fromEntries(Object.entries(data.flags ?? {}).filter((entry): entry is [string, boolean | string] => typeof entry[1] === 'boolean' || typeof entry[1] === 'string'));
     const counters = Object.fromEntries(Object.entries(data.counters ?? {}).filter((entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isFinite(entry[1])));
-    const validRooms: ObservatoryRoomId[] = ['entrance', 'corridor', 'observatory'];
-    const roomId = validRooms.includes(data.roomId as ObservatoryRoomId) ? data.roomId as ObservatoryRoomId : undefined;
-    const roomSpawn = data.roomSpawn && typeof data.roomSpawn === 'object'
-      && Number.isFinite(data.roomSpawn.x) && Number.isFinite(data.roomSpawn.y)
-      ? { x: data.roomSpawn.x, y: data.roomSpawn.y }
-      : undefined;
+    const roomId = data.roomId as ObservatoryRoomId | undefined;
+    const roomSpawn = data.roomSpawn ? { x: data.roomSpawn.x, y: data.roomSpawn.y } : undefined;
     return { version: 1, level: Math.max(0, Math.min(9, Math.floor(data.level!))), flags, counters, lanternOn: Boolean(data.lanternOn), lanternPickedUp: Boolean(data.lanternPickedUp), ...(roomId ? { roomId } : {}), ...(roomSpawn ? { roomSpawn } : {}) };
   }
 }

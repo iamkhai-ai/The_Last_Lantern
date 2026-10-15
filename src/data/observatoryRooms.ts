@@ -189,10 +189,16 @@ export const OBSERVATORY_ROOMS: Record<ObservatoryRoomId, ObservatoryRoomDefinit
       { id: 'entrance-from-corridor', position: { x: 566, y: 180 }, safe: true },
       { id: 'entrance-from-return-loop', position: { x: 238, y: 224 }, safe: true },
     ],
-    exits: [{
-      id: 'entrance-to-corridor', doorId: 'door-a', fromRoom: 'entrance', toRoom: 'corridor',
-      interactionPoint: { x: 602, y: 180 }, destinationSpawnId: 'corridor-from-entrance',
-    }],
+    exits: [
+      {
+        id: 'entrance-to-corridor', doorId: 'door-a', fromRoom: 'entrance', toRoom: 'corridor',
+        interactionPoint: { x: 602, y: 180 }, destinationSpawnId: 'corridor-from-entrance',
+      },
+      {
+        id: 'entrance-return-loop-to-observatory', doorId: 'return-loop', fromRoom: 'entrance', toRoom: 'observatory',
+        interactionPoint: { x: 238, y: 224 }, destinationSpawnId: 'observatory-far-bank',
+      },
+    ],
     obstacles: [
       { id: 'entrance-north-pillar', kind: 'pillar', x: 24, y: 44, width: 30, height: 54 },
       { id: 'entrance-south-pillar', kind: 'pillar', x: 24, y: 262, width: 30, height: 54 },
