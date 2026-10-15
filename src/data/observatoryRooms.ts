@@ -187,6 +187,7 @@ export const OBSERVATORY_ROOMS: Record<ObservatoryRoomId, ObservatoryRoomDefinit
     spawns: [
       { id: 'entrance-start', position: { x: 72, y: 180 }, safe: true },
       { id: 'entrance-from-corridor', position: { x: 566, y: 180 }, safe: true },
+      { id: 'entrance-from-return-loop', position: { x: 238, y: 224 }, safe: true },
     ],
     exits: [{
       id: 'entrance-to-corridor', doorId: 'door-a', fromRoom: 'entrance', toRoom: 'corridor',
@@ -259,10 +260,16 @@ export const OBSERVATORY_ROOMS: Record<ObservatoryRoomId, ObservatoryRoomDefinit
       { id: 'observatory-near-bridge', position: { x: 270, y: 276 }, safe: true },
       { id: 'observatory-far-bank', position: { x: 470, y: 276 }, safe: true },
     ],
-    exits: [{
-      id: 'observatory-to-corridor', doorId: 'sun-door', fromRoom: 'observatory', toRoom: 'corridor',
-      interactionPoint: { x: 24, y: 180 }, destinationSpawnId: 'corridor-from-observatory',
-    }],
+    exits: [
+      {
+        id: 'observatory-to-corridor', doorId: 'sun-door', fromRoom: 'observatory', toRoom: 'corridor',
+        interactionPoint: { x: 24, y: 180 }, destinationSpawnId: 'corridor-from-observatory',
+      },
+      {
+        id: 'observatory-return-loop-to-entrance', doorId: 'return-loop', fromRoom: 'observatory', toRoom: 'entrance',
+        interactionPoint: { x: 520, y: 316 }, destinationSpawnId: 'entrance-from-return-loop',
+      },
+    ],
     obstacles: [
       { id: 'observatory-west-pillar', kind: 'pillar', x: 74, y: 28, width: 34, height: 48 },
       { id: 'observatory-east-pillar', kind: 'pillar', x: 578, y: 28, width: 34, height: 48 },

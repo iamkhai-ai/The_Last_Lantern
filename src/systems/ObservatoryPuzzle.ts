@@ -21,6 +21,11 @@ export interface ObservatoryPuzzleInput {
   doorALatched: boolean;
   /** The saved/live room-local Lumo position; null means he is in transit or absent. */
   lumoPosition: ObservatoryRoomPoint | null;
+  /** Saved route target and arrival marker; proximity alone cannot hold the seal. */
+  lumoRoute: {
+    destinationWaypointId: ObservatoryWaypointId | null;
+    arrivedAtWaypointId: ObservatoryWaypointId | null;
+  };
 }
 
 export interface ObservatoryActiveBeamPath {
@@ -58,7 +63,11 @@ function beamPath(routeId: Exclude<ObservatoryBeamRouteId, 'off'>): ObservatoryA
   return { routeId: route.id, waypointIds: route.waypointIds, branches: route.branches };
 }
 
-function isLumoAtSeal(position: ObservatoryRoomPoint | null): boolean {
+function isLumoAtSeal(
+  position: ObservatoryRoomPoint | null,
+  route: ObservatoryPuzzleInput['lumoRoute'],
+): boolean {
+  if (route.destinationWaypointId !== 'lumo-seal' || route.arrivedAtWaypointId !== 'lumo-seal') return false;
   if (!position || position.roomId !== OBSERVATORY_LUMO_WAYPOINTS['lumo-seal'].roomId) return false;
   const seal = OBSERVATORY_LUMO_WAYPOINTS['lumo-seal'];
   return Math.hypot(position.x - seal.x, position.y - seal.y) <= LUMO_SEAL_RADIUS;
@@ -70,7 +79,7 @@ function isLumoAtSeal(position: ObservatoryRoomPoint | null): boolean {
  */
 export function deriveObservatoryState(input: ObservatoryPuzzleInput): ObservatoryDerivedState {
   const lightAvailable = input.lanternOn && input.lanternPlaced;
-  const lumoAtSeal = isLumoAtSeal(input.lumoPosition);
+  const lumoAtSeal = isLumoAtSeal(input.lumoPosition, input.lumoRoute);
 
   let activeBeamPath: ObservatoryActiveBeamPath = { routeId: 'off', waypointIds: [] };
   if (lightAvailable) {
