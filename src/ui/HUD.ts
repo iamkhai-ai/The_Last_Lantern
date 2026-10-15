@@ -122,14 +122,16 @@ export class HUD {
     this.graphics.fillStyle(lampColor, 1);
     this.graphics.fillCircle(30, 25, 7.5);
 
-    // Three diamond crystal icons at x = 60, 82, 104
+    // Three faceted crystal icons at x = 60, 82, 104
     const slots = [
-      { x: 60, active: progress.crystals.memory, color: 0xe6b842 },
-      { x: 82, active: progress.crystals.hope, color: 0x4daee6 },
-      { x: 104, active: progress.crystals.balance, color: 0xb96ce6 },
+      { x: 60, active: progress.crystals.memory, color: 0xe6b842, hi: 0xfff1a8 },
+      { x: 82, active: progress.crystals.hope, color: 0x4daee6, hi: 0xb8edff },
+      { x: 104, active: progress.crystals.balance, color: 0xb96ce6, hi: 0xeabfff },
     ];
     for (const s of slots) {
-      this.graphics.fillStyle(s.active ? s.color : 0x3e5259, 1);
+      const base = s.active ? s.color : 0x3e5259;
+      // outer diamond
+      this.graphics.fillStyle(base, 1);
       this.graphics.beginPath();
       this.graphics.moveTo(s.x, 15);
       this.graphics.lineTo(s.x + 7, 25);
@@ -137,6 +139,19 @@ export class HUD {
       this.graphics.lineTo(s.x - 7, 25);
       this.graphics.closePath();
       this.graphics.fillPath();
+      if (s.active) {
+        // left facet highlight + core sparkle
+        this.graphics.fillStyle(s.hi, 0.9);
+        this.graphics.beginPath();
+        this.graphics.moveTo(s.x, 18);
+        this.graphics.lineTo(s.x + 3.5, 25);
+        this.graphics.lineTo(s.x, 32);
+        this.graphics.lineTo(s.x - 3.5, 25);
+        this.graphics.closePath();
+        this.graphics.fillPath();
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillCircle(s.x - 1.5, 22, 1.2);
+      }
     }
 
     // Pulse cooldown mini-indicator inside left pill (x=124..170)

@@ -8,6 +8,7 @@ export class LanternSystem {
   private darknessOverlay: Phaser.GameObjects.Graphics;
   private haloSprite: Phaser.GameObjects.Image;
   private pulseGraphics: Phaser.GameObjects.Graphics;
+  private vignetteImage: Phaser.GameObjects.Image;
 
   public lanternOn = true;
   public lanternInHand = true;
@@ -40,6 +41,10 @@ export class LanternSystem {
 
     this.pulseGraphics = scene.add.graphics();
     this.pulseGraphics.setDepth(70);
+
+    this.vignetteImage = scene.add.image(320, 180, 'vignette');
+    this.vignetteImage.setDepth(71);
+    this.vignetteImage.setScrollFactor(0);
   }
 
   public onPulse(cb: PulseCallback): void {

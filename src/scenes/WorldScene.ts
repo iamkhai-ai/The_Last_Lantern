@@ -622,7 +622,13 @@ export class WorldScene extends Phaser.Scene {
     );
   }
 
-  private static readonly WATER_FRAMES = ['tile_water', 'tile_water_b', 'tile_water_c'];
+  private static readonly WATER_FRAMES = [
+    'tile_water',
+    'tile_water_b',
+    'tile_water_c',
+    'tile_water_d',
+    'tile_water_e',
+  ];
 
   private updateWaterAnimation(dt: number): void {
     if (this.waterTiles.length === 0) return;
@@ -631,7 +637,7 @@ export class WorldScene extends Phaser.Scene {
       if (!this.textures.exists(key)) return;
     }
     this.waterAnimTimer += dt;
-    if (this.waterAnimTimer < 480) return;
+    if (this.waterAnimTimer < 360) return;
     this.waterAnimTimer = 0;
     this.waterAnimStep = (this.waterAnimStep + 1) % WorldScene.WATER_FRAMES.length;
     const next = WorldScene.WATER_FRAMES[this.waterAnimStep];

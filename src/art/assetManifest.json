@@ -81,8 +81,8 @@
   },
   {
     "key": "runestone_hidden",
-    "w": 34,
-    "h": 46
+    "w": 47,
+    "h": 69
   },
   {
     "key": "runestone_moon_lit",
@@ -266,18 +266,18 @@
   },
   {
     "key": "tile_grass",
-    "w": 94,
-    "h": 97
+    "w": 184,
+    "h": 184
   },
   {
     "key": "tile_dirt",
-    "w": 94,
-    "h": 100
+    "w": 184,
+    "h": 184
   },
   {
     "key": "tile_stone",
-    "w": 94,
-    "h": 101
+    "w": 184,
+    "h": 184
   },
   {
     "key": "tile_water",
@@ -723,5 +723,15 @@
     "key": "portrait_lumo",
     "w": 72,
     "h": 72
+  },
+  {
+    "key": "tile_water_d",
+    "w": 93,
+    "h": 85
+  },
+  {
+    "key": "tile_water_e",
+    "w": 93,
+    "h": 87
   }
 ]

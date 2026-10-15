@@ -1274,6 +1274,16 @@ export class ProceduralTextures {
       ctx.fill();
     });
 
+    // Screen vignette for mood + focus (static overlay, LanternSystem draws it)
+    this.createCanvas(scene, 'vignette', 640, 360, (ctx) => {
+      const g = ctx.createRadialGradient(320, 180, 130, 320, 180, 360);
+      g.addColorStop(0, 'rgba(2, 6, 8, 0)');
+      g.addColorStop(0.72, 'rgba(2, 6, 8, 0)');
+      g.addColorStop(1, 'rgba(2, 6, 8, 0.42)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 640, 360);
+    });
+
     // Zone weather motes: petals (woods/hub), mist drops (creek), violet ash (ruins)
     const motes: Array<[string, string]> = [
       ['mote_petal', '#ffd9e6'],
