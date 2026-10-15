@@ -56,10 +56,12 @@ export class CampaignSaveSystem {
     const data = value as Partial<CampaignProgress>;
     if (data.version !== 1 || !Number.isFinite(data.level)) return null;
     const validRooms: ObservatoryRoomId[] = ['entrance', 'corridor', 'observatory'];
-    if (data.roomId !== undefined && !validRooms.includes(data.roomId)) return null;
-    if (data.roomSpawn !== undefined && (!data.roomSpawn || typeof data.roomSpawn !== 'object'
-      || !Number.isFinite(data.roomSpawn.x) || !Number.isFinite(data.roomSpawn.y)
-      || data.roomSpawn.x < 0 || data.roomSpawn.x > 640 || data.roomSpawn.y < 0 || data.roomSpawn.y > 360)) return null;
+    const roomId = validRooms.includes(data.roomId as ObservatoryRoomId) ? data.roomId as ObservatoryRoomId : undefined;
+    const roomSpawn = data.roomSpawn && typeof data.roomSpawn === 'object'
+      && Number.isFinite(data.roomSpawn.x) && Number.isFinite(data.roomSpawn.y)
+      && data.roomSpawn.x >= 0 && data.roomSpawn.x <= 640 && data.roomSpawn.y >= 0 && data.roomSpawn.y <= 360
+      ? { x: data.roomSpawn.x, y: data.roomSpawn.y }
+      : undefined;
 
     const rawFlags = data.flags ?? {};
     const rawCounters = data.counters ?? {};
@@ -97,8 +99,6 @@ export class CampaignSaveSystem {
     }
     const flags = Object.fromEntries(Object.entries(data.flags ?? {}).filter((entry): entry is [string, boolean | string] => typeof entry[1] === 'boolean' || typeof entry[1] === 'string'));
     const counters = Object.fromEntries(Object.entries(data.counters ?? {}).filter((entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isFinite(entry[1])));
-    const roomId = data.roomId as ObservatoryRoomId | undefined;
-    const roomSpawn = data.roomSpawn ? { x: data.roomSpawn.x, y: data.roomSpawn.y } : undefined;
     return { version: 1, level: Math.max(0, Math.min(9, Math.floor(data.level!))), flags, counters, lanternOn: Boolean(data.lanternOn), lanternPickedUp: Boolean(data.lanternPickedUp), ...(roomId ? { roomId } : {}), ...(roomSpawn ? { roomSpawn } : {}) };
   }
 }

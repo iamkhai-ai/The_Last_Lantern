@@ -46,6 +46,7 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryRootBody: Phaser.Physics.Arcade.StaticBody | null = null;
   private observatoryBridgeBounds = new Phaser.Geom.Rectangle(330, 280, 132, 40);
   private observatoryBridgePendingRemoval = false;
+  private observatoryBridgeTraversalSide: 'near' | 'far' | null = null;
   private hintIndex = 0;
   private selectedStone = -1;
   private heartEnd = false;
@@ -331,6 +332,7 @@ export class CampaignScene extends Phaser.Scene {
     this.roomColliders = [];
     this.observatoryRootBody = null;
     this.observatoryBridgePendingRemoval = false;
+    this.observatoryBridgeTraversalSide = null;
     this.observatoryPuzzleVisuals.clear();
     for (const object of this.roomObjects) object.destroy();
     this.roomObjects = [];
@@ -601,20 +603,29 @@ export class CampaignScene extends Phaser.Scene {
     const exactSpawn = room.spawns.find((spawn) => Math.hypot(spawn.position.x - x, spawn.position.y - y) < 2);
     if (exactSpawn) return { ...exactSpawn.position };
 
+    const playerBody = this.player.sprite.body as Phaser.Physics.Arcade.Body;
+    const playerBounds = new Phaser.Geom.Rectangle(
+      x + playerBody.x - this.player.x,
+      y + playerBody.y - this.player.y,
+      playerBody.width,
+      playerBody.height,
+    );
+
     const nearestSpawn = (): { x: number; y: number } => {
       const spawn = [...room.spawns].sort((a, b) => Math.hypot(a.position.x - x, a.position.y - y) - Math.hypot(b.position.x - x, b.position.y - y))[0];
       return { ...spawn.position };
     };
     if (x < 0 || x > room.width || y < 0 || y > room.height) return nearestSpawn();
-    if (roomId === 'observatory' && Phaser.Geom.Rectangle.Contains(this.observatoryBridgeBounds, x, y)) {
-      const bankId = x < this.observatoryBridgeBounds.centerX ? 'observatory-near-bridge' : 'observatory-far-bank';
+    if (roomId === 'observatory' && Phaser.Geom.Rectangle.Overlaps(this.observatoryBridgeBounds, playerBounds)) {
+      const bankId = playerBounds.centerX < this.observatoryBridgeBounds.centerX ? 'observatory-near-bridge' : 'observatory-far-bank';
       const bank = room.spawns.find((candidate) => candidate.id === bankId)!;
       return { ...bank.position };
     }
     if (room.exits.some((exit) => Math.hypot(exit.interactionPoint.x - x, exit.interactionPoint.y - y) < 38)) return nearestSpawn();
-    const intersectsObstacle = room.obstacles.some((obstacle) => !obstacle.dynamic
-      && x + 8 > obstacle.x && x - 8 < obstacle.x + obstacle.width
-      && y + 8 > obstacle.y && y - 8 < obstacle.y + obstacle.height);
+    const intersectsObstacle = room.obstacles.some((obstacle) => Phaser.Geom.Rectangle.Overlaps(
+      playerBounds,
+      new Phaser.Geom.Rectangle(obstacle.x, obstacle.y, obstacle.width, obstacle.height),
+    ));
     return intersectsObstacle ? nearestSpawn() : { x, y };
   }
 
@@ -752,9 +763,20 @@ export class CampaignScene extends Phaser.Scene {
   private updateObservatoryCrossingState(): void {
     if (this.activeObservatoryRoom !== 'observatory' || this.progress.flags['l8-bridge-crossed']) return;
     const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-    if (body.x >= this.observatoryBridgeBounds.right + 4 && body.y + body.height >= 248 && body.y <= 336) {
+    const playerBounds = new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height);
+    const onBridge = Phaser.Geom.Rectangle.Overlaps(playerBounds, this.observatoryBridgeBounds);
+    if (onBridge && this.getObservatoryState().bridgeEligible && this.observatoryBridgeTraversalSide === null) {
+      this.observatoryBridgeTraversalSide = playerBounds.centerX < this.observatoryBridgeBounds.centerX ? 'near' : 'far';
+    }
+    if (!onBridge && this.observatoryBridgeTraversalSide === 'near' && playerBounds.left >= this.observatoryBridgeBounds.right
+      || !onBridge && this.observatoryBridgeTraversalSide === 'far' && playerBounds.right <= this.observatoryBridgeBounds.left) {
       this.progress.flags['l8-bridge-crossed'] = true;
+      this.observatoryBridgeTraversalSide = null;
       this.save();
+      return;
+    }
+    if (!onBridge && (playerBounds.right < this.observatoryBridgeBounds.left || playerBounds.left > this.observatoryBridgeBounds.right)) {
+      this.observatoryBridgeTraversalSide = null;
     }
   }
 
