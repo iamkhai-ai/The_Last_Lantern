@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryWaypointId } from '../data/observatoryRooms';
+import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem } from '../systems/LanternSystem';
@@ -42,6 +42,10 @@ export class CampaignScene extends Phaser.Scene {
   private roomColliders: Phaser.Physics.Arcade.Collider[] = [];
   private activeObservatoryRoom: ObservatoryRoomId | null = null;
   private roomDoors = new Map<string, { image: Phaser.GameObjects.Image; body: Phaser.Physics.Arcade.StaticBody; exit: ObservatoryExit }>();
+  private observatoryPuzzleVisuals = new Map<string, Phaser.GameObjects.GameObject>();
+  private observatoryRootBody: Phaser.Physics.Arcade.StaticBody | null = null;
+  private observatoryBridgeBounds = new Phaser.Geom.Rectangle(330, 280, 132, 40);
+  private observatoryBridgePendingRemoval = false;
   private hintIndex = 0;
   private selectedStone = -1;
   private heartEnd = false;
@@ -160,14 +164,17 @@ export class CampaignScene extends Phaser.Scene {
     const dt = Math.min(delta, 50);
     const locked = this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen() || this.heartEnd;
     this.player.update(dt, !locked, this.lantern.lanternInHand, this.lantern.lanternOn);
-    this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+    if (this.progress.level === 8) this.updateObservatoryLumo(dt);
+    else this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.time.now - this.lastLumoSave >= 600) {
       this.lastLumoSave = this.time.now;
       const x = Math.round(this.lumo.sprite.x);
       const y = Math.round(this.lumo.sprite.y);
-      if (Math.abs((this.progress.counters['lumo-x'] ?? x) - x) > 3 || Math.abs((this.progress.counters['lumo-y'] ?? y) - y) > 3) {
-        this.progress.counters['lumo-x'] = x;
-        this.progress.counters['lumo-y'] = y;
+      const lumoXKey = this.progress.level === 8 ? 'l8-lumo-x' : 'lumo-x';
+      const lumoYKey = this.progress.level === 8 ? 'l8-lumo-y' : 'lumo-y';
+      if (Math.abs((this.progress.counters[lumoXKey] ?? x) - x) > 3 || Math.abs((this.progress.counters[lumoYKey] ?? y) - y) > 3) {
+        this.progress.counters[lumoXKey] = x;
+        this.progress.counters[lumoYKey] = y;
         this.save();
       }
     }
@@ -183,7 +190,10 @@ export class CampaignScene extends Phaser.Scene {
       }
     }
     this.lantern.update(dt, this.player.x, this.player.y);
-    if (this.progress.level === 8 && this.activeObservatoryRoom) this.refreshObservatoryDoors();
+    if (this.progress.level === 8 && this.activeObservatoryRoom) {
+      this.refreshObservatoryDoors();
+      this.refreshObservatoryPuzzle();
+    }
     this.interactions.update(this.player.x, this.player.y, !locked);
     this.updatePuzzle(dt);
     this.dialogue.update(dt);
@@ -252,6 +262,7 @@ export class CampaignScene extends Phaser.Scene {
     }
     this.titleText.setText(`09  ${room.title} · ${CAMPAIGN_LEVELS[8].chapter}`);
     this.drawObservatoryBackground(roomId);
+    this.buildObservatoryRootBed(roomId);
 
     for (const obstacle of room.obstacles) {
       if (obstacle.dynamic) continue;
@@ -271,34 +282,32 @@ export class CampaignScene extends Phaser.Scene {
       if (item.textureKey && item.id !== 'statue') {
         const image = this.add.image(item.position.x, item.position.y, item.textureKey).setScale(0.9).setDepth(8 + Math.floor(item.position.y / 10));
         this.roomObjects.push(image);
+        if (item.id === 'g0' || item.id === 'g1' || item.id === 'g2' || item.id === 'sun-lock' || item.id === 'lantern-pedestal') this.observatoryPuzzleVisuals.set(item.id, image);
+      }
+      if (item.id === 'statue') {
+        const statue = this.add.image(item.position.x, item.position.y, 'guardian_statue').setScale(0.9).setDepth(8 + Math.floor(item.position.y / 10));
+        this.roomObjects.push(statue);
+        this.observatoryPuzzleVisuals.set('statue', statue);
       }
       if (roomId === 'corridor' && (item.id === 'door-a-control' || item.id === 'sun-door-control')) {
         const control = this.add.image(item.position.x, item.position.y, 'receiver_off').setScale(0.62).setDepth(9 + Math.floor(item.position.y / 10));
         this.roomObjects.push(control);
       }
-      if (item.id === 'door-a-control') {
-        this.interactions.register({
-          id: `observatory-${roomId}-door-a-latch`, x: item.interactionPoint.x, y: item.interactionPoint.y, radius: 34,
-          getPrompt: () => this.progress.flags['l8-door-a-latched'] ? 'E · Door A is latched' : 'E · Latch Door A',
-          isEnabled: () => roomId === 'corridor' && !this.progress.flags['l8-door-a-latched'],
-          onInteract: () => { this.progress.flags['l8-door-a-latched'] = true; this.save(); this.refreshObservatoryDoors(); },
-        });
-      }
-      if (item.id === 'sun-door-control') {
-        this.interactions.register({
-          id: 'observatory-sun-door-control', x: item.interactionPoint.x, y: item.interactionPoint.y, radius: 34,
-          getPrompt: () => this.getObservatoryState().sunDoorUnlocked ? 'E · Sun Door is open' : 'E · Sun Door is sealed',
-          onInteract: () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().sunDoorUnlocked ? 'Cánh cửa đã nhận ánh sáng.' : 'Cánh cửa vẫn đòi hỏi một đường sáng hoàn chỉnh.' }]),
-        });
-      }
+      this.registerObservatoryInteractable(item);
     }
 
     for (const exit of room.exits) this.addObservatoryExit(exit);
     this.player.setPosition(...this.resolveObservatorySpawn(room, spawnId));
+    this.restoreObservatoryLanternPlacement();
+    if (!['entrance', 'corridor', 'observatory'].includes(String(this.progress.flags['l8-lumo-room']))) this.progress.flags['l8-lumo-room'] = 'entrance';
+    const lumoRoom = this.getObservatoryLumoRoom();
+    this.lumo.setVisible(lumoRoom === roomId);
+    this.lumo.sprite.setPosition(this.progress.counters['l8-lumo-x'] ?? this.progress.counters['lumo-x'] ?? this.lumoTarget.x, this.progress.counters['l8-lumo-y'] ?? this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
     this.progress.roomId = roomId;
     this.progress.roomSpawn = { x: this.player.x, y: this.player.y };
     this.save();
     this.refreshObservatoryDoors();
+    this.refreshObservatoryPuzzle();
     if (!this.progress.flags['intro-8']) {
       this.progress.flags['intro-8'] = true;
       this.save();
@@ -310,11 +319,170 @@ export class CampaignScene extends Phaser.Scene {
   public clearActiveRoom(): void {
     for (const collider of this.roomColliders) collider.destroy();
     this.roomColliders = [];
+    this.observatoryRootBody = null;
+    this.observatoryBridgePendingRemoval = false;
+    this.observatoryPuzzleVisuals.clear();
     for (const object of this.roomObjects) object.destroy();
     this.roomObjects = [];
     this.roomDoors.clear();
     this.activeObservatoryRoom = null;
     this.interactions.clear();
+  }
+
+  private buildObservatoryRootBed(roomId: ObservatoryRoomId): void {
+    if (roomId !== 'observatory') return;
+    const roots = this.add.graphics().setDepth(15);
+    roots.fillStyle(0x385044, 1);
+    roots.fillRoundedRect(this.observatoryBridgeBounds.x, this.observatoryBridgeBounds.y, this.observatoryBridgeBounds.width, this.observatoryBridgeBounds.height, 8);
+    roots.lineStyle(3, 0x83a65f, 0.9);
+    for (let x = this.observatoryBridgeBounds.x + 12; x < this.observatoryBridgeBounds.right; x += 24) {
+      roots.lineBetween(x, this.observatoryBridgeBounds.y + 4, x + 10, this.observatoryBridgeBounds.bottom - 4);
+    }
+    this.roomObjects.push(roots);
+    this.observatoryPuzzleVisuals.set('root-bed', roots);
+
+    const rootBodyObject = this.add.rectangle(
+      this.observatoryBridgeBounds.centerX,
+      this.observatoryBridgeBounds.centerY,
+      this.observatoryBridgeBounds.width,
+      this.observatoryBridgeBounds.height,
+      0x000000,
+      0,
+    );
+    this.physics.add.existing(rootBodyObject, true);
+    this.observatoryRootBody = rootBodyObject.body as Phaser.Physics.Arcade.StaticBody;
+    this.roomObjects.push(rootBodyObject);
+    this.roomColliders.push(this.physics.add.collider(this.player.sprite, rootBodyObject));
+
+    const bridge = this.add.image(this.observatoryBridgeBounds.centerX, this.observatoryBridgeBounds.centerY, 'stepping_stone')
+      .setDisplaySize(this.observatoryBridgeBounds.width, this.observatoryBridgeBounds.height)
+      .setDepth(16)
+      .setVisible(false);
+    this.roomObjects.push(bridge);
+    this.observatoryPuzzleVisuals.set('root-bridge', bridge);
+  }
+
+  private registerObservatoryInteractable(item: (typeof OBSERVATORY_ROOMS)[ObservatoryRoomId]['interactables'][number]): void {
+    const { id, interactionPoint } = item;
+    const register = (onInteract: () => void, getPrompt: () => string, isEnabled?: () => boolean): void => {
+      this.interactions.register({ id: `observatory-${id}`, x: interactionPoint.x, y: interactionPoint.y, radius: 34, getPrompt, isEnabled, onInteract });
+    };
+
+    if (id === 'g0' || id === 'g1' || id === 'g2') {
+      const mirror = id;
+      register(
+        () => { this.progress.counters[mirror] = (this.value(mirror) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
+        () => `E · Rotate ${mirror.toUpperCase()} (${this.value(mirror)} · 0 east, 1 south, 2 west, 3 north)`,
+      );
+    } else if (id === 'statue') {
+      register(
+        () => { this.progress.counters.statue = (this.value('statue') + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
+        () => `E · Turn statue (${this.value('statue')})`,
+      );
+    } else if (id === 'splitter') {
+      register(
+        () => this.say([{ speaker: 'Nhinh', text: 'Bộ chia cố định gửi một nhánh tới khóa Mặt Trời, nhánh kia qua bóng pho tượng.' }]),
+        () => 'E · Inspect fixed splitter',
+      );
+    } else if (id === 'lantern-pedestal') {
+      register(
+        () => {
+          if (this.lantern.lanternPlaced) {
+            this.lantern.retrieveLantern();
+            this.progress.flags['l8-lantern-placed'] = false;
+          } else if (this.lantern.lanternInHand) {
+            this.lantern.placeLanternAt(item.position.x, item.position.y);
+            this.progress.flags['l8-lantern-placed'] = true;
+          }
+          this.progress.lanternOn = this.lantern.lanternOn;
+          this.progress.counters['l8-lantern-x'] = this.lantern.placedX;
+          this.progress.counters['l8-lantern-y'] = this.lantern.placedY;
+          this.save();
+          this.refreshObservatoryPuzzle();
+        },
+        () => this.lantern.lanternPlaced ? 'E · Retrieve lantern' : this.lantern.lanternInHand ? 'E · Place lantern on pedestal' : 'Lantern unavailable',
+        () => this.lantern.lanternPlaced || this.lantern.lanternInHand,
+      );
+      this.interactions.register({
+        id: 'observatory-lumo-call-point', x: interactionPoint.x + 48, y: interactionPoint.y, radius: 30,
+        getPrompt: () => this.progress.flags['l8-lumo-recalled'] === true ? 'E · Call Lumo to the seal' : 'E · Recall Lumo to the lantern',
+        onInteract: () => this.callObservatoryLumo(this.progress.flags['l8-lumo-recalled'] === true ? 'seal' : 'recall'),
+      });
+    } else if (id === 'lumo-tube' || id === 'lumo-seal') {
+      register(
+        () => {
+          if (id === 'lumo-tube' && this.getObservatoryState().lumoAtSeal) this.callObservatoryLumo('recall');
+          else if (this.getObservatoryState().lumoAtSeal) this.say([{ speaker: 'Lumo', text: 'Tôi đang giữ ấn. Gọi tôi về bệ đèn khi cần.' }]);
+          else this.callObservatoryLumo('seal');
+        },
+        () => id === 'lumo-tube' && this.getObservatoryState().lumoAtSeal ? 'E · Recall Lumo through the tube' : this.getObservatoryState().lumoAtSeal ? 'Lumo holds the seal' : 'E · Call Lumo through the tube',
+      );
+    } else if (id === 'door-a-control') {
+      register(
+        () => { this.progress.flags['l8-door-a-latched'] = true; this.save(); this.refreshObservatoryDoors(); },
+        () => this.progress.flags['l8-door-a-latched'] ? 'Door A is latched open' : 'E · Latch Door A from this side',
+        () => this.activeObservatoryRoom === 'corridor' && !this.progress.flags['l8-door-a-latched'],
+      );
+    } else if (id === 'sun-door-control') {
+      register(
+        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().sunDoorUnlocked ? 'Cánh cửa đã nhận ánh sáng.' : 'Cánh cửa vẫn đòi hỏi một đường sáng hoàn chỉnh.' }]),
+        () => this.getObservatoryState().sunDoorUnlocked ? 'Sun Door is open' : 'Sun Door is sealed',
+      );
+    } else if (id === 'sun-lock') {
+      register(
+        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().sunDoorUnlocked ? 'Khóa Mặt Trời đang được chiếu sáng.' : 'Khóa cần tia sáng đi tới đây.' }]),
+        () => this.getObservatoryState().sunDoorUnlocked ? 'Sun lock lit' : 'E · Inspect Sun lock',
+      );
+    } else if (id === 'root-bridge') {
+      register(
+        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().bridgeEligible ? 'Bóng rễ đã kết thành cầu.' : 'Cầu chỉ thành hình khi khóa Mặt Trời sáng, rễ nằm trong bóng và Lumo giữ ấn.' }]),
+        () => this.getObservatoryState().bridgeEligible ? 'Root bridge is stable' : 'E · Inspect root bridge',
+      );
+    } else if (id === 'root-bed') {
+      register(
+        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().rootBedShadowed ? 'Pho tượng đã che bóng lên rễ.' : 'Rễ vẫn đang cản lối.' }]),
+        () => this.getObservatoryState().rootBedShadowed ? 'Roots are in shadow' : 'E · Inspect root bed',
+      );
+    }
+  }
+
+  public callObservatoryLumo(destination: 'seal' | 'recall'): void {
+    if (this.progress.level !== 8 || !this.activeObservatoryRoom) return;
+    const lumoRoom = this.getObservatoryLumoRoom();
+    const steps: ObservatoryRoomPoint[] = [];
+    const add = (roomId: ObservatoryRoomId, x: number, y: number): void => { steps.push({ roomId, x, y }); };
+    if (destination === 'seal') {
+      if (lumoRoom === 'observatory') {
+        add('observatory', 24, 180);
+        add('corridor', 596, 180);
+      } else if (lumoRoom === 'entrance') {
+        add('entrance', 586, 145);
+        add('corridor', 42, 180);
+      }
+      const tube = OBSERVATORY_ROOMS.corridor.waypoints.find((waypoint) => waypoint.id === 'lumo-tube-entry')!.position;
+      const seal = OBSERVATORY_ROOMS.corridor.waypoints.find((waypoint) => waypoint.id === 'lumo-seal')!.position;
+      add(tube.roomId, tube.x, tube.y);
+      add(seal.roomId, seal.x, seal.y);
+    } else {
+      if (lumoRoom === 'observatory') {
+        add('observatory', 24, 180);
+        add('corridor', 596, 180);
+      }
+      if (lumoRoom !== 'entrance') {
+        const tube = OBSERVATORY_ROOMS.corridor.waypoints.find((waypoint) => waypoint.id === 'lumo-tube-entry')!.position;
+        add(tube.roomId, tube.x, tube.y);
+        add('entrance', 586, 145);
+      }
+      const source = OBSERVATORY_ROOMS.entrance.waypoints.find((waypoint) => waypoint.id === 'lantern-source')!.position;
+      add(source.roomId, source.x, source.y);
+    }
+    this.progress.flags['l8-lumo-destination'] = destination === 'seal' ? 'lumo-seal' : 'lantern-source';
+    this.progress.flags['l8-lumo-arrived'] = '';
+    this.progress.flags['l8-lumo-route-json'] = JSON.stringify(steps);
+    this.progress.counters['l8-lumo-route-index'] = 0;
+    this.progress.flags['l8-lumo-recalled'] = false;
+    this.save();
+    this.say([{ speaker: 'Nhinh', text: destination === 'seal' ? 'Lumo, đi theo ống sáng tới ấn giúp mình nhé.' : 'Lumo, trở về bên bệ đèn nhé.' }, { speaker: 'Lumo', text: 'Tôi sẽ đi theo đường đã mở.' }]);
   }
 
   public transitionObservatory(exitId: string): void {
@@ -358,6 +526,9 @@ export class CampaignScene extends Phaser.Scene {
     decor.lineStyle(2, 0xd8b869, 0.45); decor.strokeRoundedRect(7, 7, room.width - 14, room.height - 14, 12);
     decor.lineStyle(1, 0xc6e7dc, 0.12); decor.strokeCircle(room.width / 2, room.height / 2, 100);
     this.roomObjects.push(decor);
+    const beams = this.add.graphics().setDepth(7);
+    this.roomObjects.push(beams);
+    this.observatoryPuzzleVisuals.set('beams', beams);
     this.roomObjects.push(this.add.text(320, 344, 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    H Hint    ESC Pause', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
   }
 
@@ -396,7 +567,6 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private getObservatoryState() {
-    const roomId = this.activeObservatoryRoom;
     const routeTarget = this.progress.flags['l8-lumo-destination'];
     const arrived = this.progress.flags['l8-lumo-arrived'];
     const waypointIds: ObservatoryWaypointId[] = ['lantern-source', 'door-a-eye', 'g1', 'g2', 'sun-lock', 'splitter', 'root-branch', 'lumo-tube-entry', 'lumo-seal'];
@@ -404,12 +574,145 @@ export class CampaignScene extends Phaser.Scene {
       mirrorRotations: { g0: this.value('g0'), g1: this.value('g1'), g2: this.value('g2') },
       statueOrientation: this.value('statue'), lanternOn: this.lantern.lanternOn, lanternPlaced: this.lantern.lanternPlaced,
       doorALatched: this.progress.flags['l8-door-a-latched'] === true,
-      lumoPosition: roomId ? { roomId, x: this.lumo.sprite.x, y: this.lumo.sprite.y } : null,
+      lumoPosition: this.getObservatoryLumoRoom() ? { roomId: this.getObservatoryLumoRoom()!, x: this.lumo.sprite.x, y: this.lumo.sprite.y } : null,
       lumoRoute: {
         destinationWaypointId: typeof routeTarget === 'string' && waypointIds.includes(routeTarget as ObservatoryWaypointId) ? routeTarget as ObservatoryWaypointId : null,
         arrivedAtWaypointId: typeof arrived === 'string' && waypointIds.includes(arrived as ObservatoryWaypointId) ? arrived as ObservatoryWaypointId : null,
       },
     });
+  }
+
+  private getObservatoryLumoRoom(): ObservatoryRoomId {
+    const saved = this.progress.flags['l8-lumo-room'];
+    return saved === 'entrance' || saved === 'corridor' || saved === 'observatory' ? saved : 'entrance';
+  }
+
+  private getObservatoryLumoSteps(): ObservatoryRoomPoint[] {
+    const raw = this.progress.flags['l8-lumo-route-json'];
+    if (typeof raw !== 'string' || !raw) return [];
+    try {
+      const steps = JSON.parse(raw) as unknown;
+      if (!Array.isArray(steps)) return [];
+      return steps.filter((step): step is ObservatoryRoomPoint => Boolean(step && typeof step === 'object'
+        && ['entrance', 'corridor', 'observatory'].includes((step as ObservatoryRoomPoint).roomId)
+        && Number.isFinite((step as ObservatoryRoomPoint).x) && Number.isFinite((step as ObservatoryRoomPoint).y)));
+    } catch { return []; }
+  }
+
+  private updateObservatoryLumo(dt: number): void {
+    const activeRoom = this.activeObservatoryRoom;
+    if (!activeRoom) return;
+    let lumoRoom = this.getObservatoryLumoRoom();
+    this.lumo.setVisible(lumoRoom === activeRoom);
+    const steps = this.getObservatoryLumoSteps();
+    const routeIndex = Math.max(0, Math.floor(this.value('l8-lumo-route-index')));
+    const step = steps[routeIndex];
+    if (step && routeIndex < steps.length) {
+      if (lumoRoom !== step.roomId) {
+        // Room changes follow the authored tube/door links; the waypoint is the safe landing point.
+        lumoRoom = step.roomId;
+        this.progress.flags['l8-lumo-room'] = lumoRoom;
+        this.lumo.sprite.setPosition(step.x, step.y);
+        this.progress.counters['l8-lumo-x'] = step.x;
+        this.progress.counters['l8-lumo-y'] = step.y;
+        this.lumo.setVisible(lumoRoom === activeRoom);
+        this.save();
+        return;
+      }
+      this.lumoTarget = { x: step.x - 18, y: step.y + 12 };
+      this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+      if (Math.hypot(this.lumo.sprite.x - step.x, this.lumo.sprite.y - step.y) <= 8) {
+        this.lumo.sprite.setPosition(step.x, step.y);
+        this.progress.counters['l8-lumo-route-index'] = routeIndex + 1;
+        this.progress.counters['l8-lumo-x'] = step.x;
+        this.progress.counters['l8-lumo-y'] = step.y;
+        if (routeIndex + 1 >= steps.length) {
+          const destination = this.progress.flags['l8-lumo-destination'];
+          this.progress.flags['l8-lumo-arrived'] = destination === 'lumo-seal' ? 'lumo-seal' : 'lantern-source';
+          this.progress.flags['l8-lumo-recalled'] = destination === 'lantern-source';
+          this.progress.flags['l8-lumo-route-json'] = '';
+        }
+        this.save();
+      }
+    } else {
+      const destination = this.progress.flags['l8-lumo-destination'];
+      const destinationWaypoint = destination === 'lumo-seal' ? OBSERVATORY_ROOMS.corridor.waypoints.find((point) => point.id === 'lumo-seal')?.position
+        : destination === 'lantern-source' ? OBSERVATORY_ROOMS.entrance.waypoints.find((point) => point.id === 'lantern-source')?.position : undefined;
+      if (destinationWaypoint && destinationWaypoint.roomId === lumoRoom) {
+        this.lumoTarget = { x: destinationWaypoint.x - 18, y: destinationWaypoint.y + 12 };
+        this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+      }
+    }
+    this.lumo.setVisible(lumoRoom === activeRoom);
+  }
+
+  private restoreObservatoryLanternPlacement(): void {
+    if (this.progress.flags['l8-lantern-placed'] !== true) return;
+    if (!this.lantern.lanternPlaced) {
+      const x = this.value('l8-lantern-x') || OBSERVATORY_ROOMS.entrance.interactables.find((item) => item.id === 'lantern-pedestal')!.position.x;
+      const y = this.value('l8-lantern-y') || OBSERVATORY_ROOMS.entrance.interactables.find((item) => item.id === 'lantern-pedestal')!.position.y;
+      this.lantern.placeLanternAt(x, y);
+    }
+    this.lantern.lanternOn = this.progress.lanternOn;
+  }
+
+  private refreshObservatoryPuzzle(): void {
+    if (!this.activeObservatoryRoom) return;
+    const state = this.getObservatoryState();
+    for (const id of ['g0', 'g1', 'g2']) {
+      const mirror = this.observatoryPuzzleVisuals.get(id);
+      if (mirror instanceof Phaser.GameObjects.Image) mirror.setTexture(`mirror_${((this.value(id) % 4) + 4) % 4}`);
+    }
+    const statue = this.observatoryPuzzleVisuals.get('statue');
+    if (statue instanceof Phaser.GameObjects.Image) statue.setAngle(((this.value('statue') % 4) + 4) % 4 * 90);
+    const lock = this.observatoryPuzzleVisuals.get('sun-lock');
+    if (lock instanceof Phaser.GameObjects.Image) lock.setTexture(state.sunDoorUnlocked ? 'lock_sun_on' : 'lock_sun_off');
+    const pedestal = this.observatoryPuzzleVisuals.get('lantern-pedestal');
+    if (pedestal instanceof Phaser.GameObjects.Image) pedestal.setTexture(this.lantern.lanternPlaced ? 'pedestal_lit' : 'pedestal_empty');
+
+    const roots = this.observatoryPuzzleVisuals.get('root-bed');
+    if (roots instanceof Phaser.GameObjects.Graphics) roots.setAlpha(state.rootBedShadowed ? 0.48 : 1);
+    const bridge = this.observatoryPuzzleVisuals.get('root-bridge');
+    if (bridge instanceof Phaser.GameObjects.Image) {
+      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
+      const playerBounds = new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height);
+      const playerOnBridge = Phaser.Geom.Rectangle.Overlaps(this.observatoryBridgeBounds, playerBounds);
+      if (!state.bridgeEligible && bridge.visible && playerOnBridge) this.observatoryBridgePendingRemoval = true;
+      if (state.bridgeEligible) this.observatoryBridgePendingRemoval = false;
+      bridge.setVisible(state.bridgeEligible || this.observatoryBridgePendingRemoval);
+      if (this.observatoryRootBody) {
+        this.observatoryRootBody.enable = !state.bridgeEligible && !this.observatoryBridgePendingRemoval;
+        this.observatoryRootBody.updateFromGameObject();
+      }
+      if (this.observatoryBridgePendingRemoval && !playerOnBridge) {
+        this.observatoryBridgePendingRemoval = false;
+        bridge.setVisible(false);
+        if (this.observatoryRootBody) this.observatoryRootBody.enable = true;
+      }
+    }
+
+    const beams = this.observatoryPuzzleVisuals.get('beams');
+    if (beams instanceof Phaser.GameObjects.Graphics) {
+      beams.clear();
+      const points = new Map<ObservatoryWaypointId, ObservatoryRoomPoint>();
+      for (const room of Object.values(OBSERVATORY_ROOMS)) for (const waypoint of room.waypoints) points.set(waypoint.id, waypoint.position);
+      const drawPath = (ids: readonly ObservatoryWaypointId[]): void => {
+        const visible = ids.map((waypointId) => points.get(waypointId)).filter((point): point is ObservatoryRoomPoint => point?.roomId === this.activeObservatoryRoom);
+        if (ids.length === 1) {
+          const split = points.get('splitter');
+          const target = points.get(ids[0]);
+          if (split?.roomId === this.activeObservatoryRoom && target?.roomId === this.activeObservatoryRoom) {
+            beams.lineStyle(3, 0xffdc77, 0.78);
+            beams.lineBetween(split.x, split.y, target.x, target.y);
+          }
+        }
+        if (visible.length < 2) return;
+        beams.lineStyle(3, 0xffdc77, 0.78);
+        for (let index = 1; index < visible.length; index += 1) beams.lineBetween(visible[index - 1].x, visible[index - 1].y, visible[index].x, visible[index].y);
+      };
+      drawPath(state.activeBeamPath.waypointIds);
+      for (const branch of state.activeBeamPath.branches ?? []) drawPath(branch);
+    }
   }
 
   private drawRoom(biome: string): void {
@@ -567,14 +870,13 @@ export class CampaignScene extends Phaser.Scene {
       }
       this.say([{ speaker: 'Nhinh', text: 'Nó nhận ra chiếc đèn.' }, { speaker: 'Lumo', text: 'Đưa ánh sáng trở lại, mọi thứ sẽ thức dậy.' }]);
     }
-    if (this.progress.level === 4 || this.progress.level === 5 || this.progress.level === 8) {
+    if (this.progress.level === 4 || this.progress.level === 5) {
       const current = { x: this.lumo.sprite.x, y: this.lumo.sprite.y };
       for (const mark of ['a', 'b', 'c', 'high', 'observatory']) {
         const p = this.getLumoMark(mark);
         if (Math.hypot(current.x - p.x, current.y - p.y) < 36) {
           const flag = `l${this.progress.level}-at-${mark}`;
           if (this.progress.flags[`l${this.progress.level}-called-${mark}`] && !this.progress.flags[flag]) { this.progress.flags[flag] = true; this.save(); }
-          if (this.progress.level === 8 && mark === 'observatory') { this.progress.flags['l8-room-two'] = true; this.save(); }
         }
       }
     }
