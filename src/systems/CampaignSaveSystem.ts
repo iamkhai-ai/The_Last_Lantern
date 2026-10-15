@@ -19,7 +19,10 @@ export class CampaignSaveSystem {
   }
 
   public static hasSave(): boolean {
-    try { return this.validate(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null')) !== null; }
+    try {
+      const raw: unknown = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null');
+      return this.validate(raw) !== null || this.recoverInvalidLocation(raw) !== null;
+    }
     catch { return false; }
   }
 
@@ -28,7 +31,12 @@ export class CampaignSaveSystem {
   }
 
   public static load(): CampaignProgress {
-    try { return this.validate(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null')) ?? this.createDefaultProgress(); }
+    try {
+      const raw: unknown = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null');
+      const valid = this.validate(raw);
+      if (valid) return valid;
+      return this.recoverInvalidLocation(raw) ?? this.createDefaultProgress();
+    }
     catch { return this.createDefaultProgress(); }
   }
 
@@ -51,17 +59,35 @@ export class CampaignSaveSystem {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch { /* Ignore storage errors. */ }
   }
 
+  private static recoverInvalidLocation(raw: unknown): CampaignProgress | null {
+    // A corrupt optional location must not erase otherwise-valid campaign progress.
+    if (!raw || typeof raw !== 'object') return null;
+    const data = { ...(raw as Record<string, unknown>) };
+    const validRooms: ObservatoryRoomId[] = ['entrance', 'corridor', 'observatory'];
+    if (data.roomId !== undefined && !validRooms.includes(data.roomId as ObservatoryRoomId)) delete data.roomId;
+    const spawn = data.roomSpawn as { x?: unknown; y?: unknown } | null | undefined;
+    if (data.roomSpawn !== undefined && (!spawn || typeof spawn !== 'object'
+      || !Number.isFinite(spawn.x) || !Number.isFinite(spawn.y)
+      || (spawn.x as number) < 0 || (spawn.x as number) > 640
+      || (spawn.y as number) < 0 || (spawn.y as number) > 360)) delete data.roomSpawn;
+    return this.validate(data);
+  }
+
   private static validate(value: unknown): CampaignProgress | null {
     if (!value || typeof value !== 'object') return null;
     const data = value as Partial<CampaignProgress>;
     if (data.version !== 1 || !Number.isFinite(data.level)) return null;
     const validRooms: ObservatoryRoomId[] = ['entrance', 'corridor', 'observatory'];
-    const roomId = validRooms.includes(data.roomId as ObservatoryRoomId) ? data.roomId as ObservatoryRoomId : undefined;
-    const roomSpawn = data.roomSpawn && typeof data.roomSpawn === 'object'
-      && Number.isFinite(data.roomSpawn.x) && Number.isFinite(data.roomSpawn.y)
-      && data.roomSpawn.x >= 0 && data.roomSpawn.x <= 640 && data.roomSpawn.y >= 0 && data.roomSpawn.y <= 360
-      ? { x: data.roomSpawn.x, y: data.roomSpawn.y }
-      : undefined;
+    if (data.roomId !== undefined && !validRooms.includes(data.roomId as ObservatoryRoomId)) return null;
+    if (data.roomSpawn !== undefined) {
+      const spawn = data.roomSpawn as { x?: unknown; y?: unknown } | null;
+      if (!spawn || typeof spawn !== 'object'
+        || !Number.isFinite(spawn.x) || !Number.isFinite(spawn.y)
+        || (spawn.x as number) < 0 || (spawn.x as number) > 640
+        || (spawn.y as number) < 0 || (spawn.y as number) > 360) return null;
+    }
+    const roomId = data.roomId as ObservatoryRoomId | undefined;
+    const roomSpawn = data.roomSpawn as { x: number; y: number } | undefined;
 
     const rawFlags = data.flags ?? {};
     const rawCounters = data.counters ?? {};

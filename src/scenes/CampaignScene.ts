@@ -622,7 +622,7 @@ export class CampaignScene extends Phaser.Scene {
       return { ...bank.position };
     }
     if (room.exits.some((exit) => Math.hypot(exit.interactionPoint.x - x, exit.interactionPoint.y - y) < 38)) return nearestSpawn();
-    const intersectsObstacle = room.obstacles.some((obstacle) => Phaser.Geom.Rectangle.Overlaps(
+    const intersectsObstacle = room.obstacles.some((obstacle) => !obstacle.dynamic && Phaser.Geom.Rectangle.Overlaps(
       playerBounds,
       new Phaser.Geom.Rectangle(obstacle.x, obstacle.y, obstacle.width, obstacle.height),
     ));
