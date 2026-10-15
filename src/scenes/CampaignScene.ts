@@ -620,7 +620,7 @@ export class CampaignScene extends Phaser.Scene {
         return;
       }
       this.lumoTarget = { x: step.x - 18, y: step.y + 12 };
-      this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+      this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y, true);
       if (Math.hypot(this.lumo.sprite.x - step.x, this.lumo.sprite.y - step.y) <= 8) {
         this.lumo.sprite.setPosition(step.x, step.y);
         this.progress.counters['l8-lumo-route-index'] = routeIndex + 1;
@@ -640,7 +640,7 @@ export class CampaignScene extends Phaser.Scene {
         : destination === 'lantern-source' ? OBSERVATORY_ROOMS.entrance.waypoints.find((point) => point.id === 'lantern-source')?.position : undefined;
       if (destinationWaypoint && destinationWaypoint.roomId === lumoRoom) {
         this.lumoTarget = { x: destinationWaypoint.x - 18, y: destinationWaypoint.y + 12 };
-        this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+        this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y, true);
       }
     }
     this.lumo.setVisible(lumoRoom === activeRoom);

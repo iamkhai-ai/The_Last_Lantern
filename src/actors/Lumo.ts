@@ -23,8 +23,8 @@ export class Lumo {
     this.sprite.setVisible(vis);
   }
 
-  public update(dt: number, targetX: number, targetY: number): void {
-    if (!this.visible) return;
+  public update(dt: number, targetX: number, targetY: number, moveWhenHidden = false): void {
+    if (!this.visible && !moveWhenHidden) return;
     this.timeElapsed += dt * 0.004;
 
     // Hover gracefully near Linh's shoulder
@@ -36,6 +36,9 @@ export class Lumo {
 
     const frame = Math.floor(this.timeElapsed * 2) % this.frameCount;
     this.sprite.setTexture(`lumo_${frame}`);
+
+    // Keep off-view route movement quiet while Lumo is in another room.
+    if (!this.visible) return;
 
     // Emit subtle glowing dust mote trail
     this.trailTimer += dt;
