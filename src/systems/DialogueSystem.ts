@@ -9,6 +9,12 @@ export class DialogueSystem {
   private speakerText: Phaser.GameObjects.Text;
   private bodyText: Phaser.GameObjects.Text;
   private hintText: Phaser.GameObjects.Text;
+  private portraitFrame: Phaser.GameObjects.Graphics;
+  private portrait: Phaser.GameObjects.Image;
+  private static readonly PORTRAITS: Record<string, string> = {
+    Linh: 'portrait_linh',
+    Lumo: 'portrait_lumo',
+  };
 
   private queue: DialogueLine[] = [];
   private currentIndex = 0;
@@ -46,8 +52,18 @@ export class DialogueSystem {
     });
     this.hintText.setOrigin(1, 0.5);
 
+    this.portraitFrame = scene.add.graphics();
+    this.portraitFrame.lineStyle(1.5, 0xd8b869, 0.9);
+    this.portraitFrame.strokeRoundedRect(48, 272, 58, 58, 4);
+    this.portrait = scene.add.image(77, 301, 'portrait_linh');
+    this.portrait.setDisplaySize(54, 54);
+    this.portrait.setVisible(false);
+    this.portraitFrame.setVisible(false);
+
     this.container = scene.add.container(0, 0, [
       this.bgGraphics,
+      this.portraitFrame,
+      this.portrait,
       this.speakerText,
       this.bodyText,
       this.hintText,
@@ -87,6 +103,23 @@ export class DialogueSystem {
     this.speakerText.setText(line.speaker.toUpperCase());
     this.speakerText.setColor(speakerColors[line.speaker] ?? '#f7dfaa');
     this.bodyText.setText('');
+
+    // Speaker portrait (Linh / Lumo); text shifts right when shown.
+    const portraitKey = DialogueSystem.PORTRAITS[line.speaker];
+    if (portraitKey && this.scene.textures.exists(portraitKey)) {
+      this.portrait.setTexture(portraitKey);
+      this.portrait.setVisible(true);
+      this.portraitFrame.setVisible(true);
+      this.speakerText.setPosition(118, 266);
+      this.bodyText.setPosition(118, 286);
+      this.bodyText.setWordWrapWidth(466);
+    } else {
+      this.portrait.setVisible(false);
+      this.portraitFrame.setVisible(false);
+      this.speakerText.setPosition(56, 266);
+      this.bodyText.setPosition(56, 286);
+      this.bodyText.setWordWrapWidth(528);
+    }
 
     this.bgGraphics.clear();
     this.bgGraphics.fillStyle(0x07141b, 0.94);

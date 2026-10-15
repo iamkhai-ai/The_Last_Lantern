@@ -6,6 +6,7 @@ export interface BuiltZoneObjects {
   colliders: Phaser.Physics.Arcade.StaticGroup;
   bridgeBlocker?: Phaser.GameObjects.Zone;
   heartTreeSprite?: Phaser.GameObjects.Sprite;
+  canopySprite?: Phaser.GameObjects.Image;
   introFootprints: Phaser.GameObjects.Image[];
   treeSprites: Phaser.GameObjects.Image[];
   bushSprites: Phaser.GameObjects.Image[];
@@ -344,6 +345,7 @@ export class WorldFactory {
     });
 
     let heartTreeSprite: Phaser.GameObjects.Sprite | undefined;
+    let canopySprite: Phaser.GameObjects.Image | undefined;
     let bridgeBlocker: Phaser.GameObjects.Zone | undefined;
 
     if (zoneId === 'hub') {
@@ -352,6 +354,15 @@ export class WorldFactory {
         : `heart_tree_${Math.min(3, crystalCount)}`;
       heartTreeSprite = scene.add.sprite(315, 122, texKey);
       heartTreeSprite.setDepth(16);
+
+      // Atlas foliage canopy over the trunk top, synced to crystal stage.
+      const canopyKey = isDawn
+        ? 'canopy_dawn'
+        : `canopy_${Math.min(3, crystalCount)}`;
+      if (scene.textures.exists(canopyKey)) {
+        canopySprite = scene.add.image(315, 52, canopyKey);
+        canopySprite.setDepth(15);
+      }
 
       const trunkCollider = scene.add.zone(315, 130, 54, 40);
       scene.physics.add.existing(trunkCollider, true);
@@ -421,6 +432,7 @@ export class WorldFactory {
       colliders,
       bridgeBlocker,
       heartTreeSprite,
+      canopySprite,
       introFootprints,
       treeSprites,
       bushSprites,

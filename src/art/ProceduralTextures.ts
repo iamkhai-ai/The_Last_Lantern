@@ -279,26 +279,9 @@ export class ProceduralTextures {
           ctx.fillRect(0, 0, 220, 210);
         }
 
-        // 2.Lush spreading canopy clusters
-        const canopyColors = v.dawn
-          ? ['#3f7836', '#5c9e49', '#88c964']
-          : v.stage >= 1
-          ? ['#245a48', '#3a7d60', '#5fa87e']
-          : ['#1e4d40', '#31705a', '#529a72'];
-
-        const canopyBlobs = [
-          { x: 110, y: 28, rx: 86, ry: 26, c: canopyColors[0] },
-          { x: 52, y: 40, rx: 48, ry: 22, c: canopyColors[1] },
-          { x: 168, y: 40, rx: 48, ry: 22, c: canopyColors[1] },
-          { x: 82, y: 24, rx: 46, ry: 18, c: canopyColors[2] },
-          { x: 138, y: 24, rx: 46, ry: 18, c: canopyColors[2] },
-        ];
-        for (const b of canopyBlobs) {
-          ctx.fillStyle = b.c;
-          ctx.beginPath();
-          ctx.ellipse(b.x, b.y, b.rx, b.ry, 0, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        // 2. Canopy is a separate atlas-composited sprite (canopy_0..3/dawn)
+        // placed over the trunk top by WorldFactory — nothing drawn here
+        // except the glow aura above, so stages stay in sync.
 
         // 3. Gnarled ancient trunk & spreading roots (06_Heart_Tree_Sanctuary.png)
         const barkBase = v.dawn ? '#6e4e2e' : '#5a4632';
@@ -1278,5 +1261,33 @@ export class ProceduralTextures {
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, 96, 40);
     });
+
+    // Soft blob shadow under characters
+    this.createCanvas(scene, 'shadow_blob', 28, 12, (ctx) => {
+      const g = ctx.createRadialGradient(14, 6, 1, 14, 6, 13);
+      g.addColorStop(0, 'rgba(4, 10, 12, 0.55)');
+      g.addColorStop(0.7, 'rgba(4, 10, 12, 0.3)');
+      g.addColorStop(1, 'rgba(4, 10, 12, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(14, 6, 13, 5.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Zone weather motes: petals (woods/hub), mist drops (creek), violet ash (ruins)
+    const motes: Array<[string, string]> = [
+      ['mote_petal', '#ffd9e6'],
+      ['mote_petal_white', '#fff9e6'],
+      ['mote_drop', '#9ad9ea'],
+      ['mote_ash', '#c9a6f2'],
+    ];
+    for (const [key, color] of motes) {
+      this.createCanvas(scene, key, 7, 7, (ctx) => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.ellipse(3.5, 3.5, 2.8, 2, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
   }
 }

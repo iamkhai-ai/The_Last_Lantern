@@ -688,5 +688,40 @@
     "key": "player_downleft_nolamp_2",
     "w": 36,
     "h": 42
+  },
+  {
+    "key": "canopy_0",
+    "w": 220,
+    "h": 70
+  },
+  {
+    "key": "canopy_1",
+    "w": 220,
+    "h": 70
+  },
+  {
+    "key": "canopy_2",
+    "w": 220,
+    "h": 70
+  },
+  {
+    "key": "canopy_3",
+    "w": 220,
+    "h": 70
+  },
+  {
+    "key": "canopy_dawn",
+    "w": 220,
+    "h": 70
+  },
+  {
+    "key": "portrait_linh",
+    "w": 72,
+    "h": 72
+  },
+  {
+    "key": "portrait_lumo",
+    "w": 72,
+    "h": 72
   }
 ]

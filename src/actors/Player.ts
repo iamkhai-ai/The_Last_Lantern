@@ -14,6 +14,7 @@ export class Player {
   public sprite: Phaser.Physics.Arcade.Sprite;
   public facing: FacingDirection = 'down';
   private scene: Phaser.Scene;
+  private shadow: Phaser.GameObjects.Image;
   private walkSpeed = 105;
   private runSpeed = 150;
   private animTimer = 0;
@@ -32,6 +33,8 @@ export class Player {
     this.sprite = scene.physics.add.sprite(x, y, 'player_down_lit_0');
     this.sprite.setDepth(20);
     this.sprite.setCollideWorldBounds(true);
+    this.shadow = scene.add.image(x, y + 17, 'shadow_blob');
+    this.shadow.setDepth(9);
 
     // Compact foot hitbox for smooth top-down navigation around trees & rocks
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
@@ -116,6 +119,8 @@ export class Player {
 
     this.updateTexture(isMoving, hasLanternInHand, lanternOn);
     this.sprite.setDepth(10 + Math.floor(this.sprite.y / 10));
+    this.shadow.setPosition(this.sprite.x, this.sprite.y + 17);
+    this.shadow.setDepth(this.sprite.depth - 1);
   }
 
   private updateTexture(

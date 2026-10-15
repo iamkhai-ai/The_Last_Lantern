@@ -35,6 +35,7 @@ export class WorldScene extends Phaser.Scene {
   public ruinsPuzzle?: RuinsBalancePuzzle;
 
   private heartTreeSprite?: Phaser.GameObjects.Sprite;
+  private canopySprite?: Phaser.GameObjects.Image;
   private treeSprites: Phaser.GameObjects.Image[] = [];
   private bushSprites: Phaser.GameObjects.Image[] = [];
   private waterTiles: Phaser.GameObjects.TileSprite[] = [];
@@ -66,6 +67,7 @@ export class WorldScene extends Phaser.Scene {
 
     const built = WorldFactory.buildZone(this, zoneId, crystalCount, isDawn);
     this.heartTreeSprite = built.heartTreeSprite;
+    this.canopySprite = built.canopySprite;
     this.introFootprints = built.introFootprints;
     this.treeSprites = built.treeSprites;
     this.bushSprites = built.bushSprites;
@@ -269,6 +271,12 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
+  private setCanopyTexture(key: string): void {
+    if (this.canopySprite && this.textures.exists(key)) {
+      this.canopySprite.setTexture(key);
+    }
+  }
+
   private handleHeartTreeInteract(): void {
     const prog = this.questSystem.progress;
     const count = this.questSystem.getCrystalCount();
@@ -300,9 +308,11 @@ export class WorldScene extends Phaser.Scene {
       this.dialogueSystem.startDialogue(DIALOGUE_DATA.hub_first_inspect);
     } else if (count === 1) {
       this.heartTreeSprite?.setTexture('heart_tree_1');
+      this.setCanopyTexture('canopy_1');
       this.dialogueSystem.startDialogue(DIALOGUE_DATA.hub_after_woods_tree);
     } else if (count === 2) {
       this.heartTreeSprite?.setTexture('heart_tree_2');
+      this.setCanopyTexture('canopy_2');
       this.dialogueSystem.startDialogue(DIALOGUE_DATA.hub_after_creek_tree);
     }
   }
@@ -312,6 +322,7 @@ export class WorldScene extends Phaser.Scene {
     this.lanternSystem.lanternOn = true;
     this.lanternSystem.isOverloadMode = true;
     this.heartTreeSprite?.setTexture('heart_tree_3');
+    this.setCanopyTexture('canopy_3');
     this.effectsSystem.spawnBurst(315, 145, 0xfff0a8, 28);
 
     if (!this.overloadBanner) {
@@ -350,6 +361,7 @@ export class WorldScene extends Phaser.Scene {
 
     SoundSystem.playDawnChord();
     this.heartTreeSprite?.setTexture('heart_tree_dawn');
+    this.setCanopyTexture('canopy_dawn');
     for (const tr of this.treeSprites) tr.setTexture('tree_dawn');
     for (const bs of this.bushSprites) bs.setTexture('bush_dawn');
 

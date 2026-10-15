@@ -16,10 +16,19 @@ interface MistLayer {
   vx: number;
 }
 
+interface WeatherMote {
+  sprite: Phaser.GameObjects.Image;
+  vy: number;
+  swayAmp: number;
+  swaySpeed: number;
+  phase: number;
+}
+
 export class EffectsSystem {
   private scene: Phaser.Scene;
   private fireflies: FireflyParticle[] = [];
   private mists: MistLayer[] = [];
+  private weather: WeatherMote[] = [];
   private rippleGraphics: Phaser.GameObjects.Graphics;
   private elapsed = 0;
   private currentZone: ZoneId = 'hub';
@@ -82,6 +91,35 @@ export class EffectsSystem {
         });
       }
     }
+
+    // Zone weather: petals / mist drops / violet ash drifting down
+    const weatherTex =
+      zone === 'woods'
+        ? ['mote_petal', 'mote_petal_white']
+        : zone === 'creek'
+          ? ['mote_drop']
+          : zone === 'ruins'
+            ? ['mote_ash']
+            : ['mote_petal_white'];
+    const weatherCount = isDawn ? 22 : 16;
+    for (let i = 0; i < weatherCount; i++) {
+      const sp = this.scene.add.image(
+        Math.random() * 640,
+        Math.random() * 360,
+        weatherTex[i % weatherTex.length]
+      );
+      sp.setDepth(61);
+      sp.setAlpha(0.55 + Math.random() * 0.35);
+      const s = 0.7 + Math.random() * 0.7;
+      sp.setScale(s);
+      this.weather.push({
+        sprite: sp,
+        vy: (zone === 'ruins' ? 9 : 13) + Math.random() * 10,
+        swayAmp: 8 + Math.random() * 14,
+        swaySpeed: 0.8 + Math.random() * 1.2,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
   }
 
   public spawnBurst(x: number, y: number, colorHex = 0xffe680, count = 14): void {
@@ -121,6 +159,19 @@ export class EffectsSystem {
       if (m.sprite.x < -60) m.sprite.x = 700;
     }
 
+    for (const w of this.weather) {
+      const sp = w.sprite;
+      sp.y += w.vy * (dt * 0.001);
+      sp.x += Math.cos(this.elapsed * w.swaySpeed + w.phase) * w.swayAmp * (dt * 0.001);
+      sp.rotation += dt * 0.0006;
+      if (sp.y > 375) {
+        sp.y = -12;
+        sp.x = Math.random() * 640;
+      }
+      if (sp.x > 655) sp.x = -12;
+      if (sp.x < -12) sp.x = 655;
+    }
+
     // Water ripples in Moonlit Creek
     this.rippleGraphics.clear();
     if (this.currentZone === 'creek') {
@@ -148,8 +199,10 @@ export class EffectsSystem {
   public clear(): void {
     for (const f of this.fireflies) f.sprite.destroy();
     for (const m of this.mists) m.sprite.destroy();
+    for (const w of this.weather) w.sprite.destroy();
     this.fireflies = [];
     this.mists = [];
+    this.weather = [];
     this.rippleGraphics.clear();
   }
 }
