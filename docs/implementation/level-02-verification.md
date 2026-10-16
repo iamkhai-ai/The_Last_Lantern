@@ -1,5 +1,7 @@
 # Level 02 final verification
 
+Historical verification for the first delivered layout. The user subsequently reported small rune stones and unclear entry flow. Latest correction and current verification limits are in [level-02-flow-follow-up.md](level-02-flow-follow-up.md); the browser PASS results below do not certify that later source revision.
+
 Date: 2026-10-17 (Asia/Saigon). Task scope: rebuild Whispering Woods only, internal campaign index 1. Another chat owns Level 01. Local branch: `codex/level-02-spatial-rebuild`; worktree: `C:/Users/Admin/.codex/worktrees/level-02-spatial-rebuild/the-last-lantern`.
 
 ## Checked revision

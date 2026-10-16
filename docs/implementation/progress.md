@@ -43,6 +43,12 @@ Current slice: rebuild **Level 02 only**, per the user's subsequent request; ano
 - Root build/pure checks, complete keyboard puzzle/Library/Continue route, 27 geometry/restore fixtures, partial/completed reload and moving-firefly observations: PASS. Two independent final Luna high reviews: PASS, no remaining actionable findings. Human acceptance and remote publication: NOT_RUN.
 - Full commands, checked revisions, initial failures, corrections, reviewer withdrawal, decisions and local artifacts: [level-02-verification.md](level-02-verification.md). Temporary preview stopped; generated dist restored. Levels 03–10 remain deferred.
 
+## Level 02 user clarity feedback — 2026-10-17
+
+- User reported small rune stones and unclear starting flow. Follow-up source `2a3d6e75`, checked revision `ab3d981`: 60×78 rune art, spawn beside the practice stone, practice SPACE/E then poem/observe guidance, unified HUD/H/ground cue, original puzzle shortcuts preserved.
+- Root pure/syntax/build/diff checks PASS. Two independent Luna high reviews PASS, no actionable source findings. Static spawn/tree alpha diagnostic PASS. New browser gameplay/visual fixtures NOT_RUN because Work browser control is disabled; earlier browser results remain historical. Human acceptance pending.
+- Human preview reopened on 5190 with a fresh flow-v2 test save and backup of the prior test progress. Latest decisions/evidence/limits: [level-02-flow-follow-up.md](level-02-flow-follow-up.md). No remote publication.
+
 ## Level 01 lighting follow-up — 2026-10-16
 
 - Decision: Level 01 uses a cached 256×256 radial alpha mask, inverted over the dark overlay and vignette so the nearby world is revealed through a soft actual transparency falloff. With lantern lit, the display diameter is 232px (about a 33px clear core, fading to about 116px); before pickup or with lantern off, it is 76px (about a 38px outer pool). Darkness opacity is 0.92 lit / 0.94 off, with the existing additive halo reduced. The mask is generated once with other procedural textures and reused; no pulse, save, gate, HUD, or other-level behavior changes are intended.

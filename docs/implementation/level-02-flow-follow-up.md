@@ -33,3 +33,13 @@ Implemented as a bounded Level 02 source and fixture correction on 2026-10-17. T
 - Base: `9eb19fde4f3421a70cff4e4db37007973f03e9e8`.
 - Follow-up source commit: `2a3d6e75a4e8ca11a2e66455bec5eb1ab0d1ab7d`.
 - No raster, dependency, save-format, or other-level changes. No remote publication requested.
+
+### Root verification and final review — 2026-10-17
+
+Checked revision `ab3d981d067d5b4464cdcbb59eee9fca3cdd8904`, source/test commit `2a3d6e75a4e8ca11a2e66455bec5eb1ab0d1ab7d`. Root independently reran the Level 02 contract, forest-edge and start-intent checks, both browser-script syntax checks, `npm run build` (406 modules), and `git diff --check`: PASS, exit 0. Generated tracked `dist/index.html` was restored. Closure edits are documentation only.
+
+Independent read-only Luna high reviews A and B examined the same frozen revision against `90ffec0`: PASS, no actionable source findings. They reviewed actual stage callers, preserved optional puzzle paths, prompts/scale, cue cleanup and test assertions; neither claimed runtime visual verification. Root also checked the actual tree/player image alpha at new spawn `(138,286)`: 432 opaque player pixels, zero covered by the southwest tree at `(65,310)`; no tree movement was needed. This is a static image overlap diagnostic, not a browser screenshot.
+
+Browser gameplay/visual fixtures on this revision: NOT_RUN. Tool returned `Local browser use is disabled in Work settings`; root did not bypass that setting. Prior complete browser results at `c76ff771` remain historical. Human review is pending and the prior acceptance status is superseded by the user's clarity feedback.
+
+The human preview remains on localhost port 5190 with a temporary configuration outside the repository. Its new flow-v2 marker starts a fresh Level 02 entry beside the practice stone and backs up the previous test save under `level02-human-preview-backup-flow-v2`. Other origins/saves are untouched. The page automatically enters CampaignScene; the introductory dialogue and puzzle remain for the user to play. Server/HTTP reachability is checked separately from runtime gameplay. No remote actions.
