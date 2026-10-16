@@ -685,11 +685,23 @@ export class CampaignScene extends Phaser.Scene {
   private drawObservatoryBackground(roomId: ObservatoryRoomId): void {
     const room = OBSERVATORY_ROOMS[roomId];
     const tint: Record<string, number> = { observatory: 0x7182a0, library: 0xd5bd87, ruins: 0x82918c };
-    this.roomObjects.push(this.add.image(0, 0, 'tile_stone').setOrigin(0).setDisplaySize(room.width, room.height).setTint(tint[room.backgroundBiome]).setDepth(0));
+    const backgroundKey = getLevelBackgroundKey(8, roomId);
+    const hasCustomBg = backgroundKey !== null && this.textures.exists(backgroundKey);
+    if (hasCustomBg) {
+      this.roomObjects.push(this.add.image(0, 0, backgroundKey).setOrigin(0).setDisplaySize(room.width, room.height).setDepth(0));
+    } else {
+      this.roomObjects.push(this.add.tileSprite(0, 0, room.width, room.height, 'ground_stone').setOrigin(0).setTint(tint[room.backgroundBiome]).setDepth(0));
+      this.roomObjects.push(this.add.tileSprite(28, 148, room.width - 56, 84, 'ground_stone').setOrigin(0).setTint(0xb5c6ce).setAlpha(0.42).setDepth(0.5));
+      for (const [tx, ty] of [[36, 54], [604, 54], [36, 306], [604, 306]] as Array<[number, number]>) {
+        this.roomObjects.push(this.add.image(tx, ty, 'ruin_pillar').setAlpha(0.85).setScale(0.9).setDepth(3));
+      }
+    }
+    if (this.progress.flags['l8-return-loop-open'] === true) {
+      this.roomObjects.push(this.add.tileSprite(44, 286, room.width - 88, 38, 'ground_stone').setOrigin(0).setTint(0x9bd8dd).setAlpha(0.55).setDepth(0.8));
+    }
     const decor = this.add.graphics().setDepth(1);
-    decor.fillStyle(0x07151c, 0.18); decor.fillRect(0, 0, room.width, room.height);
-    decor.lineStyle(2, 0xd8b869, 0.45); decor.strokeRoundedRect(7, 7, room.width - 14, room.height - 14, 12);
-    decor.lineStyle(1, 0xc6e7dc, 0.12); decor.strokeCircle(room.width / 2, room.height / 2, 100);
+    decor.fillStyle(0x07151c, hasCustomBg ? 0.08 : 0.16);
+    decor.fillRect(0, 0, room.width, room.height);
     this.roomObjects.push(decor);
     const beams = this.add.graphics().setDepth(7);
     this.roomObjects.push(beams);
@@ -927,17 +939,32 @@ export class CampaignScene extends Phaser.Scene {
   private drawRoom(biome: string): void {
     const backgroundKey = getLevelBackgroundKey(this.progress.level);
     const hasCampaignBackground = backgroundKey !== null && this.textures.exists(backgroundKey);
-    const tiles = biome === 'creek' ? 'tile_stone' : biome === 'library' || biome === 'ruins' || biome === 'observatory' ? 'tile_stone' : biome === 'tower' ? 'tile_dirt' : 'tile_grass';
-    const tint: Record<string, number> = { woods: 0x829b80, library: 0xd5bd87, creek: 0x809dad, tower: 0x9b9078, garden: 0xb2c68e, ruins: 0x82918c, observatory: 0x7182a0, heart: 0xd8b978 };
-    this.track(this.add.image(0, 0, hasCampaignBackground ? backgroundKey : tiles).setOrigin(0).setDisplaySize(640, 360).setTint(hasCampaignBackground ? 0xffffff : tint[biome] ?? 0xffffff).setDepth(0));
+    const tiles = biome === 'creek' || biome === 'library' || biome === 'ruins' || biome === 'observatory'
+      ? 'ground_stone'
+      : biome === 'tower'
+        ? 'ground_dirt'
+        : 'ground_grass';
+    const tint: Record<string, number> = { woods: 0x728f73, library: 0xb9a882, creek: 0x809dad, tower: 0x9b9078, garden: 0xb2c68e, ruins: 0x82918c, observatory: 0x7182a0, heart: 0xd8b978 };
+    if (hasCampaignBackground) {
+      this.track(this.add.image(0, 0, backgroundKey).setOrigin(0).setDisplaySize(640, 360).setDepth(0));
+    } else {
+      this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(tint[biome] ?? 0xffffff).setDepth(0));
+      if (this.progress.level === 0) {
+        this.track(this.add.tileSprite(276, 84, 88, 256, 'ground_dirt').setOrigin(0).setTint(0x9a8f7c).setAlpha(0.75).setDepth(0.4));
+        this.track(this.add.tileSprite(244, 178, 152, 76, 'ground_stone').setOrigin(0).setTint(0x9aa8a4).setAlpha(0.55).setDepth(0.5));
+      } else if (this.progress.level === 1) {
+        this.track(this.add.tileSprite(282, 78, 76, 260, 'ground_dirt').setOrigin(0).setTint(0x9a8f7c).setAlpha(0.72).setDepth(0.4));
+        this.track(this.add.tileSprite(148, 176, 344, 58, 'ground_dirt').setOrigin(0).setTint(0x9a8f7c).setAlpha(0.68).setDepth(0.4));
+        this.track(this.add.tileSprite(256, 158, 128, 92, 'ground_stone').setOrigin(0).setTint(0x95a4a0).setAlpha(0.52).setDepth(0.5));
+      } else if (this.progress.level === 2) {
+        this.track(this.add.tileSprite(96, 64, 448, 244, 'ground_stone').setOrigin(0).setTint(0xd8c69c).setAlpha(0.42).setDepth(0.4));
+        this.track(this.add.tileSprite(276, 76, 88, 232, 'ground_stone').setOrigin(0).setTint(0xefe0ba).setAlpha(0.35).setDepth(0.5));
+      }
+    }
     const decor = this.add.graphics().setDepth(1);
     if (!hasCampaignBackground) {
-      decor.fillStyle(biome === 'creek' ? 0x183f59 : 0x07151c, 0.18);
+      decor.fillStyle(biome === 'creek' ? 0x183f59 : 0x07151c, 0.16);
       decor.fillRect(0, 0, 640, 360);
-      decor.lineStyle(2, 0xd8b869, 0.45);
-      decor.strokeRoundedRect(7, 7, 626, 346, 12);
-      decor.lineStyle(1, 0xc6e7dc, 0.12);
-      decor.strokeCircle(320, 185, 100);
     }
     if (this.progress.level === 0) {
       decor.lineStyle(2, 0xffe680, 0.8);
@@ -955,18 +982,33 @@ export class CampaignScene extends Phaser.Scene {
     }
     this.track(decor);
     if (!hasCampaignBackground) {
-      const tree = biome === 'ruins' || biome === 'observatory' ? 'ruin_pillar' : 'tree_woods';
-      for (const [x, y] of [[60, 80], [580, 82], [66, 270], [574, 270]] as Array<[number, number]>) {
-        this.track(this.add.image(x, y, tree).setAlpha(0.8).setScale(0.85).setDepth(3));
+      const isStoneRoom = biome === 'library' || biome === 'ruins' || biome === 'observatory';
+      const tree = isStoneRoom ? 'ruin_pillar' : 'tree_woods';
+      const borderSpots: Array<[number, number]> = isStoneRoom
+        ? [[42, 68], [598, 68], [42, 276], [598, 276]]
+        : [[38, 56], [112, 44], [528, 44], [602, 56], [34, 165], [606, 165], [44, 286], [596, 286]];
+      borderSpots.forEach(([x, y], idx) => {
+        const key = !isStoneRoom && idx % 2 === 1 && this.textures.exists('tree_alt') ? 'tree_alt' : tree;
+        this.track(this.add.image(x, y, key).setAlpha(0.92).setScale(0.88).setDepth(3 + Math.floor(y / 24)));
+      });
+      if (!isStoneRoom) {
+        for (const [bx, by] of [[92, 316], [206, 326], [434, 326], [548, 316], [156, 82], [484, 82]] as Array<[number, number]>) {
+          this.track(this.add.image(bx, by, 'bush_woods').setAlpha(0.9).setDepth(4));
+        }
+        for (let i = 0; i < 16; i++) {
+          const gx = 54 + ((i * 83 + 29) % 532);
+          const gy = 52 + ((i * 59 + 17) % 256);
+          this.track(this.add.image(gx, gy, 'tuft_grass').setAlpha(0.75).setDepth(1.2));
+          if (i % 4 === 0) {
+            this.track(this.add.image(Math.min(590, gx + 12), Math.min(315, gy + 6), i % 8 === 0 ? 'mushroom_cyan' : 'mushroom_warm').setAlpha(0.85).setDepth(1.5));
+          }
+        }
+      }
+      for (const [sx, sy] of [[320, 298], [316, 266], [322, 152], [320, 114]] as Array<[number, number]>) {
+        this.track(this.add.image(sx, sy, 'stepping_stone').setAlpha(0.72).setScale(0.85).setDepth(1.3));
       }
     }
     this.track(this.add.text(320, 344, 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
-    if (!hasCampaignBackground) {
-      const path = this.add.graphics().setDepth(2);
-      path.lineStyle(16, biome === 'creek' ? 0x304d5c : 0x586751, 0.62);
-      path.beginPath(); path.moveTo(320, 335); path.lineTo(320, 275); path.lineTo(320, 220); path.lineTo(320, 130); path.strokePath();
-      this.track(path);
-    }
     const stage = this.progress.level;
     const landscape = this.add.graphics().setDepth(1.5);
     if (!hasCampaignBackground && stage === 3) {
@@ -1021,6 +1063,9 @@ export class CampaignScene extends Phaser.Scene {
     } else if (level === 2) {
       this.addLevelArt('room-bookshelf', 74, 143, undefined, undefined, 4);
       this.addLevelArt('room-bookshelf', 566, 143, undefined, undefined, 4);
+      this.addLevelArt('room-test-desk', 208, 134, 96, 68, 4);
+      this.addLevelArt('room-mural-fifth', 432, 92, 88, 62, 4);
+      this.addLevelArt(this.progress.flags['l2-secret'] ? 'room-panel-open' : 'room-panel-closed', 432, 152, 84, 58, 4);
       this.addLevelArt(this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed', 548, 194, 112, 112, 4);
     } else if (level === 3) {
       this.addLevelArt('storm-relief', 560, 85, 96, 64, 8);

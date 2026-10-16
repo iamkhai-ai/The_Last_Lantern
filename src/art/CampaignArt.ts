@@ -18,6 +18,10 @@ const levelArtModules = import.meta.glob([
   '../../assets/levels/03-library-beneath-the-roots/sprites/room-bookshelf.png',
   '../../assets/levels/03-library-beneath-the-roots/sprites/room-well-closed.png',
   '../../assets/levels/03-library-beneath-the-roots/sprites/room-well-open.png',
+  '../../assets/levels/03-library-beneath-the-roots/sprites/room-panel-closed.png',
+  '../../assets/levels/03-library-beneath-the-roots/sprites/room-panel-open.png',
+  '../../assets/levels/03-library-beneath-the-roots/sprites/room-test-desk.png',
+  '../../assets/levels/03-library-beneath-the-roots/sprites/room-mural-fifth.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/creek-scene-base.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/storm-relief.png',
   '../../assets/levels/05-a-path-for-two/sprites/station-scene-base.png',
@@ -34,6 +38,7 @@ const levelArtModules = import.meta.glob([
   '../../assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png',
   '../../assets/levels/08-ruins-of-two-halves/sprites/statue-notch-2.png',
   '../../assets/levels/08-ruins-of-two-halves/sprites/statue-notch-3.png',
+  '../../assets/levels/09-dark-moon-observatory/sprites/observatory-clean-base.png',
   '../../assets/levels/09-dark-moon-observatory/sprites/learned-marks-miniature.png',
   '../../assets/levels/09-dark-moon-observatory/sprites/star-chart.png',
   '../../assets/levels/09-dark-moon-observatory/sprites/wheel-stopped-sun-among-stars.png',
@@ -53,7 +58,10 @@ const levelArtModules = import.meta.glob([
   import: 'default',
 }) as Record<string, string>;
 
-const characterModules = import.meta.glob('../../assets/character/nhinh_*.png', {
+const characterModules = import.meta.glob([
+  '../../assets/character/nhinh_*.png',
+  '!../../assets/character/*contact_sheet*.png',
+], {
   eager: true,
   query: '?url',
   import: 'default',
@@ -106,7 +114,10 @@ export function getLevelBackgroundKey(levelIndex: number, roomId?: string): stri
     7: 'temple-scene-base',
     9: 'sanctuary-base',
   };
-  if (levelIndex === 8) return null;
+  if (levelIndex === 8) {
+    if (roomId === 'observatory') return getLevelArtKey(8, 'observatory-clean-base');
+    return null;
+  }
   return backgrounds[levelIndex] ? getLevelArtKey(levelIndex, backgrounds[levelIndex]) : null;
 }
 

@@ -9,7 +9,7 @@ Nguồn nội dung là 10 kịch bản đã duyệt trong `docs/scenario/`. Khô
 | Nguồn | Phân loại / quyết định | Giới hạn |
 |---|---|---|
 | `src/assets/*.png` | 135 PNG thực, 147 key manifest. Reuse cây/bụi/nền/đá/cổng/gương/bệ/khóa/tinh thể/Lumo; thông tin từng file ở inventory | Canvas thực của nhiều PNG khác manifest. Cần chuẩn hóa phi phá hủy trước tích hợp. `runestone_leaf_*` thực vẽ xoắn; `runestone_star_*` thực vẽ tam giác, không dùng làm biểu tượng Lá/Sao trong pilot |
-| `assets/character/` | 128 frame Nhinh 36×42 RGBA; runtime dùng idle/walk/run khi cầm đèn tắt và animation bật/tắt/pulse | Prototype; do thiếu pose lit/no-lamp, runtime tạm dùng frame nhân vật cũ khi đèn bật hoặc đã đặt xuống; một số hướng/tay đèn/điểm chân cần chỉnh, xem README |
+| `assets/character/` | 240 frame Nhinh 36×42 RGBA (128 frame lõi + 112 biến thể `idle_lit_0`, `walk_lit_0..2`, `run_lit_0..2`, `idle_nolamp_0`, `walk_nolamp_0..2`, `run_nolamp_0..2`); runtime dùng trọn bộ Nhinh cho mọi trạng thái đèn tắt/bật/chưa cầm và loại bỏ hoàn toàn `src/assets/player_*.png` | Vẫn là gói prototype; một số hướng chéo/tay đèn/chi tiết khăn cần tiếp tục tinh chỉnh ở vòng polish sau, xem `assets/character/README.md` |
 | `Art_References/01_Character_Style_Guide.png` | Board chuẩn phong cách/nhân vật | Không nạp nguyên board thành sprite |
 | `Art_References/02_Environment_Props_and_Puzzles.png` | Board vật liệu/đạo cụ | Có chữ và bố cục minh họa; concept-only |
 | `Art_References/03_Whispering_Woods.png` đến `07_The_Last_Dawn.png` | Concept-only không khí màn | Không phải tilemap hay scene 640×360 có thể chơi |
@@ -45,11 +45,11 @@ Navigation màn 09 đã đọc tại `docs/superpowers/specs/2026-10-16-observat
 - `shared/crop-metadata.json`: source SHA, crop box `[left,top,right,bottom)` theo pixel atlas, canvas, pivot, cách resize/loại mảnh lân cận.
 - `shared/crop-test-contact-sheet-640x360.png`: sáng/tối 1× và 2×, thử nối cỏ; là ảnh kiểm tra ngoại tuyến.
 - Các bộ màn 01–10 và shared: source, prompt, map, validation, README và preview được lưu theo từng thư mục; danh mục gom ở `asset-handoff.md` / `asset-handoff.json`.
-- `assets/character/frames.json` / `validation.json`: mapping và PASS kỹ thuật của 128 frame; prompt và sheet gốc nằm trong cùng thư mục.
+- `assets/character/frames.json` / `validation.json`: mapping và PASS kỹ thuật của 240 frame (128 lõi + 112 biến thể `lit`/`nolamp`); prompt, provenance và sheet gốc nằm trong `assets/character/source_sheets/`.
 - `tasks/todo.md`: tiến độ từng lô, giới hạn và trạng thái kiểm tra.
 
-`src/art/CampaignArt.ts` ánh xạ PNG cho runtime mà không đưa preview/source ngoại tuyến vào bundle. Các phòng dùng nền sạch có sẵn cho màn 04–08 và 10; màn 09 dùng các props cơ chế đã chọn vì các ảnh nền giao nhận có dải ghi chú/debug. CampaignScene gắn sprite cho các trạng thái câu đố đã có trong dữ liệu màn. `npm run build` PASS sau tích hợp. Browser smoke hiện xác nhận menu tải được trên cổng localhost cô lập; chưa xem trực quan đủ 10 màn hoặc xác minh mọi trạng thái trong engine. Chơi trọn câu đố và ending được để người dùng tự review.
+`src/art/CampaignArt.ts` ánh xạ PNG cho runtime mà không đưa preview/source ngoại tuyến hay contact sheet vào bundle. Các phòng dùng nền sạch có sẵn cho màn 04–08 và 10; màn 09 dùng các props cơ chế đã chọn vì các ảnh nền giao nhận có dải ghi chú/debug. CampaignScene gắn sprite cho các trạng thái câu đố đã có trong dữ liệu màn. `npm run build` PASS sau tích hợp. Browser smoke hiện xác nhận menu tải được trên cổng localhost cô lập; chưa xem trực quan đủ 10 màn hoặc xác minh mọi trạng thái trong engine. Chơi trọn câu đố và ending được để người dùng tự review.
 
 ## Trạng thái bàn giao
 
-Asset-handoff xác nhận 15 asset maps, 268 PNG output màn chơi duy nhất, 128 frame Nhinh, 128 reuse references và 177 preview. Audit có 0 lỗi đường dẫn, kích thước, hash hoặc pivot. Hai alpha rỗng là sentinel có chủ ý; tám nhóm ảnh trùng pixel đã ghi nguyên nhân. Runtime chưa dùng hết mọi asset và không thay thế các procedural P2; giới hạn pose animation, montage, terrain và hiển thị cần rà tiếp được ghi tại README của lô tương ứng.
+Asset-handoff ban đầu xác nhận 15 asset maps, 268 PNG output màn chơi duy nhất, 128 frame Nhinh lõi, 128 reuse references và 177 preview; đợt cập nhật nhánh `codex/nhinh-frame-replacement` nâng bộ nhân vật lên 240 frame Nhinh (128 lõi + 112 biến thể `lit`/`nolamp`) và gỡ bỏ hoàn toàn 72 file `src/assets/player_*.png` cũ. Audit có 0 lỗi đường dẫn, kích thước, hash hoặc pivot. Hai alpha rỗng là sentinel có chủ ý; tám nhóm ảnh trùng pixel đã ghi nguyên nhân. Runtime chưa dùng hết mọi asset và không thay thế các procedural P2; giới hạn pose animation, montage, terrain và hiển thị cần rà tiếp được ghi tại README của lô tương ứng.
