@@ -145,8 +145,10 @@ export class LanternSystem {
       this.haloSprite.setAlpha(activeLantern ? 0.42 : 0.12);
       const darknessAlpha = activeLantern ? 0.92 : 0.94;
       const size = activeLantern ? 232 : 76;
-      this.forestEdgeShade!.setPosition(lightX, lightY).setDisplaySize(size, size).setAlpha(darknessAlpha);
-      this.fillForestEdgeDarknessOutside(lightX, lightY, size, darknessAlpha);
+      const shadeX = Math.round(lightX);
+      const shadeY = Math.round(lightY);
+      this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);
+      this.fillForestEdgeDarknessOutside(shadeX, shadeY, size, darknessAlpha);
     } else if (this.lanternOn && (this.lanternInHand || this.lanternPlaced)) {
       // Night mode with warm lantern light active (radius ~115 world px)
       this.haloSprite.setVisible(true);
