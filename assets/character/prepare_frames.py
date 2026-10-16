@@ -19,6 +19,7 @@ EXPECTED_VARIANT_FILES = {
     for state, frames in VARIANT_POSES
     for frame in frames
 }
+COMBINED_CONTACT_SHEET_FILES = {'nhinh_state_variants_contact_sheet.png', 'nhinh_all_poses_contact_sheet.png'}
 STAGING_TEMP = tempfile.TemporaryDirectory(prefix='.prepare-frames-', dir=ROOT)
 STAGING = Path(STAGING_TEMP.name)
 POSES = [('idle', 0)] + [(state, i) for state in ('walk', 'run', 'lantern_on', 'lantern_off', 'pulse') for i in range(3)]
@@ -30,15 +31,19 @@ owned = set()
 _existing = None
 existing_frames = []
 variant_files_present = any((ROOT / name).is_file() for name in EXPECTED_VARIANT_FILES)
-has_combined_catalog = variant_files_present
+combined_contact_sheets_present = any((ROOT / name).is_file() for name in COMBINED_CONTACT_SHEET_FILES)
+has_combined_catalog = variant_files_present or combined_contact_sheets_present
 if (ROOT / 'frames.json').exists():
     _existing = json.loads((ROOT / 'frames.json').read_text(encoding='utf-8'))
     existing_frames = _existing.get('frames', [])
+    contact_sheets = _existing.get('contact_sheets', {})
+    contact_sheet_markers = set(contact_sheets) | set(contact_sheets.values()) if isinstance(contact_sheets, dict) else set()
     has_combined_catalog = (
         has_combined_catalog
         or _existing.get('frame_count', 0) > 128
         or len(existing_frames) > 128
         or _existing.get('state_variant_frame_count', 0) > 0
+        or bool(contact_sheet_markers & {'state_variants_14_poses', 'all_30_poses', *COMBINED_CONTACT_SHEET_FILES})
     )
     owned = {f['file'] for f in existing_frames}
 if has_combined_catalog and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
@@ -167,8 +172,40 @@ if errors:
     (ROOT / 'validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     raise SystemExit(1)
 
-for entry in core_entries:
-    os.replace(STAGING / entry['file'], ROOT / entry['file'])
-os.replace(STAGING / 'nhinh_contact_sheet.png', ROOT / 'nhinh_contact_sheet.png')
-os.replace(STAGING / 'frames.json', ROOT / 'frames.json')
-os.replace(STAGING / 'validation.json', ROOT / 'validation.json')
+publish_targets = [
+    (STAGING / entry['file'], ROOT / entry['file']) for entry in core_entries
+] + [
+    (STAGING / 'nhinh_contact_sheet.png', ROOT / 'nhinh_contact_sheet.png'),
+    (STAGING / 'frames.json', ROOT / 'frames.json'),
+    (STAGING / 'validation.json', ROOT / 'validation.json'),
+]
+backup_dir = STAGING / 'backup'
+backup_dir.mkdir()
+backups = {}
+for index, (_, target) in enumerate(publish_targets):
+    backup = backup_dir / str(index)
+    if target.exists():
+        shutil.copy2(target, backup)
+        backups[target] = backup
+    else:
+        backups[target] = None
+
+attempted_targets = []
+try:
+    for staged, target in publish_targets:
+        attempted_targets.append(target)
+        os.replace(staged, target)
+except OSError:
+    rollback_errors = []
+    for target in reversed(attempted_targets):
+        backup = backups[target]
+        try:
+            if backup is None:
+                target.unlink(missing_ok=True)
+            else:
+                os.replace(backup, target)
+        except OSError as error:
+            rollback_errors.append(f'{target.name}: {error}')
+    if rollback_errors:
+        raise RuntimeError('Publishing failed and rollback was incomplete: ' + '; '.join(rollback_errors))
+    raise
