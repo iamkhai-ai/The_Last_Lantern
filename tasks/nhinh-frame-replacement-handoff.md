@@ -1,6 +1,6 @@
 # Nhinh Frame Replacement — Handoff
 
-Status: COMPLETED (pending user playthrough of 10 puzzles and ending). Changes are uncommitted in the working tree, currently checked out on `feat/crisp-ground-tiles-and-art-cleanup` (which includes the `codex/nhinh-frame-replacement` work); nothing has been committed or merged.
+Status: COMPLETED (pending user playthrough of 10 puzzles and ending). Changes are committed on `codex/nhinh-frame-replacement`; PR #4 is open to merge that branch into `main`.
 
 ## Request
 
@@ -26,5 +26,5 @@ Retire the old `src/assets/player_*.png` character frames. Use the newer 8-direc
 - Consolidated 240-frame audit (`assets/character/validation.json`): PASS (`240/240` `36×42` `RGBA` PNGs, transparent background, foot baseline `y=40` on all 224 non-pulse frames, unique walk/run triplets, 240 unique SHA-256 hashes, 128 core frame hashes preserved, 0 `src/assets/player_*.png` remaining).
 - `npm run build` (`tsc --noEmit && vite build`): PASS (`dist/index.html` built cleanly with 0 errors and contact sheets excluded from runtime bundle).
 - Runtime menu smoke check: PASS (verified via isolated localhost server + headless Edge screenshot rendering `THE LAST LANTERN` menu and live Nhinh sprite in the background hub; full 10-level puzzle and ending playthrough reserved for the user).
-- Independent reviews on the final revision: Reviewer A PASS (subagent). Reviewer B failed with a 429 quota error, so the second check was done by the root agent via a consolidated file/catalog audit (PASS).
+- Historical review note from the earlier implementation revision: Reviewer A passed; Reviewer B could not run because of a 429 quota error, so the root agent performed a catalog audit. Current integration review status is tracked on [PR #4](https://github.com/iamkhai-ai/The_Last_Lantern/pull/4).
 

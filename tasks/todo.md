@@ -141,7 +141,7 @@ Mỗi mục nhóm tài nguyên bên dưới được tách thành lô nhỏ sau 
 - [x] Đối chiếu kích cỡ 177 ảnh preview; tách scene 640×360, pano Observatory 1920×360 và contact sheet 1×/2×; rà soát visual evidence mỗi lô trong README/validation.
 - [x] Bàn giao mapping file–key–state–màn, nguồn/reuse, provenance/prompt và giới hạn hiện còn trong handoff.
 
-**Phụ thuộc:** mọi lô P0/P1. **File:** [asset-handoff.md](../assets/levels/asset-handoff.md), [asset-handoff.json](../assets/levels/asset-handoff.json), [character validation](../assets/character/validation.json). **PASS:** 15 asset maps, 268 PNG output duy nhất, 128 frame Nhinh (36×42 RGBA), 128 reuse references và 177 preview; 0 lỗi path/dimension/hash/pivot; 2 alpha rỗng có chủ ý và 8 nhóm pixel trùng đều được ghi lý do. Đã xem contact 8×16 frame. **Giới hạn:** frame Nhinh là prototype, procedural P2/runtime còn theo từng README; bản preview không thay thế render trong engine.
+**Phụ thuộc:** mọi lô P0/P1. **File:** [asset-handoff.md](../assets/levels/asset-handoff.md), [asset-handoff.json](../assets/levels/asset-handoff.json), [character validation](../assets/character/validation.json). **PASS tại mốc bộ lõi ban đầu:** 15 asset maps, 268 PNG output duy nhất, 128 frame Nhinh lõi (36×42 RGBA), 128 reuse references và 177 preview; 0 lỗi path/dimension/hash/pivot; 2 alpha rỗng có chủ ý và 8 nhóm pixel trùng đều được ghi lý do. Contact 8×16 là bản chỉ gồm bộ lõi; tổng cuối 240 frame và contact 8×30 được ghi ở mục 18. **Giới hạn:** frame Nhinh là prototype, procedural P2/runtime còn theo từng README; bản preview không thay thế render trong engine.
 
 ## 17 — Preview trong engine sau tích hợp
 
