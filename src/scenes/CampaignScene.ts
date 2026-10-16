@@ -164,10 +164,16 @@ export class CampaignScene extends Phaser.Scene {
     this.lantern.onPulse((x, y, radius) => {
       this.progress.flags['pulse-used'] = true;
       if (this.progress.level === 0 && this.progress.flags['l0-tablet-read'] && FOREST_EDGE.objects.trail.some((mark) => Math.hypot(x - mark.x, y - mark.y) <= radius)) {
+        const firstDiscovery = this.progress.flags['l0-footprints-found'] !== true;
         this.progress.flags['l0-footprints-found'] = true;
         this.footprintTrail?.setVisible(true);
         this.revealForestEdgeFootprints();
         this.hintIndex = 0;
+        if (firstDiscovery) this.say([
+          { speaker: 'Nhinh', text: 'Có người từng đi qua đây.' },
+          { speaker: 'Lumo', text: 'Và họ để lại đường cho chúng ta. Đi cùng tôi nhé?' },
+          { speaker: 'Nhinh', text: 'Đi cùng nhau.' },
+        ]);
       }
       if (this.progress.level === 1) {
         this.activeRevealedRunes.clear();
