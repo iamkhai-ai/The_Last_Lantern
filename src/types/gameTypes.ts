@@ -38,7 +38,7 @@ export interface InteractableConfig {
   id: string;
   x: number;
   y: number;
-  promptY?: number;
+  getPromptBounds?: () => { x: number; y: number; width: number; height: number } | null;
   radius: number;
   getPrompt: () => string | null;
   onInteract: () => void;

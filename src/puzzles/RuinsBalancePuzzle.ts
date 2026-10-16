@@ -127,6 +127,7 @@ export class RuinsBalancePuzzle {
         id: `ruins_lock_${idx}`,
         x: def.x,
         y: def.y + 8,
+        getPromptBounds: () => sp.getBounds(),
         radius: 46,
         isEnabled: () => this.questSystem.progress.ruinsLockSequence < 3,
         getPrompt: () => {
@@ -221,6 +222,7 @@ export class RuinsBalancePuzzle {
       id: 'ruins_shadow_npc',
       x: 366,
       y: 162,
+      getPromptBounds: () => this.shadowSprite?.getBounds() ?? null,
       radius: 52,
       isEnabled: () => !this.questSystem.progress.shadowSeen,
       getPrompt: () => '[E] Lắng nghe Hình Bóng (The Shadow)',
@@ -264,6 +266,7 @@ export class RuinsBalancePuzzle {
       id: 'crystal_balance_pickup',
       x: 366,
       y: 132,
+      getPromptBounds: () => this.crystalSprite?.getBounds() ?? null,
       radius: 52,
       isEnabled: () =>
         this.questSystem.progress.shadowSeen &&

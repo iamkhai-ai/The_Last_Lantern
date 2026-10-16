@@ -79,6 +79,7 @@ export class WoodsRunePuzzle {
       id: 'woods_inscription',
       x: 312,
       y: 164,
+      getPromptBounds: () => this.archSprite.getBounds(),
       radius: 44,
       getPrompt: () => '[E] Đọc bia gợi ý cổng cổ',
       onInteract: () => {
@@ -129,6 +130,7 @@ export class WoodsRunePuzzle {
         id: `rune_${d.id}`,
         x: d.x,
         y: d.y + 8,
+        getPromptBounds: () => sp.getBounds(),
         radius: 46,
         isEnabled: () =>
           !this.questSystem.progress.crystals.memory &&
@@ -225,6 +227,7 @@ export class WoodsRunePuzzle {
       id: 'crystal_memory_pickup',
       x: 370,
       y: 174,
+      getPromptBounds: () => this.crystalSprite?.getBounds() ?? null,
       radius: 46,
       isEnabled: () => !this.questSystem.progress.crystals.memory,
       getPrompt: () => '[E] Thu nhận Tinh thể Ký Ức (Vàng)',
