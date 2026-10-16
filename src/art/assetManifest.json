@@ -266,23 +266,38 @@
   },
   {
     "key": "tile_grass",
-    "w": 184,
-    "h": 184
+    "w": 144,
+    "h": 168
   },
   {
     "key": "tile_dirt",
-    "w": 184,
-    "h": 184
+    "w": 144,
+    "h": 168
   },
   {
     "key": "tile_stone",
-    "w": 184,
-    "h": 184
+    "w": 144,
+    "h": 168
+  },
+  {
+    "key": "ground_grass",
+    "w": 144,
+    "h": 168
+  },
+  {
+    "key": "ground_dirt",
+    "w": 144,
+    "h": 168
+  },
+  {
+    "key": "ground_stone",
+    "w": 144,
+    "h": 168
   },
   {
     "key": "tile_water",
-    "w": 89,
-    "h": 90
+    "w": 64,
+    "h": 64
   },
   {
     "key": "lumo_2",
