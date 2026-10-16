@@ -51,7 +51,7 @@ if (ROOT / 'frames.json').exists():
 if has_combined_catalog and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
     raise RuntimeError(
         'Refusing to overwrite combined 240-frame catalog in frames.json. '
-        'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'
+        'Set ALLOW_CATALOG_OVERWRITE=1 only when deliberately regenerating all 240 frames from committed source sheets.'
     )
 
 def record_preflight_failure(message, variant_count=None):

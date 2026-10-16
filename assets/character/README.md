@@ -33,7 +33,7 @@ Bộ ảnh mới được tạo từ thiết kế nhân vật hiện có của T
 - `frames.json`: ánh xạ toàn bộ 240 file (128 core + 112 state variants), trạng thái, số frame, ô cắt ở sheet gốc, bounding box và SHA-256.
 - `source_sheets/`: 8 sheet PNG gốc 4×4 cho 128 frame lõi, cùng `source_sheets/state_variants/` (`worker_down/`, `worker_udr/`, `worker_lr/`) chứa 16 sheet PNG gốc 4×2 và file provenance/prompt của 112 biến thể.
 - `generation-prompts.json`: toàn bộ prompt của 8 lần tạo bộ lõi, kèm đường dẫn output gốc được tool trả về.
-- `prepare_frames.py`: tái tạo đủ 240 frame, ba contact sheet, catalog và validation từ các sheet đã lưu trong repo. Chạy `python assets/character/prepare_frames.py` (cần Python và Pillow); không phụ thuộc đường dẫn output image_gen trên máy tạo ảnh.
+- `prepare_frames.py`: tái tạo đủ 240 frame, ba contact sheet, catalog và validation từ các sheet đã lưu trong repo. Trên PowerShell, chạy `$env:ALLOW_CATALOG_OVERWRITE='1'; python assets/character/prepare_frames.py` (cần Python và Pillow); cờ này cho phép ghi đè có chủ đích catalog kết hợp. Script không phụ thuộc đường dẫn output image_gen trên máy tạo ảnh.
 - `body-scale-anchors.json`: 112 cặp mốc đỉnh mũ–đế giày trong ô nguồn và tên frame lõi cùng hướng/pose để đối chiếu tỷ lệ. Tọa độ là pixel nguồn, mốc dưới không bao gồm pixel tại chính tọa độ đó.
 - Pipeline kiểm tra component alpha ≥80 lớn nhất của cả 112 ô biến thể để xác nhận mốc cơ thể, loại vùng pixel rời ngoài component khỏi crop và căn giữa. Có hai ô chứa pixel thừa phía trên/trái: `downleft_run_lit_1` và `downleft_run_lit_2`; đỉnh mũ thật ở `y=51` và `y=53`, không phải `y=0`. `validation.json` ghi đầy đủ bounding box trước/sau loại vùng thừa.
 - `validation.json`: kết quả kiểm tra kỹ thuật cho toàn bộ 240 frame.
