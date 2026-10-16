@@ -37,7 +37,7 @@ Positions are ground anchors unless a row says otherwise. Rectangles are `[left,
 
 Gate art height differs between closed/open sources. Keep bottom anchor `(486,166)` fixed, preserve each image's native aspect ratio, and use IDs rather than coordinate searching for state swaps. The post coordinates may be tightened to the opaque post feet after screenshot inspection; the 78px passage stays usable. The gate opens toward the north; tree/rock boundary behind it prevents bypass before unlock. Exit interaction is on the SOUTH approach of the barrier; do not require clipping through a closed door to read its prompt.
 
-Implementation detail: the authored closed forest edge is a continuous upper canopy collision band `[0,90,640,54]`, matching the northern tree-line boundary. It prevents a player or saved position from getting behind the gate by routing around either post. The band and the doorway threshold are disabled after the eye latches; the south-side E exit remains reachable while closed.
+Implementation detail: use the permanent back-of-arch footprint `[422,96,128,30]`, joined to the north floor boundary and post tops. It closes the side route behind the passage while leaving the empty northern forest strip walkable. Keep the doorway threshold `[447,126,78,18]` conditional on the gate state; the south-side contact point `(486,128)` and E stand `(486,151)` remain reachable while closed. The backing still stops northward travel after opening, while the passage permits movement up to `(486,110)`.
 
 ## Trees, rocks and clear floor
 

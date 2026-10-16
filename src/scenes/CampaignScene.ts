@@ -3,7 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { canChargeForestEdgeReceiver, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
+import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
@@ -130,7 +130,9 @@ export class CampaignScene extends Phaser.Scene {
     });
     keyboard.on('keydown-SPACE', () => {
       if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
-      else if (!this.pauseMenu.isOpen() && this.lantern.triggerPulse(this.player.x, this.player.y)) this.player.playPulseAction();
+      else if (!this.pauseMenu.isOpen()
+        && (this.progress.level !== 0 || canUseForestEdgePulse(this.progress.flags['l0-tablet-read'] === true))
+        && this.lantern.triggerPulse(this.player.x, this.player.y)) this.player.playPulseAction();
     });
     keyboard.on('keydown-F', () => {
       const finalToggleAvailable = this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && this.lantern.lanternInHand && this.lantern.lanternOn;
@@ -1666,8 +1668,6 @@ export class CampaignScene extends Phaser.Scene {
       FOREST_EDGE_SOLIDS.forEach((rect, index) => {
         this.addCampaignBarrier(`forest-solid-${index}`, rect.x + rect.width / 2, rect.y + rect.height / 2, rect.width, rect.height);
       });
-      const closedForestBoundary = FOREST_EDGE.objects.closedForestBoundary;
-      this.addCampaignBarrier('forest-closed-forest-boundary', closedForestBoundary.x + closedForestBoundary.width / 2, closedForestBoundary.y + closedForestBoundary.height / 2, closedForestBoundary.width, closedForestBoundary.height, !this.progress.flags['l0-gate-open']);
       const barrier = FOREST_EDGE.objects.gate.threshold;
       this.addCampaignBarrier('forest-gate-threshold', barrier.x + barrier.width / 2, barrier.y + barrier.height / 2, barrier.width, barrier.height, !this.progress.flags['l0-gate-open']);
     } else if (level === 3) {

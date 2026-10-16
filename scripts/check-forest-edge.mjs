@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   canChargeForestEdgeReceiver,
+  canUseForestEdgePulse,
   feetAt,
   FOREST_EDGE,
   isForestEdgeCenterWalkable,
@@ -11,6 +12,8 @@ import {
 const close = (a, b) => Math.abs(a - b) < 1e-9;
 assert.deepEqual(feetAt({ x: 410, y: 191 }), { x: 410, y: 210 });
 assert.equal(FOREST_EDGE.player.body.height, 6, 'runtime footprint uses the authored six-pixel height');
+assert.equal(canUseForestEdgePulse(false), false, 'SPACE cannot pulse before the tablet teaches it');
+assert.equal(canUseForestEdgePulse(true), true, 'reading the tablet enables Pulse');
 assert.ok(worldDepth(230 - 1) < worldDepth(230));
 assert.ok(worldDepth(230 + 1) > worldDepth(230));
 assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.player.spawn, false), true);
@@ -18,11 +21,14 @@ assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.objects.tablet.stand, false)
 assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.objects.gate.exit, false), true, 'closed gate prompt must be reachable from the south');
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 127 }, false), false, 'closed threshold blocks the north approach');
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 130 }, false), true, 'south side remains walkable up to the threshold');
-assert.equal(isForestEdgeCenterWalkable({ x: 560, y: 100 }, false), false, 'closed forest boundary prevents east-side bypass');
-assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 100 }, true), true, 'open passage permits travel north');
-assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 90 }, false), false, 'closed gate cannot restore a player north of its threshold');
+assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 128 }, false), true, 'actual closed-threshold contact remains a valid saved position');
+assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 110 }, false), false, 'arch backing blocks a saved position behind the closed gate');
+assert.equal(isForestEdgeCenterWalkable({ x: 570, y: 110 }, false), true, 'empty northern forest strip remains walkable beyond the arch backing');
+assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 110 }, true), true, 'open passage permits travel to the backing wall');
+assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 109 }, true), false, 'arch backing remains a permanent north limit after opening');
 assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.checkpoints.gate, true), true);
 assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.checkpoints.gate, false), true);
+assert.deepEqual(resolveForestEdgeSpawn({ x: 486, y: 128 }, { gateOpen: false }), { x: 486, y: 128 }, 'save at actual closed-gate contact restores in place');
 
 function reachableWithin(start, target, gateOpen) {
   const step = 4;
@@ -55,7 +61,7 @@ assert.equal(canChargeForestEdgeReceiver(ringFeet, true, true, false, false), fa
 assert.equal(canChargeForestEdgeReceiver(ringFeet, true, true, true, true), false, 'latched gate does not recharge');
 assert.equal(canChargeForestEdgeReceiver({ x: ringFeet.x + 17, y: ringFeet.y }, true, true, true, false), false, 'receiver radius is 16 feet pixels');
 
-const restoredNorth = resolveForestEdgeSpawn({ x: 486, y: 90 }, { tabletRead: true, footprintsFound: false, gateOpen: false });
+const restoredNorth = resolveForestEdgeSpawn({ x: 486, y: 110 }, { tabletRead: true, footprintsFound: false, gateOpen: false });
 assert.ok(restoredNorth.y >= FOREST_EDGE.objects.gate.exit.y);
 assert.equal(isForestEdgeCenterWalkable(restoredNorth, false), true);
 const restoredInsideTablet = resolveForestEdgeSpawn({ x: 300, y: 200 }, { tabletRead: true, footprintsFound: false, gateOpen: false });

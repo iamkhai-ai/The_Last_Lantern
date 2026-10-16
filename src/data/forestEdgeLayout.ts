@@ -14,8 +14,7 @@ export const FOREST_EDGE = {
     lantern: { anchor: { x: 224, y: 238 }, stand: { x: 224, y: 251 }, texture: 'pickup-lantern' },
     tablet: { anchor: { x: 300, y: 230 }, stand: { x: 300, y: 238 }, solid: { x: 286, y: 218, width: 28, height: 12 } },
     ring: { anchor: { x: 410, y: 225 }, ground: { x: 410, y: 210 }, stand: { x: 410, y: 191 }, radius: 16, texture: 'stone-standing-ring' },
-    gate: { anchor: { x: 486, y: 166 }, stand: { x: 486, y: 151 }, exit: { x: 486, y: 151 }, posts: [{ x: 422, y: 126, width: 25, height: 42 }, { x: 525, y: 126, width: 25, height: 42 }], header: { x: 447, y: 126, width: 78, height: 18 }, threshold: { x: 447, y: 126, width: 78, height: 18 } },
-    closedForestBoundary: { x: 0, y: 90, width: 640, height: 54 },
+    gate: { anchor: { x: 486, y: 166 }, stand: { x: 486, y: 151 }, exit: { x: 486, y: 151 }, posts: [{ x: 422, y: 126, width: 25, height: 42 }, { x: 525, y: 126, width: 25, height: 42 }], header: { x: 447, y: 126, width: 78, height: 18 }, threshold: { x: 447, y: 126, width: 78, height: 18 }, backing: { x: 422, y: 96, width: 128, height: 30 } },
     eye: { anchor: { x: 538, y: 122 }, texture: 'sun-eye-dormant' },
     trees: [
       { id: 'tree-nw', anchor: { x: 48, y: 142 } }, { id: 'tree-northwest', anchor: { x: 112, y: 102 } },
@@ -37,6 +36,7 @@ export const FOREST_EDGE = {
 export const FOREST_EDGE_SOLIDS: Rect[] = [
   FOREST_EDGE.objects.tablet.solid,
   ...FOREST_EDGE.objects.gate.posts,
+  FOREST_EDGE.objects.gate.backing,
   ...FOREST_EDGE.objects.trees.map(({ anchor }) => ({ x: anchor.x - 9, y: anchor.y - 14, width: 18, height: 14 })),
   ...FOREST_EDGE.objects.rocks.map(({ anchor }) => ({ x: anchor.x - 13, y: anchor.y - 14, width: 26, height: 14 })),
 ];
@@ -59,7 +59,7 @@ export function isForestEdgeCenterWalkable(center: Point, gateOpen: boolean): bo
   const body: Rect = { x: feet.x - player.body.width / 2, y: feet.y - player.body.height / 2, width: player.body.width, height: player.body.height };
   if (center.x < world.left + 12 || center.x > world.right - 12 || feet.y - 5 < world.top || feet.y + 5 > world.bottom) return false;
   if (FOREST_EDGE_SOLIDS.some((solid) => overlaps(body, solid))) return false;
-  if (!gateOpen && overlaps(body, FOREST_EDGE.objects.closedForestBoundary)) return false;
+  if (!gateOpen && overlaps(body, FOREST_EDGE.objects.gate.threshold)) return false;
   return true;
 }
 
@@ -76,4 +76,8 @@ export function resolveForestEdgeSpawn(saved: Point | undefined, flags: { tablet
 export function canChargeForestEdgeReceiver(feet: Point, lampOn: boolean, tabletRead: boolean, footprintsFound: boolean, gateOpen: boolean): boolean {
   return !gateOpen && lampOn && tabletRead && footprintsFound
     && Math.hypot(feet.x - FOREST_EDGE.objects.ring.ground.x, feet.y - FOREST_EDGE.objects.ring.ground.y) <= FOREST_EDGE.objects.ring.radius;
+}
+
+export function canUseForestEdgePulse(tabletRead: boolean): boolean {
+  return tabletRead;
 }
