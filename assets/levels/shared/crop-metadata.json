@@ -1,0 +1,113 @@
+[
+  {
+    "name": "atlas_grass_sample",
+    "source": "Art_References/The_Last_Lantern_Tileset_Pack/01_terrain_water_cliffs_tileset.png",
+    "box": [
+      110,
+      12,
+      185,
+      90
+    ],
+    "canvas": [
+      32,
+      32
+    ],
+    "use": "texture swatch only; opposite edges are not authored to wrap",
+    "source_sha256": "c4ef798cb7920847b51ec07438eebf222a1ed39c3963afe79726bd313eddee92",
+    "raw_path": "assets/levels/shared/atlas_grass_sample_raw.png",
+    "output_path": "assets/levels/shared/atlas_grass_sample.png",
+    "export": {
+      "method": "full crop nearest resize; opaque texture"
+    },
+    "pivot": [
+      0.5,
+      1
+    ],
+    "edge_cleanup": "No color-key removal; source alpha preserved; no original file changed",
+    "status": "crop-test-only"
+  },
+  {
+    "name": "atlas_stairs_sample",
+    "source": "Art_References/The_Last_Lantern_Tileset_Pack/02_ruins_architecture_tileset.png",
+    "box": [
+      260,
+      420,
+      367,
+      526
+    ],
+    "canvas": [
+      48,
+      48
+    ],
+    "use": "candidate stairs prototype; perspective is more isometric than existing forest",
+    "source_sha256": "b19746c7370bb19edd9b0813f2a6a40e5e7bcdab31a5801fc8e710e9abe915bb",
+    "raw_path": "assets/levels/shared/atlas_stairs_sample_raw.png",
+    "output_path": "assets/levels/shared/atlas_stairs_sample.png",
+    "export": {
+      "source_alpha_bbox": [
+        0,
+        0,
+        107,
+        106
+      ],
+      "fit_scale": 0.411214953271028,
+      "placed_xy": [
+        2,
+        2
+      ],
+      "placed_size": [
+        44,
+        44
+      ],
+      "disconnected_atlas_neighbor_pixels_removed": 19
+    },
+    "pivot": [
+      0.5,
+      1
+    ],
+    "edge_cleanup": "No color-key removal; source alpha preserved; no original file changed",
+    "status": "crop-test-only"
+  },
+  {
+    "name": "atlas_rock_sample",
+    "source": "Art_References/The_Last_Lantern_Tileset_Pack/03_props_interactives_tileset.png",
+    "box": [
+      105,
+      921,
+      204,
+      985
+    ],
+    "canvas": [
+      36,
+      26
+    ],
+    "use": "candidate noninteractive forest rock; inspect edge fringe before production",
+    "source_sha256": "2f3587fa8921293316a878dc8e0f2fed4afdf352f37139a0a281da334e0cfb1f",
+    "raw_path": "assets/levels/shared/atlas_rock_sample_raw.png",
+    "output_path": "assets/levels/shared/atlas_rock_sample.png",
+    "export": {
+      "source_alpha_bbox": [
+        0,
+        0,
+        99,
+        64
+      ],
+      "fit_scale": 0.32323232323232326,
+      "placed_xy": [
+        2,
+        3
+      ],
+      "placed_size": [
+        32,
+        21
+      ],
+      "disconnected_atlas_neighbor_pixels_removed": 0
+    },
+    "pivot": [
+      0.5,
+      1
+    ],
+    "edge_cleanup": "No color-key removal; source alpha preserved; no original file changed",
+    "status": "crop-test-only"
+  }
+]

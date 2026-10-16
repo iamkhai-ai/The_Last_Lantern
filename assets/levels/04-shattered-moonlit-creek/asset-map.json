@@ -1,0 +1,379 @@
+[
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-1-slash.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-1-backslash.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "7db722acd743a3e6615ae0c7601541a68194c70aff9d35e6d56ab952de611110"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-1-horizontal.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "8c72f89f7ed228cf3861059e25c7790004df65fe33493361dafe4e15146b2048"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-2-slash.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "e2cbfe3f0e3590197798d9c7d8b74f529c93a9fca37061aec68b393d2df93d85"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-2-backslash.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "a11145f3f2a3e9a2b7d96f7ab35113a7c6beb08559242b8fe69927fb63049410"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-2-horizontal.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "25793954a5b4449979c1465b246ea787b1b0f3b0480e0509a57f75a9db5a4cd6"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-3-slash.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "c81a9ef92a5705c7f299b9d899a044f4e97a5b5a5e205d81eb164cd89360bef2"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-3-backslash.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "7fff92c447e63d959840ead7065892d3dfe841ea5ea11ee5a67da94216c92899"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/mirror-3-horizontal.png",
+    "size": [
+      32,
+      40
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "c001fd35f47f9fda19bbf63b7ddbb3cdc87f01fec372edd16514dcc56865f3ea"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/receiver-off.png",
+    "size": [
+      24,
+      24
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "bb0d634e37f418a63eee707838a9822f483b288539bc23f201a2449d079b5411"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/receiver-on.png",
+    "size": [
+      24,
+      24
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "c237d842b25d016d7712436a2b8f85f699d9a14b8a5f82487ca2bdeb8a6f19c9"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/receiver-energized.png",
+    "size": [
+      24,
+      24
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "4f9d44a1b4470b869bca6969138b29fcf748b700981e815f420e195730c7de6f"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/bridge-west-absent.png",
+    "size": [
+      100,
+      36
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "08b2392ee80b07971d4a5e4f204424e6604315bfd534a4bbccc1e0f228a038df"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/bridge-west-powered.png",
+    "size": [
+      100,
+      36
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "fef0159a70baa972936b5f475b81e38e9dd7c31fa97d83483234e94fdac52947"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/bridge-west-latched.png",
+    "size": [
+      100,
+      36
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "83c880727071a621960d4e5a0f99c1d1f62ce9eac6ddc30a3496944599435fbb"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/latch-west-unlatched.png",
+    "size": [
+      28,
+      32
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "d5ec9a4e8b47642bcfca0a7344a061f1cd628716a8c0a2a530a44aaaa44c7b51"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/latch-west-latched.png",
+    "size": [
+      28,
+      32
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "c8879f6b65992db09bb9679fdc658abda91045959f0968853af5a7ea9e84c89a"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/bridge-east-absent.png",
+    "size": [
+      100,
+      36
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "08b2392ee80b07971d4a5e4f204424e6604315bfd534a4bbccc1e0f228a038df"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/bridge-east-powered.png",
+    "size": [
+      100,
+      36
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "fef0159a70baa972936b5f475b81e38e9dd7c31fa97d83483234e94fdac52947"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/bridge-east-latched.png",
+    "size": [
+      100,
+      36
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "83c880727071a621960d4e5a0f99c1d1f62ce9eac6ddc30a3496944599435fbb"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/latch-east-unlatched.png",
+    "size": [
+      28,
+      32
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "6b5b2bbef52a4c658fda1bfe93b8851729a9becf417d56c4206ae99a8a5d3916"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/latch-east-latched.png",
+    "size": [
+      28,
+      32
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "2e9526c86d6e4a32280def3e98c276d34d37879f496e1c82d98a9c26fdffcc50"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/source-empty.png",
+    "size": [
+      32,
+      44
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "src/assets/pedestal_empty.png; native dark lantern for off-source",
+    "sha256": "1b7867c9f1446b0d4b87a925e1fa55f6e9ae579c82eead23efd486bd2dcd8aed"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/source-lit.png",
+    "size": [
+      32,
+      44
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "src/assets/pedestal_lit.png; native dark lantern for off-source",
+    "sha256": "ddaa58151c32609745cc91029c9acdbdd83d9c04b7fb4fef102668f152e6a4c8"
+  },
+  {
+    "file": "assets/levels/shared/mechanisms/source-off-source.png",
+    "size": [
+      32,
+      44
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "src/assets/pedestal_empty.png; native dark lantern for off-source",
+    "sha256": "62e4e5ababf526dbb96cb8c377986759d252e93330a4fd41aa009116d36d810d"
+  },
+  {
+    "file": "assets/levels/04-shattered-moonlit-creek/sprites/test-flower-closed.png",
+    "size": [
+      28,
+      28
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "d359631a63dd3eb14e58bb54a35585b6ee244de4b7ae69b17fcb04002bf44cfb"
+  },
+  {
+    "file": "assets/levels/04-shattered-moonlit-creek/sprites/test-flower-open.png",
+    "size": [
+      28,
+      28
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "prepare_assets.py",
+    "sha256": "35d6f52326bc47e4cb095434049ea924c23daab5426aa5d3992a33dd369679fd"
+  },
+  {
+    "file": "assets/levels/04-shattered-moonlit-creek/sprites/creek-scene-base.png",
+    "size": [
+      640,
+      360
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "sources/creek-generated.png",
+    "sha256": "1226e8d2ec40e005cdbc9b5710fded7754712fe33d30394ad17040d517492602"
+  },
+  {
+    "file": "assets/levels/04-shattered-moonlit-creek/sprites/storm-relief.png",
+    "size": [
+      128,
+      80
+    ],
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "source": "sources/storm-relief-generated.png",
+    "sha256": "6e8067e4ac0bb6470c3b7ed1c11e0cb9356ea93682a5624ed861f9a0bf37c025"
+  }
+]

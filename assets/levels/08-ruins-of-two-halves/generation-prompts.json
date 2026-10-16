@@ -1,0 +1,17 @@
+{
+  "mode": "built-in image_gen; no fallback",
+  "tool_path": "functions.exec -> tools.image_gen__imagegen",
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "low",
+  "resolved_model": "not exposed to worker",
+  "resolved_image_backend": "not exposed",
+  "generations": [
+    {
+      "source": "sources/temple-original.png",
+      "original_output": "C:/Users/Admin/.codex/generated_images/01a142ad-1438-7683-b401-aeb9cb313885/exec-23ff502f-3209-4340-acf1-624434d72401.png",
+      "prompt": "Use case: stylized-concept. Asset type: game environment material source for The Last Lantern Level 08. Create a clean top-down pixel art moonlit ruined stone temple courtyard, wide landscape composition. Northern stone sanctuary doorway centered at top, low mossy walls and pillars at edges, broad empty blue slate floor in middle and lower area for exact puzzle modules to be added later. Small recessed seedling bed behind central courtyard at upper right with stone curtain track. Separate inset material study on far right edge: a plain tall rectangular weathered stone column with a broad front and narrow side, no figure sculpture. Forest green, midnight blue, muted cyan stone, soft moonlight; crisp pixel clusters, restrained detail in playable floor. No characters or humanoid silhouette, no text, no symbols, no beams, no locks, no combat or horror. Match the mossy blue stone mood of the supplied silent ruins reference without its composition or characters.",
+      "transparent_background": false
+    }
+  ],
+  "reference": "Art_References/05_Silent_Ruins.png visually inspected; reference not passed as edit target"
+}

@@ -1,0 +1,208 @@
+{
+  "sprites": [
+    {
+      "key_proposed": "l01_beacon_stone_hidden",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/beacon-stone-hidden.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/beacon-stone-hidden-generated.png",
+      "source_sha256": "4f6be3eaf04bbd485c887e0dc02e2d4a3b53e91721f2dd464c455798610f6893",
+      "sha256": "6c43243ed9cb1508c5a9446d44495c11acf94550e75aba7894ef8a2394628ae7",
+      "canvas": [
+        48,
+        60
+      ],
+      "crop_bbox": [
+        255,
+        152,
+        905,
+        1232
+      ],
+      "scale_nearest": 0.05185185185185185,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    },
+    {
+      "key_proposed": "l01_beacon_stone_illuminated",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/beacon-stone-illuminated.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/beacon-stone-illuminated-generated.png",
+      "source_sha256": "214cf368d32be4c032c8c04b953314996d2285dbb37cab8b45bee32d2fcfc033",
+      "sha256": "4213fa2dc84d8c4655e966f57841b45684dae533ee38d9ba47e900e241df693d",
+      "canvas": [
+        48,
+        60
+      ],
+      "crop_bbox": [
+        255,
+        149,
+        907,
+        1233
+      ],
+      "scale_nearest": 0.05166051660516605,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    },
+    {
+      "key_proposed": "l01_pickup_lantern",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/pickup-lantern.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/pickup-lantern-generated.png",
+      "source_sha256": "4c301b1fbefe6ca94278fc86a937500257537dd4eea1d568457f07b27be5c011",
+      "sha256": "3ea8de3dc098402c73656ba2df62e21a0bbf77bcfd996479e45b65da4a7adae5",
+      "canvas": [
+        20,
+        28
+      ],
+      "crop_bbox": [
+        311,
+        230,
+        767,
+        1253
+      ],
+      "scale_nearest": 0.02346041055718475,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    },
+    {
+      "key_proposed": "l01_footprints_pulse",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/footprints-pulse.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/footprints-pulse-generated.png",
+      "source_sha256": "f4c15cb2efc8552962669cf6868d3d13ca6886068450ffc137d74f1de8176efe",
+      "sha256": "04579001b060ecb8f55952e0f5b91f74d208bd2fa90baad114c03ff59aee17d9",
+      "canvas": [
+        20,
+        28
+      ],
+      "crop_bbox": [
+        365,
+        346,
+        706,
+        1265
+      ],
+      "scale_nearest": 0.026115342763873776,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    },
+    {
+      "key_proposed": "l01_stone_standing_ring",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/stone-standing-ring.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/stone-standing-ring-generated.png",
+      "source_sha256": "ca1590dcba3e303177804bfe9558319c78625e42aa332c22e884159fe91baa30",
+      "sha256": "2f9dab0668f96f7885b0c748178771b2675d777e297d95279ff7e406e0887486",
+      "canvas": [
+        58,
+        30
+      ],
+      "crop_bbox": [
+        269,
+        147,
+        1349,
+        807
+      ],
+      "scale_nearest": 0.03939393939393939,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    },
+    {
+      "key_proposed": "l01_sun_eye_dormant",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/sun-eye-dormant.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/sun-eye-dormant-generated.png",
+      "source_sha256": "fa58d75d42dcf1e33c6f37e58b317b8b770a374de5dcd49acedb34a6092119e7",
+      "sha256": "3dc4ff2b5f6c6898389b209b75f40b16323ca40a1a5d44401c2b62ecc54f2714",
+      "canvas": [
+        32,
+        32
+      ],
+      "crop_bbox": [
+        116,
+        94,
+        1157,
+        1157
+      ],
+      "scale_nearest": 0.02634054562558796,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    },
+    {
+      "key_proposed": "l01_sun_eye_receiving",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/sun-eye-receiving.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/sun-eye-receiving-generated.png",
+      "source_sha256": "3d33f67193b8eb7bd9082e84901c5fa63366722b685119b5bf9981bf4ced16bb",
+      "sha256": "cfe7831a100ad3d3adb8cf99cf8913bbc3c9120ff98f8c95b159cda4b4f7cc0b",
+      "canvas": [
+        32,
+        32
+      ],
+      "crop_bbox": [
+        116,
+        93,
+        1159,
+        1158
+      ],
+      "scale_nearest": 0.02629107981220657,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    },
+    {
+      "key_proposed": "l01_sun_eye_full",
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/sun-eye-full.png",
+      "source": "assets/levels/01-forgotten-forest-edge/sources/sun-eye-full-generated.png",
+      "source_sha256": "555093d65fb5a406ea992fc3d5d220961d7b0d954304b5013ab7c64bd603bbb8",
+      "sha256": "9bf5231f8c01c395d5079db6212d1fe20aa524c8215a24485291229de64b9e79",
+      "canvas": [
+        32,
+        32
+      ],
+      "crop_bbox": [
+        115,
+        92,
+        1160,
+        1158
+      ],
+      "scale_nearest": 0.02626641651031895,
+      "pivot": [
+        0.5,
+        1
+      ],
+      "method": "original alpha preserved; alpha >=16 for crop bounds only"
+    }
+  ],
+  "reused_in_previews": [
+    "src/assets/tile_grass.png",
+    "src/assets/tree_woods.png",
+    "src/assets/bush_woods.png",
+    "src/assets/woods_arch_locked.png",
+    "src/assets/lumo_0.png",
+    "assets/levels/02-whispering-woods/sprites/woods_arch_open_passage.png"
+  ],
+  "scenario_source": "docs/scenario/01-forgotten-forest-edge.md",
+  "scenario_sha256": "a731e3af479e715d1fb74c2a46287f81d1c4dfd2d4f436f916051dd17a9fb2e6",
+  "state_contract": {
+    "lantern_collected": "remove pickup sprite; held lamp uses existing Nhinh frames",
+    "inscription_hidden": "beacon-stone-hidden",
+    "inscription_illuminated": "beacon-stone-illuminated; dialogue text remains verbatim in scenario",
+    "footprints": "show footprints-pulse only during Pulse",
+    "ring": "revealed standing circle; preview keeps after discovery for composition",
+    "eye": "dormant / receiving half / full",
+    "gate": "reuse locked gate / Level 02 open passage; latch behavior requires runtime integration"
+  },
+  "runtime": "NOT_RUN"
+}

@@ -1,0 +1,113 @@
+{
+  "dispatch": "Parent reports requested gpt-6.1-sol / low accepted; worker-resolved identity and image backend not exposed",
+  "sources": [
+    {
+      "path": "assets/levels/06-the-sleepless-tower/sources/tower-original.png",
+      "sha256": "ef720dbbc586d974d29987aad2b68c192a4b018f582f83a73db4d1bfdf0fa2ce"
+    },
+    {
+      "path": "assets/levels/06-the-sleepless-tower/sources/window-original.png",
+      "sha256": "033b4c8265fabfe918283f7921f0440d616f435e8099b0f71de43fb2ce7ac60d"
+    },
+    {
+      "path": "assets/levels/06-the-sleepless-tower/prepare_assets.py",
+      "sha256": "da069c102f2f8fd9b92e352978057ee2be546ef31e5bbcdfd43852fd306a8909"
+    },
+    {
+      "path": "assets/levels/06-the-sleepless-tower/generation-prompts.json",
+      "sha256": "8dcba401a52f63b382d4145269bd8c3e6e0c2200897d6fec92a20f1112787139"
+    },
+    {
+      "path": "docs/scenario/06-the-sleepless-tower.md",
+      "sha256": "6995084e1390ebee285b67826685cd62e53a1ed4700cdb1477cfb087f9cde5d0"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/source-lit.png",
+      "sha256": "ddaa58151c32609745cc91029c9acdbdd83d9c04b7fb4fef102668f152e6a4c8"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/source-empty.png",
+      "sha256": "1b7867c9f1446b0d4b87a925e1fa55f6e9ae579c82eead23efd486bd2dcd8aed"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/source-off-source.png",
+      "sha256": "62e4e5ababf526dbb96cb8c377986759d252e93330a4fd41aa009116d36d810d"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/receiver-off.png",
+      "sha256": "bb0d634e37f418a63eee707838a9822f483b288539bc23f201a2449d079b5411"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/receiver-on.png",
+      "sha256": "c237d842b25d016d7712436a2b8f85f699d9a14b8a5f82487ca2bdeb8a6f19c9"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-1-slash.png",
+      "sha256": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-1-backslash.png",
+      "sha256": "7db722acd743a3e6615ae0c7601541a68194c70aff9d35e6d56ab952de611110"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-1-horizontal.png",
+      "sha256": "8c72f89f7ed228cf3861059e25c7790004df65fe33493361dafe4e15146b2048"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-2-slash.png",
+      "sha256": "e2cbfe3f0e3590197798d9c7d8b74f529c93a9fca37061aec68b393d2df93d85"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-2-backslash.png",
+      "sha256": "a11145f3f2a3e9a2b7d96f7ab35113a7c6beb08559242b8fe69927fb63049410"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-2-horizontal.png",
+      "sha256": "25793954a5b4449979c1465b246ea787b1b0f3b0480e0509a57f75a9db5a4cd6"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/call-idle.png",
+      "sha256": "630aa850a7168aabf18c0c01d21014ad304c73040d04e857050f1812f1314a71"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/call-sent.png",
+      "sha256": "c593f8d0c361772b2c730b27a93649a1976c058a90bb2ede34275e20069c8ebe"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/call-arrived.png",
+      "sha256": "32783737ef46cebf6f08e12fed4ec360d7591175b03e8e94ec67e2897ff91ba1"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/pressure-empty.png",
+      "sha256": "6a13708fa33ab1e45391de0c9dcd6249adc5122560f1274fe118a2ee6deb5c2c"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/pressure-occupied.png",
+      "sha256": "8d2c4e3ea4dcc410e9421e7b00424fbe9f211bcd8ccde5e1098d06cff231f244"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/tube-straight.png",
+      "sha256": "109977ff8fcfbdc10b226c8b1055bec6c24dd50de0816829185e081b399b4142"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/tube-mouth.png",
+      "sha256": "8fa332a3763664a91e995086de8bf19cf24646286d9dc37fe50dcce50078baad"
+    },
+    {
+      "path": "assets/levels/05-a-path-for-two/sprites/tube-elbow.png",
+      "sha256": "c47d5e96fb1658a1ea74938853083cb2c0f0d7474e463b89f87c865f9a0d6a15"
+    },
+    {
+      "path": "src/assets/crystal_hope.png",
+      "sha256": "646fd7290f50dfdcfb14c6d29625a285ac4050dd2bb16bc87f9b68e017fef3df"
+    },
+    {
+      "path": "src/assets/lumo_0.png",
+      "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829"
+    },
+    {
+      "path": "assets/character/nhinh_downright_lantern_off_0.png",
+      "sha256": "b720c434ed3d9c33eb8af659f60f1d6f4ae9143fb26a1a7fe00f4fb2146373c5"
+    }
+  ]
+}

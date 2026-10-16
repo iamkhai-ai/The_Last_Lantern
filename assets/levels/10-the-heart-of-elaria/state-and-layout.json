@@ -1,0 +1,410 @@
+{
+  "states": [
+    {
+      "name": "01-three-empty",
+      "inputs": {
+        "insert": 0,
+        "C": false,
+        "route": "direct",
+        "balance": false
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/01-three-empty-640x360.png",
+      "sha256": "629511432a5baa0d85b91e9dd6792303f77d538974310365f0d0ce033ad69c1c"
+    },
+    {
+      "name": "02-memory-inserted",
+      "inputs": {
+        "insert": 1,
+        "C": false,
+        "route": "direct",
+        "balance": false
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/02-memory-inserted-640x360.png",
+      "sha256": "64ebda438fe5b1426b68b4550e99cabebcde0d55833d5d32cf9d8e5a7fa812c0"
+    },
+    {
+      "name": "03-hope-inserted",
+      "inputs": {
+        "insert": 2,
+        "C": true,
+        "route": "direct",
+        "balance": false
+      },
+      "current": {
+        "memory": true,
+        "hope": true,
+        "balance": false,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/03-hope-inserted-640x360.png",
+      "sha256": "265882cadbeedd041967da92096d24ae962c63a42ed27559db6545697cce2823"
+    },
+    {
+      "name": "04-three-inserted-two-incomplete",
+      "inputs": {
+        "insert": 3,
+        "C": false,
+        "route": "split",
+        "balance": false
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/04-three-inserted-two-incomplete-640x360.png",
+      "sha256": "54e2647e044a2b795c6a77a3791b56354c36774b4a86741841c95f8543c9d46e"
+    },
+    {
+      "name": "05-memory-missing",
+      "inputs": {
+        "insert": 3,
+        "C": true,
+        "route": "wrong-memory",
+        "balance": true
+      },
+      "current": {
+        "memory": false,
+        "hope": true,
+        "balance": true,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/05-memory-missing-640x360.png",
+      "sha256": "e02e87205e5289c3c6d4e2873ddcc42fff6fba95976f33613ac5bdb08e6a4ea8"
+    },
+    {
+      "name": "06-hope-missing",
+      "inputs": {
+        "insert": 3,
+        "C": false,
+        "route": "split",
+        "balance": true
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": true,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/06-hope-missing-640x360.png",
+      "sha256": "8472af1ced41b3fa20ddf3c289ba883197dfc48e704cb848af0da34224c96126"
+    },
+    {
+      "name": "07-balance-missing-direct-G0",
+      "inputs": {
+        "insert": 3,
+        "C": true,
+        "route": "direct",
+        "balance": false
+      },
+      "current": {
+        "memory": true,
+        "hope": true,
+        "balance": false,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/07-balance-missing-direct-G0-640x360.png",
+      "sha256": "d50b8d4af97d5da3bccea908e4fa0c175eaf2af32947ccc2abf7610f51f6154a"
+    },
+    {
+      "name": "08-balance-missing-narrow",
+      "inputs": {
+        "insert": 3,
+        "C": true,
+        "route": "split",
+        "balance": false
+      },
+      "current": {
+        "memory": true,
+        "hope": true,
+        "balance": false,
+        "ready": false,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/08-balance-missing-narrow-640x360.png",
+      "sha256": "5078c956c0b26672447227a185631978ba00d1869a01d5f297c755e560d9fb1d"
+    },
+    {
+      "name": "09-all-concurrent-ready",
+      "inputs": {
+        "insert": 3,
+        "C": true,
+        "route": "split",
+        "balance": true
+      },
+      "current": {
+        "memory": true,
+        "hope": true,
+        "balance": true,
+        "ready": true,
+        "latched": false,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": false,
+        "lumo_can_leave": false
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/09-all-concurrent-ready-640x360.png",
+      "sha256": "3f187ba428b4cd02923da83d535fe602f094872b9f8b714fdade5306e418f63d"
+    },
+    {
+      "name": "10-latched-lamp-on-pedestal",
+      "inputs": {
+        "insert": 3,
+        "C": false,
+        "route": "none",
+        "balance": false,
+        "latched": true
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": true,
+        "overload": false,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": true,
+        "lumo_can_leave": true
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/10-latched-lamp-on-pedestal-640x360.png",
+      "sha256": "fcdd20fd45c2ff5b017f1592f233315bd242a066b23c8c99f409784582380ce4"
+    },
+    {
+      "name": "11-retrieved-on-redundant-overload",
+      "inputs": {
+        "insert": 3,
+        "C": false,
+        "route": "none",
+        "balance": false,
+        "latched": true,
+        "taken": true
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": true,
+        "overload": true,
+        "white_old_channels": true,
+        "crystal_roots_self_hold": true,
+        "lumo_can_leave": true
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/11-retrieved-on-redundant-overload-640x360.png",
+      "sha256": "f91a2cc8a7f3de6025e56d293e79b924571090780a48eb26baa2f3f86c2e5fa8"
+    },
+    {
+      "name": "12-F-off-night",
+      "inputs": {
+        "insert": 3,
+        "C": false,
+        "route": "none",
+        "balance": false,
+        "latched": true,
+        "taken": true,
+        "off": true,
+        "night": true
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": true,
+        "overload": false,
+        "white_old_channels": false,
+        "crystal_roots_self_hold": true,
+        "lumo_can_leave": true
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/12-F-off-night-640x360.png",
+      "sha256": "712e6898bdcacdada72a4e170c650183ab6599bbd808ced8702f109bc528f3ce"
+    },
+    {
+      "name": "13-off-at-pedestal-alternative",
+      "inputs": {
+        "insert": 3,
+        "C": false,
+        "route": "none",
+        "balance": false,
+        "latched": true,
+        "off": true,
+        "night": true
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": true,
+        "overload": false,
+        "white_old_channels": false,
+        "crystal_roots_self_hold": true,
+        "lumo_can_leave": true
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/13-off-at-pedestal-alternative-640x360.png",
+      "sha256": "99917502937e2c8cf8d52ea58c3cbaa4b7b9fdba1ecaeefb8505f202fb47dd9f"
+    },
+    {
+      "name": "14-dawn-tree",
+      "inputs": {
+        "insert": 3,
+        "C": false,
+        "route": "none",
+        "balance": false,
+        "latched": true,
+        "taken": true,
+        "off": true,
+        "dawn": true
+      },
+      "current": {
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "ready": false,
+        "latched": true,
+        "overload": false,
+        "white_old_channels": false,
+        "crystal_roots_self_hold": true,
+        "lumo_can_leave": true
+      },
+      "file": "assets/levels/10-the-heart-of-elaria/previews/14-dawn-tree-640x360.png",
+      "sha256": "6520b33a3840a318cd03f6d30fe6e50db79e8882ba10ce6ab39ac6a21150b0f8"
+    }
+  ],
+  "core": [
+    320,
+    115
+  ],
+  "alcoves": [
+    [
+      158,
+      192
+    ],
+    [
+      320,
+      200
+    ],
+    [
+      480,
+      192
+    ]
+  ],
+  "root_paths": [
+    [
+      [
+        158,
+        192
+      ],
+      [
+        204,
+        178
+      ],
+      [
+        246,
+        152
+      ],
+      [
+        320,
+        115
+      ]
+    ],
+    [
+      [
+        320,
+        200
+      ],
+      [
+        330,
+        173
+      ],
+      [
+        320,
+        146
+      ],
+      [
+        320,
+        115
+      ]
+    ],
+    [
+      [
+        480,
+        192
+      ],
+      [
+        432,
+        177
+      ],
+      [
+        388,
+        151
+      ],
+      [
+        320,
+        115
+      ]
+    ]
+  ],
+  "fixed_dark_pocket": [
+    488,
+    207,
+    551,
+    248
+  ],
+  "overload_rule": "latched AND lantern_retrieved AND lantern_on; bloom starts after retrieval only",
+  "off_alternative": "After latch, F at pedestal is valid; old white channels retract, night begins directly, no forced relighting.",
+  "save_restore_contract": "Latched state persists. Reload overload: safe pedestal bank, Lumo beside Nhinh, lamp on; F immediately available. Final action saves completion; completed load goes to ending.",
+  "controls": "E inserts/confirm/retrieve, F immediate off, existing Lumo call/pressure only, H scenario hints. No timers/damage."
+}

@@ -1,0 +1,283 @@
+{
+  "requested_agent": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "low",
+    "resolved": "not exposed by worker runtime"
+  },
+  "generation": "No new imagegen call. Existing generated Level08 and task12 scenery reused with deterministic room geometry and native new wheel/chart/miniature.",
+  "inputs": [
+    {
+      "file": "docs/scenario/09-dark-moon-observatory.md",
+      "sha256": "f54877bd7d301d76fb57e7b08d7cfa858bf4264e2b3b168ca2d5f1728568525a"
+    },
+    {
+      "file": "tasks/plan.md",
+      "sha256": "d06adda7091d5e0134ad645456d413c31bed23a1380bd04c63858f50ca6b0c61"
+    },
+    {
+      "file": "src/data/campaignLevels.ts",
+      "sha256": "48eff71b825b85dbc33695bcdf1fcd01e83812981374a090d6bca4cd134b3dde"
+    },
+    {
+      "file": "src/scenes/CampaignScene.ts",
+      "sha256": "573c3513dcdbba35037e1d7ba42bc891d0ee84771dcb269ceb729596a55ecfd8"
+    },
+    {
+      "file": "docs/superpowers/specs/2026-10-16-observatory-room-navigation-design.md",
+      "sha256": "0cde0a691bae46e069adfcf887dbbc406e975506397305622cde6269802bca06"
+    },
+    {
+      "file": "docs/superpowers/plans/2026-10-16-observatory-room-navigation.md",
+      "sha256": "ae2c8d5393307dc7d14bd15f6b2f59293cf7065fe2d47a93521b30c26a61660e"
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/source-lit.png",
+      "size": [
+        32,
+        44
+      ],
+      "sha256": "ddaa58151c32609745cc91029c9acdbdd83d9c04b7fb4fef102668f152e6a4c8"
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/source-empty.png",
+      "size": [
+        32,
+        44
+      ],
+      "sha256": "1b7867c9f1446b0d4b87a925e1fa55f6e9ae579c82eead23efd486bd2dcd8aed"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-B.png",
+      "size": [
+        40,
+        48
+      ],
+      "sha256": "db1ef431197417176ab0de01689a95a7ad3fadf670fb68ad65eb9f8397c285d9"
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/mirror-1-slash.png",
+      "size": [
+        32,
+        40
+      ],
+      "sha256": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395"
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/mirror-2-backslash.png",
+      "size": [
+        32,
+        40
+      ],
+      "sha256": "a11145f3f2a3e9a2b7d96f7ab35113a7c6beb08559242b8fe69927fb63049410"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/latch-latched.png",
+      "size": [
+        28,
+        32
+      ],
+      "sha256": "c8879f6b65992db09bb9679fdc658abda91045959f0968853af5a7ea9e84c89a"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/latch-unlatched.png",
+      "size": [
+        28,
+        32
+      ],
+      "sha256": "d5ec9a4e8b47642bcfca0a7344a061f1cd628716a8c0a2a530a44aaaa44c7b51"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/door-open.png",
+      "size": [
+        64,
+        88
+      ],
+      "sha256": "c730d190edcfe2b2873f136a6da444fa7eae28b380d2e59ba4c263a1cbbab7ce"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/door-closed.png",
+      "size": [
+        64,
+        88
+      ],
+      "sha256": "e43e5dc45450cccba9bdda07a0a1712e5314dd4de089d313a3b729a79fd37ac8"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/door-held-overlay.png",
+      "size": [
+        64,
+        88
+      ],
+      "sha256": "7a77930de244ce5083c0a41b4f4017d0017df1df4f2882c699b9701de2c9060c"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/pressure-occupied.png",
+      "size": [
+        44,
+        28
+      ],
+      "sha256": "8d2c4e3ea4dcc410e9421e7b00424fbe9f211bcd8ccde5e1098d06cff231f244"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/pressure-empty.png",
+      "size": [
+        44,
+        28
+      ],
+      "sha256": "6a13708fa33ab1e45391de0c9dcd6249adc5122560f1274fe118a2ee6deb5c2c"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/call-idle.png",
+      "size": [
+        40,
+        48
+      ],
+      "sha256": "630aa850a7168aabf18c0c01d21014ad304c73040d04e857050f1812f1314a71"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/swirl-memory-scratch.png",
+      "size": [
+        40,
+        40
+      ],
+      "sha256": "2f294bd5dd69b1646cd158b644e1d3326a312a1749e3463cc4e662e8d675d4b1"
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/tube-straight.png",
+      "size": [
+        64,
+        32
+      ],
+      "sha256": "109977ff8fcfbdc10b226c8b1055bec6c24dd50de0816829185e081b399b4142"
+    },
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-receiving.png",
+      "size": [
+        48,
+        48
+      ],
+      "sha256": "df1eda1961f91bb0e8318624371da69865ad6bbb42c6bff8319631198dbffdef"
+    },
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-dark.png",
+      "size": [
+        48,
+        48
+      ],
+      "sha256": "2a59f03be8b52edb44d396c2f5fd7e3070aad020ff6742244155409aa912a92e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+      "size": [
+        64,
+        88
+      ],
+      "sha256": "229be9a551a4e94c4832a58731aa6596b335fdc938135637aadfe538ca9be1d8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+      "size": [
+        64,
+        88
+      ],
+      "sha256": "ad001a31d4cad40d41b8d48c010eefd8b5e1cd1b038abf61df0287de5c61f992"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+      "size": [
+        32,
+        40
+      ],
+      "sha256": "e6ceda2917d23b4890b02188f1a36f93c243486b63a971de57cfb7bc284f844d"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+      "size": [
+        32,
+        40
+      ],
+      "sha256": "3214a56e79aafe58eb9d2dbfed61fb68abb186e940101ceab10afdd78a16e481"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-on.png",
+      "size": [
+        48,
+        32
+      ],
+      "sha256": "be5a5acc57c0f3366573adf3fcb0a2a577350ff6e5c1d61555f0f69f43176b61"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-off.png",
+      "size": [
+        48,
+        32
+      ],
+      "sha256": "457865b7ea83e0756ce8d25cf7332b5ddae14bf98a6d59c25a4b899e7ea01a5c"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/waiting.png",
+      "size": [
+        48,
+        64
+      ],
+      "sha256": "e2204188559ce123791ad0520076dc42866523f4ad4fb9c350b259af2e6a0e75"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png",
+      "size": [
+        48,
+        64
+      ],
+      "sha256": "36d9c6caa12f24ae804f5e61d5ca39f8d4672be61f1d99efd3da30d6a024b350"
+    },
+    {
+      "file": "src/assets/lumo_0.png",
+      "size": [
+        24,
+        24
+      ],
+      "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829"
+    },
+    {
+      "file": "src/assets/crystal_balance.png",
+      "size": [
+        42,
+        78
+      ],
+      "sha256": "9c10bb1bef31ecb11eb431c875456751e2360c9b3a9fd5ca42795bb02f01f7ce"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/voice-record-panel.png",
+      "size": [
+        160,
+        72
+      ],
+      "sha256": "15d6dec640219c9e31427724d099fc10c762fc346be644d3bb35028dad5d6a8e"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-memory-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "6e97f5716f1cde98f3fd7223ac633084d0ae4e1a183b44e95a923b3d55733533"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/temple-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "e9b323496e34d375704af6e976570ce57faa72f2d89a6d953ff8a7bf02d9e560"
+    },
+    {
+      "file": "assets/character/nhinh_downright_idle_0.png",
+      "size": [
+        36,
+        42
+      ],
+      "sha256": "8b9b44d5d9517968af153047f19d780c9984dbaec7993b6668971695a1936702"
+    }
+  ],
+  "script_sha256": "c58c66ff1ea8540a74c3c65ab607c294062b06f1a3387de6d939c7a9477aeb0d"
+}

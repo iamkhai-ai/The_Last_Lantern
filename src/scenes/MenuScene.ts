@@ -3,6 +3,7 @@ import { EffectsSystem } from '../systems/EffectsSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
+import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 
 export class MenuScene extends Phaser.Scene {
   private effectsSystem!: EffectsSystem;
@@ -16,7 +17,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   public create(): void {
-    this.hasSavedGame = SaveSystem.hasSave();
+    this.hasSavedGame = CampaignSaveSystem.hasSave() || SaveSystem.hasSave();
     this.selectedIndex = 0;
     this.menuButtons = [];
     this.actions = [];
@@ -221,14 +222,21 @@ export class MenuScene extends Phaser.Scene {
   }
 
   public startNewGame(): void {
-    SaveSystem.clear();
-    const fresh = SaveSystem.createDefaultProgress();
-    SaveSystem.save(fresh);
+    CampaignSaveSystem.clear();
     SoundSystem.playLanternToggle(true);
-    this.scene.start('WorldScene', { progress: fresh });
+    this.scene.start('CampaignScene', { newGame: true });
   }
 
   public continueGame(): void {
+    if (CampaignSaveSystem.isCompleted()) {
+      this.scene.start('EndingScene', { showCredits: true, campaign: true });
+      return;
+    }
+    if (CampaignSaveSystem.hasSave()) {
+      SoundSystem.playLanternToggle(true);
+      this.scene.start('CampaignScene');
+      return;
+    }
     const saved = SaveSystem.load();
     SoundSystem.playLanternToggle(true);
     if (saved.stage === 'victory') {

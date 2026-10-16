@@ -1,0 +1,721 @@
+{
+  "exports": [
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+      "key": "ruins_lock_sun_off",
+      "state": "lock-sun-off",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "3214a56e79aafe58eb9d2dbfed61fb68abb186e940101ceab10afdd78a16e481"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+      "key": "ruins_lock_sun_on",
+      "state": "lock-sun-on",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "e6ceda2917d23b4890b02188f1a36f93c243486b63a971de57cfb7bc284f844d"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-lit.png",
+      "key": "ruins_lock_moon_lit",
+      "state": "lock-moon-lit",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "865a8e3cd5a80b05c41733337f418e7fd1243a4e486b6e798da16221c8fba9d1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-covered.png",
+      "key": "ruins_lock_moon_covered",
+      "state": "lock-moon-covered",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "09864457987a08ebdd8b9469d9b4661bc444760155da7dd05a6ea21b4c8b95bf"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+      "key": "ruins_statue_notch_0",
+      "state": "statue-notch-0",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "229be9a551a4e94c4832a58731aa6596b335fdc938135637aadfe538ca9be1d8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-0.png",
+      "key": "ruins_test_column_notch_0",
+      "state": "test-column-notch-0",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "c8685271b93b9ef448ad661d3caa3f8b26ba7b7e714d049e7586117cde3c09ce"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+      "key": "ruins_statue_notch_1",
+      "state": "statue-notch-1",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "ad001a31d4cad40d41b8d48c010eefd8b5e1cd1b038abf61df0287de5c61f992"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-1.png",
+      "key": "ruins_test_column_notch_1",
+      "state": "test-column-notch-1",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "18bde51c199abc6df8ad7f2e5e43b1eba05916312ba7d21a7045209052c411d9"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-2.png",
+      "key": "ruins_statue_notch_2",
+      "state": "statue-notch-2",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "3c479b27ab1236a551449507041e8f593446012150bf80aee358b1b3bc544926"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-2.png",
+      "key": "ruins_test_column_notch_2",
+      "state": "test-column-notch-2",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "462e2806fdb1d4bb5f2803c92c3615165c4aba86f3ad3cd215c7b7445431dd19"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-3.png",
+      "key": "ruins_statue_notch_3",
+      "state": "statue-notch-3",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "836152dfbbc29c7e8f641703751d7bad4447e106000d1aba4fd946add9cdcd1e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-3.png",
+      "key": "ruins_test_column_notch_3",
+      "state": "test-column-notch-3",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.7954545454545454
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "6d0aa4f057d66aed3b8c8e31e98a97c1962f1a6251e955a46301b2f616a0109f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-0.png",
+      "key": "ruins_shadow_notch_0",
+      "state": "shadow-notch-0",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "exact-shadow-mask",
+      "sha256": "6d139933c5593cfc82b7d5985e22241e37b9bcb71acf49042fcb0e2d63f31456"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-1.png",
+      "key": "ruins_shadow_notch_1",
+      "state": "shadow-notch-1",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "exact-shadow-mask",
+      "sha256": "d98d47335ec75467c9be683ce0cbc454ddf2ea793c473c4f4f1aa44498651b37"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-2.png",
+      "key": "ruins_shadow_notch_2",
+      "state": "shadow-notch-2",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "exact-shadow-mask",
+      "sha256": "dba6b1d3bcc27366a81473fe13a02c00fea50e8bca607d2326fb5d0aca27b5ea"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-3.png",
+      "key": "ruins_shadow_notch_3",
+      "state": "shadow-notch-3",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "exact-shadow-mask",
+      "sha256": "89045e43815e5d7922516d28eba31e1b0f54d3379ba826eac2068ae600e37ed9"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-waiting.png",
+      "key": "ruins_confirmation_waiting",
+      "state": "confirmation-waiting",
+      "size": [
+        48,
+        36
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "b05ff90199e6a2b5eff8a439cb6dc19a142d7221f169c440bc51ec9f07b01e9a"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-ready.png",
+      "key": "ruins_confirmation_ready",
+      "state": "confirmation-ready",
+      "size": [
+        48,
+        36
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "b356e663f2cdff5cf72d36d5172d10f58101ec04efa1c20c119f07f186201a5e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-latched.png",
+      "key": "ruins_confirmation_latched",
+      "state": "confirmation-latched",
+      "size": [
+        48,
+        36
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "7670443c53e31493db44716900e2b4baea5c365032dfe63591c6f4e05267a0e5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-open.png",
+      "key": "ruins_sanctuary_door_open",
+      "state": "sanctuary-door-open",
+      "size": [
+        104,
+        76
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "b81b4b9e992b1ea7bbfc8219ef4f3ddcef2b458d48477f81b466f431f45a7402"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-closed.png",
+      "key": "ruins_sanctuary_door_closed",
+      "state": "sanctuary-door-closed",
+      "size": [
+        104,
+        76
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "6b19186008d7d42358b72238058562afe17fc286861365e2fb08cb319f73e6ad"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-open.png",
+      "key": "ruins_seedling_curtain_open",
+      "state": "seedling-curtain-open",
+      "size": [
+        88,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "51aae6373aefd1c64770cdab713e3e18335c4cb4b1aad283e2833ab9b90750a1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-closed.png",
+      "key": "ruins_seedling_curtain_closed",
+      "state": "seedling-curtain-closed",
+      "size": [
+        88,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "ecf2dfbaeb3960c53e163b378c6cd688dab754b5b1a54a4dd56652675748a876"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-pedestal.png",
+      "key": "ruins_test_pedestal",
+      "state": "test-pedestal",
+      "size": [
+        48,
+        36
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "35307f6e285871fde31db885f27c8aeb91c887e4387861e07955a6811f9022f2"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-lit.png",
+      "key": "ruins_test_moon_lit",
+      "state": "test-moon-lit",
+      "size": [
+        16,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "880955807e450f67d9645facf5786ffc7e95c65d94af4aea1ac4f82e401f4cfb"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-covered.png",
+      "key": "ruins_test_moon_covered",
+      "state": "test-moon-covered",
+      "size": [
+        16,
+        20
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "fa19a86fb1993b499299c0ceb494660b74ab6b8f303d443d8d922c33ae6fed7f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-on.png",
+      "key": "ruins_fixed_three_route_splitter_on",
+      "state": "fixed-three-route-splitter-on",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "ad9ab6816768a3fb2b79905edc22cc94f955cb768afd72a383917e4b97bd71e5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-off.png",
+      "key": "ruins_fixed_three_route_splitter_off",
+      "state": "fixed-three-route-splitter-off",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "native-symbolic-module",
+      "sha256": "5a6e2ff75d41101e776fa31fc959cad489c3a43c1e8ee4a1611ea31120822128"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/temple-scene-base.png",
+      "key": "ruins_temple_scene_base",
+      "state": "temple-scene-base",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "generated-normalized",
+      "sha256": "e9b323496e34d375704af6e976570ce57faa72f2d89a6d953ff8a7bf02d9e560"
+    }
+  ],
+  "reused": [
+    {
+      "key": "prism-on",
+      "file": "assets/levels/shared/beam-splitter/prism-receiving.png",
+      "size": [
+        48,
+        48
+      ],
+      "sha256": "df1eda1961f91bb0e8318624371da69865ad6bbb42c6bff8319631198dbffdef"
+    },
+    {
+      "key": "prism-off",
+      "file": "assets/levels/shared/beam-splitter/prism-dark.png",
+      "size": [
+        48,
+        48
+      ],
+      "sha256": "2a59f03be8b52edb44d396c2f5fd7e3070aad020ff6742244155409aa912a92e"
+    },
+    {
+      "key": "mirror-left",
+      "file": "assets/levels/shared/mechanisms/mirror-1-slash.png",
+      "size": [
+        32,
+        40
+      ],
+      "sha256": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395"
+    },
+    {
+      "key": "mirror-right",
+      "file": "assets/levels/shared/mechanisms/mirror-2-backslash.png",
+      "size": [
+        32,
+        40
+      ],
+      "sha256": "a11145f3f2a3e9a2b7d96f7ab35113a7c6beb08559242b8fe69927fb63049410"
+    },
+    {
+      "key": "source-on",
+      "file": "assets/levels/shared/mechanisms/source-lit.png",
+      "size": [
+        32,
+        44
+      ],
+      "sha256": "ddaa58151c32609745cc91029c9acdbdd83d9c04b7fb4fef102668f152e6a4c8"
+    },
+    {
+      "key": "source-off",
+      "file": "assets/levels/shared/mechanisms/source-off-source.png",
+      "size": [
+        32,
+        44
+      ],
+      "sha256": "62e4e5ababf526dbb96cb8c377986759d252e93330a4fd41aa009116d36d810d"
+    },
+    {
+      "key": "latch",
+      "file": "assets/levels/shared/mechanisms/latch-west-latched.png",
+      "size": [
+        28,
+        32
+      ],
+      "sha256": "c8879f6b65992db09bb9679fdc658abda91045959f0968853af5a7ea9e84c89a"
+    },
+    {
+      "key": "sprout",
+      "file": "assets/levels/shared/garden-mechanisms/sprout-after.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "03bf0cf5dfabc6a3c4b9a649dbbdd27f348da175e4e917bf2b3fe718ef7005a1"
+    },
+    {
+      "key": "rock",
+      "file": "assets/levels/shared/atlas_rock_sample.png",
+      "size": [
+        36,
+        26
+      ],
+      "sha256": "cf6f21347e2bb0de143199a3d9aaac0d4b69d9873ed22bde536c0c8c467e59ba"
+    }
+  ],
+  "states": [
+    {
+      "file": "01-correct-wide-640x360.png",
+      "notch": 0,
+      "lamp": true,
+      "sun_left": true,
+      "sun_right": true,
+      "moon_covered": true,
+      "ready": true,
+      "latched": false
+    },
+    {
+      "file": "02-wrong-narrow-640x360.png",
+      "notch": 1,
+      "lamp": true,
+      "sun_left": true,
+      "sun_right": true,
+      "moon_covered": false,
+      "ready": false,
+      "latched": false
+    },
+    {
+      "file": "03-wrong-wide-left-640x360.png",
+      "notch": 2,
+      "lamp": true,
+      "sun_left": false,
+      "sun_right": true,
+      "moon_covered": false,
+      "ready": false,
+      "latched": false
+    },
+    {
+      "file": "04-wrong-narrow-right-640x360.png",
+      "notch": 3,
+      "lamp": true,
+      "sun_left": true,
+      "sun_right": false,
+      "moon_covered": false,
+      "ready": false,
+      "latched": false
+    },
+    {
+      "file": "05-lamp-off-640x360.png",
+      "notch": 0,
+      "lamp": false,
+      "sun_left": false,
+      "sun_right": false,
+      "moon_covered": true,
+      "ready": false,
+      "latched": false
+    },
+    {
+      "file": "06-left-route-lost-640x360.png",
+      "notch": 0,
+      "lamp": true,
+      "sun_left": false,
+      "sun_right": true,
+      "moon_covered": true,
+      "ready": false,
+      "latched": false
+    },
+    {
+      "file": "07-sanctuary-latched-640x360.png",
+      "notch": 0,
+      "lamp": true,
+      "sun_left": true,
+      "sun_right": true,
+      "moon_covered": true,
+      "ready": true,
+      "latched": true
+    },
+    {
+      "file": "08-latched-lamp-off-640x360.png",
+      "notch": 0,
+      "lamp": false,
+      "sun_left": false,
+      "sun_right": false,
+      "moon_covered": true,
+      "ready": false,
+      "latched": true
+    }
+  ],
+  "geometry": {
+    "source": [
+      320,
+      295
+    ],
+    "moon_box": [
+      304,
+      89,
+      335,
+      128
+    ],
+    "sun_paths": [
+      [
+        [
+          320,
+          295
+        ],
+        [
+          190,
+          295
+        ],
+        [
+          190,
+          110
+        ]
+      ],
+      [
+        [
+          320,
+          295
+        ],
+        [
+          450,
+          295
+        ],
+        [
+          450,
+          110
+        ]
+      ]
+    ],
+    "shadow_polygons": [
+      [
+        [
+          304,
+          220
+        ],
+        [
+          336,
+          220
+        ],
+        [
+          348,
+          75
+        ],
+        [
+          292,
+          75
+        ]
+      ],
+      [
+        [
+          314,
+          220
+        ],
+        [
+          326,
+          220
+        ],
+        [
+          324,
+          75
+        ],
+        [
+          316,
+          75
+        ]
+      ],
+      [
+        [
+          304,
+          220
+        ],
+        [
+          336,
+          220
+        ],
+        [
+          230,
+          76
+        ],
+        [
+          187,
+          76
+        ]
+      ],
+      [
+        [
+          314,
+          220
+        ],
+        [
+          326,
+          220
+        ],
+        [
+          438,
+          76
+        ],
+        [
+          420,
+          76
+        ]
+      ]
+    ]
+  },
+  "semantics": "Locks are live simultaneous conditions, never latched. Only confirmation latches door and seedling curtain. Sun left/right use exactly the same lock-sun files."
+}

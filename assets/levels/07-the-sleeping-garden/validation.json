@@ -1,0 +1,380 @@
+{
+  "status": "PASS",
+  "command": "python assets/levels/07-the-sleeping-garden/prepare_assets.py",
+  "exports": [
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sun-open.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sun-folded.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-coiled.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-extended.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-before.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-new-leaf-overlay.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-after.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-sun-bloom.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-sun-folded.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-moon-open.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-moon-closed.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-off.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-on.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-held.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-missing.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-pot-coiled.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-pot-deployed.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/reservoir-open.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/reservoir-shutter-closed-overlay.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/reservoir-closed.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/shutter-handle-open.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/shutter-handle-closed.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/gate-bar-lowered.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/gate-bar-raised.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/gate-bar-held.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/nursery-drain-closed.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/nursery-drain-open.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/nursery-water-delivered.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/side-stone-path-closed.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/side-stone-path-open.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png",
+      "status": "PASS",
+      "checks": {
+        "path": true,
+        "rgba": true,
+        "canvas": true,
+        "nonempty": true,
+        "transparent": true,
+        "sha256": true
+      }
+    }
+  ],
+  "reuse_checks": "PASS",
+  "runtime": "NOT_RUN"
+}

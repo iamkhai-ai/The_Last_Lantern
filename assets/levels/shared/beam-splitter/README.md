@@ -1,0 +1,3 @@
+# Shared two-output prism
+
+Created for Level06 task09; metadata is isolated here without modifying earlier shared metadata. One triangular prism design is reusable in later Levels08–10. Dark/receiving states are 48×48 RGBA with centered pivot; local input (24,30), left output (7,30), right output (39,30). Rays remain external native/engine overlays, with independent left/right routes. The receiving state describes current input only and has no historical latch. Source drawing: `../../06-the-sleepless-tower/prepare_assets.py`; metadata includes source/output hashes. Original shared mirror, bridge and latch files are untouched.

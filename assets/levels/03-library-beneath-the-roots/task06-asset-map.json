@@ -1,0 +1,142 @@
+{
+  "sprites": [
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-bookshelf.png",
+      "canvas": [
+        112,
+        112
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "sources/task06-bookshelf-generated.png",
+      "kind": "generated modular root bookshelf",
+      "sha256": "984aad64ca9061c919c3e313779f3e9969a21352daecbfda8b472709d89cf501"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-mural-fifth.png",
+      "canvas": [
+        96,
+        136
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "sources/task06-mural-generated.png",
+      "kind": "generated anonymous Guardian mural",
+      "sha256": "bec1928b8dc471224d50a51afb55fa3d4db1588b9d59f6ebb80d83f22fc11365"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-panel-closed.png",
+      "canvas": [
+        116,
+        148
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_room.py",
+      "kind": "native opaque sliding stone screen",
+      "sha256": "8f513dc2abb0deaa2b8c63f25a80a3d136bf6bc7e3f6c055e83aef027493ab04"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-panel-open.png",
+      "canvas": [
+        116,
+        148
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_room.py",
+      "kind": "native frame with generated mural",
+      "sha256": "464df883f8fb6eabf5f575899fb5222b60606501d7fc48151d2d79228738a1a7"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-well-closed.png",
+      "canvas": [
+        220,
+        220
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_room.py + task05 socket-empty/start-horizon/route-cue",
+      "kind": "native circular well with exact four sequential sockets",
+      "sha256": "fa8c61c3f0e8cc8914d3d8b10e3f6fe0dd0970a5e8d15716d4b38f8d1646a97f"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-well-open.png",
+      "canvas": [
+        220,
+        220
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_room.py + task05 socket-empty/start-horizon/route-cue",
+      "kind": "native circular well with exact four sequential sockets",
+      "sha256": "882431666c0af4a5da7b3b4a52671f9b58d6050d55fce9e81b9931dd82522e81"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-test-desk.png",
+      "canvas": [
+        80,
+        54
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_room.py",
+      "kind": "native wood desk under task05 page",
+      "sha256": "467d4082cdc01aa349442d5a3799b7b29a38adb5a04b6bcbfae5ab1cc1b11577"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-memory-crystal.png",
+      "canvas": [
+        28,
+        36
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "src/assets/crystal_memory.png",
+      "kind": "existing gold Memory crystal normalized nearest",
+      "sha256": "2c39451ddca97e50a5391db69fcf95cc944f2662da8985290f11e9c2394bc80a"
+    }
+  ],
+  "scenario_sha256": "37ce69106075bd0ad69838c3431e4dbe84e6b240652702db5db214592185ef81",
+  "socket_centers": [
+    [
+      110,
+      34
+    ],
+    [
+      186,
+      110
+    ],
+    [
+      110,
+      186
+    ],
+    [
+      34,
+      110
+    ]
+  ],
+  "well_origin": [
+    210,
+    116
+  ],
+  "socket_order": "clockwise from north horizon; identity not encoded",
+  "reward": "independent crystal overlay; omit after collection",
+  "runtime": "NOT_RUN"
+}

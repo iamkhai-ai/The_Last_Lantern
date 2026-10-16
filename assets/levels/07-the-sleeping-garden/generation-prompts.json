@@ -1,0 +1,18 @@
+{
+  "mode": "built-in image_gen; no fallback",
+  "dispatch": "Parent reports requested gpt-6.1-sol / low accepted; worker resolved identity and image backend not exposed",
+  "generations": [
+    {
+      "source": "sources/garden-original.png",
+      "prompt": "Use case: stylized-concept. Pixel art production background for The Last Lantern Level 07 The Sleeping Garden. Wide 16:9 top-down three-quarter quiet ancient garden at night in muted dark teal greens, weathered stone and small white flowers along distant fence, temple archway at upper right. Water returned only along outer garden edge. Broad clear earth paths remain readable in darkness. Reserve empty clear spaces for separately composited plant pots, light reservoir, mechanical bar, root bridge and nursery drain. Central narrow canal with two banks and broad alternate stone route along the far right; safe adjacent-pot teaching area at lower left with small non-blocking ditch. A quiet nursery earth patch on right. No characters, no plant puzzle props, no light explosions, no beams, no readable text, no UI, no watermark. Crisp pixel clusters suited to 640x360, no blur. Scene alone must not imply plants have activated or water already reaches nursery.",
+      "original_output": "Generated images are saved to C:\\Users\\Admin\\.codex\\generated_images\\01a142a5-a680-7480-87c6-535e6a0b7abb as C:\\Users\\Admin\\.codex\\generated_images\\01a142a5-a680-7480-87c6-535e6a0b7abb\\exec-e4112400-de50-4160-96c2-8db2537b0366.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "transparent_background": false
+    },
+    {
+      "source": "sources/plants-original.png",
+      "prompt": "Use case: stylized-concept. A production sprite source sheet on genuine transparent background for The Last Lantern pixel art game, top-down three-quarter perspective, muted teal moss and warm cream petals, crisp pixel clusters. Five clearly separated objects in one horizontal row with generous transparent gutters: 1 small Sun Flower in weathered terracotta pot with tall upright stem and white open bloom, 2 same Sun Flower folded resting downward in identical pot, 3 Moon Root in squat round stone pot with curled thick pale blue roots neatly retracted, 4 same Moon Root with three thick interwoven roots extending horizontally right as a walkable flat root bridge, 5 tiny nursery sprout with exactly two old leaves and room beside it for a new leaf added as a separate state overlay. No symbols, no text, no ground plane, no scenery, no characters, no glow halos, no UI. Every object fully contained, plants visibly different by silhouette: tall flower versus low curled root. Large clean transparent gaps; do not overlap objects.",
+      "original_output": "Generated images are saved to C:\\Users\\Admin\\.codex\\generated_images\\01a142a5-a680-7480-87c6-535e6a0b7abb as C:\\Users\\Admin\\.codex\\generated_images\\01a142a5-a680-7480-87c6-535e6a0b7abb\\exec-9fe29f9f-886a-4615-a8be-3587886b8384.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+      "transparent_background": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "requested_agent": "gpt-6.1-sol low",
+  "resolved_agent": "not exposed",
+  "tool": "built-in image_gen",
+  "backend": "not exposed",
+  "prompts": [
+    {
+      "id": "tablet-body",
+      "prompt": "Use case: stylized-concept. Asset type: modular pixel-art puzzle sprite source for 640x360 top-down The Last Lantern. Match viewed reference: chunky crisp pixels, weathered grey-brown stone, warm parchment gold and muted teal cyan, dark moss minimal. Transparent background, no text/letters/numbers, no captions or decorative clues. Create ONE single empty stone tablet frame, front face readable in top-down 3/4 view, almost square upright plaque, plain dark inset center completely empty, narrow rim, small moss at lower corner. This is the common body for independently composited clues; no glyphs, celestial symbols, arcs or engraved lines. Centered with generous transparent padding."
+    },
+    {
+      "id": "test-book-body",
+      "prompt": "Use case: stylized-concept. Asset type: modular pixel-art puzzle sprite source for 640x360 top-down The Last Lantern. Match viewed reference: chunky crisp pixels, weathered grey-brown stone, warm parchment gold and muted teal cyan, dark moss minimal. Transparent background, no text/letters/numbers, no captions or decorative clues. Create ONE single open test book, seen top-down slight 3/4 view, warm aged parchment two blank pages and dark brown worn cover, right page broad and flat with completely empty center for a separate symbol overlay. No writing, no symbols, no lines, no pictures. Crisp blocky pixel rendering matching stone reference, center object with generous transparent padding."
+    }
+  ],
+  "references": [
+    "Art_References/02_Environment_Props_and_Puzzles.png",
+    "assets/levels/02-whispering-woods/previews/rune-state-contact-sheet-640x360.png"
+  ],
+  "native_overlays": "Deterministic icons drawn in prepare_assets.py, explicitly authorized by root for exact puzzle equality; no generated in-game text."
+}

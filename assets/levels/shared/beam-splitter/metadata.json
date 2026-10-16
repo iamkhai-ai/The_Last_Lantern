@@ -1,0 +1,54 @@
+{
+  "origin": "Level06 task09",
+  "purpose": "Reusable two-output prism for Levels06/08/09/10; no latched power memory",
+  "source": "assets/levels/06-the-sleepless-tower/prepare_assets.py",
+  "source_sha256": "da069c102f2f8fd9b92e352978057ee2be546ef31e5bbcdfd43852fd306a8909",
+  "ports": {
+    "input": [
+      24,
+      30
+    ],
+    "left": [
+      7,
+      30
+    ],
+    "right": [
+      39,
+      30
+    ]
+  },
+  "exports": [
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-dark.png",
+      "proposed_key": "tower_prism_dark",
+      "state": "prism-dark",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "2a59f03be8b52edb44d396c2f5fd7e3070aad020ff6742244155409aa912a92e"
+    },
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-receiving.png",
+      "proposed_key": "tower_prism_receiving",
+      "state": "prism-receiving",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "df1eda1961f91bb0e8318624371da69865ad6bbb42c6bff8319631198dbffdef"
+    }
+  ]
+}

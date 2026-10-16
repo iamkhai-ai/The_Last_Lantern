@@ -1,0 +1,11 @@
+{
+  "asset": "woods-arch-open",
+  "prompt": "Use case: precise-object-edit.\nAsset type: one transparent pixel-art open-gate state for The Last Lantern Level 02.\nEdit target: supplied woods_arch_locked.png. Preserve its mossy gray-green stone arch, same outer silhouette and footprint, same front three-quarter top-down perspective, same dark pixel outline and clustered pixel-art material. It is the ancient forest gateway after the Moon–Leaf–Star puzzle has been solved.\nChange only the closed round door region into an unmistakably OPEN, empty dark archway, with a short flight of stone stairs visibly descending into the darkness under the roots. No circular door slab, no solid disc, no bright disc, no sun symbol blocking the passage. Ropes of roots that blocked the doorway have retracted to the two outside pillars and above the arch; they do not cross the passage. Retain the two small warm golden side lanterns, reduce magical light to restrained edge accents. Keep existing moss/olive foliage and cream-gold lights compatible with Nhinh.\nOne isolated prop only, centered within ample transparent margin. Outer frame about 120x120 logical pixels for final 128x126 game canvas; no ground patch beyond the original bottom steps, no surrounding scene. Hard-edged square pixel-art clusters, no smooth painterly blur. Preserve actual transparent RGBA outside the arch, but make the central opening dark charcoal opaque with two readable descending step edges to convey depth. No text, labels, border, watermark or extra characters.",
+  "output_hint": "Generated images are saved to C:\\Users\\Admin\\.codex\\generated_images\\01a140b0-c695-7341-972b-78ee12410f3b as C:\\Users\\Admin\\.codex\\generated_images\\01a140b0-c695-7341-972b-78ee12410f3b\\exec-45df08c6-71ff-4e65-bd7e-6a2196a94145.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link.",
+  "source": "sources/woods-arch-open-generated.png",
+  "reference": "src/assets/woods_arch_locked.png",
+  "tool": "built-in image_gen",
+  "agent_model_requested": "gpt-6.1-sol",
+  "agent_reasoning_requested": "high",
+  "image_backend_model": "not exposed"
+}

@@ -1,0 +1,794 @@
+{
+  "exports": [
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-dark.png",
+      "proposed_key": "tower_prism_dark",
+      "state": "prism-dark",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "2a59f03be8b52edb44d396c2f5fd7e3070aad020ff6742244155409aa912a92e"
+    },
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-receiving.png",
+      "proposed_key": "tower_prism_receiving",
+      "state": "prism-receiving",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "df1eda1961f91bb0e8318624371da69865ad6bbb42c6bff8319631198dbffdef"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-A.png",
+      "proposed_key": "tower_G0_to_A",
+      "state": "G0-to-A",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "9997d0a90a13694cf150dfd322674829f1eac2d11d9e9762502419406e5d101f"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-B.png",
+      "proposed_key": "tower_G0_to_B",
+      "state": "G0-to-B",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "db1ef431197417176ab0de01689a95a7ad3fadf670fb68ad65eb9f8397c285d9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-splitter.png",
+      "proposed_key": "tower_G0_to_splitter",
+      "state": "G0-to-splitter",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "1d11004719987acbc30a79bab69bd83030c0ac3f4bda8eeab11d423b7bcc74d2"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-A-off.png",
+      "proposed_key": "tower_ring_A_off",
+      "state": "ring-A-off",
+      "size": [
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "2eebfe7bb30e18ae168ae8399a7680454c987dac782aba0a1fce56b4ebb6fde1"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-A-on.png",
+      "proposed_key": "tower_ring_A_on",
+      "state": "ring-A-on",
+      "size": [
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "f85800512c0a6933f5d27b800e9d278be1a1c76bd37b15e0e05cf55201134591"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-B-off.png",
+      "proposed_key": "tower_ring_B_off",
+      "state": "ring-B-off",
+      "size": [
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "2c469fba4a2157dd012cbefbfb7de6a691decdc7c654458f2d1ff6dca58a7666"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-B-on.png",
+      "proposed_key": "tower_ring_B_on",
+      "state": "ring-B-on",
+      "size": [
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "ad3d345b6579646dee42dc1623111d3084e3523f7185173288fa242a0889cdb9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-C-off.png",
+      "proposed_key": "tower_ring_C_off",
+      "state": "ring-C-off",
+      "size": [
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "a64eb68ef88fe603c1358a052dc610c9a4a9a871c48ace4bdff759e7c3d8a39b"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-C-on.png",
+      "proposed_key": "tower_ring_C_on",
+      "state": "ring-C-on",
+      "size": [
+        40,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "d16d34435ab739350746b89e5ef3de2ace5b92c4e4fdad0edf5c7026d8c3eb46"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/waiting-for-live-circuits.png",
+      "proposed_key": "tower_waiting_for_live_circuits",
+      "state": "waiting-for-live-circuits",
+      "size": [
+        104,
+        28
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "28f6ee5159113926ec9d7e69f6c206b401533930b45cf1d2a641da0881ab48f1"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/all-currently-powered.png",
+      "proposed_key": "tower_all_currently_powered",
+      "state": "all-currently-powered",
+      "size": [
+        104,
+        28
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "446a8f1c701a7243b04b0489d9d7180ba4b28d94d418d0664cb26c193f30849d"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/return-flow-waiting.png",
+      "proposed_key": "tower_return_flow_waiting",
+      "state": "return-flow-waiting",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "0fb8924491d1cae8559ad1830934b82c8018dc7ddea812e433a252356b3f9ec9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/return-flow-held.png",
+      "proposed_key": "tower_return_flow_held",
+      "state": "return-flow-held",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "de63ecfdd1ec59165c51b0be36144ef63a3bd149ff0514d40a0400e48441ec64"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/chamber-closed.png",
+      "proposed_key": "tower_chamber_closed",
+      "state": "chamber-closed",
+      "size": [
+        80,
+        104
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "45d1eb28b38a4b2a0d4e7d0b13271254da436ec71c09b5319b905d093ab0e396"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/chamber-open.png",
+      "proposed_key": "tower_chamber_open",
+      "state": "chamber-open",
+      "size": [
+        80,
+        104
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "3c2c3a5a4f859ec52e32e6e0372d5ef96ee241f00184a21a4909308d9131c3bf"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/chamber-grille-overlay.png",
+      "proposed_key": "tower_chamber_grille_overlay",
+      "state": "chamber-grille-overlay",
+      "size": [
+        80,
+        104
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "90c7bb7e4d0f1d5e5f9b4bf42ff27edfeed465abf89942add16175043ce82e8c"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/hope-collected.png",
+      "proposed_key": "tower_hope_collected",
+      "state": "hope-collected",
+      "size": [
+        41,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "intentional-empty-state",
+      "sha256": "561c5258b525b44752a39c8cb1ab659cf142b9771c43f7654dd4327ece227c31"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/fountain-up.png",
+      "proposed_key": "tower_fountain_up",
+      "state": "fountain-up",
+      "size": [
+        56,
+        112
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "46d4d723e40dcba53fe02d77d8a1ed58e6f9a3ce9693a87d7b43df7671c0f8f9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/fountain-down.png",
+      "proposed_key": "tower_fountain_down",
+      "state": "fountain-down",
+      "size": [
+        56,
+        112
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "46f0334fa9eb41d2be4021e2233413fe99bd34cc1ee7a30a7d1b1d6df2d569f4"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-intake.png",
+      "proposed_key": "tower_tower_intake",
+      "state": "tower-intake",
+      "size": [
+        112,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "2e1f1a58eb5d8e878c555e41c239d3effcf8a50e41e67632c5bda521ece24373"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-outflow.png",
+      "proposed_key": "tower_tower_outflow",
+      "state": "tower-outflow",
+      "size": [
+        112,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "28528e112d388ffa173572a1dbbf06056b840e8a4cd077dea1f60df6028d52d5"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-lamp-white.png",
+      "proposed_key": "tower_tower_lamp_white",
+      "state": "tower-lamp-white",
+      "size": [
+        72,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "809f1d72acb5c6bb3c37f55433e0c7454f46606deeb796fe979850c63b162667"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-lamp-dim.png",
+      "proposed_key": "tower_tower_lamp_dim",
+      "state": "tower-lamp-dim",
+      "size": [
+        72,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "e51f14067015b5f995b06c86b328f01149da0773bf520192b39a3db6906659af"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/record-compartment-closed.png",
+      "proposed_key": "tower_record_compartment_closed",
+      "state": "record-compartment-closed",
+      "size": [
+        88,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "cc16cec4372b6282a5d1e5af1c1fedc661fef0ef1d3a32f97d469f3bbf0b155c"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/record-compartment-open.png",
+      "proposed_key": "tower_record_compartment_open",
+      "state": "record-compartment-open",
+      "size": [
+        88,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "482d98d9209ce53f697aef3186ae54e508d6eadb73f0070ad60a4d26dabc8ee0"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/voice-record-panel.png",
+      "proposed_key": "tower_voice_record_panel",
+      "state": "voice-record-panel",
+      "size": [
+        160,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native",
+      "sha256": "15d6dec640219c9e31427724d099fc10c762fc346be644d3bb35028dad5d6a8e"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png",
+      "proposed_key": "tower_tower_scene_base",
+      "state": "tower-scene-base",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "sources/tower-original.png",
+      "kind": "generated",
+      "sha256": "0622d77eb66231dc34c17cf8835aa07c43dc6faa5985590378203c21a2ed433d"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/window-faded-red-scarf.png",
+      "proposed_key": "tower_window_faded_red_scarf",
+      "state": "window-faded-red-scarf",
+      "size": [
+        112,
+        112
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "sources/window-original.png",
+      "kind": "generated-cutout",
+      "sha256": "3ad3283b518749e32b8ffb5dcd682db019ccfd509cde5cb83302a7cb146d3f6c"
+    }
+  ],
+  "reuse_references": [
+    {
+      "key": "source-lit",
+      "file": "assets/levels/shared/mechanisms/source-lit.png",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "ddaa58151c32609745cc91029c9acdbdd83d9c04b7fb4fef102668f152e6a4c8"
+    },
+    {
+      "key": "source-empty",
+      "file": "assets/levels/shared/mechanisms/source-empty.png",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "1b7867c9f1446b0d4b87a925e1fa55f6e9ae579c82eead23efd486bd2dcd8aed"
+    },
+    {
+      "key": "source-off-source",
+      "file": "assets/levels/shared/mechanisms/source-off-source.png",
+      "size": [
+        32,
+        44
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "62e4e5ababf526dbb96cb8c377986759d252e93330a4fd41aa009116d36d810d"
+    },
+    {
+      "key": "receiver-off",
+      "file": "assets/levels/shared/mechanisms/receiver-off.png",
+      "size": [
+        24,
+        24
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "bb0d634e37f418a63eee707838a9822f483b288539bc23f201a2449d079b5411"
+    },
+    {
+      "key": "receiver-on",
+      "file": "assets/levels/shared/mechanisms/receiver-on.png",
+      "size": [
+        24,
+        24
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "c237d842b25d016d7712436a2b8f85f699d9a14b8a5f82487ca2bdeb8a6f19c9"
+    },
+    {
+      "key": "G1-slash",
+      "file": "assets/levels/shared/mechanisms/mirror-1-slash.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395"
+    },
+    {
+      "key": "G1-backslash",
+      "file": "assets/levels/shared/mechanisms/mirror-1-backslash.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "7db722acd743a3e6615ae0c7601541a68194c70aff9d35e6d56ab952de611110"
+    },
+    {
+      "key": "G1-horizontal",
+      "file": "assets/levels/shared/mechanisms/mirror-1-horizontal.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "8c72f89f7ed228cf3861059e25c7790004df65fe33493361dafe4e15146b2048"
+    },
+    {
+      "key": "G2-slash",
+      "file": "assets/levels/shared/mechanisms/mirror-2-slash.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "e2cbfe3f0e3590197798d9c7d8b74f529c93a9fca37061aec68b393d2df93d85"
+    },
+    {
+      "key": "G2-backslash",
+      "file": "assets/levels/shared/mechanisms/mirror-2-backslash.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "a11145f3f2a3e9a2b7d96f7ab35113a7c6beb08559242b8fe69927fb63049410"
+    },
+    {
+      "key": "G2-horizontal",
+      "file": "assets/levels/shared/mechanisms/mirror-2-horizontal.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "25793954a5b4449979c1465b246ea787b1b0f3b0480e0509a57f75a9db5a4cd6"
+    },
+    {
+      "key": "call-idle",
+      "file": "assets/levels/05-a-path-for-two/sprites/call-idle.png",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "630aa850a7168aabf18c0c01d21014ad304c73040d04e857050f1812f1314a71"
+    },
+    {
+      "key": "call-sent",
+      "file": "assets/levels/05-a-path-for-two/sprites/call-sent.png",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "c593f8d0c361772b2c730b27a93649a1976c058a90bb2ede34275e20069c8ebe"
+    },
+    {
+      "key": "call-arrived",
+      "file": "assets/levels/05-a-path-for-two/sprites/call-arrived.png",
+      "size": [
+        40,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "32783737ef46cebf6f08e12fed4ec360d7591175b03e8e94ec67e2897ff91ba1"
+    },
+    {
+      "key": "pressure-empty",
+      "file": "assets/levels/05-a-path-for-two/sprites/pressure-empty.png",
+      "size": [
+        44,
+        28
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "6a13708fa33ab1e45391de0c9dcd6249adc5122560f1274fe118a2ee6deb5c2c"
+    },
+    {
+      "key": "pressure-occupied",
+      "file": "assets/levels/05-a-path-for-two/sprites/pressure-occupied.png",
+      "size": [
+        44,
+        28
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "8d2c4e3ea4dcc410e9421e7b00424fbe9f211bcd8ccde5e1098d06cff231f244"
+    },
+    {
+      "key": "tube-straight",
+      "file": "assets/levels/05-a-path-for-two/sprites/tube-straight.png",
+      "size": [
+        64,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "109977ff8fcfbdc10b226c8b1055bec6c24dd50de0816829185e081b399b4142"
+    },
+    {
+      "key": "tube-mouth",
+      "file": "assets/levels/05-a-path-for-two/sprites/tube-mouth.png",
+      "size": [
+        64,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "8fa332a3763664a91e995086de8bf19cf24646286d9dc37fe50dcce50078baad"
+    },
+    {
+      "key": "tube-elbow",
+      "file": "assets/levels/05-a-path-for-two/sprites/tube-elbow.png",
+      "size": [
+        64,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "c47d5e96fb1658a1ea74938853083cb2c0f0d7474e463b89f87c865f9a0d6a15"
+    },
+    {
+      "key": "hope",
+      "file": "src/assets/crystal_hope.png",
+      "size": [
+        41,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "646fd7290f50dfdcfb14c6d29625a285ac4050dd2bb16bc87f9b68e017fef3df"
+    },
+    {
+      "key": "lumo",
+      "file": "src/assets/lumo_0.png",
+      "size": [
+        24,
+        24
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829"
+    },
+    {
+      "key": "nhinh",
+      "file": "assets/character/nhinh_downright_lantern_off_0.png",
+      "size": [
+        36,
+        42
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "reuse-reference",
+      "sha256": "b720c434ed3d9c33eb8af659f60f1d6f4ae9143fb26a1a7fe00f4fb2146373c5"
+    }
+  ]
+}

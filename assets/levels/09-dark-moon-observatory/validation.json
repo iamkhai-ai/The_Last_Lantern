@@ -1,0 +1,306 @@
+{
+  "technical": [
+    {
+      "file": "assets/levels/09-dark-moon-observatory/sprites/wheel-stopped-sun-among-stars.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/sprites/star-chart.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/sprites/learned-marks-miniature.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/sprites/lobby-base.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/sprites/star-chart-base.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/sprites/observatory-base.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/source-lit.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/source-empty.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-B.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/mirror-1-slash.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/mechanisms/mirror-2-backslash.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/latch-latched.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/latch-unlatched.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/door-open.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/door-closed.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/door-held-overlay.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/pressure-occupied.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/pressure-empty.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/call-idle.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/swirl-memory-scratch.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/05-a-path-for-two/sprites/tube-straight.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-receiving.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-dark.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-on.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-off.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/waiting.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        155
+      ]
+    },
+    {
+      "file": "src/assets/lumo_0.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "src/assets/crystal_balance.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/voice-record-panel.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-memory-scene-base.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/temple-scene-base.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "assets/character/nhinh_downright_idle_0.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    }
+  ],
+  "preview_count": 43,
+  "path_uniqueness": "PASS",
+  "state_table": "PASS",
+  "visual": "PASS: all ten state rows / all three rooms inspected on continuity contact; native 640x360 direct, frame-wide, retrieved and final memory inspected; offline only",
+  "engine": "NOT_RUN; offline art only",
+  "review": "NOT_RUN"
+}

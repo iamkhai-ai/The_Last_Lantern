@@ -1,0 +1,181 @@
+{
+  "technical_result": "PASS",
+  "checks": [
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/beacon-stone-hidden.png",
+      "size": [
+        48,
+        60
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "6c43243ed9cb1508c5a9446d44495c11acf94550e75aba7894ef8a2394628ae7",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/beacon-stone-illuminated.png",
+      "size": [
+        48,
+        60
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "4213fa2dc84d8c4655e966f57841b45684dae533ee38d9ba47e900e241df693d",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/pickup-lantern.png",
+      "size": [
+        20,
+        28
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        253
+      ],
+      "sha256": "3ea8de3dc098402c73656ba2df62e21a0bbf77bcfd996479e45b65da4a7adae5",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/footprints-pulse.png",
+      "size": [
+        20,
+        28
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "sha256": "04579001b060ecb8f55952e0f5b91f74d208bd2fa90baad114c03ff59aee17d9",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/stone-standing-ring.png",
+      "size": [
+        58,
+        30
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "2f9dab0668f96f7885b0c748178771b2675d777e297d95279ff7e406e0887486",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/sun-eye-dormant.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "3dc4ff2b5f6c6898389b209b75f40b16323ca40a1a5d44401c2b62ecc54f2714",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/sun-eye-receiving.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "sha256": "cfe7831a100ad3d3adb8cf99cf8913bbc3c9120ff98f8c95b159cda4b4f7cc0b",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/01-forgotten-forest-edge/sprites/sun-eye-full.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "9bf5231f8c01c395d5079db6212d1fe20aa524c8215a24485291229de64b9e79",
+      "result": "PASS"
+    }
+  ],
+  "sources": 8,
+  "prompts": 8,
+  "previews": [
+    {
+      "file": "contact-sheet-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "file": "level01-lantern-on-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "file": "level01-open-latched-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "file": "level01-opening-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "file": "level01-pulse-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "file": "level01-receiving-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    }
+  ],
+  "requested_agent": "gpt-6.1-sol low",
+  "resolved_agent": "not exposed",
+  "image_backend": "not exposed",
+  "runtime": "NOT_RUN",
+  "build": "NOT_RUN",
+  "visual_review": "PASS within offline art scope: all five states and sprite contact sheet inspected; limitations in README",
+  "limitations": [
+    "AI edits can shift texture/silhouette slightly between stone and eye states.",
+    "Nearest downsampling simplifies glyph detail; sprites remain prototype art.",
+    "Existing reused gate is stone arch rather than scenario wooden gate; new Sun-eye is modular.",
+    "Preview paths, beam and white glimmer are composition cues; no engine lighting, collisions or persistence tested."
+  ]
+}

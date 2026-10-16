@@ -1,0 +1,111 @@
+{
+  "technical": [
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/waiting.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/shielding.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/walk-right.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/turn.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/stillness.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-memory-scene-base.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/faded-red-scarf-reuse.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-present-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-memory-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-reveal-overlap-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-after-memory-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/08-shadow-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-dawn-scene-base.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-0-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-1-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-2-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-3-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-4-640x360.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-1x.png",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-2x.png",
+      "result": "PASS"
+    }
+  ],
+  "visual": "PASS: native and nearest 2x contacts, 08 shielding, 09 memory/overlap, 10 dissolution/afterimage/empty inspected; source hood contains no face; silhouette contours differ slightly at shoulders",
+  "engine": "NOT_RUN; asset-only scope",
+  "review": "NOT_RUN; user authorized sequential production"
+}

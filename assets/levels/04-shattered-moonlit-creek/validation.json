@@ -1,0 +1,857 @@
+{
+  "status": "PASS",
+  "recorded_utc": "2026-10-16T02:45:18.414647+00:00",
+  "commands": [
+    {
+      "command": "python assets/levels/04-shattered-moonlit-creek/prepare_assets.py",
+      "status": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "python assets/levels/04-shattered-moonlit-creek/verify_assets.py",
+      "status": "PASS"
+    }
+  ],
+  "counts": {
+    "expected_exports": 29,
+    "shared_mechanism_pngs": 25,
+    "level_sprite_pngs": 4,
+    "previews": 10,
+    "source_originals": 2,
+    "checked_pngs": 39
+  },
+  "failures": [],
+  "pngs": [
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-1-slash.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 609,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-1-backslash.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "7db722acd743a3e6615ae0c7601541a68194c70aff9d35e6d56ab952de611110",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 609,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-1-horizontal.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "8c72f89f7ed228cf3861059e25c7790004df65fe33493361dafe4e15146b2048",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 609,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-2-slash.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "e2cbfe3f0e3590197798d9c7d8b74f529c93a9fca37061aec68b393d2df93d85",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 609,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-2-backslash.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "a11145f3f2a3e9a2b7d96f7ab35113a7c6beb08559242b8fe69927fb63049410",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 609,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-2-horizontal.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "25793954a5b4449979c1465b246ea787b1b0f3b0480e0509a57f75a9db5a4cd6",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 609,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-3-slash.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "c81a9ef92a5705c7f299b9d899a044f4e97a5b5a5e205d81eb164cd89360bef2",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 606,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-3-backslash.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "7fff92c447e63d959840ead7065892d3dfe841ea5ea11ee5a67da94216c92899",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 606,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/mirror-3-horizontal.png",
+      "expected_size": [
+        32,
+        40
+      ],
+      "actual_size": [
+        32,
+        40
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "c001fd35f47f9fda19bbf63b7ddbb3cdc87f01fec372edd16514dcc56865f3ea",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 606,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/receiver-off.png",
+      "expected_size": [
+        24,
+        24
+      ],
+      "actual_size": [
+        24,
+        24
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "bb0d634e37f418a63eee707838a9822f483b288539bc23f201a2449d079b5411",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 357,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/receiver-on.png",
+      "expected_size": [
+        24,
+        24
+      ],
+      "actual_size": [
+        24,
+        24
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "c237d842b25d016d7712436a2b8f85f699d9a14b8a5f82487ca2bdeb8a6f19c9",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 357,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/receiver-energized.png",
+      "expected_size": [
+        24,
+        24
+      ],
+      "actual_size": [
+        24,
+        24
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "4f9d44a1b4470b869bca6969138b29fcf748b700981e815f420e195730c7de6f",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 357,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/bridge-west-absent.png",
+      "expected_size": [
+        100,
+        36
+      ],
+      "actual_size": [
+        100,
+        36
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "08b2392ee80b07971d4a5e4f204424e6604315bfd534a4bbccc1e0f228a038df",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 3152,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/bridge-west-powered.png",
+      "expected_size": [
+        100,
+        36
+      ],
+      "actual_size": [
+        100,
+        36
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "fef0159a70baa972936b5f475b81e38e9dd7c31fa97d83483234e94fdac52947",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 884,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/bridge-west-latched.png",
+      "expected_size": [
+        100,
+        36
+      ],
+      "actual_size": [
+        100,
+        36
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "83c880727071a621960d4e5a0f99c1d1f62ce9eac6ddc30a3496944599435fbb",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 740,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/latch-west-unlatched.png",
+      "expected_size": [
+        28,
+        32
+      ],
+      "actual_size": [
+        28,
+        32
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "d5ec9a4e8b47642bcfca0a7344a061f1cd628716a8c0a2a530a44aaaa44c7b51",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 491,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/latch-west-latched.png",
+      "expected_size": [
+        28,
+        32
+      ],
+      "actual_size": [
+        28,
+        32
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "c8879f6b65992db09bb9679fdc658abda91045959f0968853af5a7ea9e84c89a",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 555,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/bridge-east-absent.png",
+      "expected_size": [
+        100,
+        36
+      ],
+      "actual_size": [
+        100,
+        36
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "08b2392ee80b07971d4a5e4f204424e6604315bfd534a4bbccc1e0f228a038df",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 3152,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/bridge-east-powered.png",
+      "expected_size": [
+        100,
+        36
+      ],
+      "actual_size": [
+        100,
+        36
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "fef0159a70baa972936b5f475b81e38e9dd7c31fa97d83483234e94fdac52947",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 884,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/bridge-east-latched.png",
+      "expected_size": [
+        100,
+        36
+      ],
+      "actual_size": [
+        100,
+        36
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "83c880727071a621960d4e5a0f99c1d1f62ce9eac6ddc30a3496944599435fbb",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 740,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/latch-east-unlatched.png",
+      "expected_size": [
+        28,
+        32
+      ],
+      "actual_size": [
+        28,
+        32
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "6b5b2bbef52a4c658fda1bfe93b8851729a9becf417d56c4206ae99a8a5d3916",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 491,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/latch-east-latched.png",
+      "expected_size": [
+        28,
+        32
+      ],
+      "actual_size": [
+        28,
+        32
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "2e9526c86d6e4a32280def3e98c276d34d37879f496e1c82d98a9c26fdffcc50",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 555,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/source-empty.png",
+      "expected_size": [
+        32,
+        44
+      ],
+      "actual_size": [
+        32,
+        44
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "1b7867c9f1446b0d4b87a925e1fa55f6e9ae579c82eead23efd486bd2dcd8aed",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 118,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/source-lit.png",
+      "expected_size": [
+        32,
+        44
+      ],
+      "actual_size": [
+        32,
+        44
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "ddaa58151c32609745cc91029c9acdbdd83d9c04b7fb4fef102668f152e6a4c8",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 231,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/shared/mechanisms/source-off-source.png",
+      "expected_size": [
+        32,
+        44
+      ],
+      "actual_size": [
+        32,
+        44
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "62e4e5ababf526dbb96cb8c377986759d252e93330a4fd41aa009116d36d810d",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 118,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/test-flower-closed.png",
+      "expected_size": [
+        28,
+        28
+      ],
+      "actual_size": [
+        28,
+        28
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "d359631a63dd3eb14e58bb54a35585b6ee244de4b7ae69b17fcb04002bf44cfb",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 604,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/test-flower-open.png",
+      "expected_size": [
+        28,
+        28
+      ],
+      "actual_size": [
+        28,
+        28
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "35d6f52326bc47e4cb095434049ea924c23daab5426aa5d3992a33dd369679fd",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "transparent_pixels": 439,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/creek-scene-base.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "1226e8d2ec40e005cdbc9b5710fded7754712fe33d30394ad17040d517492602",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/storm-relief.png",
+      "expected_size": [
+        128,
+        80
+      ],
+      "actual_size": [
+        128,
+        80
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "6e8067e4ac0bb6470c3b7ed1c11e0cb9356ea93682a5624ed861f9a0bf37c025",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-absent-light.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "c593b8d55427f55fc33a6cb27a1132b025c55a3dd8d837791ace1f2b34bbe45b",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-absent-dark.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "df050a80df6584130e1ae96461626f3710e86eb6354b36bf394501f63c8a896b",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-powered-light.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "c4d933d130b3eceda655890097285db0079e8dd5b841deba25a222ef587d8031",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-powered-dark.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "3911400fdd7528217fdeb8438b872701ad7d0884fd2aa841be96e642ca0d0250",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-branch-b-light.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "e3ccc0b6e9ff85c6c124165c0f1d6ece65c21478540cb8ff13a8d95c3e3e98f5",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-branch-b-dark.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "f0737cad80b9a870a68fd0e7cda54eab2e0a88c1428862d0c0aeaa1da0c6402e",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-latched-light.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "251966efdcb90c2411e008a4dafa98195718f3762d6ca6ab01606cfccb694d9e",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/level04-latched-dark.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "d467e287d1eaeaa486a2c0a7b6975fbf1b7f51964ed24bc9d11aa1f0ef840fbb",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/states-native-640x360.png",
+      "expected_size": [
+        640,
+        360
+      ],
+      "actual_size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "156e7d94867fea8d5e819d980dc02202df56234c358b157742df5b1158510894",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/previews/states-nearest-2x.png",
+      "expected_size": [
+        1280,
+        720
+      ],
+      "actual_size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA",
+      "format": "PNG",
+      "sha256": "1cff8491855e10e7ba19ed55b5b3728812719f03a384615ffe2b40a0be165aa0",
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "transparent_pixels": 0,
+      "status": "PASS"
+    }
+  ],
+  "source_originals": [
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/sources/creek-generated.png",
+      "size": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "sha256": "7c2a9a3d9e1171e88ec48312555a903922e0076d7840b37bda4fbaad1a694496"
+    },
+    {
+      "path": "assets/levels/04-shattered-moonlit-creek/sources/storm-relief-generated.png",
+      "size": [
+        1586,
+        992
+      ],
+      "mode": "RGB",
+      "sha256": "3cc995b80a5eb5b98f3be1e3282bd792fa560603ac1534e223075626dab418f7"
+    }
+  ],
+  "visual_review": {
+    "status": "PASS",
+    "method": "view_image at native canvas size",
+    "inspected": [
+      "previews/states-native-640x360.png",
+      "previews/level04-branch-b-light.png",
+      "previews/level04-latched-dark.png",
+      "sprites/storm-relief.png"
+    ],
+    "observations": [
+      "Mirror identities use visible one/two/three pedestal dots and reflector orientations.",
+      "Absent span has transparent gap; powered span cyan borders; latched span brass continuous brace.",
+      "Dedicated west/east latch handles visibly raised or lowered, with one/two identity marks.",
+      "Branch-B composition shows west latched, east powered and main return corridor clear.",
+      "Final dark preview shows both spans braced with lamp retrieved and dark receiver eyes."
+    ],
+    "limitations": [
+      "Terrain surfaces remain diagram-like; art integration polish required.",
+      "Relief carving is dense at 128x80; enlarged interaction view recommended.",
+      "Visual review is subjective and does not prove interactions."
+    ]
+  },
+  "runtime_checks": {
+    "status": "NOT_RUN",
+    "reason": "Offline art scope; no runtime/manifest changes or engine integration authorized in task 07"
+  },
+  "agent": {
+    "requested_model": "gpt-6.1-sol",
+    "requested_reasoning": "low",
+    "resolved_model": "not exposed"
+  }
+}
