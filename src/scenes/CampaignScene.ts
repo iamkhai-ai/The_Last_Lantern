@@ -9,6 +9,7 @@ import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem } from '../systems/LanternSystem';
 import { CampaignProgress, CampaignSaveSystem } from '../systems/CampaignSaveSystem';
+import { consumeCampaignNewGameIntent } from '../systems/CampaignStartIntent';
 import { deriveObservatoryState } from '../systems/ObservatoryPuzzle';
 import { SoundSystem } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
@@ -83,13 +84,14 @@ export class CampaignScene extends Phaser.Scene {
   constructor() { super({ key: 'CampaignScene' }); }
 
   public create(data?: { newGame?: boolean }): void {
-    if (data?.newGame) {
+    const newGameRequested = consumeCampaignNewGameIntent(data, this.sys.settings.data);
+    if (newGameRequested) {
       this.progress = CampaignSaveSystem.createDefaultProgress();
       CampaignSaveSystem.save(this.progress);
     } else {
       this.progress = CampaignSaveSystem.load();
     }
-    if (!data?.newGame && this.progress.flags['l9-complete'] === true) {
+    if (!newGameRequested && this.progress.flags['l9-complete'] === true) {
       this.scene.start('EndingScene', { campaign: true });
       return;
     }
@@ -1633,15 +1635,16 @@ export class CampaignScene extends Phaser.Scene {
     if (id.includes('exit') || id === 'stairs') {
       const hasGateProp = this.objects.some((object) =>
         object instanceof Phaser.GameObjects.Image
-        && Math.abs(object.x - x) < 0.1
-        && Math.abs(object.y - y) < 0.1
-        && (object.texture.key === 'woods_arch_locked'
+        && (object.getData('forestEdgeId') === 'gate'
+          || object.texture.key === 'woods_arch_locked'
           || object.texture.key === 'woods_arch_open'
-          || object.texture.key.includes('woods_arch_open_passage')),
+          || object.texture.key.includes('woods_arch_open_passage'))
+        && Math.abs(object.x - x) < 0.1
+        && Math.abs(object.y - y) < 0.1,
       );
       if (!hasGateProp) this.addProp(texture, x, y, 0.8);
     }
-    this.interactions.register({ id, x, y, radius: this.progress.level === 0 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
+    this.interactions.register({ id, x, y, promptY: id === 'gate' && this.progress.level === 0 ? 76 : undefined, radius: this.progress.level === 0 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
   }
 
   private clearCampaignColliders(): void {
@@ -1877,6 +1880,10 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private addProp(key: string, x: number, y: number, scale: number): void {
+    if (this.progress.level === 0 && (key === 'woods_arch_locked' || key === 'woods_arch_open')) {
+      this.addForestEdgeGate(key, x, y);
+      return;
+    }
     const artTexture = this.resolveLevelPropTexture(key);
     const depth = this.progress.level === 0 && key === 'pedestal_empty' ? 3 : this.progress.level === 0 ? worldDepth(y) : 8 + Math.floor(y / 10);
     const image = this.add.image(x, y, artTexture ?? key).setScale(scale).setDepth(depth);
@@ -1887,6 +1894,56 @@ export class CampaignScene extends Phaser.Scene {
     image.setInteractive({ useHandCursor: false });
     this.objects.push(image);
     if (key.startsWith('crystal_')) this.tweens.add({ targets: image, y: y - 4, duration: 900, yoyo: true, repeat: -1 });
+  }
+
+  private addForestEdgeGate(key: string, x: number, y: number): void {
+    const anchorDepth = worldDepth(y);
+    const sourceKey = this.resolveLevelPropTexture(key) ?? key;
+    const base = this.add.image(x, y, this.forestGateLayerKey(sourceKey, 'base')).setOrigin(0.5, 1).setDisplaySize(152, 156).setDepth(3);
+    base.setData('forestEdgeId', 'gate');
+    this.objects.push(base);
+    for (const layer of ['header', 'left-post', 'right-post'] as const) {
+      const image = this.add.image(x, y, this.forestGateLayerKey(sourceKey, layer))
+        .setOrigin(0.5, 1).setDisplaySize(152, 156).setDepth(anchorDepth);
+      image.setData('forestEdgeId', `gate-${layer}`);
+      this.objects.push(image);
+    }
+  }
+
+  private setForestEdgeGateTextures(sourceKey: string): void {
+    for (const object of this.objects) {
+      const id = object.getData('forestEdgeId');
+      if (!(object instanceof Phaser.GameObjects.Image)) continue;
+      if (id === 'gate') object.setTexture(this.forestGateLayerKey(sourceKey, 'base'));
+      else if (id === 'gate-header') object.setTexture(this.forestGateLayerKey(sourceKey, 'header'));
+      else if (id === 'gate-left-post') object.setTexture(this.forestGateLayerKey(sourceKey, 'left-post'));
+      else if (id === 'gate-right-post') object.setTexture(this.forestGateLayerKey(sourceKey, 'right-post'));
+    }
+  }
+
+  private forestGateLayerKey(sourceKey: string, layer: 'base' | 'header' | 'left-post' | 'right-post'): string {
+    const key = `forest-gate-${sourceKey}-${layer}`;
+    if (this.textures.exists(key)) return key;
+    const source = this.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
+    const texture = this.textures.createCanvas(key, 152, 156);
+    if (!texture) throw new Error(`Unable to create forest gate layer: ${key}`);
+    const context = texture.getContext();
+    context.clearRect(0, 0, 152, 156);
+    context.save();
+    if (layer === 'header') context.rect(0, 0, 152, 82);
+    else if (layer === 'left-post') context.rect(0, 0, 50, 156);
+    else if (layer === 'right-post') context.rect(102, 0, 50, 156);
+    else context.rect(0, 0, 152, 156);
+    context.clip();
+    const sourceWidth = (source as HTMLImageElement).naturalWidth || (source as HTMLCanvasElement).width;
+    const sourceHeight = (source as HTMLImageElement).naturalHeight || (source as HTMLCanvasElement).height;
+    const scale = Math.min(152 / sourceWidth, 156 / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    context.drawImage(source, (152 - drawWidth) / 2, 156 - drawHeight, drawWidth, drawHeight);
+    context.restore();
+    texture.refresh();
+    return key;
   }
 
   private resolveLevelPropTexture(key: string): string | null {
@@ -1947,17 +2004,16 @@ export class CampaignScene extends Phaser.Scene {
       const gateY = level === 0 ? FOREST_EDGE.objects.gate.anchor.y : 70;
       const gateX = level === 0 ? FOREST_EDGE.objects.gate.anchor.x : 320;
       const openArt = getLevelArtKey(level === 0 ? 1 : level, 'woods_arch_open_passage');
-      const gate = this.objects.find((object): object is Phaser.GameObjects.Image =>
-        object instanceof Phaser.GameObjects.Image
-        && Math.abs(object.x - gateX) < 0.1
-        && Math.abs(object.y - gateY) < 0.1
-        && (object.texture.key === 'woods_arch_locked'
-          || object.texture.key === 'woods_arch_open'
-          || object.texture.key.includes('woods_arch_open_passage')),
-      );
+      const gate = level === 0
+        ? this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image
+          && object.getData('forestEdgeId') === 'gate' && Math.abs(object.x - gateX) < 0.1 && Math.abs(object.y - gateY) < 0.1)
+        : this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image
+          && Math.abs(object.x - gateX) < 0.1 && Math.abs(object.y - gateY) < 0.1
+          && (object.texture.key === 'woods_arch_locked' || object.texture.key === 'woods_arch_open' || object.texture.key.includes('woods_arch_open_passage')));
       if (gate) {
         const texture = gateOpen && openArt && this.textures.exists(openArt) ? openArt : gateOpen ? 'woods_arch_open' : 'woods_arch_locked';
-        if (gate.texture.key !== texture) gate.setTexture(texture);
+        if (level === 0) this.setForestEdgeGateTextures(texture);
+        else if (gate.texture.key !== texture) gate.setTexture(texture);
         if (level === 0) gate.setData('forestEdgeId', 'gate');
       }
     }

@@ -76,7 +76,7 @@ export class InteractionSystem {
       this.promptBg.strokeRoundedRect(-w / 2, -h / 2, w, h, 5);
 
       const px = Math.max(w / 2 + 8, Math.min(640 - w / 2 - 8, best.x));
-      const py = Math.max(24, best.y - 32);
+      const py = best.promptY ?? Math.max(24, best.y - 32);
       this.promptContainer.setPosition(px, py);
       this.promptContainer.setVisible(true);
     } else {
