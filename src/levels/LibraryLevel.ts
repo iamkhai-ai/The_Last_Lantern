@@ -53,7 +53,6 @@ export class LibraryLevel {
   private tabletStacks = new Map<string, Phaser.GameObjects.Container>();
   private socketImages: Phaser.GameObjects.Image[] = [];
   private bookLayers: Phaser.GameObjects.Image[] = [];
-  private bookSeenThisVisit = new Set<string>();
   private selectedStone: number | null = null;
   private stageKey = '';
   private hintIndex = 0;
@@ -237,21 +236,9 @@ export class LibraryLevel {
     well.setData('library-well', true);
     for (let i = 0; i < LIBRARY_LAYOUT.seats.length; i += 1) {
       const point = LIBRARY_LAYOUT.seats[i];
-      const socket = this.addImage('socket-empty', point.x, point.y, 48, 48, 7 + Math.floor(point.y / 10));
+      const socket = this.addImage('socket-empty', point.x, point.y, 48, 48, LIBRARY_LAYOUT.groundDepth);
       socket.setData('library-socket', i);
       this.socketImages.push(socket);
-    }
-    const start = this.addImage('start-horizon', 320, 130, 20, 16, 8);
-    start.setData('library-start-marker', true);
-    const arrows = [
-      { x: 374, y: 132, rotation: Math.PI / 4 },
-      { x: 374, y: 244, rotation: 3 * Math.PI / 4 },
-      { x: 266, y: 244, rotation: 5 * Math.PI / 4 },
-      { x: 266, y: 132, rotation: 7 * Math.PI / 4 },
-    ];
-    for (const arrow of arrows) {
-      const image = this.addImage('route-cue', arrow.x, arrow.y, 24, 12, 8);
-      image.setRotation(arrow.rotation);
     }
     if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) {
       const crystal = this.addImage('room-memory-crystal', LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y, 28, 36, 35);
@@ -317,7 +304,6 @@ export class LibraryLevel {
   private readBook(): void {
     const state = this.lantern.lanternOn ? 'lit' : 'dark';
     this.progress.flags[`l2-book-${state}`] = true;
-    this.bookSeenThisVisit.add(state);
     this.save();
     let lines: DialogueLine[] = state === 'lit'
       ? [{ speaker: 'Nhinh', text: 'Bật đèn thì thấy cánh hoa khép màu vàng.' }]
@@ -344,7 +330,8 @@ export class LibraryLevel {
     if (stone === 'seed' && state === 'lit') {
       lines[0] = { speaker: 'Nhinh', text: 'Một mặt trăng trên cao. Đường quanh nó bị mất một đoạn.' };
     }
-    if (stone === 'seed' && state === 'dark' && otherLayerWasSeen) {
+    const leafBothLayersSeen = this.progress.flags['l2-leaf-lit'] === true && this.progress.flags['l2-leaf-dark'] === true;
+    if (stone === 'seed' && state === 'dark' && otherLayerWasSeen && leafBothLayersSeen) {
       lines[0] = { speaker: 'Nhinh', text: 'Đường cung hiện rồi. Giống phiến Lá, nhưng ở đó là mặt trời.' };
       lines.push({ speaker: 'Lumo', text: 'Lớp này cho thấy đường đi. Mình phải nhớ cả thiên thể ở lớp kia nữa.' });
     } else if (otherLayerWasSeen) lines.push({ speaker: 'Lumo', text: 'Hai lớp ghép lại mới cho biết thời điểm trong ngày.' });
@@ -503,7 +490,7 @@ export class LibraryLevel {
     for (let index = 0; index < slots.length; index += 1) {
       const pos = LIBRARY_LAYOUT.seats[index];
       this.socketImages[index].setTexture(this.textureKey(slots[index] >= 0 ? 'socket-occupied' : 'socket-empty'));
-      if (slots[index] >= 0) this.tabletStacks.set(this.seatKey(index), this.createTabletStack(slots[index], pos.x, pos.y, this.depthAt(pos.y + 24), this.selectedStone === slots[index]));
+      if (slots[index] >= 0) this.tabletStacks.set(this.seatKey(index), this.createTabletStack(slots[index], pos.x, pos.y, LIBRARY_LAYOUT.groundDepth, this.selectedStone === slots[index]));
     }
     this.lastLanternState = !this.lantern.lanternOn;
     this.updateVisualState(true);
@@ -525,7 +512,8 @@ export class LibraryLevel {
   private addExitArt(): void {
     const scale = LIBRARY_LAYOUT.exit.width / 152;
     const height = 156 * scale;
-    this.exitBaseImage = this.scene.add.image(LIBRARY_LAYOUT.exit.x, LIBRARY_LAYOUT.exit.anchorY, 'woods_arch_locked')
+    const baseKey = this.createArchLayerTexture('woods_arch_locked', 'base');
+    this.exitBaseImage = this.scene.add.image(LIBRARY_LAYOUT.exit.x, LIBRARY_LAYOUT.exit.anchorY, baseKey)
       .setOrigin(0.5, 1).setDisplaySize(LIBRARY_LAYOUT.exit.width, height).setDepth(4).setData('library-exit', true);
     this.objects.push(this.exitBaseImage);
     this.artImages.push(this.exitBaseImage);
@@ -550,7 +538,8 @@ export class LibraryLevel {
     const texture = this.scene.textures.createCanvas(key, 152, 156);
     if (!texture) throw new Error(`Could not create Level 03 arch layer: ${layer}`);
     const regions: Record<string, [number, number, number, number]> = {
-      header: [0, 0, 152, 82], 'left-post': [0, 0, 50, 156], 'right-post': [102, 0, 50, 156],
+      base: [0, 0, 152, 156], header: [0, 0, 152, 82],
+      'left-post': [0, 0, 50, 156], 'right-post': [102, 0, 50, 156],
     };
     const [x, y, width, height] = regions[layer];
     const context = texture.getContext();
@@ -569,7 +558,8 @@ export class LibraryLevel {
 
   private updateExitTextures(open: boolean): void {
     const texture = open ? 'woods_arch_open' : 'woods_arch_locked';
-    if (this.exitBaseImage && this.exitBaseImage.texture.key !== texture) this.exitBaseImage.setTexture(texture);
+    const baseKey = this.createArchLayerTexture(texture, 'base');
+    if (this.exitBaseImage && this.exitBaseImage.texture.key !== baseKey) this.exitBaseImage.setTexture(baseKey);
     const layers = ['header', 'left-post', 'right-post'];
     this.exitImages.forEach((image, index) => {
       const key = this.createArchLayerTexture(texture, layers[index]);
@@ -633,11 +623,6 @@ export class LibraryLevel {
   private isMuralOpen(): boolean { return this.progress.flags['l2-crystal'] === true; }
   private isExitOpen(): boolean { return this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true; }
 
-  private updateVisualStateForceExit(): void {
-    if (this.exitThresholdBody) this.exitThresholdBody.enable = !this.isExitOpen();
-    this.updateExitTextures(this.isExitOpen());
-  }
-
   private hintStage(): string {
     if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'crystal';
     if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'mural';
@@ -645,10 +630,6 @@ export class LibraryLevel {
     if (!this.progress.flags['l2-book-practice']) return 'book';
     if (!this.progress.flags['l2-memory'] && !this.progress.flags['l2-clues-ready']) return 'clues';
     return 'arrange';
-  }
-
-  private saveHudHintState(): void {
-    // Visual state is refreshed by the CampaignScene HUD on the same frame.
   }
 
   private sanitizeSavedSlots(): void {

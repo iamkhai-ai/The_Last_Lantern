@@ -11,6 +11,7 @@ export const LIBRARY_LAYOUT = {
     { x: 132, y: 236 }, { x: 180, y: 236 },
   ] as LibraryPoint[],
   rackStandOffset: 46,
+  groundDepth: 7,
   well: { x: 320, y: 188, width: 220, height: 220 },
   seats: [
     { x: 320, y: 112 }, { x: 396, y: 188 },
