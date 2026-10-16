@@ -7,7 +7,40 @@
   "all_36x42_rgba": true,
   "all_non_pulse_baseline_y40": true,
   "all_walk_run_triplets_unique": true,
-  "legacy_player_png_count": 0,
+  "all_variant_body_heights_match_core_pose": true,
+  "variant_source_cells_checked_for_detached_debris": 112,
+  "source_cells_with_excluded_detached_debris": [
+    {
+      "file": "nhinh_downleft_run_lit_1.png",
+      "full_alpha_bounds_in_cell": [
+        0,
+        0,
+        386,
+        418
+      ],
+      "body_component_bounds_in_cell": [
+        62,
+        51,
+        386,
+        418
+      ]
+    },
+    {
+      "file": "nhinh_downleft_run_lit_2.png",
+      "full_alpha_bounds_in_cell": [
+        0,
+        0,
+        386,
+        446
+      ],
+      "body_component_bounds_in_cell": [
+        52,
+        53,
+        386,
+        446
+      ]
+    }
+  ],
   "duplicate_frame_hashes": [],
   "errors": [],
   "contact_sheets": [
@@ -15,5 +48,5 @@
     "nhinh_state_variants_contact_sheet.png",
     "nhinh_all_poses_contact_sheet.png"
   ],
-  "visual_review": "PASS: inspected nhinh_contact_sheet.png (8x16 core), nhinh_state_variants_contact_sheet.png (8x14 lit/nolamp variants), and nhinh_all_poses_contact_sheet.png (8x30 combined); all 8 directions have distinct lit (with amber lantern) and nolamp (empty hands) idle/walk/run poses on y=40 baseline. Animation polish remains prototype quality per README."
+  "visual_review": "NOT_RUN by generator: inspect contact sheets; technical checks do not establish animation quality."
 }
