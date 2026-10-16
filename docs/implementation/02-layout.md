@@ -32,17 +32,19 @@ One focused module `src/data/whisperingWoodsLayout.ts` owns anchors, stand point
 | Object | Art and anchor | Player stand / interaction | Collision and depth |
 | --- | --- | --- | --- |
 | Nhinh | Current 36×42 frames | Spawn center `(280,286)` | Center API preserved; feet depth even while talking |
-| Practice leaf | L02 `runestone_leaf_*`, native 40×52, `(120,276)` bottom center | `(120,286)`, radius 24; always inspectable, dormant E explains Pulse; E when temporarily revealed completes practice once | Base `[107,264,26,12]`; same depth rule as standing tablets; practice progress independent |
-| Moon | L02 `runestone_moon_*`, `(180,248)` | `(180,258)`, radius 24 | `[167,236,26,12]`; native 40×52 |
-| Leaf | L02 `runestone_leaf_*`, `(320,174)` | `(320,184)`, radius 24 | `[307,162,26,12]`; native 40×52, separated from gate |
-| Star | L02 `runestone_star_*`, `(450,248)` | `(450,258)`, radius 24 | `[437,236,26,12]`; native 40×52 |
-| Poem | L02 `poem_fragment`, native 48×40, `(402,161)` bottom center | `(402,174)`, radius 24; repeat full poem; exact first-reading dialogue | `[385,150,34,11]`; separate target, no duplicate mural at gate |
+| Practice leaf | L02 `runestone_leaf_*`, native 40×52, `(120,276)` bottom center | `(120,282)`, radius 24; always inspectable, dormant E explains Pulse; E when temporarily revealed completes practice once | Base `[107,264,26,12]`; same depth rule as standing tablets; practice progress independent |
+| Moon | L02 `runestone_moon_*`, `(180,248)` | `(180,254)`, radius 24 | `[167,236,26,12]`; native 40×52 |
+| Leaf | L02 `runestone_leaf_*`, `(320,174)` | `(320,180)`, radius 24 | `[307,162,26,12]`; native 40×52, separated from gate |
+| Star | L02 `runestone_star_*`, `(450,248)` | `(450,254)`, radius 24 | `[437,236,26,12]`; native 40×52 |
+| Poem | L02 `poem_fragment`, native 48×40, `(402,161)` bottom center | `(402,167)`, radius 24; repeat full poem; exact first-reading dialogue | `[385,150,34,11]`; separate target, no duplicate mural at gate |
 | Gate | Closed existing arch / L02 open-passage, fitted uniformly bottom center `(510,190)` into common 128×126 canvas | `(510,181)`, radius 24; closed E gives useful locked feedback; open E descends; prompt y=94 | Posts `[456,164,20,26]`, `[544,164,20,26]`; backing `[446,108,128,48]`; closed threshold `[476,164,68,14]`. Open central corridor remains walkable. Stairs depth 3; front header/post crops at ground depth 29; full actor visible on central approach |
 | Memory | Existing `memory_vignette` | Transient warm tint and two figures during completion dialogue only | Effects above world, below dialogue/HUD; clear on completion/shutdown; no permanent duplicate figures |
 
 Gate backing ties to the northern floor boundary. Closed threshold stops the central north approach at center y=162; opening permits center y=140 before the backing. Do not teleport the player at the barrier. Open gate foot anchor must not jump. The front header crop ends at world y<=116, above the actor at the open stop (head y=119). Crop side posts to leave at least 40px clear through the center; preserve source aspect ratio and nearest-neighbor pixels. Avoid changing Level 01 gate helpers; a local Level 02 renderer/crop cache is acceptable. Bind images by object IDs rather than coincident coordinates. Only swap textures when keys change.
 
 Floor follows the existing woods contract: center x=12..628, body/feet restricted to y=96..310. Trees at `(48,142),(125,112),(240,106),(350,108),(600,130),(48,230),(600,240),(65,310),(568,310)`. Each trunk footprint `[baseX-9,baseY-14,18,14]`; rocks at `(100,195),(552,292)`, footprint `[baseX-13,baseY-14,26,14]`. Use existing trees/rocks at native proportions. Canopies sort by base; they can hide actors behind them, never replace trunk collision. Ground bushes, grass and flowers are passable. Keep the practice/rune/poem glyphs and stand points clear of canopies.
+
+Stand points six pixels below each stone's base keep E available at its southern physics contact: that contact is center y=baseY-16, only 22px from the target. This avoids losing the prompt when walking all the way against a stone. Verify that exact contact as well as the nominal stand.
 
 Use existing grass/dirt/stone textures, with an irregular circular clearing and >=48px paths connecting spawn, practice, three rune approaches, poem and gate. Ground masks/stone stamps stay below feet; no cross-shaped debug paths or drawn route lines. Empty grass remains traversable; colliders require visible corresponding art. Props must not be baked into an opaque background and drawn again.
 
