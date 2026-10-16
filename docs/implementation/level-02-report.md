@@ -29,8 +29,8 @@ No raster assets, dependencies, persisted save keys or schema, Level 01 mechanic
 
 ## Limitations
 
-The root's keyboard route result belongs to `f984e24`, before the gate correction. The corrected geometry has pure contract coverage and compiles, but final runtime collision, screenshot presentation, and the two review results remain root-owned checks and are not claimed here.
+The author's results above are distinct from root verification. Root repeated the real keyboard route and geometry/restore fixtures after corrections, and obtained two independent final reviews. Results and limitations are recorded in [level-02-verification.md](level-02-verification.md). Human acceptance remains NOT_RUN.
 
 ## Revision
 
-Correction revision: pending local checkpoint commit. Root will bind final browser and review evidence to the frozen commit.
+Correction source revision: `2a6907d6ecbd2c172ad562fe167bac91617e04ce`. Final test revision: `c76ff7713449c73422169efa25970c9e9b12638b`; product source is identical. Root evidence is bound to those revisions in the verification document.

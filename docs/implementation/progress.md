@@ -2,7 +2,7 @@
 
 ## Scope
 
-Current slice: rebuild **Level 01 only**, then let the user review before later levels. Baseline `16e01e4`. Isolated managed worktree, branch `codex/campaign-layout-rebuild`. Main checkout contains unrelated uncommitted art/source edits; they are outside this worktree.
+Current slice: rebuild **Level 02 only**, per the user's subsequent request; another chat owns Level 01. Isolated managed worktree `level-02-spatial-rebuild`, branch `codex/level-02-spatial-rebuild`, from `797c594` including main `f3c23de`. Earlier Level 01 history below is retained as context. Main checkout contains unrelated edits and remains untouched.
 
 ## Decisions
 
@@ -35,6 +35,13 @@ Current slice: rebuild **Level 01 only**, then let the user review before later 
 - Synced latest fetched main `f3c23de` into the feature branch with merge `08b93e1`, including the new Nhinh frames. Primary checkout and its unrelated edits remain untouched.
 - Final source revision `eafcc597c003ffcebc07c5724560be0e6f275568`: root build, pure checks, uninterrupted actual-keyboard New Game → Level 02 → same-runtime Continue → explicit resets, seven stair visual samples and closed/open post collision checks all PASS. Two separate Luna high final reviews found no actionable findings. Earlier reload-based lifecycle evidence is superseded.
 - Detailed findings, correction history, commands, scope and evidence: [level-01-gate-fixes.md](level-01-gate-fixes.md). Human acceptance and remote publication: NOT_RUN. Levels 02–10 remain deferred.
+
+## Level 02 completion — 2026-10-17
+
+- User moved this chat to Level 02; Level 01 belongs to another chat. Spatial flow, object footprints, gate layers, distinct poem/exit, state/save rules and decisions are documented in [02-layout.md](02-layout.md).
+- Luna high implementation: `f984e24`; root runtime findings corrected in `2a6907d`; final fixture correction `c76ff771`. No raster or other-level behavior edits.
+- Root build/pure checks, complete keyboard puzzle/Library/Continue route, 27 geometry/restore fixtures, partial/completed reload and moving-firefly observations: PASS. Two independent final Luna high reviews: PASS, no remaining actionable findings. Human acceptance and remote publication: NOT_RUN.
+- Full commands, checked revisions, initial failures, corrections, reviewer withdrawal, decisions and local artifacts: [level-02-verification.md](level-02-verification.md). Temporary preview stopped; generated dist restored. Levels 03–10 remain deferred.
 
 ## Level 01 lighting follow-up — 2026-10-16
 

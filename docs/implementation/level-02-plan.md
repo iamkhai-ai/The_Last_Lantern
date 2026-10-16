@@ -31,20 +31,20 @@
 
 **Interfaces:** Export typed rune IDs, the authored world/body/anchors/stands/footprints/route/checkpoints; pure walkability and safe-spawn helpers; puzzle normalization and rune activation results consumed by the runtime. Exact helper names may follow repo conventions; do not create a general campaign framework.
 
-- [ ] Read scenario/spec/current index-1 code. Record risks and deviations before changing product code.
-- [ ] Add focused failing checks for the spec's geometry, ordering/repeats/wrong resets, practice independence, expiration/discovery distinction, legacy completion and safe restore. Make assertions cover actual helpers used by scene code; record the initial result.
-- [ ] Implement spatial/state helpers and pass the checks. Keep durable keys and normalize contradictory old progress conservatively.
-- [ ] Implement natural paths, correct pivots/depths and footprints, distinct poem/exit, stateful gate layers/barrier, moving fireflies and transient memory art. Use data for all related coordinates and stable runtime object IDs. No PNG changes.
-- [ ] Implement full story/practice/revelation/order/repeats/reset/memory/exit, step-aware H/HUD/J and Lumo following per spec. Sleeping objects remain inspectable for useful feedback.
-- [ ] Run focused checks, existing forest-edge/start-intent checks, `npm run build` and `git diff --check`; distinguish PASS/FAIL/NOT_RUN. Do not claim actual browser gameplay from injected flags.
-- [ ] Self-review scope and commit local source. Write `docs/implementation/level-02-report.md` with decisions, exact verification results, commit(s), limitations and known questions. Return concise status/hash/commands.
+- [x] Read scenario/spec/current index-1 code. Record risks and deviations before changing product code.
+- [x] Add focused failing checks for the spec's geometry, ordering/repeats/wrong resets, practice independence, expiration/discovery distinction, legacy completion and safe restore. Make assertions cover actual helpers used by scene code; record the initial result.
+- [x] Implement spatial/state helpers and pass the checks. Keep durable keys and normalize contradictory old progress conservatively.
+- [x] Implement natural paths, correct pivots/depths and footprints, distinct poem/exit, stateful gate layers/barrier, moving fireflies and transient memory art. Use data for all related coordinates and stable runtime object IDs. No PNG changes.
+- [x] Implement full story/practice/revelation/order/repeats/reset/memory/exit, step-aware H/HUD/J and Lumo following per spec. Sleeping objects remain inspectable for useful feedback.
+- [x] Run focused checks, existing forest-edge/start-intent checks, `npm run build` and `git diff --check`; distinguish PASS/FAIL/NOT_RUN. Do not claim actual browser gameplay from injected flags.
+- [x] Self-review scope and commit local source. Write `docs/implementation/level-02-report.md` with decisions, exact verification results, commit(s), limitations and known questions. Return concise status/hash/commands.
 
 ### Final validation and review (root)
 
-- [ ] Freeze source and rerun commands. Use an isolated temporary preview and real keyboard Level 02 puzzle route, plus labeled collision/layer/restore fixtures.
-- [ ] Obtain two separate independent Luna high reviews of the same revision; keep findings separate until both complete.
-- [ ] Route confirmed corrections to the original worker, repeat affected verification and independent reviews until complete.
-- [ ] Record final evidence and decisions, stop the test server, restore generated tracked build output only, and leave a clean reviewable local branch. No remote actions.
+- [x] Freeze source and rerun commands. Use an isolated temporary preview and real keyboard Level 02 puzzle route, plus labeled collision/layer/restore fixtures.
+- [x] Obtain two separate independent Luna high reviews of the same revision; keep findings separate until both complete.
+- [x] Route confirmed corrections to the original worker, repeat affected verification and independent reviews until complete.
+- [x] Record final evidence and decisions, stop the test server, restore generated tracked build output only, and leave a clean reviewable local branch. No remote actions.
 
 ## Preflight and state
 
@@ -58,7 +58,7 @@ Ruling: use a northeastern gate and independent western poem stone, keeping Leaf
 
 Ruling: legacy completed sequence reopens its gate on load while unsolved saves remain on the near side — durable completion should not be lost — cost if wrong: contradictory manual saves may recover as solved; normal play still requires the sequence.
 
-Status: design and implementation brief prepared. Product implementation and final verification NOT_RUN.
+Status: implementation and final verification complete on checked revision c76ff771. Human acceptance and remote publication NOT_RUN. See level-02-verification.md for actual evidence and correction history.
 
 ## Root browser correction round 1
 
