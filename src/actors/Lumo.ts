@@ -27,7 +27,7 @@ export class Lumo {
     if (!this.visible && !moveWhenHidden) return;
     this.timeElapsed += dt * 0.004;
 
-    // Hover gracefully near Linh's shoulder
+    // Hover gracefully near Nhinh's shoulder
     const desiredX = targetX + 18 + Math.cos(this.timeElapsed * 0.9) * 5;
     const desiredY = targetY - 12 + Math.sin(this.timeElapsed * 1.6) * 4;
 

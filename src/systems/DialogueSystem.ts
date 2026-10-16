@@ -12,7 +12,6 @@ export class DialogueSystem {
   private portraitFrame: Phaser.GameObjects.Graphics;
   private portrait: Phaser.GameObjects.Image;
   private static readonly PORTRAITS: Record<string, string> = {
-    Linh: 'portrait_linh',
     Nhinh: 'portrait_linh',
     Lumo: 'portrait_lumo',
   };
@@ -94,7 +93,6 @@ export class DialogueSystem {
     this.charTimer = 0;
 
     const speakerColors: Record<string, string> = {
-      Linh: '#f7dfaa',
       Nhinh: '#f7dfaa',
       Lumo: '#b8f5d4',
       Shadow: '#d28cff',
@@ -107,7 +105,7 @@ export class DialogueSystem {
     this.speakerText.setColor(speakerColors[line.speaker] ?? '#f7dfaa');
     this.bodyText.setText('');
 
-    // Speaker portrait (Linh / Lumo); text shifts right when shown.
+    // Speaker portrait (Nhinh / Lumo); text shifts right when shown.
     const portraitKey = DialogueSystem.PORTRAITS[line.speaker];
     if (portraitKey && this.scene.textures.exists(portraitKey)) {
       this.portrait.setTexture(portraitKey);

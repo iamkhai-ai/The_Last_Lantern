@@ -30,7 +30,7 @@ export interface GameProgress {
 }
 
 export interface DialogueLine {
-  speaker: 'Linh' | 'Nhinh' | 'Lumo' | 'Shadow' | 'The Shadow' | 'Hệ thống' | 'Ký Ức';
+  speaker: 'Nhinh' | 'Lumo' | 'Shadow' | 'The Shadow' | 'Hệ thống' | 'Ký Ức';
   text: string;
 }
 
