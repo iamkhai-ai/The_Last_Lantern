@@ -211,6 +211,7 @@ report = {'result': 'FAIL' if errors else 'PASS', 'frame_count': len(entries), '
 (STAGING / 'validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
 print(json.dumps(report, indent=2))
 if errors:
+    os.replace(STAGING / 'validation.json', ROOT / 'validation.failed.json')
     raise SystemExit(1)
 
 publish_targets = [
@@ -220,6 +221,7 @@ publish_targets = [
 ] + [
     (STAGING / 'frames.json', ROOT / 'frames.json'),
     (STAGING / 'validation.json', ROOT / 'validation.json'),
+    (None, ROOT / 'validation.failed.json'),
 ]
 backup_dir = Path(tempfile.mkdtemp(prefix='.prepare-frames-backup-', dir=ROOT))
 backups = {}
@@ -239,7 +241,10 @@ attempted_targets = []
 try:
     for staged, target in publish_targets:
         attempted_targets.append(target)
-        os.replace(staged, target)
+        if staged is None:
+            target.unlink(missing_ok=True)
+        else:
+            os.replace(staged, target)
 except BaseException as publish_error:
     rollback_errors = []
     for target in reversed(attempted_targets):
