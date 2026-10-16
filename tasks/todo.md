@@ -141,7 +141,7 @@ Mỗi mục nhóm tài nguyên bên dưới được tách thành lô nhỏ sau 
 - [x] Đối chiếu kích cỡ 177 ảnh preview; tách scene 640×360, pano Observatory 1920×360 và contact sheet 1×/2×; rà soát visual evidence mỗi lô trong README/validation.
 - [x] Bàn giao mapping file–key–state–màn, nguồn/reuse, provenance/prompt và giới hạn hiện còn trong handoff.
 
-**Phụ thuộc:** mọi lô P0/P1. **File:** [asset-handoff.md](../assets/levels/asset-handoff.md), [asset-handoff.json](../assets/levels/asset-handoff.json), [character validation](../assets/character/validation.json). **PASS:** 15 asset maps, 268 PNG output duy nhất, 128 frame Nhinh (36×42 RGBA), 128 reuse references và 177 preview; 0 lỗi path/dimension/hash/pivot; 2 alpha rỗng có chủ ý và 8 nhóm pixel trùng đều được ghi lý do. Đã xem contact 8×16 frame. **Giới hạn:** frame Nhinh là prototype, procedural P2/runtime còn theo từng README; bản preview không thay thế render trong engine.
+**Phụ thuộc:** mọi lô P0/P1. **File:** [asset-handoff.md](../assets/levels/asset-handoff.md), [asset-handoff.json](../assets/levels/asset-handoff.json), [character validation](../assets/character/validation.json). **PASS tại mốc bộ lõi ban đầu:** 15 asset maps, 268 PNG output duy nhất, 128 frame Nhinh lõi (36×42 RGBA), 128 reuse references và 177 preview; 0 lỗi path/dimension/hash/pivot; 2 alpha rỗng có chủ ý và 8 nhóm pixel trùng đều được ghi lý do. Contact 8×16 là bản chỉ gồm bộ lõi; tổng cuối 240 frame và contact 8×30 được ghi ở mục 18. **Giới hạn:** frame Nhinh là prototype, procedural P2/runtime còn theo từng README; bản preview không thay thế render trong engine.
 
 ## 17 — Preview trong engine sau tích hợp
 
@@ -157,3 +157,13 @@ Mỗi mục nhóm tài nguyên bên dưới được tách thành lô nhỏ sau 
 - [ ] P0/P1 của 10 màn đã có tài nguyên hoặc quyết định tái dùng có preview đạt; P2 được ghi rõ hoàn tất hay để sau.
 - [ ] Preview trong engine có bằng chứng gắn revision; ghi riêng `PASS`, `FAIL`, `NOT_RUN`, không dùng nhận xét agent thay cho kiểm tra.
 - [ ] Người dùng xem bộ cảnh và các giới hạn còn lại; hoàn tất bàn giao tài nguyên, không suy ra quyền merge/release/deploy.
+
+## 18 — Thay thế hoàn toàn `player_*` bằng bộ 240 frame Nhinh (8 hướng × 30 pose)
+
+- [x] Gỡ bỏ 72 file `src/assets/player_*.png` cũ, 72 key trong `src/art/assetManifest.json` và fallback procedural `player_*` trong `src/art/ProceduralTextures.ts`.
+- [x] Bổ sung đủ 112 frame biến thể trạng thái bền (`idle_lit_0`, `walk_lit_0..2`, `run_lit_0..2`, `idle_nolamp_0`, `walk_nolamp_0..2`, `run_nolamp_0..2`) cho cả 8 hướng (`down`, `downleft`, `left`, `upleft`, `up`, `upright`, `right`, `downright`) mà không ghi đè 128 frame Nhinh lõi.
+- [x] Hợp nhất danh mục `assets/character/frames.json` (240 frame) và `assets/character/validation.json` (`PASS`, 240 SHA-256 duy nhất, `36×42` RGBA, chân `y=40` cho toàn bộ pose không phải `pulse`), tạo contact sheet `nhinh_state_variants_contact_sheet.png` (8×14) và `nhinh_all_poses_contact_sheet.png` (8×30), bảo vệ `assets/character/prepare_frames.py` không ghi đè danh mục 240 frame.
+- [x] Loại trừ `*contact_sheet*.png` khỏi glob runtime trong `src/art/CampaignArt.ts`, chạy `npm run build` và smoke check menu.
+
+**Phụ thuộc:** 16–17. **File:** `assets/character/frames.json`, `assets/character/validation.json`, `assets/character/prepare_frames.py`, `src/art/CampaignArt.ts`, `src/actors/Player.ts`, `tasks/nhinh-frame-replacement-handoff.md`. **PASS:** 240 frame Nhinh `36×42` RGBA, 0 file `src/assets/player_*.png`, `npm run build` và menu smoke check. **Giới hạn:** một số hướng chéo/tay đèn là biến thể prototype cắt từ sheet AI, cần rà tiếp khi polish trong engine. **NOT_RUN:** người dùng tự chơi trọn 10 câu đố và ending.
+

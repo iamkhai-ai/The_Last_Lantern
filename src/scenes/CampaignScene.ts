@@ -1443,11 +1443,18 @@ export class CampaignScene extends Phaser.Scene {
   private drawFifthMural(): void {
     if (this.objects.some((object) => object instanceof Phaser.GameObjects.Graphics && object.getData('campaign-fifth-mural') === true)) return;
     const muralArt = getLevelArtKey(2, 'room-mural-fifth');
-    const hasMuralArt = Boolean(muralArt && this.textures.exists(muralArt));
+    const hasMuralCaption = this.objects.some((object) =>
+      object instanceof Phaser.GameObjects.Text && object.getData('campaign-fifth-mural-caption') === true,
+    );
+    if (!hasMuralCaption) {
+      const caption = this.add.text(432, 53, 'BẢO VỆ · BÁNH XE MẶT TRỜI', { fontFamily: 'Segoe UI, sans-serif', fontSize: '7px', color: '#ffe7a4', backgroundColor: '#07151ccc', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(22);
+      caption.setData('campaign-fifth-mural-caption', true);
+      this.track(caption);
+    }
+    if (muralArt && this.textures.exists(muralArt)) return;
     const muralWidth = 62 * 96 / 136;
     const mural = this.add.graphics().setDepth(17).setPosition(432, 92);
     mural.setData('campaign-fifth-mural', true);
-    mural.setVisible(!hasMuralArt);
     mural.fillStyle(0x283342, 0.95); mural.fillRoundedRect(-muralWidth / 2, -31, muralWidth, 62, 4);
     mural.lineStyle(2, 0xe4c477, 0.8); mural.strokeRoundedRect(-muralWidth / 2 + 1, -30, muralWidth - 2, 60, 3);
     mural.lineStyle(1, 0x9fb1bd, 0.45);
@@ -1455,7 +1462,6 @@ export class CampaignScene extends Phaser.Scene {
     mural.fillStyle(0x1a1c25, 0.95); mural.fillEllipse(0, 13, 12, 24); mural.fillCircle(0, -10, 5);
     mural.lineStyle(2, 0xf4d574, 0.85); mural.strokeCircle(0, -6, 14);
     this.track(mural);
-    this.track(this.add.text(432, 53, 'BẢO VỆ · BÁNH XE MẶT TRỜI', { fontFamily: 'Segoe UI, sans-serif', fontSize: '7px', color: '#ffe7a4', backgroundColor: '#07151ccc', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(22));
   }
 
   private registerMirror(id: string, label: string, x: number, y: number, goal: number): void {
