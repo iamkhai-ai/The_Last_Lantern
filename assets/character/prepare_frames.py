@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import hashlib
 import json
-import re
 import shutil
 import tempfile
 from PIL import Image, ImageDraw, ImageFont
@@ -14,6 +13,8 @@ DIRECTIONS = [m['direction'] for m in META]
 VARIANT_POSES = (('idle_lit', (0,)), ('walk_lit', (0, 1, 2)), ('run_lit', (0, 1, 2)),
                  ('idle_nolamp', (0,)), ('walk_nolamp', (0, 1, 2)), ('run_nolamp', (0, 1, 2)))
 STATE_VARIANT_POSES = [(state, frame) for state, frames in VARIANT_POSES for frame in frames]
+MOVEMENT_POSES = [('idle', (0,)), ('walk', (0, 1, 2)), ('run', (0, 1, 2))]
+ANCHORS = json.loads((ROOT / 'body-scale-anchors.json').read_text(encoding='utf-8'))['anchors']
 EXPECTED_VARIANT_FILES = {
     f'nhinh_{direction}_{state}_{frame}.png'
     for direction in DIRECTIONS
@@ -24,8 +25,8 @@ COMBINED_CONTACT_SHEET_FILES = {'nhinh_state_variants_contact_sheet.png', 'nhinh
 STAGING_TEMP = tempfile.TemporaryDirectory(prefix='.prepare-frames-', dir=ROOT)
 STAGING = Path(STAGING_TEMP.name)
 POSES = [('idle', 0)] + [(state, i) for state in ('walk', 'run', 'lantern_on', 'lantern_off', 'pulse') for i in range(3)]
-raw = ROOT / 'source_sheets'
-raw.mkdir(exist_ok=True)
+MOVEMENT_POSES = [('idle', (0,)), ('walk', (0, 1, 2)), ('run', (0, 1, 2))]
+ANCHORS = json.loads((ROOT / 'body-scale-anchors.json').read_text(encoding='utf-8'))['anchors']
 entries = []
 cells = []
 owned = set()
@@ -50,7 +51,7 @@ if (ROOT / 'frames.json').exists():
 if has_combined_catalog and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
     raise RuntimeError(
         'Refusing to overwrite combined 240-frame catalog in frames.json. '
-        'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'
+        'Set ALLOW_CATALOG_OVERWRITE=1 only when deliberately regenerating all 240 frames from committed source sheets.'
     )
 
 def record_preflight_failure(message, variant_count=None):
@@ -71,7 +72,7 @@ def record_preflight_failure(message, variant_count=None):
     print(json.dumps(report, indent=2))
     raise RuntimeError(message)
 
-def largest_component_bounds(mask):
+def largest_component_bounds(mask, include_mask=False):
     """Exclude disconnected glow fragments leaking in from the adjacent grid row."""
     width, height = mask.size
     data = bytearray(mask.tobytes())
@@ -94,17 +95,59 @@ def largest_component_bounds(mask):
     if not largest:
         return None
     xs, ys = [p%width for p in largest], [p//width for p in largest]
-    return min(xs),min(ys),max(xs)+1,max(ys)+1
+    bounds = min(xs),min(ys),max(xs)+1,max(ys)+1
+    if include_mask:
+        component = bytearray(width * height)
+        for pos in largest:
+            component[pos] = 255
+        return bounds, Image.frombytes('L', (width, height), bytes(component))
+    return bounds
+
+
+def source_cells(path, poses, rows):
+    sheet = Image.open(path).convert('RGBA')
+    for index, (state, frame) in enumerate(poses):
+        col, row = index % 4, index // 4
+        box = (round(col * sheet.width / 4), round(row * sheet.height / rows),
+               round((col + 1) * sheet.width / 4), round((row + 1) * sheet.height / rows))
+        cell = sheet.crop(box)
+        mask = cell.getchannel('A').point(lambda alpha: 255 if alpha >= 80 else 0)
+        bounds = largest_component_bounds(mask) if rows == 4 and state != 'pulse' else mask.getbbox()
+        if bounds is None:
+            raise ValueError(f'Empty source cell: {path}/{state}/{frame}')
+        yield state, frame, cell, bounds, box
+
+
+def save_variant_frame(direction, state, frame, path, cell, bounds, box, scale,
+                       anchor, body_mask, reference, provenance):
+    crop = cell.crop(bounds)
+    size = (max(1, round(crop.width * scale)), max(1, round(crop.height * scale)))
+    if size[0] > 34 or size[1] > 40:
+        raise ValueError(f'Variant exceeds safe canvas area: {direction}/{state}/{frame}: {size}')
+    small = crop.resize(size, Image.Resampling.NEAREST)
+    output = Image.new('RGBA', (36, 42))
+    offset = ((36 - small.width) // 2, 41 - small.height)
+    output.alpha_composite(small, offset)
+    mapped_body = Image.new('L', output.size)
+    mapped_body.paste(body_mask.crop(bounds).resize(size, Image.Resampling.NEAREST), offset)
+    name = f'nhinh_{direction}_{state}_{frame}.png'
+    target = STAGING / name
+    output.save(target)
+    return {
+        'file': name, 'direction': direction, 'state': state, 'frame': frame,
+        'source_sheet': path.relative_to(ROOT).as_posix(), 'provenance': provenance,
+        'source_cell': list(box), 'crop_bounds_in_cell': list(bounds), 'scale': scale,
+        'output_bbox': list(output.getchannel('A').getbbox()),
+        'body_scale_reference': anchor['reference_frame'],
+        'source_body_y': [anchor['body_top_y'], anchor['body_bottom_y_exclusive']],
+        'target_body_height': reference['output_bbox'][3] - reference['output_bbox'][1],
+        'output_body_bbox': list(mapped_body.getbbox()),
+        'sha256': hashlib.sha256(target.read_bytes()).hexdigest(),
+    }
 for meta in META:
-    match = re.search(r' as (C:\\[^\n]+\.png) by default', meta['output_hint'])
-    if not match:
-        raise RuntimeError('Cannot locate actual imagegen output: ' + meta['direction'])
-    source = Path(match.group(1))
-    target = raw / ('nhinh_' + meta['direction'] + '_generated.png')
-    if target.exists() and target.read_bytes() != source.read_bytes():
-        raise FileExistsError(target)
-    if not target.exists():
-        shutil.copy2(source, target)
+    target = ROOT / 'source_sheets' / ('nhinh_' + meta['direction'] + '_generated.png')
+    if not target.is_file():
+        record_preflight_failure('Missing committed core source sheet: ' + target.name)
     sheet = Image.open(target).convert('RGBA')
     w, h = sheet.size
     for index, (state, frame) in enumerate(POSES):
@@ -133,25 +176,69 @@ for direction, state, frame, cell, bounds, source_box in cells:
         raise FileExistsError(target)
     staged_target = STAGING / name
     output.save(staged_target)
-    entries.append({'file': name, 'direction': direction, 'state': state, 'frame': frame, 'source_sheet': f'source_sheets/nhinh_{direction}_generated.png', 'source_cell': list(source_box), 'crop_bounds_in_cell': list(bounds), 'scale': scale, 'sha256': hashlib.sha256(staged_target.read_bytes()).hexdigest()})
+    entries.append({'file': name, 'direction': direction, 'state': state, 'frame': frame,
+                    'source_sheet': f'source_sheets/nhinh_{direction}_generated.png', 'source_cell': list(source_box),
+                    'crop_bounds_in_cell': list(bounds), 'scale': scale,
+                    'output_bbox': list(output.getchannel('A').getbbox()),
+                    'sha256': hashlib.sha256(staged_target.read_bytes()).hexdigest()})
 
 core_entries = entries.copy()
 variant_entries = []
 if has_combined_catalog:
     regenerated_core_files = {entry['file'] for entry in core_entries}
-    variant_entries = [entry for entry in existing_frames if entry['file'] not in regenerated_core_files]
-    actual_variant_files = {entry['file'] for entry in variant_entries}
-    if len(variant_entries) != 112 or actual_variant_files != EXPECTED_VARIANT_FILES:
-        record_preflight_failure(f'Combined catalog must contain all 112 expected state variants; found {len(variant_entries)} entries.', len(variant_entries))
-    for entry in variant_entries:
+    existing_variant_entries = [entry for entry in existing_frames if entry['file'] not in regenerated_core_files]
+    actual_variant_files = {entry['file'] for entry in existing_variant_entries}
+    if len(existing_variant_entries) != 112 or actual_variant_files != EXPECTED_VARIANT_FILES:
+        record_preflight_failure(f'Combined catalog must contain all 112 expected state variants; found {len(existing_variant_entries)} entries.', len(existing_variant_entries))
+    for entry in existing_variant_entries:
         variant_path = ROOT / entry['file']
         if not variant_path.is_file() or hashlib.sha256(variant_path.read_bytes()).hexdigest() != entry.get('sha256'):
-            record_preflight_failure(f'Combined catalog variant is missing or has a mismatched SHA-256: {entry["file"]}', len(variant_entries))
+            record_preflight_failure(f'Combined catalog variant is missing or has a mismatched SHA-256: {entry["file"]}', len(existing_variant_entries))
+    core_by_file = {entry['file']: entry for entry in core_entries}
+    expected_anchors = set()
+    source_debris = []
+    for direction in DIRECTIONS:
+        for variant in ('lit', 'nolamp'):
+            paths = list((ROOT / 'source_sheets/state_variants').rglob(f'nhinh_{direction}_{variant}_sheet.png'))
+            if len(paths) != 1:
+                record_preflight_failure(f'Expected one {direction}/{variant} source sheet; found {len(paths)}.', len(existing_variant_entries))
+            path = paths[0]
+            provenance = list(path.parent.glob(f'{direction}_{variant}.provenance.json'))
+            provenance_path = (provenance[0] if provenance else
+                               ROOT / 'source_sheets/state_variants/worker_down/state-variant-generation-prompts.json')
+            poses = [(state, frame) for state, frames in MOVEMENT_POSES for frame in frames]
+            for state, frame, cell, alpha_bounds, box in source_cells(path, poses, 2):
+                name = f'nhinh_{direction}_{state}_{variant}_{frame}.png'
+                if name not in EXPECTED_VARIANT_FILES:
+                    raise ValueError(f'Unexpected generated variant name: {name}')
+                expected_anchors.add(name)
+                mask = cell.getchannel('A').point(lambda alpha: 255 if alpha >= 80 else 0)
+                body_bounds, body_mask = largest_component_bounds(mask, include_mask=True)
+                if alpha_bounds != body_bounds:
+                    source_debris.append({'file': name, 'full_alpha_bounds_in_cell': list(alpha_bounds),
+                                          'body_component_bounds_in_cell': list(body_bounds)})
+                anchor = ANCHORS.get(name)
+                if not anchor:
+                    raise ValueError(f'Missing body-scale anchor: {name}')
+                if [anchor['body_top_y'], anchor['body_bottom_y_exclusive']] != [body_bounds[1], body_bounds[3]]:
+                    raise ValueError(f'Body-scale anchor differs from connected component: {name}')
+                reference = core_by_file.get(anchor['reference_frame'])
+                if not reference or (reference['direction'], reference['state'], reference['frame']) != (direction, state, frame):
+                    raise ValueError(f'Body-scale anchor references the wrong core pose: {name}')
+                body_height = reference['output_bbox'][3] - reference['output_bbox'][1]
+                variant_scale = body_height / (body_bounds[3] - body_bounds[1])
+                variant_entries.append(save_variant_frame(
+                    direction, f'{state}_{variant}', frame, path, cell, body_bounds, box,
+                    variant_scale, anchor, body_mask, reference,
+                    provenance_path.relative_to(ROOT).as_posix()))
+    if expected_anchors != set(ANCHORS) or expected_anchors != EXPECTED_VARIANT_FILES:
+        raise ValueError('Body-scale anchor catalog does not match all 112 expected variants')
     entries.extend(variant_entries)
 
 font = ImageFont.load_default()
 cw, ch = 108, 160
 core_files = {entry['file'] for entry in core_entries}
+staged_frame_files = core_files | {entry['file'] for entry in variant_entries}
 contact_sheet_map = {'core_16_poses': 'nhinh_contact_sheet.png'}
 contact_sheet_poses = [(POSES, 'nhinh_contact_sheet.png', '16 core poses')]
 if variant_entries:
@@ -171,7 +258,7 @@ for poses, filename, description in contact_sheet_poses:
         draw.text((12, 60+y*ch+50), direction, fill='#f0e2c8', font=font)
         for x, (state, frame) in enumerate(poses):
             name = f'nhinh_{direction}_{state}_{frame}.png'
-            source = STAGING if name in core_files else ROOT
+            source = STAGING if name in staged_frame_files else ROOT
             image = Image.open(source / name).convert('RGBA').resize((108,126), Image.Resampling.NEAREST)
             contact.paste(image, (160+x*cw, 60+y*ch+4), image)
             draw.rectangle((160+x*cw,60+y*ch,159+(x+1)*cw,59+(y+1)*ch),outline='#34524a')
@@ -187,7 +274,7 @@ baseline_ok = True
 walk_run_groups = {}
 hash_to_files = {}
 for entry in entries:
-    image_path = STAGING / entry['file'] if entry in core_entries else ROOT / entry['file']
+    image_path = STAGING / entry['file'] if entry['file'] in staged_frame_files else ROOT / entry['file']
     image = Image.open(image_path)
     if image.size != (36,42) or image.mode != 'RGBA':
         size_mode_ok = False
@@ -202,6 +289,14 @@ for entry in entries:
     if entry['state'] != 'pulse' and alpha_bounds and alpha_bounds[3] != 41:
         baseline_ok = False
         errors.append(entry['file'] + f': baseline_y {alpha_bounds[3] - 1}')
+    if entry in variant_entries:
+        body_bbox = entry['output_body_bbox']
+        measured_body = largest_component_bounds(image.getchannel('A').point(lambda alpha: 255 if alpha >= 80 else 0))
+        target_height = entry['target_body_height']
+        if body_bbox[3] - body_bbox[1] != target_height or body_bbox[3] != 41:
+            errors.append(entry['file'] + ': mapped body height/baseline differs from core pose')
+        if measured_body[3] - measured_body[1] != target_height or measured_body[3] != 41:
+            errors.append(entry['file'] + ': measured connected body height/baseline differs from core pose')
     if entry['state'] in {'walk', 'run', 'walk_lit', 'run_lit', 'walk_nolamp', 'run_nolamp'}:
         walk_run_groups.setdefault((entry['direction'], entry['state']), []).append((entry['frame'], actual_hash))
 duplicate_frame_hashes = sorted(value for value, files in hash_to_files.items() if len(files) > 1)
@@ -223,7 +318,7 @@ if len(actual_frame_files) != len(entries): errors.append('Unexpected frame file
 expected_frame_count = 240 if has_combined_catalog else 128
 if len(entries) != expected_frame_count: errors.append(f'Unexpected catalog entry count {len(entries)}; expected {expected_frame_count}')
 contact_sheet_names = [name for name in contact_sheet_map.values()]
-report = {'result': 'FAIL' if errors else 'PASS', 'frame_count': len(entries), 'expected_frame_count': expected_frame_count, 'core_frame_count': len(core_entries), 'variant_frame_count': len(variant_entries), 'all_36x42_rgba': size_mode_ok, 'all_non_pulse_baseline_y40': baseline_ok, 'all_walk_run_triplets_unique': walk_run_triplets_unique, 'duplicate_frame_hashes': duplicate_frame_hashes, 'errors': errors, 'contact_sheets': contact_sheet_names, 'visual_review': 'Pending contact-sheet inspection; technical checks do not establish animation quality.'}
+report = {'result': 'FAIL' if errors else 'PASS', 'frame_count': len(entries), 'expected_frame_count': expected_frame_count, 'core_frame_count': len(core_entries), 'variant_frame_count': len(variant_entries), 'all_36x42_rgba': size_mode_ok, 'all_non_pulse_baseline_y40': baseline_ok, 'all_walk_run_triplets_unique': walk_run_triplets_unique, 'all_variant_body_heights_match_core_pose': not any('body height/baseline' in error for error in errors), 'variant_source_cells_checked_for_detached_debris': len(expected_anchors) if has_combined_catalog else 0, 'source_cells_with_excluded_detached_debris': source_debris if has_combined_catalog else [], 'duplicate_frame_hashes': duplicate_frame_hashes, 'errors': errors, 'contact_sheets': contact_sheet_names, 'visual_review': 'NOT_RUN by generator: inspect contact sheets; technical checks do not establish animation quality.'}
 (STAGING / 'validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
 print(json.dumps(report, indent=2))
 if errors:
@@ -232,6 +327,8 @@ if errors:
 
 publish_targets = [
     (STAGING / entry['file'], ROOT / entry['file']) for entry in core_entries
+] + [
+    (STAGING / entry['file'], ROOT / entry['file']) for entry in variant_entries
 ] + [
     (STAGING / name, ROOT / name) for name in contact_sheet_names
 ] + [
