@@ -45,4 +45,4 @@ Local checks on the implementation revision:
 - PASS — `git diff --check`
 - NOT_RUN by worker — uninterrupted real-browser puzzle/transition, same-runtime Continue and explicit reset cases, stair screenshots, dynamic gate-layer screenshots, and post collision proof. Root owns those browser checks on the frozen source revision.
 
-Source commit: pending.
+Verified source commit: `600ac1dc81db369a4c45dec96778ce7daa4c6ece`.
