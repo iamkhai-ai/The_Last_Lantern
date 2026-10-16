@@ -3,6 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
+import { activateWoodsRune, canActivateWoodsRune, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, worldDepth as woodsDepth, type RuneId } from '../data/whisperingWoodsLayout';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -19,7 +20,7 @@ type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: P
 
 const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Trời vẫn chưa sáng sao?' }, { speaker: 'Nhinh', text: 'Mình nhớ con đường vào rừng… Còn đoạn sau thì mờ quá.' }],
-  [{ speaker: 'Lumo', text: 'Đom đóm vẫn đi đúng đường cũ. Tôi nhớ tiếng lá và tiếng trẻ con, nhưng không nhớ rõ hơn.' }, { speaker: 'Nhinh', text: 'Mình xem những bia đá muốn chỉ gì đã. Bài thơ nhắc Trăng, Lá, rồi Sao.' }],
+  [{ speaker: 'Lumo', text: 'Đom đóm vẫn đi đúng đường cũ.' }, { speaker: 'Nhinh', text: 'Cậu biết đường này?' }, { speaker: 'Lumo', text: 'Tôi biết cảm giác của nó. Có tiếng lá, tiếng trẻ con… Nhưng khi cố nhớ thì chỉ còn tiếng lá.' }, { speaker: 'Nhinh', text: 'Mình cứ xem chúng muốn chỉ gì đã.' }],
   [{ speaker: 'Nhinh', text: 'Sách mọc giữa rễ cây. Bốn bức tranh đã bị tháo khỏi vòng ngày đêm.' }, { speaker: 'Lumo', text: 'Người Elaria gửi ký ức vào đây. Hãy xem từng bức dưới ánh đèn và trong bóng tối.' }],
   [{ speaker: 'Nhinh', text: 'Mặt suối không chuyển động. Cây Mẹ đang chờ ba tinh thể.' }, { speaker: 'Lumo', text: 'Những chiếc cầu nhận sức từ ánh sáng. Đặt đèn lên bệ rồi dẫn tia qua các gương.' }],
   [{ speaker: 'Nhinh', text: 'Cửa không có tay mở ở phía này.' }, { speaker: 'Lumo', text: 'Tôi thấy một dấu giống cánh của tôi phía sau khe đá. Cậu gọi tôi tới đó nhé?' }],
@@ -80,6 +81,10 @@ export class CampaignScene extends Phaser.Scene {
   private forestEdgeChargeMs = 0;
   private forestEdgeWasInRing = false;
   private forestEdgeHintStep = '';
+  private woodsHintStep = '';
+  private woodsFlyIndex = 0;
+  private woodsFlyPhase = 0;
+  private woodsMemoryOverlay?: Phaser.GameObjects.Graphics;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -180,13 +185,13 @@ export class CampaignScene extends Phaser.Scene {
       if (this.progress.level === 1) {
         this.activeRevealedRunes.clear();
         this.runeRevealExpiresAt = this.time.now + 5000;
-        for (const [id, pos] of Object.entries(this.getRunePositions())) {
+        for (const [id, pos] of Object.entries(WHISPERING_WOODS.anchors).filter(([id]) => ['moon','leaf','star'].includes(id))) {
           if (Math.hypot(pos.x - x, pos.y - y) <= radius) {
             this.activeRevealedRunes.add(id);
             this.progress.flags[`l1-seen-${id}`] = true;
           }
         }
-        const practice = { x: 80, y: 265 };
+        const practice = WHISPERING_WOODS.anchors.practice;
         if (Math.hypot(practice.x - x, practice.y - y) <= radius) {
           this.activeRevealedRunes.add('practice-leaf');
           this.progress.flags['l1-seen-practice-leaf'] = true;
@@ -209,6 +214,10 @@ export class CampaignScene extends Phaser.Scene {
     this.player.update(dt, !locked, this.lantern.lanternInHand, this.lantern.lanternOn);
     if (this.progress.level === 0 && this.progress.flags['l0-lumo-met']) {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 58, 305) };
+    }
+    if (this.progress.level === 1) {
+      this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 28, 610), y: Phaser.Math.Clamp(this.player.y - 24, 72, 295) };
+      this.updateWoodsFirefly(dt);
     }
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
     else this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
@@ -342,6 +351,12 @@ export class CampaignScene extends Phaser.Scene {
       this.player.setPosition(spawn.x, spawn.y);
       this.forestEdgeChargeMs = 0;
       this.forestEdgeWasInRing = false;
+    } else if (level === 1) {
+      this.player.setFootPlacement(WHISPERING_WOODS.player.footOffsetY, WHISPERING_WOODS.player.body.offsetY, WHISPERING_WOODS.player.body.offsetX, WHISPERING_WOODS.player.body.width, WHISPERING_WOODS.player.body.height);
+      const state = this.normalizeAndPersistWoodsProgress();
+      const saved = typeof savedPlayerX === 'number' && typeof savedPlayerY === 'number' ? { x: savedPlayerX, y: savedPlayerY } : undefined;
+      const spawn = resolveWoodsSpawn(saved, state.open);
+      this.player.setPosition(spawn.x, spawn.y);
     } else {
       this.player.setFootPlacement(0, 27);
       this.player.setPosition(
@@ -1034,9 +1049,13 @@ export class CampaignScene extends Phaser.Scene {
     } else {
       this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(tint[biome] ?? 0xffffff).setDepth(0));
       if (this.progress.level === 1) {
-        this.track(this.add.tileSprite(282, 78, 76, 260, 'ground_dirt').setOrigin(0).setTint(0x9a8f7c).setAlpha(0.72).setDepth(0.4));
-        this.track(this.add.tileSprite(148, 176, 344, 58, 'ground_dirt').setOrigin(0).setTint(0x9a8f7c).setAlpha(0.68).setDepth(0.4));
-        this.track(this.add.tileSprite(256, 158, 128, 92, 'ground_stone').setOrigin(0).setTint(0x95a4a0).setAlpha(0.52).setDepth(0.5));
+        const paths = this.add.graphics().setDepth(0.55);
+        paths.fillStyle(0xb7a17b, 0.23); paths.fillEllipse(280, 278, 214, 112); paths.fillStyle(0xa88f6e, 0.18); paths.fillEllipse(280, 278, 162, 72);
+        paths.lineStyle(50, 0xb4a27e, 0.2); paths.beginPath(); paths.moveTo(280,286); paths.lineTo(215,275); paths.lineTo(178,258); paths.lineTo(240,221); paths.lineTo(320,184); paths.lineTo(386,216); paths.lineTo(450,258); paths.strokePath();
+        paths.lineStyle(48, 0xb4a27e, 0.17); paths.beginPath(); paths.moveTo(280,286); paths.lineTo(205,293); paths.lineTo(120,286); paths.strokePath();
+        paths.lineStyle(48, 0xb4a27e, 0.17); paths.beginPath(); paths.moveTo(386,216); paths.lineTo(402,174); paths.lineTo(510,181); paths.strokePath();
+        paths.fillStyle(0xc4b38d, 0.22); for (const [x,y,r] of [[280,277,52],[120,286,18],[180,258,18],[320,184,18],[450,258,18],[402,174,18],[510,181,18]] as Array<[number,number,number]>) paths.fillEllipse(x,y,r*2,r);
+        this.track(paths);
       } else if (this.progress.level === 2) {
         this.track(this.add.tileSprite(96, 64, 448, 244, 'ground_stone').setOrigin(0).setTint(0xd8c69c).setAlpha(0.42).setDepth(0.4));
         this.track(this.add.tileSprite(276, 76, 88, 232, 'ground_stone').setOrigin(0).setTint(0xefe0ba).setAlpha(0.35).setDepth(0.5));
@@ -1079,6 +1098,15 @@ export class CampaignScene extends Phaser.Scene {
       this.track(this.footprintTrail);
     }
     this.track(decor);
+    if (!hasCampaignBackground && this.progress.level === 1) {
+      for (const tree of WHISPERING_WOODS.trees) {
+        const texture = this.textures.exists('tree_woods') ? 'tree_woods' : 'tree_alt';
+        const image = this.add.image(tree.x, tree.y, texture).setOrigin(0.5,1).setDepth(woodsDepth(tree.y)); image.setData('woodsId', tree.id); this.track(image);
+      }
+      for (const rock of WHISPERING_WOODS.rocks) {
+        const image = this.add.image(rock.x, rock.y, 'rock_blocker').setOrigin(0.5,1).setDepth(woodsDepth(rock.y)); image.setData('woodsId', rock.id); this.track(image);
+      }
+    }
     if (!hasCampaignBackground && this.progress.level === 0) {
       for (const [index, tree] of FOREST_EDGE.objects.trees.entries()) {
         const treeKey = index % 2 === 1 && this.textures.exists('tree_alt') ? 'tree_alt' : 'tree_woods';
@@ -1154,7 +1182,7 @@ export class CampaignScene extends Phaser.Scene {
 
   private addNarrativeProps(level: number): void {
     const props: Array<[string, number, number]> = level === 0 ? [['beacon_stone', 300, 230], ['woods_arch_locked', 486, 166], ['pedestal_empty', 410, 225]]
-      : level === 1 ? [['woods_arch_locked', 320, 70], ['runestone_moon_rev', 180, 204], ['runestone_leaf_rev', 320, 125], ['runestone_star_rev', 460, 204], ['runestone_leaf_rev', 80, 265]]
+      : level === 1 ? []
       : level === 2 ? [['mural_tablet', 320, 72], ['pedestal_empty', 320, 190], ['receiver_off', 530, 194]]
       : level === 3 ? [['pedestal_lit', 120, 205], ['mirror_1', 180, 165], ['mirror_2', 220, 120], ['mirror_3', 345, 236], ['receiver_off', 220, 180], ['stepping_stone', 280, 236], ['stepping_stone', 372, 236]]
       : level === 4 ? [['receiver_off', 320, 85], ['lock_moon_off', 220, 130], ['lock_moon_off', 420, 130], ['lock_sun_off', 320, 218]]
@@ -1179,7 +1207,10 @@ export class CampaignScene extends Phaser.Scene {
         const stamp = this.addLevelArt('footprints-pulse', x, y, 20, 28, 4); stamp?.setAlpha(0.8).setData('forestEdgeId', `footprint-${index}`);
       }
     } else if (level === 1) {
-      this.addLevelArt('poem_fragment', 320, 70, 52, 42, 18);
+      this.addWoodsGate();
+      this.addWoodsArt('practice-leaf', 'runestone_leaf_sleeping', WHISPERING_WOODS.anchors.practice, 40, 52);
+      for (const id of RUNE_ORDER) this.addWoodsArt(`rune-${id}`, `runestone_${id}_sleeping`, WHISPERING_WOODS.anchors[id], 40, 52);
+      this.addWoodsArt('poem', 'poem_fragment', WHISPERING_WOODS.anchors.poem, 48, 40);
       this.updateRuneRevealVisuals();
     } else if (level === 2) {
       this.addLevelArt('room-bookshelf', 74, 143, undefined, undefined, 4);
@@ -1246,15 +1277,21 @@ export class CampaignScene extends Phaser.Scene {
         }
       }, () => true, 'woods_arch_open');
     } else if (level === 1) {
-      action('poem', 'E · Đọc bài thơ', 320, 70, () => { this.progress.flags['l1-poem-read'] = true; this.save(); this.say([{ speaker: 'Hệ thống', text: 'Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.' }, { speaker: 'Nhinh', text: 'Trăng, Lá, Sao. Ba hình này cũng có ở bia ngoài kia.' }]); }, undefined, 'mural_tablet');
-      const positions = this.getRunePositions();
-      action('practice-rune', 'E · Chạm bia lá đã soi', 80, 265, () => {
-        this.progress.flags['l1-practice-complete'] = true;
-        this.save();
-        this.say([{ speaker: 'Nhinh', text: 'Xung sáng làm hiện ký hiệu. Chạm vào thì bia ngân lên.' }, { speaker: 'Lumo', text: 'Những bia còn lại chắc cũng đang chờ như vậy.' }]);
-      }, () => !this.progress.flags['l1-practice-complete'] && this.activeRevealedRunes.has('practice-leaf'), 'runestone_leaf_lit');
-      (['moon', 'leaf', 'star'] as const).forEach((id, index) => action(`rune-${id}`, `E · Cổ tự ${id === 'moon' ? 'Trăng' : id === 'leaf' ? 'Lá' : 'Sao'}`, positions[id].x, positions[id].y, () => this.activateRune(id, index), () => this.progress.flags['l1-open'] || this.activeRevealedRunes.has(id) || this.progress.flags[`l1-activated-${id}`], `runestone_${id}_lit`));
-      action('stairs', 'E · Xuống thư viện', 320, 70, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Có một căn phòng dưới gốc cây.' }, { speaker: 'Lumo', text: 'Thư viện. Tôi nhớ từ đó.' }]), () => this.progress.flags['l1-open'], 'woods_arch_open');
+      const stands=WHISPERING_WOODS.stands;
+      action('poem', 'E · Đọc mẩu bia thơ', stands.poem.x, stands.poem.y, () => {
+        const first=!this.progress.flags['l1-poem-read']; this.progress.flags['l1-poem-read']=true; this.save();
+        this.say(first ? [{speaker:'Hệ thống',text:'Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.'},{speaker:'Nhinh',text:'Trăng, Lá, Sao. Ba hình này cũng có ở bia ngoài kia.'},{speaker:'Lumo',text:'Nếu còn thấy được chúng. Nét khắc đã ngủ lâu lắm rồi.'}] : [{speaker:'Hệ thống',text:'Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.'}]);
+      }, undefined, 'mural_tablet');
+      action('practice-rune', 'E · Kiểm tra bia tập', stands.practice.x, stands.practice.y, () => {
+        if (this.progress.flags['l1-practice-complete']) { this.say([{speaker:'Nhinh',text:'Bia tập đã ngân lên khi ánh sáng soi rõ ký hiệu.'}]); return; }
+        if (!this.activeRevealedRunes.has('practice-leaf')) { this.say([{speaker:'Nhinh',text:'Nét khắc đang ngủ. Thử dùng SPACE để soi bằng xung sáng.'}]); return; }
+        this.progress.flags['l1-practice-complete']=true; this.save(); this.say([{speaker:'Nhinh',text:'Xung sáng làm hiện ký hiệu. Chạm vào thì bia ngân một tiếng.'},{speaker:'Lumo',text:'Những bia còn lại chắc cũng đang chờ như vậy.'}]);
+      }, undefined, 'runestone_leaf_lit');
+      for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`);
+      action('stairs', () => this.progress.flags['l1-open'] ? 'E · Xuống Thư viện' : 'E · Kiểm tra cổng', stands.exit.x, stands.exit.y, () => {
+        if (!this.progress.flags['l1-open']) { this.say([{speaker:'Nhinh',text:'Rễ cây vẫn quấn kín lối xuống.'},{speaker:'Lumo',text:'Cổng đang chờ điều gì đó được nhớ lại.'}]); return; }
+        this.nextLevel([{speaker:'Nhinh',text:'Có một căn phòng dưới gốc cây.'},{speaker:'Lumo',text:'Thư viện. Tôi nhớ từ đó.'},{speaker:'Nhinh',text:'Vậy xuống xem rừng đã ghi lại những gì.'}]);
+      }, undefined, 'woods_arch_open');
     } else if (level === 2) {
       const stones = ['bird', 'leaf', 'boat', 'seed'];
       const xs = [170, 270, 370, 470];
@@ -1455,41 +1492,69 @@ export class CampaignScene extends Phaser.Scene {
     if (dt > 0 && this.time.now - this.lastGateCheck > 1000) { this.lastGateCheck = this.time.now; }
   }
 
-  private activateRune(id: 'moon' | 'leaf' | 'star', index: number): void {
-    if (this.progress.flags['l1-open']) {
-      this.say([{ speaker: 'Nhinh', text: 'Chúng vẫn sáng. Đường này sẽ còn mở cho người đến sau.' }]);
-      return;
+  private normalizeAndPersistWoodsProgress(): ReturnType<typeof normalizeRuneProgress> {
+    const state = normalizeRuneProgress({ sequence: this.value('rune-sequence'), activated: Object.fromEntries(RUNE_ORDER.map((id) => [id, this.progress.flags[`l1-activated-${id}`] === true])), open: this.progress.flags['l1-open'] === true });
+    let changed = this.value('rune-sequence') !== state.sequence || this.progress.flags['l1-open'] !== state.open;
+    this.progress.counters['rune-sequence'] = state.sequence;
+    this.progress.flags['l1-open'] = state.open;
+    for (const id of RUNE_ORDER) {
+      if (this.progress.flags[`l1-activated-${id}`] !== state.activated[id]) changed = true;
+      this.progress.flags[`l1-activated-${id}`] = state.activated[id];
     }
-    const expected = [0, 1, 2];
-    const current = this.value('rune-sequence');
-    if (this.progress.flags[`l1-activated-${id}`]) {
-      this.say([{ speaker: 'Nhinh', text: 'Ký hiệu này đã được ghi vào sổ và ngân đúng lúc.' }]);
-      return;
+    if (changed) this.save();
+    return state;
+  }
+
+  private activateRune(id: RuneId): void {
+    if (!canActivateWoodsRune(this.activeRevealedRunes.has(id), this.progress.flags[`l1-activated-${id}`]===true)) {
+      this.say([{ speaker:'Nhinh', text:'Nét khắc đang ngủ. Dùng SPACE để soi bia bằng xung sáng trước.' }]); return;
     }
-    if (expected[current] === index) {
-      this.progress.flags[`l1-activated-${id}`] = true;
-      this.progress.counters['rune-sequence'] = current + 1;
-      this.updateRuneRevealVisuals();
-      if (current === 2) {
-        this.progress.flags['l1-open'] = true;
-        this.progress.flags['l1-memory-seen'] = true;
-        this.say([{ speaker: 'Nhinh', text: 'Những rễ cây đang nới ra.' }, { speaker: 'Lumo', text: 'Nhìn kìa… có một người lớn đang treo đèn lên cành.' }, { speaker: 'Ký Ức', text: 'Mai mình lại ra đây nhé? Khi mặt trời lên. Đêm nay để rừng ngủ đã.' }, { speaker: 'Nhinh', text: 'Nơi này từng có bình minh.' }, { speaker: 'Lumo', text: 'Tôi chỉ thấy rất quen. Như một bài hát thiếu mất đoạn đầu.' }]);
+    const before = this.normalizeAndPersistWoodsProgress();
+    const result = activateWoodsRune(before,id);
+    if (result.kind === 'open') { this.say([{speaker:'Nhinh',text:'Chúng vẫn sáng. Đường này sẽ còn mở cho người đến sau.'}]); return; }
+    if (result.kind === 'repeat') { this.say([{speaker:'Nhinh',text:'Bia này vẫn sáng. Chuỗi ký hiệu không đổi.'}]); return; }
+    this.progress.counters['rune-sequence']=result.state.sequence;
+    this.progress.flags['l1-open']=result.state.open;
+    for (const rune of RUNE_ORDER) this.progress.flags[`l1-activated-${rune}`]=result.state.activated[rune];
+    this.save(); this.updateRuneRevealVisuals(); this.hintIndex=0;
+    if (result.kind==='wrong' || result.kind==='reset') {
+      this.say([{speaker:'Nhinh',text:'Mình đã làm đứt chuỗi.'},{speaker:'Lumo',text:'Không sao. Đom đom vẫn đang kể lại từ đầu.'}]); return;
+    }
+    if (result.state.sequence===1) { this.say([{speaker:'Nhinh',text:'Âm thanh này khác lúc thử.'},{speaker:'Lumo',text:'Một tiếng gọi đã được nghe thấy.'}]); return; }
+    if (result.state.sequence===2) { this.say([{speaker:'Lumo',text:'Rễ trên cổng đang nới ra. Chúng ta đang đi đúng đường.'}]); return; }
+    if (result.state.sequence===3) {
+      if (this.progress.flags['l1-memory-seen'] !== true) {
+        this.progress.flags['l1-memory-seen']=true; this.save(); this.showWoodsMemory();
       }
-      else this.say([{ speaker: 'Nhinh', text: 'Âm thanh này khác lúc thử.' }, { speaker: 'Lumo', text: 'Một tiếng gọi đã được nghe thấy.' }]);
-      this.save();
-    } else if (current !== 0) {
-      this.progress.counters['rune-sequence'] = 0;
-      for (const rune of ['moon', 'leaf', 'star']) this.progress.flags[`l1-activated-${rune}`] = false;
-      this.activeRevealedRunes.clear();
-      this.runeRevealExpiresAt = 0;
-      this.updateRuneRevealVisuals(); this.save();
-      this.say([{ speaker: 'Nhinh', text: 'Mình đã làm đứt chuỗi.' }, { speaker: 'Lumo', text: 'Không sao. Đom đóm vẫn đang kể lại từ đầu.' }]);
-    } else {
-      this.activeRevealedRunes.clear();
-      this.runeRevealExpiresAt = 0;
-      this.updateRuneRevealVisuals();
-      this.say([{ speaker: 'Nhinh', text: `${id === 'moon' ? 'Trăng' : id === 'leaf' ? 'Lá' : 'Sao'}… chưa phải dấu mở đầu.` }]);
     }
+  }
+
+  private showWoodsMemory(): void {
+    const overlay=this.add.graphics().setDepth(80); overlay.fillStyle(0xf3a84f,0.24); overlay.fillRect(0,0,640,360);
+    this.woodsMemoryOverlay=overlay; this.objects.push(overlay);
+    const vignetteKey=getLevelArtKey(1,'memory_vignette');
+    if(vignetteKey&&this.textures.exists(vignetteKey)){const vignette=this.add.image(480,248,vignetteKey).setOrigin(.5,1).setDisplaySize(128,64).setDepth(80);vignette.setData('woodsId','memory-vignette');this.objects.push(vignette);}
+    const clear=()=>{ this.woodsMemoryOverlay?.destroy(); this.woodsMemoryOverlay=undefined; this.objects.find((o)=>o.getData('woodsId')==='memory-vignette')?.destroy(); };
+    this.say([
+      {speaker:'Đứa trẻ trong ký ức',text:'Mai mình lại ra đây nhé?'},
+      {speaker:'Người lớn trong ký ức',text:'Khi mặt trời lên. Đêm nay để rừng ngủ đã.'},
+      {speaker:'Nhinh',text:'Nơi này từng có bình minh.'},
+      {speaker:'Lumo',text:'Và có người đợi nó mỗi ngày.'},
+      {speaker:'Nhinh',text:'Giọng người vừa rồi… cậu có nhận ra không?'},
+      {speaker:'Lumo',text:'Tôi chỉ thấy rất quen. Như một bài hát thiếu mất đoạn đầu.'},
+    ],clear);
+  }
+
+  private updateWoodsFirefly(dt: number): void {
+    const fly=this.objects.find((o)=>o.getData('woodsId')==='firefly') as Phaser.GameObjects.Arc | undefined;
+    const glow=this.objects.find((o)=>o.getData('woodsId')==='firefly-glow') as Phaser.GameObjects.Arc | undefined;
+    if (!fly || !glow) return;
+    const route=WHISPERING_WOODS.fireflyRoute, target=route[(this.woodsFlyIndex+1)%route.length], origin=route[this.woodsFlyIndex];
+    this.woodsFlyPhase+=dt;
+    if (this.woodsFlyPhase>=2800) { this.woodsFlyPhase=0; this.woodsFlyIndex=(this.woodsFlyIndex+1)%route.length; }
+    const progress=Math.min(1,this.woodsFlyPhase/1500), t=this.woodsFlyPhase<1500?progress:1;
+    const x=origin.x+(target.x-origin.x)*t, y=origin.y+(target.y-origin.y)*t;
+    fly.setPosition(x,y); glow.setPosition(x,y);
   }
 
   private inspectStone(stone: string): void {
@@ -1632,7 +1697,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private addAction(id: string, label: string | (() => string), x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone'): void {
-    if (id.includes('exit') || id === 'stairs') {
+    if ((id.includes('exit') || id === 'stairs') && this.progress.level !== 1) {
       const hasGateProp = this.objects.some((object) =>
         object instanceof Phaser.GameObjects.Image
         && (object.getData('forestEdgeId') === 'gate'
@@ -1644,7 +1709,9 @@ export class CampaignScene extends Phaser.Scene {
       );
       if (!hasGateProp) this.addProp(texture, x, y, 0.8);
     }
-    this.interactions.register({ id, x, y, promptY: id === 'gate' && this.progress.level === 0 ? 76 : undefined, radius: this.progress.level === 0 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
+    const glyph=id==='poem'||id==='practice-rune'||id.startsWith('rune-');
+    const glyphAnchor=id==='poem'?WHISPERING_WOODS.anchors.poem:id==='practice-rune'?WHISPERING_WOODS.anchors.practice:id.startsWith('rune-')?WHISPERING_WOODS.anchors[id.slice(5) as RuneId]:undefined;
+    this.interactions.register({ id, x, y, promptY: this.progress.level===1&&id==='stairs'?WHISPERING_WOODS.gate.promptY:this.progress.level===1&&glyph&&glyphAnchor?glyphAnchor.y-64:id === 'gate' && this.progress.level === 0 ? 76 : undefined, radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
   }
 
   private clearCampaignColliders(): void {
@@ -1679,6 +1746,18 @@ export class CampaignScene extends Phaser.Scene {
       });
       const barrier = FOREST_EDGE.objects.gate.threshold;
       this.addCampaignBarrier('forest-gate-threshold', barrier.x + barrier.width / 2, barrier.y + barrier.height / 2, barrier.width, barrier.height, !this.progress.flags['l0-gate-open']);
+    } else if (level === 1) {
+      this.addCampaignBarrier('woods-north-boundary',320,91,640,10);
+      this.addCampaignBarrier('woods-south-boundary',320,315,640,10);
+      this.addCampaignBarrier('woods-west-boundary',5,200,10,220);
+      this.addCampaignBarrier('woods-east-boundary',635,200,10,220);
+      [...WHISPERING_WOODS.trees,...WHISPERING_WOODS.rocks].forEach((obstacle)=>{
+        const r=obstacle.footprint; this.addCampaignBarrier(`woods-${obstacle.id}`,r.x+r.width/2,r.y+r.height/2,r.width,r.height);
+      });
+      for(const [id,r] of Object.entries(WHISPERING_WOODS.footprints)) this.addCampaignBarrier(`woods-footprint-${id}`,r.x+r.width/2,r.y+r.height/2,r.width,r.height);
+      for (const [id,r] of [['woods-gate-left',WHISPERING_WOODS.gate.leftPost],['woods-gate-right',WHISPERING_WOODS.gate.rightPost],['woods-gate-backing',WHISPERING_WOODS.gate.backing],['woods-gate-threshold',WHISPERING_WOODS.gate.threshold]] as const) {
+        this.addCampaignBarrier(id,r.x+r.width/2,r.y+r.height/2,r.width,r.height,id==='woods-gate-threshold'&&!this.progress.flags['l1-open']);
+      }
     } else if (level === 3) {
       // The creek runs from the top to the bottom edge; the only crossing is its narrow stone lane.
       this.addCampaignBarrier('creek-upper-water', 332.5, 110, 175, 220);
@@ -1766,6 +1845,10 @@ export class CampaignScene extends Phaser.Scene {
     };
     if (this.progress.level === 0) {
       setEnabled('forest-gate-threshold', !this.progress.flags['l0-gate-open']);
+    } else if (this.progress.level === 1) {
+      if (this.progress.flags['l1-open']) setEnabled('woods-gate-threshold',false);
+      else setEnabled('woods-gate-threshold',true);
+      setEnabled('woods-gate-left',true); setEnabled('woods-gate-right',true);
     } else if (this.progress.level === 3) {
       setEnabled('creek-bridge-a-gate', !this.progress.flags['l3-latch-a']);
       const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
@@ -2002,23 +2085,25 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private refreshCampaignArtVisuals(level: number): void {
-    if (level === 0 || level === 1) {
-      const gateOpen = level === 0 ? this.progress.flags['l0-gate-open'] === true : this.progress.flags['l1-open'] === true;
-      const gateY = level === 0 ? FOREST_EDGE.objects.gate.anchor.y : 70;
-      const gateX = level === 0 ? FOREST_EDGE.objects.gate.anchor.x : 320;
-      const openArt = getLevelArtKey(level === 0 ? 1 : level, 'woods_arch_open_passage');
-      const gate = level === 0
-        ? this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image
-          && object.getData('forestEdgeId') === 'gate' && Math.abs(object.x - gateX) < 0.1 && Math.abs(object.y - gateY) < 0.1)
-        : this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image
-          && Math.abs(object.x - gateX) < 0.1 && Math.abs(object.y - gateY) < 0.1
-          && (object.texture.key === 'woods_arch_locked' || object.texture.key === 'woods_arch_open' || object.texture.key.includes('woods_arch_open_passage')));
+    if (level === 0) {
+      const gateOpen = this.progress.flags['l0-gate-open'] === true;
+      const gateY = FOREST_EDGE.objects.gate.anchor.y;
+      const gateX = FOREST_EDGE.objects.gate.anchor.x;
+      const openArt = getLevelArtKey(1, 'woods_arch_open_passage');
+      const gate = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image
+        && object.getData('forestEdgeId') === 'gate' && Math.abs(object.x - gateX) < 0.1 && Math.abs(object.y - gateY) < 0.1);
       if (gate) {
         const texture = gateOpen && openArt && this.textures.exists(openArt) ? openArt : gateOpen ? 'woods_arch_open' : 'woods_arch_locked';
-        if (level === 0) this.setForestEdgeGateTextures(texture);
-        else if (gate.texture.key !== texture) gate.setTexture(texture);
-        if (level === 0) gate.setData('forestEdgeId', 'gate');
+        this.setForestEdgeGateTextures(texture);
+        gate.setData('forestEdgeId', 'gate');
       }
+    } else if (level===1) {
+      const source=getLevelArtKey(1,this.progress.flags['l1-open']?'woods_arch_open_passage':'woods_arch_locked')??(this.progress.flags['l1-open']?'woods_arch_open':'woods_arch_locked');
+      for(const layer of ['base','header','left-post','right-post'] as const){
+        const image=this.objects.find((o):o is Phaser.GameObjects.Image=>o instanceof Phaser.GameObjects.Image&&o.getData('woodsId')===`gate-${layer}`);
+        const key=this.woodsGateLayerTexture(source,layer);if(image&&image.texture.key!==key)image.setTexture(key);
+      }
+      this.updateRuneRevealVisuals();
     }
     if (level === 0) {
       const tablet = this.objects.find((object) => object.getData('forestEdgeId') === 'tablet');
@@ -2218,19 +2303,18 @@ export class CampaignScene extends Phaser.Scene {
   private getRunePositions(): Record<string, { x: number; y: number }> { return { moon: { x: 180, y: 204 }, leaf: { x: 320, y: 125 }, star: { x: 460, y: 204 } }; }
 
   private updateRuneRevealVisuals(): void {
-    for (const id of ['moon', 'leaf', 'star']) {
-      const position = this.getRunePositions()[id];
-      const image = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && Math.abs(object.x - position.x) < 0.1 && Math.abs(object.y - position.y) < 0.1);
+    for (const id of RUNE_ORDER) {
+      const image = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && object.getData('woodsId')===`rune-${id}`);
       const active = this.progress.flags[`l1-activated-${id}`] === true;
-      const revealed = active || this.activeRevealedRunes.has(id) || this.progress.flags[`l1-seen-${id}`] === true;
+      const revealed = active || this.activeRevealedRunes.has(id);
       const art = getLevelArtKey(1, `runestone_${id}_${active ? 'active' : revealed ? 'revealed' : 'sleeping'}`);
-      if (image) image.setTexture(art && this.textures.exists(art) ? art : `runestone_${id}_${revealed ? 'lit' : 'rev'}`);
+      if (image && art && this.textures.exists(art) && image.texture.key!==art) image.setTexture(art);
     }
-    const practice = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && Math.abs(object.x - 80) < 0.1 && Math.abs(object.y - 265) < 0.1);
+    const practice = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && object.getData('woodsId')==='practice-leaf');
     const practiceActive = this.progress.flags['l1-practice-complete'] === true;
-    const practiceRevealed = practiceActive || this.activeRevealedRunes.has('practice-leaf') || this.progress.flags['l1-seen-practice-leaf'] === true;
+    const practiceRevealed = practiceActive || this.activeRevealedRunes.has('practice-leaf');
     const practiceArt = getLevelArtKey(1, `runestone_leaf_${practiceActive ? 'active' : practiceRevealed ? 'revealed' : 'sleeping'}`);
-    if (practice) practice.setTexture(practiceArt && this.textures.exists(practiceArt) ? practiceArt : `runestone_leaf_${practiceRevealed ? 'lit' : 'rev'}`);
+    if (practice && practiceArt && this.textures.exists(practiceArt) && practice.texture.key!==practiceArt) practice.setTexture(practiceArt);
   }
 
   private showRuneJournal(): void {
@@ -2240,9 +2324,11 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.flags['l1-seen-practice-leaf']) labels['practice-leaf'] = 'Lá — bia tập bên lối vào';
     if (this.progress.flags['l1-seen-practice-leaf']) discovered.push('practice-leaf');
     const notes = discovered.length ? `Các dấu đã ghi:\n${discovered.map((id) => `• ${labels[id]}`).join('\n')}` : 'Sổ tay chưa ghi cổ tự nào.';
-    const poem = this.progress.flags['l1-poem-read'] ? '\n\nBài thơ bên cổng: “Trăng, Lá, rồi Sao.”' : '';
-    const text = discovered.length || this.progress.flags['l1-poem-read']
-      ? `${notes}${poem}`
+    const practice=this.progress.flags['l1-practice-complete']?'Bia tập: đã soi và ngân lên.':'Bia tập: chưa hoàn thành.';
+    const poem = this.progress.flags['l1-poem-read'] ? '\n\nBài thơ: “Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.”' : '';
+    const memory=this.progress.flags['l1-memory-seen']?'\n\nKý ức: một đứa trẻ hẹn ngày mai; người lớn treo đèn trước khi khu rừng ngủ.':'';
+    const text = discovered.length || this.progress.flags['l1-poem-read'] || this.progress.flags['l1-practice-complete'] || this.progress.flags['l1-memory-seen']
+      ? `${notes}\n${practice}${poem}${memory}`
       : 'Sổ tay chưa ghi cổ tự nào. Dùng SPACE để Pulse gần các bia đá.';
     this.say([{ speaker: 'Nhinh', text: `Sổ tay của mình.\n${text}` }]);
   }
@@ -2268,15 +2354,40 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private drawFireflyRoute(): void {
-    const route = this.add.graphics().setDepth(3);
-    route.lineStyle(1, 0xffe680, 0.22);
-    route.beginPath(); route.moveTo(180, 204); route.lineTo(320, 125); route.lineTo(460, 204); route.strokePath();
-    this.track(route);
-    for (let index = 0; index < 3; index += 1) {
-      const firefly = this.add.circle([180, 320, 460][index], [204, 125, 204][index], 3, 0xffe680, 0.9).setDepth(6);
-      this.tweens.add({ targets: firefly, alpha: 0.25, scale: 1.7, duration: 650, yoyo: true, repeat: -1, delay: index * 220 });
-      this.track(firefly);
+    this.woodsFlyIndex = 0; this.woodsFlyPhase = 0;
+    const glow = this.add.circle(180, 248, 10, 0xffd96d, 0.12).setDepth(5); glow.setData('woodsId','firefly-glow'); this.track(glow);
+    const firefly = this.add.circle(180, 248, 3, 0xfff0a1, 0.95).setDepth(6); firefly.setData('woodsId','firefly'); this.track(firefly);
+    this.tweens.add({ targets: [glow, firefly], alpha: { from: 0.4, to: 1 }, scale: { from: 0.8, to: 1.25 }, duration: 650, yoyo: true, repeat: -1 });
+  }
+
+  private addWoodsArt(id: string, filename: string, anchor: {x:number;y:number}, width: number, height: number): Phaser.GameObjects.Image | null {
+    const key = getLevelArtKey(1, filename);
+    if (!key || !this.textures.exists(key)) return null;
+    const image = this.add.image(anchor.x, anchor.y, key).setOrigin(0.5,1).setDisplaySize(width,height).setDepth(woodsDepth(anchor.y));
+    image.setData('woodsId', id); this.objects.push(image); return image;
+  }
+
+  private addWoodsGate(): void {
+    const anchor = WHISPERING_WOODS.anchors.gate;
+    const source = getLevelArtKey(1, this.progress.flags['l1-open'] ? 'woods_arch_open_passage' : 'woods_arch_locked') ?? (this.progress.flags['l1-open'] ? 'woods_arch_open' : 'woods_arch_locked');
+    for (const layer of ['base','header','left-post','right-post'] as const) {
+      const key = this.woodsGateLayerTexture(source,layer);
+      const depth = layer==='base' ? 3 : woodsDepth(anchor.y);
+      const image=this.add.image(anchor.x,anchor.y,key).setOrigin(0.5,1).setDisplaySize(128,126).setDepth(depth);
+      image.setData('woodsId',`gate-${layer}`); this.objects.push(image);
     }
+  }
+
+  private woodsGateLayerTexture(source: string, layer: 'base'|'header'|'left-post'|'right-post'): string {
+    const key=`woods-gate-l1-${source}-${layer}`; if(this.textures.exists(key)) return key;
+    const sourceImage=this.textures.get(source).getSourceImage() as CanvasImageSource;
+    const dimensions=this.textures.get(source).getSourceImage() as {naturalWidth?:number;naturalHeight?:number;width:number;height:number};
+    const sw=dimensions.naturalWidth||dimensions.width, sh=dimensions.naturalHeight||dimensions.height;
+    const scale=Math.min(128/sw,126/sh),dw=sw*scale,dh=sh*scale,ox=(128-dw)/2,oy=126-dh;
+    const texture=this.textures.createCanvas(key,128,126); if(!texture)return source;
+    const ctx=texture.getContext();ctx.clearRect(0,0,128,126);ctx.save();
+    if(layer==='header')ctx.rect(0,0,128,47);else if(layer==='left-post')ctx.rect(0,0,38,126);else if(layer==='right-post')ctx.rect(90,0,38,126);else ctx.rect(0,0,128,126);
+    ctx.clip();ctx.drawImage(sourceImage,ox,oy,dw,dh);ctx.restore();texture.refresh();return key;
   }
 
   private showHint(): void {
@@ -2297,6 +2408,19 @@ export class CampaignScene extends Phaser.Scene {
       this.hintIndex = Math.min(this.hintIndex + 1, stageHints.length - 1);
       this.say([{ speaker: 'Hệ thống', text: message }]);
       return;
+    }
+    if (this.progress.level===1) {
+      const count=this.value('rune-sequence');
+      const step=this.progress.flags['l1-open']?'exit':count===0?'observe':count===1?'next-leaf':count===2?'next-star':'sequence';
+      if(step!==this.woodsHintStep){this.woodsHintStep=step;this.hintIndex=0;}
+      const hints:Record<string,string[]>={
+        observe:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Bài thơ cạnh cổng cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
+        sequence:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Bài thơ cạnh cổng cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
+        'next-leaf':['Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.','Bia kế tiếp nằm giữa phía trên. Dùng Pulse để đọc dấu trước khi chạm.','Bước tiếp theo là Lá ở giữa phía trên. Soi bia rồi kích hoạt khi nét còn sáng.'],
+        'next-star':['Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.','Bia cuối cùng nằm bên phải. Dùng Pulse để đọc dấu trước khi chạm.','Bước tiếp theo là Sao bên phải. Soi bia rồi kích hoạt khi nét còn sáng.'],
+        exit:['Cổng đã mở. Hãy bước tới lối đi giữa hai trụ đá.','Bậc thang dẫn xuống dưới cổng.','Đến lối đi và nhấn E để xuống Thư viện.'],
+      };
+      const choices=hints[step],message=choices[Math.min(this.hintIndex,choices.length-1)];this.hintIndex=Math.min(this.hintIndex+1,choices.length-1);this.say([{speaker:'Hệ thống',text:message}]);return;
     }
     const hints = this.progress.level === 9 && this.progress.flags['l9-roots']
       ? (this.progress.flags['l9-overload'] ? ['Tắt đèn bằng F để giải phóng nguồn sáng đang quá tải.'] : ['Nhận lại đèn ở bệ dẫn sáng để đưa nguồn sáng trở về tay Nhinh.', 'Khi ánh sáng dâng quá ngưỡng, nhấn F để tắt đèn và khép vòng.'])
@@ -2319,13 +2443,19 @@ export class CampaignScene extends Phaser.Scene {
       if (this.objectiveText) this.objectiveText.setText(objective[step]);
       if (this.controlsText) this.controlsText.setText(`WASD Move    E Interact${this.progress.lanternPickedUp ? '    F Lantern' : ''}${this.progress.flags['l0-tablet-read'] ? '    SPACE Pulse' : ''}    J Journal    H Hint    ESC Pause`);
     }
+    if(this.progress.level===1){
+      const count=this.value('rune-sequence');
+      const objective=this.progress.flags['l1-open']?'Cổng đã mở. Đến bậc thang và nhấn E để xuống Thư viện.':count>0?`Chuỗi cổ tự: ${count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.`:'Quan sát đàn đom đóm và thử soi bia tập bằng SPACE.';
+      if(this.objectiveText)this.objectiveText.setText(objective);
+      if(this.controlsText)this.controlsText.setText('WASD Move    E Interact    SPACE Pulse    J Journal    H Hint    ESC Pause');
+    }
     if (this.titleText) this.titleText.setText(this.progress.level === 8 && this.activeObservatoryRoom
       ? `09  ${OBSERVATORY_ROOMS[this.activeObservatoryRoom].title}   ·   ${level.chapter}`
       : `${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
     if (this.statusText) {
       const levelIndex = this.progress.level;
       const state = levelIndex === 0 ? `Bia: ${this.progress.flags['l0-tablet-read'] ? 'đã đọc' : 'chưa đọc'} · Dấu chân: ${this.progress.flags['l0-footprints-found'] ? 'đã thấy' : 'chưa thấy'} · Cổng: ${this.progress.flags['l0-gate-open'] ? 'mở' : 'đóng'}`
-        : levelIndex === 1 ? `Cổ tự: ${this.value('rune-sequence')}/3 · Bia tập: ${this.progress.flags['l1-practice-complete'] ? 'đã thử' : 'SPACE soi rồi E chạm'} · J sổ tay`
+        : levelIndex === 1 ? `Cổ tự: ${this.value('rune-sequence')}/3 · Bia tập: ${this.progress.flags['l1-practice-complete'] ? 'đã thử' : 'chưa thử'} · Cổng: ${this.progress.flags['l1-open']?'mở':'đóng'} · J sổ tay`
         : levelIndex === 2 ? `Phiến: ${this.value('memory-slots') ?? 0}/4 · Hai lớp: ${['bird', 'leaf', 'boat', 'seed'].filter((s) => this.progress.flags[`l2-${s}-lit`] && this.progress.flags[`l2-${s}-dark`]).length}/4 · Tranh sau vách: ${this.progress.flags['l2-fifth-viewed'] ? 'đã xem' : 'chưa xem'}`
         : levelIndex === 3 ? `Cầu: ${Number(Boolean(this.progress.flags['l3-latch-a'])) + Number(Boolean(this.progress.flags['l3-latch-b']))}/2 · G1 ${this.value('g1')} / G2 ${this.value('g2')} / G3 ${this.value('g3')}`
         : levelIndex === 4 ? `Cửa: ${Number(Boolean(this.progress.flags['l4-latch-a'])) + Number(Boolean(this.progress.flags['l4-latch-b'])) + Number(Boolean(this.progress.flags['l4-latch-c']))}/3 · Lumo: ${this.progress.flags['l4-reunited'] ? 'đã trở lại' : 'theo mốc'}`
