@@ -1,0 +1,40 @@
+{
+  "sheet": "upright_lit",
+  "generation_tool": "built-in image_gen",
+  "prompt": "Use case: stylized-concept\nAsset type: pixel-art game character sprite sheet\nPrimary request: Create one clean 4-column by 2-row sprite sheet of the NEW Nhinh character, oriented THREE-QUARTER BACK VIEW facing diagonally UP-RIGHT (45 degrees away from viewer toward screen upper-right). Use the provided contact sheet and down-facing new frames to match the outfit, palette, body proportions, pixel scale, and lantern design; also use the prior left-facing generated sheet as a visual consistency reference where useful.\nScene/backdrop: truly transparent background.\nSubject: The same small cloaked child adventurer in every occupied cell: cream hood and cloak, brown hair where visible from this angle, red scarf trailing behind, dark brown boots. Each occupied pose holds the small handheld lantern in the forward hand; it is visibly lit with a crisp bright golden core and only a small contained warm glow.\nStyle/medium: crisp pixel art with hard edges, limited palette, deliberate pixel clusters, matching the coarse pixel scale of the references.\nComposition/framing: 4 columns x 2 rows, eight equal transparent cells with no borders, gaps, or overlap. Reading left-to-right, top-to-bottom: idle; walk 0; walk 1; walk 2; run 0; run 1; run 2; empty fully transparent cell. One full character in each of the first seven cells, centered horizontally, with identical apparent height and scale. Keep every foot on one common baseline within the row. Leave enough transparent padding that no character, scarf, lantern, or glow crosses cell boundaries. The first orientation clause defines the facing direction for every pose; keep all 7 poses aimed the same way. Walk poses are three distinct alternating steps. Run poses are three distinct faster, longer-stride poses. No animation labels, numbering, or text.\nLighting/mood: small lantern casts a clear warm amber light on the nearby hand and cloak\nColor palette: muted cream hood/cloak, deep brown hair, red scarf, dark warm-brown boots, and for the lit variant only, amber-gold lantern matching the references.\nMaterials/textures: clean pixel clusters and readable silhouette at 36x42 after nearest-neighbor reduction.\nConstraints: transparent alpha; no ground/shadow; same character design across poses; coherent feet baseline; no detached details.\nAvoid: photorealism, 3D rendering, soft painterly blur, anti-aliasing, solid background, grid lines, words, watermark, extra characters, and any pose or orientation inconsistent with THREE-QUARTER BACK VIEW facing diagonally UP-RIGHT (45 degrees away from viewer toward screen upper-right).",
+  "referenced_image_paths": [
+    "assets/character/nhinh_contact_sheet.png",
+    "assets/character/nhinh_down_idle_0.png",
+    "assets/character/nhinh_down_lantern_on_0.png",
+    "assets/character/source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png"
+  ],
+  "source_image_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a14310-b818-7f61-a578-d31a7ce6e8e4\\exec-85e54088-3ebc-41ec-b796-c97d3ea0c3ee.png",
+  "source_image_output_hint": "Generated images are saved to C:\\Users\\Admin\\.codex\\generated_images\\01a14310-b818-7f61-a578-d31a7ce6e8e4 as C:\\Users\\Admin\\.codex\\generated_images\\01a14310-b818-7f61-a578-d31a7ce6e8e4\\exec-85e54088-3ebc-41ec-b796-c97d3ea0c3ee.png by default. If you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.",
+  "copied_source_sheet_path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\character\\source_sheets\\state_variants\\worker_lr\\nhinh_upright_lit_sheet.png",
+  "source_sheet_sha256": "d4d618f7b8b17928edd36784bd84fa44c33f91834cf7b24641041fd00731d9bf",
+  "final_png_sha256": {
+    "assets/character/nhinh_upright_idle_lit_0.png": "bca207f651085b359b7d4c65abbf73d2ef5092c44747bc92db1aa82c911c1811",
+    "assets/character/nhinh_upright_walk_lit_0.png": "9309b51611e79e667e478aa871c1f453721776da91f2c846b56754130351bbdc",
+    "assets/character/nhinh_upright_walk_lit_1.png": "14d6c6bd3ae97e52559baf5d779b0732b19436edf03d7a46271baebf08b626ce",
+    "assets/character/nhinh_upright_walk_lit_2.png": "222776306a4e0a9b75fa34a22e9f4316e8334e1db67b4bf0180143a2d2340c6e",
+    "assets/character/nhinh_upright_run_lit_0.png": "fc596f774c00f583870499fd86aec878d986a8f64545fbd840a2d5ded2e1fd41",
+    "assets/character/nhinh_upright_run_lit_1.png": "d785394fd9400c5aa32b4db303140e4a0fc754f101f3f6e3c3fea34a42d5c298",
+    "assets/character/nhinh_upright_run_lit_2.png": "60480f4e7ce3887c9214b327372f6b22b9999a5cd5c1e1173d6e61dcbbc3655b"
+  },
+  "processing": {
+    "cell_order": [
+      "idle",
+      "walk_0",
+      "walk_1",
+      "walk_2",
+      "run_0",
+      "run_1",
+      "run_2",
+      "empty"
+    ],
+    "final_canvas": "36x42 RGBA",
+    "crop_alpha_threshold": 16,
+    "scale": "nearest-neighbor, fit to 28px character height and 28px maximum width",
+    "feet_baseline": "y=40"
+  }
+}

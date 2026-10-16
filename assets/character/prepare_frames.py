@@ -16,7 +16,13 @@ entries = []
 cells = []
 owned = set()
 if (ROOT / 'frames.json').exists():
-    owned = {f['file'] for f in json.loads((ROOT / 'frames.json').read_text())['frames']}
+    _existing = json.loads((ROOT / 'frames.json').read_text(encoding='utf-8'))
+    if _existing.get('frame_count', 0) > 128 and 'ALLOW_CATALOG_OVERWRITE' not in __import__('os').environ:
+        raise RuntimeError(
+            'Refusing to overwrite combined 240-frame catalog in frames.json. '
+            'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'
+        )
+    owned = {f['file'] for f in _existing['frames']}
 
 def largest_component_bounds(mask):
     """Exclude disconnected glow fragments leaking in from the adjacent grid row."""

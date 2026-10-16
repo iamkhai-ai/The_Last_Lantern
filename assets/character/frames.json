@@ -19,9 +19,15 @@
     "run": 3,
     "lantern_on": 3,
     "lantern_off": 3,
-    "pulse": 3
+    "pulse": 3,
+    "idle_lit": 1,
+    "walk_lit": 3,
+    "run_lit": 3,
+    "idle_nolamp": 1,
+    "walk_nolamp": 3,
+    "run_nolamp": 3
   },
-  "frame_count": 128,
+  "frame_count": 240,
   "baseline_y": 40,
   "origin_recommended": [
     0.5,
@@ -2716,6 +2722,2365 @@
       ],
       "scale": 0.1152542372881356,
       "sha256": "652ee33478af3e1dea698b5be44fe9efe85c5e929ed03a50e521a61fd069e110"
+    },
+    {
+      "file": "nhinh_down_idle_lit_0.png",
+      "direction": "down",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        7,
+        15,
+        28,
+        41
+      ],
+      "sha256": "30877cd6457e3eb3e21476a627e9c5f6a164be7265cb7d0e130168b0901140c9"
+    },
+    {
+      "file": "nhinh_down_walk_lit_0.png",
+      "direction": "down",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        6,
+        18,
+        30,
+        41
+      ],
+      "sha256": "07d27d18f2e23e8db3f9d14026b2d421ac32d1860706029755863bfeefcbea25"
+    },
+    {
+      "file": "nhinh_down_walk_lit_1.png",
+      "direction": "down",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        7,
+        15,
+        29,
+        41
+      ],
+      "sha256": "ddf0f27ded9600ee3e1183e7fdd14f5e0c20644a09fcc1386396a1e0393ec853"
+    },
+    {
+      "file": "nhinh_down_walk_lit_2.png",
+      "direction": "down",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        7,
+        18,
+        28,
+        41
+      ],
+      "sha256": "20013125db0f609828f11eb1b876f5f44dde61974034cfebe5b27fde86ff4c14"
+    },
+    {
+      "file": "nhinh_down_run_lit_0.png",
+      "direction": "down",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        8,
+        17,
+        27,
+        41
+      ],
+      "sha256": "cbf21d19afa4cc29f1a36b4f886e909d370d5faf2b9391ada53456ba27c37332"
+    },
+    {
+      "file": "nhinh_down_run_lit_1.png",
+      "direction": "down",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        8,
+        16,
+        28,
+        41
+      ],
+      "sha256": "cceeb020b9d7e7278de2bc53432856493805fc0586fb07cbcd7ea8e09366577f"
+    },
+    {
+      "file": "nhinh_down_run_lit_2.png",
+      "direction": "down",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        8,
+        15,
+        28,
+        41
+      ],
+      "sha256": "608e45b5dcee408df4b8310b29e1b49f726b111ab4919c1d2dfdffca92699958"
+    },
+    {
+      "file": "nhinh_down_idle_nolamp_0.png",
+      "direction": "down",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        0,
+        372,
+        528
+      ],
+      "output_bbox": [
+        9,
+        14,
+        27,
+        41
+      ],
+      "sha256": "988113cb0f00136c0b42a3b6bcda35eba45f865118d734ca04e90e6c5b5c926c"
+    },
+    {
+      "file": "nhinh_down_walk_nolamp_0.png",
+      "direction": "down",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        372,
+        0,
+        745,
+        528
+      ],
+      "output_bbox": [
+        9,
+        15,
+        27,
+        41
+      ],
+      "sha256": "cdfc60b67c60a747015d7a7204c6d378cd40d25df9c72b793000cc43aa528a26"
+    },
+    {
+      "file": "nhinh_down_walk_nolamp_1.png",
+      "direction": "down",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        745,
+        0,
+        1118,
+        528
+      ],
+      "output_bbox": [
+        8,
+        14,
+        28,
+        41
+      ],
+      "sha256": "f2182911439c82c9e36acdb7bec22f65e818298d3ab3825f864d0a7a4c05aaad"
+    },
+    {
+      "file": "nhinh_down_walk_nolamp_2.png",
+      "direction": "down",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        1118,
+        0,
+        1490,
+        528
+      ],
+      "output_bbox": [
+        9,
+        15,
+        27,
+        41
+      ],
+      "sha256": "350f1f639ee84a5d355ad6d2b37253eb365c46f4353e3c7daff1950a3e8704b5"
+    },
+    {
+      "file": "nhinh_down_run_nolamp_0.png",
+      "direction": "down",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        528,
+        372,
+        1055
+      ],
+      "output_bbox": [
+        9,
+        16,
+        27,
+        41
+      ],
+      "sha256": "6614935bfd1ddd298934d200448e78ee27dd6c146ba51633b259e1a6e03c0108"
+    },
+    {
+      "file": "nhinh_down_run_nolamp_1.png",
+      "direction": "down",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        372,
+        528,
+        745,
+        1055
+      ],
+      "output_bbox": [
+        9,
+        14,
+        27,
+        41
+      ],
+      "sha256": "543ffa9ed11ba85f47dd7eec887d3adf0f0839397652caf9706ae7fca783d2ee"
+    },
+    {
+      "file": "nhinh_down_run_nolamp_2.png",
+      "direction": "down",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        745,
+        528,
+        1118,
+        1055
+      ],
+      "output_bbox": [
+        9,
+        12,
+        26,
+        41
+      ],
+      "sha256": "2baf2fae4348a6c531f2d1831c15d2d27530827975d39b75c26c5fbabd921117"
+    },
+    {
+      "file": "nhinh_downleft_idle_lit_0.png",
+      "direction": "downleft",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        0,
+        386,
+        510
+      ],
+      "output_bbox": [
+        9,
+        18,
+        27,
+        41
+      ],
+      "sha256": "220bb047ef7e294f50caf4c30e99a028643f835b8aaf15fe1a127b991e097f07"
+    },
+    {
+      "file": "nhinh_downleft_walk_lit_0.png",
+      "direction": "downleft",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        386,
+        0,
+        772,
+        510
+      ],
+      "output_bbox": [
+        9,
+        18,
+        27,
+        41
+      ],
+      "sha256": "11960e7706f28d9e39e2ad66ec1a4669f222204f722da7e7bc96d3fa1ac37107"
+    },
+    {
+      "file": "nhinh_downleft_walk_lit_1.png",
+      "direction": "downleft",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        772,
+        0,
+        1158,
+        510
+      ],
+      "output_bbox": [
+        8,
+        18,
+        27,
+        41
+      ],
+      "sha256": "30afb13ddc222e7e663e3a3e270d310978e5638e6511c99f228e04e327bec27f"
+    },
+    {
+      "file": "nhinh_downleft_walk_lit_2.png",
+      "direction": "downleft",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        1158,
+        0,
+        1544,
+        510
+      ],
+      "output_bbox": [
+        8,
+        18,
+        27,
+        41
+      ],
+      "sha256": "29ce0d6199717f33f225166c1fe5258c9891d1a749f85c9deea03724499bfe57"
+    },
+    {
+      "file": "nhinh_downleft_run_lit_0.png",
+      "direction": "downleft",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        510,
+        386,
+        1019
+      ],
+      "output_bbox": [
+        8,
+        15,
+        27,
+        41
+      ],
+      "sha256": "178538211ef537e681d1ca9e37131b9b41e824146f4bf6e7bc2f3d6b1ec0c583"
+    },
+    {
+      "file": "nhinh_downleft_run_lit_1.png",
+      "direction": "downleft",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        386,
+        510,
+        772,
+        1019
+      ],
+      "output_bbox": [
+        7,
+        13,
+        29,
+        41
+      ],
+      "sha256": "8b79684b08a6f4e92d61499cb9f341e08593643d30db9e0d621fc5ade4d1d25e"
+    },
+    {
+      "file": "nhinh_downleft_run_lit_2.png",
+      "direction": "downleft",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        772,
+        510,
+        1158,
+        1019
+      ],
+      "output_bbox": [
+        7,
+        13,
+        29,
+        41
+      ],
+      "sha256": "8240c0a51ffe037fc3ee038ec506edbb9c13ba50cb19867969e21929397ee1d6"
+    },
+    {
+      "file": "nhinh_downleft_idle_nolamp_0.png",
+      "direction": "downleft",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        8,
+        15,
+        27,
+        41
+      ],
+      "sha256": "3338269e02694528643c556a307addef27a90cfe418b43944c3517cdbccd4ce2"
+    },
+    {
+      "file": "nhinh_downleft_walk_nolamp_0.png",
+      "direction": "downleft",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        7,
+        14,
+        28,
+        41
+      ],
+      "sha256": "7a275ede91f652211087243faab8bd0ba73d89b747036362ba64063cad52ec3b"
+    },
+    {
+      "file": "nhinh_downleft_walk_nolamp_1.png",
+      "direction": "downleft",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        6,
+        13,
+        29,
+        41
+      ],
+      "sha256": "122a37facc5a40829b6e70e2ad85186e792c31464955cad8220a1a336211c5a5"
+    },
+    {
+      "file": "nhinh_downleft_walk_nolamp_2.png",
+      "direction": "downleft",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        7,
+        14,
+        28,
+        41
+      ],
+      "sha256": "3b486daba721b9397ea1588f2f3986148d2ba5b32e845ceec0f5dde05f28b93f"
+    },
+    {
+      "file": "nhinh_downleft_run_nolamp_0.png",
+      "direction": "downleft",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        5,
+        15,
+        31,
+        41
+      ],
+      "sha256": "fe6276f40c375ce5f2cb8580e9c2c1e7a2c62ce5e94efab4c5aab1f8a24f0d36"
+    },
+    {
+      "file": "nhinh_downleft_run_nolamp_1.png",
+      "direction": "downleft",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        5,
+        15,
+        31,
+        41
+      ],
+      "sha256": "26404e4d0c10b0cc6bcc85f61e1a126dc07341451e9f07ca614249d990f31f24"
+    },
+    {
+      "file": "nhinh_downleft_run_nolamp_2.png",
+      "direction": "downleft",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        5,
+        15,
+        30,
+        41
+      ],
+      "sha256": "bb31988c50a778f9f582d9411ff72e84e32a41147e02928f342bbe0803e5112a"
+    },
+    {
+      "file": "nhinh_left_idle_lit_0.png",
+      "direction": "left",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "a226d6d6665b13ffc27288d5435cc0ebfd011dfe4e4d862cc27e08bde4c32aa8"
+    },
+    {
+      "file": "nhinh_left_walk_lit_0.png",
+      "direction": "left",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "459c1fd1fdf5000e52d2aabd9e0bdcc90bc95a683bc5925ee8d5e0321d1ee5b6"
+    },
+    {
+      "file": "nhinh_left_walk_lit_1.png",
+      "direction": "left",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "264d0efa99a5ea9db98831db7823ffde183394d2bd366f050ec6abeb2295c9f2"
+    },
+    {
+      "file": "nhinh_left_walk_lit_2.png",
+      "direction": "left",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "623c06f0ae4ac18b5259dcdc36edf42ac23a1b75f18f1dea995be38e83d0f33c"
+    },
+    {
+      "file": "nhinh_left_run_lit_0.png",
+      "direction": "left",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        15,
+        32,
+        41
+      ],
+      "sha256": "c94d17b41b610a1317f71dd14b6866b750f72626e133a8abc1e98b543f96c554"
+    },
+    {
+      "file": "nhinh_left_run_lit_1.png",
+      "direction": "left",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "a0b1b881e4f69e6b77d15fb23bc0ede8d9534386fde02ae22182f8839d961f5a"
+    },
+    {
+      "file": "nhinh_left_run_lit_2.png",
+      "direction": "left",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        15,
+        32,
+        41
+      ],
+      "sha256": "880e1a6577e218851a5e4d7ce4271fdf2884842245e466c2eb40b112104ec20e"
+    },
+    {
+      "file": "nhinh_left_idle_nolamp_0.png",
+      "direction": "left",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "e8a1b3dea739cf2623d8821759f2eb42f459db96ad69b0803ef38dc4c9f557cd"
+    },
+    {
+      "file": "nhinh_left_walk_nolamp_0.png",
+      "direction": "left",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "77932b44b2f2600c787b6d24d090e1f4921177c22e4596b598a8b60cfea697e1"
+    },
+    {
+      "file": "nhinh_left_walk_nolamp_1.png",
+      "direction": "left",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "fdb8a022f829aa5b01d23021e44b559d52f3af7ac6d2219de80024c99283384e"
+    },
+    {
+      "file": "nhinh_left_walk_nolamp_2.png",
+      "direction": "left",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "3ccacdfc144cff355ff0c44ef7ac3831384a421c56411d0683f76fc271c95792"
+    },
+    {
+      "file": "nhinh_left_run_nolamp_0.png",
+      "direction": "left",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        15,
+        32,
+        41
+      ],
+      "sha256": "e812b9f6a8f4ebd84c2b4c8c2813df195d12ad330c6a13c2714ac5b1bc3fe37a"
+    },
+    {
+      "file": "nhinh_left_run_nolamp_1.png",
+      "direction": "left",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        17,
+        32,
+        41
+      ],
+      "sha256": "7a0fc7891be45c6f74b09e6614b1c826753a4d0f3f88089b20812c7400f2d765"
+    },
+    {
+      "file": "nhinh_left_run_nolamp_2.png",
+      "direction": "left",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        18,
+        32,
+        41
+      ],
+      "sha256": "16bffb32c440e30a40b00c0761bbd9b144b6d7460ed6b5f01642c2f03f817729"
+    },
+    {
+      "file": "nhinh_upleft_idle_lit_0.png",
+      "direction": "upleft",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "5eb03bc6c67518691eecaad88f60104286ab8e86c269ad0b67cf7818310b8b19"
+    },
+    {
+      "file": "nhinh_upleft_walk_lit_0.png",
+      "direction": "upleft",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "2e440450c8281853d94b35b80da7959b1c7684b8fb4b1a91a0605eb91cb38ad5"
+    },
+    {
+      "file": "nhinh_upleft_walk_lit_1.png",
+      "direction": "upleft",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "9429982633f558e9121bccfdc2a960fcaab6e40efd1dc4562acf792a468a086c"
+    },
+    {
+      "file": "nhinh_upleft_walk_lit_2.png",
+      "direction": "upleft",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "87bbec99cc3402af93426924dc722d8936ca101a5388873532544a32d0f7d2ea"
+    },
+    {
+      "file": "nhinh_upleft_run_lit_0.png",
+      "direction": "upleft",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "96ff82e42c402c7f81ef4611ab99fe504cc1ff45954e50781f6c78f7dc3cc61f"
+    },
+    {
+      "file": "nhinh_upleft_run_lit_1.png",
+      "direction": "upleft",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "2d7367626f182359b1771219c84605d82964e20872dcc486edf7f6904bb5d0d7"
+    },
+    {
+      "file": "nhinh_upleft_run_lit_2.png",
+      "direction": "upleft",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "ef54cc5c7f8ef4b1a07706cc252053e7921266e578d5d7cf099ec1547d018fef"
+    },
+    {
+      "file": "nhinh_upleft_idle_nolamp_0.png",
+      "direction": "upleft",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        6,
+        13,
+        29,
+        41
+      ],
+      "sha256": "6f7b2683fa606bc385a984ce4a6970113a23083d7e7271f5dcffc25e1d79ecfe"
+    },
+    {
+      "file": "nhinh_upleft_walk_nolamp_0.png",
+      "direction": "upleft",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "49ab078b665db28a9fb8db4898a6d74297756c3b66d66c8d861c62353c93acec"
+    },
+    {
+      "file": "nhinh_upleft_walk_nolamp_1.png",
+      "direction": "upleft",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "46a1c19cf6570cce3e6411f33d86d0b78617596a8f6665cf2bb4b706553c9511"
+    },
+    {
+      "file": "nhinh_upleft_walk_nolamp_2.png",
+      "direction": "upleft",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "098bbc5e6e0fab291321c4dda4d22b3f6a26658c05bc4f72a668b7daa08e7929"
+    },
+    {
+      "file": "nhinh_upleft_run_nolamp_0.png",
+      "direction": "upleft",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "492d844d68bff3f6f59870152a807d846adfa79c94ebc1562c0a7e4337ad5476"
+    },
+    {
+      "file": "nhinh_upleft_run_nolamp_1.png",
+      "direction": "upleft",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "a6f6031b833b417d5ab22f5e244ff164b99eb6a60bb97ae7f76cd63116a845dc"
+    },
+    {
+      "file": "nhinh_upleft_run_nolamp_2.png",
+      "direction": "upleft",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "ad23a217bbb770c475c0e0a4ef26d54c2ec83e964fab708e724aa46de4a4083f"
+    },
+    {
+      "file": "nhinh_up_idle_lit_0.png",
+      "direction": "up",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        374,
+        526
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "6402077603077d6fa10213b0aa89f0c5dc66ab5e46ae47114c6e76b050457137"
+    },
+    {
+      "file": "nhinh_up_walk_lit_0.png",
+      "direction": "up",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "source_cell": [
+        374,
+        0,
+        748,
+        526
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "22a261fa0f613b0f612c05dc2dbeb54b73a7c293b2170e5235a133b1d60db202"
+    },
+    {
+      "file": "nhinh_up_walk_lit_1.png",
+      "direction": "up",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "source_cell": [
+        748,
+        0,
+        1121,
+        526
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "cfe789c47e09feb545e6c8b3fc7310238bb0964a04c473428d7a2e0f46cb5329"
+    },
+    {
+      "file": "nhinh_up_walk_lit_2.png",
+      "direction": "up",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "source_cell": [
+        1121,
+        0,
+        1495,
+        526
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "6ba95f070047962da6afc4158a7e442dc99d7037a84046d072bc3715077e7db4"
+    },
+    {
+      "file": "nhinh_up_run_lit_0.png",
+      "direction": "up",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "source_cell": [
+        0,
+        526,
+        374,
+        1052
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "64db303c843ede0e8af1e3c44ece9239473f108378a7176882faf0cc2f2a1564"
+    },
+    {
+      "file": "nhinh_up_run_lit_1.png",
+      "direction": "up",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "source_cell": [
+        374,
+        526,
+        748,
+        1052
+      ],
+      "output_bbox": [
+        4,
+        14,
+        32,
+        41
+      ],
+      "sha256": "d7125eb488062a6ec409540e3fd31cdd8b66031a283644d213ae508c9af40d51"
+    },
+    {
+      "file": "nhinh_up_run_lit_2.png",
+      "direction": "up",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "source_cell": [
+        748,
+        526,
+        1121,
+        1052
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "6267fa7ddae8a59d15d107a37741855e413a7b943981d06bfd4a85896105cb95"
+    },
+    {
+      "file": "nhinh_up_idle_nolamp_0.png",
+      "direction": "up",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        372,
+        529
+      ],
+      "output_bbox": [
+        6,
+        13,
+        29,
+        41
+      ],
+      "sha256": "26ebf043753ae6c6cbe517060774997b344087228b8a641bb2109be678b38819"
+    },
+    {
+      "file": "nhinh_up_walk_nolamp_0.png",
+      "direction": "up",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "source_cell": [
+        372,
+        0,
+        744,
+        529
+      ],
+      "output_bbox": [
+        7,
+        13,
+        29,
+        41
+      ],
+      "sha256": "e37e2e4828da16d59a0682058e8825196c6db19146d6eb4896af4f1ee4b87c54"
+    },
+    {
+      "file": "nhinh_up_walk_nolamp_1.png",
+      "direction": "up",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "source_cell": [
+        744,
+        0,
+        1115,
+        529
+      ],
+      "output_bbox": [
+        6,
+        13,
+        29,
+        41
+      ],
+      "sha256": "eecbb28d9f66b11fe00a6881a1e7addd10614bab0e120060a3b6d07029947b5a"
+    },
+    {
+      "file": "nhinh_up_walk_nolamp_2.png",
+      "direction": "up",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "source_cell": [
+        1115,
+        0,
+        1487,
+        529
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "d9f1f77122addb564b9cf1cb22c7f1118daa832dbe5432d462f2906226cdfcb2"
+    },
+    {
+      "file": "nhinh_up_run_nolamp_0.png",
+      "direction": "up",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        529,
+        372,
+        1058
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "a109b21e4bfde7b9d7e4c8be09ffbc74f0b7b8c7c67a784c6bb7f4fad6df2221"
+    },
+    {
+      "file": "nhinh_up_run_nolamp_1.png",
+      "direction": "up",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "source_cell": [
+        372,
+        529,
+        744,
+        1058
+      ],
+      "output_bbox": [
+        7,
+        13,
+        29,
+        41
+      ],
+      "sha256": "bb5c17d49ff9b30ff63ae8ce71e3e3af5615661eda14a21d02aa7c5093898730"
+    },
+    {
+      "file": "nhinh_up_run_nolamp_2.png",
+      "direction": "up",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "source_cell": [
+        744,
+        529,
+        1115,
+        1058
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "4a5ed63115dfe0da7e6bec1b4e3f6dc1d65b38baae03e3230285f0e4fc95377e"
+    },
+    {
+      "file": "nhinh_upright_idle_lit_0.png",
+      "direction": "upright",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "bca207f651085b359b7d4c65abbf73d2ef5092c44747bc92db1aa82c911c1811"
+    },
+    {
+      "file": "nhinh_upright_walk_lit_0.png",
+      "direction": "upright",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "9309b51611e79e667e478aa871c1f453721776da91f2c846b56754130351bbdc"
+    },
+    {
+      "file": "nhinh_upright_walk_lit_1.png",
+      "direction": "upright",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "14d6c6bd3ae97e52559baf5d779b0732b19436edf03d7a46271baebf08b626ce"
+    },
+    {
+      "file": "nhinh_upright_walk_lit_2.png",
+      "direction": "upright",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "222776306a4e0a9b75fa34a22e9f4316e8334e1db67b4bf0180143a2d2340c6e"
+    },
+    {
+      "file": "nhinh_upright_run_lit_0.png",
+      "direction": "upright",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        15,
+        32,
+        41
+      ],
+      "sha256": "fc596f774c00f583870499fd86aec878d986a8f64545fbd840a2d5ded2e1fd41"
+    },
+    {
+      "file": "nhinh_upright_run_lit_1.png",
+      "direction": "upright",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        15,
+        32,
+        41
+      ],
+      "sha256": "d785394fd9400c5aa32b4db303140e4a0fc754f101f3f6e3c3fea34a42d5c298"
+    },
+    {
+      "file": "nhinh_upright_run_lit_2.png",
+      "direction": "upright",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        15,
+        32,
+        41
+      ],
+      "sha256": "60480f4e7ce3887c9214b327372f6b22b9999a5cd5c1e1173d6e61dcbbc3655b"
+    },
+    {
+      "file": "nhinh_upright_idle_nolamp_0.png",
+      "direction": "upright",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "05e4d387f011bf7a4af5b7bd5812e835cdc3b9ef38c401db20b500aeb90160c3"
+    },
+    {
+      "file": "nhinh_upright_walk_nolamp_0.png",
+      "direction": "upright",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "1dc3fd921cbc34d45bb5e793151f4c0a0efeb91b25d18b3cbb63af5c80cb9a86"
+    },
+    {
+      "file": "nhinh_upright_walk_nolamp_1.png",
+      "direction": "upright",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "b8bc7891e749073b16699298a77292ee7a238447f1731b5e3e9067bdef31e588"
+    },
+    {
+      "file": "nhinh_upright_walk_nolamp_2.png",
+      "direction": "upright",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "b68d48986a86c4ea142dfbe7a60d54ff300899053b4587bc0d61f0b8e04075b5"
+    },
+    {
+      "file": "nhinh_upright_run_nolamp_0.png",
+      "direction": "upright",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "88e69ad14d3fc68c1d82d0a3c492d5998b1a167447ac3372905c1f330e8707a7"
+    },
+    {
+      "file": "nhinh_upright_run_nolamp_1.png",
+      "direction": "upright",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "7437f351ff7a81d51cf6877dd823e2250cd4a806c12367ec14c54c29ecd27caa"
+    },
+    {
+      "file": "nhinh_upright_run_nolamp_2.png",
+      "direction": "upright",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "00d143d7af5ae281d94e2d5427e9a5dee8fded0363c506e643a4c6de13d06d86"
+    },
+    {
+      "file": "nhinh_right_idle_lit_0.png",
+      "direction": "right",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "d71afc2e6995bde613365c11bae45fd488026fdb798b14d75a2edec1b3b29f16"
+    },
+    {
+      "file": "nhinh_right_walk_lit_0.png",
+      "direction": "right",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "8ec006909e6ddc3415113e7bd9c670e033631261ac945f65c15db99d5c868976"
+    },
+    {
+      "file": "nhinh_right_walk_lit_1.png",
+      "direction": "right",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "d1442b91d41f57666f365903bd84f855e276476368be67520d0c6d3606fe43e5"
+    },
+    {
+      "file": "nhinh_right_walk_lit_2.png",
+      "direction": "right",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        31,
+        41
+      ],
+      "sha256": "b3f65236ba1ba896a8ac5d566681aa1af713e2a12eb5335e3c1ee91c81964648"
+    },
+    {
+      "file": "nhinh_right_run_lit_0.png",
+      "direction": "right",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "e2571bf026205fadf4c617140940281bef20025321d9232b52a657c99743aafa"
+    },
+    {
+      "file": "nhinh_right_run_lit_1.png",
+      "direction": "right",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        15,
+        32,
+        41
+      ],
+      "sha256": "3580449098b69893c8953b050976d619db4b94f3d12db4cb0f54f3ad84207854"
+    },
+    {
+      "file": "nhinh_right_run_lit_2.png",
+      "direction": "right",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        14,
+        32,
+        41
+      ],
+      "sha256": "658c4c742aafb16b4bc6853393c2110bbbe52b17a386fcd1d315489c7fafc6ad"
+    },
+    {
+      "file": "nhinh_right_idle_nolamp_0.png",
+      "direction": "right",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "4b300ce93b4ba0acdb97c67abaa68af741307f8e9496ad06641334edeb54fdad"
+    },
+    {
+      "file": "nhinh_right_walk_nolamp_0.png",
+      "direction": "right",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "88fdf43dc8a180ac77c7b8e5bbe2d4affd60b54b28836f8e9ce4d63197d85777"
+    },
+    {
+      "file": "nhinh_right_walk_nolamp_1.png",
+      "direction": "right",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "e03122f693952f1b3316d0909b48390a1b85b29eaf273ca6b3b07a2c5b1f2bff"
+    },
+    {
+      "file": "nhinh_right_walk_nolamp_2.png",
+      "direction": "right",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "source_cell": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "ba379f57cd21ea20916db60090f77b55ebd458073d5456ab5568e5bb34e638cd"
+    },
+    {
+      "file": "nhinh_right_run_nolamp_0.png",
+      "direction": "right",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "21dc1b57780140936d00c6bb9accc808237b3b6195f9fa8d0d3785d3b508578b"
+    },
+    {
+      "file": "nhinh_right_run_nolamp_1.png",
+      "direction": "right",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "source_cell": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "2732a11fe39ff5ce8c0bd8cb1fe60d4b4b6abd2e1870ab8133e7af3e358eb9e9"
+    },
+    {
+      "file": "nhinh_right_run_nolamp_2.png",
+      "direction": "right",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "source_cell": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "output_bbox": [
+        4,
+        16,
+        32,
+        41
+      ],
+      "sha256": "649db7c2d6b91809dce049ae258267a0b2211858fca530b9bdc0be6cc4a5a2f7"
+    },
+    {
+      "file": "nhinh_downright_idle_lit_0.png",
+      "direction": "downright",
+      "state": "idle_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        384,
+        512
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "00cb63cdef2b95d2f9030e211ed408de71583b2f7c8a260014175d32df5150ab"
+    },
+    {
+      "file": "nhinh_downright_walk_lit_0.png",
+      "direction": "downright",
+      "state": "walk_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "source_cell": [
+        384,
+        0,
+        768,
+        512
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "96a6e23e274796cd9bbd973067766f0f1b19a48b56e79500755dcd4ee5989865"
+    },
+    {
+      "file": "nhinh_downright_walk_lit_1.png",
+      "direction": "downright",
+      "state": "walk_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "source_cell": [
+        768,
+        0,
+        1152,
+        512
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "c2c87081ffbc3e3703009654915e44deab948f340200e52b1b3bc48ca6746ec5"
+    },
+    {
+      "file": "nhinh_downright_walk_lit_2.png",
+      "direction": "downright",
+      "state": "walk_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "source_cell": [
+        1152,
+        0,
+        1536,
+        512
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "e827e7822c88791ae6683afeb345bb571306273ad04870f955372e0bf241f712"
+    },
+    {
+      "file": "nhinh_downright_run_lit_0.png",
+      "direction": "downright",
+      "state": "run_lit",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "source_cell": [
+        0,
+        512,
+        384,
+        1024
+      ],
+      "output_bbox": [
+        5,
+        13,
+        31,
+        41
+      ],
+      "sha256": "bf73bef28eafc0f73ab542e9c482aa45e975465e4922dfdca17a390bb605269a"
+    },
+    {
+      "file": "nhinh_downright_run_lit_1.png",
+      "direction": "downright",
+      "state": "run_lit",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "source_cell": [
+        384,
+        512,
+        768,
+        1024
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "ef47ee35fbb264ce47e8ba9b581606991adf04ebed7f674347ee30dfcd98759f"
+    },
+    {
+      "file": "nhinh_downright_run_lit_2.png",
+      "direction": "downright",
+      "state": "run_lit",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "source_cell": [
+        768,
+        512,
+        1152,
+        1024
+      ],
+      "output_bbox": [
+        4,
+        13,
+        32,
+        41
+      ],
+      "sha256": "8d256a83634f5a5394691a6eddd105cb58559ced26c270fac4a21f77937da033"
+    },
+    {
+      "file": "nhinh_downright_idle_nolamp_0.png",
+      "direction": "downright",
+      "state": "idle_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        0,
+        384,
+        512
+      ],
+      "output_bbox": [
+        7,
+        13,
+        28,
+        41
+      ],
+      "sha256": "b70070e6761e85ac4e82b1a983b08f7bd0cdc1404e5ccbf85e477df43ef43174"
+    },
+    {
+      "file": "nhinh_downright_walk_nolamp_0.png",
+      "direction": "downright",
+      "state": "walk_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "source_cell": [
+        384,
+        0,
+        768,
+        512
+      ],
+      "output_bbox": [
+        7,
+        13,
+        28,
+        41
+      ],
+      "sha256": "15972106cd79f97063c1763d77a14585d6cfe32bcc5d6ab27a365ecf9f622bcb"
+    },
+    {
+      "file": "nhinh_downright_walk_nolamp_1.png",
+      "direction": "downright",
+      "state": "walk_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "source_cell": [
+        768,
+        0,
+        1152,
+        512
+      ],
+      "output_bbox": [
+        7,
+        13,
+        28,
+        41
+      ],
+      "sha256": "ad4f1057d6e84d9154b86d7652139c298e0157b112666ed32806b570d4f47c10"
+    },
+    {
+      "file": "nhinh_downright_walk_nolamp_2.png",
+      "direction": "downright",
+      "state": "walk_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "source_cell": [
+        1152,
+        0,
+        1536,
+        512
+      ],
+      "output_bbox": [
+        8,
+        13,
+        28,
+        41
+      ],
+      "sha256": "9c6a9366df5976d8b3a9d259f06af281faa6f4fb8a24fa2dd944aa057b1b6ce0"
+    },
+    {
+      "file": "nhinh_downright_run_nolamp_0.png",
+      "direction": "downright",
+      "state": "run_nolamp",
+      "frame": 0,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "source_cell": [
+        0,
+        512,
+        384,
+        1024
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "bb5daa33f9531ca25a57f7da16a71aa938d7115b4b2b0d4042a38d7909fa3b1d"
+    },
+    {
+      "file": "nhinh_downright_run_nolamp_1.png",
+      "direction": "downright",
+      "state": "run_nolamp",
+      "frame": 1,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "source_cell": [
+        384,
+        512,
+        768,
+        1024
+      ],
+      "output_bbox": [
+        6,
+        13,
+        30,
+        41
+      ],
+      "sha256": "a0b7cb5afb489025c551f30f6f8b3b3b2e699bbc120c1e9c723b673b82804c0a"
+    },
+    {
+      "file": "nhinh_downright_run_nolamp_2.png",
+      "direction": "downright",
+      "state": "run_nolamp",
+      "frame": 2,
+      "source_sheet": "source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "provenance": "source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "source_cell": [
+        768,
+        512,
+        1152,
+        1024
+      ],
+      "output_bbox": [
+        5,
+        13,
+        30,
+        41
+      ],
+      "sha256": "8c09660f063bf321091aeb1267c43c51d5d32860165290dc7614c65a020dd800"
     }
-  ]
+  ],
+  "core_frame_count": 128,
+  "state_variant_frame_count": 112,
+  "contact_sheets": {
+    "core_16_poses": "nhinh_contact_sheet.png",
+    "state_variants_14_poses": "nhinh_state_variants_contact_sheet.png",
+    "all_30_poses": "nhinh_all_poses_contact_sheet.png"
+  }
 }
