@@ -52,6 +52,7 @@ export class LibraryLevel {
   private bodies: Phaser.Physics.Arcade.StaticBody[] = [];
   private tabletStacks = new Map<string, Phaser.GameObjects.Container>();
   private socketImages: Phaser.GameObjects.Image[] = [];
+  private rackEmptyStands: Phaser.GameObjects.Image[] = [];
   private bookLayers: Phaser.GameObjects.Image[] = [];
   private selectedStone: number | null = null;
   private stageKey = '';
@@ -240,6 +241,11 @@ export class LibraryLevel {
       socket.setData('library-socket', i);
       this.socketImages.push(socket);
     }
+    for (const point of LIBRARY_LAYOUT.racks) {
+      const stand = this.addImage('socket-empty', point.x, point.y, LIBRARY_LAYOUT.art.rack, LIBRARY_LAYOUT.art.rack,
+        this.depthAt(point.y + LIBRARY_LAYOUT.art.rack / 2), true).setVisible(false);
+      this.rackEmptyStands.push(stand);
+    }
     if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) {
       const crystal = this.addImage('room-memory-crystal', LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y, 28, 36, 35);
       crystal.setData('library-crystal', true);
@@ -264,7 +270,8 @@ export class LibraryLevel {
         const stone = this.rackStone(rackIndex);
         return stone ? `E · Xem phiến ${LABELS[stone]}` : 'Giá đá trống';
       },
-      getPromptBounds: () => this.tabletStacks.get(this.rackKey(rackIndex))?.getBounds() ?? null,
+      getPromptBounds: () => this.tabletStacks.get(this.rackKey(rackIndex))?.getBounds()
+        ?? this.rackEmptyStands[rackIndex]?.getBounds() ?? null,
       onInteract: () => { const stone = this.rackStone(rackIndex); if (stone) this.inspectAndSelect(stone); },
       isEnabled: () => true,
     }));
@@ -483,6 +490,7 @@ export class LibraryLevel {
     const occupied = new Set(slots.filter((id) => id >= 0));
     for (let index = 0; index < LIBRARY_LAYOUT.racks.length; index += 1) {
       const identity = STONES.indexOf(RACK_ORDER[index]);
+      this.rackEmptyStands[index].setVisible(occupied.has(identity));
       if (occupied.has(identity)) continue;
       const pos = LIBRARY_LAYOUT.racks[index];
       this.tabletStacks.set(this.rackKey(index), this.createTabletStack(identity, pos.x, pos.y, this.depthAt(pos.y + 24), this.selectedStone === identity));
