@@ -5,11 +5,22 @@ import hashlib
 import json
 import re
 import shutil
+import tempfile
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent
 META = json.loads((ROOT / 'generation-prompts.json').read_text(encoding='utf-8'))
 DIRECTIONS = [m['direction'] for m in META]
+VARIANT_POSES = (('idle_lit', (0,)), ('walk_lit', (0, 1, 2)), ('run_lit', (0, 1, 2)),
+                 ('idle_nolamp', (0,)), ('walk_nolamp', (0, 1, 2)), ('run_nolamp', (0, 1, 2)))
+EXPECTED_VARIANT_FILES = {
+    f'nhinh_{direction}_{state}_{frame}.png'
+    for direction in DIRECTIONS
+    for state, frames in VARIANT_POSES
+    for frame in frames
+}
+STAGING_TEMP = tempfile.TemporaryDirectory(prefix='.prepare-frames-', dir=ROOT)
+STAGING = Path(STAGING_TEMP.name)
 POSES = [('idle', 0)] + [(state, i) for state in ('walk', 'run', 'lantern_on', 'lantern_off', 'pulse') for i in range(3)]
 raw = ROOT / 'source_sheets'
 raw.mkdir(exist_ok=True)
@@ -17,17 +28,24 @@ entries = []
 cells = []
 owned = set()
 _existing = None
-has_combined_catalog = False
+existing_frames = []
+variant_files_present = any((ROOT / name).is_file() for name in EXPECTED_VARIANT_FILES)
+has_combined_catalog = variant_files_present
 if (ROOT / 'frames.json').exists():
     _existing = json.loads((ROOT / 'frames.json').read_text(encoding='utf-8'))
     existing_frames = _existing.get('frames', [])
-    has_combined_catalog = _existing.get('frame_count', 0) > 128 or len(existing_frames) > 128
-    if has_combined_catalog and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
-        raise RuntimeError(
-            'Refusing to overwrite combined 240-frame catalog in frames.json. '
-            'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'
-        )
+    has_combined_catalog = (
+        has_combined_catalog
+        or _existing.get('frame_count', 0) > 128
+        or len(existing_frames) > 128
+        or _existing.get('state_variant_frame_count', 0) > 0
+    )
     owned = {f['file'] for f in existing_frames}
+if has_combined_catalog and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
+    raise RuntimeError(
+        'Refusing to overwrite combined 240-frame catalog in frames.json. '
+        'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'
+    )
 
 def largest_component_bounds(mask):
     """Exclude disconnected glow fragments leaking in from the adjacent grid row."""
@@ -89,23 +107,17 @@ for direction, state, frame, cell, bounds, source_box in cells:
     target = ROOT / name
     if target.exists() and name not in owned:
         raise FileExistsError(target)
-    output.save(target)
-    entries.append({'file': name, 'direction': direction, 'state': state, 'frame': frame, 'source_sheet': f'source_sheets/nhinh_{direction}_generated.png', 'source_cell': list(source_box), 'crop_bounds_in_cell': list(bounds), 'scale': scale, 'sha256': hashlib.sha256(target.read_bytes()).hexdigest()})
+    staged_target = STAGING / name
+    output.save(staged_target)
+    entries.append({'file': name, 'direction': direction, 'state': state, 'frame': frame, 'source_sheet': f'source_sheets/nhinh_{direction}_generated.png', 'source_cell': list(source_box), 'crop_bounds_in_cell': list(bounds), 'scale': scale, 'sha256': hashlib.sha256(staged_target.read_bytes()).hexdigest()})
 
 core_entries = entries.copy()
 variant_entries = []
 if has_combined_catalog:
     regenerated_core_files = {entry['file'] for entry in core_entries}
     variant_entries = [entry for entry in existing_frames if entry['file'] not in regenerated_core_files]
-    expected_variant_files = {
-        f'nhinh_{direction}_{state}_{frame}.png'
-        for direction in DIRECTIONS
-        for state, frames in (('idle_lit', (0,)), ('walk_lit', (0, 1, 2)), ('run_lit', (0, 1, 2)),
-                              ('idle_nolamp', (0,)), ('walk_nolamp', (0, 1, 2)), ('run_nolamp', (0, 1, 2)))
-        for frame in frames
-    }
     actual_variant_files = {entry['file'] for entry in variant_entries}
-    if len(variant_entries) != 112 or actual_variant_files != expected_variant_files:
+    if len(variant_entries) != 112 or actual_variant_files != EXPECTED_VARIANT_FILES:
         raise RuntimeError(
             f'Combined catalog must contain all 112 expected state variants; found {len(variant_entries)} entries.'
         )
@@ -125,28 +137,38 @@ for i, (state, frame) in enumerate(POSES):
 for y, direction in enumerate(DIRECTIONS):
     draw.text((12, 60+y*ch+50), direction, fill='#f0e2c8', font=font)
     for x, (state, frame) in enumerate(POSES):
-        image = Image.open(ROOT / f'nhinh_{direction}_{state}_{frame}.png').convert('RGBA').resize((108,126), Image.Resampling.NEAREST)
+        image = Image.open(STAGING / f'nhinh_{direction}_{state}_{frame}.png').convert('RGBA').resize((108,126), Image.Resampling.NEAREST)
         contact.paste(image, (160+x*cw, 60+y*ch+4), image)
         draw.rectangle((160+x*cw,60+y*ch,159+(x+1)*cw,59+(y+1)*ch),outline='#34524a')
-contact.save(ROOT / 'nhinh_contact_sheet.png')
+contact.save(STAGING / 'nhinh_contact_sheet.png')
 states = _existing.get('states', {'idle': 1, 'walk':3, 'run':3, 'lantern_on':3, 'lantern_off':3, 'pulse':3}) if variant_entries else {'idle': 1, 'walk':3, 'run':3, 'lantern_on':3, 'lantern_off':3, 'pulse':3}
 manifest = dict(_existing or {})
 manifest.update({'frame_size': [36,42], 'directions': DIRECTIONS, 'states': states, 'frame_count': len(entries), 'core_frame_count': len(core_entries), 'state_variant_frame_count': len(variant_entries), 'baseline_y':40, 'origin_recommended': [0.5,1], 'common_source_to_frame_scale': scale, 'frames': entries})
-(ROOT / 'frames.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
+(STAGING / 'frames.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
 
 errors = []
 for entry in entries:
-    image = Image.open(ROOT / entry['file'])
+    image_path = STAGING / entry['file'] if entry in core_entries else ROOT / entry['file']
+    image = Image.open(image_path)
     if image.size != (36,42) or image.mode != 'RGBA': errors.append(entry['file'] + ': size/mode')
-    if hashlib.sha256((ROOT / entry['file']).read_bytes()).hexdigest() != entry['sha256']: errors.append(entry['file'] + ': sha256')
+    if hashlib.sha256(image_path.read_bytes()).hexdigest() != entry['sha256']: errors.append(entry['file'] + ': sha256')
     extrema = image.getchannel('A').getextrema()
     if extrema[0] != 0 or extrema[1] < 250: errors.append(entry['file'] + ': alpha extrema ' + str(extrema))
     if not image.getchannel('A').getbbox(): errors.append(entry['file'] + ': empty')
-actual = list(ROOT.glob('nhinh_*_*.png'))
-actual = [p for p in actual if 'contact_sheet' not in p.name]
-if len(actual) != len(entries): errors.append('Unexpected frame file count ' + str(len(actual)))
+actual_frame_files = {p.name for p in ROOT.glob('nhinh_*_*.png') if 'contact_sheet' not in p.name}
+actual_frame_files.update(entry['file'] for entry in core_entries)
+if len(actual_frame_files) != len(entries): errors.append('Unexpected frame file count ' + str(len(actual_frame_files)))
 expected_frame_count = 240 if has_combined_catalog else 128
 if len(entries) != expected_frame_count: errors.append(f'Unexpected catalog entry count {len(entries)}; expected {expected_frame_count}')
 report = {'result': 'FAIL' if errors else 'PASS', 'frame_count': len(entries), 'expected_frame_count': expected_frame_count, 'core_frame_count': len(core_entries), 'variant_frame_count': len(variant_entries), 'all_36x42_rgba': not errors, 'errors': errors, 'contact_sheets': sorted(p.name for p in ROOT.glob('*contact_sheet*.png')), 'visual_review': 'Pending contact-sheet inspection; technical checks do not establish animation quality.'}
-(ROOT / 'validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+(STAGING / 'validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
 print(json.dumps(report, indent=2))
+if errors:
+    (ROOT / 'validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    raise SystemExit(1)
+
+for entry in core_entries:
+    os.replace(STAGING / entry['file'], ROOT / entry['file'])
+os.replace(STAGING / 'nhinh_contact_sheet.png', ROOT / 'nhinh_contact_sheet.png')
+os.replace(STAGING / 'frames.json', ROOT / 'frames.json')
+os.replace(STAGING / 'validation.json', ROOT / 'validation.json')
