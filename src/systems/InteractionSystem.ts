@@ -9,6 +9,7 @@ export class InteractionSystem {
   private promptBg: Phaser.GameObjects.Graphics;
   private promptText: Phaser.GameObjects.Text;
   private lastInteractTime = 0;
+  private lastPlayerPosition = { x: 0, y: 0 };
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -38,6 +39,7 @@ export class InteractionSystem {
   }
 
   public update(playerX: number, playerY: number, canInteract: boolean): void {
+    this.lastPlayerPosition = { x: playerX, y: playerY };
     if (!canInteract) {
       this.activeTarget = null;
       this.promptContainer.setVisible(false);
@@ -84,9 +86,15 @@ export class InteractionSystem {
 
   public tryInteract(now: number): boolean {
     if (!this.activeTarget) return false;
+    const target = this.activeTarget;
+    if ((target.isEnabled && !target.isEnabled()) || Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > target.radius) {
+      this.activeTarget = null;
+      this.promptContainer.setVisible(false);
+      return false;
+    }
     if (now - this.lastInteractTime < 160) return false;
     this.lastInteractTime = now;
-    this.activeTarget.onInteract();
+    target.onInteract();
     return true;
   }
 

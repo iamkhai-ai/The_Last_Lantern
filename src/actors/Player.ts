@@ -18,6 +18,8 @@ export class Player {
   private shadow: Phaser.GameObjects.Image;
   private walkSpeed = 105;
   private runSpeed = 150;
+  private footDepthOffset = 0;
+  private footBodyOffsetY = 27;
   private animTimer = 0;
   private animStep = 0;
   private actionAnimation: 'pulse' | 'lantern_on' | 'lantern_off' | null = null;
@@ -74,6 +76,7 @@ export class Player {
     if (!canMove) {
       body.setVelocity(0, 0);
       this.updateTexture(false, false, hasLanternInHand, lanternOn);
+      this.updateGroundDepth();
       return;
     }
 
@@ -128,9 +131,7 @@ export class Player {
 
     const isRunning = Boolean(this.keys?.SHIFT?.isDown || this.cursors?.shift?.isDown);
     this.updateTexture(isMoving, isRunning, hasLanternInHand, lanternOn);
-    this.sprite.setDepth(10 + Math.floor(this.sprite.y / 10));
-    this.shadow.setPosition(this.sprite.x, this.sprite.y + 17);
-    this.shadow.setDepth(this.sprite.depth - 1);
+    this.updateGroundDepth();
   }
 
   public playLanternAction(isOn: boolean): void {
@@ -173,6 +174,25 @@ export class Player {
     if (body) {
       body.setVelocity(0, 0);
     }
+  }
+
+  /** Configure foot collision and depth for a scene while preserving center-based public coordinates. */
+  public setFootPlacement(depthOffsetY: number, bodyOffsetY: number, bodyOffsetX = 9, bodyWidth = 14, bodyHeight = 10): void {
+    this.footDepthOffset = depthOffsetY;
+    this.footBodyOffsetY = bodyOffsetY;
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    if (body) {
+      body.setSize(bodyWidth, bodyHeight);
+      body.setOffset(bodyOffsetX, bodyOffsetY);
+    }
+    this.updateGroundDepth();
+  }
+
+  private updateGroundDepth(): void {
+    const groundY = this.sprite.y + this.footDepthOffset;
+    this.sprite.setDepth(this.footDepthOffset === 0 ? 10 + Math.floor(groundY / 10) : 10 + groundY / 10);
+    this.shadow.setPosition(this.sprite.x, this.footDepthOffset === 0 ? this.sprite.y + 17 : groundY - 2);
+    this.shadow.setDepth(this.sprite.depth - 1);
   }
 
   public get x(): number {
