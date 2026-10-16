@@ -24,7 +24,8 @@ for(const id of ['practice','moon','leaf','star','poem']){
   assert.equal(Math.hypot(anchor.x-stand.x,anchor.y-18-stand.y)<=24,true,`${id} interaction remains reachable at southern solid contact`);
   assert.equal(anchor.y-64<stand.y-20,true,`${id} prompt stays above the actor head`);
 }
-assert.equal(isWoodsCenterWalkable({ x: 510, y: 162 }), false, 'closed threshold blocks at authored center stop');
+assert.equal(isWoodsCenterWalkable({ x: 510, y: 162 }), true, 'physical southern contact with closed threshold remains walkable');
+assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }), false, 'closed threshold blocks center above contact');
 assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }, true), true, 'open central gate corridor passes');
 assert.equal(isWoodsCenterWalkable({ x: 456, y: 170 }, true), false, 'gate posts remain solid');
 assert.equal(isWoodsPointSafe({ x: 402, y: 174 }), true, 'poem stand reachable');
@@ -40,6 +41,9 @@ assert.equal(isWoodsPointSafe(restored,false),true,'invalid/backing restore reso
 assert.equal(restored.y>WHISPERING_WOODS.gate.openStopY,true,'locked restore stays on near side');
 assert.equal(resolveWoodsSpawn(WHISPERING_WOODS.stands.moon, false).x, 180);
 assert.equal(resolveWoodsSpawn(WHISPERING_WOODS.stands.exit, true).x, 510);
+assert.deepEqual(resolveWoodsSpawn({ x: 510, y: 162 }, false), { x: 510, y: 162 }, 'closed-gate safe contact restore stays in place');
+assert.equal(resolveWoodsSpawn({ x: 510, y: 140 }, false).y >= 162, true, 'closed-gate save behind threshold restores near side');
+assert.deepEqual(resolveWoodsSpawn({ x: 510, y: 140 }, true), { x: 510, y: 140 }, 'open-gate corridor save remains valid');
 let state = normalizeRuneProgress({ sequence: 0, activated: {}, open: false });
 let result = activateWoodsRune(state, 'moon'); state = result.state; assert.equal(result.kind, 'activated');
 assert.equal(activateWoodsRune(state, 'moon').kind, 'repeat');

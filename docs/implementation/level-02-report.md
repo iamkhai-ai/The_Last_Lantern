@@ -1,34 +1,35 @@
 # Level 02 implementation report
 
-## Scope and decisions
+## Scope
 
-Implemented Whispering Woods at campaign index 1 only. `src/data/whisperingWoodsLayout.ts` owns anchors, collision footprints, stands, movement route, gate geometry, foot/body mapping, safe restore, and rune progress helpers. `CampaignScene` consumes that data for its Level 02 rendering, collision, Pulse, interaction, HUD, story, journal, and restore branches. No raster assets, dependencies, save keys/schema, Level 01 mechanics, or Levels 03–10 were changed. The dialogue speaker union in `src/types/gameTypes.ts` was extended with the two exact memory speakers required by the scenario; this is source-compatible and changes no persisted shape.
+Implemented Whispering Woods at campaign index 1 only. The Level 02 data module owns the authored anchors, stands, footprints, gate geometry, movement routes, body mapping, safe restore, and rune-state helpers. `CampaignScene` consumes it for presentation, collision, timed Pulse reveals, interactions, journal and hint text, story dialogue, and progression. `DialogueLine.speaker` includes the two memory-scene speakers required by the authored story.
 
-Implementation choices:
+No raster assets, dependencies, persisted save keys or schema, Level 01 mechanics, or Levels 03–10 behavior were changed. Level 02 remains distinct from Library index 2.
 
-- Kept the existing v1 keys (`l1-*`, `rune-sequence`) and normalized saves to a valid activated prefix. Explicit `l1-open`, counter 3, or all activated flags recover sequence 3/open/all gold tablets. A contradictory partial save trims to the shorter valid prefix.
-- Durable `l1-seen-*` facts feed J only; visuals and E eligibility depend on a live 5-second Pulse or permanent activation. Wrong picks retain discovery, practice, poem, and the live Pulse.
-- Used stable `woodsId` tags instead of coordinate lookups for runes, gate layers, poem, memory, firefly, trees, and rocks. Poem and exit targets are distinct.
-- Kept the open gate to a single uniform 128×126 canvas fit. The cropped header and side posts use the existing art; only the existing memory vignette is shown temporarily.
-- Adopted the revised stand centers practice `(120,282)`, Moon `(180,254)`, Leaf `(320,180)`, Star `(450,254)`, poem `(402,167)` to keep E available at southern solid contact. Prompt labels use `anchor.y - 64`; gate prompt is y=94.
-- Intro dialogue contains only the scenario's four opening lines. H escalates from observation to relationships to the full order, with partial progress naming only its next rune. No crystal is granted in this level.
+## Decisions and corrections
+
+- Kept existing `l1-*` flags and `rune-sequence`; saves normalize to the valid activated prefix. Explicit `l1-open`, sequence 3, or all three activation flags restores an open gate and three active runes. Contradictory partial flags trim conservatively.
+- Durable `l1-seen-*` facts are journal knowledge only. A sleeping glyph appears and accepts E only during the five-second Pulse reveal; activated glyphs remain available after the reveal expires.
+- Used stable object IDs for world geometry and separate poem and exit targets. Stand centers follow the authored revision: practice `(120,282)`, Moon `(180,254)`, Leaf `(320,180)`, Star `(450,254)`, poem `(402,167)`. Prompt labels use `anchor.y - 64`; gate prompt uses y=94.
+- Gate collision uses backing `[446,96,128,60]`, posts `[456,156,20,34]` and `[544,156,20,34]`, and threshold `[476,156,68,22]`. Backing and posts stay solid for both gate states; only the threshold toggles. Strict physical overlap permits safe contact at center y=162 while closed and y=140 while open. Restore separately moves a stale closed-gate save from behind the threshold to the near side.
+- The root's first real keyboard pass at commit `f984e24` completed the puzzle, memory, poem, Library transition, and Continue path with an empty console. Its geometry diagnostic caught the gate backing disabled at runtime. This correction keeps that finding distinct from the successful interaction route.
+- Replaced the temporary flat path bands with an irregular mask over the existing `ground_dirt` texture. The mask geometry is hidden after it is applied, and Level 02 controls use the existing bottom-aligned y=358 row so they do not overlap status text.
+- Practice response matches the authored line exactly: “Xung sáng làm hiện ký hiệu. Chạm vào thì nó trả lời.” The open-gate image remains uniformly fitted; the existing memory vignette is reused temporarily.
 
 ## Verification
 
-- Initial test-first run: expected `FAIL` before the spatial module existed (`ERR_MODULE_NOT_FOUND`); recorded before implementation.
-- `node --experimental-strip-types scripts/check-whispering-woods.mjs`: PASS. Covers center/feet/body, stands and reachable routes, target separation, closed/open gate and posts, contact-range prompts, safe restore, legacy/contradictory sequence recovery, repeat/wrong/correct order, and live-reveal versus durable discovery.
+- Test-first contract initially failed before the new spatial module existed (`ERR_MODULE_NOT_FOUND`), as expected.
+- `node --experimental-strip-types scripts/check-whispering-woods.mjs`: PASS after the gate correction. Covers actor body/feet mapping, stand reachability, contacts, closed/open gate overlap, closed-contact restore, behind-gate restore, save normalization, rune order/repeat/reset, and reveal versus durable discovery.
 - `node --experimental-strip-types scripts/check-forest-edge.mjs`: PASS.
 - `node --experimental-strip-types scripts/check-campaign-start-intent.mjs`: PASS.
-- `npm run build`: PASS (TypeScript and Vite; 406 modules).
+- `npm run build`: PASS (TypeScript and Vite; 406 modules). Generated `dist/index.html` was restored after build.
 - `git diff --check`: PASS.
-- Browser keyboard route, screenshot fixtures, and independent reviews: NOT_RUN by worker; root owns those final gates. No runtime gameplay is claimed here.
+- Portable browser fixtures are checked in as `scripts/level02-browser.cjs` and `scripts/level02-geometry.cjs`. They accept `PLAYWRIGHT_MODULE`, `PLAYWRIGHT_CHROMIUM_EXECUTABLE`, `LEVEL02_BASE_URL`, and `LEVEL02_ARTIFACT_DIR`; default artifacts go to the system temporary directory. Worker did not run a browser/server. Root owns final browser verification and independent reviews for the frozen correction revision.
 
-## Risks and limitations
+## Limitations
 
-- Physics is verified by pure geometry assertions and build, but actual collision feel, sprite layering, prompt presentation, timing, and the complete keyboard playthrough still need root's isolated browser run.
-- The scene's existing `memory_vignette` art is used as delivered; the warm overlay is transient. No art approval is asserted.
-- The game has no package-script wrapper for the no-dependency assertions; they are run directly with Node's strip-types flag.
+The root's keyboard route result belongs to `f984e24`, before the gate correction. The corrected geometry has pure contract coverage and compiles, but final runtime collision, screenshot presentation, and the two review results remain root-owned checks and are not claimed here.
 
 ## Revision
 
-Local implementation commit: pending checkpoint creation. Final revision and root browser/review evidence are recorded by the root task after freezing this source.
+Correction revision: pending local checkpoint commit. Root will bind final browser and review evidence to the frozen commit.

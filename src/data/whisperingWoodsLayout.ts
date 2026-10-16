@@ -16,7 +16,7 @@ export const WHISPERING_WOODS = Object.freeze({
   anchors: Object.freeze({ practice: point(120, 276), moon: point(180, 248), leaf: point(320, 174), star: point(450, 248), poem: point(402, 161), gate: point(510, 190) }),
   stands,
   footprints: Object.freeze({ practice: rect(107, 264, 26, 12), moon: rect(167, 236, 26, 12), leaf: rect(307, 162, 26, 12), star: rect(437, 236, 26, 12), poem: rect(385, 150, 34, 11) }),
-  gate: Object.freeze({ backing: rect(446, 108, 128, 48), leftPost: rect(456, 164, 20, 26), rightPost: rect(544, 164, 20, 26), threshold: rect(476, 164, 68, 14), promptY: 94, openStopY: 140 }),
+  gate: Object.freeze({ backing: rect(446, 96, 128, 60), leftPost: rect(456, 156, 20, 34), rightPost: rect(544, 156, 20, 34), threshold: rect(476, 156, 68, 22), promptY: 94, openStopY: 140, closedStopY: 162 }),
   trees: Object.freeze([[48,142],[125,112],[240,106],[350,108],[600,130],[48,230],[600,240],[65,310],[568,310]].map(([x,y], i) => Object.freeze({ id:`tree-${i}`, x, y, footprint:rect(x-9,y-14,18,14) }))),
   rocks: Object.freeze([[100,195],[552,292]].map(([x,y], i) => Object.freeze({ id:`rock-${i}`, x, y, footprint:rect(x-13,y-14,26,14) }))),
   route: Object.freeze([point(280,286),point(230,286),point(180,258),point(250,220),point(320,184),point(385,215),point(450,258),point(402,174),point(510,181)]),
@@ -36,16 +36,16 @@ function bodyRect(center: WoodsPoint): WoodsRect {
 }
 export function isWoodsCenterWalkable(center: WoodsPoint, gateOpen = false): boolean {
   const f = feetAt(center);
-  if (center.x < 12 || center.x > 628 || f.y < 96 || f.y > 310) return false;
   const body = bodyRect(center);
+  if (center.x < 12 || center.x > 628 || f.y < 96 || f.y > 310 || body.y < 96 || body.y + body.height > 310) return false;
   const solids = [...Object.values(WHISPERING_WOODS.footprints), ...WHISPERING_WOODS.trees.map((x) => x.footprint), ...WHISPERING_WOODS.rocks.map((x) => x.footprint), WHISPERING_WOODS.gate.leftPost, WHISPERING_WOODS.gate.rightPost, WHISPERING_WOODS.gate.backing, ...(gateOpen ? [] : [WHISPERING_WOODS.gate.threshold])];
-  return !solids.some((solid) => solid===WHISPERING_WOODS.gate.threshold
-    ? body.x <= solid.x+solid.width && body.x+body.width >= solid.x && body.y <= solid.y+solid.height && body.y+body.height >= solid.y
-    : overlaps(body, solid));
+  return !solids.some((solid) => overlaps(body, solid));
 }
 export function isWoodsPointSafe(center: WoodsPoint, gateOpen = false): boolean { return isWoodsCenterWalkable(center, gateOpen); }
 export function resolveWoodsSpawn(saved: WoodsPoint | undefined, gateOpen: boolean): WoodsPoint {
-  if (saved && isWoodsPointSafe(saved, gateOpen)) return point(saved.x, saved.y);
+  const threshold=WHISPERING_WOODS.gate.threshold;
+  const behindLockedGate=!gateOpen&&saved&&saved.x>=threshold.x-8&&saved.x<=threshold.x+threshold.width+8&&saved.y<WHISPERING_WOODS.gate.closedStopY;
+  if (saved && !behindLockedGate && isWoodsPointSafe(saved, gateOpen)) return point(saved.x, saved.y);
   const options = gateOpen ? [WHISPERING_WOODS.stands.spawn, WHISPERING_WOODS.stands.exit, WHISPERING_WOODS.stands.moon] : [WHISPERING_WOODS.stands.spawn, WHISPERING_WOODS.stands.practice, WHISPERING_WOODS.stands.moon, WHISPERING_WOODS.stands.leaf, WHISPERING_WOODS.stands.star, WHISPERING_WOODS.stands.poem];
   return options.filter((p) => isWoodsPointSafe(p, gateOpen)).sort((a,b) => saved ? Math.hypot(a.x-saved.x,a.y-saved.y)-Math.hypot(b.x-saved.x,b.y-saved.y) : 0)[0] ?? WHISPERING_WOODS.stands.spawn;
 }

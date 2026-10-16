@@ -1050,12 +1050,19 @@ export class CampaignScene extends Phaser.Scene {
       this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(tint[biome] ?? 0xffffff).setDepth(0));
       if (this.progress.level === 1) {
         const paths = this.add.graphics().setDepth(0.55);
-        paths.fillStyle(0xb7a17b, 0.23); paths.fillEllipse(280, 278, 214, 112); paths.fillStyle(0xa88f6e, 0.18); paths.fillEllipse(280, 278, 162, 72);
-        paths.lineStyle(50, 0xb4a27e, 0.2); paths.beginPath(); paths.moveTo(280,286); paths.lineTo(215,275); paths.lineTo(178,258); paths.lineTo(240,221); paths.lineTo(320,184); paths.lineTo(386,216); paths.lineTo(450,258); paths.strokePath();
-        paths.lineStyle(48, 0xb4a27e, 0.17); paths.beginPath(); paths.moveTo(280,286); paths.lineTo(205,293); paths.lineTo(120,286); paths.strokePath();
-        paths.lineStyle(48, 0xb4a27e, 0.17); paths.beginPath(); paths.moveTo(386,216); paths.lineTo(402,174); paths.lineTo(510,181); paths.strokePath();
-        paths.fillStyle(0xc4b38d, 0.22); for (const [x,y,r] of [[280,277,52],[120,286,18],[180,258,18],[320,184,18],[450,258,18],[402,174,18],[510,181,18]] as Array<[number,number,number]>) paths.fillEllipse(x,y,r*2,r);
-        this.track(paths);
+        paths.fillStyle(0xffffff,1);
+        paths.fillPoints([[184,285],[177,264],[182,243],[204,222],[232,209],[265,204],[296,207],[326,216],[351,231],[369,252],[372,273],[360,293],[338,307],[307,315],[275,317],[244,313],[216,304],[195,296]].map(([x,y])=>new Phaser.Geom.Point(x,y)),true);
+        const blobs: Array<[number,number,number,number]> = [
+          [258,277,52,46],[226,273,54,46],[198,264,54,45],[180,257,50,44],[206,285,54,44],[237,294,58,46],[270,291,54,46],
+          [279,248,50,46],[294,222,50,46],[311,197,50,46],[322,177,50,46],[341,196,52,46],[365,216,52,46],[390,237,52,46],[416,250,52,46],[440,257,52,46],
+          [180,253,50,46],[151,270,52,46],[125,281,52,46],
+          [374,205,52,46],[392,181,52,46],[407,164,52,46],[439,169,52,46],[468,176,52,46],[494,180,52,46],[513,181,52,46],
+        ];
+        for(const [x,y,w,h] of blobs) paths.fillEllipse(x,y,w,h);
+        const mask=paths.createGeometryMask();
+        const pathTexture=this.add.tileSprite(0,0,640,360,'ground_dirt').setOrigin(0).setTint(0xc2ad82).setAlpha(.82).setDepth(.55).setMask(mask);
+        paths.setVisible(false);
+        this.track(paths);this.track(pathTexture);
       } else if (this.progress.level === 2) {
         this.track(this.add.tileSprite(96, 64, 448, 244, 'ground_stone').setOrigin(0).setTint(0xd8c69c).setAlpha(0.42).setDepth(0.4));
         this.track(this.add.tileSprite(276, 76, 88, 232, 'ground_stone').setOrigin(0).setTint(0xefe0ba).setAlpha(0.35).setDepth(0.5));
@@ -1150,7 +1157,7 @@ export class CampaignScene extends Phaser.Scene {
     const controls = this.progress.level === 0
       ? `WASD Move    E Interact${this.progress.lanternPickedUp ? '    F Lantern' : ''}${this.progress.flags['l0-tablet-read'] ? '    SPACE Pulse' : ''}    J Journal    H Hint    ESC Pause`
       : 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause';
-    this.controlsText = this.track(this.add.text(320, this.progress.level === 0 ? 358 : 344, controls, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
+    this.controlsText = this.track(this.add.text(320, this.progress.level === 0 || this.progress.level === 1 ? 358 : 344, controls, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
     const stage = this.progress.level;
     const landscape = this.add.graphics().setDepth(1.5);
     if (!hasCampaignBackground && stage === 3) {
@@ -1285,7 +1292,7 @@ export class CampaignScene extends Phaser.Scene {
       action('practice-rune', 'E · Kiểm tra bia tập', stands.practice.x, stands.practice.y, () => {
         if (this.progress.flags['l1-practice-complete']) { this.say([{speaker:'Nhinh',text:'Bia tập đã ngân lên khi ánh sáng soi rõ ký hiệu.'}]); return; }
         if (!this.activeRevealedRunes.has('practice-leaf')) { this.say([{speaker:'Nhinh',text:'Nét khắc đang ngủ. Thử dùng SPACE để soi bằng xung sáng.'}]); return; }
-        this.progress.flags['l1-practice-complete']=true; this.save(); this.say([{speaker:'Nhinh',text:'Xung sáng làm hiện ký hiệu. Chạm vào thì bia ngân một tiếng.'},{speaker:'Lumo',text:'Những bia còn lại chắc cũng đang chờ như vậy.'}]);
+        this.progress.flags['l1-practice-complete']=true; this.save(); this.say([{speaker:'Nhinh',text:'Xung sáng làm hiện ký hiệu. Chạm vào thì nó trả lời.'},{speaker:'Lumo',text:'Những bia còn lại chắc cũng đang chờ như vậy.'}]);
       }, undefined, 'runestone_leaf_lit');
       for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`);
       action('stairs', () => this.progress.flags['l1-open'] ? 'E · Xuống Thư viện' : 'E · Kiểm tra cổng', stands.exit.x, stands.exit.y, () => {
@@ -1749,14 +1756,14 @@ export class CampaignScene extends Phaser.Scene {
     } else if (level === 1) {
       this.addCampaignBarrier('woods-north-boundary',320,91,640,10);
       this.addCampaignBarrier('woods-south-boundary',320,315,640,10);
-      this.addCampaignBarrier('woods-west-boundary',5,200,10,220);
-      this.addCampaignBarrier('woods-east-boundary',635,200,10,220);
+      this.addCampaignBarrier('woods-west-boundary',2.5,200,5,220);
+      this.addCampaignBarrier('woods-east-boundary',637.5,200,5,220);
       [...WHISPERING_WOODS.trees,...WHISPERING_WOODS.rocks].forEach((obstacle)=>{
         const r=obstacle.footprint; this.addCampaignBarrier(`woods-${obstacle.id}`,r.x+r.width/2,r.y+r.height/2,r.width,r.height);
       });
       for(const [id,r] of Object.entries(WHISPERING_WOODS.footprints)) this.addCampaignBarrier(`woods-footprint-${id}`,r.x+r.width/2,r.y+r.height/2,r.width,r.height);
       for (const [id,r] of [['woods-gate-left',WHISPERING_WOODS.gate.leftPost],['woods-gate-right',WHISPERING_WOODS.gate.rightPost],['woods-gate-backing',WHISPERING_WOODS.gate.backing],['woods-gate-threshold',WHISPERING_WOODS.gate.threshold]] as const) {
-        this.addCampaignBarrier(id,r.x+r.width/2,r.y+r.height/2,r.width,r.height,id==='woods-gate-threshold'&&!this.progress.flags['l1-open']);
+        this.addCampaignBarrier(id,r.x+r.width/2,r.y+r.height/2,r.width,r.height,id==='woods-gate-threshold'?!this.progress.flags['l1-open']:true);
       }
     } else if (level === 3) {
       // The creek runs from the top to the bottom edge; the only crossing is its narrow stone lane.
@@ -1848,6 +1855,7 @@ export class CampaignScene extends Phaser.Scene {
     } else if (this.progress.level === 1) {
       if (this.progress.flags['l1-open']) setEnabled('woods-gate-threshold',false);
       else setEnabled('woods-gate-threshold',true);
+      setEnabled('woods-gate-backing',true);
       setEnabled('woods-gate-left',true); setEnabled('woods-gate-right',true);
     } else if (this.progress.level === 3) {
       setEnabled('creek-bridge-a-gate', !this.progress.flags['l3-latch-a']);
