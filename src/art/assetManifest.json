@@ -280,6 +280,21 @@
     "h": 184
   },
   {
+    "key": "ground_grass",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "ground_dirt",
+    "w": 36,
+    "h": 42
+  },
+  {
+    "key": "ground_stone",
+    "w": 36,
+    "h": 42
+  },
+  {
     "key": "tile_water",
     "w": 89,
     "h": 90

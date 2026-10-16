@@ -228,9 +228,13 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private drawRoom(biome: string): void {
-    const tiles = biome === 'creek' ? 'tile_stone' : biome === 'library' || biome === 'ruins' || biome === 'observatory' ? 'tile_stone' : biome === 'tower' ? 'tile_dirt' : 'tile_grass';
+    const tiles = biome === 'creek' || biome === 'library' || biome === 'ruins' || biome === 'observatory'
+      ? 'ground_stone'
+      : biome === 'tower'
+        ? 'ground_dirt'
+        : 'ground_grass';
     const tint: Record<string, number> = { woods: 0x829b80, library: 0xd5bd87, creek: 0x809dad, tower: 0x9b9078, garden: 0xb2c68e, ruins: 0x82918c, observatory: 0x7182a0, heart: 0xd8b978 };
-    this.track(this.add.image(0, 0, tiles).setOrigin(0).setDisplaySize(640, 360).setTint(tint[biome] ?? 0xffffff).setDepth(0));
+    this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(tint[biome] ?? 0xffffff).setDepth(0));
     const decor = this.add.graphics().setDepth(1);
     decor.fillStyle(biome === 'creek' ? 0x183f59 : 0x07151c, 0.18);
     decor.fillRect(0, 0, 640, 360);

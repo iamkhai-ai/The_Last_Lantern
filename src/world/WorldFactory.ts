@@ -62,15 +62,15 @@ export class WorldFactory {
     const NIGHT_CREEK_GRASS = 0x5a7a8c;
     // Full-screen textured base per zone (ruins sits on dark stone, creek on moonlit grass)
     if (zoneId === 'ruins') {
-      addTiles('tile_stone', isDawn ? WARM : 0x5f5f76, (g) => {
+      addTiles('ground_stone', isDawn ? WARM : 0x5f5f76, (g) => {
         g.fillRect(0, 0, 640, 360);
       });
     } else if (zoneId === 'creek') {
-      addTiles('tile_grass', isDawn ? WARM : NIGHT_CREEK_GRASS, (g) => {
+      addTiles('ground_grass', isDawn ? WARM : NIGHT_CREEK_GRASS, (g) => {
         g.fillRect(0, 0, 640, 360);
       });
     } else {
-      addTiles('tile_grass', isDawn ? WARM : NIGHT_GRASS, (g) => {
+      addTiles('ground_grass', isDawn ? WARM : NIGHT_GRASS, (g) => {
         g.fillRect(0, 0, 640, 360);
       });
     }
@@ -106,7 +106,7 @@ export class WorldFactory {
       }
 
       // Concentric circular stone sanctuary plaza around the Heart Tree
-      addTiles('tile_stone', isDawn ? WARM : 0xb0b0bc, (g) => {
+      addTiles('ground_stone', isDawn ? WARM : 0xb0b0bc, (g) => {
         g.fillCircle(315, 175, 84);
         g.fillRect(284, 36, 62, 324);
         g.fillRect(315, 176, 325, 38);
@@ -170,7 +170,7 @@ export class WorldFactory {
       bg.strokePath();
 
       // Flagged forest paths leading to the 3 runestones & Circular Sun-Gate
-      addTiles('tile_dirt', isDawn ? WARM : 0x9a938a, (g) => {
+      addTiles('ground_dirt', isDawn ? WARM : 0x9a938a, (g) => {
         g.beginPath();
         g.moveTo(255, 360);
         g.lineTo(275, 235);
@@ -202,7 +202,7 @@ export class WorldFactory {
       bg.strokeRect(402, 206, 52, 20);
     } else if (zoneId === 'creek') {
       // Stone terraces on West & East banks + diagonal Moonlit Creek (04_Moonlit_Creek.png)
-      addTiles('tile_stone', isDawn ? WARM : 0x8a98a8, (g) => {
+      addTiles('ground_stone', isDawn ? WARM : 0x8a98a8, (g) => {
         g.fillRect(40, 80, 240, 220);
       });
       bg.lineStyle(2, 0x34566a, 0.9);
@@ -227,7 +227,7 @@ export class WorldFactory {
     } else if (zoneId === 'ruins') {
       // Ancient elevated stone masonry courtyard (05_Silent_Ruins.png)
       // Lighter slab texture so the courtyard lifts off the dark stone base.
-      addTiles('tile_stone', isDawn ? WARM : 0xffffff, (g) => {
+      addTiles('ground_stone', isDawn ? WARM : 0xffffff, (g) => {
         g.beginPath();
         g.moveTo(155, 205);
         g.lineTo(345, 110);
