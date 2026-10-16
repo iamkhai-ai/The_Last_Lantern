@@ -4,7 +4,7 @@ Date: 2026-10-16
 
 Scope: Level 01 only
 
-Implementation commit: `c956898` (`fix(level01): align pulse and arch collision`)
+Implementation commit: `af1dc43` (`fix(level01): play footprint discovery dialogue`)
 
 Baseline: `16e01e4`
 
@@ -12,7 +12,7 @@ Baseline: `16e01e4`
 
 Rebuilt the Forgotten Forest Edge with a typed spatial definition shared by rendering, physics, interaction anchors, receiver charging, ground depth and save restoration. The player keeps the center-based public position API; Level 01 uses a 14×6 body aligned to feet at `centerY + 19` and fractional depth `10 + groundY / 10`. The route uses a masked existing dirt tile with irregular edges. Trees, rocks, tablet, gate posts and the closed passage have authored collision footprints. The gate uses the existing Level 02 open passage art and requires an explicit E exit from the south side.
 
-The permanent back-of-arch footprint `[422,96,128,30]` joins the north floor boundary to the gate posts. It blocks entry behind the arch while preserving the empty forest strip beyond it. The doorway threshold `[447,126,78,18]` is conditional on gate state; the closed-gate contact `(486,128)` remains valid, and opening permits northward movement to `(486,110)` where the backing stops travel. The gate stand at `(486,151)` remains walkable. Level 01 status and command rows are separated, and the open-gate prompt reads “E · Qua cổng rừng”. No image files or later-level puzzle logic changed.
+The permanent back-of-arch footprint `[422,96,128,30]` joins the north floor boundary to the gate posts. It blocks entry behind the arch while preserving the empty forest strip beyond it. The doorway threshold `[447,126,78,18]` is conditional on gate state; the closed-gate contact `(486,128)` remains valid, and opening permits northward movement to `(486,110)` where the backing stops travel. The gate stand at `(486,151)` remains walkable. Level 01 status and command rows are separated, and the open-gate prompt reads “E · Qua cổng rừng”. The first successful post-reading Pulse now plays the scenario's three footprint-discovery lines once, keyed by the durable discovery flag. No image files or later-level puzzle logic changed.
 
 ## Changed files
 
@@ -34,4 +34,4 @@ The permanent back-of-arch footprint `[422,96,128,30]` joins the north floor bou
 
 - Kept the planned threshold `[447,126,78,18]` and south stand `(486,151)`. Round 1 reviewers: Reviewer A found that SPACE triggered Pulse and cooldown before the tablet taught it; Reviewer B found no issues. This revision gates Level 01 Pulse until tablet reading while preserving SPACE dialogue advancement and other-level behavior. Root also identified that the prior full-width closed forest boundary had no matching continuous art and removed open forest space; this revision replaces it with the permanent arch backing in `01-layout.md`.
 - Used the existing `woods_arch_open_passage` art from Level 02 without editing or regenerating assets.
-- Post-review browser verification for this revision is **NOT_RUN** by the implementation worker; root owns the frozen-revision rerun. Levels 02–10 remain deferred.
+- Final post-review browser verification is owned by root and must be rebound after this scenario-dialogue correction. Levels 02–10 remain deferred.
