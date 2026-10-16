@@ -25,7 +25,7 @@ export class MenuScene extends Phaser.Scene {
     // Build atmospheric Heart Tree Night scene matching 00_cover.png
     WorldFactory.buildZone(this, 'hub', 0, false);
 
-    // Linh & Lumo standing before the Heart Tree with warm lantern glow
+    // Nhinh & Lumo standing before the Heart Tree with warm lantern glow
     const halo = this.add.image(312, 298, 'light_radial');
     halo.setDepth(19);
     halo.setScale(0.85);
@@ -223,6 +223,7 @@ export class MenuScene extends Phaser.Scene {
 
   public startNewGame(): void {
     CampaignSaveSystem.clear();
+    SaveSystem.clear();
     SoundSystem.playLanternToggle(true);
     this.scene.start('CampaignScene', { newGame: true });
   }

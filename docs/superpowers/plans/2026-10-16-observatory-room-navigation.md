@@ -61,10 +61,12 @@
 
 **Files:**
 - Modify: `src/scenes/CampaignScene.ts`
+- Modify: `src/systems/CampaignSaveSystem.ts` for the room checkpoint fields needed by transitions.
 - Use: `src/data/observatoryRooms.ts`
 
 **Interfaces:**
 - Consumes `OBSERVATORY_ROOMS` from Task 1.
+- Adds optional `roomId?: ObservatoryRoomId` and `roomSpawn?: { x: number; y: number }` to `CampaignProgress`, preserving existing version 1 saves.
 - Adds scene methods `buildObservatoryRoom(roomId: ObservatoryRoomId, spawnId?: string): void`, `clearActiveRoom(): void`, and `transitionObservatory(exitId: string): void`.
 - Room transitions retain the same `Player`, `LanternSystem`, `InteractionSystem`, and `CampaignProgress` instances.
 
@@ -103,7 +105,7 @@
 - Modify: `src/scenes/CampaignScene.ts`
 
 **Interfaces:**
-- Adds optional `roomId?: ObservatoryRoomId` and `roomSpawn?: { x: number; y: number }` to `CampaignProgress`; existing `version: 1` data remains valid.
+- Consumes the optional room/checkpoint fields added in Task 2; existing `version: 1` data remains valid.
 - Stores Lumo's room, route waypoint/index, target, and seal-arrival state as validated save data or typed progress counters/flags.
 - Scene restore order: load inputs → choose saved room and safe spawn → build active room → restore actors/lantern → derive doors/beams/bridge → enable controls.
 
