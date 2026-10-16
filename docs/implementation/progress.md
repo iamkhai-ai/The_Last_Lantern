@@ -16,7 +16,7 @@ Current slice: rebuild **Level 01 only**, then let the user review before later 
 - 2026-10-16: Ruling: use exact fractional depth based on actor feet for Level 01 to avoid ten-pixel sorting ties; retain legacy actor depth outside this level. Cost if incorrect: sprites could overlap differently at a prop's base, covered by before/behind browser checks.
 - 2026-10-16: Level 01 uses an authored 14×6 foot body centered at the frame's ground baseline. Body dimensions, foot offset and depth must agree in runtime and pure spatial checks.
 - 2026-10-16: Existing dirt texture is clipped by an irregular path mask; no raster files regenerated. Move the Level 01 command row to y=358 so it does not overlap the status row.
-- 2026-10-16: Ruling: replace the full-width temporary northern band with permanent arch backing `[422,96,128,30]`; the empty grass remains traversable and collider/restore geometry shares the same solids. Cost if wrong: an arch approach could be obstructed; real closed/open movement checks passed.
+- 2026-10-16: Initial ruling replaced the full-width temporary northern band with permanent arch backing `[422,96,128,30]`; see the collision follow-up below for the corrected full-rim geometry.
 
 ## State
 
@@ -49,6 +49,13 @@ Current slice: rebuild **Level 01 only**, then let the user review before later 
 - Audit: addressed shared Level 01 and all ten campaign `addAction` levels, Observatory interactables/exits, the legacy WorldScene beacon/tree/portals, and direct Woods, Creek, and Ruins puzzle targets. Large canopy/world/background images are excluded from the shared CampaignScene bounds lookup by size.
 - Regression proof added: `scripts/check-interaction-prompt-layout.mjs` covers Level 01 lamp approaches from four directions, tablet/gate approaches, Lumo above the lamp, left/right viewport and HUD edges, and a long dynamic label.
 - Verification: NOT_RUN by worker per delegation. Root owns the build and browser audit across campaign/Observatory fixtures.
+
+## Prompt and gate collision review follow-up — 2026-10-16
+
+- Review correction: Observatory `root-bed` is a `Graphics` surface with no inferred Image bounds; it now uses the authored live bridge rectangle. The initially hidden `root-bridge` now reports current image bounds only when it becomes visible. Pure prompt regressions cover both target bounds.
+- Gate collision correction: the actual runtime gate crop is 152×156 at `(410,10)` with bottom anchor `(486,166)`; its side-post strips span local x `[0,50]` and `[102,152]`. Shared permanent geometry now covers those full post strips at y=126..166 and extends the backing across the full frame width at y=96..126. The centered opening remains 52px wide; the locked threshold remains separate and conditional. Save resolution consumes the same shared `FOREST_EDGE_SOLIDS` data as runtime colliders.
+- Gate proof added to `scripts/check-forest-edge.mjs`: both posts' outer and inner edges in open/closed states, centered passage clearance, upper backing coverage, stale-save recovery, and existing reachable approaches.
+- Verification: NOT_RUN by worker per delegation. Root owns tests, build, reviews, and real-browser collision/prompt confirmation.
 - Final source revision: `561b4286d6769f5018430cde97e621894ea6731e`. PASS — root `npm run build` (TypeScript and Vite, 405 modules, exit 0), `git diff --check`, and two independent read-only Luna high reviews on that exact revision with no remaining actionable findings.
 - PASS — root manual browser preview on isolated origin port 5184: lantern pickup and toggling through the normal UI, lit/off local falloff, movement, right viewport edge coverage, readable HUD/prompts/dialogue, and no captured console errors. A fractional-coordinate seam observed on `da82885` was corrected by rounding the shade and rectangle center together; final moving screenshots show no seam. The temporary preview and tab were closed afterward; the user's port 5173 save was not modified.
 - NOT_RUN — automated tests, forced Canvas runtime preview, later-level playthrough and human acceptance for the new lighting. Canvas uses the same renderer-independent image/rectangle composition and was reviewed in source; this does not claim a forced Canvas browser run.

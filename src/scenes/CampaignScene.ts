@@ -517,8 +517,19 @@ export class CampaignScene extends Phaser.Scene {
       object instanceof Phaser.GameObjects.Image && object.visible
       && Math.abs(object.x - item.position.x) < 0.1 && Math.abs(object.y - item.position.y) < 0.1,
     );
+    const getPromptBounds = (): { x: number; y: number; width: number; height: number } | null => {
+      if (id === 'root-bed') {
+        const bounds = this.observatoryBridgeBounds;
+        return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+      }
+      if (id === 'root-bridge') {
+        const bridge = this.observatoryPuzzleVisuals.get('root-bridge');
+        return bridge instanceof Phaser.GameObjects.Image && bridge.visible ? bridge.getBounds() : null;
+      }
+      return visual?.getBounds() ?? null;
+    };
     const register = (onInteract: () => void, getPrompt: () => string, isEnabled?: () => boolean): void => {
-      this.interactions.register({ id: `observatory-${id}`, x: interactionPoint.x, y: interactionPoint.y, radius: 34, getPromptBounds: () => visual?.getBounds() ?? null, getPrompt, isEnabled, onInteract });
+      this.interactions.register({ id: `observatory-${id}`, x: interactionPoint.x, y: interactionPoint.y, radius: 34, getPromptBounds, getPrompt, isEnabled, onInteract });
     };
 
     if (id === 'g0' || id === 'g1' || id === 'g2') {

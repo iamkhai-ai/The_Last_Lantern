@@ -30,5 +30,8 @@ for (const y of [128, 151, 174]) checkClear(`Gate approach y=${y}`, gate, actor(
 
 checkClear('Near left viewport and upper HUD', { x: 0, y: 72, width: 22, height: 24 }, actor(16, 91), 150, 24);
 checkClear('Near right viewport and lower HUD with long dynamic label', { x: 596, y: 278, width: 28, height: 28 }, actor(614, 300), 378, 52);
+const observatoryRoots = { x: 330, y: 280, width: 132, height: 40 };
+checkClear('Observatory root bed', observatoryRoots, actor(396, 288), 160, 24);
+checkClear('Observatory root bridge after it becomes visible', observatoryRoots, actor(398, 326), 238, 24);
 
 console.log('Interaction prompt placement checks passed.');

@@ -14,7 +14,7 @@ export const FOREST_EDGE = {
     lantern: { anchor: { x: 224, y: 238 }, stand: { x: 224, y: 251 }, texture: 'pickup-lantern' },
     tablet: { anchor: { x: 300, y: 230 }, stand: { x: 300, y: 238 }, solid: { x: 286, y: 218, width: 28, height: 12 } },
     ring: { anchor: { x: 410, y: 225 }, ground: { x: 410, y: 210 }, stand: { x: 410, y: 191 }, radius: 16, texture: 'stone-standing-ring' },
-    gate: { anchor: { x: 486, y: 166 }, stand: { x: 486, y: 151 }, exit: { x: 486, y: 151 }, posts: [{ x: 422, y: 126, width: 25, height: 42 }, { x: 525, y: 126, width: 25, height: 42 }], header: { x: 447, y: 126, width: 78, height: 18 }, threshold: { x: 447, y: 126, width: 78, height: 18 }, backing: { x: 422, y: 96, width: 128, height: 30 } },
+    gate: { anchor: { x: 486, y: 166 }, stand: { x: 486, y: 151 }, exit: { x: 486, y: 151 }, posts: [{ x: 410, y: 126, width: 50, height: 40 }, { x: 512, y: 126, width: 50, height: 40 }], header: { x: 447, y: 126, width: 78, height: 18 }, threshold: { x: 447, y: 126, width: 78, height: 18 }, backing: { x: 410, y: 96, width: 152, height: 30 } },
     eye: { anchor: { x: 538, y: 122 }, texture: 'sun-eye-dormant' },
     trees: [
       { id: 'tree-nw', anchor: { x: 48, y: 142 } }, { id: 'tree-northwest', anchor: { x: 112, y: 102 } },
