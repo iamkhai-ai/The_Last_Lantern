@@ -44,7 +44,7 @@ Gate backing ties to the northern floor boundary. Closed threshold stops the cen
 
 Floor follows the existing woods contract: center x=12..628, body/feet restricted to y=96..310. Trees at `(48,142),(125,112),(240,106),(350,108),(600,130),(48,230),(600,240),(65,310),(568,310)`. Each trunk footprint `[baseX-9,baseY-14,18,14]`; rocks at `(100,195),(552,292)`, footprint `[baseX-13,baseY-14,26,14]`. Use existing trees/rocks at native proportions. Canopies sort by base; they can hide actors behind them, never replace trunk collision. Ground bushes, grass and flowers are passable. Keep the practice/rune/poem glyphs and stand points clear of canopies.
 
-Stand points six pixels below each stone's base keep E available at its southern physics contact: that contact is center y=baseY-16, only 22px from the target. This avoids losing the prompt when walking all the way against a stone. Verify that exact contact as well as the nominal stand.
+Stand points six pixels below each stone's base keep E available at its southern physics contact: that contact is center y=baseY-16, only 22px from the target. Place each practice/rune/poem label at `promptY=anchorY-64` (gate remains y=94), above its glyph and the actor's head even at that contact. Verify E availability and label placement at exact contact as well as the nominal stand.
 
 Use existing grass/dirt/stone textures, with an irregular circular clearing and >=48px paths connecting spawn, practice, three rune approaches, poem and gate. Ground masks/stone stamps stay below feet; no cross-shaped debug paths or drawn route lines. Empty grass remains traversable; colliders require visible corresponding art. Props must not be baked into an opaque background and drawn again.
 
