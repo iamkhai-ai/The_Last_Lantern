@@ -28,3 +28,10 @@ Current slice: rebuild **Level 01 only**, then let the user review before later 
 - Baseline build: PASS at `16e01e4` (`npm run build`, 403 modules). Root final build: PASS at `6c3b4cd`, 404 modules. Pure geometry/state checks: PASS. Final full keyboard route and browser console: PASS. Geometry/arch fixtures: PASS on equivalent unchanged geometry from `0076027`. Human acceptance: NOT_RUN.
 - Draft browser observations: original keyboard flow reached Level 02; geometry fixtures confirmed safe restore, real tree collision, before/behind depth, baseline alignment and transparent open arch. These runs preceded final corrections, so they do not certify the final revision. Strict repeat confirmed closed passage blocks in place at approximately `(488,128)`, then was interrupted by Vite HMR while the worker edited source. Repeat on frozen build required.
 - Final evidence and correction history: [level-01-verification.md](level-01-verification.md). All repeat checks needed after corrections are complete; the draft observations above are retained as history only.
+
+## Level 01 gate follow-up — 2026-10-16
+
+- Fixed two user-reported regressions: stairs occluding Nhinh and retained New Game launch data resetting progress on the first gate transition. Gate ground and front layers now render separately; New Game intent is consumed once. Gate prompt moved above the approach.
+- Synced latest fetched main `f3c23de` into the feature branch with merge `08b93e1`, including the new Nhinh frames. Primary checkout and its unrelated edits remain untouched.
+- Final source revision `eafcc597c003ffcebc07c5724560be0e6f275568`: root build, pure checks, uninterrupted actual-keyboard New Game → Level 02 → same-runtime Continue → explicit resets, seven stair visual samples and closed/open post collision checks all PASS. Two separate Luna high final reviews found no actionable findings. Earlier reload-based lifecycle evidence is superseded.
+- Detailed findings, correction history, commands, scope and evidence: [level-01-gate-fixes.md](level-01-gate-fixes.md). Human acceptance and remote publication: NOT_RUN. Levels 02–10 remain deferred.

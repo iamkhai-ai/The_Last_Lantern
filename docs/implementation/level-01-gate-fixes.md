@@ -28,12 +28,12 @@ Local evidence: `C:/Users/Admin/.codex/visualizations/2026/10/15/01a1402c-9306-7
 
 ## Status
 
-Root reproduction: both bugs confirmed. Main sync: PASS (already contains fetched main). Implementation and local focused checks: complete. Root browser proof and independent reviews: pending.
+Root reproduction: both bugs confirmed. Final main sync: PASS (`f3c23de2453230bbd90b0d73381ba43e4fb654ed`, merged in `08b93e1`). Implementation, root verification and both independent final reviews are complete on source revision `eafcc597c003ffcebc07c5724560be0e6f275568`. Human acceptance: NOT_RUN.
 
 ## Fix decisions and local evidence
 
 - New Game intent is consumed once from both the `create(data)` argument and Phaser's retained `sys.settings.data`. `nextLevel()` restart and menu Continue therefore load the current save, while Menu New Game and pause Restart continue to pass an explicit reset request. Existing save schema and keys are unchanged.
-- Level 01 gate uses one full-size ground image at depth 3 plus runtime-generated transparent header and side-post crops at the gate anchor depth. The source artwork is fitted uniformly and bottom-aligned in the shared native 152×156 frame; open and closed sources update all four layers together. The level's existing post, threshold, and backing colliders are unchanged. Cropped textures remain cached in Phaser's texture manager across scene restarts; their scene images are destroyed/rebuilt with the rest of the level objects.
+- Level 01 gate uses one full-size ground image at depth 3 plus runtime-generated transparent header and side-post crops at the gate anchor depth. The source artwork is fitted uniformly and bottom-aligned in a shared 152×156 canvas; open and closed sources update all four layers together. The level's existing post, threshold, and backing colliders are unchanged. Cropped textures remain cached in Phaser's texture manager across scene restarts; their scene images are destroyed/rebuilt with the rest of the level objects.
 - The gate prompt has a gate-only screen anchor at y=76 so it does not cover Nhinh on the stairs. Other interaction prompts keep their prior placement.
 - Added `scripts/check-campaign-start-intent.mjs` for one-shot consumption, normal restart/Continue behavior, and explicit New Game / Restart requests.
 
@@ -63,3 +63,26 @@ node scripts/level01-browser-regression.cjs 5182
 The runner resolves Playwright with `require('playwright')` by default; `PLAYWRIGHT_MODULE` can point to another resolvable Playwright module, and `PLAYWRIGHT_CHROMIUM_EXECUTABLE` optionally selects a Chromium executable. `LEVEL01_BASE_URL` can replace the port argument. `LEVEL01_ARTIFACT_DIR` chooses the screenshot/results folder; otherwise a new folder is created under the system temporary directory. The runner prints the chosen URL and artifact folder.
 
 The authoring agent did not run this browser script per the delegated task; root owns verification on the final revision.
+
+## Final root verification — 2026-10-16
+
+Source revision: `eafcc597c003ffcebc07c5724560be0e6f275568`. Main was fetched again after browser verification; `origin/main` remained `f3c23de2453230bbd90b0d73381ba43e4fb654ed` and is an ancestor of the source revision. New Nhinh frames from main were included in every final check. No raster assets were edited by this fix.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `node --experimental-strip-types scripts/check-forest-edge.mjs` | PASS | Geometry/state assertions, exit 0 |
+| `node --experimental-strip-types scripts/check-campaign-start-intent.mjs` | PASS | One-shot intent assertions, exit 0 |
+| `npm run build` | PASS | TypeScript and Vite, 405 modules, exit 0 |
+| `git diff --check` | PASS | Exit 0 |
+| Checked-in `level01-browser-regression.cjs 5183` | PASS | Actual uninterrupted New Game tutorial/puzzle → E → Level 02 (internal index 1); same-runtime Continue stays at index 1; second New Game and confirmed pause Restart return to index 0 with lantern uncollected; console errors empty |
+| Separate gate visual/physics browser regression | PASS | Seven approach samples: closed y≈174/151/128, open y≈174/151/128/110; no opaque actor pixels covered by gate layers in the central stairway; active E prompt stays above actor |
+| Gate collision in actual browser | PASS | Closed passage stops at center y=128; open passage reaches backing at y=110; left/right posts stop sideways movement at x=454/518 in both gate states |
+| Independent final review A | PASS | `/root/review_gate_fix_a`, Luna high, read-only review of exact source revision; no actionable findings |
+| Independent final review B | PASS | `/root/review_gate_fix_b`, Luna high, separate read-only review of exact source revision; no actionable findings |
+| Human acceptance / remote publication | NOT_RUN | User review remains; no push or merge into main performed |
+
+Browser checks used an isolated Chromium context and temporary preview on port 5183. The user's port 5173 localStorage was not touched. Root inspected final closed/open stair screenshots. The preview was stopped after verification.
+
+Local artifacts: `C:/Users/Admin/.codex/visualizations/2026/10/15/01a1402c-9306-78e1-a991-c95a32d53f83/gate-fixes/`. The checked-in browser run is under `final/level01-browser-results.json`; stair screenshots and `gate-visual-results.json` are in the parent folder. The visual diagnostic uses explicit saved-state fixtures; the checked-in lifecycle run completes the puzzle with real keyboard input and no injected puzzle flags or page reload.
+
+One initial post-collision diagnostic failed because its timed movement stopped below the post's collision footprint. The diagnostic now uses position feedback to reach y≈148 before moving sideways; the repeated check passed. This was a fixture setup correction and required no product source change. Both round 1 review findings were corrected and independently re-reviewed. Prior Level 01 browser evidence that reloaded before exiting did not cover the retained New Game bug; this uninterrupted run supersedes that lifecycle claim.
