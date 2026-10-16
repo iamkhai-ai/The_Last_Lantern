@@ -17,14 +17,17 @@ entries = []
 cells = []
 owned = set()
 _existing = None
+has_combined_catalog = False
 if (ROOT / 'frames.json').exists():
     _existing = json.loads((ROOT / 'frames.json').read_text(encoding='utf-8'))
-    if _existing.get('frame_count', 0) > 128 and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
+    existing_frames = _existing.get('frames', [])
+    has_combined_catalog = _existing.get('frame_count', 0) > 128 or len(existing_frames) > 128
+    if has_combined_catalog and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
         raise RuntimeError(
             'Refusing to overwrite combined 240-frame catalog in frames.json. '
             'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'
         )
-    owned = {f['file'] for f in _existing['frames']}
+    owned = {f['file'] for f in existing_frames}
 
 def largest_component_bounds(mask):
     """Exclude disconnected glow fragments leaking in from the adjacent grid row."""
@@ -91,9 +94,25 @@ for direction, state, frame, cell, bounds, source_box in cells:
 
 core_entries = entries.copy()
 variant_entries = []
-if _existing and _existing.get('frame_count', 0) > 128:
+if has_combined_catalog:
     regenerated_core_files = {entry['file'] for entry in core_entries}
-    variant_entries = [entry for entry in _existing['frames'] if entry['file'] not in regenerated_core_files]
+    variant_entries = [entry for entry in existing_frames if entry['file'] not in regenerated_core_files]
+    expected_variant_files = {
+        f'nhinh_{direction}_{state}_{frame}.png'
+        for direction in DIRECTIONS
+        for state, frames in (('idle_lit', (0,)), ('walk_lit', (0, 1, 2)), ('run_lit', (0, 1, 2)),
+                              ('idle_nolamp', (0,)), ('walk_nolamp', (0, 1, 2)), ('run_nolamp', (0, 1, 2)))
+        for frame in frames
+    }
+    actual_variant_files = {entry['file'] for entry in variant_entries}
+    if len(variant_entries) != 112 or actual_variant_files != expected_variant_files:
+        raise RuntimeError(
+            f'Combined catalog must contain all 112 expected state variants; found {len(variant_entries)} entries.'
+        )
+    for entry in variant_entries:
+        variant_path = ROOT / entry['file']
+        if not variant_path.is_file() or hashlib.sha256(variant_path.read_bytes()).hexdigest() != entry.get('sha256'):
+            raise RuntimeError(f'Combined catalog variant is missing or has a mismatched SHA-256: {entry["file"]}')
     entries.extend(variant_entries)
 
 font = ImageFont.load_default()
@@ -126,6 +145,8 @@ for entry in entries:
 actual = list(ROOT.glob('nhinh_*_*.png'))
 actual = [p for p in actual if 'contact_sheet' not in p.name]
 if len(actual) != len(entries): errors.append('Unexpected frame file count ' + str(len(actual)))
-report = {'result': 'FAIL' if errors else 'PASS', 'frame_count': len(entries), 'expected_frame_count': len(entries), 'core_frame_count': len(core_entries), 'variant_frame_count': len(variant_entries), 'all_36x42_rgba': not errors, 'errors': errors, 'contact_sheets': sorted(p.name for p in ROOT.glob('*contact_sheet*.png')), 'visual_review': 'Pending contact-sheet inspection; technical checks do not establish animation quality.'}
+expected_frame_count = 240 if has_combined_catalog else 128
+if len(entries) != expected_frame_count: errors.append(f'Unexpected catalog entry count {len(entries)}; expected {expected_frame_count}')
+report = {'result': 'FAIL' if errors else 'PASS', 'frame_count': len(entries), 'expected_frame_count': expected_frame_count, 'core_frame_count': len(core_entries), 'variant_frame_count': len(variant_entries), 'all_36x42_rgba': not errors, 'errors': errors, 'contact_sheets': sorted(p.name for p in ROOT.glob('*contact_sheet*.png')), 'visual_review': 'Pending contact-sheet inspection; technical checks do not establish animation quality.'}
 (ROOT / 'validation.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
 print(json.dumps(report, indent=2))

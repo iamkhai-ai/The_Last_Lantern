@@ -33,7 +33,7 @@ Bộ ảnh mới được tạo từ thiết kế nhân vật hiện có của T
 - `frames.json`: ánh xạ toàn bộ 240 file (128 core + 112 state variants), trạng thái, số frame, ô cắt ở sheet gốc, bounding box và SHA-256.
 - `source_sheets/`: 8 sheet PNG gốc 4×4 cho 128 frame lõi, cùng `source_sheets/state_variants/` (`worker_down/`, `worker_udr/`, `worker_lr/`) chứa 16 sheet PNG gốc 4×2 và file provenance/prompt của 112 biến thể.
 - `generation-prompts.json`: toàn bộ prompt của 8 lần tạo bộ lõi, kèm đường dẫn output gốc được tool trả về.
-- `prepare_frames.py`: công đoạn cắt/thu nhỏ cho 128 frame lõi. Nếu catalog đã gộp 240 frame, script từ chối ghi đè trừ khi đặt chính xác `ALLOW_CATALOG_OVERWRITE=1`; khi bật, nó giữ 112 mục biến thể, cập nhật catalog và kiểm tra đủ 240 frame. Contact sheet cần được xem lại sau khi tái tạo; kiểm tra kỹ thuật không thay thế đánh giá hình ảnh.
+- `prepare_frames.py`: công đoạn cắt/thu nhỏ cho 128 frame lõi. Nếu catalog đã gộp 240 frame, script từ chối ghi đè trừ khi đặt chính xác `ALLOW_CATALOG_OVERWRITE=1`; khi bật, nó chỉ cập nhật catalog nếu đủ 112 biến thể có tên file, PNG và SHA-256 khớp, rồi xác nhận tổng 240 frame. Contact sheet cần được xem lại sau khi tái tạo; kiểm tra kỹ thuật không thay thế đánh giá hình ảnh.
 - `validation.json`: kết quả kiểm tra kỹ thuật cho toàn bộ 240 frame.
 
 ## Phương pháp tạo
