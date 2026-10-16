@@ -58,7 +58,10 @@ const levelArtModules = import.meta.glob([
   import: 'default',
 }) as Record<string, string>;
 
-const characterModules = import.meta.glob('../../assets/character/nhinh_*.png', {
+const characterModules = import.meta.glob([
+  '../../assets/character/nhinh_*.png',
+  '!../../assets/character/*contact_sheet*.png',
+], {
   eager: true,
   query: '?url',
   import: 'default',
