@@ -3,6 +3,8 @@ import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
+import { LIBRARY_LAYOUT, resolveLibrarySpawn } from '../data/libraryLayout';
+import { LibraryLevel } from '../levels/LibraryLevel';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -80,6 +82,7 @@ export class CampaignScene extends Phaser.Scene {
   private forestEdgeChargeMs = 0;
   private forestEdgeWasInRing = false;
   private forestEdgeHintStep = '';
+  private libraryLevel?: LibraryLevel;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -154,6 +157,7 @@ export class CampaignScene extends Phaser.Scene {
     keyboard.on('keydown-J', () => {
       if (this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
       if (this.progress.level === 8) this.showObservatoryJournal();
+      else if (this.progress.level === 2) this.libraryLevel?.showJournal();
       else if (this.progress.level === 1) this.showRuneJournal();
       else if (this.progress.level === 0) this.showOpeningJournal();
     });
@@ -210,6 +214,9 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level === 0 && this.progress.flags['l0-lumo-met']) {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 58, 305) };
     }
+    if (this.progress.level === 2) {
+      this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) };
+    }
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
     else this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.time.now - this.lastLumoSave >= 600) {
@@ -254,8 +261,12 @@ export class CampaignScene extends Phaser.Scene {
       this.player.y,
       !locked,
       this.player.sprite.getBounds(),
-      this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : [],
+      [
+        ...(this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : []),
+        ...(this.libraryLevel?.getProtectedPromptBounds() ?? []),
+      ],
     );
+    this.libraryLevel?.update();
     this.updatePuzzle(dt);
     this.updateCampaignCrossingState();
     this.updateCampaignBarriers();
@@ -321,6 +332,8 @@ export class CampaignScene extends Phaser.Scene {
       return;
     }
     this.clearCampaignColliders();
+    this.libraryLevel?.destroy();
+    this.libraryLevel = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.memoryLayerLabels.clear();
@@ -329,12 +342,18 @@ export class CampaignScene extends Phaser.Scene {
     const level = this.progress.level;
     const definition = CAMPAIGN_LEVELS[level];
     this.selectedStone = -1;
-    this.drawRoom(definition.biome);
+    if (level !== 2) this.drawRoom(definition.biome);
     this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
     this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
     this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
     this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
     this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
+    if (level === 2) {
+      this.controlsText = this.track(this.add.text(320, 344,
+        'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause',
+        { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } })
+        .setOrigin(0.5, 1).setDepth(87));
+    }
     const overloadCheckpoint = level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'];
     const savedPlayerX = this.progress.counters['player-level'] === level ? this.progress.counters['player-x'] : undefined;
     const savedPlayerY = this.progress.counters['player-level'] === level ? this.progress.counters['player-y'] : undefined;
@@ -348,6 +367,14 @@ export class CampaignScene extends Phaser.Scene {
       this.player.setPosition(spawn.x, spawn.y);
       this.forestEdgeChargeMs = 0;
       this.forestEdgeWasInRing = false;
+    } else if (level === 2) {
+      this.player.setFootPlacement(LIBRARY_LAYOUT.actor.feetY, LIBRARY_LAYOUT.actor.bodyY,
+        LIBRARY_LAYOUT.actor.bodyX, LIBRARY_LAYOUT.actor.bodyWidth, LIBRARY_LAYOUT.actor.bodyHeight);
+      const spawn = resolveLibrarySpawn(
+        typeof savedPlayerX === 'number' && typeof savedPlayerY === 'number' ? { x: savedPlayerX, y: savedPlayerY } : undefined,
+        this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true,
+      );
+      this.player.setPosition(spawn.x, spawn.y);
     } else {
       this.player.setFootPlacement(0, 27);
       this.player.setPosition(
@@ -357,8 +384,11 @@ export class CampaignScene extends Phaser.Scene {
     }
     (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.updateFromGameObject();
     this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
-    this.lumoTarget = overloadCheckpoint ? { x: 165, y: 205 } : this.getSavedLumoTarget();
-    this.lumo.sprite.setPosition(overloadCheckpoint ? this.lumoTarget.x : this.progress.counters['lumo-x'] ?? this.lumoTarget.x, overloadCheckpoint ? this.lumoTarget.y : this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
+    this.lumoTarget = level === 2
+      ? { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) }
+      : overloadCheckpoint ? { x: 165, y: 205 } : this.getSavedLumoTarget();
+    this.lumo.sprite.setPosition(level === 2 ? this.lumoTarget.x : overloadCheckpoint ? this.lumoTarget.x : this.progress.counters['lumo-x'] ?? this.lumoTarget.x,
+      level === 2 ? this.lumoTarget.y : overloadCheckpoint ? this.lumoTarget.y : this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
     this.lumo.setVisible(level !== 0 || this.progress.lanternPickedUp || this.progress.flags['l0-gate-open'] === true || this.progress.flags['l0-lumo-met'] === true);
     this.lantern.lanternInHand = this.progress.lanternPickedUp || level > 0;
     this.lantern.lanternOn = this.progress.lanternOn;
@@ -376,15 +406,25 @@ export class CampaignScene extends Phaser.Scene {
       this.lantern.placeLanternAt(100, 205);
       this.lantern.lanternOn = savedLampState;
     }
-    this.addNarrativeProps(level);
-    if (level === 2) this.drawMemoryProgress();
-    this.registerLevel(level);
-    this.buildCampaignBarriers(level);
+    if (level === 2) {
+      this.libraryLevel = new LibraryLevel({
+        scene: this, progress: this.progress, player: this.player, interactions: this.interactions,
+        lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
+        nextLevel: (lines) => this.nextLevel(lines),
+      });
+      this.libraryLevel.build();
+    } else {
+      this.addNarrativeProps(level);
+      this.registerLevel(level);
+      this.buildCampaignBarriers(level);
+    }
     if (level === 1) this.updateRuneRevealVisuals();
     if (!this.progress.flags[`intro-${level}`]) {
       this.progress.flags[`intro-${level}`] = true;
+      if (level === 2) this.progress.flags['l2-inscription-read'] = true;
       this.save();
-      this.dialogue.startDialogue(OPENING[level]);
+      if (level === 2) this.libraryLevel?.startOpeningDialogue();
+      else this.dialogue.startDialogue(OPENING[level]);
     }
     this.refreshHud();
   }
@@ -2322,6 +2362,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private showHint(): void {
+    if (this.progress.level === 2) { this.libraryLevel?.showHint(); return; }
     if (this.progress.level === 0) {
       const step = this.getForestEdgeStep();
       if (this.forestEdgeHintStep !== step) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
@@ -2361,6 +2402,10 @@ export class CampaignScene extends Phaser.Scene {
       if (this.objectiveText) this.objectiveText.setText(objective[step]);
       if (this.controlsText) this.controlsText.setText(`WASD Move    E Interact${this.progress.lanternPickedUp ? '    F Lantern' : ''}${this.progress.flags['l0-tablet-read'] ? '    SPACE Pulse' : ''}    J Journal    H Hint    ESC Pause`);
     }
+    if (this.progress.level === 2 && this.libraryLevel) {
+      this.objectiveText?.setText(this.libraryLevel.getObjectiveText());
+      this.statusText?.setText(this.libraryLevel.getStatusText());
+    }
     if (this.titleText) this.titleText.setText(this.progress.level === 8 && this.activeObservatoryRoom
       ? `09  ${OBSERVATORY_ROOMS[this.activeObservatoryRoom].title}   ·   ${level.chapter}`
       : `${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
@@ -2376,7 +2421,7 @@ export class CampaignScene extends Phaser.Scene {
         : levelIndex === 7 ? `Mắt: ${Number(this.isRuinsOuterBeamReady('left')) + Number(this.isRuinsOuterBeamReady('right'))}/2 · Bóng giữa: ${this.value('statue') === 2 ? 'đúng' : 'chưa đúng'} · Điện thờ: ${this.progress.flags['l7-solved'] ? 'mở' : 'khóa'}`
         : levelIndex === 9 ? `Tinh thể: ${['memory', 'hope', 'balance'].filter((s) => this.progress.flags[`l9-${s}`]).length}/3 · Nhánh: ${Number(this.value('heart-memory') === 1) + Number(this.value('heart-balance') === 2)}/2 · Lumo: ${this.progress.flags['l9-at-heart'] ? 'đang tới ấn' : 'chưa gọi'}`
         : `Đèn: ${this.lantern.lanternOn ? 'BẬT' : 'TẮT'} · Lumo: đang đi cùng`;
-      this.statusText.setText(state);
+      this.statusText.setText(levelIndex === 2 && this.libraryLevel ? this.libraryLevel.getStatusText() : state);
     }
     if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.level === 4
       ? (this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về')

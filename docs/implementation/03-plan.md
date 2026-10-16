@@ -15,9 +15,9 @@ Dependencies: asset audit and approved-by-delegated-authority layout.
 
 Likely files: `src/data/libraryLayout.ts`, `src/levels/LibraryLevel.ts`, `src/art/CampaignArt.ts`, narrow `CampaignScene.ts` integration.
 
-- [ ] Shared spatial data owns floor bounds, spawn/checkpoints, art sizes/pivots, base solids, core shape, seat transforms and east exit passage.
-- [ ] Existing assets render a coherent desk/gallery/well/mural/exit room; actor feet/depth, collision, same-side controls and prompts use those definitions.
-- [ ] Safe restore uses actual permanent/conditional geometry; Level 01/02 and other-level code paths remain intact.
+- [x] Shared spatial data owns floor bounds, spawn/checkpoints, art sizes/pivots, base solids, core shape, seat transforms and east exit passage.
+- [x] Existing assets render a coherent desk/gallery/well/mural/exit room; actor feet/depth, collision, same-side controls and prompts use those definitions.
+- [x] Safe restore uses actual permanent/conditional geometry; Level 01/02 and other-level code paths remain intact.
 
 Verification: source inspection and production build. Automated tests are NOT_RUN unless explicitly requested. Root inspects final visual geometry and notes runtime limitations.
 
@@ -25,9 +25,9 @@ Verification: source inspection and production build. Automated tests are NOT_RU
 
 Dependency: Task 1. Likely files: level-local controller, focused pure state helper if useful, CampaignScene hint/journal dispatch.
 
-- [ ] Book teaches both ink layers; every tablet/occupied seat can be read and selected under either state, without mandatory observation gating; unique pieces move/swap without losing progress, and only explicit E confirmation solves.
-- [ ] Crystal/panel/mural/exit follow scenario order, complete dialogue, repeat-safe beats and unchanged durable save flags.
-- [ ] State-aware H/J/objective/status reveal only earned information and remain readable. Source and world views switch to exactly one light-state layer.
+- [x] Book teaches both ink layers; every tablet/occupied seat can be read and selected under either state, without mandatory observation gating; unique pieces move/swap without losing progress, and only explicit E confirmation solves.
+- [x] Crystal/panel/mural/exit follow scenario order, complete dialogue, repeat-safe beats and unchanged durable save flags.
+- [x] State-aware H/J/objective/status reveal only earned information and remain readable. Source and world views switch to exactly one light-state layer.
 
 Verification: trace every action and save transition against the scenario; inspect relevant visuals. No test suite claimed from a worker's assertion or injected completion state.
 
