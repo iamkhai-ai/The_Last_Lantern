@@ -1,0 +1,39 @@
+{
+  "sheet": "up_nolamp",
+  "generation_tool": "built-in image_gen",
+  "prompt": "Use case: stylized-concept\nAsset type: game character sprite sheet for 36×42 pixel animation frames\nPrimary request: Generate one transparent sprite sheet for the NEW Nhinh character facing straight up (away from the viewer). Arrange exactly 7 distinct poses in a clean 4-column × 2-row grid: top row = idle, walk 0, walk 1, walk 2; bottom row = run 0, run 1, run 2, with the last bottom-right cell completely empty and transparent. Each cell should contain one centered full-body sprite, same scale and consistent feet baseline.\nInput images: Image 1 is the current Nhinh contact sheet and defines the NEW design; use its down row for outfit/palette and its up row only for facing direction. Image 2 is the approved NEW down idle frame and defines exact body size, colors, hood, scarf, boots and pixel finish. Image 3 is the approved NEW down lantern-off idle frame and defines the unlit hands and outfit.\nScene/backdrop: no scene, genuinely transparent background; no floor or shadows.\nSubject: the same small hooded adventurer in all cells, back facing, with cream/tan hood and short cloak, red scarf, dark brown boots and small utility details. For this unlit sheet, Nhinh carries nothing: both hands are empty, and there is no lantern, flame, glow, spark, or light source in any pose. Preserve character proportions across all seven poses.\nStyle/medium: clean hand-authored-looking pixel art with crisp square pixel edges and restrained clusters, matching the NEW character shown in references. No antialiasing, blur, gradients or text.\nComposition/framing: landscape sprite atlas; exactly 4 equal columns and 2 equal rows, generous transparent padding between cells, each sprite upright and fully visible, 36:42 character-cell proportions. Top row static idle then three clearly distinct walking phases; bottom row three clearly distinct running phases. Walking and running poses should loop smoothly through different leg/arm placements and slight body bob without changing facing or size. Leave the eighth cell fully transparent.\nLighting/mood: even neutral sprite shading, no external light effects.\nColor palette: match references: warm ivory/cream cloth, muted sand and peach skin/shadow pixels, deep rust-red scarf, dark espresso brown boots and outlines.\nConstraints: transparent alpha; exactly seven sprites; no sprite touches a cell boundary; feet rest on a common baseline; maintain crisp pixel scale and matching appearance; use references only for design guidance.\nAvoid: any other characters, backgrounds, tile grids/lines, borders, captions, labels, logos, watermark, duplicate sprites, extra props, alternate costume, any lantern or handheld item, glow, sparks, or stray opaque pixels in the empty eighth cell.",
+  "referenced_image_paths": [
+    "assets/character/nhinh_contact_sheet.png",
+    "assets/character/nhinh_down_idle_0.png",
+    "assets/character/nhinh_down_lantern_off_0.png"
+  ],
+  "source_image_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a14310-cbda-7e41-a3ee-89c2e75626ca\\exec-6cc2531f-e8ac-4f5d-b0cd-543036425276.png",
+  "source_image_output_hint": "Generated images are saved to C:\\Users\\Admin\\.codex\\generated_images\\01a14310-cbda-7e41-a3ee-89c2e75626ca as C:\\Users\\Admin\\.codex\\generated_images\\01a14310-cbda-7e41-a3ee-89c2e75626ca\\exec-6cc2531f-e8ac-4f5d-b0cd-543036425276.png by default. If you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.",
+  "copied_source_sheet_path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\character\\source_sheets\\state_variants\\worker_udr\\nhinh_up_nolamp_sheet.png",
+  "source_sheet_sha256": "6b37a21e459b75204d1cd45900b783336247cf7aed4fbabb5386045526f9ac33",
+  "final_png_sha256": {
+    "assets/character/nhinh_up_idle_nolamp_0.png": "26ebf043753ae6c6cbe517060774997b344087228b8a641bb2109be678b38819",
+    "assets/character/nhinh_up_walk_nolamp_0.png": "e37e2e4828da16d59a0682058e8825196c6db19146d6eb4896af4f1ee4b87c54",
+    "assets/character/nhinh_up_walk_nolamp_1.png": "eecbb28d9f66b11fe00a6881a1e7addd10614bab0e120060a3b6d07029947b5a",
+    "assets/character/nhinh_up_walk_nolamp_2.png": "d9f1f77122addb564b9cf1cb22c7f1118daa832dbe5432d462f2906226cdfcb2",
+    "assets/character/nhinh_up_run_nolamp_0.png": "a109b21e4bfde7b9d7e4c8be09ffbc74f0b7b8c7c67a784c6bb7f4fad6df2221",
+    "assets/character/nhinh_up_run_nolamp_1.png": "bb5c17d49ff9b30ff63ae8ce71e3e3af5615661eda14a21d02aa7c5093898730",
+    "assets/character/nhinh_up_run_nolamp_2.png": "4a5ed63115dfe0da7e6bec1b4e3f6dc1d65b38baae03e3230285f0e4fc95377e"
+  },
+  "processing": {
+    "cell_order": [
+      "idle",
+      "walk_0",
+      "walk_1",
+      "walk_2",
+      "run_0",
+      "run_1",
+      "run_2",
+      "empty"
+    ],
+    "final_canvas": "36x42 RGBA",
+    "crop_alpha_threshold": 16,
+    "scale": "nearest-neighbor, fit to 28px character height and 28px maximum width",
+    "feet_baseline": "y=40"
+  }
+}

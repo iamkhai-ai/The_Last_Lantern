@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getNhinhTexture } from '../art/CampaignArt';
 
 export type FacingDirection =
   | 'down'
@@ -19,6 +20,8 @@ export class Player {
   private runSpeed = 150;
   private animTimer = 0;
   private animStep = 0;
+  private actionAnimation: 'pulse' | 'lantern_on' | 'lantern_off' | null = null;
+  private actionElapsed = 0;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys?: {
     W: Phaser.Input.Keyboard.Key;
@@ -30,7 +33,9 @@ export class Player {
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
-    this.sprite = scene.physics.add.sprite(x, y, 'player_down_lit_0');
+    const initialTexture = getNhinhTexture('idle', 'down', 0);
+    if (!initialTexture) throw new Error('Missing required Nhinh idle frame: down');
+    this.sprite = scene.physics.add.sprite(x, y, initialTexture);
     this.sprite.setDepth(20);
     this.sprite.setCollideWorldBounds(true);
     this.shadow = scene.add.image(x, y + 17, 'shadow_blob');
@@ -61,10 +66,14 @@ export class Player {
     hasLanternInHand: boolean,
     lanternOn: boolean
   ): void {
+    if (this.actionAnimation) {
+      this.actionElapsed += dt;
+      if (this.actionElapsed >= 330) this.actionAnimation = null;
+    }
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     if (!canMove) {
       body.setVelocity(0, 0);
-      this.updateTexture(false, hasLanternInHand, lanternOn);
+      this.updateTexture(false, false, hasLanternInHand, lanternOn);
       return;
     }
 
@@ -109,7 +118,7 @@ export class Player {
       this.animTimer += dt * (isRunning ? 1.35 : 1);
       if (this.animTimer >= 150) {
         this.animTimer = 0;
-        this.animStep = (this.animStep + 1) % 4;
+        this.animStep = (this.animStep + 1) % 3;
       }
     } else {
       body.setVelocity(0, 0);
@@ -117,33 +126,45 @@ export class Player {
       this.animTimer = 0;
     }
 
-    this.updateTexture(isMoving, hasLanternInHand, lanternOn);
+    const isRunning = Boolean(this.keys?.SHIFT?.isDown || this.cursors?.shift?.isDown);
+    this.updateTexture(isMoving, isRunning, hasLanternInHand, lanternOn);
     this.sprite.setDepth(10 + Math.floor(this.sprite.y / 10));
     this.shadow.setPosition(this.sprite.x, this.sprite.y + 17);
     this.shadow.setDepth(this.sprite.depth - 1);
   }
 
+  public playLanternAction(isOn: boolean): void {
+    this.playAction(isOn ? 'lantern_on' : 'lantern_off');
+  }
+
+  public playPulseAction(): void {
+    this.playAction('pulse');
+  }
+
+  private playAction(action: 'pulse' | 'lantern_on' | 'lantern_off'): void {
+    if (!getNhinhTexture(action, this.facing, 0)) return;
+    this.actionAnimation = action;
+    this.actionElapsed = 0;
+  }
+
   private updateTexture(
     isMoving: boolean,
+    isRunning: boolean,
     hasLanternInHand: boolean,
     lanternOn: boolean
   ): void {
-    const state = !hasLanternInHand ? 'nolamp' : lanternOn ? 'lit' : 'unlit';
-    const frameMap = [0, 1, 0, 2];
-    const frame = isMoving ? frameMap[this.animStep] : 0;
-    let texKey = `player_${this.facing}_${state}_${frame}`;
-    if (!this.scene.textures.exists(texKey)) {
-      // Fall back to the dominant cardinal direction for incomplete packs.
-      const fallback =
-        this.facing.includes('left') ? 'left'
-        : this.facing.includes('right') ? 'right'
-        : this.facing.includes('up') ? 'up'
-        : 'down';
-      texKey = `player_${fallback}_${state}_${frame}`;
+    const pose = isMoving ? (isRunning ? 'run' : 'walk') : 'idle';
+    const frame = isMoving ? this.animStep : 0;
+    const actionFrame = this.actionAnimation ? Math.min(2, Math.floor(this.actionElapsed / 110)) : 0;
+    const actionTexture = this.actionAnimation
+      ? getNhinhTexture(this.actionAnimation, this.facing, actionFrame)
+      : null;
+    const lampPose = !hasLanternInHand ? `${pose}_nolamp` : lanternOn ? `${pose}_lit` : pose;
+    const texture = actionTexture ?? getNhinhTexture(lampPose, this.facing, frame);
+    if (!texture || !this.scene.textures.exists(texture)) {
+      throw new Error(`Missing required Nhinh frame: ${lampPose}/${this.facing}/${frame}`);
     }
-    if (this.sprite.texture.key !== texKey) {
-      this.sprite.setTexture(texKey);
-    }
+    if (this.sprite.texture.key !== texture) this.sprite.setTexture(texture);
   }
 
   public setPosition(x: number, y: number): void {

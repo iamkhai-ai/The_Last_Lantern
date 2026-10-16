@@ -2,14 +2,14 @@
 
 Đợt 2026-10-16 đã hoàn tất sản xuất đồ họa ngoại tuyến cho 10 màn (mục 01–16 trong `tasks/todo.md`). Các lô ban đầu dùng `gpt-6.1-sol` / high theo chỉ đạo lúc đó; những lô tiếp theo dùng low theo chỉ đạo mới hơn. Raster được tạo bằng `image_gen` tích hợp; công cụ không công bố tên backend.
 
-Nguồn nội dung là 10 kịch bản đã duyệt trong `docs/scenario/`. Không thay nội dung kịch bản. `inventory.json` là ảnh chụp nguồn tại HEAD `6fb15893fca946f328c06c010f5869af5f7de1f7`; working tree khi lập danh mục có thay đổi chưa commit. Các lô art vẫn là bản bàn giao ngoại tuyến, chưa được nối vào manifest/runtime.
+Nguồn nội dung là 10 kịch bản đã duyệt trong `docs/scenario/`. Không thay nội dung kịch bản. `inventory.json` là ảnh chụp nguồn tại HEAD `6fb15893fca946f328c06c010f5869af5f7de1f7`; working tree khi lập danh mục có thay đổi chưa commit. Từ đợt tích hợp 2026-10-16, runtime nạp các ảnh được chọn trực tiếp từ `assets/levels/` và `assets/character/` qua `src/art/CampaignArt.ts`; đây là mapping runtime riêng, không sửa `assetManifest.json` cũ.
 
 ## Phân loại nguồn
 
 | Nguồn | Phân loại / quyết định | Giới hạn |
 |---|---|---|
 | `src/assets/*.png` | 135 PNG thực, 147 key manifest. Reuse cây/bụi/nền/đá/cổng/gương/bệ/khóa/tinh thể/Lumo; thông tin từng file ở inventory | Canvas thực của nhiều PNG khác manifest. Cần chuẩn hóa phi phá hủy trước tích hợp. `runestone_leaf_*` thực vẽ xoắn; `runestone_star_*` thực vẽ tam giác, không dùng làm biểu tượng Lá/Sao trong pilot |
-| `assets/character/` | 128 frame Nhinh 36×42 RGBA, kiểm tra manifest và xem contact sheet; prototype tham chiếu cho cảnh | Chưa tích hợp; chưa có biến thể lit/unlit cho mọi animation; một số hướng/tay đèn/điểm chân cần chỉnh, xem README |
+| `assets/character/` | 128 frame Nhinh 36×42 RGBA; runtime dùng idle/walk/run khi cầm đèn tắt và animation bật/tắt/pulse | Prototype; do thiếu pose lit/no-lamp, runtime tạm dùng frame nhân vật cũ khi đèn bật hoặc đã đặt xuống; một số hướng/tay đèn/điểm chân cần chỉnh, xem README |
 | `Art_References/01_Character_Style_Guide.png` | Board chuẩn phong cách/nhân vật | Không nạp nguyên board thành sprite |
 | `Art_References/02_Environment_Props_and_Puzzles.png` | Board vật liệu/đạo cụ | Có chữ và bố cục minh họa; concept-only |
 | `Art_References/03_Whispering_Woods.png` đến `07_The_Last_Dawn.png` | Concept-only không khí màn | Không phải tilemap hay scene 640×360 có thể chơi |
@@ -23,7 +23,7 @@ Nguồn nội dung là 10 kịch bản đã duyệt trong `docs/scenario/`. Khô
 
 ## Ma trận màn / trạng thái / đầu ra
 
-Ma trận dưới đây là danh mục mục tiêu ban đầu; kích thước/frame thực và trạng thái bàn giao nằm trong `assets/levels/asset-handoff.json` cùng asset-map của từng lô. Key là đề xuất, chưa đăng ký manifest. Pivot thường `(0.5,1)` cho prop và `(0.5,0.5)` cho overlay; xem từng map để lấy giá trị cụ thể.
+Ma trận dưới đây là danh mục mục tiêu ban đầu; kích thước/frame thực và trạng thái bàn giao nằm trong `assets/levels/asset-handoff.json` cùng asset-map của từng lô. Key trong asset-map là key bàn giao; subset được runtime ánh xạ ở `src/art/CampaignArt.ts`, không đăng ký trong `assetManifest.json`. Pivot thường `(0.5,1)` cho prop và `(0.5,0.5)` cho overlay; xem từng map để lấy giá trị cụ thể.
 
 | Màn | Reuse có source tại `src/assets/` | Mới/crop; state cần có | Ưu tiên; canvas dự kiến; output |
 |---|---|---|---|
@@ -48,8 +48,8 @@ Navigation màn 09 đã đọc tại `docs/superpowers/specs/2026-10-16-observat
 - `assets/character/frames.json` / `validation.json`: mapping và PASS kỹ thuật của 128 frame; prompt và sheet gốc nằm trong cùng thư mục.
 - `tasks/todo.md`: tiến độ từng lô, giới hạn và trạng thái kiểm tra.
 
-Các lô art chưa được đăng ký trong `src/art/assetManifest.json`; runtime chỉ tìm PNG trực tiếp dưới `src/assets/`. `npm run build` hiện tại PASS và browser smoke đã mở menu/màn 01, nhưng đó không phải bằng chứng game đang dùng bộ art mới. Tích hợp asset, preview đủ 10 màn và kiểm tra state vẫn NOT_RUN; xem mục 17 trong checklist.
+`src/art/CampaignArt.ts` ánh xạ PNG cho runtime mà không đưa preview/source ngoại tuyến vào bundle. Các phòng dùng nền sạch có sẵn cho màn 04–08 và 10; màn 09 dùng các props cơ chế đã chọn vì các ảnh nền giao nhận có dải ghi chú/debug. CampaignScene gắn sprite cho các trạng thái câu đố đã có trong dữ liệu màn. `npm run build` PASS sau tích hợp. Browser smoke hiện xác nhận menu tải được trên cổng localhost cô lập; chưa xem trực quan đủ 10 màn hoặc xác minh mọi trạng thái trong engine. Chơi trọn câu đố và ending được để người dùng tự review.
 
 ## Trạng thái bàn giao
 
-Asset-handoff xác nhận 15 asset maps, 268 PNG output màn chơi duy nhất, 128 frame Nhinh, 128 reuse references và 177 preview. Audit có 0 lỗi đường dẫn, kích thước, hash hoặc pivot. Hai alpha rỗng là sentinel có chủ ý; tám nhóm ảnh trùng pixel đã ghi nguyên nhân. Mọi giới hạn về procedural P2, pose animation, montage, terrain và runtime được ghi tại README của lô tương ứng.
+Asset-handoff xác nhận 15 asset maps, 268 PNG output màn chơi duy nhất, 128 frame Nhinh, 128 reuse references và 177 preview. Audit có 0 lỗi đường dẫn, kích thước, hash hoặc pivot. Hai alpha rỗng là sentinel có chủ ý; tám nhóm ảnh trùng pixel đã ghi nguyên nhân. Runtime chưa dùng hết mọi asset và không thay thế các procedural P2; giới hạn pose animation, montage, terrain và hiển thị cần rà tiếp được ghi tại README của lô tương ứng.

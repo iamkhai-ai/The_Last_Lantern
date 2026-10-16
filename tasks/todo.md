@@ -145,12 +145,12 @@ Mỗi mục nhóm tài nguyên bên dưới được tách thành lô nhỏ sau 
 
 ## 17 — Preview trong engine sau tích hợp
 
-- [x] Đọc lại source cuối: loader chỉ tìm `src/assets/*.png` qua `src/art/assetManifest.json`; lô đồ họa mới hiện nằm offline trong `assets/levels/`.
-- [ ] Đưa asset P0 đã chốt vào `src/assets/`, nối manifest/state/scene theo mapping trong phạm vi tích hợp riêng.
-- [ ] Chạy `npm run dev`, xem đủ 10 màn ở độ phân giải gốc và Scale.FIT; kiểm tra depth/hitbox/tia/bóng/HUD và checkpoint liên quan. **PASS hiện tại chỉ cho menu + Level 01 smoke; 02–10 và state đồ họa mới NOT_RUN.**
-- [x] Chạy `npm run build` trên working tree hiện tại: **PASS** (TypeScript và Vite build). Chưa có runtime-art changes trong lượt này.
+- [x] Đọc source cuối và chọn cách nối asset runtime. Các PNG mới nằm ngoài `src/assets/` nên được ánh xạ trong `src/art/CampaignArt.ts` thay vì chép/nhân đôi hoặc sửa manifest key cũ.
+- [x] Nối các frame Nhinh, asset trạng thái câu đố được chọn và nền sạch cho các phòng phù hợp vào loader/scene. Không dùng ảnh nền Observatory có dải ghi chú/debug.
+- [ ] Chạy `npm run dev`, xem đủ 10 màn ở độ phân giải gốc và Scale.FIT; kiểm tra depth/hitbox/tia/bóng/HUD và checkpoint liên quan. **PASS:** menu tải được trên localhost cô lập; **NOT_RUN:** kiểm tra hình ảnh đủ 10 màn và từng state mới. Người dùng tự chơi trọn câu đố/ending.
+- [x] Chạy `npm run build` sau tích hợp trên working tree: **PASS** (TypeScript và Vite build).
 
-**Phụ thuộc:** 16 và công việc tích hợp được triển khai. **File:** `assets/levels/asset-handoff.md` ghi rõ giới hạn hiện tại. **PASS:** build hiện tại; menu và Level 01 mở trong browser. **NOT_RUN:** asset mới chưa đăng ký vào loader/manifest nên không thể kết luận preview đủ 10 màn hoặc state đồ họa mới; cần một lượt tích hợp runtime riêng.
+**Phụ thuộc:** 16. **File:** `src/art/CampaignArt.ts`, `src/scenes/CampaignScene.ts`, [asset-handoff.md](../assets/levels/asset-handoff.md). **PASS:** build và menu smoke. **NOT_RUN:** render/review trực quan toàn bộ màn và states; người dùng giữ lượt playtest trọn câu đố/ending.
 
 ### Điểm kiểm tra E — Hoàn tất phạm vi đồ họa
 

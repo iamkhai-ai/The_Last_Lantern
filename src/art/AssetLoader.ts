@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import manifest from './assetManifest.json';
+import { CAMPAIGN_ART_FILES } from './CampaignArt';
 
 interface ManifestEntry {
   key: string;
@@ -52,7 +53,7 @@ export class AssetLoader {
       }
     }
 
-    if (present.length === 0) {
+    if (present.length === 0 && CAMPAIGN_ART_FILES.length === 0) {
       return { loaded: [], missing };
     }
 
@@ -60,6 +61,7 @@ export class AssetLoader {
       const url = getAssetUrl(key);
       if (url) scene.load.image(key, url);
     }
+    for (const asset of CAMPAIGN_ART_FILES) scene.load.image(asset.key, asset.url);
 
     await new Promise<void>((resolve) => {
       scene.load.once(Phaser.Loader.Events.COMPLETE, () => resolve());
@@ -67,7 +69,10 @@ export class AssetLoader {
       scene.load.start();
     });
 
-    const loaded = present.filter((key) => scene.textures.exists(key));
+    const loaded = [
+      ...present.filter((key) => scene.textures.exists(key)),
+      ...CAMPAIGN_ART_FILES.filter((asset) => scene.textures.exists(asset.key)).map((asset) => asset.key),
+    ];
     return { loaded, missing };
   }
 }

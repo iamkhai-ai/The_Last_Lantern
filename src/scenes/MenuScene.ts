@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getNhinhTexture } from '../art/CampaignArt';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
@@ -31,7 +32,9 @@ export class MenuScene extends Phaser.Scene {
     halo.setScale(0.85);
     halo.setAlpha(0.85);
 
-    const linh = this.add.sprite(306, 295, 'player_right_lit_0');
+    const menuNhinh = getNhinhTexture('idle_lit', 'right', 0);
+    if (!menuNhinh) throw new Error('Missing required Nhinh menu frame: idle_lit/right/0');
+    const linh = this.add.sprite(306, 295, menuNhinh);
     linh.setDepth(22);
 
     const lumo = this.add.sprite(362, 268, 'lumo_0');

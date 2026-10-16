@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getNhinhTexture } from '../art/CampaignArt';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
@@ -24,7 +25,9 @@ export class EndingScene extends Phaser.Scene {
     // Build Dawn Heart Tree backdrop matching 05_final_dawn.png
     WorldFactory.buildZone(this, 'hub', 3, true);
 
-    const linh = this.add.sprite(306, 295, 'player_up_unlit_0');
+    const endingNhinh = getNhinhTexture('idle', 'up', 0);
+    if (!endingNhinh) throw new Error('Missing required Nhinh ending frame: idle/up/0');
+    const linh = this.add.sprite(306, 295, endingNhinh);
     linh.setDepth(22);
 
     const lumo = this.add.sprite(348, 266, 'lumo_0');

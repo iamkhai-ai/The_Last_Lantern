@@ -1,0 +1,111 @@
+{
+  "generator": "Codex built-in image_gen.imagegen",
+  "source_output_note": "Built-in image_gen returned transparent sprite sheets, not individual frames; each sheet was cropped and nearest-neighbor scaled into seven 36x42 RGBA frames. The downleft-lit sheet contains visible art in the reserved eighth cell; that cell was excluded from the runtime frame crops.",
+  "variants": [
+    {
+      "direction": "down",
+      "state": "lit",
+      "generation_tool": "Codex built-in image_gen.imagegen",
+      "tool_returned_output_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a14303-7e0f-7993-9dd1-3589d31377d7\\exec-9f25ce52-78a2-4706-a0de-b32f39251e63.png",
+      "saved_source_sheet": "assets/character/source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "input_references": [
+        "assets/character/nhinh_contact_sheet.png",
+        "assets/character/source_sheets/nhinh_down_generated.png"
+      ],
+      "prompt": "Use case: stylized-concept\nAsset type: transparent-background 2D game sprite sheet, to be sliced into separate small character animation frames.\nPrimary request: Create exactly seven distinct persistent movement poses of the same small hooded lantern bearer facing DOWN toward the viewer, arranged in a strict 4-column by 2-row grid. Row 1: standing idle, walk pose 0, walk pose 1, walk pose 2. Row 2: run pose 0, run pose 1, run pose 2, with the last cell fully empty. Keep every pose isolated in its own equal-size cell.\nInput images: Image 1 is the current approved new Nhinh character contact sheet, a reference for identity, outfit, palette, sprite proportions, and direction only. Image 2 is the new down-facing source sprite sheet, a reference for the same new character's down-facing anatomy and held lantern. Create new poses, do not reproduce any complete source cell.\nScene/backdrop: genuinely transparent.\nSubject: one child-sized fantasy adventurer per occupied cell; cream hood and cloak, brown hair and visible face, red scarf, brown boots, small brass-and-glass hand lantern held in the right hand.\nStyle/medium: crisp pixel-art game sprite, restrained palette and dark pixel outline matching the reference, clean individual silhouettes with no glow spilling between cells.\nComposition/framing: strict 4 columns x 2 rows, equal square cells, one full-body sprite centered in each occupied cell, consistent scale, pose reads clearly, feet at the same baseline across all seven; generous transparent margins; no grid lines or separators; final individual art will be reduced to 36x42 pixels using nearest-neighbor.\nLighting/mood: lantern remains visibly lit in all seven poses, small stable warm amber flame in the lantern; no broad glow or light aura.\nColor palette: cream, warm brown, deep red, charcoal, amber and muted gold as in the reference.\nConstraints: exactly seven sprites in the named cells; same character design, same held lantern, lantern visible and lit in every cell, preserve direction down, maintain transparent alpha, no text, no numbering, no icons, no background, no shadows outside sprite, no extra objects.",
+      "frames": [
+        "nhinh_down_idle_lit_0.png",
+        "nhinh_down_walk_lit_0.png",
+        "nhinh_down_walk_lit_1.png",
+        "nhinh_down_walk_lit_2.png",
+        "nhinh_down_run_lit_0.png",
+        "nhinh_down_run_lit_1.png",
+        "nhinh_down_run_lit_2.png"
+      ]
+    },
+    {
+      "direction": "down",
+      "state": "nolamp",
+      "generation_tool": "Codex built-in image_gen.imagegen",
+      "tool_returned_output_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a14303-7e0f-7993-9dd1-3589d31377d7\\exec-23827a0b-a56f-47b4-a93b-8bed09568a84.png",
+      "saved_source_sheet": "assets/character/source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "input_references": [
+        "assets/character/nhinh_contact_sheet.png",
+        "assets/character/source_sheets/nhinh_down_generated.png"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: transparent 2D game sprite sheet. Create exactly seven distinct new persistent poses of one approved Nhinh character facing down toward the viewer. Strict 4-column by 2-row grid: row 1 is idle, walk 0, walk 1, walk 2; row 2 is run 0, run 1, run 2, then one empty cell. Same sprite scale and consistent foot baseline. Each sprite is isolated within its own equal cell; no dividers. Character identity and palette reference: the attached approved new Nhinh contact sheet and the new down-facing source sheet. Cream hood/cloak, brown hair where visible, red scarf, brown boots; crisp pixel art with dark pixel outline and compact palette. The character carries no lantern and holds no object. Both hands are empty and visible; arms rest naturally at the sides or swing naturally during walking and running. No lamp, no lantern, no flame, no glow, no object in either hand. Transparent background. No text or labels, no extra objects, no shadows outside sprites. Designed for nearest-neighbor reduction to 36x42 pixels.",
+      "frames": [
+        "nhinh_down_idle_nolamp_0.png",
+        "nhinh_down_walk_nolamp_0.png",
+        "nhinh_down_walk_nolamp_1.png",
+        "nhinh_down_walk_nolamp_2.png",
+        "nhinh_down_run_nolamp_0.png",
+        "nhinh_down_run_nolamp_1.png",
+        "nhinh_down_run_nolamp_2.png"
+      ],
+      "postprocess_adjustments": [
+        {
+          "file": "nhinh_down_idle_nolamp_0.png",
+          "method": "scaled the cropped character with nearest-neighbor and recentered it on the 36x42 canvas, keeping the visible bottom at y=40",
+          "scale_factor": 1.22,
+          "source_bbox_xyxy": [
+            10,
+            19,
+            25,
+            41
+          ],
+          "output_bbox_xyxy": [
+            9,
+            14,
+            27,
+            41
+          ],
+          "source_sha256": "9a4b18f0c8b8c16612d91cad862fb860e53cc47f2a870257f9fd6bd7c4b3d496",
+          "sha256": "988113cb0f00136c0b42a3b6bcda35eba45f865118d734ca04e90e6c5b5c926c"
+        }
+      ]
+    },
+    {
+      "direction": "downleft",
+      "state": "lit",
+      "generation_tool": "Codex built-in image_gen.imagegen",
+      "tool_returned_output_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a14303-7e0f-7993-9dd1-3589d31377d7\\exec-5243db1c-7bc3-4017-b4d6-ec67e99a1fe7.png",
+      "saved_source_sheet": "assets/character/source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "input_references": [
+        "assets/character/nhinh_contact_sheet.png",
+        "assets/character/source_sheets/nhinh_downleft_generated.png"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: transparent 2D game sprite sheet. Create exactly seven distinct new persistent poses of one approved Nhinh character facing downleft toward the indicated direction. Strict 4-column by 2-row grid: row 1 is idle, walk 0, walk 1, walk 2; row 2 is run 0, run 1, run 2, then one empty cell. Same sprite scale and consistent foot baseline. Each sprite is isolated within its own equal cell; no dividers. Character identity and palette reference: the attached approved new Nhinh contact sheet and the new downleft-facing source sheet. Cream hood/cloak, brown hair where visible, red scarf, brown boots; crisp pixel art with dark pixel outline and compact palette. The character holds the small brass-and-glass hand lantern in the right hand; a small amber flame is clearly visible in every occupied cell. Keep the flame within the lantern and use no broad glow. Transparent background. No text or labels, no extra objects, no shadows outside sprites. Designed for nearest-neighbor reduction to 36x42 pixels.",
+      "frames": [
+        "nhinh_downleft_idle_lit_0.png",
+        "nhinh_downleft_walk_lit_0.png",
+        "nhinh_downleft_walk_lit_1.png",
+        "nhinh_downleft_walk_lit_2.png",
+        "nhinh_downleft_run_lit_0.png",
+        "nhinh_downleft_run_lit_1.png",
+        "nhinh_downleft_run_lit_2.png"
+      ]
+    },
+    {
+      "direction": "downleft",
+      "state": "nolamp",
+      "generation_tool": "Codex built-in image_gen.imagegen",
+      "tool_returned_output_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a14303-7e0f-7993-9dd1-3589d31377d7\\exec-0aa5887d-531f-4230-8c81-b36fb135cd37.png",
+      "saved_source_sheet": "assets/character/source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "input_references": [
+        "assets/character/nhinh_contact_sheet.png",
+        "assets/character/source_sheets/nhinh_downleft_generated.png"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: transparent 2D game sprite sheet. Create exactly seven distinct new persistent poses of one approved Nhinh character facing downleft. Strict 4-column by 2-row grid: row 1 is idle, walk 0, walk 1, walk 2; row 2 is run 0, run 1, run 2, then one empty cell. Same sprite scale and consistent foot baseline. Each sprite is isolated within its own equal cell; no dividers. Character identity and palette reference: the attached approved new Nhinh contact sheet and the new downleft-facing source sheet. Cream hood/cloak, brown hair where visible, red scarf, brown boots; crisp pixel art with dark pixel outline and compact palette. The character carries no lantern and holds no object. Both hands are empty and visible; arms rest naturally at the sides or swing naturally during walking and running. No lamp, no lantern, no flame, no glow, no object in either hand. Transparent background. No text or labels, no extra objects, no shadows outside sprites. Designed for nearest-neighbor reduction to 36x42 pixels.",
+      "frames": [
+        "nhinh_downleft_idle_nolamp_0.png",
+        "nhinh_downleft_walk_nolamp_0.png",
+        "nhinh_downleft_walk_nolamp_1.png",
+        "nhinh_downleft_walk_nolamp_2.png",
+        "nhinh_downleft_run_nolamp_0.png",
+        "nhinh_downleft_run_nolamp_1.png",
+        "nhinh_downleft_run_nolamp_2.png"
+      ]
+    }
+  ]
+}

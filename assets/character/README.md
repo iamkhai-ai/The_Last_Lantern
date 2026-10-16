@@ -17,7 +17,7 @@ Bộ ảnh mới được tạo từ thiết kế nhân vật hiện có của T
 
 `direction` gồm: `down`, `downleft`, `left`, `upleft`, `up`, `upright`, `right`, `downright`.
 
-Đi bộ và chạy là các pose để lặp. Các thao tác bật/tắt/pulse đi từ frame 0 đến 2; frame cuối của thao tác bật là đèn sáng, frame cuối thao tác tắt là đèn tắt. Idle/walk/run sử dụng trạng thái đèn chưa phát sáng. Bộ này chưa có biến thể lit/unlit riêng cho mọi hoạt động.
+Đi bộ và chạy là các pose để lặp. Các thao tác bật/tắt/pulse đi từ frame 0 đến 2; frame cuối của thao tác bật là đèn sáng, frame cuối thao tác tắt là đèn tắt. Idle/walk/run trong bộ này dùng trạng thái đèn tắt và luôn có đèn cầm tay. Runtime dùng frame nhân vật cũ khi đèn đang sáng hoặc đã đặt xuống vì bộ Nhinh chưa có pose lit/no-lamp cho các hoạt động này.
 
 ## Cách đối chiếu
 
@@ -42,6 +42,6 @@ Công đoạn xử lý cắt lưới 4×4, lấy vùng nhân vật, bỏ các m�
 
 **Đã xem trực quan contact sheet:** 8 hướng chính đọc được, bộ trang phục và bảng màu bám tham chiếu; đã loại bỏ các mảnh glow rời ở đáy những ô bị ảnh hưởng khi cắt.
 
-**Chất lượng hiện tại là prototype, cần chỉnh pixel trước production.** AI chưa khóa chính xác hình thể và tay cầm đèn qua mọi pose. Một số frame run/pulse nghiêng góc khác hướng dự kiến (đặc biệt run hướng down nghiêng sang phải); nhịp bước và điểm chạm chân có thể giật khi lặp. Pulse dùng hiệu ứng trong cùng canvas nên một số tia sáng bị giới hạn bởi ô cắt. Các chi tiết ở 36×42 bị giản lược so với sheet gốc. Chưa chạy xem animation trong engine và chưa tích hợp vào manifest hoặc code game.
+**Chất lượng hiện tại là prototype, cần chỉnh pixel trước production.** AI chưa khóa chính xác hình thể và tay cầm đèn qua mọi pose. Một số frame run/pulse nghiêng góc khác hướng dự kiến (đặc biệt run hướng down nghiêng sang phải); nhịp bước và điểm chạm chân có thể giật khi lặp. Pulse dùng hiệu ứng trong cùng canvas nên một số tia sáng bị giới hạn bởi ô cắt. Các chi tiết ở 36×42 bị giản lược so với sheet gốc. Game đã nạp các frame runtime qua `src/art/CampaignArt.ts`; chưa rà animation trực quan trong engine cho đủ 8 hướng/trạng thái, và pose lit/no-lamp đang tạm dùng hình cũ.
 
 Lệnh xử lý và kiểm tra đã chạy: `python assets/character/prepare_frames.py`.

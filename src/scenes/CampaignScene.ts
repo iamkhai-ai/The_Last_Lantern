@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
@@ -122,12 +123,13 @@ export class CampaignScene extends Phaser.Scene {
     });
     keyboard.on('keydown-SPACE', () => {
       if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
-      else if (!this.pauseMenu.isOpen()) this.lantern.triggerPulse(this.player.x, this.player.y);
+      else if (!this.pauseMenu.isOpen() && this.lantern.triggerPulse(this.player.x, this.player.y)) this.player.playPulseAction();
     });
     keyboard.on('keydown-F', () => {
       const finalToggleAvailable = this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && this.lantern.lanternInHand && this.lantern.lanternOn;
       if ((!this.dialogue.isInputLocked(performance.now()) || finalToggleAvailable) && !this.pauseMenu.isOpen()) {
         if (this.lantern.toggleLantern(performance.now())) {
+          this.player.playLanternAction(this.lantern.lanternOn);
           this.progress.lanternOn = this.lantern.lanternOn;
           this.save();
           if (this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && !this.lantern.lanternOn) {
@@ -154,6 +156,7 @@ export class CampaignScene extends Phaser.Scene {
       this.progress.flags['pulse-used'] = true;
       if (this.progress.level === 0 && this.progress.flags['l0-tablet-read'] && Math.hypot(x - 320, y - 214) <= radius) {
         this.progress.flags['l0-footprints-found'] = true;
+        this.setLevelArtAt(320, 206, 'beacon-stone-illuminated');
         this.footprintTrail?.setVisible(true);
       }
       if (this.progress.level === 1) {
@@ -310,6 +313,11 @@ export class CampaignScene extends Phaser.Scene {
     }
     this.titleText.setText(`09  ${room.title} · ${CAMPAIGN_LEVELS[8].chapter}`);
     this.drawObservatoryBackground(roomId);
+    if (roomId === 'entrance') this.addObservatoryArt('learned-marks-miniature', 320, 150, 128, 64);
+    if (roomId === 'corridor') {
+      this.addObservatoryArt('star-chart', 320, 162, 124, 73);
+      this.addObservatoryArt('wheel-stopped-sun-among-stars', 500, 128, 72, 56);
+    }
     this.buildObservatoryRootBed(roomId);
 
     for (const obstacle of room.obstacles) {
@@ -689,6 +697,12 @@ export class CampaignScene extends Phaser.Scene {
     this.roomObjects.push(this.add.text(320, 344, 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    H Hint    ESC Pause', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
   }
 
+  private addObservatoryArt(filename: string, x: number, y: number, width: number, height: number): void {
+    const key = getLevelArtKey(8, filename);
+    if (!key || !this.textures.exists(key)) return;
+    this.roomObjects.push(this.add.image(x, y, key).setDisplaySize(width, height).setDepth(5));
+  }
+
   private addObservatoryExit(exit: ObservatoryExit): void {
     const horizontalEdge = exit.interactionPoint.x < 50 || exit.interactionPoint.x > 590;
     const bottomEdge = !horizontalEdge && exit.interactionPoint.y > 310;
@@ -911,16 +925,20 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private drawRoom(biome: string): void {
+    const backgroundKey = getLevelBackgroundKey(this.progress.level);
+    const hasCampaignBackground = backgroundKey !== null && this.textures.exists(backgroundKey);
     const tiles = biome === 'creek' ? 'tile_stone' : biome === 'library' || biome === 'ruins' || biome === 'observatory' ? 'tile_stone' : biome === 'tower' ? 'tile_dirt' : 'tile_grass';
     const tint: Record<string, number> = { woods: 0x829b80, library: 0xd5bd87, creek: 0x809dad, tower: 0x9b9078, garden: 0xb2c68e, ruins: 0x82918c, observatory: 0x7182a0, heart: 0xd8b978 };
-    this.track(this.add.image(0, 0, tiles).setOrigin(0).setDisplaySize(640, 360).setTint(tint[biome] ?? 0xffffff).setDepth(0));
+    this.track(this.add.image(0, 0, hasCampaignBackground ? backgroundKey : tiles).setOrigin(0).setDisplaySize(640, 360).setTint(hasCampaignBackground ? 0xffffff : tint[biome] ?? 0xffffff).setDepth(0));
     const decor = this.add.graphics().setDepth(1);
-    decor.fillStyle(biome === 'creek' ? 0x183f59 : 0x07151c, 0.18);
-    decor.fillRect(0, 0, 640, 360);
-    decor.lineStyle(2, 0xd8b869, 0.45);
-    decor.strokeRoundedRect(7, 7, 626, 346, 12);
-    decor.lineStyle(1, 0xc6e7dc, 0.12);
-    decor.strokeCircle(320, 185, 100);
+    if (!hasCampaignBackground) {
+      decor.fillStyle(biome === 'creek' ? 0x183f59 : 0x07151c, 0.18);
+      decor.fillRect(0, 0, 640, 360);
+      decor.lineStyle(2, 0xd8b869, 0.45);
+      decor.strokeRoundedRect(7, 7, 626, 346, 12);
+      decor.lineStyle(1, 0xc6e7dc, 0.12);
+      decor.strokeCircle(320, 185, 100);
+    }
     if (this.progress.level === 0) {
       decor.lineStyle(2, 0xffe680, 0.8);
       decor.strokeCircle(320, 246, 15);
@@ -936,38 +954,42 @@ export class CampaignScene extends Phaser.Scene {
       this.track(this.footprintTrail);
     }
     this.track(decor);
-    const tree = biome === 'ruins' || biome === 'observatory' ? 'ruin_pillar' : 'tree_woods';
-    for (const [x, y] of [[60, 80], [580, 82], [66, 270], [574, 270]] as Array<[number, number]>) {
-      this.track(this.add.image(x, y, tree).setAlpha(0.8).setScale(0.85).setDepth(3));
+    if (!hasCampaignBackground) {
+      const tree = biome === 'ruins' || biome === 'observatory' ? 'ruin_pillar' : 'tree_woods';
+      for (const [x, y] of [[60, 80], [580, 82], [66, 270], [574, 270]] as Array<[number, number]>) {
+        this.track(this.add.image(x, y, tree).setAlpha(0.8).setScale(0.85).setDepth(3));
+      }
     }
     this.track(this.add.text(320, 344, 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
-    const path = this.add.graphics().setDepth(2);
-    path.lineStyle(16, biome === 'creek' ? 0x304d5c : 0x586751, 0.62);
-    path.beginPath(); path.moveTo(320, 335); path.lineTo(320, 275); path.lineTo(320, 220); path.lineTo(320, 130); path.strokePath();
-    this.track(path);
+    if (!hasCampaignBackground) {
+      const path = this.add.graphics().setDepth(2);
+      path.lineStyle(16, biome === 'creek' ? 0x304d5c : 0x586751, 0.62);
+      path.beginPath(); path.moveTo(320, 335); path.lineTo(320, 275); path.lineTo(320, 220); path.lineTo(320, 130); path.strokePath();
+      this.track(path);
+    }
     const stage = this.progress.level;
     const landscape = this.add.graphics().setDepth(1.5);
-    if (stage === 3) {
+    if (!hasCampaignBackground && stage === 3) {
       landscape.fillStyle(0x123d58, 0.82); landscape.fillRect(245, 145, 175, 195);
       landscape.fillStyle(0x66bfd0, 0.25); landscape.fillEllipse(330, 195, 140, 22); landscape.fillEllipse(300, 300, 120, 18);
       landscape.fillStyle(0xa1b79a, 0.72); landscape.fillRect(235, 218, 195, 12);
       landscape.lineStyle(2, 0x9bd8dd, 0.22); landscape.lineBetween(260, 162, 405, 162); landscape.lineBetween(258, 176, 400, 176);
-    } else if (stage === 4) {
+    } else if (!hasCampaignBackground && stage === 4) {
       landscape.lineStyle(7, 0x7c786a, 0.56); landscape.lineBetween(295, 86, 295, 280); landscape.lineBetween(440, 86, 440, 280);
       landscape.lineStyle(1, 0xb8a87d, 0.42); landscape.lineBetween(300, 100, 435, 100); landscape.lineBetween(300, 270, 435, 270);
       landscape.lineStyle(3, this.lantern.lanternOn ? 0x8b8d76 : 0x88e4d4, this.lantern.lanternOn ? 0.25 : 0.8);
       landscape.beginPath(); landscape.moveTo(300, 230); landscape.lineTo(350, 230); landscape.lineTo(385, 245); landscape.lineTo(435, 245); landscape.strokePath();
-    } else if (stage === 5) {
+    } else if (!hasCampaignBackground && stage === 5) {
       landscape.lineStyle(2, 0xd1ba83, 0.42); landscape.strokeCircle(320, 175, 128); landscape.strokeCircle(320, 175, 92);
       landscape.fillStyle(0x1f5567, 0.55); landscape.fillRect(535, 82, 12, 202); landscape.lineStyle(3, 0x6acfe0, 0.6); landscape.lineBetween(541, 278, 541, 98);
-    } else if (stage === 6) {
+    } else if (!hasCampaignBackground && stage === 6) {
       landscape.fillStyle(0x245263, 0.78); landscape.fillRect(0, 246, 640, 28);
       landscape.lineStyle(2, 0x66bfd0, 0.45); landscape.lineBetween(0, 246, 640, 246); landscape.lineBetween(0, 274, 640, 274);
       landscape.lineStyle(2, 0xb9d08b, 0.5); landscape.lineBetween(70, 185, 570, 185); landscape.lineBetween(70, 292, 570, 292);
-    } else if (stage === 7) {
+    } else if (!hasCampaignBackground && stage === 7) {
       landscape.lineStyle(3, 0xa9a18d, 0.32); landscape.strokeCircle(320, 180, 122); landscape.strokeCircle(320, 180, 76);
       landscape.lineStyle(1, 0xd1bf94, 0.2); landscape.lineBetween(320, 58, 320, 300); landscape.lineBetween(198, 180, 442, 180);
-    } else if (stage === 9) {
+    } else if (!hasCampaignBackground && stage === 9) {
       landscape.lineStyle(3, 0xe9d18b, 0.55); landscape.strokeCircle(320, 160, 76); landscape.strokeCircle(320, 160, 110);
       landscape.lineStyle(2, 0x74bd95, 0.5); landscape.lineBetween(320, 210, 320, 292); landscape.lineBetween(270, 238, 190, 275); landscape.lineBetween(370, 238, 450, 275);
     }
@@ -985,7 +1007,38 @@ export class CampaignScene extends Phaser.Scene {
       : level === 7 ? [['guardian_statue', 320, 170], ['lock_sun_off', 200, 126], ['lock_sun_off', 440, 126], ['lock_moon_off', 320, 222], ['ruins_altar', 320, 82], ['pedestal_empty', 120, 205], ['mirror_1', 220, 175], ['mirror_1', 420, 175], ['receiver_off', 200, 126], ['receiver_off', 440, 126], ...(this.progress.flags['l7-solved'] ? [['shadow_npc', 320, 98] as [string, number, number]] : [])]
       : level === 8 ? [['mirror_0', 220, 175], ['mirror_2', 420, 175], ['shadow_npc', 320, 114], ['crystal_balance', 320, 68]]
       : [['heart_tree_0', 320, 157], ['crystal_memory', 190, 260], ['crystal_hope', 320, 260], ['crystal_balance', 450, 260], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
-    for (const [key, x, y] of props) this.addProp(key, x, y, key === 'woods_arch_locked' || key === 'heart_tree_0' ? 1 : 0.9);
+    for (const [key, x, y] of props) {
+      if (level === 9 && key === 'heart_tree_0') continue;
+      this.addProp(key, x, y, key === 'woods_arch_locked' || key === 'heart_tree_0' ? 1 : 0.9);
+    }
+    if (level === 0) {
+      this.addLevelArt('sun-eye-dormant', 320, 72, 26, 26, 18);
+      if (!this.progress.lanternPickedUp) this.addLevelArt('pickup-lantern', 274, 186, undefined, undefined, 12);
+      if (this.progress.flags['l0-footprints-found']) this.addLevelArt('footprints-pulse', 320, 231, 28, 36, 4);
+    } else if (level === 1) {
+      this.addLevelArt('poem_fragment', 320, 70, 52, 42, 18);
+      this.updateRuneRevealVisuals();
+    } else if (level === 2) {
+      this.addLevelArt('room-bookshelf', 74, 143, undefined, undefined, 4);
+      this.addLevelArt('room-bookshelf', 566, 143, undefined, undefined, 4);
+      this.addLevelArt(this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed', 548, 194, 112, 112, 4);
+    } else if (level === 3) {
+      this.addLevelArt('storm-relief', 560, 85, 96, 64, 8);
+    } else if (level === 4) {
+      this.addLevelArt('call-idle', 320, 85, 26, 26, 8);
+    } else if (level === 5) {
+      this.addLevelArt('tower-lamp-dim', 541, 108, 48, 48, 8);
+    } else if (level === 6) {
+      this.addLevelArt(this.progress.flags['l6-canopy-shut'] ? 'reservoir-shutter-closed-overlay' : 'reservoir-open', 320, 236, 80, 72, 5);
+      this.addLevelArt(this.progress.flags['l6-water-flowing'] ? 'nursery-water-delivered' : 'nursery-drain-closed', 480, 178, 88, 20, 8);
+    } else if (level === 9) {
+      for (const [name, x] of [['memory', 190], ['hope', 320], ['balance', 450]] as const) {
+        const state = this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty';
+        this.addLevelArt(`${name}-alcove-${state}`, x, 260, 52, 52, 8);
+      }
+      const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
+      this.addLevelArt(core, 320, 154, 46, 46, 8);
+    }
     if (level === 1) this.drawFireflyRoute();
     if (level === 2 && this.progress.flags['l2-memory'] === true) this.addProp('crystal_memory', 320, 190, 0.9);
     if (level === 2 && this.progress.flags['l2-crystal'] === true) this.drawFifthMural();
@@ -995,7 +1048,7 @@ export class CampaignScene extends Phaser.Scene {
   private registerLevel(level: number): void {
     const action = (id: string, label: string, x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone') => this.addAction(id, label, x, y, fn, enabled, texture);
     if (level === 0) {
-      action('lamp', 'E · Nhận đèn lồng', 274, 210, () => { this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; this.say([{ speaker: 'Nhinh', text: 'Hãy giữ ánh sáng cho đến khi mọi người trở về.' }, { speaker: 'Lumo', text: 'Thử thắp đèn lên nhé.' }]); this.save(); }, () => !this.progress.lanternPickedUp, 'pedestal_empty');
+      action('lamp', 'E · Nhận đèn lồng', 274, 210, () => { this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; const pickup = getLevelArtKey(0, 'pickup-lantern'); if (pickup) this.objects.find((object) => object instanceof Phaser.GameObjects.Image && object.texture.key === pickup)?.destroy(); this.say([{ speaker: 'Nhinh', text: 'Hãy giữ ánh sáng cho đến khi mọi người trở về.' }, { speaker: 'Lumo', text: 'Thử thắp đèn lên nhé.' }]); this.save(); }, () => !this.progress.lanternPickedUp, 'pedestal_empty');
       action('tablet', 'E · Đọc bia đá', 320, 206, () => {
         const firstRead = !this.progress.flags['l0-tablet-read'];
         this.progress.flags['l0-tablet-read'] = true;
@@ -1181,7 +1234,10 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level === 0 && !this.progress.flags['l0-gate-open'] && this.progress.lanternPickedUp && this.progress.flags['l0-tablet-read'] && this.progress.flags['l0-footprints-found'] && this.lantern.lanternOn && Math.hypot(this.player.x - 320, this.player.y - 246) < 30) {
       this.progress.flags['l0-gate-open'] = true; this.save();
       for (const object of this.objects) {
-        if (object instanceof Phaser.GameObjects.Image && object.texture.key === 'woods_arch_locked') object.setTexture('woods_arch_open');
+        if (object instanceof Phaser.GameObjects.Image && object.texture.key === 'woods_arch_locked') {
+          const openArt = getLevelArtKey(0, 'woods_arch_open_passage');
+          object.setTexture(openArt && this.textures.exists(openArt) ? openArt : 'woods_arch_open');
+        }
       }
       this.say([{ speaker: 'Nhinh', text: 'Nó nhận ra chiếc đèn.' }, { speaker: 'Lumo', text: 'Đưa ánh sáng trở lại, mọi thứ sẽ thức dậy.' }]);
     }
@@ -1389,7 +1445,17 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private addAction(id: string, label: string, x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone'): void {
-    if (id.includes('exit') || id === 'stairs') this.addProp(texture, x, y, 0.8);
+    if (id.includes('exit') || id === 'stairs') {
+      const hasGateProp = this.objects.some((object) =>
+        object instanceof Phaser.GameObjects.Image
+        && Math.abs(object.x - x) < 0.1
+        && Math.abs(object.y - y) < 0.1
+        && (object.texture.key === 'woods_arch_locked'
+          || object.texture.key === 'woods_arch_open'
+          || object.texture.key.includes('woods_arch_open_passage')),
+      );
+      if (!hasGateProp) this.addProp(texture, x, y, 0.8);
+    }
     this.interactions.register({ id, x, y, radius: 35, getPrompt: () => isEnabled() ? label : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
   }
 
@@ -1614,10 +1680,99 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private addProp(key: string, x: number, y: number, scale: number): void {
-    const image = this.add.image(x, y, key).setScale(scale).setDepth(8 + Math.floor(y / 10));
+    const artTexture = this.resolveLevelPropTexture(key);
+    const image = this.add.image(x, y, artTexture ?? key).setScale(scale).setDepth(8 + Math.floor(y / 10));
     image.setInteractive({ useHandCursor: false });
     this.objects.push(image);
     if (key.startsWith('crystal_')) this.tweens.add({ targets: image, y: y - 4, duration: 900, yoyo: true, repeat: -1 });
+  }
+
+  private resolveLevelPropTexture(key: string): string | null {
+    const level = this.progress.level;
+    if (level === 0 && key === 'beacon_stone') {
+      return getLevelArtKey(level, this.progress.flags['l0-footprints-found'] ? 'beacon-stone-illuminated' : 'beacon-stone-hidden');
+    }
+    if (level === 0 && key === 'pedestal_empty') return getLevelArtKey(level, 'stone-standing-ring');
+    if (level === 0 && (key === 'woods_arch_locked' || key === 'woods_arch_open') && this.progress.flags['l0-gate-open']) return getLevelArtKey(level, 'woods_arch_open_passage');
+    if (level === 1) {
+      const rune = key.match(/^runestone_(moon|leaf|star)_(?:rev|lit)$/);
+      if (rune) {
+        const id = rune[1];
+        const activated = this.progress.flags[`l1-activated-${id}`] === true;
+        const revealed = this.progress.flags[`l1-seen-${id}`] === true || this.activeRevealedRunes.has(id);
+        return getLevelArtKey(level, `runestone_${id}_${activated ? 'active' : revealed ? 'revealed' : 'sleeping'}`);
+      }
+      if (key === 'mural_tablet') return getLevelArtKey(level, 'poem_fragment');
+      if ((key === 'woods_arch_locked' || key === 'woods_arch_open') && this.progress.flags['l1-open']) return getLevelArtKey(level, 'woods_arch_open_passage');
+    }
+    if (level === 2 && key === 'mural_tablet') return getLevelArtKey(level, 'tablet-body');
+    if (level === 7 && key === 'guardian_statue') return getLevelArtKey(level, `statue-notch-${this.value('statue') % 4}`);
+    return null;
+  }
+
+  private addLevelArt(
+    filename: string,
+    x: number,
+    y: number,
+    width?: number,
+    height?: number,
+    depth = 8 + Math.floor(y / 10),
+  ): Phaser.GameObjects.Image | null {
+    const key = getLevelArtKey(this.progress.level, filename);
+    if (!key || !this.textures.exists(key)) return null;
+    const image = this.add.image(x, y, key).setDepth(depth);
+    if (width !== undefined && height !== undefined) image.setDisplaySize(width, height);
+    this.objects.push(image);
+    return image;
+  }
+
+  private setLevelArtAt(x: number, y: number, filename: string): void {
+    const key = getLevelArtKey(this.progress.level, filename);
+    if (!key || !this.textures.exists(key)) return;
+    const image = this.objects.find((object): object is Phaser.GameObjects.Image =>
+      object instanceof Phaser.GameObjects.Image
+      && object.texture.key.startsWith('art_')
+      && Math.abs(object.x - x) < 0.1
+      && Math.abs(object.y - y) < 0.1,
+    );
+    if (image && image.texture.key !== key) image.setTexture(key);
+  }
+
+  private refreshCampaignArtVisuals(level: number): void {
+    if (level === 0 || level === 1) {
+      const gateOpen = level === 0 ? this.progress.flags['l0-gate-open'] === true : this.progress.flags['l1-open'] === true;
+      const gateY = level === 0 ? 72 : 70;
+      const openArt = getLevelArtKey(level, 'woods_arch_open_passage');
+      const gate = this.objects.find((object): object is Phaser.GameObjects.Image =>
+        object instanceof Phaser.GameObjects.Image
+        && Math.abs(object.x - 320) < 0.1
+        && Math.abs(object.y - gateY) < 0.1
+        && (object.texture.key === 'woods_arch_locked'
+          || object.texture.key === 'woods_arch_open'
+          || object.texture.key.includes('woods_arch_open_passage')),
+      );
+      if (gate) {
+        const texture = gateOpen && openArt && this.textures.exists(openArt) ? openArt : gateOpen ? 'woods_arch_open' : 'woods_arch_locked';
+        if (gate.texture.key !== texture) gate.setTexture(texture);
+      }
+    }
+    if (level === 0) {
+      this.setLevelArtAt(320, 206, this.progress.flags['l0-footprints-found'] ? 'beacon-stone-illuminated' : 'beacon-stone-hidden');
+      this.setLevelArtAt(320, 72, this.progress.flags['l0-gate-open'] ? 'sun-eye-full' : 'sun-eye-dormant');
+    } else if (level === 2) {
+      this.setLevelArtAt(548, 194, this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed');
+    } else if (level === 6) {
+      this.setLevelArtAt(320, 236, this.progress.flags['l6-canopy-shut'] ? 'reservoir-shutter-closed-overlay' : 'reservoir-open');
+      this.setLevelArtAt(480, 178, this.progress.flags['l6-water-flowing'] ? 'nursery-water-delivered' : 'nursery-drain-closed');
+    } else if (level === 7) {
+      this.setLevelArtAt(320, 170, `statue-notch-${this.value('statue') % 4}`);
+    } else if (level === 9) {
+      for (const [name, x] of [['memory', 190], ['hope', 320], ['balance', 450]] as const) {
+        this.setLevelArtAt(x, 260, `${name}-alcove-${this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty'}`);
+      }
+      const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
+      this.setLevelArtAt(320, 154, core);
+    }
   }
 
   private track<T extends Phaser.GameObjects.GameObject>(object: T): T { this.objects.push(object); return object; }
@@ -1648,6 +1803,7 @@ export class CampaignScene extends Phaser.Scene {
 
   private refreshCampaignPuzzleVisuals(): void {
     const level = this.progress.level;
+    this.refreshCampaignArtVisuals(level);
     if (![3, 4, 5, 6, 7, 9].includes(level)) return;
     if (!this.campaignBeamGraphics || !this.campaignBeamGraphics.active) {
       this.campaignBeamGraphics = this.add.graphics().setDepth(6);
@@ -1772,11 +1928,18 @@ export class CampaignScene extends Phaser.Scene {
 
   private updateRuneRevealVisuals(): void {
     for (const id of ['moon', 'leaf', 'star']) {
-      const image = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && (object.texture.key === `runestone_${id}_rev` || object.texture.key === `runestone_${id}_lit`));
-      image?.setTexture(this.activeRevealedRunes.has(id) || this.progress.flags[`l1-activated-${id}`] ? `runestone_${id}_lit` : `runestone_${id}_rev`);
+      const position = this.getRunePositions()[id];
+      const image = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && Math.abs(object.x - position.x) < 0.1 && Math.abs(object.y - position.y) < 0.1);
+      const active = this.progress.flags[`l1-activated-${id}`] === true;
+      const revealed = active || this.activeRevealedRunes.has(id) || this.progress.flags[`l1-seen-${id}`] === true;
+      const art = getLevelArtKey(1, `runestone_${id}_${active ? 'active' : revealed ? 'revealed' : 'sleeping'}`);
+      if (image) image.setTexture(art && this.textures.exists(art) ? art : `runestone_${id}_${revealed ? 'lit' : 'rev'}`);
     }
-    const practice = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && object.x === 80 && object.y === 265);
-    practice?.setTexture(this.activeRevealedRunes.has('practice-leaf') || this.progress.flags['l1-practice-complete'] ? 'runestone_leaf_lit' : 'runestone_leaf_rev');
+    const practice = this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && Math.abs(object.x - 80) < 0.1 && Math.abs(object.y - 265) < 0.1);
+    const practiceActive = this.progress.flags['l1-practice-complete'] === true;
+    const practiceRevealed = practiceActive || this.activeRevealedRunes.has('practice-leaf') || this.progress.flags['l1-seen-practice-leaf'] === true;
+    const practiceArt = getLevelArtKey(1, `runestone_leaf_${practiceActive ? 'active' : practiceRevealed ? 'revealed' : 'sleeping'}`);
+    if (practice) practice.setTexture(practiceArt && this.textures.exists(practiceArt) ? practiceArt : `runestone_leaf_${practiceRevealed ? 'lit' : 'rev'}`);
   }
 
   private showRuneJournal(): void {
