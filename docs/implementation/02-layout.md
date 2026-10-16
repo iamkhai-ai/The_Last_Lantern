@@ -6,7 +6,7 @@ Rebuild Level 02 only: `progress.level === 1` (Library is index 2). Source story
 
 ## Player flow
 
-Arrive in the southern clearing `(280,286)` carrying the lantern. Hear the scenario's four opening lines, with no poem/order spoiler. A short spur leads left to the lone practice leaf. Pulse and E teach revelation then activation; the practice never changes the main sequence. From the clearing the player can observe the moving fireflies or read the poem on a separate stone to the LEFT of the northeastern gate. Neither observation nor practice is an artificial prerequisite for a player who already understands the puzzle.
+Arrive beside the practice stone at player center `(138,286)` carrying the lantern. Hear the scenario's four opening lines, followed by a short contextual Lumo instruction pointing to the practice stone directly ahead. The active E prompt, a subtle ground halo and a specific SPACE objective identify this first action immediately. A live practice reveal changes the objective to E. On practice completion, remove its halo and direct attention to the separate poem stone LEFT of the northeastern gate. Reading the poem then moves the objective to observing the firefly order and revealing/activating the three main stones. Neither practice nor reading the poem is a hard prerequisite for a player who already understands the puzzle; partial/solved saves prioritize puzzle progress or exit over tutorial guidance.
 
 Walk around the three tablets: Moon left, Leaf upper middle, Star right. Pulse locally identifies a sleeping tablet; E while revealed activates it. Correct tablets stay gold without a timer for the whole sequence. A wrong pick resets only sequence/activation, preserving discoveries and poem. Re-touching a correct tablet is harmless. On the third correct tablet the northern gate opens, roots release, a warm memory vignette and the exact scenario dialogue play once. The player then walks to the distinct gate approach and presses E to descend to Library. Reading the poem can never intercept this exit.
 
@@ -19,7 +19,7 @@ NORTH — vegetation and gate backing
             Moon                                    Star
           (180,248)                               (450,248)
     practice
-   (120,276)            spawn (280,286)
+   (120,276) spawn (138,286)
 SOUTH — HUD/status margin
 ```
 
@@ -31,11 +31,11 @@ One focused module `src/data/whisperingWoodsLayout.ts` owns anchors, stand point
 
 | Object | Art and anchor | Player stand / interaction | Collision and depth |
 | --- | --- | --- | --- |
-| Nhinh | Current 36×42 frames | Spawn center `(280,286)` | Center API preserved; feet depth even while talking |
-| Practice leaf | L02 `runestone_leaf_*`, native 40×52, `(120,276)` bottom center | `(120,282)`, radius 24; always inspectable, dormant E explains Pulse; E when temporarily revealed completes practice once | Base `[107,264,26,12]`; same depth rule as standing tablets; practice progress independent |
-| Moon | L02 `runestone_moon_*`, `(180,248)` | `(180,254)`, radius 24 | `[167,236,26,12]`; native 40×52 |
-| Leaf | L02 `runestone_leaf_*`, `(320,174)` | `(320,180)`, radius 24 | `[307,162,26,12]`; native 40×52, separated from gate |
-| Star | L02 `runestone_star_*`, `(450,248)` | `(450,254)`, radius 24 | `[437,236,26,12]`; native 40×52 |
+| Nhinh | Current 36×42 frames | Spawn center `(138,286)` | Center API preserved; feet depth even while talking |
+| Practice leaf | L02 `runestone_leaf_*`, source 40×52 displayed 60×78, `(120,276)` bottom center | `(120,282)`, radius 24; always inspectable, dormant E explains Pulse; E when temporarily revealed completes practice once | Base `[107,264,26,12]`; same depth rule as standing tablets; practice progress independent |
+| Moon | L02 `runestone_moon_*`, `(180,248)` | `(180,254)`, radius 24 | `[167,236,26,12]`; display 60×78 |
+| Leaf | L02 `runestone_leaf_*`, `(320,174)` | `(320,180)`, radius 24 | `[307,162,26,12]`; display 60×78, separated from gate |
+| Star | L02 `runestone_star_*`, `(450,248)` | `(450,254)`, radius 24 | `[437,236,26,12]`; display 60×78 |
 | Poem | L02 `poem_fragment`, native 48×40, `(402,161)` bottom center | `(402,167)`, radius 24; repeat full poem; exact first-reading dialogue | `[385,150,34,11]`; separate target, no duplicate mural at gate |
 | Gate | Closed existing arch / L02 open-passage, fitted uniformly bottom center `(510,190)` into common 128×126 canvas | `(510,181)`, radius 24; closed E gives useful locked feedback; open E descends; prompt y=94 | Posts `[456,156,20,34]`, `[544,156,20,34]`; backing `[446,96,128,60]`; closed threshold `[476,156,68,22]`. Open central corridor remains walkable. Stairs depth 3; front header/post crops at ground depth 29; full actor visible on central approach |
 | Memory | Existing `memory_vignette` | Transient warm tint and two figures during completion dialogue only | Effects above world, below dialogue/HUD; clear on completion/shutdown; no permanent duplicate figures |
@@ -44,7 +44,7 @@ Gate backing ties to the northern floor boundary. Closed threshold stops the cen
 
 Floor follows the existing woods contract: center x=12..628, body/feet restricted to y=96..310. Trees at `(48,142),(125,112),(240,106),(350,108),(600,130),(48,230),(600,240),(65,310),(568,310)`. Each trunk footprint `[baseX-9,baseY-14,18,14]`; rocks at `(100,195),(552,292)`, footprint `[baseX-13,baseY-14,26,14]`. Use existing trees/rocks at native proportions. Canopies sort by base; they can hide actors behind them, never replace trunk collision. Ground bushes, grass and flowers are passable. Keep the practice/rune/poem glyphs and stand points clear of canopies.
 
-Stand points six pixels below each stone's base keep E available at its southern physics contact: that contact is center y=baseY-16, only 22px from the target. Place each practice/rune/poem label at `promptY=anchorY-64` (gate remains y=94), above its glyph and the actor's head even at that contact. Verify E availability and label placement at exact contact as well as the nominal stand.
+Stand points six pixels below each stone's base keep E available at its southern physics contact: that contact is center y=baseY-16, only 22px from the target. Practice/main rune labels now use `promptY=anchorY-92`, above the enlarged 78px artwork; poem remains `anchorY-64`, gate y=94. Keep compact stone-base footprints: enlarging the carved upper body does not require an invisible collider across its entire silhouette. Preserve aspect ratio and nearest-neighbor texture filtering. Verify the initial spawn is unobscured by the southwest canopy; adjust only that tree's ground anchor leftward if required, with its footprint updated from the same data.
 
 Use existing grass/dirt/stone textures, with an irregular circular clearing and >=48px paths connecting spawn, practice, three rune approaches, poem and gate. Ground masks/stone stamps stay below feet; no cross-shaped debug paths or drawn route lines. Empty grass remains traversable; colliders require visible corresponding art. Props must not be baked into an opaque background and drawn again.
 
@@ -61,11 +61,17 @@ Use existing grass/dirt/stone textures, with an irregular circular clearing and 
 - J contains discovered glyphs and positions, practice, the full poem only after reading, and day/night memory only after seen; no future crystal. Existing Vietnamese scenario dialogue remains the copy source. English filenames.
 - Lumo follows during this level; no stationary old-level target or unnecessary companion puzzle.
 
+### User review correction — 2026-10-17
+
+User found the symbol stones too small and the starting flow unclear. Supersedes prior generic observe/practice objective and distant `(280,286)` spawn. Store rune display size and tutorial stage computation in the focused Level 02 module. Stage priority: open exit, existing sequence progress, practice (SPACE or E according to its live reveal), poem, then main observation/sequence. Old saves with solved/partial progress must not be sent back to practice. Stage-specific H should reinforce the same current action; reset its escalation on stage changes. Existing correct/wrong/expiry/memory/save semantics stay intact.
+
+Use one subtle ground cue only for the current practice/poem target; remove it when moving to the main puzzle. Do not light a sleeping glyph or label a correct main rune merely to provide direction. Preserve the firefly clue and discovery. Keep full original practice dialogue, then add one directional Lumo sentence about the poem. Initial opening may add one sentence about the nearby practice stone; no full-order spoiler. Add a visible low-key `Bia tập` label if needed to distinguish the lone training stone from the three principal stones.
+
 ## Save restoration
 
 Preserve v1 keys `l1-seen-*`, `l1-activated-*`, `l1-practice-complete`, `l1-poem-read`, `l1-open`, `l1-memory-seen`, `rune-sequence`, existing player counters. Normalize sequence to its valid activated prefix on load; a legacy `rune-sequence=3` or all three activated flags is a completed puzzle and must recover an open gate (addresses prior 3/3-but-closed saves). An explicit open flag remains open even if older flags are incomplete. Do not discard unrelated progress.
 
-Revelation is temporary and not restored as live power from `seen` notes. Resolve old/in-solid/behind-locked-gate positions onto safe near-side floor. Named centers: start `(280,286)`, practice `(120,286)`, moon `(180,258)`, leaf `(320,184)`, star `(450,258)`, open gate approach `(510,194)`. A stale coordinate inside the gate backing must not move the player past a locked threshold. Physical contact at closed center `(510,162)` is safe and loads in place; use strict body overlap, not inclusive edge collision. Add any near-side restoration guard only to restore logic, not a mismatched invisible movement strip. Persist changed discoveries/activation before dialogue. Do not change the save key or clear the user's save.
+Revelation is temporary and not restored as live power from `seen` notes. Resolve old/in-solid/behind-locked-gate positions onto safe near-side floor. Named centers: start `(138,286)`, practice `(120,286)`, moon `(180,258)`, leaf `(320,184)`, star `(450,258)`, open gate approach `(510,194)`. A stale coordinate inside the gate backing must not move the player past a locked threshold. Physical contact at closed center `(510,162)` is safe and loads in place; use strict body overlap, not inclusive edge collision. Add any near-side restoration guard only to restore logic, not a mismatched invisible movement strip. Persist changed discoveries/activation before dialogue. Do not change the save key or clear the user's save.
 
 ## Acceptance and verification
 
