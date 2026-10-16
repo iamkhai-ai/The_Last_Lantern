@@ -8,7 +8,7 @@ const entry=(flags={},counters={})=>({version:1,level:1,flags:{'intro-0':true,'i
 const launchOptions={headless:true};if(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE)launchOptions.executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;const browser=await chromium.launch(launchOptions);
 let page,context;
 const launch=async(save)=>{if(context)await context.close();context=await browser.newContext({viewport:{width:1280,height:720}});page=await context.newPage();await page.addInitScript(s=>localStorage.setItem('last-lantern-campaign-save-v1',JSON.stringify(s)),save);await page.goto(base);await page.waitForFunction(()=>window.__LAST_LANTERN_GAME__?.scene.isActive('MenuScene'));await page.keyboard.press('Enter');await page.waitForFunction(()=>window.__LAST_LANTERN_GAME__?.scene.isActive('CampaignScene'));await page.waitForTimeout(350)};
-const read=()=>page.evaluate(()=>{const s=window.__LAST_LANTERN_GAME__.scene.getScene('CampaignScene');return{x:s.player.x,y:s.player.y,depth:s.player.sprite.depth,flags:{...s.progress.flags},counters:{...s.progress.counters},target:s.interactions.getActiveTarget()?.id}});
+const read=()=>page.evaluate(()=>{const s=window.__LAST_LANTERN_GAME__.scene.getScene('CampaignScene');return{x:s.player.x,y:s.player.y,depth:s.player.sprite.depth,flags:{...s.progress.flags},counters:{...s.progress.counters},target:s.interactions.getActiveTarget()?.id,objective:s.objectiveText?.text,tutorialCue:{visible:s.woodsTutorialCue?.visible,stage:s.woodsTutorialCue?.getData('stage'),target:s.woodsTutorialCue?.getData('target')},objects:s.objects.filter(o=>o.getData?.('woodsId')).map(o=>({id:o.getData('woodsId'),width:o.displayWidth,height:o.displayHeight,text:o.text}))}});
 const moveAxis=async(axis,target)=>{for(let i=0;i<70;i++){const s=await read(),d=target-s[axis];if(Math.abs(d)<2.6)return;const key=axis==='x'?(d>0?'d':'a'):(d>0?'s':'w');await page.keyboard.down(key);await page.waitForTimeout(Math.max(18,Math.min(70,Math.abs(d)/105*1000)));await page.keyboard.up(key);await page.waitForTimeout(70)}throw new Error(`Failed move ${axis} ${target}: ${JSON.stringify(await read())}`)};
 const hold=async(key,ms=650)=>{await page.keyboard.down(key);await page.waitForTimeout(ms);await page.keyboard.up(key);await page.waitForTimeout(100)};
 const sample=(focusWoodsId)=>page.evaluate((focusWoodsId)=>{
@@ -25,6 +25,13 @@ const sample=(focusWoodsId)=>page.evaluate((focusWoodsId)=>{
  const prompt=s.interactions.promptContainer,pb=prompt.getBounds();return{x:p.x,y:p.y,depth:p.depth,opaque,covered,coverKeys:[...keys],coverIds:[...ids],promptVisible:prompt.visible,promptBottom:pb.bottom,actorTop:b.top,layers:s.objects.filter(o=>o.texture&&/woods.*gate|gate.*woods/.test(o.texture.key)).map(o=>({key:o.texture.key,depth:o.depth}))};
 },focusWoodsId);
 try{
+ await launch(entry({}, {'player-level':0}));
+ const spawn=await read();assert.ok(Math.abs(spawn.x-138)<1&&Math.abs(spawn.y-286)<1,`Practice-side spawn ${JSON.stringify(spawn)}`);assert.equal(spawn.target,'practice-rune');assert.ok(spawn.objective.includes('SPACE'));assert.deepEqual(spawn.tutorialCue,{visible:true,stage:'practice-space',target:'practice'});
+ for(const id of ['practice-leaf','rune-moon','rune-leaf','rune-star']){const stone=spawn.objects.find(o=>o.id===id);assert.ok(stone,`Missing ${id}`);assert.equal(stone.width,60);assert.equal(stone.height,78)}
+ assert.ok(spawn.objects.some(o=>o.id==='practice-name'&&o.text==='Bia tập'));
+ const spawnPixels=await sample();assert.equal(spawnPixels.covered,0,`Spawn must remain unobscured: ${JSON.stringify(spawnPixels)}`);await page.screenshot({path:path.join(out,'level02-practice-entry.png')});results.push({name:'practice-side entry, stage cue, four enlarged stones and clear spawn',status:'PASS',data:spawn});
+ await launch(entry({'l1-poem-read':true,'l1-activated-moon':true},{'player-level':0,'rune-sequence':1}));
+ const partial=await read();assert.equal(partial.tutorialCue.stage,'sequence');assert.equal(partial.tutorialCue.visible,false);assert.ok(partial.objective.includes('1/3'),'Partial save must bypass practice and poem guidance');results.push({name:'partial save prioritizes main puzzle stage',status:'PASS',data:partial});
  for(const open of [false,true]){
   await launch(entry({'l1-open':open,'l1-memory-seen':open},{'player-x':510,'player-y':210}));
   for(const y of open?[210,181,162,140]:[210,181,162]){

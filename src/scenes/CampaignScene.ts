@@ -3,7 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { activateWoodsRune, canActivateWoodsRune, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, worldDepth as woodsDepth, type RuneId } from '../data/whisperingWoodsLayout';
+import { activateWoodsRune, canActivateWoodsRune, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_PROMPT_OFFSET_Y, WOODS_RUNE_ART, WOODS_RUNE_PROMPT_OFFSET_Y, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -20,7 +20,7 @@ type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: P
 
 const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Trời vẫn chưa sáng sao?' }, { speaker: 'Nhinh', text: 'Mình nhớ con đường vào rừng… Còn đoạn sau thì mờ quá.' }],
-  [{ speaker: 'Lumo', text: 'Đom đóm vẫn đi đúng đường cũ.' }, { speaker: 'Nhinh', text: 'Cậu biết đường này?' }, { speaker: 'Lumo', text: 'Tôi biết cảm giác của nó. Có tiếng lá, tiếng trẻ con… Nhưng khi cố nhớ thì chỉ còn tiếng lá.' }, { speaker: 'Nhinh', text: 'Mình cứ xem chúng muốn chỉ gì đã.' }],
+  [{ speaker: 'Lumo', text: 'Đom đóm vẫn đi đúng đường cũ.' }, { speaker: 'Nhinh', text: 'Cậu biết đường này?' }, { speaker: 'Lumo', text: 'Tôi biết cảm giác của nó. Có tiếng lá, tiếng trẻ con… Nhưng khi cố nhớ thì chỉ còn tiếng lá.' }, { speaker: 'Nhinh', text: 'Mình cứ xem chúng muốn chỉ gì đã.' }, { speaker: 'Lumo', text: 'Bia tập ngay cạnh lối vào. Dùng SPACE để soi nét khắc nhé.' }],
   [{ speaker: 'Nhinh', text: 'Sách mọc giữa rễ cây. Bốn bức tranh đã bị tháo khỏi vòng ngày đêm.' }, { speaker: 'Lumo', text: 'Người Elaria gửi ký ức vào đây. Hãy xem từng bức dưới ánh đèn và trong bóng tối.' }],
   [{ speaker: 'Nhinh', text: 'Mặt suối không chuyển động. Cây Mẹ đang chờ ba tinh thể.' }, { speaker: 'Lumo', text: 'Những chiếc cầu nhận sức từ ánh sáng. Đặt đèn lên bệ rồi dẫn tia qua các gương.' }],
   [{ speaker: 'Nhinh', text: 'Cửa không có tay mở ở phía này.' }, { speaker: 'Lumo', text: 'Tôi thấy một dấu giống cánh của tôi phía sau khe đá. Cậu gọi tôi tới đó nhé?' }],
@@ -85,6 +85,8 @@ export class CampaignScene extends Phaser.Scene {
   private woodsFlyIndex = 0;
   private woodsFlyPhase = 0;
   private woodsMemoryOverlay?: Phaser.GameObjects.Graphics;
+  private woodsTutorialCue?: Phaser.GameObjects.Graphics;
+  private woodsCueStage?: WoodsTutorialStage;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -1215,9 +1217,10 @@ export class CampaignScene extends Phaser.Scene {
       }
     } else if (level === 1) {
       this.addWoodsGate();
-      this.addWoodsArt('practice-leaf', 'runestone_leaf_sleeping', WHISPERING_WOODS.anchors.practice, 40, 52);
-      for (const id of RUNE_ORDER) this.addWoodsArt(`rune-${id}`, `runestone_${id}_sleeping`, WHISPERING_WOODS.anchors[id], 40, 52);
+      this.addWoodsArt('practice-leaf', 'runestone_leaf_sleeping', WHISPERING_WOODS.anchors.practice, WOODS_RUNE_ART.width, WOODS_RUNE_ART.height);
+      for (const id of RUNE_ORDER) this.addWoodsArt(`rune-${id}`, `runestone_${id}_sleeping`, WHISPERING_WOODS.anchors[id], WOODS_RUNE_ART.width, WOODS_RUNE_ART.height);
       this.addWoodsArt('poem', 'poem_fragment', WHISPERING_WOODS.anchors.poem, 48, 40);
+      this.createWoodsTutorialCue();
       this.updateRuneRevealVisuals();
     } else if (level === 2) {
       this.addLevelArt('room-bookshelf', 74, 143, undefined, undefined, 4);
@@ -1289,10 +1292,10 @@ export class CampaignScene extends Phaser.Scene {
         const first=!this.progress.flags['l1-poem-read']; this.progress.flags['l1-poem-read']=true; this.save();
         this.say(first ? [{speaker:'Hệ thống',text:'Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.'},{speaker:'Nhinh',text:'Trăng, Lá, Sao. Ba hình này cũng có ở bia ngoài kia.'},{speaker:'Lumo',text:'Nếu còn thấy được chúng. Nét khắc đã ngủ lâu lắm rồi.'}] : [{speaker:'Hệ thống',text:'Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.'}]);
       }, undefined, 'mural_tablet');
-      action('practice-rune', 'E · Kiểm tra bia tập', stands.practice.x, stands.practice.y, () => {
+      action('practice-rune', 'E · Bia tập', stands.practice.x, stands.practice.y, () => {
         if (this.progress.flags['l1-practice-complete']) { this.say([{speaker:'Nhinh',text:'Bia tập đã ngân lên khi ánh sáng soi rõ ký hiệu.'}]); return; }
         if (!this.activeRevealedRunes.has('practice-leaf')) { this.say([{speaker:'Nhinh',text:'Nét khắc đang ngủ. Thử dùng SPACE để soi bằng xung sáng.'}]); return; }
-        this.progress.flags['l1-practice-complete']=true; this.save(); this.say([{speaker:'Nhinh',text:'Xung sáng làm hiện ký hiệu. Chạm vào thì nó trả lời.'},{speaker:'Lumo',text:'Những bia còn lại chắc cũng đang chờ như vậy.'}]);
+        this.progress.flags['l1-practice-complete']=true; this.save(); this.say([{speaker:'Nhinh',text:'Xung sáng làm hiện ký hiệu. Chạm vào thì nó trả lời.'},{speaker:'Lumo',text:'Những bia còn lại chắc cũng đang chờ như vậy.'},{speaker:'Lumo',text:'Mẩu thơ nằm bên trái cổng phía Bắc.'}]);
       }, undefined, 'runestone_leaf_lit');
       for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`);
       action('stairs', () => this.progress.flags['l1-open'] ? 'E · Xuống Thư viện' : 'E · Kiểm tra cổng', stands.exit.x, stands.exit.y, () => {
@@ -1718,7 +1721,10 @@ export class CampaignScene extends Phaser.Scene {
     }
     const glyph=id==='poem'||id==='practice-rune'||id.startsWith('rune-');
     const glyphAnchor=id==='poem'?WHISPERING_WOODS.anchors.poem:id==='practice-rune'?WHISPERING_WOODS.anchors.practice:id.startsWith('rune-')?WHISPERING_WOODS.anchors[id.slice(5) as RuneId]:undefined;
-    this.interactions.register({ id, x, y, promptY: this.progress.level===1&&id==='stairs'?WHISPERING_WOODS.gate.promptY:this.progress.level===1&&glyph&&glyphAnchor?glyphAnchor.y-64:id === 'gate' && this.progress.level === 0 ? 76 : undefined, radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
+    const promptY = this.progress.level===1&&id==='stairs' ? WHISPERING_WOODS.gate.promptY
+      : this.progress.level===1&&glyph&&glyphAnchor ? glyphAnchor.y+(id==='poem' ? WOODS_POEM_PROMPT_OFFSET_Y : WOODS_RUNE_PROMPT_OFFSET_Y)
+      : id === 'gate' && this.progress.level === 0 ? 76 : undefined;
+    this.interactions.register({ id, x, y, promptY, radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
   }
 
   private clearCampaignColliders(): void {
@@ -2368,6 +2374,44 @@ export class CampaignScene extends Phaser.Scene {
     this.tweens.add({ targets: [glow, firefly], alpha: { from: 0.4, to: 1 }, scale: { from: 0.8, to: 1.25 }, duration: 650, yoyo: true, repeat: -1 });
   }
 
+  private createWoodsTutorialCue(): void {
+    this.woodsTutorialCue = this.track(this.add.graphics().setDepth(4));
+    this.woodsTutorialCue.setData('woodsId', 'tutorial-cue');
+    const practiceName = this.track(this.add.text(154, 258, 'Bia tập', {
+      fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#f2e6b7',
+      backgroundColor: '#07151ccc', padding: { x: 4, y: 2 },
+    }).setOrigin(0, 0.5).setDepth(6));
+    practiceName.setData('woodsId', 'practice-name');
+    this.woodsCueStage = undefined;
+  }
+
+  private updateWoodsTutorialCue(stage: WoodsTutorialStage): void {
+    if (!this.woodsTutorialCue || this.woodsCueStage === stage) return;
+    this.woodsCueStage = stage;
+    this.woodsTutorialCue.clear();
+    const target = stage === 'practice-space' || stage === 'practice-e' ? WHISPERING_WOODS.anchors.practice
+      : stage === 'poem' ? WHISPERING_WOODS.anchors.poem : undefined;
+    this.woodsTutorialCue.setData('stage', stage);
+    this.woodsTutorialCue.setData('target', target ? stage === 'poem' ? 'poem' : 'practice' : null);
+    this.woodsTutorialCue.setVisible(Boolean(target));
+    if (!target) return;
+    const color = stage === 'poem' ? 0xb4dfb2 : 0xf0d990;
+    this.woodsTutorialCue.fillStyle(color, 0.12);
+    this.woodsTutorialCue.fillEllipse(target.x, target.y - 2, 46, 18);
+    this.woodsTutorialCue.lineStyle(2, color, 0.55);
+    this.woodsTutorialCue.strokeEllipse(target.x, target.y - 2, 46, 18);
+  }
+
+  private getWoodsTutorialStage(): WoodsTutorialStage {
+    return getWoodsTutorialStage({
+      open: this.progress.flags['l1-open'] === true,
+      sequence: this.value('rune-sequence'),
+      practiceComplete: this.progress.flags['l1-practice-complete'] === true,
+      practiceRevealed: this.activeRevealedRunes.has('practice-leaf'),
+      poemRead: this.progress.flags['l1-poem-read'] === true,
+    });
+  }
+
   private addWoodsArt(id: string, filename: string, anchor: {x:number;y:number}, width: number, height: number): Phaser.GameObjects.Image | null {
     const key = getLevelArtKey(1, filename);
     if (!key || !this.textures.exists(key)) return null;
@@ -2419,9 +2463,13 @@ export class CampaignScene extends Phaser.Scene {
     }
     if (this.progress.level===1) {
       const count=this.value('rune-sequence');
-      const step=this.progress.flags['l1-open']?'exit':count===0?'observe':count===1?'next-leaf':count===2?'next-star':'sequence';
+      const stage=this.getWoodsTutorialStage();
+      const step=stage==='sequence' ? count===1?'next-leaf':'next-star' : stage;
       if(step!==this.woodsHintStep){this.woodsHintStep=step;this.hintIndex=0;}
       const hints:Record<string,string[]>={
+        'practice-space':['Bia tập ở ngay cạnh lối vào.','Dùng SPACE gần bia tập để soi nét khắc.','Đứng cạnh bia tập rồi nhấn SPACE.'],
+        'practice-e':['Nét trên bia tập đang hiện.','Chạm bia tập khi nét còn sáng.','Đứng cạnh bia tập rồi nhấn E trước khi Pulse tắt.'],
+        poem:['Mẩu thơ nằm bên trái cổng phía Bắc.','Đến gần mẩu bia để đọc lời ghi.','Đứng cạnh mẩu thơ rồi nhấn E.'],
         observe:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Bài thơ cạnh cổng cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
         sequence:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Bài thơ cạnh cổng cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
         'next-leaf':['Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.','Bia kế tiếp nằm giữa phía trên. Dùng Pulse để đọc dấu trước khi chạm.','Bước tiếp theo là Lá ở giữa phía trên. Soi bia rồi kích hoạt khi nét còn sáng.'],
@@ -2453,8 +2501,17 @@ export class CampaignScene extends Phaser.Scene {
     }
     if(this.progress.level===1){
       const count=this.value('rune-sequence');
-      const objective=this.progress.flags['l1-open']?'Cổng đã mở. Đến bậc thang và nhấn E để xuống Thư viện.':count>0?`Chuỗi cổ tự: ${count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.`:'Quan sát đàn đom đóm và thử soi bia tập bằng SPACE.';
-      if(this.objectiveText)this.objectiveText.setText(objective);
+      const stage=this.getWoodsTutorialStage();
+      this.updateWoodsTutorialCue(stage);
+      const objective:Record<WoodsTutorialStage,string>={
+        exit:'Cổng đã mở. Đến bậc thang và nhấn E để xuống Thư viện.',
+        sequence:`Chuỗi cổ tự: ${count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.`,
+        'practice-space':'Bia tập ngay cạnh lối vào: đến gần rồi nhấn SPACE.',
+        'practice-e':'Bia tập đã hiện nét. Đến gần rồi nhấn E trước khi Pulse tắt.',
+        poem:'Đọc mẩu thơ nằm bên trái cổng phía Bắc bằng E.',
+        observe:'Quan sát đàn đom đóm rồi dùng Pulse để soi ba bia chính.',
+      };
+      if(this.objectiveText)this.objectiveText.setText(objective[stage]);
       if(this.controlsText)this.controlsText.setText('WASD Move    E Interact    SPACE Pulse    J Journal    H Hint    ESC Pause');
     }
     if (this.titleText) this.titleText.setText(this.progress.level === 8 && this.activeObservatoryRoom

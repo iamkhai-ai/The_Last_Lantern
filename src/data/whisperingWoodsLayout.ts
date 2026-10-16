@@ -4,11 +4,16 @@ export type WoodsRect = Readonly<{ x: number; y: number; width: number; height: 
 export type RuneProgress = { sequence: number; activated: Record<RuneId, boolean>; open: boolean };
 export type RuneFlags = { sequence: number; activated: Partial<Record<RuneId, boolean>>; open: boolean };
 export type RuneActivation = { kind: 'activated' | 'repeat' | 'reset' | 'wrong' | 'open'; state: RuneProgress };
+export type WoodsTutorialStage = 'exit' | 'sequence' | 'practice-space' | 'practice-e' | 'poem' | 'observe';
+export type WoodsTutorialState = Readonly<{ open: boolean; sequence: number; practiceComplete: boolean; practiceRevealed: boolean; poemRead: boolean }>;
 
 export const RUNE_ORDER: readonly RuneId[] = ['moon', 'leaf', 'star'];
 const point = (x: number, y: number): WoodsPoint => Object.freeze({ x, y });
 const rect = (x: number, y: number, width: number, height: number): WoodsRect => Object.freeze({ x, y, width, height });
-const stands = Object.freeze({ spawn: point(280, 286), practice: point(120, 282), moon: point(180, 254), leaf: point(320, 180), star: point(450, 254), poem: point(402, 167), exit: point(510, 181) });
+const stands = Object.freeze({ spawn: point(138, 286), practice: point(120, 282), moon: point(180, 254), leaf: point(320, 180), star: point(450, 254), poem: point(402, 167), exit: point(510, 181) });
+export const WOODS_RUNE_ART = Object.freeze({ sourceWidth: 40, sourceHeight: 52, width: 60, height: 78 });
+export const WOODS_RUNE_PROMPT_OFFSET_Y = -92;
+export const WOODS_POEM_PROMPT_OFFSET_Y = -64;
 
 export const WHISPERING_WOODS = Object.freeze({
   size: point(640, 360),
@@ -19,13 +24,20 @@ export const WHISPERING_WOODS = Object.freeze({
   gate: Object.freeze({ backing: rect(446, 96, 128, 60), leftPost: rect(456, 156, 20, 34), rightPost: rect(544, 156, 20, 34), threshold: rect(476, 156, 68, 22), promptY: 94, openStopY: 140, closedStopY: 162 }),
   trees: Object.freeze([[48,142],[125,112],[240,106],[350,108],[600,130],[48,230],[600,240],[65,310],[568,310]].map(([x,y], i) => Object.freeze({ id:`tree-${i}`, x, y, footprint:rect(x-9,y-14,18,14) }))),
   rocks: Object.freeze([[100,195],[552,292]].map(([x,y], i) => Object.freeze({ id:`rock-${i}`, x, y, footprint:rect(x-13,y-14,26,14) }))),
-  route: Object.freeze([point(280,286),point(230,286),point(180,258),point(250,220),point(320,184),point(385,215),point(450,258),point(402,174),point(510,181)]),
+  route: Object.freeze([point(138,286),point(120,286),point(180,258),point(250,220),point(320,184),point(385,215),point(450,258),point(402,174),point(510,181)]),
   fireflyRoute: Object.freeze([point(180,248),point(320,174),point(450,248)]),
   checkpoints: stands,
 });
 
 export function feetAt(center: WoodsPoint): WoodsPoint { return point(center.x, center.y + WHISPERING_WOODS.player.footOffsetY); }
 export function worldDepth(anchorY: number): number { return 10 + anchorY / 10; }
+export function getWoodsTutorialStage(state: WoodsTutorialState): WoodsTutorialStage {
+  if (state.open || state.sequence >= 3) return 'exit';
+  if (state.sequence > 0) return 'sequence';
+  if (!state.practiceComplete) return state.practiceRevealed ? 'practice-e' : 'practice-space';
+  if (!state.poemRead) return 'poem';
+  return 'observe';
+}
 
 function overlaps(a: WoodsRect, b: WoodsRect): boolean {
   return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;

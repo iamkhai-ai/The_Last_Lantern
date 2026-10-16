@@ -15,4 +15,21 @@ Ruling: use soft sequential guidance without locking the main puzzle — clear e
 
 ## State
 
-Design recorded, product correction NOT_RUN. Prior final verification at `c76ff771` is historical and does not certify this follow-up. No remote publication requested.
+Implemented as a bounded Level 02 source and fixture correction on 2026-10-17. The source checkpoint hash is recorded below after commit. Prior browser evidence at `c76ff771` is historical and does not certify this follow-up.
+
+### Verification
+
+- `node --experimental-strip-types scripts/check-whispering-woods.mjs` — PASS. Covers spawn interaction range, 1.5× rune dimensions, prompt offsets, tutorial stage progression/expiry/partial-save priority, and existing geometry, gate, restore, legacy, and sequence contracts.
+- `node --experimental-strip-types scripts/check-forest-edge.mjs` — PASS.
+- `node --experimental-strip-types scripts/check-campaign-start-intent.mjs` — PASS.
+- `node --check scripts/level02-browser.cjs` — PASS.
+- `node --check scripts/level02-geometry.cjs` — PASS.
+- `npm run build` — PASS; TypeScript and Vite, 406 modules. The generated `dist/index.html` was restored after the build.
+- `git diff --check` — PASS.
+- Browser fixtures were updated but NOT_RUN. Read-only browser automation is disabled in Work settings; no browser/server/UI automation was attempted. Root owns any available runtime verification and two independent read-only reviews.
+
+### Revision
+
+- Base: `9eb19fde4f3421a70cff4e4db37007973f03e9e8`.
+- Follow-up source commit: pending.
+- No raster, dependency, save-format, or other-level changes. No remote publication requested.

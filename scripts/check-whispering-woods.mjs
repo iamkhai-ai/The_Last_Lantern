@@ -1,11 +1,25 @@
 import assert from 'node:assert/strict';
 import {
-  WHISPERING_WOODS, RUNE_ORDER, feetAt, isWoodsCenterWalkable, isWoodsPointSafe,
+  WHISPERING_WOODS, WOODS_RUNE_ART, WOODS_RUNE_PROMPT_OFFSET_Y, WOODS_POEM_PROMPT_OFFSET_Y,
+  RUNE_ORDER, feetAt, getWoodsTutorialStage, isWoodsCenterWalkable, isWoodsPointSafe,
   resolveWoodsSpawn, normalizeRuneProgress, activateWoodsRune, canActivateWoodsRune,
 } from '../src/data/whisperingWoodsLayout.ts';
 
 assert.deepEqual(feetAt({ x: 280, y: 286 }), { x: 280, y: 305 });
 assert.deepEqual(WHISPERING_WOODS.player.body, { width: 14, height: 6, offsetX: 11, offsetY: 37 });
+assert.deepEqual(WHISPERING_WOODS.stands.spawn, { x: 138, y: 286 });
+assert.equal(Math.hypot(WHISPERING_WOODS.stands.spawn.x-WHISPERING_WOODS.stands.practice.x,WHISPERING_WOODS.stands.spawn.y-WHISPERING_WOODS.stands.practice.y)<=24,true,'spawn begins inside practice interaction range');
+assert.deepEqual(WHISPERING_WOODS.anchors.practice,{x:120,y:276});
+assert.deepEqual(WHISPERING_WOODS.anchors.moon,{x:180,y:248});
+assert.deepEqual(WHISPERING_WOODS.anchors.leaf,{x:320,y:174});
+assert.deepEqual(WHISPERING_WOODS.anchors.star,{x:450,y:248});
+assert.deepEqual(WHISPERING_WOODS.footprints.practice,{x:107,y:264,width:26,height:12});
+assert.deepEqual(WHISPERING_WOODS.footprints.moon,{x:167,y:236,width:26,height:12});
+assert.deepEqual(WHISPERING_WOODS.footprints.leaf,{x:307,y:162,width:26,height:12});
+assert.deepEqual(WHISPERING_WOODS.footprints.star,{x:437,y:236,width:26,height:12});
+assert.deepEqual(WOODS_RUNE_ART,{sourceWidth:40,sourceHeight:52,width:60,height:78});
+assert.equal(WOODS_RUNE_ART.width/WOODS_RUNE_ART.sourceWidth,1.5);
+assert.equal(WOODS_RUNE_ART.height/WOODS_RUNE_ART.sourceHeight,1.5);
 for (const stand of Object.values(WHISPERING_WOODS.stands)) assert.equal(isWoodsCenterWalkable(stand), true, `stand ${stand.x},${stand.y}`);
 function reachableWithin(start,target,gateOpen=false){
   const step=4,queue=[start],seen=new Set([`${start.x},${start.y}`]);
@@ -34,8 +48,19 @@ assert.equal(reachableClosedGateInterior(),false,'closed gate has no 2px-grid ro
 for(const id of ['practice','moon','leaf','star','poem']){
   const anchor=WHISPERING_WOODS.anchors[id],stand=WHISPERING_WOODS.stands[id];
   assert.equal(Math.hypot(anchor.x-stand.x,anchor.y-18-stand.y)<=24,true,`${id} interaction remains reachable at southern solid contact`);
-  assert.equal(anchor.y-64<stand.y-20,true,`${id} prompt stays above the actor head`);
+  const offset=id==='poem'?WOODS_POEM_PROMPT_OFFSET_Y:WOODS_RUNE_PROMPT_OFFSET_Y;
+  assert.equal(anchor.y+offset<stand.y-20,true,`${id} prompt stays above the actor head`);
 }
+const tutorial=(patch={})=>getWoodsTutorialStage({open:false,sequence:0,practiceComplete:false,practiceRevealed:false,poemRead:false,...patch});
+assert.equal(tutorial(),'practice-space');
+assert.equal(tutorial({practiceRevealed:true}),'practice-e');
+assert.equal(tutorial({practiceComplete:true}),'poem');
+assert.equal(tutorial({practiceComplete:true,poemRead:true}),'observe');
+assert.equal(tutorial({practiceRevealed:false}),'practice-space','expired reveal returns the tutorial to SPACE');
+assert.equal(tutorial({sequence:1}),'sequence','partial sequence takes priority over practice');
+assert.equal(tutorial({sequence:2,practiceComplete:true}),'sequence','partial sequence takes priority over poem');
+assert.equal(tutorial({sequence:1,poemRead:true}),'sequence','partial save bypasses both guidance steps');
+assert.equal(tutorial({open:true}),'exit');
 assert.equal(isWoodsCenterWalkable({ x: 510, y: 162 }), true, 'physical southern contact with closed threshold remains walkable');
 assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }), false, 'closed threshold blocks center above contact');
 assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }, true), true, 'open central gate corridor passes');
