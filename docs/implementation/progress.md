@@ -35,3 +35,9 @@ Current slice: rebuild **Level 01 only**, then let the user review before later 
 - Synced latest fetched main `f3c23de` into the feature branch with merge `08b93e1`, including the new Nhinh frames. Primary checkout and its unrelated edits remain untouched.
 - Final source revision `eafcc597c003ffcebc07c5724560be0e6f275568`: root build, pure checks, uninterrupted actual-keyboard New Game → Level 02 → same-runtime Continue → explicit resets, seven stair visual samples and closed/open post collision checks all PASS. Two separate Luna high final reviews found no actionable findings. Earlier reload-based lifecycle evidence is superseded.
 - Detailed findings, correction history, commands, scope and evidence: [level-01-gate-fixes.md](level-01-gate-fixes.md). Human acceptance and remote publication: NOT_RUN. Levels 02–10 remain deferred.
+
+## Level 01 lighting follow-up — 2026-10-16
+
+- Decision: Level 01 uses a cached 256×256 radial alpha mask, inverted over the dark overlay and vignette so the nearby world is revealed through a soft actual transparency falloff. With lantern lit, the display diameter is 232px (about a 33px clear core, fading to about 116px); before pickup or with lantern off, it is 76px (about a 38px outer pool). Darkness opacity is 0.92 lit / 0.94 off, with the existing additive halo reduced. The mask is generated once with other procedural textures and reused; no pulse, save, gate, HUD, or other-level behavior changes are intended.
+- Renderer limit: Phaser bitmap masks require WebGL. Canvas fallback keeps the previous lighter global dimming/glow so the scene remains playable without per-frame raster work.
+- Verification: NOT_RUN by worker as requested. Root owns the production build and visual inspection, including actor/world visibility near level edges and unchanged HUD/dialogue depth.

@@ -106,7 +106,7 @@ export class CampaignScene extends Phaser.Scene {
     this.lumo = new Lumo(this, this.progress.counters['lumo-x'] ?? this.lumoTarget.x, this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
     if (this.progress.level === 0 && !this.progress.lanternPickedUp && !this.progress.flags['l0-gate-open']) this.lumo.setVisible(false);
     if (this.progress.level === 0 && (this.progress.lanternPickedUp || this.progress.flags['l0-gate-open'])) this.progress.flags['l0-lumo-met'] = true;
-    this.lantern = new LanternSystem(this);
+    this.lantern = new LanternSystem(this, this.progress.level === 0);
     this.lantern.lanternOn = this.progress.lanternOn;
     this.lantern.lanternInHand = this.progress.lanternPickedUp || this.progress.level > 0;
     this.interactions = new InteractionSystem(this);

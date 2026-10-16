@@ -9,6 +9,9 @@ export class LanternSystem {
   private haloSprite: Phaser.GameObjects.Image;
   private pulseGraphics: Phaser.GameObjects.Graphics;
   private vignetteImage: Phaser.GameObjects.Image;
+  private forestEdgeReveal?: Phaser.GameObjects.Image;
+  private forestEdgeMask?: Phaser.Display.Masks.BitmapMask;
+  private readonly forestEdgeLighting: boolean;
 
   public lanternOn = true;
   public lanternInHand = true;
@@ -30,8 +33,9 @@ export class LanternSystem {
   public static readonly PULSE_DURATION_MS = 1000;
   public static readonly PULSE_MAX_RADIUS = 195;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, forestEdgeLighting = false) {
     this.scene = scene;
+    this.forestEdgeLighting = forestEdgeLighting;
 
     this.darknessOverlay = scene.add.graphics();
     this.darknessOverlay.setDepth(68);
@@ -45,6 +49,14 @@ export class LanternSystem {
     this.vignetteImage = scene.add.image(320, 180, 'vignette');
     this.vignetteImage.setDepth(71);
     this.vignetteImage.setScrollFactor(0);
+
+    if (forestEdgeLighting && scene.game.renderer.type === Phaser.WEBGL && scene.textures.exists('light_reveal_mask')) {
+      this.forestEdgeReveal = scene.add.image(0, 0, 'light_reveal_mask').setVisible(false);
+      this.forestEdgeMask = this.forestEdgeReveal.createBitmapMask();
+      this.forestEdgeMask.invertAlpha = true;
+      this.darknessOverlay.setMask(this.forestEdgeMask);
+      this.vignetteImage.setMask(this.forestEdgeMask);
+    }
   }
 
   public onPulse(cb: PulseCallback): void {
@@ -129,6 +141,19 @@ export class LanternSystem {
       const pulseAlpha = 0.36 + Math.sin(this.flickerTime * 4) * 0.12;
       this.darknessOverlay.fillStyle(0xfff5cc, pulseAlpha);
       this.darknessOverlay.fillRect(0, 0, 640, 360);
+    } else if (this.forestEdgeLighting) {
+      const activeLantern = this.lanternOn && (this.lanternInHand || this.lanternPlaced);
+      const localRevealAvailable = this.forestEdgeMask !== undefined;
+      this.haloSprite.setVisible(true);
+      this.haloSprite.setPosition(lightX, lightY);
+      this.haloSprite.setScale((localRevealAvailable ? (activeLantern ? 0.68 : 0.28) : (activeLantern ? 0.95 : 0.38)) * flicker);
+      this.haloSprite.setAlpha(localRevealAvailable ? (activeLantern ? 0.42 : 0.12) : (activeLantern ? 0.88 : 0.32));
+      this.darknessOverlay.fillStyle(0x03080c, localRevealAvailable ? (activeLantern ? 0.92 : 0.94) : (activeLantern ? 0.24 : 0.44));
+      this.darknessOverlay.fillRect(0, 0, 640, 360);
+      if (this.forestEdgeReveal) {
+        this.forestEdgeReveal.setPosition(lightX, lightY);
+        this.forestEdgeReveal.setDisplaySize(activeLantern ? 232 : 76, activeLantern ? 232 : 76);
+      }
     } else if (this.lanternOn && (this.lanternInHand || this.lanternPlaced)) {
       // Night mode with warm lantern light active (radius ~115 world px)
       this.haloSprite.setVisible(true);
