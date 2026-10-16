@@ -59,3 +59,11 @@ Ruling: use a northeastern gate and independent western poem stone, keeping Leaf
 Ruling: legacy completed sequence reopens its gate on load while unsolved saves remain on the near side — durable completion should not be lost — cost if wrong: contradictory manual saves may recover as solved; normal play still requires the sequence.
 
 Status: design and implementation brief prepared. Product implementation and final verification NOT_RUN.
+
+## Root browser correction round 1
+
+Both independent source reviews on `f984e24` reported no actionable findings, but root's separate browser diagnostic found the gate backing disabled. The keyboard puzzle/exit/Continue run passed. Runtime permanent-body enable state must match spatial data; a source review alone did not prove it.
+
+Ruling: join gate backing to the northern floor and extend post/threshold tops to meet its bottom, keeping all bottoms, anchors, stop points and stand points unchanged — closes narrow unintended seams — cost if wrong: the upper part of a gate post blocks a small area of visually empty grass; final screenshots/physics must check it.
+
+Root also requires the authored irregular textured path instead of flat overlapping bands, exact practice dialogue, and checked-in portable browser regressions. Worker owns these corrections; frozen source and all affected verification/reviews must repeat.
