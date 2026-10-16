@@ -85,13 +85,13 @@ export function deriveObservatoryState(input: ObservatoryPuzzleInput): Observato
   if (lightAvailable) {
     if (isRouteAligned('door-a', input)) {
       activeBeamPath = beamPath('door-a');
-    } else if (isRouteAligned('g2-split', input)) {
+    } else if (lumoAtSeal && isRouteAligned('g2-split', input)) {
       activeBeamPath = beamPath('g2-split');
-    } else if (isRouteAligned('g2-direct-sun', input)) {
+    } else if (lumoAtSeal && isRouteAligned('g2-direct-sun', input)) {
       activeBeamPath = beamPath('g2-direct-sun');
-    } else if (isRouteAligned('g0-to-g2', input)) {
+    } else if (lumoAtSeal && isRouteAligned('g0-to-g2', input)) {
       activeBeamPath = beamPath('g0-to-g2');
-    } else if (isRouteAligned('g0-to-g1', input)) {
+    } else if (lumoAtSeal && isRouteAligned('g0-to-g1', input)) {
       activeBeamPath = beamPath('g0-to-g1');
     }
   }

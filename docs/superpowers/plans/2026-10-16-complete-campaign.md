@@ -92,22 +92,22 @@ Run `npm run build`, manually play Levels 01–10 and ending in browser, exercis
 - Task 9: complete — live receiver/shadow conditions, solved latch, inscription, and Shadow beat implemented.
 - Task 10: complete — retained three-room observatory, explicit blocked prerequisites, return loop, record, crystal, and Level 10 transition implemented.
 - Task 11: complete — live root prerequisites, safe overload restore, both authored lantern end states, and completion resume implemented.
-- Task 12: in progress — production build and fixture-based scene-entry smoke for all ten levels passed; Level 01 opening interaction smoke passed; temporary test-origin save restored to empty. Full manual route through all levels remains NOT_RUN. Two final read-only reviews pending.
+- Task 12: in progress — production build passed after bridge corrections. Level 01 opening dialogue and fixture-based scene-entry smoke for all ten level indices passed on the current candidate. Full puzzle routes remain unplayed. Review fixes add creek/garden collision routes, foot-hitbox far-bank crossing commits, atomically checkpointed bridge approach state, pending removal only after an already-open crossing becomes invalid, safe gate removal on creek/garden bridges, Heart lantern restoration, and the live Observatory seal gate. The temporary test-origin save was cleared and verified at the title screen. Two final read-only reviews found no issues on the frozen candidate. Full manual route through all levels remains NOT_RUN.
 
 ## Verification record
 
 | Check | Result | Evidence |
 |---|---|---|
 | `npm run build` | PASS | TypeScript check and Vite production build succeeded after campaign changes. |
-| `git diff --check` | PASS | No whitespace errors before the final Level 05 ink-route adjustment; rerun at final revision. |
-| Level 01 browser smoke | PASS (partial) | On the isolated `127.0.0.1:5174` test origin, New Game, Nhinh/Lumo opening, lantern interaction, and tablet dialogue rendered. Gate and Level 02 transition not played. |
-| Level 01–10 scene entry smoke | PASS | Isolated test fixtures loaded each level scene, including all three Observatory rooms' default entry state. Screens rendered for all ten level indices. This confirms scene boot only, not puzzle routes. |
+| `git diff --check` | PASS | Clean after bridge-gate fixes and documentation updates. |
+| Level 01 browser smoke | PASS (partial) | On isolated 127.0.0.1:5174, New Game and Nhinh/Lumo opening dialogue rendered on current candidate. Level 01 gate and Level 02 transition not played. |
+| Level 01–10 scene entry smoke | PASS | On isolated 127.0.0.1:5174, fixture saves rendered all ten level indices. Level 09 smoke used Entrance Hall only; no puzzle routes tested. |
 | Full Level 01–10 routes and ending | NOT_RUN | No end-to-end route evidence on this revision. |
-| Save restoration | PASS | Test origin menu no longer offers Continue after clearing its temporary campaign/save keys. Original user tab on port 5173 was not used. |
-| Final reviewers | NOT_RUN | Dispatch after final frozen revision. |
+| Save restoration | PASS | Temporary test save cleared on isolated 127.0.0.1:5174; title screen showed New Game only. User tab on port 5173 was not used. |
+| Final reviewers | PASS | Two independent read-only reviews found no actionable issues on HEAD `e24373c4da02c8700b82e500b35652206e6a3833` and frozen unstaged diff `393db850b80a46e5c9ccdb1f7880ca6e1c7fd63f`. |
 
 ## Known limits
 
 - Full Level 01–10 playthrough and save checkpoints have not been verified manually.
-- Several non-observatory rooms use scene graphics and state-driven route affordances without full physical collision topology; the approved single-scene architecture remains in place.
+- Several non-observatory rooms outside Levels 04 and 07 use state-driven route affordances without full physical collision topology; the approved single-scene architecture remains in place.
 - New character art/assets were outside this scope; existing textures and Phaser primitives are used.
