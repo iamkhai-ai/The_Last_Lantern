@@ -31,5 +31,5 @@ Implemented as a bounded Level 02 source and fixture correction on 2026-10-17. T
 ### Revision
 
 - Base: `9eb19fde4f3421a70cff4e4db37007973f03e9e8`.
-- Follow-up source commit: pending.
+- Follow-up source commit: `2a3d6e75a4e8ca11a2e66455bec5eb1ab0d1ab7d`.
 - No raster, dependency, save-format, or other-level changes. No remote publication requested.

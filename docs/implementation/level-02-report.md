@@ -39,4 +39,4 @@ The author's results above are distinct from root verification. Root's earlier k
 
 ## Revision
 
-Earlier gate correction revisions: `2a6907d6ecbd2c172ad562fe167bac91617e04ce` and test-only `c76ff7713449c73422169efa25970c9e9b12638b`. The 2026-10-17 follow-up source revision is recorded in `level-02-flow-follow-up.md` after its checkpoint commit.
+Earlier gate correction revisions: `2a6907d6ecbd2c172ad562fe167bac91617e04ce` and test-only `c76ff7713449c73422169efa25970c9e9b12638b`. Follow-up source commit: `2a3d6e75a4e8ca11a2e66455bec5eb1ab0d1ab7d`; exact commands and results are recorded in `level-02-flow-follow-up.md`.
