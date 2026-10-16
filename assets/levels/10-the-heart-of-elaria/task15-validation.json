@@ -1,0 +1,89 @@
+{
+  "technical": "PASS",
+  "exports": 6,
+  "scene_previews": 12,
+  "checks": [
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-nhinh-seated-unlit-leaf.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-nhinh-seated-detail.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-dawn-lighting-overlay.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-nhinh-carry-off-reference.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-leaf-handle-attachment.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-title-the-last-dawn.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-01-seated-by-roots-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-02-seated-detail-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-03-montage-garden-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-03-montage-creek-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-03-montage-tower-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-0-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-1-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-2-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-3-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-4-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-05-daytime-trail-640x360.png",
+      "status": "PASS"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-06-final-title-640x360.png",
+      "status": "PASS"
+    }
+  ],
+  "transparency": "PASS seated cutout retains transparent pixels",
+  "visual_review": "PASS: source, native/2x contacts, root composition, final title/trail and scene overview inspected; limitations in README-task15.md",
+  "runtime": "NOT_RUN",
+  "animation": "NOT_RUN",
+  "limitations": [
+    "Single seated pose, no sit/stand or clip-to-belt animation.",
+    "Montage backgrounds preserve existing lighting; runtime dawn/motion treatment remains.",
+    "Daytime trail uses schematic native terrain and existing dawn vegetation.",
+    "Existing carry pose is one standing keyframe; continuous carry-walk animation remains."
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "technical_result": "PASS",
+  "sprite_png_count": 12,
+  "expected_sprite_count": 12,
+  "checks": [
+    {
+      "file": "memory_vignette.png",
+      "size": [
+        128,
+        64
+      ],
+      "expected_size": [
+        128,
+        64
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "nonempty": true,
+      "sha256": "aea7dfe85ed7d4914a9d09f2cdf4691db5980a8ccaef199bc44bf62e8ba2644b",
+      "result": "PASS"
+    },
+    {
+      "file": "poem_fragment.png",
+      "size": [
+        48,
+        40
+      ],
+      "expected_size": [
+        48,
+        40
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "nonempty": true,
+      "sha256": "fa1e5c39f7f630784050c82008c6e54085081cd5ac37a026f972bc10cb2c3a47",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_leaf_active.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "nonempty": true,
+      "sha256": "6d2069282fc3bbf7194badc26726f670dacc92e317ba438e92ec3c423d80b011",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_leaf_revealed.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "nonempty": true,
+      "sha256": "7876ee0d20d45ea0e3d846a63f1614e28694dd0888e0c266c92e2bb9e175e58b",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_leaf_sleeping.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "nonempty": true,
+      "sha256": "553bcf30741b13ed647b7b3f0c752504119e1147111d2b42ac2bca5713434cb5",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_moon_active.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "nonempty": true,
+      "sha256": "9e08c6ae9b98e1e834c4f0d2145e8311a331d3711be8ac043e84a61b9be3e76e",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_moon_revealed.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "nonempty": true,
+      "sha256": "19b1b0cde2b55493f97014a7568d3dbdcd336f5ef1ddb8ee188f6d9667ec4c8a",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_moon_sleeping.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "nonempty": true,
+      "sha256": "553bcf30741b13ed647b7b3f0c752504119e1147111d2b42ac2bca5713434cb5",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_star_active.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "nonempty": true,
+      "sha256": "e64c6c79857d6ac3b008cbf041d86548bada6c5d17e00d0b0969f5a26681d649",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_star_revealed.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "nonempty": true,
+      "sha256": "b285ae9532ecf587067fe0d648721de5966caf85a5f1565c138a29c4954aadb0",
+      "result": "PASS"
+    },
+    {
+      "file": "runestone_star_sleeping.png",
+      "size": [
+        40,
+        52
+      ],
+      "expected_size": [
+        40,
+        52
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        254
+      ],
+      "nonempty": true,
+      "sha256": "553bcf30741b13ed647b7b3f0c752504119e1147111d2b42ac2bca5713434cb5",
+      "result": "PASS"
+    },
+    {
+      "file": "woods_arch_open_passage.png",
+      "size": [
+        128,
+        126
+      ],
+      "expected_size": [
+        128,
+        126
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "nonempty": true,
+      "sha256": "d0bba8f24ff05a32cfaa034c22835f01d3cb3a17ab3cf74723fca20bb623fd5b",
+      "result": "PASS"
+    }
+  ],
+  "preview_checks": [
+    {
+      "path": "assets/levels/02-whispering-woods/previews/gate-props-contact-sheet-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "path": "assets/levels/02-whispering-woods/previews/level02-lantern-off-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "path": "assets/levels/02-whispering-woods/previews/level02-lantern-on-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "path": "assets/levels/02-whispering-woods/previews/level02-open-memory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "path": "assets/levels/02-whispering-woods/previews/level02-pilot-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "path": "assets/levels/02-whispering-woods/previews/level02-pilot-before-open-gate-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "path": "assets/levels/02-whispering-woods/previews/level02-pulse-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    },
+    {
+      "path": "assets/levels/02-whispering-woods/previews/rune-state-contact-sheet-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "result": "PASS"
+    }
+  ],
+  "generated_source_count": 6,
+  "prompt_count": 6,
+  "model_requested": "gpt-6.1-sol high",
+  "image_backend_model": "not exposed by built-in image_gen",
+  "runtime": "NOT_RUN",
+  "build": "NOT_RUN; no runtime changes",
+  "checkpoint_A": "PENDING USER REVIEW",
+  "visual_review": "Inspected offline 640x360 open-memory, lantern-off/on, pulse, rune contact and gate/prop contact; open passage visible, glyphs distinguishable, HUD area clear, true transparent prop edges on dark/light backgrounds. Art approval remains pending user.",
+  "known_limitations": [
+    "Generated open gate has slight shape/material variation from reused closed gate; animation interpolation is not provided.",
+    "Memory output retains clothing details rather than flat silhouettes; used at 75% alpha in preview.",
+    "Existing Nhinh prototype motion/alignment limitations remain.",
+    "Prop alignment and collision are not checked in engine."
+  ]
+}

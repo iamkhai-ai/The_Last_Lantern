@@ -1,0 +1,204 @@
+{
+  "coordinate_system": "three 640x360 room-local views, panorama x offset 0/640/1280",
+  "source_route": {
+    "lobby": [
+      [
+        96,
+        198
+      ],
+      [
+        176,
+        198
+      ],
+      [
+        176,
+        140
+      ],
+      [
+        640,
+        140
+      ]
+    ],
+    "star-chart": [
+      [
+        0,
+        140
+      ],
+      [
+        90,
+        140
+      ],
+      [
+        230,
+        140
+      ],
+      [
+        325,
+        140
+      ]
+    ],
+    "upper_branch": [
+      [
+        325,
+        140
+      ],
+      [
+        325,
+        85
+      ],
+      [
+        640,
+        85
+      ]
+    ],
+    "observatory_upper": [
+      [
+        0,
+        85
+      ],
+      [
+        207,
+        85
+      ]
+    ],
+    "middle_branch": [
+      [
+        325,
+        140
+      ],
+      [
+        325,
+        220
+      ],
+      [
+        400,
+        220
+      ],
+      [
+        640,
+        220
+      ]
+    ],
+    "direct": [
+      [
+        230,
+        140
+      ],
+      [
+        640,
+        140
+      ]
+    ]
+  },
+  "safe_walk": {
+    "lobby": [
+      [
+        96,
+        240
+      ],
+      [
+        584,
+        240
+      ]
+    ],
+    "star-chart": [
+      [
+        0,
+        240
+      ],
+      [
+        520,
+        240
+      ]
+    ],
+    "observatory_far_bank": [
+      [
+        262,
+        240
+      ],
+      [
+        600,
+        240
+      ]
+    ],
+    "root_crossing": {
+      "star-chart": [
+        [
+          545,
+          240
+        ],
+        [
+          640,
+          240
+        ]
+      ],
+      "observatory": [
+        [
+          0,
+          240
+        ],
+        [
+          150,
+          240
+        ]
+      ]
+    },
+    "return_loop_y": 319,
+    "loop_access_x": {
+      "lobby": 96,
+      "star-chart": 125,
+      "observatory": 290
+    }
+  },
+  "safe_spawns": {
+    "lobby": [
+      140,
+      250
+    ],
+    "star-chart": [
+      490,
+      250
+    ],
+    "observatory_far_bank": [
+      280,
+      250
+    ]
+  },
+  "door_A": {
+    "lobby": [
+      554,
+      173,
+      618,
+      261
+    ],
+    "inside_latch_star": [
+      8,
+      247
+    ]
+  },
+  "final_door": {
+    "observatory": [
+      185,
+      174,
+      249,
+      262
+    ],
+    "far_bank_controls": [
+      270,
+      246
+    ]
+  },
+  "pressure_C": {
+    "star-chart": [
+      340,
+      80
+    ],
+    "requires_actual_arrival": true
+  },
+  "checkpoint_restore": {
+    "before_root_bridge": "Saved accessible stone in lobby or star-chart; bridge saves map to near-bank star-chart (490,250). Keep lamp position/on, G0-G2, statue, actual Lumo route/arrival and both latches. Recompute curtain/Sun/roots.",
+    "across_bridge_before_loop": "Observatory (280,250), outside threshold/bridge. Preserve even lamp off/Lumo released. Final latch and loop control reachable without power. Do not auto restore light.",
+    "after_loop": "Saved room stone spawn. Loop stays open. Preserve lamp on hand/pedestal and Lumo at seal/returned. Continuous walking access to source and call regardless of power."
+  },
+  "state_retention": "Wrong configuration changes only current derived beam/lock/root state; retain all inputs and intermediate latches. Occupied roots wait until safe bank before retracting. Never restore onto retracting bridge."
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "Art_References/04_Moonlit_Creek.png",
+    "sha256": "5a95faa2ac496e930fabd27b7df1ebc9dab46eece1cff124ac07d59c89b3834f"
+  },
+  {
+    "path": "assets/levels/04-shattered-moonlit-creek/sources/creek-generated.png",
+    "sha256": "7c2a9a3d9e1171e88ec48312555a903922e0076d7840b37bda4fbaad1a694496"
+  },
+  {
+    "path": "assets/levels/04-shattered-moonlit-creek/sources/storm-relief-generated.png",
+    "sha256": "3cc995b80a5eb5b98f3be1e3282bd792fa560603ac1534e223075626dab418f7"
+  },
+  {
+    "path": "src/assets/pedestal_empty.png",
+    "sha256": "9f9d8157e8a660199beab6549896f3de0d8948515340fb5f38e18f09d619b1ad"
+  },
+  {
+    "path": "src/assets/pedestal_lit.png",
+    "sha256": "245e364fb88d5eb15d8b48684c16a71f1a9e493a14f28ce649b1f436e5404e99"
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "character": "Use case: stylized-concept. Asset type: transparent pixel sprite source sheet for The Last Lantern, concept/prototype. Create six separate full-body poses of the SAME quiet adult hooded cloaked person, arranged in a single horizontal row with very wide empty transparent gutters: waiting still facing upper right; shielding small seedlings from white light with one raised open arm (person only, no seedlings or beam); calm walking right; calm quarter turn; stillness facing horizon; Guardian memory variant in precisely the same waiting pose/body geometry as first pose, hood lowered to show a plain unrendered warm shadow oval, simple muted brown coat. No facial features in any pose, no eyes. Dark blue charcoal cloak, subdued teal edge, rounded narrow shoulders, simple shoes, gentle patient posture. Top down three quarter game view, clear hand clustered pixels. Each figure intended for a 48x64 pixel canvas, feet centered bottom, minimal detail readable at 1x, hard square pixel clusters, no antialias, no glow, no drop shadow. Genuine transparent RGBA background. No weapons, fangs, red eyes, attack, chase, threatening pose, text, labels, borders, ground or scenery. Guardian is father waiting; do not depict child or invented outcome. Preserve same adult silhouette size and feet alignment across poses.",
+  "agent": {
+    "requested_model": "gpt-6.1-sol",
+    "requested_effort": "low",
+    "runtime_resolved_model": "unknown",
+    "runtime_resolved_effort": "unknown"
+  },
+  "image_tool": "built-in image_gen; generator model not exposed",
+  "dawn_edit": "Edit this exact observatory scenery only for Level10 peaceful dawn concept/prototype montage. Preserve all stone architecture, floor, window, pipe, pressure plate and camera geometry exactly. Change night beyond window to soft pink dawn touching the floor; distant forest alive and quiet. Rotate the brass day/night wheel clockwise by a small visible amount to imply resumed motion; preserve its circle and location. No characters, no child, no scarf, no text, no weapons, no dramatic bloom. Crisp pixel art, muted warm light, retain shadows. Do not add birds or rain."
+}

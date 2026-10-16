@@ -13,6 +13,7 @@ export class DialogueSystem {
   private portrait: Phaser.GameObjects.Image;
   private static readonly PORTRAITS: Record<string, string> = {
     Linh: 'portrait_linh',
+    Nhinh: 'portrait_linh',
     Lumo: 'portrait_lumo',
   };
 
@@ -94,8 +95,10 @@ export class DialogueSystem {
 
     const speakerColors: Record<string, string> = {
       Linh: '#f7dfaa',
+      Nhinh: '#f7dfaa',
       Lumo: '#b8f5d4',
       Shadow: '#d28cff',
+      'The Shadow': '#d28cff',
       'Ký Ức': '#ffd966',
       'Hệ thống': '#8cc3da',
     };

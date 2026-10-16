@@ -1,0 +1,158 @@
+{
+  "status": "PASS",
+  "command": "python assets/levels/08-ruins-of-two-halves/prepare_assets.py",
+  "exports": [
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-lit.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-covered.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-0.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-1.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-2.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-2.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-3.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-3.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-0.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-1.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-2.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-3.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-waiting.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-ready.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-latched.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-open.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-closed.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-open.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-closed.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-pedestal.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-lit.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-covered.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-on.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-off.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/temple-scene-base.png",
+      "status": "PASS",
+      "canvas_alpha_hash": true
+    }
+  ],
+  "reused_hashes": "PASS",
+  "geometry": "PASS: full central box covered by notch0; side paths outside footprint",
+  "runtime": "NOT_RUN",
+  "raycast": "NOT_RUN",
+  "interactions": "NOT_RUN",
+  "collision": "NOT_RUN",
+  "save_restore": "NOT_RUN"
+}

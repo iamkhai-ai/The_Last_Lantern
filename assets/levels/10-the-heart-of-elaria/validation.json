@@ -1,0 +1,224 @@
+{
+  "technical": "PASS",
+  "exports": 34,
+  "reuse": 35,
+  "preview_checks": [
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/01-three-empty-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "629511432a5baa0d85b91e9dd6792303f77d538974310365f0d0ce033ad69c1c"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/02-memory-inserted-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "64ebda438fe5b1426b68b4550e99cabebcde0d55833d5d32cf9d8e5a7fa812c0"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/03-hope-inserted-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "265882cadbeedd041967da92096d24ae962c63a42ed27559db6545697cce2823"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/04-three-inserted-two-incomplete-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "54e2647e044a2b795c6a77a3791b56354c36774b4a86741841c95f8543c9d46e"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/05-memory-missing-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "e02e87205e5289c3c6d4e2873ddcc42fff6fba95976f33613ac5bdb08e6a4ea8"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/06-hope-missing-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "8472af1ced41b3fa20ddf3c289ba883197dfc48e704cb848af0da34224c96126"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/07-balance-missing-direct-G0-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "d50b8d4af97d5da3bccea908e4fa0c175eaf2af32947ccc2abf7610f51f6154a"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/08-balance-missing-narrow-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "5078c956c0b26672447227a185631978ba00d1869a01d5f297c755e560d9fb1d"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/09-all-concurrent-ready-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "3f187ba428b4cd02923da83d535fe602f094872b9f8b714fdade5306e418f63d"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/10-latched-lamp-on-pedestal-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "fcdd20fd45c2ff5b017f1592f233315bd242a066b23c8c99f409784582380ce4"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/11-retrieved-on-redundant-overload-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "f91a2cc8a7f3de6025e56d293e79b924571090780a48eb26baa2f3f86c2e5fa8"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/12-F-off-night-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "712e6898bdcacdada72a4e170c650183ab6599bbd808ced8702f109bc528f3ce"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/13-off-at-pedestal-alternative-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "99917502937e2c8cf8d52ea58c3cbaa4b7b9fdba1ecaeefb8505f202fb47dd9f"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/14-dawn-tree-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "6520b33a3840a318cd03f6d30fe6e50db79e8882ba10ce6ab39ac6a21150b0f8"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/15-dawn-shadow-0-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "ef21024db27d23eca6a530539ea21d0bb4fbdef968c65b661aac40b4f86c1c0b"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/15-dawn-shadow-1-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "ddc5a306b9fc401cba6a87b71e7943465f63d81c776684e98150700e9d876c4e"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/15-dawn-shadow-2-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "38648c19b35bdb414ce258993ba38ec5a25303a46b7910d2dc7613bee5e53b0b"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/15-dawn-shadow-3-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "16be87e4db928a1353baaabbfc5c13da66c775d1e831e88303e55f869b087776"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/15-dawn-shadow-4-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "126dc715d20e76ae9d4adffa2e5675dfd565c213d3854c919d2af02761ca84c7"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/16-dawn-montage-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "7b90db0ec4b7aadbae0e3e9c1fdfe8b04b89109f6eeb24e906f8bb2c62f528ac"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/17-final-credits-composition-proxy-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "882c25a1c98d43745cf09c3a284c0bb99977083f564c540fe289df6a1dcb9a10"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/contact-assets-2x.png",
+      "size": [
+        1280,
+        2100
+      ],
+      "sha256": "10d6375bb8627c7eb176354d1f5ca23d72e18e4f366b53bb78f9aa3c8f3bde5b"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/contact-assets-native.png",
+      "size": [
+        640,
+        1050
+      ],
+      "sha256": "6be7b4a699d15a6e9548ee62d359be73968aac15a206944c5d4a84f2863e14a0"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/contact-scenes-2x.png",
+      "size": [
+        2560,
+        8448
+      ],
+      "sha256": "33f82c93e851af966b51623a69ef842147873351dab15340a602ae8257b480e8"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/contact-scenes-native.png",
+      "size": [
+        1280,
+        4224
+      ],
+      "sha256": "da8d452e21778bc28ed386b1924f9eb0f82bb14e2a2c21d29639abaa53d3f752"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/inspection-overview.png",
+      "size": [
+        960,
+        1620
+      ],
+      "sha256": "f6ef0aa729aa0352a39c6dbcb0fdbd4b27771307f2eb8a11e89073560075f1c0"
+    }
+  ],
+  "branch_truth_table": "PASS: current conjunction, no historical accumulation; latch self holds; overload only retrieved on; off-at-pedestal no overload",
+  "runtime": "NOT_RUN",
+  "visual_review": "PASS with documented limits: full state overview inspected; all-concurrent, overload and F-off/night reviewed at 640x360. Final overload re-inspected after shadow reuse change. Dark pocket and purple outline remain distinct during bloom/night. Scenic patches and final standing proxy are not production cutout/seated assets.",
+  "limits": [
+    "Offline staging is not a live optical solver or navigation/collision map.",
+    "Tree crop patches retain scenery, not final alpha cutouts.",
+    "Final seated pose is task15; proxy uses approved standing pose.",
+    "Wheel arrow is animation direction study, no animated runtime supplied."
+  ]
+}

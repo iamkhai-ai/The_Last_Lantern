@@ -1,0 +1,30 @@
+[
+  {
+    "path": "assets/levels/05-a-path-for-two/sources/station-original.png",
+    "sha256": "f1f8a5b73997d40d9bf0de2f6aa90313efc9d070d8ba4b95efb9a92698d18ce3"
+  },
+  {
+    "path": "src/assets/lumo_0.png",
+    "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829"
+  },
+  {
+    "path": "assets/character/nhinh_downright_lantern_on_0.png",
+    "sha256": "e37ba7fc86318afb8582b29a2f9911e286c6fb603108d144914d03e7c9ce9732"
+  },
+  {
+    "path": "assets/character/nhinh_downright_lantern_off_0.png",
+    "sha256": "b720c434ed3d9c33eb8af659f60f1d6f4ae9143fb26a1a7fe00f4fb2146373c5"
+  },
+  {
+    "path": "assets/levels/shared/mechanisms/latch-west-unlatched.png",
+    "sha256": "d5ec9a4e8b47642bcfca0a7344a061f1cd628716a8c0a2a530a44aaaa44c7b51"
+  },
+  {
+    "path": "assets/levels/shared/mechanisms/latch-west-latched.png",
+    "sha256": "c8879f6b65992db09bb9679fdc658abda91045959f0968853af5a7ea9e84c89a"
+  },
+  {
+    "path": "assets/levels/05-a-path-for-two/prepare_assets.py",
+    "sha256": "51b99fe65daa7d64d583cdaa63a12e91ab26d482dc076521cd0edf58f6696b3e"
+  }
+]

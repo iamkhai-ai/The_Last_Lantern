@@ -1,0 +1,513 @@
+{
+  "command": "python assets/levels/06-the-sleepless-tower/prepare_assets.py",
+  "checks": [
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-dark.png",
+      "status": "PASS",
+      "size": [
+        48,
+        48
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "2a59f03be8b52edb44d396c2f5fd7e3070aad020ff6742244155409aa912a92e"
+    },
+    {
+      "file": "assets/levels/shared/beam-splitter/prism-receiving.png",
+      "status": "PASS",
+      "size": [
+        48,
+        48
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "df1eda1961f91bb0e8318624371da69865ad6bbb42c6bff8319631198dbffdef"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-A.png",
+      "status": "PASS",
+      "size": [
+        40,
+        48
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "9997d0a90a13694cf150dfd322674829f1eac2d11d9e9762502419406e5d101f"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-B.png",
+      "status": "PASS",
+      "size": [
+        40,
+        48
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "db1ef431197417176ab0de01689a95a7ad3fadf670fb68ad65eb9f8397c285d9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-splitter.png",
+      "status": "PASS",
+      "size": [
+        40,
+        48
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "1d11004719987acbc30a79bab69bd83030c0ac3f4bda8eeab11d423b7bcc74d2"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-A-off.png",
+      "status": "PASS",
+      "size": [
+        40,
+        40
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "2eebfe7bb30e18ae168ae8399a7680454c987dac782aba0a1fce56b4ebb6fde1"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-A-on.png",
+      "status": "PASS",
+      "size": [
+        40,
+        40
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "f85800512c0a6933f5d27b800e9d278be1a1c76bd37b15e0e05cf55201134591"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-B-off.png",
+      "status": "PASS",
+      "size": [
+        40,
+        40
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "2c469fba4a2157dd012cbefbfb7de6a691decdc7c654458f2d1ff6dca58a7666"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-B-on.png",
+      "status": "PASS",
+      "size": [
+        40,
+        40
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "ad3d345b6579646dee42dc1623111d3084e3523f7185173288fa242a0889cdb9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-C-off.png",
+      "status": "PASS",
+      "size": [
+        40,
+        40
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "a64eb68ef88fe603c1358a052dc610c9a4a9a871c48ace4bdff759e7c3d8a39b"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/ring-C-on.png",
+      "status": "PASS",
+      "size": [
+        40,
+        40
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "d16d34435ab739350746b89e5ef3de2ace5b92c4e4fdad0edf5c7026d8c3eb46"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/waiting-for-live-circuits.png",
+      "status": "PASS",
+      "size": [
+        104,
+        28
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "28f6ee5159113926ec9d7e69f6c206b401533930b45cf1d2a641da0881ab48f1"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/all-currently-powered.png",
+      "status": "PASS",
+      "size": [
+        104,
+        28
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "446a8f1c701a7243b04b0489d9d7180ba4b28d94d418d0664cb26c193f30849d"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/return-flow-waiting.png",
+      "status": "PASS",
+      "size": [
+        40,
+        48
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "0fb8924491d1cae8559ad1830934b82c8018dc7ddea812e433a252356b3f9ec9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/return-flow-held.png",
+      "status": "PASS",
+      "size": [
+        40,
+        48
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "de63ecfdd1ec59165c51b0be36144ef63a3bd149ff0514d40a0400e48441ec64"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/chamber-closed.png",
+      "status": "PASS",
+      "size": [
+        80,
+        104
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "45d1eb28b38a4b2a0d4e7d0b13271254da436ec71c09b5319b905d093ab0e396"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/chamber-open.png",
+      "status": "PASS",
+      "size": [
+        80,
+        104
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "3c2c3a5a4f859ec52e32e6e0372d5ef96ee241f00184a21a4909308d9131c3bf"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/chamber-grille-overlay.png",
+      "status": "PASS",
+      "size": [
+        80,
+        104
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "90c7bb7e4d0f1d5e5f9b4bf42ff27edfeed465abf89942add16175043ce82e8c"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/hope-collected.png",
+      "status": "PASS",
+      "size": [
+        41,
+        72
+      ],
+      "alpha_extrema": [
+        0,
+        0
+      ],
+      "sha256": "561c5258b525b44752a39c8cb1ab659cf142b9771c43f7654dd4327ece227c31"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/fountain-up.png",
+      "status": "PASS",
+      "size": [
+        56,
+        112
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "46d4d723e40dcba53fe02d77d8a1ed58e6f9a3ce9693a87d7b43df7671c0f8f9"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/fountain-down.png",
+      "status": "PASS",
+      "size": [
+        56,
+        112
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "46f0334fa9eb41d2be4021e2233413fe99bd34cc1ee7a30a7d1b1d6df2d569f4"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-intake.png",
+      "status": "PASS",
+      "size": [
+        112,
+        32
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "2e1f1a58eb5d8e878c555e41c239d3effcf8a50e41e67632c5bda521ece24373"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-outflow.png",
+      "status": "PASS",
+      "size": [
+        112,
+        32
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "28528e112d388ffa173572a1dbbf06056b840e8a4cd077dea1f60df6028d52d5"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-lamp-white.png",
+      "status": "PASS",
+      "size": [
+        72,
+        72
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "809f1d72acb5c6bb3c37f55433e0c7454f46606deeb796fe979850c63b162667"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-lamp-dim.png",
+      "status": "PASS",
+      "size": [
+        72,
+        72
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "e51f14067015b5f995b06c86b328f01149da0773bf520192b39a3db6906659af"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/record-compartment-closed.png",
+      "status": "PASS",
+      "size": [
+        88,
+        32
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "cc16cec4372b6282a5d1e5af1c1fedc661fef0ef1d3a32f97d469f3bbf0b155c"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/record-compartment-open.png",
+      "status": "PASS",
+      "size": [
+        88,
+        32
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "482d98d9209ce53f697aef3186ae54e508d6eadb73f0070ad60a4d26dabc8ee0"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/voice-record-panel.png",
+      "status": "PASS",
+      "size": [
+        160,
+        72
+      ],
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "sha256": "15d6dec640219c9e31427724d099fc10c762fc346be644d3bb35028dad5d6a8e"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png",
+      "status": "PASS",
+      "size": [
+        640,
+        360
+      ],
+      "alpha_extrema": [
+        255,
+        255
+      ],
+      "sha256": "0622d77eb66231dc34c17cf8835aa07c43dc6faa5985590378203c21a2ed433d"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/window-faded-red-scarf.png",
+      "status": "PASS",
+      "size": [
+        112,
+        112
+      ],
+      "alpha_extrema": [
+        0,
+        253
+      ],
+      "sha256": "3ad3283b518749e32b8ffb5dcd682db019ccfd509cde5cb83302a7cb146d3f6c"
+    }
+  ],
+  "reuse_paths_and_hashes": "PASS",
+  "previews": [
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/AB-live-C-empty-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "eb6ceef567b5944069d564712f3974dfb168338f7feeee5fba45c30dfb0d9b12"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/ABC-simultaneous-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "ead1758444ad04eb190e27070e98482a04f33d55571983143a383b6019969b18"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/after-collected-record-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "46c28d0bc7f44b552d58ab7ac453d3308b0aa26a3320f3aa48b28eed91707457"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/after-return-flow-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "28ae17383d0ffea5c8c82444508c72714a217608c863a7bc1510a6020d6dffe1"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/branch-A-only-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "69b8bd426f8752272f8e5a5eb3f78423c0cbabb6db00e115af123eb3dcef8d79"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/branch-B-only-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "8549231b4687ac2b8addd3b4e1c2fec6e2cbe9438eb4518e8baa4214946bd7c1"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/C-only-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "702d4ad0c1f5bdeee79ab9d7ea461abd0ed8b72839b87b922cd0047f7c992089"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/condition-lost-waiting-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "dea61e5ac5a2c0a74cde466fe2b83fb88d198909f01b9c1d3fd461c90af7156f"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/direct-A-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "b0984faa9ec4328d689774eb8caad505874474e2991ef95385686354e14c79dc"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/direct-B-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "96863bea71f3655478dca41288c9c8cec344deaacbf11e47d4e84608d55fc978"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/states-native-1x.png",
+      "size": [
+        720,
+        1056
+      ],
+      "sha256": "6f5f509435cb712eed857ae62e7c0834260e7e319ea4d6f3b7623e3a09d47682"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/states-nearest-2x.png",
+      "size": [
+        1440,
+        2112
+      ],
+      "sha256": "0c8022c09f040623f90e57c9497787a38c680a6f09e5c4970365fef65334565d"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/test-bench-input-away-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "8c94ddb3f0518df71aae1fd93173e421076aff30c6e91157c2f98b025714421f"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/previews/test-bench-powered-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "a7213a0724525b2422b17aa1bc2728576a201fff5001fd84cee8e39df6e45dfc"
+    }
+  ],
+  "scenario_sha256": "6995084e1390ebee285b67826685cd62e53a1ed4700cdb1477cfb087f9cde5d0",
+  "visual": "PASS: direct-A/B, C-only, branch-B-only, both bench states, simultaneous, after-return and record scenes, native and nearest contacts inspected; Hope behind grille and prism port corrections confirmed",
+  "engine": "NOT_RUN"
+}

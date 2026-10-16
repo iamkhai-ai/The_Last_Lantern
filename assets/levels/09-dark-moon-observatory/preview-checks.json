@@ -1,0 +1,435 @@
+{
+  "checks": [
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/01-door-A-powered-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "aa12a98d8ebccd7fe5b88717156ec643aae8b95670ddc583cea17e45ef454ce2",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/01-door-A-powered-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "1bdb9202d225f2d035390fa202938142d8bfb988bee776fdf3e7fd7be051ab5c",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/01-door-A-powered-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "b5d669e00b0a6c6dfa1418472c19440327c6f961012889a6699698d6546495ba",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/01-door-A-powered-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "6704abd946532655fac13a27f1ec47139265c48acc1148b67cf6c5691c49cb3c",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/02-door-A-latched-follow-Lumo-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "fb1b4da64908172d4ccbde76f4df7a41a67e2a5563cfd840d49b368bbd725ef9",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/02-door-A-latched-follow-Lumo-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "ec8e7f6bbdaab18b20b20368507757736468d11c1029dc1760151c41f152d63d",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/02-door-A-latched-follow-Lumo-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "323d2de5f10f526cd15067e3f22e78d5c826edfb1bd3184f4ec85672a5846731",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/02-door-A-latched-follow-Lumo-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "50bd6ec4392cf5f2bbbac84ec4f1f9a8c45820b396cdf0a7bc6e11146a2ce70a",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/03-G2-direct-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "ba507956a67b0b600ad39a083703d09647b70f5bef3f538e6a39e24d00258dbf",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/03-G2-direct-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "be412cbe702ba5d3cc3b012962be247784f5ac7f9d7cda93355176545295c25a",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/03-G2-direct-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "a50aa587888fe8afaee3cd8fca8d6f03510bae444e623fafeedbd8b706486d54",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/03-G2-direct-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "c5467e090c5e2c402243e3820828d806005902bc67cfa0b8b4c36f13558bb5bc",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/04-frame-narrow-pre-bridge-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "eb13a2d4de1fb0d10fe2de98619ea459584e7a04ab8dfd3fd054db6e0f74c8c8",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/04-frame-narrow-pre-bridge-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "6cbedc656152b17126f89e45ea39226894eb87de1f8d86f1d27f886cdf112003",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/04-frame-narrow-pre-bridge-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "7ac7aeb20049bf8a70d84f8a0382f598ca8af8a560319a4ac3416a956d2a8893",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/04-frame-narrow-pre-bridge-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "fa504a3d9ff12fadc9ad9b79384bdc08104b23c12ee3036e85e8dbb568da2a02",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/05-frame-wide-bridge-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "3d2289f56aad21bdb3ce843d2890275a1f43534964e887c8fa9385338f4d581e",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/05-frame-wide-bridge-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "01eb8bf6edde94072c1d33d66928bd419fc5a70640dd0386a5a3f41f81cad2bf",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/05-frame-wide-bridge-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "c6cdb9632bf3097f3a0ef5d98970ea91c3af18f24c75a3ee4c46d5b860cd3ced",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/05-frame-wide-bridge-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "dde271702b03e38e7f6b901a39ddc9afe62bff1a19d0c606bc5db2088d184d9c",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/06-far-bank-before-loop-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "bcda2659011179cb0dbe271252c74e682e3a5a0df7a6ba6d8f757db5c56e38be",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/06-far-bank-before-loop-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "afa9994fb8a175aa1f32032b24987c9e9eacd5c3f4c9c09664f39cfaa7987700",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/06-far-bank-before-loop-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "4197baedc63b591cc8b28beb9e37c5de408cc7dbb711942123a7d87a2981f7bd",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/06-far-bank-before-loop-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "95150a3dc20a270fa37531575d15fdc2b7f0c0aabd1b12184903347ca59b73d5",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/07-loop-return-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "3a23cb2e809d4d92c9c7257f29bab814dfe2396e33ba6d1761fc27f92e885c37",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/07-loop-return-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "115704a308db3b76321ff3ea1e2c870fa529db3e92f00b0b0c1417f5c699a7de",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/07-loop-return-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "35c0b06cc508211d4459d8bbc32dbbd3e93c219aa65160fdbdfe0c1df8a444d5",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/07-loop-return-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "2dbf3bee687fe81d11a005b368a8234eafb1d2cff69ad82d3244398da5a019e8",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/08-lamp-retrieved-Lumo-returned-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "9cf2ad10bbb7ec107aa99e6c1feaa406e28bcd9bf6e8c5a0ec5a0343b178fc14",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/08-lamp-retrieved-Lumo-returned-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "e70b78ecaa50a47773a6ff45696bfadd16ed51dda59459a302cd25f96ec5bc7b",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/08-lamp-retrieved-Lumo-returned-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "1b92976ed471fa249e3d9f58652d9784cd4fa5bb3c83573150142f6130054016",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/08-lamp-retrieved-Lumo-returned-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "6ea67bb60d1051c14e34ab03dad91300998101be1874f03ada297dc0f2633f88",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/09-final-memory-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "118c6668d4200753b1367ffbc52479a3fd5bad9d5845ae2fadfc33a11f50572c",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/09-final-memory-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "f6d9fba26f077a35dcfda4ad668b1f8006f77680ea934f545070efd35f61e169",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/09-final-memory-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "668e928f43bc6bb61c2879e713f08a1745992d39a5fe74c0061b7e26c7ea2337",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/09-final-memory-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "fc60f2909351f441c9a54ecc94b271974d445866927118c7aadf6612d9e5322c",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/10-after-memory-Shadow-present-lobby-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "047907959451e7be1836e35ea1692832ab7e753943c05a282f9f51d2f88ce31a",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/10-after-memory-Shadow-present-observatory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "6c73e5fae4a0efb106137cf2f320bc432608a93c956fde9bd1624c021da11905",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/10-after-memory-Shadow-present-panorama.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "2b17bdf09653db322ba2c8955a399bce55a01670d672ad49890180dffc4596a1",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/10-after-memory-Shadow-present-star-chart-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "4b8369184bd079abd183e53a32d2d6106bdabd742e6606e7d46ef820e95188fe",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/all-states-contact.png",
+      "size": [
+        1920,
+        3600
+      ],
+      "mode": "RGBA",
+      "sha256": "feafebfcc8dc2feb4579f1aafdfb526c5d543a8ba5ae6f95071d9978f35aa42d",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/memory-contact.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "668e928f43bc6bb61c2879e713f08a1745992d39a5fe74c0061b7e26c7ea2337",
+      "result": "PASS"
+    },
+    {
+      "file": "assets/levels/09-dark-moon-observatory/previews/room-contact.png",
+      "size": [
+        1920,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "c6cdb9632bf3097f3a0ef5d98970ea91c3af18f24c75a3ee4c46d5b860cd3ced",
+      "result": "PASS"
+    }
+  ],
+  "unique_paths": "PASS"
+}

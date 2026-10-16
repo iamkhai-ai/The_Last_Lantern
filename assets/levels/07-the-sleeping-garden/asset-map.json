@@ -1,0 +1,625 @@
+{
+  "exports": [
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sun-open.png",
+      "proposed_key": "garden_sun_open",
+      "state": "sun-open",
+      "size": [
+        48,
+        72
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "source": "sources/plants-original.png",
+      "kind": "generated-normalized",
+      "sha256": "1a684fd078f11dde595a0efa457a62cccc8f440fc750a6e155bd1d0f9b70ac30"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sun-folded.png",
+      "proposed_key": "garden_sun_folded",
+      "state": "sun-folded",
+      "size": [
+        48,
+        72
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "source": "sources/plants-original.png",
+      "kind": "generated-normalized",
+      "sha256": "e7495e4c419a767f851e22da8a8e7991ac71818f7bac424a23807ff886211ccf"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-coiled.png",
+      "proposed_key": "garden_moon_coiled",
+      "state": "moon-coiled",
+      "size": [
+        48,
+        44
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "source": "sources/plants-original.png",
+      "kind": "generated-normalized",
+      "sha256": "6594414ac911a629e16d43598f59a0caaff7fe888ca0ee0933decefeb879918b"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-extended.png",
+      "proposed_key": "garden_moon_extended",
+      "state": "moon-extended",
+      "size": [
+        112,
+        44
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "source": "sources/plants-original.png",
+      "kind": "generated-normalized",
+      "sha256": "f03dd02be05d1b25e2e9fc95a741c144220acaf5d3b1f290f71f1879972fd78b"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-before.png",
+      "proposed_key": "garden_sprout_before",
+      "state": "sprout-before",
+      "size": [
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "source": "sources/plants-original.png",
+      "kind": "generated-normalized",
+      "sha256": "3113280e678d011447b6d3f8f26413ee4a9cb3c8392682ff25285cf2d4f82414"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-new-leaf-overlay.png",
+      "proposed_key": "garden_sprout_new_leaf_overlay",
+      "state": "sprout-new-leaf-overlay",
+      "size": [
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "e70588e66454a44fcd45d753d758833849d4b31ecab28b316aa01d1ca5cc11c1"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-after.png",
+      "proposed_key": "garden_sprout_after",
+      "state": "sprout-after",
+      "size": [
+        32,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "03bf0cf5dfabc6a3c4b9a649dbbdd27f348da175e4e917bf2b3fe718ef7005a1"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-sun-bloom.png",
+      "proposed_key": "garden_icon_sun_bloom",
+      "state": "icon-sun-bloom",
+      "size": [
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "136f0e7a9f38b5b20c103fd55142b2b76e629865d37eb2fd4173b07258434c5f"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-sun-folded.png",
+      "proposed_key": "garden_icon_sun_folded",
+      "state": "icon-sun-folded",
+      "size": [
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "806dd1d2abce5457f7020c3e56fd755b058109d6b321c7f56cc9761472f5483c"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-moon-open.png",
+      "proposed_key": "garden_icon_moon_open",
+      "state": "icon-moon-open",
+      "size": [
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "43f02cad9585b429334e9367fa2d1fafb558b37d25ab1725d23208367aace3d0"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-moon-closed.png",
+      "proposed_key": "garden_icon_moon_closed",
+      "state": "icon-moon-closed",
+      "size": [
+        16,
+        16
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "03cef9844424382606e3ca5478f42be58787e23822db6864122e03d950f6693f"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-off.png",
+      "proposed_key": "garden_root_bridge_off",
+      "state": "root-bridge-off",
+      "size": [
+        48,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "457865b7ea83e0756ce8d25cf7332b5ddae14bf98a6d59c25a4b899e7ea01a5c"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-on.png",
+      "proposed_key": "garden_root_bridge_on",
+      "state": "root-bridge-on",
+      "size": [
+        48,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "be5a5acc57c0f3366573adf3fcb0a2a577350ff6e5c1d61555f0f69f43176b61"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-held.png",
+      "proposed_key": "garden_root_bridge_held",
+      "state": "root-bridge-held",
+      "size": [
+        48,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "db6177e51b0386ebba14b172f4380986dd2c1bb8d4454a4c0e42eff1e19fd02b"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-missing.png",
+      "proposed_key": "garden_root_bridge_missing",
+      "state": "root-bridge-missing",
+      "size": [
+        48,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "db86e3ea1872f89a87cd77a85bb253de4b64794e6497405f24bbb526785c3ece"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-pot-coiled.png",
+      "proposed_key": "garden_moon_pot_coiled",
+      "state": "moon-pot-coiled",
+      "size": [
+        128,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "0e7c18eff390b878b4dd09a6d220892cff167244a514451cb090e50f55e3af89"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-pot-deployed.png",
+      "proposed_key": "garden_moon_pot_deployed",
+      "state": "moon-pot-deployed",
+      "size": [
+        128,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "c9696799ff623a641845b75b3abbff7cae2e3c68e17e721725b5b62592051b10"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/reservoir-open.png",
+      "proposed_key": "garden_reservoir_open",
+      "state": "reservoir-open",
+      "size": [
+        80,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "220ad61e5027fbba0ee7eb72ead5a76740c3cd55ba877beed9eb545b2a5d4c26"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/reservoir-shutter-closed-overlay.png",
+      "proposed_key": "garden_reservoir_shutter_closed_overlay",
+      "state": "reservoir-shutter-closed-overlay",
+      "size": [
+        80,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "abb15f2487f881a89e6a4f6666e39f211210a660a7093ce07f8ad161a4a3e486"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/reservoir-closed.png",
+      "proposed_key": "garden_reservoir_closed",
+      "state": "reservoir-closed",
+      "size": [
+        80,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "f8b0d85ad6775bc2b7d9d4aa926a2959247bde298e748a555b9afc40617cc2e2"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/shutter-handle-open.png",
+      "proposed_key": "garden_shutter_handle_open",
+      "state": "shutter-handle-open",
+      "size": [
+        24,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "3896443daabbcaedc48574b5ca4db14c67cb2c9157786c62d9d73ce762b538c5"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/shutter-handle-closed.png",
+      "proposed_key": "garden_shutter_handle_closed",
+      "state": "shutter-handle-closed",
+      "size": [
+        24,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "6264fa0350b56e2e84cfd257451297fd151f1e898f680f8647b9afd0876f55e8"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/gate-bar-lowered.png",
+      "proposed_key": "garden_gate_bar_lowered",
+      "state": "gate-bar-lowered",
+      "size": [
+        112,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "ae0ab17281c6ef13a3e5b9e7bf4d41a6f6aeff41a1e55a5a41e46c993b154fff"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/gate-bar-raised.png",
+      "proposed_key": "garden_gate_bar_raised",
+      "state": "gate-bar-raised",
+      "size": [
+        112,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "1e800ba080c3a49214dd65c759407860105aa6bbeac95c4b91514bdef4045af8"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/gate-bar-held.png",
+      "proposed_key": "garden_gate_bar_held",
+      "state": "gate-bar-held",
+      "size": [
+        112,
+        72
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "54ebf50d83a54779974b31027f2d318254bf4a1b098b66ffda88b87b34c96eaf"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/nursery-drain-closed.png",
+      "proposed_key": "garden_nursery_drain_closed",
+      "state": "nursery-drain-closed",
+      "size": [
+        52,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "4eac727764dee9b7045274e7c336cb59e6ec3f4b037a48c5f664bdea7ee2efe6"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/nursery-drain-open.png",
+      "proposed_key": "garden_nursery_drain_open",
+      "state": "nursery-drain-open",
+      "size": [
+        52,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "3864275cb58f54dd89ca72346e2ec42c66f9a33f803950f999e059c2c47912d5"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/nursery-water-delivered.png",
+      "proposed_key": "garden_nursery_water_delivered",
+      "state": "nursery-water-delivered",
+      "size": [
+        128,
+        24
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "d47af3c2bf9231abd2a991a37ab9923947478c48a113ed15f1393a9cbcdb9df0"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/side-stone-path-closed.png",
+      "proposed_key": "garden_side_stone_path_closed",
+      "state": "side-stone-path-closed",
+      "size": [
+        80,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "d0016717192d7a3d4fb42e68a69ab9a8c9bc40b2d42bc18643777958ba8e8641"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/side-stone-path-open.png",
+      "proposed_key": "garden_side_stone_path_open",
+      "state": "side-stone-path-open",
+      "size": [
+        80,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "prepare_assets.py",
+      "kind": "native-state-layer",
+      "sha256": "8690050348f4b9b065bcbb6c0a5da97394f3da9685e8310943c010012137a2c1"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png",
+      "proposed_key": "garden_garden_scene_base",
+      "state": "garden-scene-base",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "source": "sources/garden-original.png",
+      "kind": "generated-normalized",
+      "sha256": "ef0f3af17025009b23b5cf2dd09f150cfcac4d9f65a8565de0d1af3c8bb2db3c"
+    }
+  ],
+  "reused": [
+    {
+      "key": "latch-west-unlatched",
+      "file": "assets/levels/shared/mechanisms/latch-west-unlatched.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sha256": "d5ec9a4e8b47642bcfca0a7344a061f1cd628716a8c0a2a530a44aaaa44c7b51"
+    },
+    {
+      "key": "latch-east-unlatched",
+      "file": "assets/levels/shared/mechanisms/latch-east-unlatched.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sha256": "6b5b2bbef52a4c658fda1bfe93b8851729a9becf417d56c4206ae99a8a5d3916"
+    },
+    {
+      "key": "latch-west-latched",
+      "file": "assets/levels/shared/mechanisms/latch-west-latched.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sha256": "c8879f6b65992db09bb9679fdc658abda91045959f0968853af5a7ea9e84c89a"
+    },
+    {
+      "key": "latch-east-latched",
+      "file": "assets/levels/shared/mechanisms/latch-east-latched.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sha256": "2e9526c86d6e4a32280def3e98c276d34d37879f496e1c82d98a9c26fdffcc50"
+    },
+    {
+      "key": "lumo",
+      "file": "src/assets/lumo_0.png",
+      "size": [
+        24,
+        24
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829"
+    },
+    {
+      "key": "nhinh-on",
+      "file": "assets/character/nhinh_downright_lantern_on_0.png",
+      "size": [
+        36,
+        42
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sha256": "e37ba7fc86318afb8582b29a2f9911e286c6fb603108d144914d03e7c9ce9732"
+    },
+    {
+      "key": "nhinh-off",
+      "file": "assets/character/nhinh_downright_lantern_off_0.png",
+      "size": [
+        36,
+        42
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "sha256": "b720c434ed3d9c33eb8af659f60f1d6f4ae9143fb26a1a7fe00f4fb2146373c5"
+    }
+  ],
+  "crop_boxes": {
+    "sun-open": [
+      40,
+      40,
+      365,
+      650
+    ],
+    "sun-folded": [
+      370,
+      180,
+      680,
+      650
+    ],
+    "moon-coiled": [
+      720,
+      310,
+      1052,
+      650
+    ],
+    "moon-extended": [
+      1090,
+      320,
+      1856,
+      650
+    ],
+    "sprout-before": [
+      1860,
+      380,
+      2125,
+      650
+    ]
+  }
+}

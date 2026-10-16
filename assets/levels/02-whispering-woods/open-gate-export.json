@@ -1,0 +1,33 @@
+{
+  "key_proposed": "l02_woods_arch_open_passage",
+  "file": "assets/levels/02-whispering-woods/sprites/woods_arch_open_passage.png",
+  "source": "assets/levels/02-whispering-woods/sources/woods-arch-open-generated.png",
+  "source_sha256": "e07012a21ff178cb3a266d8d6c41aa71ca0189cb1e4b93a69502ff641d8fad5c",
+  "source_crop_box": [
+    110,
+    38,
+    1170,
+    1100
+  ],
+  "canvas": [
+    128,
+    126
+  ],
+  "scale_nearest": 0.11299435028248588,
+  "placed_size": [
+    120,
+    120
+  ],
+  "placed_xy": [
+    4,
+    4
+  ],
+  "pivot": [
+    0.5,
+    1
+  ],
+  "alpha_method": "Original alpha preserved; bbox ignores source alpha below 16 for crop bounds only",
+  "state": "open permanent passage",
+  "reuse_closed_source": "src/assets/woods_arch_locked.png",
+  "integration": "NOT_RUN; proposed key only"
+}

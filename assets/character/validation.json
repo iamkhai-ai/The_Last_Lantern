@@ -1,0 +1,8 @@
+{
+  "result": "PASS",
+  "frame_count": 128,
+  "expected_frame_count": 128,
+  "all_36x42_rgba": true,
+  "errors": [],
+  "visual_review": "PASS: inspected nhinh_contact_sheet.png at full 8-direction × 16-pose layout; overall costume/readability consistent; frame-by-frame animation polish is still prototype quality per README."
+}

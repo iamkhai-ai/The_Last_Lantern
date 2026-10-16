@@ -1,0 +1,28 @@
+{
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "low",
+  "dispatch": "Parent reports accepted; worker resolved model and effort not exposed",
+  "image_backend": "built-in image_gen; backend model not exposed; two successful calls, no fallback",
+  "sources": [
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sources/garden-original.png",
+      "sha256": "d1070b46735e446277d79e75af3211297de6880f72423f5bfc491a03e451c094"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sources/plants-original.png",
+      "sha256": "83e465ffd9db8fdf4c59d636f9ef5605c4a5ff742d344bc545a52191b797d939"
+    },
+    {
+      "file": "docs/scenario/07-the-sleeping-garden.md",
+      "sha256": "e9df0156182b6cedfd34da53d3a290927175a1e028b64c34e1b5f86d21983b6c"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/generation-prompts.json",
+      "sha256": "8c70089b6d78d80d884d1cdfa206d85c918765175dac46fd270aa967107b915a"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/prepare_assets.py",
+      "sha256": "5488ab77be0edad106a23459e9c87bdcc81e569bfddde87c529899d0e928dfc5"
+    }
+  ]
+}

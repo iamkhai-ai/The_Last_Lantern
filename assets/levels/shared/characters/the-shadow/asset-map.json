@@ -1,0 +1,530 @@
+{
+  "scope": "task12 concept/prototype assets only",
+  "exports": [
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/waiting.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "e2204188559ce123791ad0520076dc42866523f4ad4fb9c350b259af2e6a0e75",
+      "kind": "deterministic-export",
+      "source": "sources/shadow-guardian-original.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "crop_source_xyxy": [
+        78,
+        137,
+        277,
+        585
+      ],
+      "alpha_cleanup": "threshold160-largest-connected-component-nearest",
+      "state": "waiting"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/shielding.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "a585e485dd8e5e8ff0ac9ecd14242259acab707d5ce4a0d9a32e438e49477c68",
+      "kind": "deterministic-export",
+      "source": "sources/shadow-guardian-original.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "crop_source_xyxy": [
+        399,
+        172,
+        697,
+        585
+      ],
+      "alpha_cleanup": "threshold160-largest-connected-component-nearest",
+      "state": "shielding"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/walk-right.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "0b37b3505135e9721382cdd9f8f41f5b0ff0e7324a4eb9afcd33b0871ed968c6",
+      "kind": "deterministic-export",
+      "source": "sources/shadow-guardian-original.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "crop_source_xyxy": [
+        776,
+        157,
+        1020,
+        585
+      ],
+      "alpha_cleanup": "threshold160-largest-connected-component-nearest",
+      "state": "walk-right"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/turn.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "cfd55acdef1eace74bc243687aa4cd7932eaa3ead91dea388e537d982aa71169",
+      "kind": "deterministic-export",
+      "source": "sources/shadow-guardian-original.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "crop_source_xyxy": [
+        1144,
+        162,
+        1348,
+        595
+      ],
+      "alpha_cleanup": "threshold160-largest-connected-component-nearest",
+      "state": "turn"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/stillness.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "6411f867cb7435d3e3c8cd70c770006a552a26fbec2beaf583ea16d58bf22eda",
+      "kind": "deterministic-export",
+      "source": "sources/shadow-guardian-original.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "crop_source_xyxy": [
+        1533,
+        147,
+        1740,
+        590
+      ],
+      "alpha_cleanup": "threshold160-largest-connected-component-nearest",
+      "state": "stillness"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "8de5cfae38cf3e842c58671a9fef8575c152b97769d629f9dfb03e7b6de734cc",
+      "kind": "deterministic-export",
+      "source": "sources/shadow-guardian-original.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "crop_source_xyxy": [
+        1885,
+        165,
+        2085,
+        585
+      ],
+      "alpha_cleanup": "threshold160-largest-connected-component-nearest",
+      "state": "guardian-waiting"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "36d9c6caa12f24ae804f5e61d5ca39f8d4672be61f1d99efd3da30d6a024b350",
+      "kind": "deterministic-export",
+      "source": "sprites/guardian-waiting.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "state": "memory-overlay",
+      "intentional_uniform_alpha": 155
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "259a365f6705ca9868e42b2aefde9a9985ef0c1d86aacf7da723fc781b865649",
+      "kind": "deterministic-export",
+      "source": "sprites/stillness.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "state": "dawn-dissolve-1",
+      "intentional_uniform_alpha": 165
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "307c7d33a2a506e196da8b54277c5277f2fedf6537c84ecdc3db3c02fa2050d5",
+      "kind": "deterministic-export",
+      "source": "sprites/stillness.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "state": "dawn-dissolve-2",
+      "intentional_uniform_alpha": 75
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "99223b9fdbaff1e4a8636d8334fd57e7f10859b5b77cd0576c7905c2f588aaea",
+      "kind": "deterministic-export",
+      "source": "sprites/stillness.png",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "state": "dawn-afterimage",
+      "intentional_uniform_alpha": 22
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png",
+      "size": [
+        48,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "e9bd74696f45da069b0ff079b0be177e0052fbb546bad1f11145ef240f3547e1",
+      "kind": "deterministic-export",
+      "pivot_pixels": [
+        24,
+        62
+      ],
+      "state": "empty-at-dawn-only",
+      "intentional_empty": true
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-memory-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "6e97f5716f1cde98f3fd7223ac633084d0ae4e1a183b44e95a923b3d55733533",
+      "kind": "deterministic-export",
+      "source": "sources/observatory-original.png"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/faded-red-scarf-reuse.png",
+      "size": [
+        17,
+        35
+      ],
+      "mode": "RGBA",
+      "sha256": "4d376c5c57df9f9aee651a71bce7eca5b95ae062bfac0e4c6ee288367fb0f863",
+      "kind": "deterministic-export",
+      "source": "assets/levels/06-the-sleepless-tower/sprites/window-faded-red-scarf.png",
+      "crop_source_xyxy": [
+        68,
+        64,
+        85,
+        99
+      ],
+      "role": "exact-existing-faded-red-cloth-crop"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-present-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "edabafcd95f919a7a853831a7f2b5bf5a87a6d614260e81173b3147090b6b860",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-memory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "7d7da0841fafcb98e18d25085220d2634caf188ecdc58bb92882f1b627764e54",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-reveal-overlap-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "011a4fbc3f40cf3586d010445d25c0afa128f6cee06c5738bf1cd8f85479ec66",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-after-memory-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "adab4f21409c62c6b6cdf9d03064792173fd40a05fad478cb5de052a4355b8b6",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/08-shadow-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "f7269f8dac9d2abf86290415e21329a5dcf327115286aea2293a06d5c7dcf859",
+      "kind": "offline-concept-composition"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-dawn-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "70679eaf38280540d3104475f7a97ac80aae109adb3ea7b1db46181bd29f2f96",
+      "kind": "deterministic-export",
+      "source": "sources/observatory-dawn-original.png"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-0-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "c05260c78f3ecf6dfb7b291cbed1dfff103f67a560ab6e4c6ffbc6a481df0d49",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-1-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "1c2a247f456e548f448d50cb238285bfb45793fa4aadd1d0d58541822fab155f",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-2-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "63e2b6793259cc48119c183fa2a596b2426d283a68d6807edcd9b2d70b4911e4",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-3-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "05a9140b6f35e48786539e3c0726e0d7f6eb79cd97683a9de89cd161712aabf4",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-4-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "mode": "RGBA",
+      "sha256": "a5d77895e7950096eb19a6d89a5f08fef6abe7f8ca5d6d14a9482ed8bac1c639",
+      "kind": "offline-concept-composition",
+      "character_foot": [
+        174,
+        231
+      ],
+      "runtime": "NOT_RUN"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-1x.png",
+      "size": [
+        640,
+        230
+      ],
+      "mode": "RGBA",
+      "sha256": "bd3d9c258a49c1bd5eeee6c482db4551343d41e09963507c6b4450a8d7b9898b",
+      "kind": "contact-not-runtime"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-2x.png",
+      "size": [
+        1280,
+        460
+      ],
+      "mode": "RGBA",
+      "sha256": "91e6e24507761606d8eb8dc518c2bb8f1b88e0bbcd3b94a4248819a534116ac6",
+      "kind": "contact-not-runtime"
+    }
+  ],
+  "sources": [
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/observatory-dawn-original.png",
+      "sha256": "0d7b13a8089a13cfb0bd2b6b6e6c9ffacc0bae4a6384d6668b6c18854f93bccc",
+      "size": [
+        1672,
+        941
+      ]
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/observatory-original.png",
+      "sha256": "2ec2a9b86024481ae8c67a983329890d38501f364d305f20959b2f38d24eecf8",
+      "size": [
+        1672,
+        941
+      ]
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/shadow-guardian-original.png",
+      "sha256": "3e29010bacc9c9240a2e2945a27a0025e8dcce25d822b6d65c3a46f63c599672",
+      "size": [
+        2172,
+        724
+      ]
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/window-faded-red-scarf.png",
+      "sha256": "3ad3283b518749e32b8ffb5dcd682db019ccfd509cde5cb83302a7cb146d3f6c",
+      "size": [
+        112,
+        112
+      ],
+      "kind": "reused-reference"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/temple-scene-base.png",
+      "sha256": "e9b323496e34d375704af6e976570ce57faa72f2d89a6d953ff8a7bf02d9e560",
+      "size": [
+        640,
+        360
+      ],
+      "kind": "reused-reference"
+    },
+    {
+      "file": "src/assets/lumo_0.png",
+      "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829",
+      "size": [
+        24,
+        24
+      ],
+      "kind": "reused-reference"
+    }
+  ],
+  "anchor_contract": {
+    "canvas": [
+      48,
+      64
+    ],
+    "foot": [
+      24,
+      62
+    ],
+    "09_10_preview_foot": [
+      174,
+      231
+    ]
+  },
+  "reveal_sequence": [
+    "waiting",
+    "memory-overlay",
+    "waiting+memory-overlay",
+    "waiting"
+  ],
+  "dissolution": "Level10 dawn only; never crystal pickup"
+}

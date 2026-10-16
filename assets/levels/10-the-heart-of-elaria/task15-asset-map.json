@@ -1,0 +1,398 @@
+{
+  "exports": [
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-nhinh-seated-unlit-leaf.png",
+      "size": [
+        36,
+        42
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "transparent-layer",
+      "sha256": "8f732d0673180c60df14bc3fa1c6bbce34943fb2383b515b5623651f55d29194"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-nhinh-seated-detail.png",
+      "size": [
+        144,
+        168
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "dialogue-insert",
+      "sha256": "e33f97a045e2910f5d0e3dfa0ec048915266ceb9aaa367be1853aca05a07be1e"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-dawn-lighting-overlay.png",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "lighting-overlay",
+      "sha256": "8a68e1e02af33b14c28d9d81d72d4cd0670f281f49dc5d292b95063fd1c79be5"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-nhinh-carry-off-reference.png",
+      "size": [
+        36,
+        42
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "existing-pose-reuse",
+      "sha256": "3d062499b16ddfc6ae5a6a8eafb04e07a21c847af545ad1f3ab2f7782e3dc113"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-leaf-handle-attachment.png",
+      "size": [
+        10,
+        10
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "attachment",
+      "sha256": "cbfe59cb0ca309ae144f4b17f0d4b9fa7f0c2fbbc20441edf1ae202e82de3d50"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/ending-title-the-last-dawn.png",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "title-overlay",
+      "sha256": "b6740da128e32320b85c78fa93dcaa410eccb53bd7f41a9aaa6165b5c0d758c6"
+    }
+  ],
+  "scenes": [
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-01-seated-by-roots-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "lantern": "off-held-in-lap",
+        "leaf": "on-handle",
+        "lumo": "beside-handle",
+        "pose": "seated",
+        "time": "dawn"
+      },
+      "sha256": "5b56be9eff5d360b42d9a2ce975f269726b4025ea4c3a5b605dce4b2d8c623b5"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-02-seated-detail-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "purpose": "dialogue-detail",
+        "lantern": "off",
+        "leaf": "on-handle"
+      },
+      "sha256": "4bdbbfcdae3d565ac968be3cecc28117286cd79f1afb3656aa1dac224cec0a01"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-03-montage-garden-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn-sequence",
+        "location": "garden",
+        "movement": "runtime-required",
+        "lighting": "native-overlay"
+      },
+      "sha256": "aff0a31d0acad41a47c9c550824b45b4d89348e36f4b41aa55c3f4b37c784bfb"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-03-montage-creek-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn-sequence",
+        "location": "creek",
+        "movement": "runtime-required",
+        "lighting": "native-overlay"
+      },
+      "sha256": "ea972a6a646c755ea8c94dae2146815a0d2facf57304e1fbb2d41d5fa4e0684b"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-03-montage-tower-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn-sequence",
+        "location": "tower",
+        "movement": "runtime-required",
+        "lighting": "native-overlay"
+      },
+      "sha256": "1e84fc07885df53981db1ef41e1b4f5f22b18237ede5a94029d56563e73182dc"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-0-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn",
+        "wheel": "resuming",
+        "shadow": "stillness",
+        "never_before_dawn": true
+      },
+      "sha256": "ac7e5dbebeb0f40243586ef94ab9d9ec3c29b38d200a1c01981402314b0c5c49"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-1-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn",
+        "wheel": "resuming",
+        "shadow": "dawn-dissolve-1",
+        "never_before_dawn": true
+      },
+      "sha256": "a8229582b834598a2a1757b222e644d3a03071a076e4b42ff99ad79bcef02769"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-2-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn",
+        "wheel": "resuming",
+        "shadow": "dawn-dissolve-2",
+        "never_before_dawn": true
+      },
+      "sha256": "809c3e32829b4324d9abcbb561621e8cb6309b2d49487c15c9bfe613c076da0b"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-3-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn",
+        "wheel": "resuming",
+        "shadow": "dawn-afterimage",
+        "never_before_dawn": true
+      },
+      "sha256": "e9fb2f5cafef14f6c94a67e42a4da4eb390a0224c87f1b45906293eed71d15ed"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-04-wheel-resumes-shadow-4-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "dawn",
+        "wheel": "resuming",
+        "shadow": "dawn-empty",
+        "never_before_dawn": true
+      },
+      "sha256": "8b47ac39c16ae1357fb76671c453146882a921497a41b1b6de2b161aaa2c2ff4"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-05-daytime-trail-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "time": "day",
+        "lantern": "off-carried",
+        "leaf": "handle-attachment",
+        "pose": "existing-carry-pose-staging",
+        "girl_fate": "not-depicted"
+      },
+      "sha256": "190bd194faf737e72907c825693f496164b2135b6d4d0533eaae7fa528dccf33"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/previews/task15-06-final-title-640x360.png",
+      "size": [
+        640,
+        360
+      ],
+      "state": {
+        "title": "THE LAST DAWN",
+        "continue": "E",
+        "credits": "text-runtime-required"
+      },
+      "sha256": "b6b45415cb6a8befabe97d850f99262ada50ea9d9837de35cef65e3dac95b365"
+    }
+  ],
+  "reuse": [
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/task15-nhinh-seated-original.png",
+      "size": [
+        1312,
+        1199
+      ],
+      "sha256": "63c2156a0ce54fee7f424787181e7df96fae123bfc0d131230bdbe20ffc40827"
+    },
+    {
+      "file": "src/assets/lumo_0.png",
+      "size": [
+        24,
+        24
+      ],
+      "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/sanctuary-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "3ce541b5ccb5ce579029117e97505dd4df93ca9a390e99d0c7967a563af1be84"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "ef0f3af17025009b23b5cf2dd09f150cfcac4d9f65a8565de0d1af3c8bb2db3c"
+    },
+    {
+      "file": "assets/levels/04-shattered-moonlit-creek/sprites/creek-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "1226e8d2ec40e005cdbc9b5710fded7754712fe33d30394ad17040d517492602"
+    },
+    {
+      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "0622d77eb66231dc34c17cf8835aa07c43dc6faa5985590378203c21a2ed433d"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-dawn-scene-base.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "70679eaf38280540d3104475f7a97ac80aae109adb3ea7b1db46181bd29f2f96"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/day-night-wheel-resuming.png",
+      "size": [
+        96,
+        80
+      ],
+      "sha256": "23c20421c2b038ce4b97d98251bdc3b09fec6a2c0e25dfdbb950e8d4169a2e09"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/stillness.png",
+      "size": [
+        48,
+        64
+      ],
+      "sha256": "6411f867cb7435d3e3c8cd70c770006a552a26fbec2beaf583ea16d58bf22eda"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png",
+      "size": [
+        48,
+        64
+      ],
+      "sha256": "259a365f6705ca9868e42b2aefde9a9985ef0c1d86aacf7da723fc781b865649"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png",
+      "size": [
+        48,
+        64
+      ],
+      "sha256": "307c7d33a2a506e196da8b54277c5277f2fedf6537c84ecdc3db3c02fa2050d5"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png",
+      "size": [
+        48,
+        64
+      ],
+      "sha256": "99223b9fdbaff1e4a8636d8334fd57e7f10859b5b77cd0576c7905c2f588aaea"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png",
+      "size": [
+        48,
+        64
+      ],
+      "sha256": "e9bd74696f45da069b0ff079b0be177e0052fbb546bad1f11145ef240f3547e1"
+    },
+    {
+      "file": "src/assets/tree_dawn.png",
+      "size": [
+        60,
+        94
+      ],
+      "sha256": "ba6340b4e2dbf0487ae2518e3b68981cee9ef519645b28789051315398016d1a"
+    },
+    {
+      "file": "src/assets/bush_dawn.png",
+      "size": [
+        71,
+        82
+      ],
+      "sha256": "04e6b3a1c50df587223f630da3b7aebd47d15907038bd76dab40ba8b77bab0e1"
+    },
+    {
+      "file": "src/assets/canopy_dawn.png",
+      "size": [
+        220,
+        70
+      ],
+      "sha256": "c601f089db7ebdf6cb8fb2c54d860400b2222f95f810da72415b3daef6dd8406"
+    },
+    {
+      "file": "assets/character/nhinh_right_lantern_off_2.png",
+      "size": [
+        36,
+        42
+      ],
+      "sha256": "3d062499b16ddfc6ae5a6a8eafb04e07a21c847af545ad1f3ab2f7782e3dc113"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sprites/lantern-new-leaf.png",
+      "size": [
+        10,
+        10
+      ],
+      "sha256": "cbfe59cb0ca309ae144f4b17f0d4b9fa7f0c2fbbc20441edf1ae202e82de3d50"
+    }
+  ]
+}

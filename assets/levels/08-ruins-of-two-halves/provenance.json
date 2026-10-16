@@ -1,0 +1,86 @@
+{
+  "requested_model": "gpt-6.1-sol",
+  "requested_effort": "low",
+  "resolved_worker_model": "not exposed",
+  "resolved_image_model": "not exposed",
+  "tool_path": "functions.exec -> tools.image_gen__imagegen",
+  "image_result": "success; no fallback",
+  "files": [
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/prepare_assets.py",
+      "sha256": "570d61617a904bb9676c16e0e91caa2df8a15d115b367245e6637c390959c397"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/generation-prompts.json",
+      "sha256": "9aa627a7de9486c928c020cc5bb720834acf00126c26af59aba19184f64b85d5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sources/temple-original.png",
+      "sha256": "ee81df978d7c8c64cc7f6ade7d96a6f8a6907bdde2fd465371cc605158dd17a3"
+    },
+    {
+      "file": "docs/scenario/08-ruins-of-two-halves.md",
+      "sha256": "48e0f441e49fc67f796d39dcb129ed95c3e9bd41120439131c52e10f86074a62"
+    },
+    {
+      "file": "tasks/plan.md",
+      "sha256": "d06adda7091d5e0134ad645456d413c31bed23a1380bd04c63858f50ca6b0c61"
+    },
+    {
+      "file": "tasks/todo.md",
+      "sha256": "2eeaac2d0392392041d9721c5c381e2a24b5ea9b3756e78cf04a738fbd919738"
+    },
+    {
+      "file": "Art_References/05_Silent_Ruins.png",
+      "sha256": "c7a42e8d1c9f874b2143dcae8bf5ed5d7972c324535b41569e322485613d57c7"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/01-correct-wide-640x360.png",
+      "sha256": "6cac30879932e67447795a3466b3d466e104a23fde7f15ab7c26600bedf76665"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/02-wrong-narrow-640x360.png",
+      "sha256": "24191bea208886971552518e5080021bf0a9187d0c2baa2f70d58f43de2c1b89"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/03-wrong-wide-left-640x360.png",
+      "sha256": "faf8700ba0401ed86ae289dfd2c14c3b18b00173193edb54e6e0d0dd5cb594e2"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/04-wrong-narrow-right-640x360.png",
+      "sha256": "969c1b71e7158dc63818b8884d918b378b9454640be7486906acb0089b93428d"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/05-lamp-off-640x360.png",
+      "sha256": "75a3bc5a6717ae03eee5c828f979a3963f32554ff24bc682522c92772ad84ee5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/06-left-route-lost-640x360.png",
+      "sha256": "32e822709e250cadbbc4a866d9ec3eea5766793cd78642423c0d58e3c198bbe8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/07-sanctuary-latched-640x360.png",
+      "sha256": "20004b55f7d3900d491d451e640096e55f465f102d9ba476e9f54f3622262676"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/08-latched-lamp-off-640x360.png",
+      "sha256": "a1d4d716d782bc1857ff1ebe9eae8ed1452198fd4a26457a45af36df321697cb"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/contact-native-1x.png",
+      "sha256": "5a6c85743b4ebe2585d9a1d84a101e6fa97aaa20e0af0de89d4c07df8a1a6c7c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/contact-nearest-2x.png",
+      "sha256": "c3e108e1b380de7115c9a608080b8a2c4c36f9870b62f9f7451d2b6f32993f41"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/states-native-1x.png",
+      "sha256": "d43b97288f13810fb00ff1da016354ead8ee2fe419838be412063c2320c4b485"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/previews/states-nearest-2x.png",
+      "sha256": "f5234bf69f56dec694cb29425005445981d8302438528fd4d8f9a4c8522968dc"
+    }
+  ]
+}

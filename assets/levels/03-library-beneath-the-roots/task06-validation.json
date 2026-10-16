@@ -1,0 +1,157 @@
+{
+  "technical_result": "PASS",
+  "checks": [
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-bookshelf.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-mural-fifth.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-panel-closed.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-panel-open.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-well-closed.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-well-open.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-test-desk.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sprites/room-memory-crystal.png",
+      "result": "PASS",
+      "alpha_extrema": [
+        0,
+        251
+      ]
+    }
+  ],
+  "task05_preserved": "PASS",
+  "previews": [
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-library-empty-well-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "84a4e92ad7aa97f77371b7ee29ec887553f526e54c8c70d0e98dc5030820eb90"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-library-mural-open-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "50825bde2e81d3646510e617375b8169b54b289d232e3b07a956111a65dd1f7b"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-library-reward-state-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "ae209c8c49025754776b4dd3dac80718ca71bed6dede7fd919a7360f6f6f6897"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-modules-contact-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "ae6e16cd818d004d0080e95d3ecd5d62be3f4c714a4b12ebf5c50bac09af3c4b"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-mural-contact-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "d6f79d253dd4d23c26354dfe4fb84151da25cc3715861e34d7966080dbadd333"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-panel-states-2x-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "58b9aa236464d215941edb95cbe02f81783309ab8dfb6cde68c67c198ac6541f"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-panel-states-contact-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "11829b3c2603e6cacd87c607178c39f98db464dc0f9c90f4a3066f055128137a"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-well-states-2x.png",
+      "canvas": [
+        920,
+        500
+      ],
+      "sha256": "da475d73c08e8ae218652ec69a58fc795daf342aab0afad91b955a66ebbbca0f"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/previews/task06-well-states-contact-640x360.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "sha256": "d149479139a90ebfe247eeda1eed5926ba249e81b8f03d42e46cb3af873cf86a"
+    }
+  ],
+  "sources": [
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sources/task06-bookshelf-generated.png",
+      "sha256": "ee688f1e93a513a0d83f39e49a4e7a39e3a436ac1de5b87090ab349b77bddea5"
+    },
+    {
+      "file": "assets/levels/03-library-beneath-the-roots/sources/task06-mural-generated.png",
+      "sha256": "357a69af8424998fa668609f12ab2667d1a5bdbe896edb6d8f35e78f41404325"
+    }
+  ],
+  "runtime": "NOT_RUN",
+  "build": "NOT_RUN",
+  "visual": "PASS with limitations: actual 640x360 open/closed/reward room and native/2x module, mural, panel, well contacts inspected; raised wheel/anonymous figure/stars read; cracks/tree best at 2x; repeated floor and simple native geometry remain"
+}

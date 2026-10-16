@@ -1,0 +1,21 @@
+# Level 05 — Lối Đi Hai Người — task 08
+
+Offline asset delivery only. 19 transparent modular RGBA sprites and one 640×360 opaque scenic base. `prepare_assets.py` rebuilds all exports and eight preview/evidence PNGs. No runtime, manifest, scenario or task checklist edits. Requested agent configuration is GPT-6.1 Sol / low; resolved configuration is not exposed. Built-in imagegen succeeded once; exact prompt and original output path are in `generation-prompts.json`. Original raster is preserved in `sources/station-original.png`. `provenance.json` and `asset-map.json` record SHA256, sources, dimensions, centered pivots and proposed keys.
+
+## Modules and integration contract
+
+Call markers are 40×48, with a winged firefly carving: idle has no status badge, sent has cyan arrows, arrived has a gold check. These are distinct from Moon locks. Sent means Lumo is travelling; arrival must be driven by reaching the target, never a timer. Empty/occupied pressure marks are 44×28, with an additional gold underline when occupied. Only Lumo activates these marks; they do not stand in for lantern sensors or plant puzzles. A/B/C reuse the same modules and require external identity/room placement metadata when integrated.
+
+Three 160×40 root cable overlays show rest/flow/arrival; repeated or extended native paths may be needed for actual room geometry. 64×32 tube straight/elbow/mouth modules have an 8px bore, much narrower than the 36×42 Nhinh frame. The main passage is broad and level. The narrow pipe and main passage are scenic demonstrations, not collision shapes.
+
+64×88 closed/open doors share a canvas. `door-held-overlay` is a separate brass brace over the open door, used only after a physical latch is fitted. 28×32 latch states reuse task07's dedicated handle art exactly. Pressure occupancy keeps an unlatched door open; after release, closure must wait until Nhinh clears the threshold. Latched doors remain open permanently. Calls must stay accessible on both sides. These safety rules, checkpoint restoration, and interactions are **NOT_RUN** here.
+
+240×48 ink route overlays share identical geometry: cyan/blue visible with lantern off, dim with lantern on. Gentle Lumo light preserves route visibility; switching lantern on never creates a fall or resets progress. 40×40 spiral scratch is a separate memory prop. Existing Lumo frame and Nhinh lantern on/off prototype frames are reused only in previews; no new character pose or animation is implied.
+
+## Previews and evidence
+
+All five room studies are 640×360. Initial call shows Lumo in the narrow pipe, cyan sent arrows and closed doors. Latched relay shows released pressure A, mechanically held door A, Lumo on pressure B and open unlatched door B. End corridor shows both doors held and Lumo returned beside Nhinh with pressure marks empty. Ink bright/dark pairs preserve geometry to compare line visibility. The compressed contact-layout sheet is 640×360; the separate `states-native-1x.png` preserves every sprite's native pixels, and `states-nearest-2x.png` is an exact nearest enlargement.
+
+PASS: actual command `python assets/levels/05-a-path-for-two/prepare_assets.py` exported 20 files; dimension, path, RGBA, nonempty alpha, transparency and SHA256 checks passed for every applicable export. Native and nearest sheets plus initial/relay/end and ink bright/dark room states were viewed. Travel arrows, arrival check, occupied underline, door opening and brass held brace read separately. Dark ink is visible at game size; bright ink is nearly hidden. Visual evidence is offline composition, not engine behavior.
+
+Limitations: native modules are simpler and flatter than generated stone detail. Scenic floor has a deliberately plain overlay to keep cues readable; pipe geometry is a proposal. Backdrop includes a barred intake and spiral stair as scenery, not extra interactive doors. Fine textures soften when source is normalized nearest. No water-flow animation, transition frames, shader, dynamic cable routing, collision, runtime calls/pressure/latch behavior, saves or engine/build verification is implemented or passed. All runtime checks are **NOT_RUN**. Reusable modules stay in this owned folder to avoid mutating the existing shared mechanism batch; later levels can reference their stable proposed keys and paths.

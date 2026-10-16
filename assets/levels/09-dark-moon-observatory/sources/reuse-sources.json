@@ -1,0 +1,13 @@
+{
+  "strategy": "Reuse retained generated scene art; deterministic new geometry/state layers only.",
+  "generated_source_packages": [
+    "assets/levels/08-ruins-of-two-halves/generation-prompts.json",
+    "assets/levels/08-ruins-of-two-halves/sources/temple-original.png",
+    "assets/levels/shared/characters/the-shadow/sources/prompts.json",
+    "assets/levels/shared/characters/the-shadow/sources/observatory-original.png"
+  ],
+  "new_prompts": [],
+  "new_generation_calls": 0,
+  "composition_tool": "Python 3.12 / Pillow, prepare_assets.py",
+  "fallback": "none"
+}
