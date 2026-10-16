@@ -35,10 +35,10 @@ Verification: trace every action and save transition against the scenario; inspe
 
 Dependency: frozen worker source.
 
-- [ ] Root inspects the diff, runs production build, records source revision and actual result.
-- [ ] Root visually inspects the room on an isolated origin; preserve user storage and distinguish fixtures from a real puzzle playthrough.
-- [ ] Two independent read-only Luna high reviewers examine the same frozen revision; findings remain separate until both complete. Correct confirmed findings and re-review/recheck affected work.
-- [ ] Record final spatial decisions, command outcomes, limitations and local review branch. Human acceptance remains NOT_RUN until the user plays.
+- [x] Root inspects the diff, runs production build, records source revision and actual result.
+- [ ] Root visual inspection: NOT_RUN. The browser tool returned `Local browser use is disabled in Work settings`. The temporary server and fixture were removed; user storage was not accessed. A real puzzle playthrough remains pending.
+- [x] Two independent read-only Luna high reviewers examine the same frozen revision; findings remain separate until both complete. Correct confirmed findings and re-review/recheck affected work.
+- [x] Record final spatial decisions, command outcomes, limitations and local review branch. Human acceptance remains NOT_RUN until the user plays. See `level-03-verification.md`.
 
 ## Risks
 

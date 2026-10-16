@@ -1,5 +1,7 @@
 # Level 03 implementation report
 
+Final source revision: `f1d070d9a8650c08096ada2fe683402d49e3fa8b`. Root build and two independent static reviews are recorded in [level-03-verification.md](level-03-verification.md). Runtime appearance and a full puzzle playthrough remain unverified.
+
 ## Scope and decisions
 
 Implemented the Library Beneath the Roots in the existing CampaignScene as a level-local `LibraryLevel` controller with shared `libraryLayout` geometry. The work is limited to level index 2, its art allowlist, and its scene dispatch. Level 02 and other level mechanics remain on their existing paths.
@@ -24,4 +26,4 @@ Implemented the Library Beneath the Roots in the existing CampaignScene as a lev
 
 ## Known limits
 
-The exit requires E from the authored approach; stepping into the arch does not transition. This revision has not been played through in a browser. Root's two source reviews found no actionable findings on the previous revision; the bounded depth, arch-underlay alignment, and clue-gating corrections still require review.
+The exit requires E from the authored approach; stepping into the arch does not transition. This revision has not been played through in a browser. Both independent source reviewers completed their final review on `f1d070d` with no actionable findings. This is bounded source review, not evidence of runtime appearance or player acceptance. The branch remains local and has not been pushed or merged.
