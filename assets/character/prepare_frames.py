@@ -53,6 +53,24 @@ if has_combined_catalog and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
         'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'
     )
 
+def record_preflight_failure(message, variant_count=None):
+    report = {
+        'result': 'FAIL',
+        'stage': 'preflight',
+        'frame_count': len(existing_frames),
+        'expected_frame_count': 240 if has_combined_catalog else 128,
+        'core_frame_count': (_existing or {}).get('core_frame_count', 0),
+        'variant_frame_count': variant_count if variant_count is not None else (_existing or {}).get('state_variant_frame_count', 0),
+        'errors': [message],
+        'contact_sheets': list((_existing or {}).get('contact_sheets', {}).values()),
+        'visual_review': 'NOT_RUN: regeneration preflight failed.',
+    }
+    failure_path = STAGING / 'validation.failed.json'
+    failure_path.write_text(json.dumps(report, indent=2), encoding='utf-8')
+    os.replace(failure_path, ROOT / 'validation.failed.json')
+    print(json.dumps(report, indent=2))
+    raise RuntimeError(message)
+
 def largest_component_bounds(mask):
     """Exclude disconnected glow fragments leaking in from the adjacent grid row."""
     width, height = mask.size
@@ -124,13 +142,11 @@ if has_combined_catalog:
     variant_entries = [entry for entry in existing_frames if entry['file'] not in regenerated_core_files]
     actual_variant_files = {entry['file'] for entry in variant_entries}
     if len(variant_entries) != 112 or actual_variant_files != EXPECTED_VARIANT_FILES:
-        raise RuntimeError(
-            f'Combined catalog must contain all 112 expected state variants; found {len(variant_entries)} entries.'
-        )
+        record_preflight_failure(f'Combined catalog must contain all 112 expected state variants; found {len(variant_entries)} entries.', len(variant_entries))
     for entry in variant_entries:
         variant_path = ROOT / entry['file']
         if not variant_path.is_file() or hashlib.sha256(variant_path.read_bytes()).hexdigest() != entry.get('sha256'):
-            raise RuntimeError(f'Combined catalog variant is missing or has a mismatched SHA-256: {entry["file"]}')
+            record_preflight_failure(f'Combined catalog variant is missing or has a mismatched SHA-256: {entry["file"]}', len(variant_entries))
     entries.extend(variant_entries)
 
 font = ImageFont.load_default()
