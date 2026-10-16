@@ -1914,10 +1914,13 @@ export class CampaignScene extends Phaser.Scene {
     for (const object of this.objects) {
       const id = object.getData('forestEdgeId');
       if (!(object instanceof Phaser.GameObjects.Image)) continue;
-      if (id === 'gate') object.setTexture(this.forestGateLayerKey(sourceKey, 'base'));
-      else if (id === 'gate-header') object.setTexture(this.forestGateLayerKey(sourceKey, 'header'));
-      else if (id === 'gate-left-post') object.setTexture(this.forestGateLayerKey(sourceKey, 'left-post'));
-      else if (id === 'gate-right-post') object.setTexture(this.forestGateLayerKey(sourceKey, 'right-post'));
+      const layer = id === 'gate' ? 'base'
+        : id === 'gate-header' ? 'header'
+          : id === 'gate-left-post' ? 'left-post'
+            : id === 'gate-right-post' ? 'right-post' : null;
+      if (!layer) continue;
+      const textureKey = this.forestGateLayerKey(sourceKey, layer);
+      if (object.texture.key !== textureKey) object.setTexture(textureKey);
     }
   }
 

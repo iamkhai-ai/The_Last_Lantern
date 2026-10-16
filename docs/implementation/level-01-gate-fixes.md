@@ -46,3 +46,20 @@ Local checks on the implementation revision:
 - NOT_RUN by worker — uninterrupted real-browser puzzle/transition, same-runtime Continue and explicit reset cases, stair screenshots, dynamic gate-layer screenshots, and post collision proof. Root owns those browser checks on the frozen source revision.
 
 Verified source commit: `600ac1dc81db369a4c45dec96778ce7daa4c6ece`.
+
+## Independent review follow-up
+
+Round 1 found two issues:
+
+- P3: gate textures were rebound on every visual refresh. `setForestEdgeGateTextures` now compares each generated layer's current texture key and only calls `setTexture` when the open/closed state actually changes.
+- P2: the checked-in start-intent helper test did not exercise Phaser's real scene and menu lifecycle. Added `scripts/level01-browser-regression.cjs`, adapted from the root's successful keyboard playthrough. It drives the actual uninterrupted tutorial and gate puzzle, exits to Level 02 with E, returns through the in-game Pause → Main Menu → Continue path, then verifies a second New Game and confirmed Pause Restart each reset progress. It does not inject puzzle flags or reload the page.
+
+Run the browser regression against a running local game server with:
+
+```powershell
+node scripts/level01-browser-regression.cjs 5182
+```
+
+The runner resolves Playwright with `require('playwright')` by default; `PLAYWRIGHT_MODULE` can point to another resolvable Playwright module, and `PLAYWRIGHT_CHROMIUM_EXECUTABLE` optionally selects a Chromium executable. `LEVEL01_BASE_URL` can replace the port argument. `LEVEL01_ARTIFACT_DIR` chooses the screenshot/results folder; otherwise a new folder is created under the system temporary directory. The runner prints the chosen URL and artifact folder.
+
+The authoring agent did not run this browser script per the delegated task; root owns verification on the final revision.
