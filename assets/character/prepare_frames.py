@@ -1,4 +1,5 @@
 """Slice the generated 4x4 pose sheets; no generation API is called here."""
+import os
 from pathlib import Path
 import hashlib
 import json
@@ -17,7 +18,7 @@ cells = []
 owned = set()
 if (ROOT / 'frames.json').exists():
     _existing = json.loads((ROOT / 'frames.json').read_text(encoding='utf-8'))
-    if _existing.get('frame_count', 0) > 128 and 'ALLOW_CATALOG_OVERWRITE' not in __import__('os').environ:
+    if _existing.get('frame_count', 0) > 128 and os.environ.get('ALLOW_CATALOG_OVERWRITE') != '1':
         raise RuntimeError(
             'Refusing to overwrite combined 240-frame catalog in frames.json. '
             'Set ALLOW_CATALOG_OVERWRITE=1 only when explicitly regenerating the 128 core frames.'

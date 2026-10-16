@@ -1064,8 +1064,9 @@ export class CampaignScene extends Phaser.Scene {
       this.addLevelArt('room-bookshelf', 74, 143, undefined, undefined, 4);
       this.addLevelArt('room-bookshelf', 566, 143, undefined, undefined, 4);
       this.addLevelArt('room-test-desk', 208, 134, 96, 68, 4);
-      this.addLevelArt('room-mural-fifth', 432, 92, 88, 62, 4);
-      this.addLevelArt(this.progress.flags['l2-secret'] ? 'room-panel-open' : 'room-panel-closed', 432, 152, 84, 58, 4);
+      // Keep the portrait artwork proportional within its existing vertical slots.
+      this.addLevelArt('room-mural-fifth', 432, 92, 62 * 96 / 136, 62, 4);
+      this.addLevelArt(this.progress.flags['l2-secret'] ? 'room-panel-open' : 'room-panel-closed', 432, 152, 58 * 116 / 148, 58, 4);
       this.addLevelArt(this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed', 548, 194, 112, 112, 4);
     } else if (level === 3) {
       this.addLevelArt('storm-relief', 560, 85, 96, 64, 8);
@@ -1121,7 +1122,7 @@ export class CampaignScene extends Phaser.Scene {
       socketXs.forEach((x, i) => action(`socket-${i}`, `E · Đặt phiến vào hốc ${i + 1}`, x, 255, () => this.placeStone(i), () => !this.progress.flags['l2-memory'], 'pedestal_empty'));
       action('check-memory', 'E · Kiểm tra vòng ngày đêm', 320, 190, () => this.checkMemory(), () => !this.progress.flags['l2-memory'], 'receiver_off');
       action('memory-crystal', 'E · Nhận Tinh thể Ký Ức', 320, 190, () => this.finishMemory(), () => this.progress.flags['l2-memory'] === true && !this.progress.flags['l2-crystal'], 'crystal_memory');
-      action('fifth-mural', 'E · Xem bức tranh sau vách rễ', 530, 100, () => {
+      action('fifth-mural', 'E · Xem bức tranh sau vách rễ', 432, 92, () => {
         this.progress.flags['l2-fifth-viewed'] = true;
         this.save();
         this.say([{ speaker: 'Nhinh', text: 'Người này đang giữ bánh xe lại.' }, { speaker: 'Lumo', text: 'Tôi nghe thấy mưa. Và ai đó bảo đừng để đèn tắt.' }, { speaker: 'Nhinh', text: 'Giống dòng chữ trên chiếc đèn. Mình mang ký ức này theo, chưa cần đoán phần còn thiếu.' }]);
@@ -1441,16 +1442,19 @@ export class CampaignScene extends Phaser.Scene {
 
   private drawFifthMural(): void {
     if (this.objects.some((object) => object instanceof Phaser.GameObjects.Graphics && object.getData('campaign-fifth-mural') === true)) return;
-    const mural = this.add.graphics().setDepth(17);
+    const muralArt = getLevelArtKey(2, 'room-mural-fifth');
+    if (muralArt && this.textures.exists(muralArt)) return;
+    const muralWidth = 62 * 96 / 136;
+    const mural = this.add.graphics().setDepth(17).setPosition(432, 92);
     mural.setData('campaign-fifth-mural', true);
-    mural.fillStyle(0x283342, 0.95); mural.fillRoundedRect(475, 58, 108, 62, 5);
-    mural.lineStyle(2, 0xe4c477, 0.8); mural.strokeRoundedRect(475, 58, 108, 62, 5);
+    mural.fillStyle(0x283342, 0.95); mural.fillRoundedRect(-muralWidth / 2, -31, muralWidth, 62, 4);
+    mural.lineStyle(2, 0xe4c477, 0.8); mural.strokeRoundedRect(-muralWidth / 2 + 1, -30, muralWidth - 2, 60, 3);
     mural.lineStyle(1, 0x9fb1bd, 0.45);
-    for (const [x, y] of [[490, 72], [515, 66], [558, 76], [500, 103], [566, 99]] as Array<[number, number]>) mural.strokeCircle(x, y, 1.5);
-    mural.fillStyle(0x1a1c25, 0.95); mural.fillEllipse(528, 97, 18, 25); mural.fillCircle(528, 81, 8);
-    mural.lineStyle(3, 0xf4d574, 0.85); mural.strokeCircle(528, 82, 19);
+    for (const [x, y] of [[-14, -23], [8, -24], [16, -13], [-15, 18], [15, 23]] as Array<[number, number]>) mural.strokeCircle(x, y, 1);
+    mural.fillStyle(0x1a1c25, 0.95); mural.fillEllipse(0, 13, 12, 24); mural.fillCircle(0, -10, 5);
+    mural.lineStyle(2, 0xf4d574, 0.85); mural.strokeCircle(0, -6, 14);
     this.track(mural);
-    this.track(this.add.text(529, 126, 'BẢO VỆ · BÁNH XE MẶT TRỜI', { fontFamily: 'Segoe UI, sans-serif', fontSize: '7px', color: '#ffe7a4', backgroundColor: '#07151ccc', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(22));
+    this.track(this.add.text(432, 53, 'BẢO VỆ · BÁNH XE MẶT TRỜI', { fontFamily: 'Segoe UI, sans-serif', fontSize: '7px', color: '#ffe7a4', backgroundColor: '#07151ccc', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(22));
   }
 
   private registerMirror(id: string, label: string, x: number, y: number, goal: number): void {
