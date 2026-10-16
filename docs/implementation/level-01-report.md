@@ -4,6 +4,8 @@ Date: 2026-10-16
 
 Scope: Level 01 only
 
+Root verification and independent review are complete; see [level-01-verification.md](level-01-verification.md) for final revision binding, commands, browser evidence and resolved findings. The worker-stage entries below preserve their original verification scope.
+
 Implementation commit: `af1dc43` (`fix(level01): play footprint discovery dialogue`)
 
 Baseline: `16e01e4`

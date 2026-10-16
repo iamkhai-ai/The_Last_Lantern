@@ -32,18 +32,18 @@
 
 **Interfaces:** Spatial module exports typed object IDs, anchors/stand points, footprint rectangles, named spawn/checkpoints, foot offset, depth helper, receiver charge predicate and safe-spawn resolver. Names may follow repo idiom; values must come from the Level 01 layout. Runtime consumers share those exports. No unrelated abstract level editor, scene router or save version migration.
 
-- [ ] Read scenario, layout, art map and relevant engine code; record deviations before implementation.
-- [ ] Add pure spatial definitions and focused checks for route reachability with closed/open gate, solid interaction access, actor foot transform, safe checkpoint recovery and ring charge stages. Check runtime physics constants match these inputs; do not test a duplicate map disconnected from runtime.
-- [ ] Implement Level 01 terrain/props using correct pivots, native proportions and ID-bound state images. Add trunk/base/rock/post colliders and the stateful gate passage collider. Tie every invisible physics rectangle to visible terrain/prop.
-- [ ] Implement wake/nearby Lumo meeting, pickup/re-read, lit tablet requirement, post-reading Pulse discovery, charging/latched eye and explicit passage exit. Use full relevant scenario lines and repeat dialogue. Preserve active interaction checks when E is pressed; make any shared-system amendment small and compatibility-safe.
-- [ ] Implement step-aware objective, H escalation and J records; show only taught controls. Follow Lumo when unassigned. Restore old saves onto reachable floor before movement; compute visual/collider states from durable flags.
-- [ ] Run focused checks, `npm run build`, `git diff --check`; report exact commands/status. Root handles browser evidence separately, so do not claim playthrough from state fixtures.
-- [ ] Inspect changes for scope, commit code to local feature branch after checks, write report with commit hash, files, decisions/deviations, evidence and known limits. No push/merge.
+- [x] Read scenario, layout, art map and relevant engine code; record deviations before implementation.
+- [x] Add pure spatial definitions and focused checks for route reachability with closed/open gate, solid interaction access, actor foot transform, safe checkpoint recovery and ring charge stages. Check runtime physics constants match these inputs; do not test a duplicate map disconnected from runtime.
+- [x] Implement Level 01 terrain/props using correct pivots, native proportions and ID-bound state images. Add trunk/base/rock/post colliders and the stateful gate passage collider. Tie every invisible physics rectangle to visible terrain/prop.
+- [x] Implement wake/nearby Lumo meeting, pickup/re-read, lit tablet requirement, post-reading Pulse discovery, charging/latched eye and explicit passage exit. Use full relevant scenario lines and repeat dialogue. Preserve active interaction checks when E is pressed; make any shared-system amendment small and compatibility-safe.
+- [x] Implement step-aware objective, H escalation and J records; show only taught controls. Follow Lumo when unassigned. Restore old saves onto reachable floor before movement; compute visual/collider states from durable flags.
+- [x] Run focused checks, `npm run build`, `git diff --check`; report exact commands/status. Root handles browser evidence separately, so do not claim playthrough from state fixtures.
+- [x] Inspect changes for scope, commit code to local feature branch after checks, write report with commit hash, files, decisions/deviations, evidence and known limits. No push/merge.
 
 ### Final validation and review (root)
 
-- [ ] Root reruns build and focused checks on frozen worker commit.
-- [ ] Root uses separate localhost origin for browser geometry/tutorial smoke; preserve user's save and stop local server afterward.
-- [ ] Two independent read-only Luna high reviewers examine same frozen commit against scenario/layout; collect findings separately before reconciling.
-- [ ] Worker addresses confirmed findings and checks/reviews repeat for affected revision.
-- [ ] Report current Level 01 result and reviewable branch/path; Levels 02–10 remain deferred.
+- [x] Root reruns build and focused checks on frozen worker commit.
+- [x] Root uses separate localhost origin for browser geometry/tutorial smoke; preserve user's save and stop local server afterward.
+- [x] Two independent read-only Luna high reviewers examine same frozen commit against scenario/layout; collect findings separately before reconciling.
+- [x] Worker addresses confirmed findings and checks/reviews repeat for affected revision.
+- [x] Report current Level 01 result and reviewable branch/path; Levels 02–10 remain deferred.
