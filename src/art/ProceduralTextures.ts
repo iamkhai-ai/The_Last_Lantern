@@ -1075,13 +1075,14 @@ export class ProceduralTextures {
       ctx.fillRect(0, 0, 256, 256);
     });
 
-    this.createCanvas(scene, 'light_reveal_mask', 256, 256, (ctx) => {
+    this.createCanvas(scene, 'level01_darkness_falloff', 256, 256, (ctx) => {
       const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 126);
-      g.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      g.addColorStop(0.28, 'rgba(255, 255, 255, 1)');
-      g.addColorStop(0.55, 'rgba(255, 255, 255, 0.82)');
-      g.addColorStop(0.82, 'rgba(255, 255, 255, 0.3)');
-      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      g.addColorStop(0, 'rgba(3, 8, 12, 0)');
+      g.addColorStop(0.28, 'rgba(3, 8, 12, 0)');
+      g.addColorStop(0.55, 'rgba(3, 8, 12, 0.18)');
+      g.addColorStop(0.82, 'rgba(3, 8, 12, 0.84)');
+      g.addColorStop(0.9, 'rgba(3, 8, 12, 1)');
+      g.addColorStop(1, 'rgba(3, 8, 12, 1)');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, 256, 256);
     });
