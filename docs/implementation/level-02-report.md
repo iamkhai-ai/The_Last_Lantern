@@ -25,6 +25,7 @@ No raster assets, dependencies, persisted save keys or schema, Level 01 mechanic
 - `npm run build`: PASS (TypeScript and Vite; 406 modules). Generated `dist/index.html` was restored after build.
 - `git diff --check`: PASS.
 - Portable browser fixtures are checked in as `scripts/level02-browser.cjs` and `scripts/level02-geometry.cjs`. They accept `PLAYWRIGHT_MODULE`, `PLAYWRIGHT_CHROMIUM_EXECUTABLE`, `LEVEL02_BASE_URL`, and `LEVEL02_ARTIFACT_DIR`; default artifacts go to the system temporary directory. Worker did not run a browser/server. Root owns final browser verification and independent reviews for the frozen correction revision.
+- The geometry fixture scopes the behind/in-front canopy pixel check to `tree-5`, so unrelated overlapping canopies cannot produce a false layering failure. Gate stair samples still inspect every world prop. The pure contract also explores the closed map on a 2-pixel grid and rejects any reachable center in the gate interior above the y=162 contact line.
 
 ## Limitations
 

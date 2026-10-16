@@ -19,6 +19,18 @@ function reachableWithin(start,target,gateOpen=false){
   return false;
 }
 for(const [name,stand] of Object.entries(WHISPERING_WOODS.stands)) assert.equal(reachableWithin(WHISPERING_WOODS.stands.spawn,stand,name==='exit'),true,`route reaches ${name}`);
+function reachableClosedGateInterior(){
+  const step=2,start=WHISPERING_WOODS.stands.spawn,queue=[start],seen=new Set([`${start.x},${start.y}`]);
+  for(let i=0;i<queue.length;i++){
+    const p=queue[i];
+    for(const [dx,dy] of [[step,0],[-step,0],[0,step],[0,-step]]){
+      const next={x:p.x+dx,y:p.y+dy},key=`${next.x},${next.y}`;
+      if(!seen.has(key)&&isWoodsCenterWalkable(next,false)){seen.add(key);queue.push(next);}
+    }
+  }
+  return [...seen].some((key)=>{const [x,y]=key.split(',').map(Number);return x>=483&&x<=537&&y<162;});
+}
+assert.equal(reachableClosedGateInterior(),false,'closed gate has no 2px-grid route through posts, backing, or threshold');
 for(const id of ['practice','moon','leaf','star','poem']){
   const anchor=WHISPERING_WOODS.anchors[id],stand=WHISPERING_WOODS.stands[id];
   assert.equal(Math.hypot(anchor.x-stand.x,anchor.y-18-stand.y)<=24,true,`${id} interaction remains reachable at southern solid contact`);
