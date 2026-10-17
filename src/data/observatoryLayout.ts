@@ -346,9 +346,11 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     // The root bed is a full-depth divider: it can only be approached from its
     // west/east face, which RULE_GAMES.md section 3 allows for objects that
     // cannot be reached from the south. Documented exception.
+    // The stand sits on the NEAR-bank face (west of the bed, south of the statue)
+    // so the player can read why the roots will not close BEFORE crossing.
     id: 'root-bed', roomId: 'observatory', art: { kind: 'texture', key: 'root-bed' },
     nativeWidth: 44, nativeHeight: 148, scale: 1, mount: 'ground',
-    anchor: { x: 362, y: 300 }, stand: { x: 398, y: 200 }, radius: 24, approach: 'side',
+    anchor: { x: 362, y: 300 }, stand: { x: 330, y: 252 }, radius: 24, approach: 'side',
     solidOverride: { x: 340, y: 152, width: 44, height: 148 },
   },
   {

@@ -40,6 +40,7 @@ import {
   nearestSafeObservatorySpawn,
   observatoryArtRect,
   observatoryBody,
+  observatoryCompletionReady,
   observatoryDoorBlockReason,
   observatoryDoorOpen,
   observatoryDoorShouldBlock,
@@ -645,6 +646,134 @@ for (const guard of [
 assert.equal(saveSource.includes('roomId') && saveSource.includes('validRooms'), true,
   'roomId is still restricted to the three observatory rooms');
 
+/* ------------------------------------------------------------------ *
+ * 14. Authored player flow: every step is physically walkable, and no step
+ *     leaves the player without a reachable control or exit
+ * ------------------------------------------------------------------ */
+const standOf = (id) => OBSERVATORY_ELEMENTS.find((element) => element.id === id);
+const exitOf = (roomId, doorId) => OBSERVATORY_ROOMS[roomId].exits.find((exit) => exit.doorId === doorId);
+const reachableFrom = (roomId, from, stage, target, tolerance) => reachable(roomId, from, stage, target, tolerance);
+
+/** One authored step: where the player is, then what must be true afterwards. */
+const FLOW = [
+  {
+    id: '1-lobby',
+    room: 'entrance',
+    stage: STAGES.arrival,
+    from: OBSERVATORY_ROOMS.entrance.spawns.find((s) => s.id === 'entrance-start').position,
+    at: ['lantern-pedestal', 'g0', 'learned-marks'],
+    // Door A is shut: the alcove mouth answers, the deep trigger does not.
+    unreachableStands: [],
+    exitsLocked: ['door-a'],
+  },
+  {
+    id: '2-lamp-placed-door-a',
+    room: 'entrance',
+    stage: STAGES.lampPlaced,
+    from: OBSERVATORY_ROOMS.entrance.spawns.find((s) => s.id === 'entrance-start').position,
+    at: ['lantern-pedestal', 'g0'],
+    exitsOpen: ['door-a'],
+  },
+  {
+    id: '3-latch-door-a',
+    room: 'corridor',
+    stage: STAGES.doorALatched,
+    from: OBSERVATORY_ROOMS.corridor.spawns.find((s) => s.id === 'corridor-from-entrance').position,
+    at: ['lumo-tube', 'lumo-seal', 'g1', 'door-a-control'],
+    exitsOpen: ['door-a'],
+    exitsLocked: ['sun-door'],
+  },
+  {
+    id: '4-beam-to-observatory',
+    room: 'corridor',
+    stage: STAGES.beamToObservatory,
+    from: OBSERVATORY_ROOMS.corridor.spawns.find((s) => s.id === 'corridor-from-entrance').position,
+    at: ['sun-door-control', 'g1'],
+    exitsOpen: ['sun-door'],
+  },
+  {
+    id: '5-direct-g2-opens-door-without-bridge',
+    room: 'observatory',
+    stage: STAGES.beamToObservatory,
+    from: OBSERVATORY_ROOMS.observatory.spawns.find((s) => s.id === 'observatory-from-corridor').position,
+    at: ['g2', 'statue', 'splitter', 'sun-lock', 'root-bed'],
+    farBankLocked: true,
+  },
+  {
+    id: '6-shadowed-split-grows-bridge',
+    room: 'observatory',
+    stage: STAGES.splitWithShadow,
+    from: OBSERVATORY_ROOMS.observatory.spawns.find((s) => s.id === 'observatory-from-corridor').position,
+    at: ['g2', 'statue', 'splitter', 'sun-lock', 'root-bed'],
+    farBankLocked: false,
+  },
+  {
+    id: '7-cross-and-latch',
+    room: 'observatory',
+    stage: STAGES.crossed,
+    from: OBSERVATORY_ROOMS.observatory.spawns.find((s) => s.id === 'observatory-far-bank').position,
+    at: ['final-door-control', 'stone-return-loop'],
+  },
+  {
+    id: '8-loop-open-backtrack',
+    room: 'observatory',
+    stage: STAGES.loopOpen,
+    from: OBSERVATORY_ROOMS.observatory.spawns.find((s) => s.id === 'observatory-far-bank').position,
+    at: ['final-record'],
+    exitsOpen: ['return-loop'],
+  },
+  {
+    id: '9-lantern-home-lumo-back',
+    room: 'observatory',
+    stage: STAGES.finished,
+    from: OBSERVATORY_ROOMS.observatory.spawns.find((s) => s.id === 'observatory-far-bank').position,
+    at: ['final-record', 'balance-crystal', 'final-door-control'],
+    exitsOpen: ['return-loop'],
+  },
+];
+for (const step of FLOW) {
+  for (const id of step.at ?? []) {
+    const element = standOf(id);
+    assert.ok(element, `flow ${step.id} references the authored control ${id}`);
+    assert.ok(reachableFrom(step.room, step.from, step.stage, element.stand),
+      `flow ${step.id}: ${id} is walkable from ${JSON.stringify(step.from)}`);
+  }
+  for (const doorId of step.exitsOpen ?? []) {
+    const exit = exitOf(step.room, doorId);
+    assert.ok(observatoryDoorOpen(doorId, step.stage), `flow ${step.id}: ${doorId} is open`);
+    assert.ok(reachableFrom(step.room, step.from, step.stage, exit.interactionPoint, 28),
+      `flow ${step.id}: the ${doorId} transit trigger is reachable`);
+  }
+  for (const doorId of step.exitsLocked ?? []) {
+    const exit = exitOf(step.room, doorId);
+    const alcove = OBSERVATORY_ALCOVES.find((candidate) => candidate.roomId === step.room && candidate.doorId === doorId);
+    assert.ok(reachableFrom(step.room, step.from, step.stage, alcove.inspect, alcove.inspectRadius),
+      `flow ${step.id}: the ${doorId} inspect control still answers while locked`);
+    assert.equal(reachableFrom(step.room, step.from, step.stage, exit.interactionPoint, alcove.triggerRadius), false,
+      `flow ${step.id}: the ${doorId} transit trigger stays unreachable while locked`);
+    assert.ok(observatoryDoorBlockReason(doorId, step.stage).length > 12,
+      `flow ${step.id}: the locked ${doorId} names its missing prerequisite`);
+  }
+  if (step.farBankLocked === true) {
+    for (const id of ['final-door-control', 'final-record', 'balance-crystal']) {
+      assert.equal(reachableFrom(step.room, step.from, step.stage, standOf(id).stand), false,
+        `flow ${step.id}: ${id} stays behind the unbridged root bed`);
+    }
+  }
+  if (step.farBankLocked === false) {
+    for (const id of ['final-door-control', 'final-record', 'balance-crystal']) {
+      assert.ok(reachableFrom(step.room, step.from, step.stage, standOf(id).stand),
+        `flow ${step.id}: ${id} is reachable once the bridge holds`);
+    }
+  }
+}
+// Completion gating: nothing before the crystal may finish the level.
+for (const [name, stage] of Object.entries(STAGES)) {
+  if (name === 'finished') continue;
+  assert.equal(observatoryCompletionReady(stage), false, `stage ${name} cannot complete the level early`);
+}
+assert.equal(observatoryCompletionReady(STAGES.finished), true, 'the documented final stage completes the level');
+
 console.log('Level 09 observatory geometry/state checks passed:');
 console.log(`  rooms        : ${ROOMS.length}`);
 console.log(`  elements     : ${OBSERVATORY_ELEMENTS.length}`);
@@ -655,4 +784,5 @@ console.log('  solids       : every collider blocks the 14x6 body from 4 directi
 console.log('  art          : every collider maps to a registered, existing PNG');
 console.log('  controls     : every authored control is registered and vice versa');
 console.log('  wiring       : CampaignScene consumes the verified layout symbols');
+console.log(`  flow         : ${FLOW.length} authored steps trace spawn to crystal`);
 console.log('  save         : v1 observatory validations intact');

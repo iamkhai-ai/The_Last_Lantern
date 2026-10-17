@@ -1,207 +1,258 @@
 # Level 09 — The Dark Moon Observatory: spatial layout (authoritative spec)
 
-Source: `docs/scenario/09-dark-moon-observatory.md`. Flow plan: `09-plan.md`. Runtime data: `src/data/observatoryRooms.ts` (legacy, to be hardened into `observatoryLayout.ts`) + `src/systems/ObservatoryPuzzle.ts`. Art: `assets/levels/09-dark-moon-observatory/sprites/{lobby,star-chart,observatory}-base.png`, `observatory-clean-base.png`, `learned-marks-miniature.png`, `star-chart.png`, `wheel-stopped-sun-among-stars.png`, plus shared mechanisms. Staging: `assets/levels/09-dark-moon-observatory/layout-and-restores.json` and `previews/01..10` (illustrative composites only; rectangles below are authoritative).
+> **Generated from the runtime data.** Every rectangle, stand, radius and prompt below comes from
+> `src/data/observatoryLayout.ts` + `src/data/observatoryRooms.ts` via
+> `scripts/gen-observatory-layout-doc.mjs`, so this document cannot drift from the colliders the game
+> uses. Verify with `node scripts/check-observatory.mjs` and `npm run build`.
 
-Conventions: 640×360 per room, native scale, nearest filtering. Actor center coordinates; body = `center + (-7, +16, 14, 6)`, feet line `center + (0, 19)`. Standing prop anchors = art top-left. Depth: floor art 4–6, standing props `10 + groundAnchorY/10`, beam graphics 7, latched door braces 12, memory overlay 95, actor `10 + (y+19)/10`, prompts 82, dialogue 95, HUD 86+. Darkness uses the shared LanternSystem overlay stack (darkness 68 / halo 69 / pulse 70 / vignette 71) driven by `lantern.isDawnMode` — no level-local overlay. HUD text occupies y=0..70 and y=320..360.
+- Scenario: `docs/scenario/09-dark-moon-observatory.md` · flow plan: `09-plan.md`
+- Geometry, state, prompts: `src/data/observatoryLayout.ts`
+- Rooms, spawns, exits, waypoints: `src/data/observatoryRooms.ts`
+- Pure state derivation: `src/systems/ObservatoryPuzzle.ts`
+- Runtime controller: `src/scenes/CampaignScene.ts` (`buildObservatoryRoom`, `transitionObservatory`,
+  `updateObservatoryLumo`, `updateObservatoryCrossingState`, `refreshObservatoryDoors`,
+  `refreshObservatoryPuzzle`, `resolveSafeObservatoryCheckpoint`, `clearActiveRoom`, `callObservatoryLumo`)
+- Art: `assets/levels/09-dark-moon-observatory/sprites/` plus reused Level 05/08 mechanism frames
+  registered in `src/art/CampaignArt.ts`. Staging files (`layout-and-restores.json`, `previews/01..10`)
+  are illustrative composites and are **never loaded at runtime**.
 
-## Coordinate system and room model
+## Conventions
 
-Three independent 640×360 rooms: `entrance` (lobby), `corridor` (star-map corridor), `observatory`. Panorama x offset 0/640/1280 is a continuity aid only; runtime uses room-local coordinates plus `roomId`. Safe spawns per room (from `layout-and-restores.json`): lobby `(140,250)`, star-chart `(490,250)`, observatory far bank `(280,250)`.
+- Each room is an independent 640×360 view; runtime uses room-local coordinates plus `roomId`.
+- Native art sizes are preserved. Standing props are fitted by a **uniform** factor
+  (`fitObservatoryArt`), so no sprite is stretched; wall/floor art keeps its authored ratio.
+- Actor frame 36×42 with baseline 40: feet at `center + (0, 19)`; the Arcade foot body
+  is **14×6** at `center + (-7, +16)`.
+- Depth: floor art 0..7, door arches 3, ground-mounted art 3, bridge deck 6, standing props
+  `10 + groundAnchorY/10`, memory overlay 94, prompt container 82, HUD 86. Darkness uses the shared
+  `LanternSystem` overlay stack (68..71) instead of a level-local overlay.
+- HUD text occupies y=0..58 and y=320..360. No collider, stand or prompt sits in those bands, and every
+  world sprite sorts below prompt/HUD depth so nothing can draw over the HUD.
+- A door is a recessed alcove: a 48px opening, permanent jambs
+  24px thick, and a threshold that is solid only while the door is shut. The transit
+  trigger sits deep inside the alcove, so it is geometrically unreachable while locked, and a
+  room-facing inspect control at the alcove mouth always names the missing prerequisite in Vietnamese.
 
-## Zones (walkable floors)
+## Walkable floors and permanent masonry
 
-### Room: entrance (lobby)
-| id | rect (x,y,w,h) | contents |
+| room | floor band (x,y,w,h) | minX..maxX |
 | --- | --- | --- |
-| lobby floor | 28,96,584,208 | main walkable floor |
-| south band | 0,280,640,80 | approach to pedestal/door |
-| entry mouth (from return loop) | 216,210,44,30 | spawn (238,224) when arriving from the loop |
-| door-A approach | 520,150,120,90 | approach to Door A (east wall) |
+| tiền sảnh (`lobby-base`) | 24,88,592,216 | 24..616 |
+| hành lang phòng sao (`star-chart-base`) | 24,88,592,216 | 24..616 |
+| phòng thiên văn (`observatory-clean-base`) | 24,152,592,148 | 24..616 |
 
-### Room: corridor (star-map corridor)
-| id | rect (x,y,w,h) | contents |
-| --- | --- | --- |
-| corridor floor | 28,96,584,208 | main walkable floor |
-| tube alcove (north) | 80,56,60,60 | Lumo tube inlet at (105,78); stand (105,112) |
-| seal alcove (north) | 296,56,60,60 | Lumo seal at (320,80); stand (320,112) |
-| star-map table zone | 250,230,120,60 | table at (282,250); walkable around |
+### Masonry — tiền sảnh (`lobby-base`)
 
-### Room: observatory
-| id | rect (x,y,w,h) | contents |
-| --- | --- | --- |
-| near bank | 28,96,230,208 | G2, splitter, statue, Sun lock approach |
-| root crossing | 0,230,150,30 (obs) / 545,230,95,30 (star) | bridge strip, walkable only while deployed/held |
-| far bank | 262,230,338,80 | final door, loop control, record, crystal |
-| west pillar niche | 60,16,60,70 | pillar at (74,28) |
-| east pillar niche | 560,16,60,70 | pillar at (578,28) |
+| rect (x,y,w,h) |
+| --- |
+| 0,0,640,88 |
+| 0,304,640,56 |
+| 0,88,24,108 |
+| 0,244,24,60 |
+| 616,88,24,68 |
+| 616,204,24,100 |
 
-## Static solids (walls, structures, props)
+### Masonry — hành lang phòng sao (`star-chart-base`)
 
-### entrance
-| id | rect | note |
-| --- | --- | --- |
-| band-north | 0,0,640,96 | top wall/border |
-| band-south | 0,300,640,60 | bottom border (entry mouth carved) |
-| band-west | 0,96,28,204 | left wall |
-| band-east | 612,96,28,204 | right wall (Door A carved 554,173,618,261) |
-| pillar-nw | 24,44,30,54 | top-left pillar |
-| pillar-sw | 24,262,30,54 | bottom-left pillar |
-| pedestal-base | 148,150,46,44 | solid furniture |
-| door-A frame | 554,173,64,88 | solid until opened; becomes scenery after open |
-| G0 base | 436,136,24,24 | solid prop (G0 mirror) |
+| rect (x,y,w,h) |
+| --- |
+| 0,0,640,88 |
+| 0,304,640,56 |
+| 0,88,24,68 |
+| 0,204,24,100 |
+| 616,88,24,108 |
+| 616,244,24,60 |
 
-### corridor
-| id | rect | note |
-| --- | --- | --- |
-| band-north | 0,0,640,96 | top wall |
-| band-south | 0,300,640,60 | bottom wall |
-| band-west | 0,96,28,204 | left wall (Door A carved 8,247 entry) |
-| band-east | 612,96,28,204 | right wall (Sun Door carved 590,150,50,60) |
-| pillar-n | 180,22,34,48 | top pillar |
-| pillar-s | 180,290,34,48 | bottom pillar |
-| star-map table | 282,250,88,30 | solid furniture |
-| G1 base | 223,126,24,20 | solid prop |
-| Lumo tube (decor) | 90,64,30,30 | solid decor (tube inlet is the stand) |
-| Lumo seal (decor) | 305,66,30,30 | solid decor |
+### Masonry — phòng thiên văn (`observatory-clean-base`)
 
-### observatory
-| id | rect | note |
-| --- | --- | --- |
-| band-north | 0,0,640,56 | top wall/roof |
-| band-south | 0,312,640,48 | bottom border |
-| band-west | 0,56,28,256 | left wall (Sun Door carved 0,150,50,60) |
-| band-east | 612,56,28,256 | right wall |
-| pillar-w | 74,28,34,48 | top-left pillar |
-| pillar-e | 578,28,34,48 | top-right pillar |
-| statue | 292,122,44,62 | solid; rotation changes shadow cone only |
-| root bed (dynamic) | 330,220,132,54 | solid while roots up; walkable once bridged |
-| G2 base | 132,108,24,20 | solid prop |
-| splitter frame | 228,100,24,24 | solid prop (fixed splitter) |
-| Sun lock | 508,84,24,24 | solid prop |
-| final door frame | 185,174,64,88 | solid until opened |
-| return-loop control | 540,270,24,24 | solid prop |
-| record pedestal | 476,154,24,24 | solid prop |
-| crystal pedestal | 562,152,24,24 | solid prop |
+| rect (x,y,w,h) |
+| --- |
+| 0,0,640,100 |
+| 0,100,468,52 |
+| 532,100,108,52 |
+| 0,152,24,38 |
+| 0,238,24,62 |
+| 616,152,24,148 |
+| 0,300,488,60 |
+| 548,300,92,60 |
+| 496,334,48,26 |
 
-## Dynamic solids
+### Door alcoves
+
+| id | room | door | threshold | jambs | inspect (r) | transit trigger (r) | arch |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `door-a-entrance` | entrance | door-a | 536,156,104,48 | 536,132,104,24 · 536,204,104,24 | 520,180 (24) | 604,180 (28) | 576,152,48,48 |
+| `door-a-corridor` | corridor | door-a | 24,156,104,48 | 24,132,104,24 · 24,204,104,24 | 144,180 (22) | 36,180 (28) | 72,152,48,48 |
+| `sun-door-corridor` | corridor | sun-door | 536,196,104,48 | 536,172,104,24 · 536,244,104,24 | 512,220 (22) | 604,220 (28) | 576,192,48,48 |
+| `sun-door-observatory` | observatory | sun-door | 24,190,80,48 | 24,166,80,24 · 24,238,80,24 | 118,214 (22) | 36,214 (28) | 56,186,48,48 |
+| `return-loop-entrance` | entrance | return-loop | 24,196,104,48 | 24,172,104,24 · 24,244,104,24 | 140,220 (22) | 36,220 (28) | 72,192,48,48 |
+| `return-loop-observatory` | observatory | return-loop | 496,300,48,34 | 488,300,8,60 · 548,300,8,60 | 520,262 (22) | 520,318 (28) | 496,300,48,34 |
+
+## Modules (art + stand + behaviour)
+
+The stand is the E trigger, authored at the object's **south edge** (RULE_GAMES.md 1) or its documented
+side. A standing prop sorts at `10 + anchor.y/10`; ground-mounted art sits at depth 3.
+
+### tiền sảnh (`lobby-base`)
+
+| id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
+| --- | --- | --- | --- | --- | --- | --- |
+| `lantern-pedestal` | texture `pedestal_empty` | 36×46 ×1 | 188,232 | 170,186,36,46 | 188,250 (22) | south |
+| `g0` | texture `mirror_0` | 40×50 ×0.9 | 432,236 | 414,191,36,45 | 432,254 (22) | south |
+| `learned-marks` | level 8 `learned-marks-miniature` | 160×80 ×1 | 320,184 | 240,104,160,80 | 320,202 (24) | south, ground mount |
+
+### hành lang phòng sao (`star-chart-base`)
+
+| id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
+| --- | --- | --- | --- | --- | --- | --- |
+| `g1` | texture `mirror_1` | 40×50 ×0.9 | 240,216 | 222,171,36,45 | 240,234 (22) | south |
+| `lumo-tube` | level 4 `tube-mouth` | 64×32 ×1 | 105,88 | 73,56,64,32 | 105,106 (22) | south |
+| `lumo-seal` | level 7 `lock-moon-covered` | 32×40 ×1 | 320,88 | 304,48,32,40 | 320,106 (22) | south |
+| `door-a-control` | level 4 `latch-unlatched` | 28×32 ×1 | 56,204 | 42,172,28,32 | 56,222 (22) | south |
+| `sun-door-control` | level 7 `lock-sun-off` | 36×44 ×1 | 500,260 | 482,216,36,44 | 500,278 (22) | south |
+| `star-map-table` | texture `ruins_altar` | 104×52 ×0.8 | 320,280 | 278.5,238,83,42 | 320,280 (—) | side |
+
+### phòng thiên văn (`observatory-clean-base`)
+
+| id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
+| --- | --- | --- | --- | --- | --- | --- |
+| `g2` | texture `mirror_2` | 40×50 ×0.9 | 168,258 | 150,213,36,45 | 168,276 (22) | south |
+| `splitter` | level 7 set `fixed-three-route-splitter-off / fixed-three-route-splitter-on` | 48×48 ×0.8 | 240,240 | 221,202,38,38 | 240,258 (22) | south |
+| `statue` | level 7 set `statue-notch-0 / statue-notch-1 / statue-notch-2 / statue-notch-3` | 64×88 ×0.8 | 296,252 | 270.5,182,51,70 | 296,270 (22) | south |
+| `sun-lock` | level 7 `lock-sun-off` | 36×44 ×0.85 | 176,152 | 160.5,115,31,37 | 176,170 (22) | south |
+| `root-bed` | texture `root-bed` | 44×148 ×1 | 362,300 | 340,152,44,148 | 330,252 (24) | side, ground mount |
+| `final-door-control` | level 3 `mechanisms/latch-east-unlatched` | 28×32 ×1 | 500,152 | 486,120,28,32 | 500,170 (22) | south, ground mount |
+| `final-door` | level 7 set `sanctuary-door-closed / sanctuary-door-open` | 104×76 ×0.62 | 500,152 | 468,105,64,47 | 500,152 (—) | gate, ground mount |
+| `stone-return-loop` | texture `receiver_off` | 40×48 ×0.7 | 466,252 | 452,218,28,34 | 466,270 (22) | south |
+| `final-record` | texture `ruins_altar` | 104×52 ×0.62 | 418,256 | 386,224,64,32 | 418,274 (22) | south |
+| `balance-crystal` | texture `crystal_balance` | 42×50 ×0.6 | 568,252 | 555.5,222,25,30 | 568,270 (22) | south |
+
+Rooms, spawns, exits and beam waypoints:
+
+- **tiền sảnh (`lobby-base`)**
+  - spawns: `entrance-start` 100,268 · `entrance-from-corridor` 500,180 · `entrance-from-return-loop` 176,268
+  - exits: `entrance-to-corridor` (door-a; trigger 604,180; inspect 520,180 → corridor / corridor-from-entrance) · `entrance-return-loop-to-observatory` (return-loop; trigger 36,220; inspect 140,220 → observatory / observatory-far-bank)
+  - waypoints: `lantern-source` (entrance 188,176) · `door-a-eye` (entrance 604,168)
+- **hành lang phòng sao (`star-chart-base`)**
+  - spawns: `corridor-from-entrance` 152,180 · `corridor-from-observatory` 516,190
+  - exits: `corridor-to-entrance` (door-a; trigger 36,180; latch 56,222 → entrance / entrance-from-corridor) · `corridor-to-observatory` (sun-door; trigger 604,220; inspect 512,220 → observatory / observatory-from-corridor)
+  - waypoints: `g1` (corridor 240,190) · `lumo-tube-entry` (corridor 105,78) · `lumo-seal` (corridor 320,80)
+- **phòng thiên văn (`observatory-clean-base`)**
+  - spawns: `observatory-from-corridor` 128,200 · `observatory-near-bridge` 280,276 · `observatory-far-bank` 452,276
+  - exits: `observatory-to-corridor` (sun-door; trigger 36,214; inspect 118,214 → corridor / corridor-from-observatory) · `observatory-return-loop-to-entrance` (return-loop; trigger 520,318; inspect 520,262 → entrance / entrance-from-return-loop)
+  - waypoints: `g2` (observatory 168,226) · `sun-lock` (observatory 176,133) · `splitter` (observatory 240,220) · `root-branch` (observatory 362,226)
+
+## Dynamic structures
 
 | id | rect | state |
 | --- | --- | --- |
-| Door A (entrance↔corridor) | 554,173,64,88 | solid until `l8-door-a-latched` OR beam holds it open; after latch, scenery only |
-| Sun Door (corridor↔observatory) | 590,150,50,60 (corridor) / 0,150,50,60 (observatory) | solid until `sunDoorUnlocked` (Sun lock lit) |
-| root bed | 330,220,132,54 | solid while roots are up; once bridge eligible, the bed is shadowed and the bridge strip becomes walkable |
-| root bridge (near side, star-chart) | 545,230,95,20 | walkable only while deployed or a span is held under the body |
-| root bridge (far side, observatory) | 0,230,150,20 | same |
-| final door | 185,174,64,88 | solid until `l8-final-door-latched` |
-| return loop strip | per room, y=319, width ~88 | walkable only after `l8-return-loop-open` |
+| root bed | 340,152,44,148 | full-depth divider drawn by `buildObservatoryRootBed()`; both masses stay solid and are painted exactly on their colliders, and the southern mass occludes a body standing in the lane |
+| root bridge lane | 340,202,44,48 | the only cut through the bed: solid until `bridgeEligible`; a span held under the body waits for a bank before retracting |
+| final door head | 468,100,64,52 | solid until `finalDoorLatched` |
+| `door-a-entrance` threshold | 536,156,104,48 | solid until the door-a opens or latches |
+| `door-a-corridor` threshold | 24,156,104,48 | solid until the door-a opens or latches |
+| `sun-door-corridor` threshold | 536,196,104,48 | solid until the sun-door opens or latches |
+| `sun-door-observatory` threshold | 24,190,80,48 | solid until the sun-door opens or latches |
+| `return-loop-entrance` threshold | 24,196,104,48 | solid until the return-loop opens or latches |
+| `return-loop-observatory` threshold | 496,300,48,34 | solid until the return-loop opens or latches |
 
-## Modules (art + stand + behavior)
+Ground stamps (painted floor decor, below the feet, never solid):
 
-### Room: entrance
-| id | art (anchor) | solid | stand / behavior |
-| --- | --- | --- | --- |
-| room base | `lobby-base.png` 640×360 @ (0,0), depth 0 | — | painted room |
-| learned-marks miniature | `learned-marks-miniature.png` 160×80 @ (320,150) center, depth 5 | none | E inspect; captions only; sets `l8-miniature-viewed` |
-| pedestal | shared `source-empty/lit` 32×44 @ (170,166) top-left | pedestal-base | stand (170,202) r24; `E · Đặt đèn lên bệ` / `E · Thu hồi đèn`; lantern on/off state |
-| G0 | shared mirror 32×40 @ (448,146) | G0 base | stand (448,184) r24; E cycles rotation 0/1/2/3; `E · Xoay G0` |
-| Door A | shared latch/door art @ (560,142) | door frame | stand (555,190) r30; opens on beam hit; latch inside at (72,180) |
+- entrance: `loop-path` 128,210,60,24 depth 2 · `source-ring` 156,214,64,34 depth 1
+- corridor: `pipe-run` 73,74,215,18 depth 2 · `latch-grille` 28,236,56,28 depth 2
+- observatory: `pipe-run` 344,60,264,18 depth 2 · `pipe-drop` 592,76,18,180 depth 2 · `loop-path` 472,266,96,32 depth 2 · `final-door-sill` 468,140,64,14 depth 2
 
-### Room: corridor
-| id | art (anchor) | solid | stand / behavior |
-| --- | --- | --- | --- |
-| room base | `star-chart-base.png` 640×360 @ (0,0), depth 0 | — | painted room |
-| star chart (wall) | `star-chart.png` 136×80 @ (320,162) center, depth 5 | none | decor |
-| wheel (wall) | `wheel-stopped-sun-among-stars.png` 144×112 @ (500,128) center, depth 5 | none | decor; sun stopped among stars |
-| G1 | shared mirror 32×40 @ (235,136) | G1 base | stand (235,176) r24; E cycles rotation; `E · Xoay G1` |
-| Lumo tube inlet | decor @ (105,78) | tube decor | stand (105,112) r24; `E · Gọi Lumo qua ống` / `E · Gọi Lumo về` |
-| Lumo seal | decor @ (320,80) | seal decor | no direct stand; Lumo holds it |
-| Door A latch (inside) | shared latch-west @ (68,142) | none | stand (72,180) r24; `E · Gài chốt cửa A`; only when bar raised/door open |
-| Sun Door | shared lock-sun @ (568,142) | door frame | stand (560,180) r24; opens on Sun lock lit |
-
-### Room: observatory
-| id | art (anchor) | solid | stand / behavior |
-| --- | --- | --- | --- |
-| room base (clean) | `observatory-clean-base.png` 640×360 @ (0,0), depth 0 | — | used while record unread |
-| room base (memory) | `observatory-base.png` 640×360 @ (0,0), depth 0 | — | used once memory overlay is active (record + Shadow baked in) |
-| G2 | shared mirror 32×40 @ (144,118) | G2 base | stand (144,158) r24; E cycles; `E · Xoay G2` |
-| splitter frame | shared fixed-three-route-splitter @ (240,112) | frame | stand (240,158) r24; inspect only; `E · Xem khung chia tia` |
-| statue | shared statue-notch 64×88 @ (292,122) | statue | stand (314,192) r24; E cycles facing 0..3; `E · Xoay tượng`; wide face (2) shadows roots |
-| Sun lock | shared lock-sun @ (520,96) | lock | stand (520,132) r24; inspect; `E · Xem khóa Nhật` |
-| root bed | graphics @ (330,220) 132×54 | dynamic | stand (396,288) r24; inspect; `E · Xem luống rễ` |
-| root bridge | shared root-bridge on/off/held @ span centers (327,238)/(371.5,238) | dynamic strip | stand (398,326) r24; inspect; `E · Xem cầu rễ` |
-| final door latch | shared latch-east @ (552,226) | door frame | stand (552,260) r24; `E · Gài chốt cửa cuối` |
-| return-loop control | decor @ (552,282) | control | stand (520,316) r24; `E · Mở lối vòng` |
-| final record | shared ruins_altar @ (488,166) | pedestal | stand (488,204) r24; `E · Đọc bản ghi` |
-| Balance Crystal | shared crystal_balance @ (574,164) | pedestal | stand (574,204) r24; `E · Nhận Tinh thể Cân Bằng` |
+Non-colliding art — wall-mounted modules, walkable floor art, the dynamic root bed and the two latch
+plates painted on a door sill: `lumo-tube`, `lumo-seal`, `learned-marks`, `final-door`, `root-bed`, `door-a-control`, `final-door-control`.
 
 ## Beam routing (pure, derived)
 
-Waypoints (room-local):
-- `lantern-source` = entrance (170,154)
-- `door-a-eye` = entrance (586,145)
-- `g1` = corridor (235,136)
-- `g2` = observatory (144,118)
-- `sun-lock` = observatory (520,96)
-- `splitter` = observatory (240,112)
-- `root-branch` = observatory (396,244)
-- `lumo-tube-entry` = corridor (105,78)
-- `lumo-seal` = corridor (320,80)
+- Waypoints: `lantern-source` entrance 188,176 · `door-a-eye` entrance 604,168 · `g1` corridor 240,190 ·
+  `lumo-tube-entry` corridor 105,78 · `lumo-seal` corridor 320,80 · `g2` observatory 168,226 ·
+  `sun-lock` observatory 176,133 · `splitter` observatory 240,220 · `root-branch` observatory 362,226.
+- Routes (mirror rotations required): `door-a` G0=0 → Door A eye · `g0-to-g1` G0=1 → tube → seal → G1 ·
+  `g0-to-g2` G0=1,G1=2 → … → G2 · `g2-direct-sun` +G2=0 → Sun lock · `g2-split` +G2=1 → splitter, with the
+  fixed branches `[sun-lock]` and `[root-branch]`.
+- Every route past Door A also requires Lumo **physically** at the seal: his saved route must target and
+  have reached `lumo-seal` while his live position is inside the seal radius (28px, which covers his
+  authored resting hover 21.6px from the waypoint). A stale arrival flag cannot hold the seal.
+- Statue facing: 0 narrow (no shadow), 1/3 partial, 2 wide (full shadow over the bed).
 
-Routes (mirror rotations required):
-- `door-a`: G0=0 → lantern-source → door-a-eye (opens Door A).
-- `g0-to-g1`: G0=1 → lantern-source → lumo-tube-entry → lumo-seal → g1 (requires Lumo at seal).
-- `g0-to-g2`: G0=1, G1=2 → … → g2.
-- `g2-direct-sun`: G0=1, G1=2, G2=0 → … → sun-lock (opens final door, lights root bed, no bridge).
-- `g2-split`: G0=1, G1=2, G2=1 → … → splitter → branches: upper → sun-lock, middle → root-branch (via statue). Bridge eligible iff sun-lock lit AND statue facing 2 (root bed shadowed) AND Lumo at seal.
+## State model
 
-Statue facing convention: 0 = narrow (no shadow), 1/3 = partial, 2 = wide (full shadow over root bed). Only facing 2 shadows the full bed.
+| state | rule |
+| --- | --- |
+| `doorAUnlocked` | live beam reaches the Door A eye, or `l8-door-a-latched` |
+| `sunDoorUnlocked` | live beam reaches the Sun lock (direct route or splitter upper branch) |
+| `rootBedShadowed` | split route live AND statue facing 2 |
+| `bridgeEligible` | Sun lock lit AND bed shadowed AND Lumo at the seal |
+| `bridgeCrossed` | durable: the body entered the lane with a live bridge and left on the far bank |
+| `finalDoorLatched` | durable `l8-final-door-latched`, settable only from the far bank |
+| `returnLoopOpen` | durable `l8-return-loop-open`, settable only from the far bank |
+| completion | final door latched AND loop open AND lantern retrieved AND Lumo recalled AND record read AND crystal taken |
 
-## State model (pure, in `observatoryLayout.ts`)
+Durable door state keeps the level un-strandable: `l8-door-a-latched` holds Door A after G0 moves, and
+the Sun Door latches the first time the Sun lock lights (`l8-sun-door-latched`, also implied by
+`l8-bridge-crossed` / `l8-final-door-latched` / `l8-return-loop-open`), so turning the lantern off can
+never lock Nhinh out of the corridor or in the observatory.
 
-- `lanternOnPedestal = flags['l8-lantern-placed'] && !flags['l8-lantern-retrieved']`.
-- `doorAOpen = lanternOnPedestal && G0===0` (beam) OR `flags['l8-door-a-latched']`.
-- `lumoAtSeal = flags['l8-lumo-arrived'] && !flags['l8-lumo-recalled']`.
-- `sunDoorUnlocked = (G0===1 && G1===2 && (G2===0 || (G2===1 && upper branch reaches)))` i.e. Sun lock lit.
-- `rootBedShadowed = statueFacing === 2 && G2===1` (middle branch blocked by wide face).
-- `bridgeEligible = sunDoorUnlocked && rootBedShadowed && lumoAtSeal`.
-- `bridgeDeployed = bridgeEligible` (roots retract when eligibility lost, but spans held under the body wait).
-- `bridgeWalkable(span, body)` = deployed OR held-span safety (body overlaps span while lantern turns on).
-- `finalDoorOpen = sunDoorUnlocked` (G2=0 route also unlocks it) OR `flags['l8-final-door-latched']`.
-- `returnLoopOpen = flags['l8-return-loop-open']`.
-- `completionReady = finalDoorOpen && bridgeEligible && returnLoopOpen && lanternRetrieved && lumoRecalled && recordRead && crystalTaken`? No — completion (advance to Level 10) requires: final door latched, return loop open, lantern retrieved, Lumo recalled, record read, crystal taken. Bridge eligibility is needed to cross but not to finish (the loop provides backtracking).
+Derived values are recomputed from flags, mirror/statue rotations and Lumo's live position on every
+load and after every change; they are never persisted.
 
-Sanitize on load (legacy migration):
-- `returnLoopOpen ⇒ finalDoorLatched`.
-- `finalDoorLatched ⇒ sunDoorUnlocked` at some point, but do not force recompute if flags say latched (latch is permanent).
-- `lumoRecalled ⇒ lumoAtSeal was true at some point`; on load, if `l8-lumo-recalled` is true, set `l8-lumo-arrived=false` (Lumo is back with Nhinh).
-- `lanternRetrieved ⇒ lanternOnPedestal=false`.
-- `bridgeCrossed ⇒ finalDoorLatched` not required, but if crossed, restore to far bank, not on bridge.
-- Counters `l8-g0/g1/g2` clamped to 0..3; `l8-statue` clamped to 0..3.
-- `l8-lumo-route-json` parsed as waypoint list; if invalid, drop to `[]` and reset index 0.
-- `progress.roomId` must be one of entrance/corridor/observatory else reset to `entrance`; `roomSpawn` must exist in that room else use entrySpawnId.
+## Prompts (RULE_GAMES audit)
 
-## Prompt rules (RULE_GAMES audit)
+| id | prompt while its condition is unmet |
+| --- | --- |
+| `lantern-pedestal` | E · Đặt đèn lên bệ |
+| `g0` | E · Xoay G0 (nấc 0/3) |
+| `learned-marks` | E · Xem lại các dấu đã học |
+| `g1` | E · Xoay G1 (nấc 0/3) |
+| `lumo-tube` | E · Gọi Lumo qua ống tới ấn |
+| `lumo-seal` | E · Gọi Lumo tới ấn này |
+| `door-a-control` | E · Kiểm tra chốt cửa A — Đặt đèn đang bật lên bệ đá trước. |
+| `sun-door-control` | E · Kiểm tra cửa Mặt Trời — Đặt đèn lên bệ đá ở tiền sảnh trước. |
+| `g2` | E · Xoay G2 (nấc 0/3) |
+| `splitter` | E · Xem khung chia tia |
+| `statue` | E · Xoay tượng (hướng 0/3) |
+| `sun-lock` | E · Kiểm tra khóa Nhật |
+| `root-bed` | E · Xem luống rễ — Khóa Nhật chưa sáng: cần tia sáng đi tới đó. |
+| `final-door-control` | E · Gài chốt cửa cuối |
+| `stone-return-loop` | E · Mở lối đá vòng — Phải qua cầu rễ sang bờ bên kia trước. |
+| `final-record` | E · Đọc bản ghi cuối — Bản ghi chưa mở. Còn cần: mở lối đá vòng và gọi Lumo về bên đèn. |
+| `balance-crystal` | E · Nhận Tinh thể Cân Bằng |
 
-- Every trigger sits at the south edge of its object with radius 22–30. No trigger center sits inside its own art.
-- Door transitions use the documented gate/arch exception (trigger under the door, approached from inside the level).
-- Latch controls are additionally guarded to the room side they belong to (Door A latch: only from inside the corridor; final door latch: only from the far bank) so they cannot be actuated through a wall.
-- The miniature has no trigger inside its art; its stand is 16px below the miniature's bottom edge.
-- No trigger reaches the far (north) face of any object; verified by the check script with the authored 14×6 body.
+- Every trigger centre sits at or below its object's south edge, or on the documented side/gate
+  exception; standing north, east or west of a prop shows nothing, and radii stay 22..24 (exits 28..30).
+- Every locked door and disabled control states the unmet prerequisite in Vietnamese via
+  `observatoryDoorBlockReason`, `observatoryBridgeBlockReason`, `observatoryRecordBlockReason` and
+  `observatoryFinalDoorBlockReason`.
+- The Door A latch plate is painted inside the alcove sill and only answers from the corridor side; the
+  final-door plate only answers from the far bank, so neither can be reached through a wall.
 
-## Darkness and readability
+## Guidance (objective / status / hints / journal)
 
-- Lantern on the pedestal lights the beam network; the lantern's own glow stays bright above the overlay so the puzzle reads in the dark. Room bases are authored for the lit state; dimming uses the shared overlay (no level-local overlay).
-- Icons are 16×16 state stickers drawn at depth 6 beside their prop, never over the actor.
-- The memory overlay keeps the room visible underneath (transparent amber) at depth 95.
+`observatoryGuidance(roomId, state)` feeds the objective row, the status row, the Lumo badge and the
+three-step H ladder; `J` lists the learned facts and, once read, the final record. Locked gates always
+say what is still missing, and no HUD row asserts a live condition from history.
 
 ## Restore rules
 
-Save `player-level/x/y`, `lumo-x/y` on the existing cadence. On load, rebuild state from flags, then place the player:
-- If saved center is unsafe (inside a solid/dynamic solid, on a bridge strip without walkable bridge, or in a room unreachable with current doors), use `nearestSafeObservatorySpawn` around the saved point, then the stage anchors: lobby (140,250), star-chart (490,250), observatory far bank (280,250).
-- Three documented restore cases:
-  1. **Before root bridge** (not crossed): place on accessible stone in lobby or star-chart; bridge saves map to near-bank star-chart (490,250). Keep lamp position/on, G0–G2, statue, actual Lumo route/arrival and both latches. Recompute curtain/Sun/roots.
-  2. **Across bridge, before loop**: place on observatory (280,250), outside threshold/bridge. Preserve even lamp off / Lumo released. Final latch and loop control reachable without power. Do not auto-restore light.
-  3. **After loop**: place on the saved room's stone spawn. Loop stays open. Preserve lamp on hand/pedestal and Lumo at seal/returned. Continuous walking access to source and call regardless of power.
-- If a save occurs while standing on the bridge, use the near-bank stone spawn instead of the bridge center.
-- Legacy saves: old `l8-*` flags load as-is; visuals re-derive; unknown flags ignored; never write new fields outside the v1 save shape except the listed `l8-*` keys.
-- Integration: `CampaignScene` owns the controller (`observatoryLevel`), level index 8 routes here, and the campaign gate now opens `ComingSoonScene` only from level ≥ 9 so level 09 is playable.
+Restores are resolved by `nearestSafeObservatorySpawn()` — the predicate the checks verify, so the
+result is never inside a solid, never inside the root-bridge rectangle and never outside the room.
+
+1. **Before the bridge** — the saved room's reachable stone spawn. Lantern position/power, mirrors,
+   statue, Lumo route/arrival and both latches are kept; beam, roots and bridge are recomputed.
+2. **Across the bridge, before the loop** — the far-bank stone `(452,276)`, or the near-bank stone
+   `(280,276)` when the save was taken on the bridge itself. Final latch and loop control stay reachable.
+3. **After the loop** — the saved room's stone spawn; the loop stays open and both the lantern and
+   Lumo keep the state they were saved in.
+
+`progress.roomId` ∈ {entrance, corridor, observatory} and `roomSpawn` inside 0..640 / 0..360 remain
+validated by `CampaignSaveSystem` (save v1), and the `l8-lumo-*` fields keep their existing validation.
+
+## Verification
+
+- `node scripts/check-observatory.mjs` — per-stage collision-aware reachability, four-way blocking of
+  every solid, art registration, control parity, scene wiring and save guards.
+- `npm run build` — `tsc --noEmit` plus the Vite production build.
+- Playtest is a manual step: no automated browser run is claimed here.
