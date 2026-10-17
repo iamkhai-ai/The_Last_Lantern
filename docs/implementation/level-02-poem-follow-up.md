@@ -11,4 +11,18 @@ User feedback: the reading stone is too far from the start. Base `9c50579`. Narr
 
 Ruling: move the clue closer rather than enlarge its interaction radius — makes the entry route coherent and keeps physical approach meaningful — cost if wrong: the clue may need a different entry position after user review.
 
-Status: design recorded; implementation and final checks NOT_RUN. No image edits, dependencies, other-level behavior changes, remote publication or forced puzzle prerequisites.
+## Implementation report — 2026-10-17
+
+Moved the shared Level02 poem anchor, stand, footprint, checkpoint, cue, interaction, and route to the authored entry-path coordinates. Updated Lumo, H, and HUD directions to place it right of the practice stone. The browser fixture now approaches it at the new location and takes the post-open exit route through the south/east lane. Added pure checks for the entry-to-poem path, distinct interaction ranges, poem/Moon art gap, and safe restoration of old poem-area saves.
+
+Verification on the implementation revision:
+
+- `node --experimental-strip-types scripts/check-whispering-woods.mjs` — PASS.
+- `node --experimental-strip-types scripts/check-forest-edge.mjs` — PASS.
+- `node --experimental-strip-types scripts/check-campaign-start-intent.mjs` — PASS.
+- `node --check scripts/level02-browser.cjs` and `node --check scripts/level02-geometry.cjs` — PASS.
+- `npm run build` — PASS (`tsc --noEmit`; Vite built 406 modules). Restored generated `dist/index.html` afterward.
+- `git diff --check` — PASS before this report addition; rerun for the final revision.
+- Real browser/runtime automation — NOT_RUN because Work browser control is disabled; no server or UI was started.
+
+No raster, dependency, save-format, or other-level changes.

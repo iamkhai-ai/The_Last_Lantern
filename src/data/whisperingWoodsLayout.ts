@@ -10,7 +10,7 @@ export type WoodsTutorialState = Readonly<{ open: boolean; sequence: number; pra
 export const RUNE_ORDER: readonly RuneId[] = ['moon', 'leaf', 'star'];
 const point = (x: number, y: number): WoodsPoint => Object.freeze({ x, y });
 const rect = (x: number, y: number, width: number, height: number): WoodsRect => Object.freeze({ x, y, width, height });
-const stands = Object.freeze({ spawn: point(138, 286), practice: point(120, 282), moon: point(180, 254), leaf: point(320, 180), star: point(450, 254), poem: point(402, 167), exit: point(510, 181) });
+const stands = Object.freeze({ spawn: point(138, 286), practice: point(120, 282), moon: point(180, 254), leaf: point(320, 180), star: point(450, 254), poem: point(236, 284), exit: point(510, 181) });
 export const WOODS_RUNE_ART = Object.freeze({ sourceWidth: 40, sourceHeight: 52, width: 60, height: 78 });
 export const WOODS_RUNE_PROMPT_OFFSET_Y = -92;
 export const WOODS_POEM_PROMPT_OFFSET_Y = -64;
@@ -18,13 +18,13 @@ export const WOODS_POEM_PROMPT_OFFSET_Y = -64;
 export const WHISPERING_WOODS = Object.freeze({
   size: point(640, 360),
   player: Object.freeze({ footOffsetY: 19, body: Object.freeze({ width: 14, height: 6, offsetX: 11, offsetY: 37 }) }),
-  anchors: Object.freeze({ practice: point(120, 276), moon: point(180, 248), leaf: point(320, 174), star: point(450, 248), poem: point(402, 161), gate: point(510, 190) }),
+  anchors: Object.freeze({ practice: point(120, 276), moon: point(180, 248), leaf: point(320, 174), star: point(450, 248), poem: point(236, 278), gate: point(510, 190) }),
   stands,
-  footprints: Object.freeze({ practice: rect(107, 264, 26, 12), moon: rect(167, 236, 26, 12), leaf: rect(307, 162, 26, 12), star: rect(437, 236, 26, 12), poem: rect(385, 150, 34, 11) }),
+  footprints: Object.freeze({ practice: rect(107, 264, 26, 12), moon: rect(167, 236, 26, 12), leaf: rect(307, 162, 26, 12), star: rect(437, 236, 26, 12), poem: rect(219, 267, 34, 11) }),
   gate: Object.freeze({ backing: rect(446, 96, 128, 60), leftPost: rect(456, 156, 20, 34), rightPost: rect(544, 156, 20, 34), threshold: rect(476, 156, 68, 22), promptY: 94, openStopY: 140, closedStopY: 162 }),
   trees: Object.freeze([[48,142],[125,112],[240,106],[350,108],[600,130],[48,230],[600,240],[65,310],[568,310]].map(([x,y], i) => Object.freeze({ id:`tree-${i}`, x, y, footprint:rect(x-9,y-14,18,14) }))),
   rocks: Object.freeze([[100,195],[552,292]].map(([x,y], i) => Object.freeze({ id:`rock-${i}`, x, y, footprint:rect(x-13,y-14,26,14) }))),
-  route: Object.freeze([point(138,286),point(120,286),point(180,258),point(250,220),point(320,184),point(385,215),point(450,258),point(402,174),point(510,181)]),
+  route: Object.freeze([point(138,286),point(120,286),point(236,286),point(180,258),point(250,220),point(320,184),point(385,215),point(450,258),point(510,286),point(510,181)]),
   fireflyRoute: Object.freeze([point(180,248),point(320,174),point(450,248)]),
   checkpoints: stands,
 });

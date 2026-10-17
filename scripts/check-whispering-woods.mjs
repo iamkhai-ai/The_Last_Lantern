@@ -13,10 +13,13 @@ assert.deepEqual(WHISPERING_WOODS.anchors.practice,{x:120,y:276});
 assert.deepEqual(WHISPERING_WOODS.anchors.moon,{x:180,y:248});
 assert.deepEqual(WHISPERING_WOODS.anchors.leaf,{x:320,y:174});
 assert.deepEqual(WHISPERING_WOODS.anchors.star,{x:450,y:248});
+assert.deepEqual(WHISPERING_WOODS.anchors.poem,{x:236,y:278});
 assert.deepEqual(WHISPERING_WOODS.footprints.practice,{x:107,y:264,width:26,height:12});
 assert.deepEqual(WHISPERING_WOODS.footprints.moon,{x:167,y:236,width:26,height:12});
 assert.deepEqual(WHISPERING_WOODS.footprints.leaf,{x:307,y:162,width:26,height:12});
 assert.deepEqual(WHISPERING_WOODS.footprints.star,{x:437,y:236,width:26,height:12});
+assert.deepEqual(WHISPERING_WOODS.footprints.poem,{x:219,y:267,width:34,height:11});
+assert.deepEqual(WHISPERING_WOODS.stands.poem,{x:236,y:284});
 assert.deepEqual(WOODS_RUNE_ART,{sourceWidth:40,sourceHeight:52,width:60,height:78});
 assert.equal(WOODS_RUNE_ART.width/WOODS_RUNE_ART.sourceWidth,1.5);
 assert.equal(WOODS_RUNE_ART.height/WOODS_RUNE_ART.sourceHeight,1.5);
@@ -33,6 +36,11 @@ function reachableWithin(start,target,gateOpen=false){
   return false;
 }
 for(const [name,stand] of Object.entries(WHISPERING_WOODS.stands)) assert.equal(reachableWithin(WHISPERING_WOODS.stands.spawn,stand,name==='exit'),true,`route reaches ${name}`);
+for(const y of [284,286]) for(let x=138;x<=236;x+=2) assert.equal(isWoodsCenterWalkable({x,y}),true,`direct entry-to-poem path clear at ${x},${y}`);
+assert.equal(Math.hypot(WHISPERING_WOODS.stands.practice.x-WHISPERING_WOODS.stands.poem.x,WHISPERING_WOODS.stands.practice.y-WHISPERING_WOODS.stands.poem.y)>48,true,'practice and poem interaction radii stay separate');
+const moonRight=WHISPERING_WOODS.anchors.moon.x+WOODS_RUNE_ART.width/2;
+const poemLeft=WHISPERING_WOODS.anchors.poem.x-24;
+assert.equal(poemLeft>moonRight,true,'poem art has a visible gap from enlarged Moon');
 function reachableClosedGateInterior(){
   const step=2,start=WHISPERING_WOODS.stands.spawn,queue=[start],seen=new Set([`${start.x},${start.y}`]);
   for(let i=0;i<queue.length;i++){
@@ -65,7 +73,8 @@ assert.equal(isWoodsCenterWalkable({ x: 510, y: 162 }), true, 'physical southern
 assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }), false, 'closed threshold blocks center above contact');
 assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }, true), true, 'open central gate corridor passes');
 assert.equal(isWoodsCenterWalkable({ x: 456, y: 170 }, true), false, 'gate posts remain solid');
-assert.equal(isWoodsPointSafe({ x: 402, y: 174 }), true, 'poem stand reachable');
+assert.equal(isWoodsPointSafe(WHISPERING_WOODS.stands.poem), true, 'poem stand reachable');
+assert.deepEqual(resolveWoodsSpawn({ x: 402, y: 167 }, false), { x: 402, y: 167 }, 'old poem-area saves remain on ordinary walkable floor');
 assert.equal(Math.hypot(WHISPERING_WOODS.stands.poem.x - WHISPERING_WOODS.stands.exit.x, WHISPERING_WOODS.stands.poem.y - WHISPERING_WOODS.stands.exit.y) > 24, true, 'poem and exit targets are distinct');
 assert.deepEqual(RUNE_ORDER, ['moon', 'leaf', 'star']);
 assert.equal(normalizeRuneProgress({ sequence: 3, activated: { moon: true, leaf: true, star: true }, open: false }).open, true, 'legacy 3/3 recovers open');

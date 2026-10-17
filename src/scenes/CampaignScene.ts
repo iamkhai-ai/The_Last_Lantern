@@ -1295,7 +1295,7 @@ export class CampaignScene extends Phaser.Scene {
       action('practice-rune', 'E · Bia tập', stands.practice.x, stands.practice.y, () => {
         if (this.progress.flags['l1-practice-complete']) { this.say([{speaker:'Nhinh',text:'Bia tập đã ngân lên khi ánh sáng soi rõ ký hiệu.'}]); return; }
         if (!this.activeRevealedRunes.has('practice-leaf')) { this.say([{speaker:'Nhinh',text:'Nét khắc đang ngủ. Thử dùng SPACE để soi bằng xung sáng.'}]); return; }
-        this.progress.flags['l1-practice-complete']=true; this.save(); this.say([{speaker:'Nhinh',text:'Xung sáng làm hiện ký hiệu. Chạm vào thì nó trả lời.'},{speaker:'Lumo',text:'Những bia còn lại chắc cũng đang chờ như vậy.'},{speaker:'Lumo',text:'Mẩu thơ nằm bên trái cổng phía Bắc.'}]);
+        this.progress.flags['l1-practice-complete']=true; this.save(); this.say([{speaker:'Nhinh',text:'Xung sáng làm hiện ký hiệu. Chạm vào thì nó trả lời.'},{speaker:'Lumo',text:'Những bia còn lại chắc cũng đang chờ như vậy.'},{speaker:'Lumo',text:'Mẩu thơ ở bên phải bia tập, ngay trên lối vào.'}]);
       }, undefined, 'runestone_leaf_lit');
       for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`);
       action('stairs', () => this.progress.flags['l1-open'] ? 'E · Xuống Thư viện' : 'E · Kiểm tra cổng', stands.exit.x, stands.exit.y, () => {
@@ -2469,9 +2469,9 @@ export class CampaignScene extends Phaser.Scene {
       const hints:Record<string,string[]>={
         'practice-space':['Bia tập ở ngay cạnh lối vào.','Dùng SPACE gần bia tập để soi nét khắc.','Đứng cạnh bia tập rồi nhấn SPACE.'],
         'practice-e':['Nét trên bia tập đang hiện.','Chạm bia tập khi nét còn sáng.','Đứng cạnh bia tập rồi nhấn E trước khi Pulse tắt.'],
-        poem:['Mẩu thơ nằm bên trái cổng phía Bắc.','Đến gần mẩu bia để đọc lời ghi.','Đứng cạnh mẩu thơ rồi nhấn E.'],
-        observe:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Bài thơ cạnh cổng cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
-        sequence:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Bài thơ cạnh cổng cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
+        poem:['Mẩu thơ ở bên phải bia tập, ngay trên lối vào.','Đi theo lối vào về bên phải bia tập.','Đứng cạnh mẩu thơ rồi nhấn E.'],
+        observe:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Mẩu thơ bên phải bia tập cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
+        sequence:['Đàn đom đóm dừng ở ba bia theo một đường cố định. Mẩu thơ bên phải bia tập cũng nhắc ba hình.','Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
         'next-leaf':['Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.','Bia kế tiếp nằm giữa phía trên. Dùng Pulse để đọc dấu trước khi chạm.','Bước tiếp theo là Lá ở giữa phía trên. Soi bia rồi kích hoạt khi nét còn sáng.'],
         'next-star':['Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.','Bia cuối cùng nằm bên phải. Dùng Pulse để đọc dấu trước khi chạm.','Bước tiếp theo là Sao bên phải. Soi bia rồi kích hoạt khi nét còn sáng.'],
         exit:['Cổng đã mở. Hãy bước tới lối đi giữa hai trụ đá.','Bậc thang dẫn xuống dưới cổng.','Đến lối đi và nhấn E để xuống Thư viện.'],
@@ -2508,7 +2508,7 @@ export class CampaignScene extends Phaser.Scene {
         sequence:`Chuỗi cổ tự: ${count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.`,
         'practice-space':'Bia tập ngay cạnh lối vào: đến gần rồi nhấn SPACE.',
         'practice-e':'Bia tập đã hiện nét. Đến gần rồi nhấn E trước khi Pulse tắt.',
-        poem:'Đọc mẩu thơ nằm bên trái cổng phía Bắc bằng E.',
+        poem:'Mẩu thơ ở bên phải bia tập. Đọc bằng E.',
         observe:'Quan sát đàn đom đóm rồi dùng Pulse để soi ba bia chính.',
       };
       if(this.objectiveText)this.objectiveText.setText(objective[stage]);

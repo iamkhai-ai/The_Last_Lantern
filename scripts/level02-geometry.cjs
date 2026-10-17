@@ -40,7 +40,7 @@ try{
   await hold('w');const stop=await read();assert.ok(Math.abs(stop.y-(open?140:162))<1);results.push({name:`${open?'open':'closed'} central gate contact`,status:'PASS',sample:stop});
   await moveAxis('y',170);await hold('a');const left=await read();assert.ok(Math.abs(left.x-483)<1,`Left gate post ${JSON.stringify(left)}`);await hold('d',1000);const right=await read();assert.ok(Math.abs(right.x-537)<1,`Right gate post ${JSON.stringify(right)}`);results.push({name:`${open?'open':'closed'} solid gate posts`,status:'PASS',left,right});
  }
- for(const [name,x,startY,stopY,target] of [['moon',180,258,232,'rune-moon'],['leaf',320,184,158,'rune-leaf'],['star',450,258,232,'rune-star'],['practice',120,286,260,'practice-rune'],['poem',402,174,145,'poem'],['tree',48,244,214,null],['rock',100,215,179,null]]){
+ for(const [name,x,startY,stopY,target] of [['moon',180,258,232,'rune-moon'],['leaf',320,184,158,'rune-leaf'],['star',450,258,232,'rune-star'],['practice',120,286,260,'practice-rune'],['poem',236,286,262,'poem'],['tree',48,244,214,null],['rock',100,215,179,null]]){
   await launch(entry({}, {'player-x':x,'player-y':startY}));await hold('w',1000);const data=await read();assert.ok(Math.abs(data.y-stopY)<1,`Solid ${name}: ${JSON.stringify(data)}`);if(target){assert.equal(data.target,target,`E must remain available at ${name} contact`);const visual=await sample();assert.ok(visual.promptVisible);assert.ok(visual.promptBottom<visual.actorTop,`Contact label covers actor: ${JSON.stringify(visual)}`)}results.push({name:`${name} collision/contact prompt`,status:'PASS',data});
  }
  for(const [name,y,expected] of [['behind-tree',188,true],['in-front-tree',232,false]]){
