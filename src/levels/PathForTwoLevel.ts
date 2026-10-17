@@ -7,7 +7,7 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
-import { choosePathCallAction, getPathDoorFace, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isValidPathPipeHop, nearestSafePathSpawn, pathDoorShouldClose, PATH_BODY, PATH_ROOMS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRestorePathFollower, shouldRoutePathFollower, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
+import { choosePathCallAction, getPathDoorFace, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, PATH_BODY, PATH_ROOMS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
 
 export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
@@ -47,8 +47,10 @@ export class PathForTwoLevel {
     this.normalizeProgress();
     this.room=this.getSavedRoom();
     this.assignment=this.getAssignment();
-    this.route=this.readRoute();
-    if(!isPathRouteValid(this.route))this.route=[];
+    const savedRoute=this.readRoute();
+    this.route=savedRoute.route;
+    const invalidSavedRoute=savedRoute.invalid||!isPathRouteValid(this.route);
+    if(invalidSavedRoute)this.route=[];
     this.routeIndex=Math.max(0,Math.min(this.route.length,Math.floor(this.progress.counters['l4-route-index']??0)));
     const hasLumoRoomMetadata=['entry','relay','ink'].includes(String(this.progress.flags['l4-lumo-room']));
     this.lumoRoom=this.readLumoRoom();
@@ -68,23 +70,17 @@ export class PathForTwoLevel {
       returning:this.progress.flags['l4-return-called']===true,
       reunited:this.progress.flags['l4-reunited']===true,
     });
-    if(rebuildLegacyAssignment){
+    if(invalidSavedRoute){
+      this.restoreFollowerBeside(spawn);
+    }else if(rebuildLegacyAssignment){
       this.lumoRoom=this.room;
       this.lumo.sprite.setPosition(Phaser.Math.Clamp(spawn.x-22,30,610),Phaser.Math.Clamp(spawn.y-18,88,300));
       this.route=this.buildAssignmentRoute(this.assignment as 'a'|'b'|'c',{x:spawn.x,y:spawn.y});
       this.routeIndex=0;
       this.persistRoute();
       this.save();
-    }else if(shouldRestorePathFollower({hasRoomMetadata:hasLumoRoomMetadata,assignment:this.assignment,travelling:this.isTravelling(),actuallyArrived:arrived})){
-      this.assignment='follow';
-      this.lumoRoom=this.room;
-      this.lumo.sprite.setPosition(Phaser.Math.Clamp(spawn.x-22,30,610),Phaser.Math.Clamp(spawn.y-18,88,300));
-      this.route=[];
-      this.routeIndex=0;
-      this.progress.flags['l4-assignment']='follow';
-      this.progress.flags['l4-route']='';
-      this.progress.counters['l4-route-index']=0;
-      this.progress.flags['l4-lumo-room']=this.room;
+    }else if(shouldRecoverPathFollower({invalidSavedRoute:false,hasRoomMetadata:hasLumoRoomMetadata,assignment:this.assignment,travelling:this.isTravelling(),actuallyArrived:arrived})){
+      this.restoreFollowerBeside(spawn);
     }
     this.progress.flags['l4-room']=this.room;
     for(const mark of ['practice','a','b','c'] as const)this.progress.flags[`l4-at-${mark}`]=this.hasPower(mark);
@@ -153,7 +149,32 @@ export class PathForTwoLevel {
   private getSavedRoom():PathRoomId{return resolvePathRoom(this.progress.flags['l4-room'],this.progress.flags['l4-visited-relay']===true,this.progress.flags['l4-visited-ink']===true,this.progress.flags['l4-latch-a']===true,this.progress.flags['l4-latch-b']===true,this.progress.flags['l4-latch-c']===true);}
   private getAssignment():string{const a=this.progress.flags['l4-assignment'];return typeof a==='string'?a:'follow';}
   private readLumoRoom():PathRoomId{const r=this.progress.flags['l4-lumo-room'];return r==='relay'||r==='ink'?r:'entry';}
-  private readRoute():PathRoutePoint[]{const raw=this.progress.flags['l4-route'];if(typeof raw!=='string')return[];try{const v=JSON.parse(raw);return Array.isArray(v)?v.filter((p):p is PathRoutePoint=>p&&['entry','relay','ink'].includes(p.room)&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=24&&p.x<=616&&p.y>=80&&p.y<=310):[];}catch{return[];}}
+  private readRoute():{route:PathRoutePoint[];invalid:boolean}{
+    const raw=this.progress.flags['l4-route'];
+    if(raw===undefined||raw==='')return{route:[],invalid:false};
+    if(typeof raw!=='string')return{route:[],invalid:true};
+    try{
+      const route=parsePathRoute(JSON.parse(raw));
+      return route?{route,invalid:false}:{route:[],invalid:true};
+    }catch{
+      return{route:[],invalid:true};
+    }
+  }
+  private restoreFollowerBeside(spawn:PathPoint):void{
+    this.assignment='follow';
+    this.lumoRoom=this.room;
+    this.lumo.sprite.setPosition(Phaser.Math.Clamp(spawn.x-22,30,610),Phaser.Math.Clamp(spawn.y-18,88,300));
+    this.lumo.setVisible(true);
+    this.route=[];
+    this.routeIndex=0;
+    this.progress.flags['l4-assignment']='follow';
+    this.progress.flags['l4-route']='';
+    this.progress.counters['l4-route-index']=0;
+    this.progress.flags['l4-lumo-room']=this.room;
+    this.progress.counters['l4-lumo-x']=Math.round(this.lumo.sprite.x);
+    this.progress.counters['l4-lumo-y']=Math.round(this.lumo.sprite.y);
+    this.save();
+  }
   private getLumoPosition():PathPoint{
     const x=this.progress.counters['l4-lumo-x']??this.progress.counters['lumo-x'];
     const y=this.progress.counters['l4-lumo-y']??this.progress.counters['lumo-y'];

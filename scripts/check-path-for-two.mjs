@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { choosePathCallAction, getPathDoorFace, getPathElementSolid, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isValidPathPipeHop, nearestSafePathSpawn, pathActorBody, pathDoorShouldClose, PATH_BODY, PATH_DOORS, PATH_ROOMS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
+import { choosePathCallAction, getPathDoorFace, getPathElementSolid, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, PATH_BODY, PATH_DOORS, PATH_ROOMS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
 
 const allOpen = { a: true, b: true, c: true, practice: true };
 const actor = (room, point, open = allOpen) => isPathPositionSafe(room, point, { latches: open });
@@ -91,6 +91,7 @@ assert.equal(reach('ink',PATH_ROOMS.ink.spawn,PATH_ROOMS.ink.elements.find(e=>e.
 assert.equal(reach('ink',PATH_ROOMS.ink.spawn,PATH_ROOMS.ink.elements.find(e=>e.id==='latch-c').stand),true,'corridor reaches final side latch');
 assert.equal(reach('entry',PATH_ROOMS.entry.spawn,PATH_ROOMS.entry.elements.find(e=>e.id==='inner-call').stand,{a:false,b:false,c:false,practice:true}),true,'open practice doorway connects the lower hall to its inside recovery call');
 assert.equal(isValidPathPipeHop({room:'entry',x:480,y:190,pipe:'a',end:'out'},{room:'relay',x:110,y:280,pipe:'a',end:'in'}),true,'A tube pairs its authored entry and relay endpoints');
+assert.equal(isValidPathPipeHop({room:'entry',x:480,y:190,pipe:'x',end:'out'},{room:'relay',x:110,y:280,pipe:'x',end:'in'}),false,'unknown pipe labels fail closed without unsafe endpoint lookup');
 assert.deepEqual(getPathPipePoint('a','entry','out'),{room:'entry',x:480,y:190,pipe:'a',end:'out'},'runtime route uses the authored A endpoint data');
 assert.equal(isValidPathPipeHop({room:'entry',x:480,y:190,pipe:'a',end:'out'},{room:'ink',x:82,y:280,pipe:'a',end:'in'}),false,'a matching label cannot hop to an unrelated room');
 assert.equal(isValidPathPipeHop({room:'entry',x:479,y:190,pipe:'a',end:'out'},{room:'relay',x:110,y:280,pipe:'a',end:'in'}),false,'wrong outgoing coordinates cannot use the A room hop');
@@ -98,6 +99,10 @@ assert.equal(isValidPathPipeHop({room:'entry',x:480,y:190,pipe:'a',end:'out'},{r
 assert.equal(isValidPathPipeHop({room:'relay',x:480,y:190,pipe:'b',end:'out'},{room:'ink',x:82,y:280,pipe:'b',end:'in'}),true,'B tube pairs its authored relay and ink endpoints');
 assert.equal(isNearPathPipeEndpoint({x:480,y:190},{room:'entry',x:480,y:190,pipe:'a',end:'out'}),true,'companion at the actual outgoing port may cross rooms');
 assert.equal(isNearPathPipeEndpoint({x:460,y:190},{room:'entry',x:480,y:190,pipe:'a',end:'out'}),false,'companion far from the outgoing port cannot be teleported across rooms');
+assert.equal(isNearPathPipeEndpoint({x:480,y:190},{room:'entry',x:480,y:190,pipe:'x',end:'out'}),false,'unknown pipe labels cannot pass outgoing endpoint checks');
+assert.equal(parsePathRoute([{room:'entry',x:480,y:190,pipe:'x',end:'out'},{room:'relay',x:110,y:280,pipe:'a',end:'in'}]),undefined,'saved routes with unknown labels are rejected in full');
+assert.equal(parsePathRoute([{room:'entry',x:480,y:190,pipe:'a',end:'out'},{room:'relay',x:110,y:279,pipe:'a',end:'in'}]),undefined,'saved routes with malformed endpoint coordinates are rejected in full');
+assert.deepEqual(parsePathRoute([{room:'entry',x:180,y:280}]),[{room:'entry',x:180,y:280}],'valid same-room saved routes remain parseable');
 assert.equal(isPathRouteValid([{room:'ink',x:558,y:244},{room:'ink',x:520,y:200},{room:'ink',x:82,y:280,pipe:'b',end:'out'},{room:'relay',x:480,y:190,pipe:'b',end:'in'}]),true,'a recalled follower uses the visible ink return pipe before entering relay');
 assert.equal(isPathRouteValid([{room:'entry',x:200,y:280},{room:'ink',x:82,y:280,pipe:'b',end:'in'}]),false,'route restore rejects unpaired cross-room jumps');
 
@@ -109,6 +114,7 @@ assert.equal(shouldRestorePathFollower({hasRoomMetadata:false,assignment:'a',tra
 assert.equal(shouldRestorePathFollower({hasRoomMetadata:true,assignment:'a',travelling:true,actuallyArrived:false}),false,'valid current travel resumes from its saved route');
 assert.equal(shouldRestorePathFollower({hasRoomMetadata:true,assignment:'a',travelling:false,actuallyArrived:true}),false,'valid current plate arrival remains assigned');
 assert.equal(shouldRestorePathFollower({hasRoomMetadata:true,assignment:'a',travelling:false,actuallyArrived:false}),true,'stale assigned state without a route or real arrival restores safely');
+assert.equal(shouldRecoverPathFollower({invalidSavedRoute:true,hasRoomMetadata:true,assignment:'follow',travelling:false,actuallyArrived:false}),true,'a malformed saved route restores an off-room follower beside the player');
 assert.equal(shouldRebuildLegacyPathAssignment({hasRoomMetadata:false,assignment:'b',wasCalled:true,eligible:true,returning:false,reunited:false}),true,'known active legacy B assignment reconstructs companion travel');
 assert.equal(shouldRebuildLegacyPathAssignment({hasRoomMetadata:false,assignment:'b',wasCalled:true,eligible:true,returning:true,reunited:false}),false,'legacy returning state falls back to a safe follower');
 assert.equal(shouldRebuildLegacyPathAssignment({hasRoomMetadata:false,assignment:'b',wasCalled:true,eligible:false,returning:false,reunited:false}),false,'legacy B assignment cannot bypass A latch');

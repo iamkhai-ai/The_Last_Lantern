@@ -19,8 +19,8 @@ export const PATH_PIPE_ENDPOINTS:Record<PathPipeId,Partial<Record<PathRoomId,Pat
   b:{relay:{x:480,y:190},ink:{x:82,y:280}},
 };
 export function getPathPipePoint(pipe:PathPipeId,room:PathRoomId,end:'out'|'in'):PathRoutePoint{
-  const point=PATH_PIPE_ENDPOINTS[pipe][room];
-  if(!point)throw new Error(`No ${pipe} pipe endpoint in ${room}`);
+  const point=PATH_PIPE_ENDPOINTS[pipe]?.[room];
+  if(!point)return{room,x:Number.NaN,y:Number.NaN,pipe,end};
   return{room,...point,pipe,end};
 }
 export interface PathDoorFace { id:'practice'|'a'|'b'|'c'; room:PathRoomId; x:number; base:number; }
@@ -31,16 +31,16 @@ export const PATH_DOOR_FACES: readonly PathDoorFace[] = [
 ];
 export function getPathDoorFace(id:string,room:PathRoomId):PathDoorFace|undefined{return PATH_DOOR_FACES.find((face)=>face.id===id&&face.room===room);}
 export function isValidPathPipeHop(from:PathRoutePoint|undefined,to:PathRoutePoint):boolean{
-  if(!from||from.end!=='out'||to.end!=='in'||!from.pipe||from.pipe!==to.pipe||from.room===to.room)return false;
-  const fromEndpoint=PATH_PIPE_ENDPOINTS[from.pipe][from.room];
-  const toEndpoint=PATH_PIPE_ENDPOINTS[to.pipe][to.room];
+  if(!from||from.end!=='out'||to.end!=='in'||(from.pipe!=='a'&&from.pipe!=='b')||from.pipe!==to.pipe||from.room===to.room)return false;
+  const fromEndpoint=PATH_PIPE_ENDPOINTS[from.pipe]?.[from.room];
+  const toEndpoint=PATH_PIPE_ENDPOINTS[to.pipe]?.[to.room];
   return !!fromEndpoint&&!!toEndpoint
     &&from.x===fromEndpoint.x&&from.y===fromEndpoint.y
     &&to.x===toEndpoint.x&&to.y===toEndpoint.y;
 }
 export function isNearPathPipeEndpoint(actual:PathPoint,endpoint:PathRoutePoint,tolerance=8):boolean{
-  if(endpoint.end!=='out'||!endpoint.pipe)return false;
-  const authored=PATH_PIPE_ENDPOINTS[endpoint.pipe][endpoint.room];
+  if(endpoint.end!=='out'||(endpoint.pipe!=='a'&&endpoint.pipe!=='b'))return false;
+  const authored=PATH_PIPE_ENDPOINTS[endpoint.pipe]?.[endpoint.room];
   return !!authored&&endpoint.x===authored.x&&endpoint.y===authored.y
     &&Math.hypot(actual.x-endpoint.x,actual.y-endpoint.y)<=tolerance;
 }
@@ -50,6 +50,25 @@ export function isPathRouteValid(route:readonly PathRoutePoint[]):boolean{
   }
   return true;
 }
+export function parsePathRoute(value:unknown):PathRoutePoint[]|undefined{
+  if(!Array.isArray(value))return undefined;
+  const route:PathRoutePoint[]=[];
+  for(const point of value){
+    if(!point||typeof point!=='object'||Array.isArray(point))return undefined;
+    const p=point as Record<string,unknown>;
+    const room=p.room;
+    const hasPipe=Object.prototype.hasOwnProperty.call(p,'pipe');
+    const hasEnd=Object.prototype.hasOwnProperty.call(p,'end');
+    if((room!=='entry'&&room!=='relay'&&room!=='ink')
+      ||!Number.isFinite(p.x)||!Number.isFinite(p.y)
+      ||(p.x as number)<24||(p.x as number)>616||(p.y as number)<80||(p.y as number)>310
+      ||hasPipe!==hasEnd
+      ||(hasPipe&&p.pipe!=='a'&&p.pipe!=='b')
+      ||(hasEnd&&p.end!=='out'&&p.end!=='in'))return undefined;
+    route.push({room,x:p.x as number,y:p.y as number,...(hasPipe?{pipe:p.pipe as PathPipeId,end:p.end as 'out'|'in'}:{})});
+  }
+  return isPathRouteValid(route)?route:undefined;
+}
 export function choosePathCallAction(assignment:string,target:'practice'|'a'|'b'|'c',eligible:boolean):'send'|'recall'{
   if(assignment===target)return'recall';
   if(assignment!=='follow'&&!eligible)return'recall';
@@ -58,6 +77,9 @@ export function choosePathCallAction(assignment:string,target:'practice'|'a'|'b'
 export function shouldRestorePathFollower(state:{hasRoomMetadata:boolean;assignment:string;travelling:boolean;actuallyArrived:boolean}):boolean{
   if(!state.hasRoomMetadata)return true;
   return state.assignment!=='follow'&&!state.travelling&&!state.actuallyArrived;
+}
+export function shouldRecoverPathFollower(state:{invalidSavedRoute:boolean;hasRoomMetadata:boolean;assignment:string;travelling:boolean;actuallyArrived:boolean}):boolean{
+  return state.invalidSavedRoute||shouldRestorePathFollower(state);
 }
 export function shouldRebuildLegacyPathAssignment(state:{hasRoomMetadata:boolean;assignment:string;wasCalled:boolean;eligible:boolean;returning:boolean;reunited:boolean}):boolean{
   return !state.hasRoomMetadata&&['a','b','c'].includes(state.assignment)&&state.wasCalled&&state.eligible&&!state.returning&&!state.reunited;
