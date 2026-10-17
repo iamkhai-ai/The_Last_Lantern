@@ -8,11 +8,11 @@ import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
-  auditHeartStands, canExtinguishHeartLantern, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
-  getHeartStage, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
+  auditHeartStands, canExtinguishHeartLantern, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
+  getHeartStage, heartArtCandidates, heartArtNativeSize, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
   HEART_G0_ID, HEART_LANE_COLORS, HEART_MAT_ID, HEART_MOON_SHADOW, HEART_OVERLOAD_CHECKPOINT, HEART_PROPS,
   HEART_RING_LANES, HEART_ROOT_LANES, HEART_SEAL_ID, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
-  HEART_STATUE_SHADOW, isHeartPositionSafe, isInsideHeartGate, nearestSafeHeartSpawn, normalizeHeartProgress,
+  HEART_STATUE_SHADOW, isHeartPositionSafe, nearestSafeHeartSpawn, normalizeHeartProgress,
   resolveHeartRestoreState, type HeartBranchId, type HeartElement, type HeartPoint, type HeartPuzzleState, type HeartStage,
 } from '../data/heartOfElariaLayout';
 
@@ -346,10 +346,11 @@ export class HeartOfElariaLevel {
           ? 'Chờ Lumo tới ấn Hy Vọng và đứng giữ.'
           : 'Gọi Lumo tới ấn Hy Vọng rồi để cậu ấy giữ.';
       case 'route': {
+        // Never claim the branches are ready while any prerequisite is still unmet (including Lumo's
+        // live position and the lantern state, which the old filter ignored).
         const missing = getHeartPrerequisiteFeedback(state);
-        const lightMissing = missing.filter((line) => line.startsWith('hướng G0') || line.startsWith('chỉnh gương') || line.startsWith('giữ cả hai') || line.startsWith('mở lại') || line.startsWith('xoay tượng'));
-        return lightMissing.length
-          ? `Chỉnh đường sáng: còn thiếu ${lightMissing.length} điều kiện trên ba nhánh.`
+        return missing.length
+          ? `Chỉnh đường sáng và giữ Lumo ở ấn: còn ${missing.length} điều kiện chưa đúng.`
           : 'Ba nhánh đã sẵn sàng. Tới nút rễ trung tâm ở giữa nền đất.';
       }
       case 'confirm': return 'Nhấn E ở nút rễ trung tâm để khóa cấu hình ba nhánh.';
@@ -448,6 +449,10 @@ export class HeartOfElariaLevel {
     this.lantern.lanternOn = false;
     this.progress.lanternOn = false;
     this.lantern.isOverloadMode = false;
+    // The lantern never left the pedestal here, so no overload stage may linger in the save.
+    this.progress.flags['l9-overload'] = false;
+    this.progress.flags['l9-lantern-placed'] = true;
+    this.progress.flags['l9-lantern-retrieved'] = false;
     this.save();
     this.refresh();
     this.say([{ speaker: 'Nhinh', text: 'Ánh sáng đã rời khỏi bệ. Cây Mẹ đã có đủ.' }]);
@@ -564,9 +569,47 @@ export class HeartOfElariaLevel {
     return this.track(image);
   }
 
-  private textureArt(key: string, x: number, y: number, width: number, height: number, depth: number): Phaser.GameObjects.Image | null {
-    if (!this.scene.textures.exists(key)) return null;
-    return this.track(this.scene.add.image(x, y, key).setDisplaySize(width, height).setDepth(depth));
+  /**
+   * Resolve a control's art. Level-10 package art first, then a documented reuse from another
+   * package (level 04 pressure plates, level 08 statue notches), then a raw runtime texture
+   * (`pedestal_lit`, `mirror_N`, `lock_sun_off/on`, `lock_moon_off/on`). Never returns a key the
+   * texture manager does not hold, so a control can never end up invisible-but-interactive.
+   */
+  private artKey(name: string): string | null {
+    for (const candidate of heartArtCandidates(name)) {
+      const key = candidate.kind === 'texture' ? candidate.file : getLevelArtKey(candidate.level, candidate.file);
+      if (key && this.scene.textures.exists(key)) return key;
+    }
+    return null;
+  }
+
+  /** Standing props are bottom-anchored on their base line; floor sockets stay centred on the cell. */
+  private applyNativePlacement(image: Phaser.GameObjects.Image, element: HeartElement, artName: string = element.art): void {
+    const native = heartArtNativeSize(artName);
+    const width = native?.width ?? element.width;
+    const height = native?.height ?? element.height;
+    if (element.kind === 'prop') image.setOrigin(0.5, 1).setPosition(element.x, element.y + element.height / 2);
+    else image.setOrigin(0.5, 0.5).setPosition(element.x, element.y);
+    image.setDisplaySize(width, height);
+  }
+
+  /** One control's image at its native aspect ratio — no arbitrary stretching into a collision box. */
+  private elementArt(element: HeartElement, depth: number): Phaser.GameObjects.Image | null {
+    const key = this.artKey(element.art);
+    if (!key) return null;
+    const image = this.scene.add.image(element.x, element.y, key).setDepth(depth);
+    this.applyNativePlacement(image, element);
+    return this.track(image);
+  }
+
+  /** Swap a control to another state texture, keeping its native aspect ratio and its base line. */
+  private swapArt(id: string, name: string, element: HeartElement): void {
+    const image = this.images.get(id);
+    if (!image) return;
+    const key = this.artKey(name);
+    if (!key) return;
+    if (image.texture.key !== key) image.setTexture(key);
+    this.applyNativePlacement(image, element, name);
   }
 
   private drawScene(): void {
@@ -604,11 +647,12 @@ export class HeartOfElariaLevel {
     wheel?.setAlpha(0).setVisible(false);
     if (wheel) this.images.set('wheel', wheel);
 
-    // Floor sockets, props and the central node.
+    this.protected.length = 0;
+    // Floor sockets, props and the central node, each at its own native size.
     for (const element of HEART_ELEMENTS) {
       const standing = element.kind === 'prop';
       const depth = standing ? this.depthAt(element.stand.y) : 7;
-      const image = this.textureOrLevelArt(element, depth);
+      const image = this.elementArt(element, depth);
       if (!image) continue;
       image.setData('heart-id', element.id);
       this.images.set(element.id, image);
@@ -616,7 +660,9 @@ export class HeartOfElariaLevel {
     }
     // The prism is authored inside G0's mount: aiming G0 into it is the scenario's split route.
     const prismKey = getSharedMechanismKey('prism-dark');
-    const prism = prismKey ? this.textureArt(prismKey, HEART_BEAM_NODES.prism.x, HEART_BEAM_NODES.prism.y, 48, 48, this.depthAt(260) + 0.2) : null;
+    const prism = prismKey && this.scene.textures.exists(prismKey)
+      ? this.track(this.scene.add.image(HEART_BEAM_NODES.prism.x, HEART_BEAM_NODES.prism.y, prismKey).setDepth(this.depthAt(260) + 0.2))
+      : null;
     if (prism) {
       prism.setData('heart-id', 'heart-prism');
       this.images.set('heart-prism', prism);
@@ -628,16 +674,13 @@ export class HeartOfElariaLevel {
     if (dawn) this.dawnOverlay = dawn.setOrigin(0, 0).setVisible(false);
 
     // Solid colliders: every prop base and the visible scenery bands the player must never cross.
+    // A prop only blocks once its own art is on screen, so a missing texture can never turn into an
+    // invisible wall (the check script proves every control resolves).
     for (const element of HEART_PROPS) {
       const solid = getHeartSolid(element.id);
-      if (solid) this.addCollider(solid);
+      if (solid && this.imageVisible(element.id)) this.addCollider(solid);
     }
     for (const band of HEART_BLOCKERS) this.addCollider(band);
-  }
-
-  private textureOrLevelArt(element: HeartElement, depth: number): Phaser.GameObjects.Image | null {
-    if (element.artSource === 'texture') return this.textureArt(element.art, element.x, element.y, element.width, element.height, depth);
-    return this.levelArt(element.art, element.x, element.y, element.width, element.height, depth);
   }
 
   private addCollider(rect: { x: number; y: number; width: number; height: number }): void {
@@ -670,13 +713,9 @@ export class HeartOfElariaLevel {
     return Boolean(image?.active && image.visible);
   }
 
-  /** Gate check: rule 1 (south edge) for props, rule 2 (inside the cell) for floor sockets. */
+  /** Gate check, shared with the check script: rule 1 (south edge) for props, rule 2 (inside the cell) for sockets. */
   private canReach(element: HeartElement): boolean {
-    if (element.kind === 'cell') return isInsideHeartGate(element.id, { x: this.player.x, y: this.player.y });
-    const distance = Math.hypot(this.player.x - element.stand.x, this.player.y - element.stand.y);
-    if (distance > element.radius) return false;
-    // Never answer from behind the prop.
-    return this.player.y >= element.y - element.height / 2 - 4;
+    return canReachHeartElement(element, { x: this.player.x, y: this.player.y });
   }
 
   private promptFor(element: HeartElement): string | null {
@@ -833,6 +872,9 @@ export class HeartOfElariaLevel {
         this.lantern.placeLanternAt(this.lanternSpot.x, this.lanternSpot.y);
         this.lantern.lanternInHand = false;
         this.lantern.lanternOn = true;
+        // Putting the lantern back ends the carried-light stage: no overload may stay flagged.
+        this.progress.flags['l9-overload'] = false;
+        this.lantern.isOverloadMode = false;
         this.progress.flags['l9-lantern-placed'] = true;
         this.progress.flags['l9-lantern-retrieved'] = false;
         this.progress.lanternOn = true;
@@ -926,9 +968,8 @@ export class HeartOfElariaLevel {
       ['heart-balance', this.progress.flags['l9-balance'] === true ? 'balance-alcove-inserted' : 'balance-alcove-empty'],
     ];
     for (const [id, name] of socketStates) {
-      const image = this.images.get(id);
-      const key = getLevelArtKey(9, name);
-      if (image && key && this.scene.textures.exists(key) && image.texture.key !== key) image.setTexture(key);
+      const element = getHeartElement(id);
+      if (element) this.swapArt(id, name, element);
     }
     const coreName = this.completed || this.progress.flags['l9-complete'] === true ? 'core-dawn'
       : state.latched ? 'core-latched'
@@ -939,42 +980,35 @@ export class HeartOfElariaLevel {
     if (core && coreKey && this.scene.textures.exists(coreKey) && core.texture.key !== coreKey) core.setTexture(coreKey);
 
     const nodeName = this.progress.flags['l9-roots'] === true ? 'confirmation-root-latched' : state.ready ? 'confirmation-root-ready' : 'confirmation-root-waiting';
-    const nodeKey = getLevelArtKey(9, nodeName);
-    const node = this.images.get(HEART_CONFIRM_ID);
-    if (node && nodeKey && this.scene.textures.exists(nodeKey) && node.texture.key !== nodeKey) node.setTexture(nodeKey);
+    const nodeElement = getHeartElement(HEART_CONFIRM_ID);
+    if (nodeElement) this.swapArt(HEART_CONFIRM_ID, nodeName, nodeElement);
 
-    const eyeLeft = this.images.get('heart-eye-left');
-    const eyeRight = this.images.get('heart-eye-right');
-    const moon = this.images.get('heart-moon');
-    const leftKey = getHeartElement('heart-eye-left') ? this.textureKey('lock_sun', state.eyeLeft) : null;
-    const rightKey = this.textureKey('lock_sun', state.eyeRight);
-    const moonKey = this.textureKey('lock_moon', state.moonShadow);
-    if (eyeLeft && leftKey && eyeLeft.texture.key !== leftKey) eyeLeft.setTexture(leftKey);
-    if (eyeRight && rightKey && eyeRight.texture.key !== rightKey) eyeRight.setTexture(rightKey);
-    if (moon && moonKey && moon.texture.key !== moonKey) moon.setTexture(moonKey);
+    const leftElement = getHeartElement('heart-eye-left');
+    const rightElement = getHeartElement('heart-eye-right');
+    const moonElement = getHeartElement('heart-moon');
+    if (leftElement) this.swapArt('heart-eye-left', state.eyeLeft ? 'lock_sun_on' : 'lock_sun_off', leftElement);
+    if (rightElement) this.swapArt('heart-eye-right', state.eyeRight ? 'lock_sun_on' : 'lock_sun_off', rightElement);
+    if (moonElement) this.swapArt('heart-moon', state.moonShadow ? 'lock_moon_on' : 'lock_moon_off', moonElement);
 
-    const pedestal = this.images.get('heart-pedestal');
-    const pedestalKey = this.lantern.lanternPlaced ? 'pedestal_lit' : 'pedestal_empty';
-    if (pedestal && this.scene.textures.exists(pedestalKey) && pedestal.texture.key !== pedestalKey) pedestal.setTexture(pedestalKey);
+    const pedestalElement = getHeartElement('heart-pedestal');
+    if (pedestalElement) this.swapArt('heart-pedestal', this.lantern.lanternPlaced ? 'pedestal_lit' : 'pedestal_empty', pedestalElement);
 
-    const g0 = this.images.get('heart-g0');
-    if (g0) g0.setTexture(`mirror_${state.g0Split ? 0 : 1}`);
+    const g0Element = getHeartElement(HEART_G0_ID);
+    if (g0Element) this.swapArt(HEART_G0_ID, `mirror_${state.g0Split ? 0 : 1}`, g0Element);
     const prism = this.images.get('heart-prism');
     if (prism) {
       const prismKey = getSharedMechanismKey(state.light && state.g0Split ? 'prism-receiving' : 'prism-dark');
       if (prismKey && this.scene.textures.exists(prismKey) && prism.texture.key !== prismKey) prism.setTexture(prismKey);
     }
-    const memoryMirror = this.images.get('heart-memory-mirror');
-    if (memoryMirror) memoryMirror.setTexture(`mirror_${this.value('heart-memory')}`);
-    const balanceMirror = this.images.get('heart-balance-mirror');
-    if (balanceMirror) balanceMirror.setTexture(`mirror_${this.value('heart-balance')}`);
-    const statue = this.images.get('heart-statue');
-    const statueKey = `statue-notch-${this.value('heart-statue')}`;
-    if (statue && this.scene.textures.exists(statueKey) && statue.texture.key !== statueKey) statue.setTexture(statueKey);
+    const memoryMirrorElement = getHeartElement('heart-memory-mirror');
+    const balanceMirrorElement = getHeartElement('heart-balance-mirror');
+    const statueElement = getHeartElement('heart-statue');
+    if (memoryMirrorElement) this.swapArt('heart-memory-mirror', `mirror_${this.value('heart-memory')}`, memoryMirrorElement);
+    if (balanceMirrorElement) this.swapArt('heart-balance-mirror', `mirror_${this.value('heart-balance')}`, balanceMirrorElement);
+    if (statueElement) this.swapArt('heart-statue', `statue-notch-${this.value('heart-statue')}`, statueElement);
 
-    const seal = this.images.get(HEART_SEAL_ID);
-    const sealKey = this.lumoMode === 'follow' ? 'pressure-empty' : 'pressure-occupied';
-    if (seal && this.scene.textures.exists(sealKey) && seal.texture.key !== sealKey) seal.setTexture(sealKey);
+    const sealElement = getHeartElement(HEART_SEAL_ID);
+    if (sealElement) this.swapArt(HEART_SEAL_ID, this.lumoMode === 'follow' ? 'pressure-empty' : 'pressure-occupied', sealElement);
 
     const wheel = this.images.get('wheel');
     if (wheel) {
@@ -983,11 +1017,6 @@ export class HeartOfElariaLevel {
       wheel.setAlpha(show ? (this.dawn ? 0.9 : 0.6) : 0);
       if (show) wheel.setAngle((this.scene.time.now / 60) % 360);
     }
-  }
-
-  private textureKey(prefix: string, on: boolean): string {
-    const key = `${prefix}_${on ? 'on' : 'off'}`;
-    return this.scene.textures.exists(key) ? key : `${prefix}_off`;
   }
 
   private refreshLanternArt(state: HeartPuzzleState): void {

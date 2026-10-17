@@ -1,11 +1,17 @@
 import assert from 'node:assert/strict';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
-  auditHeartGaps, auditHeartStands, deriveHeartPuzzle, getHeartElement, getHeartExitBlock, getHeartPrerequisiteFeedback,
-  getHeartSolid, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CHECKPOINTS, HEART_ELEMENTS, HEART_FLOOR, HEART_MOON_SHADOW,
+  auditHeartGaps, auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartExitBlock, getHeartPrerequisiteFeedback,
+  getHeartSolid, heartArtCandidates, heartArtNativeSize, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CHECKPOINTS, HEART_CONTROL_ORDER, HEART_ELEMENTS, HEART_FLOOR, HEART_MOON_SHADOW,
   HEART_OVERLOAD_CHECKPOINT, HEART_PROPS, HEART_SPAWN, HEART_STATUE_SHADOW, HEART_WORLD, heartActorBody, heartRectsOverlap,
   canExtinguishHeartLantern, isHeartFinalActionAvailable, isHeartPositionSafe, isInsideHeartGate, nearestSafeHeartSpawn, normalizeHeartProgress,
   resolveHeartRestoreState, shouldPersistHeartOverload,
 } from '../src/data/heartOfElariaLayout.ts';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const normalize = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 
 /* ------------------------------------------------------------------ body and floor contract */
 
@@ -319,4 +325,187 @@ for (const checkpoint of HEART_CHECKPOINTS) {
 assert.ok(Math.abs(HEART_MOON_SHADOW.x - 416) <= 1, 'the statue shadow is centred on the Moon pocket column');
 assert.ok(HEART_MOON_SHADOW.radiusX >= 20, 'the statue shadow is wide enough to read over the Moon pocket');
 
-console.log(`Level 10 geometry/state checks passed (${HEART_ELEMENTS.length} controls, ${HEART_PROPS.length} solids, ${HEART_BLOCKERS.length} scenery blockers).`);
+/* ------------------------------------------------------------------ art: every referenced texture exists, none is stretched */
+
+const LEVEL_DIRS = [
+  '01-forgotten-forest-edge', '02-whispering-woods', '03-library-beneath-the-roots', '04-shattered-moonlit-creek',
+  '05-a-path-for-two', '06-the-sleepless-tower', '07-the-sleeping-garden', '08-ruins-of-two-halves',
+  '09-dark-moon-observatory', '10-the-heart-of-elaria',
+];
+const campaignArtSource = readFileSync(path.join(ROOT, 'src/art/CampaignArt.ts'), 'utf8');
+const level10Sprites = new Set(readdirSync(path.join(ROOT, 'assets/levels/10-the-heart-of-elaria/sprites')).filter((name) => name.endsWith('.png')));
+
+const manifestKeys = new Set();
+const collectKeys = (value) => {
+  if (Array.isArray(value)) { value.forEach(collectKeys); return; }
+  if (value && typeof value === 'object') {
+    if (typeof value.key === 'string') manifestKeys.add(value.key);
+    Object.values(value).forEach(collectKeys);
+  }
+};
+collectKeys(JSON.parse(readFileSync(path.join(ROOT, 'src/art/assetManifest.json'), 'utf8')));
+
+/** Real PNG size straight from the IHDR chunk: proof the layout box is not a guess. */
+const pngSize = (file) => {
+  const bytes = readFileSync(file);
+  assert.equal(bytes.slice(1, 4).toString('ascii'), 'PNG', `${file} is a PNG`);
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+};
+
+/** Resolve one art name exactly the way the runtime does, but against the filesystem. */
+const resolveArt = (name) => {
+  for (const candidate of heartArtCandidates(name)) {
+    if (candidate.kind === 'texture') {
+      if (!manifestKeys.has(candidate.file)) continue;
+      const file = path.join(ROOT, 'src/assets', `${candidate.file}.png`);
+      if (!existsSync(file)) continue;
+      return { kind: 'texture', key: candidate.file, file, size: pngSize(file) };
+    }
+    if (candidate.level === 9) {
+      const file = `${name}.png`;
+      if (!level10Sprites.has(file)) continue;
+      if (!campaignArtSource.includes('10-the-heart-of-elaria/sprites/*.png')) continue;
+      return { kind: 'level', level: 9, key: `art_10_the_heart_of_elaria_${normalize(name)}`, file: path.join(ROOT, 'assets/levels/10-the-heart-of-elaria/sprites', file), size: pngSize(path.join(ROOT, 'assets/levels/10-the-heart-of-elaria/sprites', file)) };
+    }
+    const dir = LEVEL_DIRS[candidate.level];
+    const file = `${candidate.file}.png`;
+    if (!campaignArtSource.includes(`${dir}/sprites/${file}`)) continue;
+    const full = path.join(ROOT, 'assets/levels', dir, 'sprites', file);
+    if (!existsSync(full)) continue;
+    return { kind: 'level', level: candidate.level, file: full, size: pngSize(full) };
+  }
+  return null;
+};
+
+/** Every state texture the runtime swaps to, on top of each control's initial art. */
+const RUNTIME_ART = [
+  'memory-alcove-empty', 'memory-alcove-inserted', 'hope-alcove-empty', 'hope-alcove-inserted',
+  'balance-alcove-empty', 'balance-alcove-inserted', 'confirmation-root-waiting', 'confirmation-root-ready',
+  'confirmation-root-latched', 'lock_sun_on', 'lock_sun_off', 'lock_moon_on', 'lock_moon_off',
+  'pedestal_lit', 'pedestal_empty', 'mirror_0', 'mirror_1', 'mirror_2', 'mirror_3',
+  'statue-notch-0', 'statue-notch-1', 'statue-notch-2', 'statue-notch-3',
+  'pressure-empty', 'pressure-occupied', 'core-night', 'core-ready', 'core-latched', 'core-dawn', 'core-waiting',
+  'old-white-channels-feeding', 'old-white-channels-retracted', 'fixed-dark-pocket-purple-border',
+  'temporary-core-bloom-after-retrieval', 'redundant-carried-lantern-line', 'day-night-wheel-resuming',
+  'ending-dawn-lighting-overlay', 'memory-root-broken', 'memory-root-repaired', 'memory-root-connected',
+  'hope-root-broken', 'hope-root-repaired', 'hope-root-connected',
+  'balance-root-broken', 'balance-root-repaired', 'balance-root-connected', 'root-rule-reminder-table',
+];
+for (const name of RUNTIME_ART) {
+  const resolved = resolveArt(name);
+  assert.ok(resolved, `runtime art "${name}" resolves to a real file or texture`);
+  const declared = heartArtNativeSize(name);
+  if (declared) {
+    assert.deepEqual(resolved.size, declared, `"${name}" native size matches the declared size`);
+  }
+}
+for (const element of HEART_ELEMENTS) {
+  const resolved = resolveArt(element.art);
+  assert.ok(resolved, `${element.id}: its art "${element.art}" exists`);
+  // Native aspect preserved: the authored box is the art's own pixel size, never squeezed.
+  assert.deepEqual(resolved.size, { width: element.width, height: element.height },
+    `${element.id}: the collision/art box keeps the native ${resolved.size.width}x${resolved.size.height} aspect`);
+}
+for (const prism of ['prism-dark', 'prism-receiving']) {
+  // Registered through the shared beam-splitter glob, keyed `shared_prism_*`.
+  assert.ok(campaignArtSource.includes('shared/beam-splitter/*.png'), 'CampaignArt registers the shared beam-splitter package');
+  assert.ok(existsSync(path.join(ROOT, 'assets/levels/shared/beam-splitter', `${prism}.png`)), `shared prism art "${prism}" exists`);
+}
+
+/* ------------------------------------------------------------------ anchors and the south-edge rule */
+
+for (const element of HEART_PROPS) {
+  assert.equal(element.y + element.height / 2, element.stand.y, `${element.id}: art is bottom-anchored on its base line`);
+}
+for (const element of HEART_ELEMENTS) {
+  const press = element.kind === 'prop' ? { x: element.stand.x, y: element.stand.y - 16 } : { x: element.stand.x, y: element.stand.y };
+  assert.equal(canReachHeartElement(element, press), true, `${element.id}: its authored south-edge stand opens the prompt`);
+}
+// RULE_GAMES rule 1: no reachable position behind a prop (or outside a socket cell) may answer, and
+// standing due north of a prop at its own vertical centre must be silent for every prop.
+for (const element of HEART_PROPS) {
+  for (const northY of [element.y - 2, element.y - 8, element.y - element.height / 2]) {
+    assert.equal(canReachHeartElement(element, { x: element.stand.x, y: northY }), false,
+      `${element.id}: never answers from behind/above the art (y=${northY})`);
+  }
+}
+for (const report of auditHeartStands()) {
+  assert.equal(report.blindFromNorth, true, `${report.id}: no reachable position above the art can hold the prompt open`);
+  assert.equal(report.southOfArt, true, `${report.id}: its trigger sits at the south edge / inside the socket cell`);
+}
+
+/* ------------------------------------------------------------------ nearest-target ownership over the whole floor */
+
+const sampleStride = 3;
+const ownedPairs = new Map();
+const strictlyOwned = new Set();
+for (let y = HEART_FLOOR.top; y <= HEART_FLOOR.bottom; y += sampleStride) {
+  for (let x = HEART_FLOOR.left; x <= HEART_FLOOR.right; x += sampleStride) {
+    const point = { x, y };
+    if (!isHeartPositionSafe(point)) continue;
+    const live = HEART_ELEMENTS.filter((element) => canReachHeartElement(element, point));
+    if (live.length === 0) continue;
+    const ranked = live
+      .map((element) => ({ element, distance: Math.hypot(point.x - element.stand.x, point.y - element.stand.y) }))
+      .sort((a, b) => a.distance - b.distance);
+    if (ranked.length === 1 || ranked[0].distance + 3 < ranked[1].distance) strictlyOwned.add(ranked[0].element.id);
+    for (let i = 0; i < ranked.length; i += 1) {
+      for (let j = i + 1; j < ranked.length; j += 1) {
+        const key = `${ranked[i].element.id}|${ranked[j].element.id}`;
+        const entry = ownedPairs.get(key) ?? { samples: 0, tieXs: new Set(), tieYs: new Set() };
+        entry.samples += 1;
+        if (Math.abs(ranked[i].distance - ranked[j].distance) < 3) { entry.tieXs.add(x); entry.tieYs.add(y); }
+        ownedPairs.set(key, entry);
+      }
+    }
+  }
+}
+// Every control must win its own prompt somewhere reachable, or the nearest-target rule would make
+// it unreachable in practice even though its trigger is technically enabled.
+for (const element of HEART_ELEMENTS) {
+  assert.equal(strictlyOwned.has(element.id), true, `${element.id}: owns a reachable position where it is the strict nearest control`);
+}
+for (const [key, entry] of ownedPairs) {
+  // Overlapping discs are fine as long as the nearest one wins. Two co-linear stands can only tie on
+  // the perpendicular bisector, i.e. one line: assert the tie region really is a single line, where
+  // HEART_CONTROL_ORDER (cells before props) then decides it deterministically.
+  assert.ok(entry.tieXs.size <= 1 || entry.tieYs.size <= 1,
+    `${key}: ties are confined to one line (saw ${entry.tieXs.size}x${entry.tieYs.size})`);
+}
+assert.ok(HEART_CONTROL_ORDER.indexOf('heart-g0') < HEART_CONTROL_ORDER.indexOf('heart-memory-mirror'),
+  'the documented arbitration puts G0 before the Memory mirror, matching registration order');
+assert.ok(HEART_CONTROL_ORDER.indexOf('heart-moon') < HEART_CONTROL_ORDER.indexOf('heart-statue'),
+  'the Moon pocket is registered before the statue, so standing on the pocket never yields the statue prompt');
+
+/* ------------------------------------------------------------------ feedback and objective invariants */
+
+const everyMissing = [
+  ['crystals', { crystals: { memory: false, hope: false, balance: false } }],
+  ['lantern', { lanternPlaced: false }],
+  ['unlit lantern', { lanternOn: false }],
+  ['g0 direct', { g0: 1 }],
+  ['memory mirror', { memoryMirror: 0 }],
+  ['balance mirror', { balanceMirror: 0 }],
+  ['left eye', { statue: 1 }],
+  ['right eye', { statue: 3 }],
+  ['moon shadow', { statue: 0 }],
+  ['lumo away', { lumo: { x: 140, y: 300 } }],
+];
+for (const [name, override] of everyMissing) {
+  const state = deriveHeartPuzzle({ ...baseInput(), ...override });
+  assert.equal(state.ready, false, `${name}: never ready while one condition is missing`);
+  assert.ok(getHeartPrerequisiteFeedback(state).length > 0, `${name}: the level always has something specific to say`);
+  assert.notEqual(getHeartExitBlock(state, false), undefined, `${name}: the ending stays blocked`);
+}
+// A ready state never carries feedback, so the objective row can trust the count it shows.
+for (const statue of [0, 1, 2, 3]) {
+  for (const g0 of [0, 1]) {
+    for (const lumo of [{ x: 320, y: 244 }, { x: 120, y: 300 }]) {
+      const state = deriveHeartPuzzle({ ...baseInput(), statue, g0, lumo });
+      if (!state.ready) continue;
+      assert.deepEqual(getHeartPrerequisiteFeedback(state), [], 'a ready configuration has nothing left to report');
+    }
+  }
+}
+
+console.log(`Level 10 geometry/state checks passed (${HEART_ELEMENTS.length} controls, ${HEART_PROPS.length} solids, ${HEART_BLOCKERS.length} scenery blockers, ${RUNTIME_ART.length} art states verified on disk).`);

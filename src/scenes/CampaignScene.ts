@@ -108,7 +108,9 @@ export class CampaignScene extends Phaser.Scene {
       this.scene.start('EndingScene', { campaign: true });
       return;
     }
-    if (this.progress.level >= 4) {
+    // Index 9 (The Heart of Elaria) is the level this branch implements, so the coming-soon gate is
+    // relaxed for it alone; levels 4..8 stay gated exactly as on test-develop.
+    if (this.progress.level >= 4 && this.progress.level !== 9) {
       this.scene.start('ComingSoonScene');
       return;
     }
@@ -158,16 +160,16 @@ export class CampaignScene extends Phaser.Scene {
         if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen() && this.shatteredCreek?.toggleLantern()) this.player.playLanternAction(this.lantern.lanternOn);
         return;
       }
-      const finalToggleAvailable = this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && this.lantern.lanternInHand && this.lantern.lanternOn;
-      if ((!this.dialogue.isInputLocked(performance.now()) || finalToggleAvailable) && !this.pauseMenu.isOpen()) {
+      // Level 10 owns F: the final action must work the instant the overload starts, even mid-dialogue.
+      if (this.progress.level === 9) {
+        if (!this.pauseMenu.isOpen()) this.heartLevel?.handleLanternKey();
+        return;
+      }
+      if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen()) {
         if (this.lantern.toggleLantern(performance.now())) {
           this.player.playLanternAction(this.lantern.lanternOn);
           this.progress.lanternOn = this.lantern.lanternOn;
           this.save();
-          if (this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && !this.lantern.lanternOn) {
-            this.lantern.isOverloadMode = true;
-            this.finishHeart();
-          }
         }
       }
     });
@@ -175,6 +177,7 @@ export class CampaignScene extends Phaser.Scene {
     keyboard.on('keydown-J', () => {
       if (this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
+      else if (this.progress.level === 9) this.heartLevel?.showJournal();
       else if (this.progress.level === 8) this.showObservatoryJournal();
       else if (this.progress.level === 2) this.libraryLevel?.showJournal();
       else if (this.progress.level === 4) this.pathForTwoLevel?.showJournal();
@@ -215,6 +218,9 @@ export class CampaignScene extends Phaser.Scene {
         for (const [id, pos] of Object.entries(this.getRunePositions())) {
           if (Math.hypot(pos.x - x, pos.y - y) <= radius) this.progress.flags[`revealed-${id}`] = true;
         }
+      } else if (this.progress.level === 9) {
+        // Scenario §3: Pulse near the root-rule table reveals the moss-covered root lanes.
+        this.heartLevel?.onPulse(x, y);
       }
       this.save();
       this.refreshHud();
@@ -239,8 +245,8 @@ export class CampaignScene extends Phaser.Scene {
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
-    else if (this.progress.level !== 4) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
-    if (this.progress.level !== 4 && this.time.now - this.lastLumoSave >= 600) {
+    else if (this.progress.level !== 4 && this.progress.level !== 9) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+    if (this.progress.level !== 4 && this.progress.level !== 9 && this.time.now - this.lastLumoSave >= 600) {
       this.lastLumoSave = this.time.now;
       const x = Math.round(this.lumo.sprite.x);
       const y = Math.round(this.lumo.sprite.y);
@@ -252,7 +258,7 @@ export class CampaignScene extends Phaser.Scene {
         this.save();
       }
     }
-    if (this.progress.level !== 4 && this.time.now - this.lastPlayerSave >= 600) {
+    if (this.progress.level !== 4 && this.progress.level !== 9 && this.time.now - this.lastPlayerSave >= 600) {
       this.lastPlayerSave = this.time.now;
       const x = Math.round(this.player.x);
       const y = Math.round(this.player.y);
@@ -287,11 +293,13 @@ export class CampaignScene extends Phaser.Scene {
         ...(this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : []),
         ...(this.libraryLevel?.getProtectedPromptBounds() ?? []),
         ...(this.pathForTwoLevel?.getProtectedPromptBounds() ?? []),
+        ...(this.heartLevel?.getProtectedPromptBounds() ?? []),
       ],
     );
     this.libraryLevel?.update();
     this.pathForTwoLevel?.update(dt);
-    if (this.progress.level !== 3 && this.progress.level !== 4) {
+    this.heartLevel?.update(dt);
+    if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 9) {
       this.updatePuzzle(dt);
       this.updateCampaignCrossingState();
       this.updateCampaignBarriers();
@@ -364,6 +372,8 @@ export class CampaignScene extends Phaser.Scene {
     this.shatteredCreek = undefined;
     this.pathForTwoLevel?.destroy();
     this.pathForTwoLevel = undefined;
+    this.heartLevel?.destroy();
+    this.heartLevel = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.memoryLayerLabels.clear();
@@ -399,7 +409,6 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshHud();
       return;
     }
-    const overloadCheckpoint = level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'];
     const savedPlayerX = this.progress.counters['player-level'] === level ? this.progress.counters['player-x'] : undefined;
     const savedPlayerY = this.progress.counters['player-level'] === level ? this.progress.counters['player-y'] : undefined;
     const defaultPlayerX = [320, 320, 320, 90, 90, 90, 90, 320, 320, 320][level];
@@ -426,36 +435,29 @@ export class CampaignScene extends Phaser.Scene {
         this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true,
       );
       this.player.setPosition(spawn.x, spawn.y);
-    } else if (level !== 4) {
+    } else if (level !== 4 && level !== 9) {
       this.player.setFootPlacement(0, 27);
       this.player.setPosition(
-        overloadCheckpoint ? 130 : typeof savedPlayerX === 'number' ? Phaser.Math.Clamp(savedPlayerX, 24, 616) : defaultPlayerX,
-        overloadCheckpoint ? 205 : typeof savedPlayerY === 'number' ? Phaser.Math.Clamp(savedPlayerY, 58, 305) : level === 6 ? 160 : 290,
+        typeof savedPlayerX === 'number' ? Phaser.Math.Clamp(savedPlayerX, 24, 616) : defaultPlayerX,
+        typeof savedPlayerY === 'number' ? Phaser.Math.Clamp(savedPlayerY, 58, 305) : level === 6 ? 160 : 290,
       );
     }
+    // Level 10 (index 9) owns its own foot body, lantern state, Lumo and safe spawn: HeartOfElariaLevel.build().
     (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.updateFromGameObject();
     this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
     this.lumoTarget = level === 2
       ? { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) }
-      : overloadCheckpoint ? { x: 165, y: 205 } : this.getSavedLumoTarget();
-    this.lumo.sprite.setPosition(level === 2 ? this.lumoTarget.x : overloadCheckpoint ? this.lumoTarget.x : this.progress.counters['lumo-x'] ?? this.lumoTarget.x,
-      level === 2 ? this.lumoTarget.y : overloadCheckpoint ? this.lumoTarget.y : this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
+      : this.getSavedLumoTarget();
+    this.lumo.sprite.setPosition(level === 2 ? this.lumoTarget.x : this.progress.counters['lumo-x'] ?? this.lumoTarget.x,
+      level === 2 ? this.lumoTarget.y : this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
     this.lumo.setVisible(level !== 0 || this.progress.lanternPickedUp || this.progress.flags['l0-gate-open'] === true || this.progress.flags['l0-lumo-met'] === true);
     this.lantern.lanternInHand = this.progress.lanternPickedUp || level > 0;
     this.lantern.lanternOn = this.progress.lanternOn;
     this.lantern.lanternPlaced = false;
     this.lantern.isDawnMode = false;
     this.lantern.isOverloadMode = false;
-    if (level === 9 && this.progress.flags['l9-overload']) this.lantern.isOverloadMode = true;
     if (level === 7 && this.progress.flags['l7-lantern-placed']) this.lantern.placeLanternAt(120, 205);
     if (level === 5 && this.progress.flags['l5-lantern-placed'] && !this.progress.flags['l5-lantern-retrieved']) this.lantern.placeLanternAt(120, 205);
-    const heartLanternShouldBePlaced = this.progress.flags['l9-lantern-placed'] === true
-      || (this.progress.flags['l9-lantern-placed'] === undefined && this.progress.flags['l9-roots'] === true && !this.progress.flags['l9-lantern-retrieved']);
-    if (level === 9 && heartLanternShouldBePlaced && !this.progress.flags['l9-lantern-retrieved'] && !this.progress.flags['l9-overload']) {
-      const savedLampState = this.progress.lanternOn;
-      this.lantern.placeLanternAt(100, 205);
-      this.lantern.lanternOn = savedLampState;
-    }
     if (level === 2) {
       this.libraryLevel = new LibraryLevel({
         scene: this, progress: this.progress, player: this.player, interactions: this.interactions,
@@ -468,6 +470,17 @@ export class CampaignScene extends Phaser.Scene {
         interactions: this.interactions, lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
         nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen() });
       this.pathForTwoLevel.build();
+    } else if (level === 9) {
+      // Level 10 owns the whole room: art, colliders, interactions, Lumo, HUD text and the ending.
+      this.heartLevel = new HeartOfElariaLevel({
+        scene: this, progress: this.progress, player: this.player, lumo: this.lumo, interactions: this.interactions,
+        lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
+        isDialogueLocked: () => this.dialogue.isInputLocked(performance.now()),
+        isPaused: () => this.pauseMenu.isOpen(),
+        playLanternAction: (on) => this.player.playLanternAction(on),
+        finish: () => this.finishHeartCampaign(),
+      });
+      this.heartLevel.build();
     } else {
       this.addNarrativeProps(level);
       this.registerLevel(level);
@@ -480,6 +493,7 @@ export class CampaignScene extends Phaser.Scene {
       this.save();
       if (level === 2) this.libraryLevel?.startOpeningDialogue();
       else if (level === 4) this.pathForTwoLevel?.startOpeningDialogue();
+      else if (level === 9) this.heartLevel?.startOpeningDialogue();
       else {
         const woodsStage = level === 1 ? this.getWoodsTutorialStage() : undefined;
         const woodsDirection = woodsStage === 'exit' ? 'Cổng đã mở. Đi theo lối phía đông tới bậc thang.'
@@ -1902,20 +1916,9 @@ export class CampaignScene extends Phaser.Scene {
       }
       this.addCampaignBarrier('garden-root-bridge-gate', 320, 260, 100, 30, !bridgeReady && !this.gardenBridgePendingRemoval);
     } else if (level === 9) {
-      this.addCampaignBarrier('heart-north-boundary', 320, 91, 640, 10);
-      this.addCampaignBarrier('heart-south-boundary', 320, 315, 640, 10);
-      this.addCampaignBarrier('heart-west-boundary', 2.5, 200, 5, 220);
-      this.addCampaignBarrier('heart-east-boundary', 637.5, 200, 5, 220);
-      // Mother Tree trunk blocks passage.
-      this.addCampaignBarrier('heart-tree-trunk', 320, 182, 68, 20);
-      // Standing props and mechanisms block passage; alcoves/eyes remain approachable.
-      this.addCampaignBarrier('heart-pedestal', 100, 205, 34, 24);
-      this.addCampaignBarrier('heart-mirror-memory', 220, 220, 34, 40);
-      this.addCampaignBarrier('heart-mirror-balance', 420, 220, 34, 40);
-      this.addCampaignBarrier('heart-prism', 320, 200, 30, 34);
-      this.addCampaignBarrier('heart-statue', 400, 125, 30, 34);
-      this.addCampaignBarrier('heart-receiver-left', 180, 145, 26, 24);
-      this.addCampaignBarrier('heart-receiver-right', 460, 145, 26, 24);
+      // Level 10 registers its own colliders from HeartOfElariaLevel's layout (props + scenery bands),
+      // so the generic campaign barriers must not add a second, contradictory set of walls here.
+      return;
     }
   }
 
@@ -2183,6 +2186,14 @@ export class CampaignScene extends Phaser.Scene {
       this.save();
       this.scene.restart();
     });
+  }
+
+  /** Level 10's ending: HeartOfElariaLevel has already saved `l9-complete`, so only the scene switch is left. */
+  private finishHeartCampaign(): void {
+    this.progress.flags['l9-complete'] = true;
+    this.save();
+    this.heartEnd = true;
+    this.scene.start('EndingScene', { campaign: true });
   }
 
   private finishHeart(): void {
@@ -2460,6 +2471,7 @@ export class CampaignScene extends Phaser.Scene {
   private showHint(): void {
     if (this.progress.level === 2) { this.libraryLevel?.showHint(); return; }
     if (this.progress.level === 4) { this.pathForTwoLevel?.showHint(); return; }
+    if (this.progress.level === 9) { this.heartLevel?.showHint(); return; }
     if (this.progress.level === 0) {
       const step = this.getForestEdgeStep();
       if (this.forestEdgeHintStep !== step) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
@@ -2506,6 +2518,13 @@ export class CampaignScene extends Phaser.Scene {
     const level = CAMPAIGN_LEVELS[this.progress.level];
     if (this.progress.level === 4 && this.pathForTwoLevel) {
       if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về');
+      return;
+    }
+    if (this.progress.level === 9 && this.heartLevel) {
+      this.objectiveText?.setText(this.heartLevel.getObjectiveText());
+      if (this.titleText) this.titleText.setText(`${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
+      this.statusText?.setText(this.heartLevel.getStatusText());
+      if (this.lumoStatusText) this.lumoStatusText.setText(this.heartLevel.getLumoStatusText());
       return;
     }
     if (this.progress.level === 0) {

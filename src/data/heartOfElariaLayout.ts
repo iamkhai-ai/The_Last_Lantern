@@ -47,6 +47,64 @@ export const HEART_OVERLOAD_CHECKPOINT: HeartPoint = { x: 150, y: 244 };
 
 export type HeartArtSource = 'level10' | 'texture';
 
+/**
+ * Art resolution contract for this room.
+ *
+ * `level10` names live in `assets/levels/10-the-heart-of-elaria/sprites/` and resolve through
+ * `getLevelArtKey(9, name)`. `texture` names are runtime textures: the procedural/`src/assets`
+ * keys registered by `AssetLoader` + `ProceduralTextures` (`pedestal_lit`, `mirror_N`,
+ * `lock_sun_off/on`, `lock_moon_off/on`). A few controls intentionally reuse another level's
+ * package art, which is recorded in `HEART_REUSED_ART` so the check script can prove every
+ * referenced file exists on disk instead of trusting the string.
+ */
+export const HEART_REUSED_ART: Readonly<Record<string, { level: number; file: string; native: { width: number; height: number } }>> = {
+  'pressure-empty': { level: 4, file: 'pressure-empty', native: { width: 44, height: 28 } },
+  'pressure-occupied': { level: 4, file: 'pressure-occupied', native: { width: 44, height: 28 } },
+  'statue-notch-0': { level: 7, file: 'statue-notch-0', native: { width: 64, height: 88 } },
+  'statue-notch-1': { level: 7, file: 'statue-notch-1', native: { width: 64, height: 88 } },
+  'statue-notch-2': { level: 7, file: 'statue-notch-2', native: { width: 64, height: 88 } },
+  'statue-notch-3': { level: 7, file: 'statue-notch-3', native: { width: 64, height: 88 } },
+};
+
+/** Native sizes of the runtime textures this room switches between (never rescaled). */
+export const HEART_TEXTURE_NATIVE: Readonly<Record<string, { width: number; height: number }>> = {
+  pedestal_lit: { width: 40, height: 56 },
+  pedestal_empty: { width: 36, height: 39 },
+  mirror_0: { width: 36, height: 48 },
+  mirror_1: { width: 36, height: 48 },
+  mirror_2: { width: 36, height: 48 },
+  mirror_3: { width: 36, height: 48 },
+  lock_sun_off: { width: 40, height: 33 },
+  lock_sun_on: { width: 40, height: 33 },
+  lock_moon_off: { width: 40, height: 34 },
+  lock_moon_on: { width: 40, height: 34 },
+};
+
+export interface HeartArtCandidate {
+  kind: 'level' | 'texture';
+  /** For `level` candidates: the campaign index whose sprite package owns the file. */
+  level: number;
+  file: string;
+}
+
+/**
+ * Ordered art candidates for one control. The first candidate that exists at runtime wins, so a
+ * name that only lives in the level-10 package can never silently fall back to a missing texture.
+ */
+export function heartArtCandidates(name: string): HeartArtCandidate[] {
+  const reused = HEART_REUSED_ART[name];
+  const candidates: HeartArtCandidate[] = reused
+    ? [{ kind: 'level', level: reused.level, file: reused.file }]
+    : [{ kind: 'level', level: 9, file: name }];
+  if (HEART_TEXTURE_NATIVE[name]) candidates.push({ kind: 'texture', level: -1, file: name });
+  return candidates;
+}
+
+/** Native pixel size the image must keep (never stretched into its collision box). */
+export function heartArtNativeSize(name: string): { width: number; height: number } | undefined {
+  return HEART_REUSED_ART[name]?.native ?? HEART_TEXTURE_NATIVE[name];
+}
+
 export interface HeartElement {
   id: string;
   /** `prop` is a standing object with a solid footprint; `cell` is a walkable floor socket. */
@@ -143,7 +201,21 @@ export const HEART_CELLS: readonly HeartElement[] = [
   cell('heart-rule-table', 'root-rule-reminder-table', 150, 284, 124, 48, 40, 18, 46),
 ];
 
-export const HEART_ELEMENTS: readonly HeartElement[] = [...HEART_PROPS, ...HEART_CELLS];
+/**
+ * Cells first, then props. Registration order is the documented tie-break of `InteractionSystem`
+ * (`dist < bestDist` keeps the first registered control), so on an exact distance tie the floor
+ * socket Nhinh is standing on wins over a neighbouring standing object.
+ */
+export const HEART_ELEMENTS: readonly HeartElement[] = [...HEART_CELLS, ...HEART_PROPS];
+
+/**
+ * Documented target arbitration for adjacent controls. `InteractionSystem` keeps the strictly
+ * nearest enabled control; an exact distance tie can only happen on the perpendicular bisector
+ * between two stands, and there the registration order above decides it. Two such lines exist in
+ * this room: x=226 between G0 and the Memory mirror (G0 wins, both are props) and y=271 between the
+ * statue and the Moon pocket (the pocket wins, because cells register first).
+ */
+export const HEART_CONTROL_ORDER: readonly string[] = HEART_ELEMENTS.map((element) => element.id);
 
 export const HEART_CORE = { x: 320, y: 115, width: 58, height: 68 } as const;
 /** The statue shadow that must cover the Moon pocket while the branch holds. */
@@ -272,6 +344,20 @@ export function heartGateCenter(element: HeartElement): HeartPoint {
   return { x: element.gate.x + element.gate.width / 2, y: element.gate.y + element.gate.height / 2 };
 }
 
+/**
+ * RULE_GAMES.md rule 1 / rule 2 as a pure predicate, shared by the runtime and the check script:
+ * a standing prop answers only from its south edge (inside the radius circle, never from above the
+ * art), a floor socket answers only while Nhinh stands inside its authored cell.
+ */
+export function canReachHeartElement(element: HeartElement, player: HeartPoint): boolean {
+  if (element.kind === 'cell') return isInsideHeartGate(element.id, player);
+  const distance = Math.hypot(player.x - element.stand.x, player.y - element.stand.y);
+  if (distance > element.radius) return false;
+  // The trigger circle sits on the south edge; standing at or above the prop's vertical centre is
+  // "behind" it and must stay silent.
+  return player.y >= element.y - 2;
+}
+
 export function getHeartElement(id: string): HeartElement | undefined {
   return HEART_ELEMENTS.find((item) => item.id === id);
 }
@@ -324,13 +410,21 @@ function anySafeWithin(center: HeartPoint, radius: number): boolean {
   return false;
 }
 
-function reachableNorthProbe(element: HeartElement): boolean {
-  const artTop = element.y - element.height / 2;
-  for (let y = artTop - 60; y < artTop - 1; y += 2) {
-    for (let dx = -element.radius; dx <= element.radius; dx += 2) {
-      const probe = { x: element.stand.x + dx, y };
-      if (Math.hypot(probe.x - element.stand.x, probe.y - element.stand.y) > element.radius) continue;
-      if (isHeartPositionSafe(probe)) return true;
+/**
+ * Rule-1 leak test: scan the entire trigger disc of a standing prop and look for any reachable
+ * position that is above the prop's vertical centre yet still answers. The old version only probed
+ * one axis and was satisfied vacuously; this one fails loudly if a prompt could ever be raised
+ * while Nhinh stands behind or beside the object.
+ */
+function promptLeaksBehindArt(element: HeartElement): boolean {
+  const reach = Math.ceil(element.radius) + 1;
+  for (let dy = -reach; dy <= reach; dy += 1) {
+    for (let dx = -reach; dx <= reach; dx += 1) {
+      if (Math.hypot(dx, dy) > element.radius) continue;
+      const probe = { x: element.stand.x + dx, y: element.stand.y + dy };
+      if (probe.y >= element.y - 2) continue;
+      if (!isHeartPositionSafe(probe)) continue;
+      if (canReachHeartElement(element, probe)) return true;
     }
   }
   return false;
@@ -350,7 +444,7 @@ export function auditHeartStands(): HeartStandReport[] {
       reachable: heartReaches(HEART_SPAWN, element.stand, element.radius + 8),
       canPress: isHeartPositionSafe(resting) && anySafeWithin(element.stand, Math.min(element.radius, 24)),
       southOfArt: element.kind === 'cell' || element.stand.y >= artBottom - 10,
-      blindFromNorth: element.kind === 'cell' ? true : !reachableNorthProbe(element),
+      blindFromNorth: element.kind === 'cell' ? true : !promptLeaksBehindArt(element),
       gateOnArt,
     };
   });
