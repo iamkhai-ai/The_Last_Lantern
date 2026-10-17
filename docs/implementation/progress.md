@@ -2,7 +2,16 @@
 
 ## Scope
 
-Current slice: rebuild **Level 04 only**, per the user's 2026-10-17 request. Level 02 was accepted and integrated into main at `0446554`; another chat owns Level 03. Reuse the managed `level-02-spatial-rebuild` worktree on `codex/level-04-spatial-rebuild`, based on main `0446554`. Earlier Level 01/02 history below is retained as context. Main checkout contains unrelated edits and remains untouched.
+Current slice: rebuild **Level 06 (The Sleepless Tower, campaign index 5)** on branch `codex/level-06-spatial-rebuild` from `test-develop` `33fa1c3`. Level 05 is handled by a separate worktree; another chat owns the remaining levels. Earlier Level 04/02/01 history below is retained as context. Main checkout contains unrelated edits and remains untouched.
+
+## Level 06 — 2026-10-18
+
+- Design first in [06-layout.md](06-layout.md) and [06-plan.md](06-plan.md): single tower room, splitter bench lesson, three simultaneous circuits on the main machine, one-shot Return-Flow switch, Hope Crystal, record, reunion and garden exit.
+- Implemented `src/data/towerLayout.ts` (geometry, optics, live conditions, step machine, gating, spawn, migration), `src/levels/SleeplessTowerLevel.ts` (composition, interactions, beams/indicators, Lumo call/travel/recall, full scenario dialogue, H/J/HUD, save) and focused index 5 routing in `CampaignScene`; removed the coming-soon gate for index >= 4 (legacy 4-9 become reachable; record for the merge decision).
+- Corrections during implementation: bench practice-2 dead stub `(118,155)` -> `(140,175)` with a check assertion; one controller TS fix (outflow hide via the visuals map). Opening dialogue runs from `build()` under `intro-5` (no `startOpeningDialogue`), matching Level 04.
+- **PASS** `node scripts/check-sleepless-tower.mjs` and `npm run build` (531 modules) on the working tree; `npm ci` needed first in the fresh worktree. Generated `dist/index.html` restored per plan.
+- **NOT_RUN** live browser/gameplay/visual verification and human acceptance (Work browser control disabled). Independent root reviews not yet performed; branch is local. Full evidence and limits: [06-report.md](06-report.md).
+- User-requested deep audit after the first commit (offline composites + per-file PNG dimension/alpha checks; no browser): tube chute corrected to uniform 38×19 and the optics now render dormant after Return Flow (grey routing without end marks, dark prisms, receiver heads off) to match the `after-return-flow` study; check script pins it. Check + build re-PASS in the follow-up commit; browser/gameplay audit still NOT_RUN.
 
 ## Level 04 — 2026-10-17
 
