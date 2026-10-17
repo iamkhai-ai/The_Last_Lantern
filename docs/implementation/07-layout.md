@@ -9,7 +9,7 @@ Conventions: 640×360, native scale, nearest filtering. Actor center coordinates
 
 | id | rect (x,y,w,h) | contents |
 | --- | --- | --- |
-| Z1 practice lawn | 28,266,276,82 | spawn (238,336), practice pots, teaching waterline, entry mouth (216,348,42,12) |
+| Z1 practice lawn | 28,266,276,82 | spawn (238,300), practice pots, teaching waterline, entry mouth (216,348,42,12) |
 | Z2 forecourt | 218,186,86,64 | moon pot at the top of the court, west bridge approach runs under it |
 | Z3 terrace | 208,96,96,90 | sun flower, bar gate corridor zone above |
 | gate corridor | 104,136,92,20 | shutter handle stand, west latch stand (only when bar raised) |
@@ -58,27 +58,27 @@ Conventions: 640×360, native scale, nearest filtering. Actor center coordinates
 | --- | --- | --- |
 | bar beam | 107,136,87,26 | solid while the bar is lowered (no effective light and not held); ejected player lands at y112 (north) or y170 (south) |
 | bridge gate | 304,228,92,20 | solid while the bridge is not walkable (coiled; or light-on with no foot on a span) |
-| side plank | 304,284,92,24 | solid until `l6-return-latched` |
+| side plank | 304,284,80,32 | solid until `l6-return-latched` (matches the visible 80×32 plank exactly) |
 
 ## Modules
 
 | id | art (top-left, size) | solid | stand / behavior |
 | --- | --- | --- | --- |
 | reservoir | reservoir-open/closed 36,58 80×72 | full | glow when open; canopy closes permanently via handle |
-| shutter handle | shutter-handle-open/closed 120,86 24×40 | full | stand (132,138) r22, corridor; `E · Kéo màn che bể tích quang`; once |
-| sun (main) | sun-open/folded 196,124 48×72 | 200,152,40,44 | state follows effective light; icon at (210,200) |
+| shutter handle | shutter-handle-open/closed 120,86 24×40 | full | stand (132,132) r22, gap band; `E · Kéo màn che bể tích quang`; once |
+| sun (main) | sun-open/folded 196,124 48×72 | 200,152,40,44 | state follows effective light; icon at (252,164) |
 | bar gate | gate-bar-lowered/raised/held 94,104 112×72 | posts + beam | beam solid 107,136,87,26 while lowered; raised/held beam overhead depth 70 |
-| latch west | latch-west-unlatched/latched 128,96 28×32 | full | stand (142,144) r22, only inside the corridor and only when bar raised; `E · Gài chốt thanh chắn` |
-| moon (main) | moon-coiled 252,186 48×44 · moon-extended 200,186 112×44 | full (coiled body) | sits at the top of the forecourt; extended reaches toward the canal; icon at (262,212); the 20px band under it is the west bridge approach |
+| latch west | latch-west-unlatched/latched 128,96 28×32 | full | stand (142,132) r22, only inside the gap band and only when bar raised; `E · Gài chốt thanh chắn` |
+| moon (main) | moon-coiled 252,186 48×44 · moon-extended 200,186 112×44 | full (coiled body) | sits at the top of the forecourt; extended reaches toward the canal; icon at (250,240); the 20px band under it is the west bridge approach |
 | root bridge | root-bridge-off/on/held, two images at span centers (327,238) · (371.5,238) | dynamic strip | walkable when deployed; held spans stay under the feet |
 | drain | nursery-drain-closed/open 436,224 52×48 | full | stand (462,286) r24; `E · Mở cống vườn ươm`; once |
 | delivered water | nursery-water-delivered 466,262 128×24 | none (depth 4) | shown after drain; flows through the steps opening |
 | sprout | sprout-before/after 484,232 32×32 | none | examine stand (500,280) r24; `E · Ngắm mầm cây` |
-| side path | side-stone-path-closed/open 304,284 92×24 | dynamic strip | tiles always visible; plank blocks until latched |
+| side path | side-stone-path-closed/open 304,284 **80×32 native** | dynamic strip 304,284,80,32 | tiles always visible; the plank blocks only where it is drawn (walkable strip stays 304..396 until `l6-return-latched`) |
 | latch east | latch-east-unlatched/latched 400,240 28×32 | full | stand (414,286) r22; `E · Gài chốt lối đá phụ`; once |
 | exit trigger | arch, no art | — | (574,64) r24; `E · Qua cổng điện thờ`; enabled on completion |
-| practice sun pot | sun-open/folded 70,266 48×72 | 74,294,40,44 | lit-state demo; icon (84,316) |
-| practice moon pot | moon-coiled/extended 132,284 48×44 | 136,290,40,38 | dark-state demo; icon (146,334) |
+| practice sun pot | sun-open/folded 70,266 48×72 | 74,294,40,44 | lit-state demo; icon (126,275) |
+| practice moon pot | moon-coiled/extended 132,284 48×44 | 136,290,40,38 | dark-state demo; icon (160,274) |
 | teaching waterline | graphics y306, runs 186..202 · 208..224 + spark | none | "khe thử không cản lối đi" — walkable |
 | teaching bridge | root-bridge-on 182,288 48×32 | none | appears with the first dark state, demo only |
 
@@ -112,19 +112,21 @@ Depth = `10 + groundAnchorY/10` for standing props and actor feet; ground stamps
 
 ## Prompt rules (RULE_GAMES audit)
 
-- Every trigger sits at the south edge of its object (handle 12px below arm, latches 12–14px below body, drain 14px below, sprout 16px below). Radius 20–24. No trigger center sits inside its own art.
-- West latch is additionally guarded to the gate corridor (`104 ≤ x ≤ 196`, `100 ≤ y ≤ 136` on player centers) so it can only be used after stepping through the raised gate; the south band of the corridor body-space (`y 136..162`) never prompts.
+- Every trigger sits at the south edge of its object (handle 6px below the body, latches 4–14px below, drain 14px below, sprout 16px below). Radius 20–24. No trigger center sits inside its own art.
+- The handle/latch pair sits north of the wall gap, so both are worked from the gap band (player centers `104 ≤ x ≤ 196`, `100 ≤ y ≤ 136`): the documented stands are (132,132) and (142,132) and the live guards (`gardenHandleEnabled` / `gardenLatchWestEnabled`) are mutually exclusive, so the two overlapping 22px circles can never fight for the nearest target. The corridor's south band (`y 136..156`) never prompts.
 - The arch exit uses the documented gate exception (trigger under the arch, approached from inside the level).
 - No trigger reaches the far (north) face of any object; verified by the check script with the authored 14×6 body.
 
 ## Darkness and readability
 
 - After `l6-canopy-shut`: `lantern.isDawnMode = false`, so the shared LanternSystem overlay dims the room (no level-local overlay); reservoir glow removed; the lantern halo stays bright above the overlay so the dark puzzle remains readable. Plant state changes get a 120ms scale pulse (1.12) so they read even in darkness.
-- Icons are 16×16 state stickers (open/closed bloom, open/closed curl) drawn at depth 6 beside their pot, never over the actor.
+- Icons are 16×16 state stickers drawn at depth 6 on open floor beside their pot, never over the actor, never under their own pot art (including the 112px extended Moon Root art) and never inside the bottom HUD strip `y ≥ 320`: sun-main (252,164), moon-main (250,240), practice sun (126,275), practice moon (160,274). The check script asserts all four conditions from the module table.
 
 ## Restore rules
 
 - Save `player-level/x/y`, `lumo-x/y` on the existing cadence.
-- On load, rebuild state from flags, then place the player: if the saved center is unsafe (inside a solid/dynamic solid, on a canal without walkable crossing, or in a zone unreachable with current crossings/bar), use `nearestSafeGardenSpawn` around the saved point, then the stage anchors (238,336), (200,300), (258,300), (440,282), (576,150), (574,64).
+- On load, rebuild state from flags, then place the player: if the saved center is unsafe (inside a solid/dynamic solid, on a canal without walkable crossing, or in a zone unreachable with current crossings/bar), use `nearestSafeGardenSpawn` around the saved point, then the stage anchors (238,300), (200,300), (258,300), (440,282), (576,150), (574,64).
+- **Reachability is part of "safe".** A collision-free point can still be sealed behind an unsolved crossing — a legacy save inside the nursery/walkway/arch while the garden is still lit would strand the player east of the canal with the shutter handle unreachable and the level unwinnable. `nearestSafeGardenSpawn` therefore accepts a candidate only when it is collision-free *and* belongs to `gardenReachableRegion` (the shared 4px collision-aware flood-fill from the entry, `GARDEN_REACH_ORIGIN` 14,12). The entry (238,300) is walkable in every state, so the fallback is always the west lawn; the anchor list is only reached when the saved point is unusable.
+- The spawn itself is (238,300) — not deeper south — because the shared bottom HUD strip starts at y=320 (`statusText` y320, controls bar y344) and a (238,336) spawn put the actor behind two panels.
 - Legacy saves: old `l6-*` flags load as-is; plant visuals re-derive; unknown flags ignored; never write new fields outside the v1 save shape except the listed `l6-*` keys.
-- Integration: `CampaignScene` owns the controller (`gardenLevel`), level index 6 routes here, and the campaign gate now opens `ComingSoonScene` only from level ≥ 7 so level 07 is playable.
+- Integration: `CampaignScene` owns the controller (`gardenLevel`), level index 6 routes here, and the playtest gate still reads `if (this.progress.level >= 4 && this.progress.level !== 6) start('ComingSoonScene')` — index 6 is playable, every other unfinished index keeps the coming-soon screen (reconciled at integration where 05/06 add their own index to the same line).

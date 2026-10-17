@@ -19,9 +19,9 @@ Light model (matches asset previews 01/02):
 
 ## Player flow (shipped target)
 
-1. Spawn on the south practice lawn `(238,336)` walking in from the southern mouth; Lumo follows. Opening dialogue from scenario §2 (4 lines).
-2. Practice pots (west of spawn, walled lesson corner): while the canopy is still open the pots hold the lit state. Turn west; at the fixed shutter handle `stand (132,138)` press E: the canopy closes over the reservoir, the garden darkens, bar lowers; two-line beat ("Tối đi thật."). First lantern toggle after that plays the four-line practice observation (scenario §3) and every pot shows its state icon.
-3. Main gate: with the lantern ON the Sun Flower opens and the bar raises. Walk north through the bar corridor (posts at x99..106 / x194..201, beam line y150..162), then press E at the west latch `stand (142,144)` to hold the bar. It stays raised when the flower folds.
+1. Spawn on the south practice lawn `(238,300)` (above the shared bottom HUD strip, which starts at y320; the original `(238,336)` put the actor behind the status line and the controls bar) walking in from the southern mouth; Lumo follows. Opening dialogue from scenario §2 (4 lines, unchanged scenario text).
+2. Practice pots (west of spawn, walled lesson corner): while the canopy is still open the pots hold the lit state. Turn west; at the fixed shutter handle `stand (132,132)` press E: the canopy closes over the reservoir, the garden darkens, bar lowers; two-line beat ("Tối đi thật."). First lantern toggle after that plays the four-line practice observation (scenario §3) and every pot shows its state icon.
+3. Main gate: with the lantern ON the Sun Flower opens and the bar raises. Walk north through the bar corridor (posts at x99..106 / x194..201, beam line y150..162), then press E at the west latch `stand (142,132)` to hold the bar. It stays raised when the flower folds.
 4. Turn the lantern OFF. The practice Moon Root and the main one extend; the root bridge spans the vertical canal `(x304..364, y228..248)`. Cross it in the dark to the nursery.
 5. Press E at the drain `stand (462,286)`: water runs east around the sprout, one new leaf opens, the seven-line nursery scene plays (Lumo realizes some things need to sleep), `l6-lumo-realized` is recorded. The distant Sun Flower visibly folds.
 6. Press E at the east latch `stand (414,286)`: the side stone path plank retracts permanently, giving a light-independent return crossing at `(x304..396, y284..312)`.
@@ -43,10 +43,10 @@ See `07-layout.md` for the full coordinate table. Summary of what is on top of w
 ## Collision contract
 
 - Shared actor body: 14×6 at `center + (-7, +16)`; feet line `center + (0,19)`. Pure layout, Arcade bodies and safe-restore all consume the same rectangles.
-- Canals are water: solid everywhere except an open crossing. Crossings: root bridge strip `(y228..248)` with spans `s1 304..350`, `s2 347..396` walkable only while deployed or held under the feet; side path strip `(304..396, y284..308)` walkable only after `l6-return-latched` (before that a solid plank `304,284,92,24` closes it); the sluice crossing over the horizontal canal `(x148..190, y218..258)` is permanent stone.
+- Canals are water: solid everywhere except an open crossing. Crossings: root bridge strip `(y228..248)` with spans `s1 304..350`, `s2 347..396` walkable only while deployed or held under the feet; side path strip `(304..396, y284..308)` walkable only after `l6-return-latched` (before that the solid plank `304,284,80,32` — the native plank art — closes it, so the closed crossing draws exactly where it blocks); the sluice crossing over the horizontal canal `(x148..190, y218..258)` is permanent stone.
 - Standing props are solid from all four directions using their full silhouette footprint (RULE_GAMES). Flat art (waterline, water chevrons, icons, sprout) is walkable.
 - Every interaction trigger sits at the object's south edge with radius 20–24 and a `canApproach` guard where the object can be reached from more than one side (west latch: only from inside the gate corridor). Gate arch exit trigger follows the documented arch exception.
-- Backtracking stays open: held bar, retracted plank and opened drain are permanent. A save inside a closed area (canal without a crossing, gate corridor with the bar lowered, nursery with both crossings closed) restores to the nearest safe point with the same body/solid predicate.
+- Backtracking stays open: held bar, retracted plank and opened drain are permanent. A save inside a closed area (canal without a crossing, gate corridor with the bar lowered, nursery with both crossings closed) restores to the nearest safe point with the same body/solid predicate **and the same reachability predicate**: `nearestSafeGardenSpawn` only accepts a candidate that is collision-free *and* inside `gardenReachableRegion` from the entry, so a legacy save east of the canal with the garden still lit comes back to the west lawn instead of stranding the player without the shutter handle.
 
 ## Guidance contract
 
@@ -68,7 +68,7 @@ See `07-layout.md` for the full coordinate table. Summary of what is on top of w
 | bar held, drain not open, lantern ON | *Tắt đèn (F) cho Rễ Nguyệt bắc cầu qua mương, rồi sang vườn ươm.* | Thanh chắn đã được giữ. Giờ chỉ bóng tối mới đánh thức được Rễ Nguyệt. | Rễ Nguyệt vươn ra khi đèn tắt. | Tắt đèn bằng F rồi qua cầu rễ bắc ngang mương ở giữa vườn. | first retract-before-cross → 3-line "Mở được cửa thì lại mất cầu." |
 | bar held, drain not open, lantern OFF | *Bóng tối đang giữ. Qua cầu rễ giữa vườn tới vườn ươm và mở cống.* (west bank) / *Nhấn E ở cống vườn ươm để mở đường nước.* (east bank) | Cầu rễ chỉ bắc khi đèn tắt. | Vườn ươm nằm bên kia mương, phía đông. | Qua cầu rễ tới vườn ươm và nhấn E ở cống để mở đường nước. | 7-line nursery scene (sets `l6-lumo-realized`) |
 | drain open, side not latched | *Gài chốt lối đá phụ cạnh cống để mở lối về không cần ánh sáng.* | Nước đã chảy tới vườn ươm. | Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm. | Nhấn E ở chốt để mở lối về không cần ánh sáng. | "Chốt đá đã gài. Lối đá phụ mở rồi." |
-| side latched, scene pending | *Nói với Lumo bên mầm cây trong vườn ươm.* | cả vườn đã chăm lại… | …cổng điện thờ nằm ở góc đông bắc… | …đi theo vườn ươm lên bậc đá rồi rẽ lên walkway. | sprout re-read: 2 lines |
+| side latched, scene pending | *Nói với Lumo bên mầm cây trong vườn ươm.* | cả vườn đã chăm lại… | …cổng điện thờ nằm ở góc đông bắc… | …đi theo vườn ươm lên bậc đá rồi rẽ lên walkway. | sprout re-read: 2 lines (also commits `l6-lumo-realized` if the queued nursery scene was skipped) |
 | complete | *Tới cổng điện thờ ở góc đông bắc và nhấn E.* | Cả vườn đã được chăm lại. Cổng điện thờ nằm ở góc đông bắc. | Đi theo vườn ươm lên bậc đá phía đông rồi rẽ lên walkway. | Tới cổng và nhấn E. | 5-line ending |
 
 The exit interaction never disappears: while `gardenExitReady()` is false it shows `Cổng điện thờ đang khép · chăm khu vườn trước` and E returns the specific missing step instead of advancing.
@@ -97,7 +97,7 @@ Opening 4 lines; canopy beat 2 lines; practice observation 4 lines (once); retra
 - [x] Create `scripts/check-sleeping-garden.mjs`: geometry (solids vs stands, reachability flood-fill by stage), crossings by state, prompt side rules, state machine (light model, held moments, latch permanence), completion gating, restore safety. Fixes found by the script: moon pot moved to 252,186 so the west bridge approach is walkable; anchor (160,300) sat inside the practice moon pot and moved to (200,300).
 - [x] Verify: `node scripts/check-sleeping-garden.mjs`, `npx tsc --noEmit`, `npm run build`. Runtime smoke with a seeded `level:6` save passed (boot, intro dialogue, walk, lantern toggle, no page errors); screenshots in `%TEMP%\opencode\ll07_shots`.
 - [x] Write `docs/implementation/level-07-report.md` with exact commands/results and coordinate adjustments.
-- [ ] Self-review the diff; no push, no merge, no save resets, no PNG/character edits.
+- [x] Review pass (repairs in `a0b04bb`): reachable-only restore, sticker visibility, art-true plank, operable stand points, live control guards, status line, HUD-safe spawn, scenario intro, sprout objective. See "Review pass" in the report for the evidence per defect. Browser playthrough remains NOT_RUN in this session.
 
 ## Risks and decisions
 
