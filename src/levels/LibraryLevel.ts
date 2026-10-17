@@ -122,6 +122,7 @@ export class LibraryLevel {
     if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'Đọc bức tranh sau vách rễ bằng E.';
     if (this.isExitOpen()) return 'Tới lối phía Đông và nhấn E.';
     if (!this.progress.flags['l2-book-practice']) return 'Đọc trang thử bằng E, rồi đổi đèn bằng F.';
+    if (!this.progress.flags['l2-memory'] && this.progress.flags['l2-clues-ready']) return 'Xếp Chim → Lá → Thuyền → Hạt theo mũi tên quanh giếng, bắt đầu từ hốc khắc mặt trời, rồi kiểm tra ở bệ giữa.';
     if (!this.progress.flags['l2-memory']) return 'Đọc các lớp mực, xếp phiến quanh giếng và xác nhận ở bệ giữa.';
     return 'Khám phá thư viện.';
   }
@@ -142,8 +143,8 @@ export class LibraryLevel {
     if (stage !== this.stageKey) { this.stageKey = stage; this.hintIndex = 0; }
     const hints: Record<string, string[]> = {
       book: ['Trang sách ở bàn cho thấy mực thay đổi khi cậu tắt đèn.', 'Trang có hai lớp hình chồng lên nhau.', 'Đứng cạnh sách và nhấn E khi đèn bật, rồi thử lại khi đèn tắt.'],
-      clues: ['Mỗi phiến có thể được đọc dưới cả hai trạng thái đèn.', 'Bật đèn để nhận ra thiên thể và vị trí. Tắt đèn để xem đường chuyển động.', 'Từ hốc chân trời sáng, đặt Chim, Lá, Thuyền rồi Hạt; dùng bệ giữa để kiểm tra.'],
-      arrange: ['Hốc có dấu chân trời là điểm bắt đầu của vòng.', 'Lần theo mũi tên quanh giếng theo chiều kim đồng hồ.', 'Từ hốc chân trời sáng, đặt Chim, Lá, Thuyền rồi Hạt; dùng bệ giữa để kiểm tra.'],
+      clues: ['Mỗi phiến có thể được đọc dưới cả hai trạng thái đèn.', 'Bật đèn để nhận ra thiên thể và vị trí. Tắt đèn để xem đường chuyển động.', 'Hốc phía trên giếng khắc hình mặt trời mọc — đó là điểm bắt đầu. Đặt Chim, Lá, Thuyền rồi Hạt theo chiều kim đồng hồ.'],
+      arrange: ['Hốc phía trên giếng (khắc hình mặt trời) là điểm bắt đầu của vòng.', 'Lần theo các mũi tên quanh giếng theo chiều kim đồng hồ.', 'Từ hốc mặt trời, đặt Chim, Lá, Thuyền rồi Hạt; xong thì kiểm tra ở bệ giữa.'],
       crystal: ['Giếng đã mở ở giữa vòng.', 'Đứng ở mép phía nam để tới tinh thể.', 'Nhấn E tại bệ giữa để nhận Tinh thể Ký Ức.'],
       mural: ['Ánh sáng đã mở vách sau rễ cây.', 'Tới trước tấm vách ở phía đông bắc.', 'Đứng trước vách và nhấn E để đọc bức tranh thứ năm.'],
       exit: ['Đường rễ cây dẫn ra phía đông.', 'Lối đi nằm dưới bức tranh thứ năm.', 'Tới cổng ở góc đông nam và nhấn E để đi tiếp.'],
@@ -241,6 +242,7 @@ export class LibraryLevel {
       socket.setData('library-socket', i);
       this.socketImages.push(socket);
     }
+    this.drawCycleMarks();
     for (const point of LIBRARY_LAYOUT.racks) {
       const stand = this.addImage('socket-empty', point.x, point.y, LIBRARY_LAYOUT.art.rack, LIBRARY_LAYOUT.art.rack,
         this.depthAt(point.y + LIBRARY_LAYOUT.art.rack / 2), true).setVisible(false);
@@ -251,6 +253,25 @@ export class LibraryLevel {
       crystal.setData('library-crystal', true);
     }
     this.redrawTabletStacks();
+  }
+
+  private drawCycleMarks(): void {
+    const start = LIBRARY_LAYOUT.seats[0];
+    this.addImage('bright-horizon-sun', start.x, start.y + 36, 34, 34, LIBRARY_LAYOUT.groundDepth - 0.4).setAlpha(1);
+    const graphics = this.scene.add.graphics().setDepth(LIBRARY_LAYOUT.groundDepth - 0.4);
+    graphics.fillStyle(0xd8b869, 0.55);
+    graphics.lineStyle(3, 0xd8b869, 0.55);
+    const radius = LIBRARY_LAYOUT.core.radius + 16;
+    for (const angle of [315, 45, 135, 225]) {
+      const radians = Phaser.Math.DegToRad(angle);
+      const px = LIBRARY_LAYOUT.core.x + Math.cos(radians) * radius;
+      const py = LIBRARY_LAYOUT.core.y + Math.sin(radians) * radius;
+      const dx = -Math.sin(radians);
+      const dy = Math.cos(radians);
+      graphics.lineBetween(px - dx * 10, py - dy * 10, px + dx * 2, py + dy * 2);
+      graphics.fillTriangle(px + dx * 8, py + dy * 8, px + dx - dy * 5, py + dy + dx * 5, px + dx + dy * 5, py + dy - dx * 5);
+    }
+    this.track(graphics);
   }
 
   private registerInteractions(): void {
@@ -280,7 +301,8 @@ export class LibraryLevel {
       getPrompt: () => {
         const stone = this.readSlots()[seatIndex];
         if (this.progress.flags['l2-memory']) return stone >= 0 ? `E · Đọc phiến ${LABELS[STONES[stone]]}` : 'Hốc trống';
-        return stone >= 0 ? (this.selectedStone === null ? `E · Xem phiến ${LABELS[STONES[stone]]}` : 'E · Đặt hoặc đổi phiến') : 'E · Đặt phiến đã chọn';
+        if (stone >= 0) return this.selectedStone === null ? `E · Xem phiến ${LABELS[STONES[stone]]}` : 'E · Đặt hoặc đổi phiến';
+        return seatIndex === 0 ? 'E · Đặt phiến (hốc khắc mặt trời)' : 'E · Đặt phiến đã chọn';
       },
       getPromptBounds: () => this.tabletStacks.get(this.seatKey(seatIndex))?.getBounds() ?? this.socketImages[seatIndex].getBounds(),
       onInteract: () => this.interactWithSeat(seatIndex),
@@ -384,6 +406,20 @@ export class LibraryLevel {
     if (this.progress.flags['l2-memory']) return;
     const slots = this.readSlots();
     if (slots.join(',') !== '0,1,2,3') {
+      if (slots.includes(-1)) {
+        const missing = slots.filter((slot) => slot < 0).length;
+        this.say([{ speaker: 'Nhinh', text: `Quanh giếng còn ${missing} hốc trống. Đặt đủ bốn phiến rồi hãy kiểm tra.` }]);
+        return;
+      }
+      const isRotationOf = (base: readonly number[]) => base.some((_, shift) => base.every((value, index) => slots[(index + shift) % base.length] === value));
+      if (isRotationOf([0, 1, 2, 3])) {
+        this.say([{ speaker: 'Nhinh', text: 'Đúng thứ tự rồi, nhưng vòng phải bắt đầu từ hốc khắc mặt trời ở phía trên giếng.' }]);
+        return;
+      }
+      if (isRotationOf([0, 3, 2, 1])) {
+        this.say([{ speaker: 'Nhinh', text: 'Vòng này chạy ngược chiều kim đồng hồ. Đi theo các mũi tên quanh giếng xem.' }]);
+        return;
+      }
       this.say([{ speaker: 'Nhinh', text: 'Vòng này chưa liền mạch.' }, { speaker: 'Lumo', text: 'Mình xem lại đường đi của mặt trời trên từng tranh nhé.' }]);
       return;
     }
