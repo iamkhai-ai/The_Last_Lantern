@@ -112,6 +112,10 @@ assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }), false, 'closed threshold
 assert.equal(isWoodsCenterWalkable({ x: 510, y: 140 }, true), true, 'open central gate corridor passes');
 assert.equal(isWoodsCenterWalkable({ x: 456, y: 170 }, true), false, 'gate posts remain solid');
 assert.equal(isWoodsPointSafe(WHISPERING_WOODS.stands.poem), true, 'poem stand reachable');
+assert.equal(isWoodsCenterWalkable({x:232,y:220}),false,'restore fixture point lies inside the current Moon base');
+const moonBaseRestore=resolveWoodsSpawn({x:232,y:220},false);
+assert.notDeepEqual(moonBaseRestore,{x:232,y:220},'unsafe Moon-base save is moved');
+assert.equal(isWoodsCenterWalkable(moonBaseRestore),true,'unsafe Moon-base save resolves to safe floor');
 assert.deepEqual(resolveWoodsSpawn({ x: 402, y: 167 }, false), { x: 402, y: 167 }, 'old poem-area saves remain on ordinary walkable floor');
 assert.equal(Math.hypot(WHISPERING_WOODS.stands.poem.x - WHISPERING_WOODS.stands.exit.x, WHISPERING_WOODS.stands.poem.y - WHISPERING_WOODS.stands.exit.y) > 24, true, 'poem and exit targets are distinct');
 assert.deepEqual(RUNE_ORDER, ['moon', 'leaf', 'star']);

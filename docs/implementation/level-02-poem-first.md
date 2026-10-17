@@ -75,6 +75,8 @@ Resolution: add a pure fit helper in the shared Level02 layout module. It maps e
 
 The focused pure contract checks each of the nine measured state bounds plus the empty-bounds fallback. The browser and geometry fixtures measure alpha≥96 world bounds from the rendered texture and assert the shared height, horizontal center, and baseline for sleeping, revealed, active, expired, and restored examples. Browser runtime remains NOT_RUN when the Work browser setting is disabled.
 
+Root inspection of the geometry fixture then found its “inside Moon” stale-save case still used the previous Moon coordinates `(180,225)`, which are ordinary floor after the poem-first layout. Updated the fixture to `(232,220)`, inside the current Moon base, and added a pure check that this unsafe save resolves to safe floor. Product source is unchanged by this fixture correction.
+
 ## Root verification and review — 2026-10-17
 
 Checked frozen source revision `2e8a91754ff1a8b59594c8b556c9cb4365258fc0`. Root independently ran the woods, forest-edge and campaign-start-intent checks, both browser fixture syntax checks, `npm run build` (406 modules, Vite 9.39s), and `git diff --check 252aef0 HEAD`: PASS. Only generated tracked `dist/index.html` changed during build and was restored. Source scope is restricted to the Level02 module and Level02-specific CampaignScene branches; character frames and raster assets are unchanged.

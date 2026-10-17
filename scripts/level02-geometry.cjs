@@ -59,10 +59,10 @@ try{
   ['explicit open incomplete flags',entry({'l1-open':true,'l1-memory-seen':true}),true],
   ['unsolved stale inside gate',entry({}, {'player-x':510,'player-y':140}),false],
   ['closed contact restores in place',entry({}, {'player-x':510,'player-y':162}),false],
-  ['unsolved inside moon',entry({}, {'player-x':180,'player-y':225}),false],
+  ['unsolved inside moon',entry({}, {'player-x':232,'player-y':220}),false],
   ['completed stale in backing',entry({'l1-open':true,'l1-memory-seen':true}, {'player-x':510,'player-y':120}),true],
  ]){
-  await launch(save);const data=await read();assert.equal(data.flags['l1-open']===true,open);if(open){assert.equal(data.counters['rune-sequence'],3);assert.ok(['moon','leaf','star'].every(id=>data.flags[`l1-activated-${id}`]===true))}if(!open)assert.ok(data.y>=162,'Unsolved restore must be near side');if(name.includes('contact restores')){assert.equal(data.x,510);assert.equal(data.y,162)}if(name.includes('inside moon'))assert.ok(!(data.x===180&&data.y===225));if(name.includes('backing'))assert.ok(data.y>=140);results.push({name,status:'PASS',data});
+  await launch(save);const data=await read();assert.equal(data.flags['l1-open']===true,open);if(open){assert.equal(data.counters['rune-sequence'],3);assert.ok(['moon','leaf','star'].every(id=>data.flags[`l1-activated-${id}`]===true))}if(!open)assert.ok(data.y>=162,'Unsolved restore must be near side');if(name.includes('contact restores')){assert.equal(data.x,510);assert.equal(data.y,162)}if(name.includes('inside moon'))assert.ok(!(data.x===232&&data.y===220));if(name.includes('backing'))assert.ok(data.y>=140);results.push({name,status:'PASS',data});
  }
 }catch(e){console.error(e.stack);results.push({name:'geometry/restore fixture',status:'FAIL',error:String(e),sample:page?await read():null});if(page)await page.screenshot({path:path.join(out,'level02-geometry-failure.png')});process.exitCode=1}
 finally{fs.writeFileSync(path.join(out,'level02-geometry-results.json'),JSON.stringify(results,null,2));console.log(JSON.stringify(results));await browser.close()}
