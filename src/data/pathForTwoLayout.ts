@@ -3,6 +3,7 @@ export interface PathPoint { x: number; y: number; }
 export interface PathRect extends PathPoint { width: number; height: number; }
 export interface PathSolid extends PathRect { elementId?: string; }
 export interface PathRoutePoint extends PathPoint { room: PathRoomId; pipe?: 'a'|'b'; end?: 'out'|'in'; }
+export type PathPipeId = 'a'|'b';
 export interface PathElement extends PathPoint { id: string; art: string; width: number; height: number; stand: PathPoint; }
 export interface PathRoom { id: PathRoomId; title: string; spawn: PathPoint; entrySpawn: PathPoint; walls: readonly PathRect[]; solids: readonly PathSolid[]; elements: readonly PathElement[]; }
 
@@ -13,6 +14,15 @@ export const PATH_DOORS = {
   b: { room: 'relay' as const, x: 480, base: 210, target: 'ink' as const },
   c: { room: 'ink' as const, x: 574, base: 180, target: 'exit' as const },
 };
+export const PATH_PIPE_ENDPOINTS:Record<PathPipeId,Partial<Record<PathRoomId,PathPoint>>>= {
+  a:{entry:{x:480,y:190},relay:{x:110,y:280}},
+  b:{relay:{x:480,y:190},ink:{x:82,y:280}},
+};
+export function getPathPipePoint(pipe:PathPipeId,room:PathRoomId,end:'out'|'in'):PathRoutePoint{
+  const point=PATH_PIPE_ENDPOINTS[pipe][room];
+  if(!point)throw new Error(`No ${pipe} pipe endpoint in ${room}`);
+  return{room,...point,pipe,end};
+}
 export interface PathDoorFace { id:'practice'|'a'|'b'|'c'; room:PathRoomId; x:number; base:number; }
 export const PATH_DOOR_FACES: readonly PathDoorFace[] = [
   {id:'practice',room:'entry',x:156,base:210},{id:'a',room:'entry',x:480,base:210},
@@ -22,10 +32,17 @@ export const PATH_DOOR_FACES: readonly PathDoorFace[] = [
 export function getPathDoorFace(id:string,room:PathRoomId):PathDoorFace|undefined{return PATH_DOOR_FACES.find((face)=>face.id===id&&face.room===room);}
 export function isValidPathPipeHop(from:PathRoutePoint|undefined,to:PathRoutePoint):boolean{
   if(!from||from.end!=='out'||to.end!=='in'||!from.pipe||from.pipe!==to.pipe||from.room===to.room)return false;
-  return (from.pipe==='a'&&from.room==='entry'&&to.room==='relay')
-    ||(from.pipe==='a'&&from.room==='relay'&&to.room==='entry')
-    ||(from.pipe==='b'&&from.room==='relay'&&to.room==='ink')
-    ||(from.pipe==='b'&&from.room==='ink'&&to.room==='relay');
+  const fromEndpoint=PATH_PIPE_ENDPOINTS[from.pipe][from.room];
+  const toEndpoint=PATH_PIPE_ENDPOINTS[to.pipe][to.room];
+  return !!fromEndpoint&&!!toEndpoint
+    &&from.x===fromEndpoint.x&&from.y===fromEndpoint.y
+    &&to.x===toEndpoint.x&&to.y===toEndpoint.y;
+}
+export function isNearPathPipeEndpoint(actual:PathPoint,endpoint:PathRoutePoint,tolerance=8):boolean{
+  if(endpoint.end!=='out'||!endpoint.pipe)return false;
+  const authored=PATH_PIPE_ENDPOINTS[endpoint.pipe][endpoint.room];
+  return !!authored&&endpoint.x===authored.x&&endpoint.y===authored.y
+    &&Math.hypot(actual.x-endpoint.x,actual.y-endpoint.y)<=tolerance;
 }
 export function isPathRouteValid(route:readonly PathRoutePoint[]):boolean{
   for(let index=1;index<route.length;index++){
@@ -41,6 +58,20 @@ export function choosePathCallAction(assignment:string,target:'practice'|'a'|'b'
 export function shouldRestorePathFollower(state:{hasRoomMetadata:boolean;assignment:string;travelling:boolean;actuallyArrived:boolean}):boolean{
   if(!state.hasRoomMetadata)return true;
   return state.assignment!=='follow'&&!state.travelling&&!state.actuallyArrived;
+}
+export function shouldRebuildLegacyPathAssignment(state:{hasRoomMetadata:boolean;assignment:string;wasCalled:boolean;eligible:boolean;returning:boolean;reunited:boolean}):boolean{
+  return !state.hasRoomMetadata&&['a','b','c'].includes(state.assignment)&&state.wasCalled&&state.eligible&&!state.returning&&!state.reunited;
+}
+export function shouldRoutePathFollower(assignment:string):boolean{return assignment==='follow';}
+export function isActuallyReunited(state:{assignment:string;travelling:boolean;playerRoom:PathRoomId;lumoRoom:PathRoomId;player:PathPoint;lumo:PathPoint}):boolean{
+  return state.assignment==='follow'&&!state.travelling&&state.playerRoom===state.lumoRoom
+    &&Math.hypot(state.player.x-state.lumo.x,state.player.y-state.lumo.y)<36;
+}
+export function getPathExitBlock(state:{latchC:boolean;memoRead:boolean;reunited:boolean}):'latch'|'memo'|'companion'|undefined{
+  if(!state.latchC)return'latch';
+  if(!state.memoRead)return'memo';
+  if(!state.reunited)return'companion';
+  return undefined;
 }
 const doorPosts = (x: number, base: number): PathRect[] => [
   { x: x - 32, y: base - 88, width: 10, height: 88 },
