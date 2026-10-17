@@ -1381,7 +1381,15 @@ export class CampaignScene extends Phaser.Scene {
       const destination = this.progress.flags['l8-lumo-destination'];
       const destinationWaypoint = destination === 'lumo-seal' ? OBSERVATORY_ROOMS.corridor.waypoints.find((point) => point.id === 'lumo-seal')?.position
         : destination === 'lantern-source' ? OBSERVATORY_ROOMS.entrance.waypoints.find((point) => point.id === 'lantern-source')?.position : undefined;
-      if (destinationWaypoint && destinationWaypoint.roomId === lumoRoom) {
+      const unassigned = !destinationWaypoint || this.progress.flags['l8-lumo-arrived'] === 'lantern-source';
+      if (unassigned) {
+        // Unassigned Lumo follows Nhinh inside the active room, like Levels 01-08.
+        this.lumoTarget = {
+          x: Phaser.Math.Clamp(this.player.x - 20, 28, 610),
+          y: Phaser.Math.Clamp(this.player.y - 22, 58, 300),
+        };
+        this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y, true);
+      } else if (destinationWaypoint.roomId === lumoRoom) {
         this.lumoTarget = { x: destinationWaypoint.x - 18, y: destinationWaypoint.y + 12 };
         this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y, true);
       }
