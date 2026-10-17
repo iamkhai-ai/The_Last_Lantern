@@ -67,6 +67,14 @@ User review found the poem slab too small to show its Moon, Leaf, and Star glyph
 
 Both independent reviews of the enlarged-slab revision `e48fb8deb9f8a7df42df7c503037f82f1ee096ff` reported the same P2: the cue fill was 86px wide but its outline remained 46px. Resolution: derive one local `cueWidth` from `WOODS_POEM_ART.width - 10` and use it for both fill and stroke ellipses. This keeps the cue centered and consistently outlined as the slab dimensions change.
 
+## Follow-up diagnosis — rune body size changes after Pulse
+
+User review found that the three rune stones visibly shrank after Pulse. Source PNGs are already uniformly 40×52 and Phaser keeps their 60×78 display size. The cause is the states' differing visible alpha bounds at threshold 96: sleeping `[8,5,25,39]`; Moon revealed `[10,11,21,34]` and active `[8,8,24,37]`; Leaf revealed `[10,12,21,34]` and active `[8,9,22,36]`; Star revealed `[10,12,21,33]` and active `[9,4,25,40]`. No raster change is needed.
+
+Resolution: add a pure fit helper in the shared Level02 layout module. It maps each measured visible body to height 39, center x=20.5, and bottom y=44 in a 40×52 frame, preserving aspect ratio. Runtime scans each source PNG once, builds and caches a nearest-neighbor canvas under a key derived from its source texture, and applies normalized textures for sleeping, revealed, active, expiry, and restored states. The object display size, origin, anchor, depth, colliders, Pulse flags, and save behavior remain unchanged. If bounds are empty or invalid, fit the full source canvas to keep the transform finite.
+
+The focused pure contract checks each of the nine measured state bounds plus the empty-bounds fallback. The browser and geometry fixtures measure alpha≥96 world bounds from the rendered texture and assert the shared height, horizontal center, and baseline for sleeping, revealed, active, expired, and restored examples. Browser runtime remains NOT_RUN when the Work browser setting is disabled.
+
 ## Root verification and review — 2026-10-17
 
 Checked frozen source revision `2e8a91754ff1a8b59594c8b556c9cb4365258fc0`. Root independently ran the woods, forest-edge and campaign-start-intent checks, both browser fixture syntax checks, `npm run build` (406 modules, Vite 9.39s), and `git diff --check 252aef0 HEAD`: PASS. Only generated tracked `dist/index.html` changed during build and was restored. Source scope is restricted to the Level02 module and Level02-specific CampaignScene branches; character frames and raster assets are unchanged.

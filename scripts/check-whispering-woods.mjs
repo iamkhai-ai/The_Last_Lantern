@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {
-  WHISPERING_WOODS, WOODS_RUNE_ART, WOODS_POEM_ART, WOODS_RUNE_PROMPT_OFFSET_Y, WOODS_POEM_PROMPT_OFFSET_Y,
+  WHISPERING_WOODS, WOODS_RUNE_ART, WOODS_POEM_ART, WOODS_RUNE_BODY_FIT, fitWoodsRuneArt, WOODS_RUNE_PROMPT_OFFSET_Y, WOODS_POEM_PROMPT_OFFSET_Y,
   RUNE_ORDER, feetAt, getWoodsTutorialStage, isWoodsCenterWalkable, isWoodsPointSafe,
   resolveWoodsSpawn, normalizeRuneProgress, activateWoodsRune, canActivateWoodsRune,
 } from '../src/data/whisperingWoodsLayout.ts';
@@ -30,6 +30,20 @@ assert.equal(WOODS_POEM_ART.width/WOODS_POEM_ART.sourceWidth,2);
 assert.equal(WOODS_POEM_ART.height/WOODS_POEM_ART.sourceHeight,2);
 assert.equal(WOODS_RUNE_ART.width/WOODS_RUNE_ART.sourceWidth,1.5);
 assert.equal(WOODS_RUNE_ART.height/WOODS_RUNE_ART.sourceHeight,1.5);
+const measuredRuneBounds={
+  'moon-sleeping':{x:8,y:5,width:25,height:39},'moon-revealed':{x:10,y:11,width:21,height:34},'moon-active':{x:8,y:8,width:24,height:37},
+  'leaf-sleeping':{x:8,y:5,width:25,height:39},'leaf-revealed':{x:10,y:12,width:21,height:34},'leaf-active':{x:8,y:9,width:22,height:36},
+  'star-sleeping':{x:8,y:5,width:25,height:39},'star-revealed':{x:10,y:12,width:21,height:33},'star-active':{x:9,y:4,width:25,height:40},
+};
+for(const [variant,bounds] of Object.entries(measuredRuneBounds)){
+  const fit=fitWoodsRuneArt(bounds);
+  assert.ok(Math.abs(bounds.height*fit.scale-WOODS_RUNE_BODY_FIT.height)<1e-9,`${variant} visible body height`);
+  assert.ok(Math.abs((bounds.x+bounds.width/2)*fit.scale+fit.offsetX-WOODS_RUNE_BODY_FIT.centerX)<1e-9,`${variant} visible body center`);
+  assert.ok(Math.abs((bounds.y+bounds.height)*fit.scale+fit.offsetY-WOODS_RUNE_BODY_FIT.bottomY)<1e-9,`${variant} visible body baseline`);
+  assert.ok(Number.isFinite(fit.scale)&&Number.isFinite(fit.offsetX)&&Number.isFinite(fit.offsetY),`${variant} finite transform`);
+}
+const emptyRuneFit=fitWoodsRuneArt({x:0,y:0,width:0,height:0});
+assert.ok(Number.isFinite(emptyRuneFit.scale)&&Number.isFinite(emptyRuneFit.offsetX)&&Number.isFinite(emptyRuneFit.offsetY),'empty alpha bounds use a finite fallback');
 for (const stand of Object.values(WHISPERING_WOODS.stands)) assert.equal(isWoodsCenterWalkable(stand), true, `stand ${stand.x},${stand.y}`);
 function reachableWithin(start,target,gateOpen=false){
   const step=4,queue=[start],seen=new Set([`${start.x},${start.y}`]);

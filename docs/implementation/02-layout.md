@@ -42,6 +42,8 @@ One focused `src/data/whisperingWoodsLayout.ts` owns anchors, stands, visible ba
 
 The enlarged poem ends at x=184, leaving an 18px visible gap before Moon artwork begins at x=202. Its prompt sits 24px above the art top; the restrained unread-poem ground cue widens to fit the slab. Keep all stands and the actor’s feet on visible ground. The southern entry dirt path runs from the world edge to the poem nook, bends east toward Moon, then joins an irregular clearing that contains all three runes. An eastern path reaches the open gate from the south. Use the existing masked dirt texture with natural edges, minimum 48px clear widths, and no arrows, numbered labels, or drawn solution line. Keep the poem pocket clear of canopies, bright decor, rune art, and extra stones. Gate geometry and layers stay as previously authored.
 
+Rune source PNGs are all 40×52, but their alpha≥96 body bounds vary by state. Keeping a 60×78 sprite canvas therefore made glyph bodies shrink on reveal. At runtime, scan each source state's alpha bounds and draw it into a cached 40×52 canvas using a shared fit: visible body height 39px, center x=20.5, and bottom y=44. Use nearest-neighbor drawing, then keep the image at 60×78, origin `(0.5,1)`, and the same ground anchor/depth/collider. No PNG is edited. The helper falls back to the full source canvas if alpha bounds are empty or invalid.
+
 Floor bounds and solid trees/rocks remain in the shared module. Preserve body-to-foot agreement, trunk collision, passable foliage, actor/prop depth ordering, and the closed-gate center contact at y=162. The closed threshold blocks the arch; the open passage allows the center to y=140. Gate backing, posts, prompt, and save guard remain unchanged.
 
 ## Persistence and restoration

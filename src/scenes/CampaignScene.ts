@@ -3,7 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { activateWoodsRune, canActivateWoodsRune, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_POEM_PROMPT_OFFSET_Y, WOODS_RUNE_ART, WOODS_RUNE_PROMPT_OFFSET_Y, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
+import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_POEM_PROMPT_OFFSET_Y, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, WOODS_RUNE_PROMPT_OFFSET_Y, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -2313,8 +2313,32 @@ export class CampaignScene extends Phaser.Scene {
       const active = this.progress.flags[`l1-activated-${id}`] === true;
       const revealed = active || this.activeRevealedRunes.has(id);
       const art = getLevelArtKey(1, `runestone_${id}_${active ? 'active' : revealed ? 'revealed' : 'sleeping'}`);
-      if (image && art && this.textures.exists(art) && image.texture.key!==art) image.setTexture(art);
+      const fittedArt = art && this.textures.exists(art) ? this.normalizedWoodsRuneTexture(art) : undefined;
+      if (image && fittedArt && image.texture.key!==fittedArt) image.setTexture(fittedArt).setDisplaySize(WOODS_RUNE_ART.width,WOODS_RUNE_ART.height);
     }
+  }
+
+  private normalizedWoodsRuneTexture(sourceKey: string): string {
+    const key=`woods-rune-normalized-${sourceKey}`;
+    if(this.textures.exists(key))return key;
+    const source=this.textures.get(sourceKey).getSourceImage() as CanvasImageSource;
+    const texture=this.textures.createCanvas(key,WOODS_RUNE_ART.sourceWidth,WOODS_RUNE_ART.sourceHeight);
+    if(!texture)return sourceKey;
+    const ctx=texture.getContext();
+    const width=WOODS_RUNE_ART.sourceWidth,height=WOODS_RUNE_ART.sourceHeight;
+    ctx.clearRect(0,0,width,height);ctx.imageSmoothingEnabled=false;
+    let minX:number=width,minY:number=height,maxX:number=-1,maxY:number=-1;
+    try{
+      ctx.drawImage(source,0,0,width,height);
+      const pixels=ctx.getImageData(0,0,width,height).data;
+      for(let y=0;y<height;y++)for(let x=0;x<width;x++)if(pixels[(y*width+x)*4+3]>=WOODS_RUNE_BODY_FIT.alphaThreshold){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
+    }catch{/* If source pixels cannot be read, the pure fit helper supplies a finite full-canvas fallback. */}
+    const bounds=maxX>=minX&&maxY>=minY?{x:minX,y:minY,width:maxX-minX+1,height:maxY-minY+1}:undefined;
+    const fit=fitWoodsRuneArt(bounds);
+    ctx.clearRect(0,0,width,height);
+    ctx.drawImage(source,fit.offsetX,fit.offsetY,width*fit.scale,height*fit.scale);
+    texture.refresh();
+    return key;
   }
 
   private showRuneJournal(): void {

@@ -13,8 +13,21 @@ const rect = (x: number, y: number, width: number, height: number): WoodsRect =>
 const stands = Object.freeze({ spawn: point(136, 286), poem: point(136, 276), moon: point(232, 248), leaf: point(326, 180), star: point(408, 272), exit: point(510, 181) });
 export const WOODS_RUNE_ART = Object.freeze({ sourceWidth: 40, sourceHeight: 52, width: 60, height: 78 });
 export const WOODS_POEM_ART = Object.freeze({ sourceWidth: 48, sourceHeight: 40, width: 96, height: 80 });
+export const WOODS_RUNE_BODY_FIT = Object.freeze({ height: 39, centerX: 20.5, bottomY: 44, alphaThreshold: 96 });
 export const WOODS_RUNE_PROMPT_OFFSET_Y = -92;
 export const WOODS_POEM_PROMPT_OFFSET_Y = -104;
+
+export function fitWoodsRuneArt(bounds?: Pick<WoodsRect, 'x'|'y'|'width'|'height'> | null): Readonly<{scale:number;offsetX:number;offsetY:number}> {
+  const valid = bounds && Number.isFinite(bounds.x) && Number.isFinite(bounds.y)
+    && Number.isFinite(bounds.width) && Number.isFinite(bounds.height) && bounds.width > 0 && bounds.height > 0;
+  const body = valid ? bounds! : { x:0, y:0, width:WOODS_RUNE_ART.sourceWidth, height:WOODS_RUNE_ART.sourceHeight };
+  const scale = WOODS_RUNE_BODY_FIT.height / body.height;
+  return Object.freeze({
+    scale,
+    offsetX: WOODS_RUNE_BODY_FIT.centerX - (body.x + body.width / 2) * scale,
+    offsetY: WOODS_RUNE_BODY_FIT.bottomY - (body.y + body.height) * scale,
+  });
+}
 
 export const WHISPERING_WOODS = Object.freeze({
   size: point(640, 360),
