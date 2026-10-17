@@ -1,0 +1,89 @@
+# Level 07 — The Sleeping Garden: implementation plan
+
+Worktree: `codex/level-07-spatial-rebuild` (base `test-develop` @ `1928ae6`).
+Scenario source: `docs/scenario/07-the-sleeping-garden.md`. Spatial spec: `docs/implementation/07-layout.md`.
+Planned controller: `src/levels/SleepingGardenLevel.ts`. Pure layout/state: `src/data/sleepingGardenLayout.ts`. Checks: `scripts/check-sleeping-garden.mjs`.
+Scope: campaign index 6 only. Levels 05/06 are owned by other branches; do not touch them.
+
+## Goal
+
+Deliver a playable, readable Level 07 in the existing scenic garden: close the reservoir canopy, learn the two-plant rule on the safe practice pots, hold the bar with its latch, turn the lantern off to grow the root bridge, water the nursery, latch the side stone path and reach the shrine gate. Player flow and object collision are the priority; every guidance line must state the next physical action in plain Vietnamese.
+
+## World model (single packed room)
+
+One 640×360 garden, not multiple rooms: `garden-scene-base` already paints the terrace, canals, nursery, practice lawn and shrine gate, and the puzzle never needs two simultaneous local views. The controller owns all index-6 building, updates, story, HUD text, hints, journal and save checkpoints inside the existing CampaignScene.
+
+Light model (matches asset previews 01/02):
+- `gardenLighted = canopyShut ? lanternOn : true`. The reservoir glow lights the whole garden until the shutter closes; after that Nhinh's lantern is the only switch. Lumo's light only helps orientation: it never opens Sun Flower or retracts Moon Root (scenario §3).
+- Derived plant states (never persisted): Sun Flower open/folded, bar raised/lowered, Moon Root coiled/extended, root bridge on/off.
+
+## Player flow (shipped target)
+
+1. Spawn on the south practice lawn `(238,336)` walking in from the southern mouth; Lumo follows. Opening dialogue from scenario §2 (4 lines).
+2. Practice pots (west of spawn, walled lesson corner): while the canopy is still open the pots hold the lit state. Turn west; at the fixed shutter handle `stand (132,138)` press E: the canopy closes over the reservoir, the garden darkens, bar lowers; two-line beat ("Tối đi thật."). First lantern toggle after that plays the four-line practice observation (scenario §3) and every pot shows its state icon.
+3. Main gate: with the lantern ON the Sun Flower opens and the bar raises. Walk north through the bar corridor (posts at x99..106 / x194..201, beam line y150..162), then press E at the west latch `stand (142,144)` to hold the bar. It stays raised when the flower folds.
+4. Turn the lantern OFF. The practice Moon Root and the main one extend; the root bridge spans the vertical canal `(x304..364, y228..248)`. Cross it in the dark to the nursery.
+5. Press E at the drain `stand (462,286)`: water runs east around the sprout, one new leaf opens, the seven-line nursery scene plays (Lumo realizes some things need to sleep), `l6-lumo-realized` is recorded. The distant Sun Flower visibly folds.
+6. Press E at the east latch `stand (414,286)`: the side stone path plank retracts permanently, giving a light-independent return crossing at `(x304..396, y284..312)`.
+7. Optional: press E at the sprout `stand (500,280)` for the two closing lines.
+8. Walk east/up the nursery steps into the eastern walkway and north to the shrine gate. When `drainOpen && sunLatched && sideLatched`, E under the arch plays the shadow ending (scenario §7) and advances to Level 08.
+
+Failure/order recovery, no time pressure: if the player turns the lantern back ON while standing on the root bridge, only the spans under her feet stay (held overlay); empty spans retract and wait until she reaches a bank. Turning the lantern OFF restores the full bridge. The first time the bridge retracts before the drain is open, the three-line "Mở được cửa thì lại mất cầu." exchange plays once.
+
+## Object placement, layering, occlusion
+
+See `07-layout.md` for the full coordinate table. Summary of what is on top of what and what hides what:
+- Base scenic image at depth 0. Walkable floor art (teaching waterline, delivered-water chevrons, bridge deck while retracted stubs are not floor) at depth 4–5, below feet.
+- Standing props (reservoir, shutter handle, bar posts + beam, both latches, both Moon Root pots, both Sun Flower pots, drain, east latch) use `10 + groundAnchorY/10` so the player y-sorts against them.
+- The bar beam is a special case: lowered it collides (solid x106..194, y150..162); raised/held it is overhead art (depth 70) so the player walks beneath it and never occludes wrong.
+- Bar posts, tower, walls, balustrades and canal side-walls occlude the player only above their own painted footprint; no blanket depth raise.
+- The canopy modify only dims the scene: a darkness overlay below HUD, above floor; the lantern's own glow stays above it so the puzzle reads in the dark.
+- Icons (16×16 state stickers) sit at depth 6 beside their pot, on floor pixels, never over the actor.
+
+## Collision contract
+
+- Shared actor body: 14×6 at `center + (-7, +16)`; feet line `center + (0,19)`. Pure layout, Arcade bodies and safe-restore all consume the same rectangles.
+- Canals are water: solid everywhere except an open crossing. Crossings: root bridge strip `(304..364, y228..248)` walkable only while deployed or held under the feet; side path strip `(304..396, y284..312)` walkable only after `l6-return-latched` (before that a solid plank closes it); the sluice crossing over the horizontal canal `(x148..190, y218..258)` is permanent stone.
+- Standing props are solid from all four directions using their full silhouette footprint (RULE_GAMES). Flat art (waterline, water chevrons, icons, sprout) is walkable.
+- Every interaction trigger sits at the object's south edge with radius 20–24 and a `canApproach` guard where the object can be reached from more than one side (west latch: only from inside the gate corridor). Gate arch exit trigger follows the documented arch exception.
+- Backtracking stays open: held bar, retracted plank and opened drain are permanent. A save inside a closed area (canal without a crossing, gate corridor with the bar lowered, nursery with both crossings closed) restores to the nearest safe point with the same body/solid predicate.
+
+## Guidance contract
+
+- Objective line states the immediate physical action per stage, e.g. `Kéo tay màn che bể tích quang (E) ở lối vào vườn.` → `Bật đèn (F) để Hoa Nhật nâng thanh chắn, rồi gài chốt.` → `Tắt đèn (F) cho Rễ Nguyệt bắc cầu, qua mương mở cống.` → `Gài chốt lối đá phụ cạnh cống.` → `Tới cổng điện thờ ở góc đông bắc.`
+- H hints follow scenario §6 in three levels, with the two special cases: before the canopy is shut it points at the handle first; after the drain it points at the side path and the shrine gate.
+- J journal records the three learned facts: Sun Flower needs light / Moon Root needs dark; the seedling needs water and a rest in the dark; latches keep a change while the lantern flips.
+- Prompt labels are action-first Vietnamese (`E · Kéo màn che bể tích quang`, `E · Gài chốt thanh chắn`, `E · Mở cống vườn ươm`, `E · Gài chốt lối đá phụ`, `E · Qua cổng điện thờ`, `E · Ngắm mầm cây`).
+- Controls bar lists WASD / E / F / H / J / ESC. Prompts protect the actor, Lumo and the active prop art via `getProtectedPromptBounds`.
+
+## Dialogue beats (complete scenario text)
+
+Opening 4 lines; canopy beat 2 lines; practice observation 4 lines (once); retract-before-crossing 3 lines (once); held+roots-rejoined 2 lines (once after latching then dark); nursery 7 lines (once, sets `l6-lumo-realized`); sprout re-read 2 lines (repeatable trigger, one-shot autoplay); ending 5 lines + shadow crossing at the gate. Cricket ambience noted in text only ("Nghe kìa."), no new audio.
+
+## Persistence
+
+- Reuse v1 save key and existing flag names for compatibility: `l6-canopy-shut`, `l6-sun-latched`, `l6-water-flowing`, `l6-return-latched`, `l6-lumo-realized`, `l6-bridge-crossed`, `l6-crossing-side`. Plant states are always derived, never stored. Legacy saves that set old flags load safely; unknown values are ignored.
+- Checkpoints: `player-level`/`player-x/y`, `lumo-x/y` saved on the existing cadence; restore uses `nearestSafeSpawn` with the current crossing states.
+
+## Integration (CampaignScene, index 6 only)
+
+- Construct `SleepingGardenLevel` in `buildLevel` for `level === 6` (LibraryLevel/ShatteredCreek pattern); skip generic `addNarrativeProps`, `registerLevel`, `buildCampaignBarriers`, generic spawn block and the generic `intro-6` dialogue for this level.
+- Delegate `update`, H (`showHint`), J (`showJournal`), objective/status/controls text and protected prompt bounds to the controller. Remove the legacy index-6 routines so no second garden barrier/crossing/visual pass runs.
+- The playtest coming-soon gate is raised from `>= 4` to `>= 7` in this branch so index 6 is reachable; final gate value reconciles at integration (other branches own 05/06). Recorded in the report.
+
+## Tasks
+
+- [ ] Write layout spec `07-layout.md` with zones, solids, crossings, module table, stands and depth rules (this commit).
+- [ ] Create `src/data/sleepingGardenLayout.ts`: zones/solids/crossings/modules/stands, predicates (`effectiveLight`, `barRaised`, `bridgeDeployed`, `bridgeWalkable`, `sidePathOpen`, `isPositionSafe`, `nearestSafeSpawn`, `completionBlock`, crossing-side state, save sanitize).
+- [ ] Create `src/levels/SleepingGardenLevel.ts`: render, physics solids, interactions (E/F/H/J), story beats, HUD/objective/status/controls, light→plant visuals, bridge occupancy holding, checkpoints, destroy.
+- [ ] Integrate index 6 in `CampaignScene.ts`; raise the coming-soon gate; keep every other level's behavior identical.
+- [ ] Create `scripts/check-sleeping-garden.mjs`: geometry (solids vs stands, reachability flood-fill by stage), crossings by state, prompt side rules, state machine (light model, held moments, latch permanence), completion gating, restore safety.
+- [ ] Verify: `node scripts/check-sleeping-garden.mjs`, `npx tsc --noEmit`, `npm run build`. Attempt a local runtime screenshot pass with a seeded `level:6` save; otherwise record runtime/human playtest as NOT_RUN.
+- [ ] Write `docs/implementation/level-07-report.md` with exact commands/results and coordinate adjustments.
+- [ ] Self-review the diff; no push, no merge, no save resets, no PNG/character edits.
+
+## Risks and decisions
+
+- Preview staging coordinates are illustrative, not collision-true; this plan's rects are authoritative and deviations are documented in `07-layout.md`.
+- The bar gate relocates into the reservoir-gate wall so "đi qua rồi gài chốt" is physically required; the Sensor-circuit wording in the scenario covers the Sun Flower being west of the gate.
+- Dark state must still be readable: darkness overlay keeps the tower HUD and prompt depths untouched and the lantern glow stays lit.
