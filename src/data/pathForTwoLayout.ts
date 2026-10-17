@@ -30,6 +30,17 @@ export const PATH_DOOR_FACES: readonly PathDoorFace[] = [
   {id:'b',room:'ink',x:82,base:318},{id:'c',room:'ink',x:574,base:180},
 ];
 export function getPathDoorFace(id:string,room:PathRoomId):PathDoorFace|undefined{return PATH_DOOR_FACES.find((face)=>face.id===id&&face.room===room);}
+export function getPathBackArrival(id:'a'|'b'):PathPoint{
+  const face=id==='a'?getPathDoorFace('a','entry'):getPathDoorFace('b','relay');
+  return face?{x:face.x,y:face.base+20}:{x:480,y:230};
+}
+export function isInsidePracticeAlcove(room:PathRoomId,point:PathPoint):boolean{return room==='entry'&&point.x<320&&point.y<180;}
+export function isPathThresholdOccupied(room:PathRoomId,id:string,point:PathPoint):boolean{
+  const face=getPathDoorFace(id,room);
+  if(!face)return false;
+  if(rectsOverlap(pathActorBody(point),{x:face.x-22,y:face.base-30,width:44,height:30}))return true;
+  return id==='practice'&&isInsidePracticeAlcove(room,point);
+}
 export function isValidPathPipeHop(from:PathRoutePoint|undefined,to:PathRoutePoint):boolean{
   if(!from||from.end!=='out'||to.end!=='in'||(from.pipe!=='a'&&from.pipe!=='b')||from.pipe!==to.pipe||from.room===to.room)return false;
   const fromEndpoint=PATH_PIPE_ENDPOINTS[from.pipe]?.[from.room];

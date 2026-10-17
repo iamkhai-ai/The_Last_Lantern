@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { choosePathCallAction, getPathDoorFace, getPathElementSolid, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, PATH_BODY, PATH_DOORS, PATH_ROOMS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
+import { choosePathCallAction, getPathBackArrival, getPathDoorFace, getPathElementSolid, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, PATH_BODY, PATH_DOORS, PATH_ROOMS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
 
 const allOpen = { a: true, b: true, c: true, practice: true };
 const actor = (room, point, open = allOpen) => isPathPositionSafe(room, point, { latches: open });
@@ -69,6 +69,25 @@ assert.equal(actor('relay',{x:150,y:296},{a:true,b:false,c:false,practice:false}
 assert.deepEqual(getPathDoorFace('a','entry'),{id:'a',room:'entry',x:480,base:210});
 assert.deepEqual(getPathDoorFace('a','relay'),{id:'a',room:'relay',x:110,base:318});
 assert.deepEqual(getPathDoorFace('b','ink'),{id:'b',room:'ink',x:82,base:318});
+assert.deepEqual(getPathBackArrival('a'),{x:480,y:230},'returning through A lands beside its entry face, not the far room spawn');
+assert.deepEqual(getPathBackArrival('b'),{x:480,y:230},'returning through B lands beside its relay face, not the far room spawn');
+assert.equal(actor('entry',getPathBackArrival('a'),{a:false,b:false,c:false,practice:false}),true,'A return arrival is walkable entry floor while the door is closed');
+assert.equal(actor('relay',getPathBackArrival('b'),{a:true,b:false,c:false,practice:false}),true,'B return arrival is walkable relay floor while the door is closed');
+assert.equal(reach('entry',PATH_ROOMS.entry.spawn,getPathBackArrival('a'),{a:false,b:false,c:false,practice:false}),true,'A return arrival stays connected to the entry hall');
+assert.equal(reach('relay',PATH_ROOMS.relay.spawn,getPathBackArrival('b'),{a:true,b:false,c:false,practice:false}),true,'B return arrival stays connected to the relay hall');
+assert.equal(isInsidePracticeAlcove('entry',{x:244,y:150}),true,'the practice stand sits inside the lesson alcove');
+assert.equal(isInsidePracticeAlcove('entry',{x:544,y:150}),false,'the A alcove is not treated as the practice lesson area');
+assert.equal(isInsidePracticeAlcove('relay',{x:100,y:150}),false,'other rooms never report the entry practice alcove');
+assert.equal(isPathThresholdOccupied('entry','practice',{x:244,y:150}),true,'standing at the inside lesson call keeps the practice door open');
+assert.equal(isPathThresholdOccupied('entry','practice',{x:180,y:280}),false,'the entry hall floor never counts as practice threshold occupancy');
+assert.equal(isPathThresholdOccupied('entry','a',{x:480,y:190}),true,'standing in the A doorway defers its closure');
+assert.equal(isPathThresholdOccupied('entry','a',{x:480,y:230}),false,'standing south of A leaves its threshold free to close');
+assert.equal(actor('entry',{x:480,y:190},{a:false,b:false,c:false,practice:false}),false,'a closed A threshold blocks the doorway itself');
+assert.equal(actor('entry',{x:480,y:190},{a:true,b:false,c:false,practice:false}),true,'an open A threshold lets the body occupy the doorway');
+assert.equal(actor('relay',{x:480,y:190},{a:true,b:false,c:false,practice:false}),false,'a closed B threshold blocks the relay doorway');
+assert.equal(actor('relay',{x:480,y:190},{a:true,b:true,c:false,practice:false}),true,'an open B threshold lets the body occupy the relay doorway');
+assert.equal(reach('ink',PATH_ROOMS.ink.spawn,{x:574,y:188},{a:true,b:true,c:false,practice:false}),true,'the ink corridor reaches the final exit stand without the exit latch');
+assert.equal(reach('ink',PATH_ROOMS.ink.spawn,{x:574,y:188},{a:true,b:true,c:true,practice:false}),true,'the final exit stand stays reachable after the exit latch');
 assert.equal(pathDoorShouldClose(false,true,false),false,'occupied threshold defers closure');
 assert.equal(pathDoorShouldClose(false,false,false),true,'threshold closes after the body clears');
 assert.equal(pathDoorShouldClose(false,false,true),false,'latched door stays open');

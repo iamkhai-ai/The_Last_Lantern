@@ -7,7 +7,7 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
-import { choosePathCallAction, getPathDoorFace, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, PATH_BODY, PATH_ROOMS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
+import { choosePathCallAction, getPathBackArrival, getPathDoorFace, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, PATH_BODY, PATH_ROOMS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
 
 export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
@@ -99,11 +99,12 @@ export class PathForTwoLevel {
   public getProtectedPromptBounds():PromptRect[]{return this.protected.filter((o):o is Phaser.GameObjects.Image=>o instanceof Phaser.GameObjects.Image&&o.active&&o.visible).map(o=>o.getBounds());}
   public getObjectiveText():string{
     if(this.room==='entry'){
-      if(this.assignment==='practice'&&this.isTravelling())return'Chờ Lumo tới ấn thử.';
-      if(this.assignment==='practice'&&this.hasPower('practice'))return'Cửa thử đã mở. Quan sát rồi gọi Lumo về mốc.';
-      if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return'Thử gọi Lumo ở mốc gần cậu, rồi chờ cậu ấy xác nhận.';
+      if(this.assignment==='practice'&&this.isTravelling())return'Nhấn E ở mốc gần cậu để gọi Lumo, rồi chờ cậu ấy tới ấn sau cửa thấp.';
+      if(this.assignment==='practice'&&this.hasPower('practice'))return'Cửa thử đã mở. Bước vào trong và nhấn E ở mốc trong để gọi Lumo về mốc.';
+      if(isInsidePracticeAlcove(this.room,{x:this.player.x,y:this.player.y})&&!this.isDoorOpen('practice'))return'Cửa thử đang đóng. Nhấn E ở mốc trong để gọi Lumo quay lại ấn, cửa sẽ mở cho cậu ra.';
+      if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return'Nhấn E ở mốc đứng gần cậu để gọi Lumo tới ấn sau cửa thấp.';
       if(this.isDoorOpen('a'))return'Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.';
-      return'Gọi Lumo tới ấn A sau cửa đầu.';
+      return'Nhấn E ở mốc A trong sảnh để gọi Lumo tới ấn A, rồi qua cửa A.';
     }
     if(this.room==='relay')return !this.progress.flags['l4-latch-a']?'Gài chốt A ở mặt bên kia trước khi gọi Lumo tới B.':this.isDoorOpen('b')?'Qua cửa B tới hành lang mực.':'Gọi Lumo tới ấn B.';
     if(!this.progress.flags['l4-latch-b'])return 'Gài chốt B trước khi gọi Lumo tới cuối hành lang.';
@@ -119,12 +120,12 @@ export class PathForTwoLevel {
   }
   public getStatusText():string{
     const arrival=(['practice','a','b','c'] as const).find(mark=>this.hasPower(mark));
-    const lumoState=this.isTravelling()?'đang đi':arrival?`đã tới ${arrival.toUpperCase()}`:'theo Nhinh';
-    return `Buồng ${PATH_ROOMS[this.room].title} · A ${this.progress.flags['l4-latch-a']?'giữ':'mở khi Lumo tới'} · B ${this.progress.flags['l4-latch-b']?'giữ':'chờ'} · C ${this.progress.flags['l4-latch-c']?'giữ':'chờ'} · Lumo: ${lumoState}`;
+    const lumoState=this.isTravelling()?'đang đi':arrival?(arrival==='practice'?'đã tới ấn thử':`đã tới ${arrival.toUpperCase()}`):'theo Nhinh';
+    return `${PATH_ROOMS[this.room].title} · A ${this.progress.flags['l4-latch-a']?'giữ':'mở khi Lumo tới'} · B ${this.progress.flags['l4-latch-b']?'giữ':'chờ'} · C ${this.progress.flags['l4-latch-c']?'giữ':'chờ'} · Lumo: ${lumoState}`;
   }
   public showHint():void{
     const stage=this.room==='entry'?'practice':this.room==='relay'?this.progress.flags['l4-latch-a']?'b':'a':!this.progress.flags['l4-latch-b']?'latch-b':!this.progress.flags['l4-ink-revealed']?'ink':!this.hasPower('c')?'c':'exit';
-    if(stage!==this.hintStage){this.hintStage=stage;this.hintIndex=0;} const hints=['Dây rễ từ mốc gọi nối tới ấn bên kia cửa. Trong mỗi buồng còn có một tay chốt.','Tôi giữ ấn để cậu qua cửa. Cậu gài chốt rồi tôi mới có thể sang nơi khác.','Gọi tôi tới ấn đang mở cửa trước mặt, đi qua và gài chốt. Tại hành lang cuối, tắt đèn để đọc vạch nền.'];
+    if(stage!==this.hintStage){this.hintStage=stage;this.hintIndex=0;} const hints=['Nhấn E ở mốc gọi để đưa Lumo tới ấn bên kia cửa. Mỗi buồng đều có một tay chốt giữ cửa.','Tôi giữ ấn để cậu qua cửa. Cậu nhấn E ở tay chốt, rồi tôi mới sang được nơi khác.','Nhấn E ở mốc đang mở cửa trước mặt, đi qua và gài chốt. Tới hành lang cuối, nhấn F tắt đèn để đọc vạch nền.'];
     this.say([{speaker:'Hệ thống',text:hints[Math.min(this.hintIndex++,2)]}]);
   }
   public showJournal():void{const e:DialogueLine[]=[];if(this.progress.flags['l4-called-a'])e.push({speaker:'Nhinh',text:'Gọi Lumo tới ấn mở cửa, rồi qua cửa để gài chốt.'});if(this.progress.flags['l4-ink-revealed'])e.push({speaker:'Nhinh',text:'Đèn dịu xuống thì vạch mực trên nền hiện rõ.'});if(this.progress.flags['l4-memo'])e.push({speaker:'Lumo',text:'Vết xoắn trong đường ống gợi lại đêm bão và tiếng gọi ngoài kia.'});this.say([{speaker:'Nhinh',text:'Sổ tay giữ những điều hai đứa đã học.'},...(e.length?e:[{speaker:'Nhinh' as const,text:'Chưa ghi thêm manh mối nào.'}])]);}
@@ -310,7 +311,7 @@ export class PathForTwoLevel {
     this.track(this.roomObjective);
     this.roomStatus=this.scene.add.text(16,320,'',{fontFamily:'Segoe UI, sans-serif',fontSize:'9px',color:'#d3e5dc',backgroundColor:'#07151cbb',padding:{x:8,y:4}}).setDepth(86);
     this.track(this.roomStatus);
-    this.roomControls=this.scene.add.text(624,340,'Di chuyển: WASD / mũi tên   F: đèn   H: gợi ý   J: sổ tay',{fontFamily:'Segoe UI, sans-serif',fontSize:'8px',color:'#ffe680',backgroundColor:'#07151cbb',padding:{x:7,y:2}}).setOrigin(1,0).setDepth(86);
+    this.roomControls=this.scene.add.text(624,340,'WASD di chuyển · E tương tác · F đèn · H gợi ý · J sổ tay',{fontFamily:'Segoe UI, sans-serif',fontSize:'8px',color:'#ffe680',backgroundColor:'#07151cbb',padding:{x:7,y:2}}).setOrigin(1,0).setDepth(86);
     this.track(this.roomControls);
   }
   private registerRoomInteractions():void{
@@ -485,7 +486,7 @@ export class PathForTwoLevel {
     if(mark==='practice'||mark==='a'||mark==='b'||mark==='c'){
       this.progress.flags[`l4-at-${mark}`]=true;
       this.progress.flags['l4-lumo-arrived']=mark;
-      this.queueStoryBeat([
+      if(mark==='practice')this.queueStoryBeat([
         {speaker:'Lumo',text:'Tôi tới rồi. Cửa có mở không?'},
         {speaker:'Nhinh',text:'Có. Khi cậu rời dấu, nó sẽ đóng lại đúng không?'},
         {speaker:'Lumo',text:'Vậy trước khi gọi tôi về, hãy xem cậu có cần nó nữa không.'},
@@ -517,9 +518,9 @@ export class PathForTwoLevel {
     }
     const mark=id as 'a'|'b';if(!this.isDoorOpen(mark)){this.say([{speaker:'Nhinh',text:`Cần Lumo ở ấn ${mark.toUpperCase()} trước khi qua cửa.`}]);return;}
     if(mark==='a'&&this.room==='entry'){this.transition('relay',{x:110,y:251},'l4-visited-relay');return;}
-    if(mark==='a'&&this.room==='relay'){this.transition('entry',{x:180,y:280},'l4-room');return;}
+    if(mark==='a'&&this.room==='relay'){this.transition('entry',getPathBackArrival('a'),'l4-room');return;}
     if(mark==='b'&&this.room==='relay'){this.transition('ink',{x:82,y:251},'l4-visited-ink');return;}
-    if(mark==='b'&&this.room==='ink'){this.transition('relay',{x:110,y:251},'l4-room');return;}
+    if(mark==='b'&&this.room==='ink'){this.transition('relay',getPathBackArrival('b'),'l4-room');return;}
   }
   private transition(to:PathRoomId,spawn:PathPoint,visitFlag:string):void{
     if(visitFlag.startsWith('l4-visited'))this.progress.flags[visitFlag]=true;
@@ -568,8 +569,7 @@ export class PathForTwoLevel {
     }
   }
   private thresholdOccupied(id:string):boolean{
-    const face=getPathDoorFace(id,this.room);
-    return face?rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),{x:face.x-22,y:face.base-30,width:44,height:30}):false;
+    return isPathThresholdOccupied(this.room,id,{x:this.player.x,y:this.player.y});
   }
   private updateDoors():void{
     for(const [id,body] of this.doorBodies){
