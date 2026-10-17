@@ -7,11 +7,11 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
-import { getPathDoorFace, hasDoorPower, isPathPositionSafe, isValidPathPipeHop, nearestSafePathSpawn, pathDoorShouldClose, PATH_BODY, PATH_ROOMS, pathActorBody, rectsOverlap, resolvePathRoom, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
+import { choosePathCallAction, getPathDoorFace, hasDoorPower, isPathPositionSafe, isPathRouteValid, isValidPathPipeHop, nearestSafePathSpawn, pathDoorShouldClose, PATH_BODY, PATH_ROOMS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRestorePathFollower, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
 
 export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
-  save: () => void; say: (lines: DialogueLine[], onComplete?: () => void) => void; nextLevel: (lines: DialogueLine[]) => void;
+  save: () => void; say: (lines: DialogueLine[], onComplete?: () => void) => void; nextLevel: (lines: DialogueLine[]) => void; canStartStory: () => boolean;
 }
 const INTRO: DialogueLine[] = [
   {speaker:'Nhinh',text:'Cửa không có tay mở ở phía này.'},{speaker:'Lumo',text:'Tôi thấy ánh sáng sau khe đá. Để tôi nhìn thử.'},
@@ -29,7 +29,7 @@ const PLATE_POINTS: Record<'practice'|'a'|'b'|'c',PathPoint> = {practice:{x:212,
 export class PathForTwoLevel {
   private scene: Phaser.Scene; private progress: CampaignProgress; private player: Player; private lumo: Lumo;
   private interactions: InteractionSystem; private lantern: LanternSystem; private save: () => void;
-  private say: PathForTwoLevelOptions['say']; private nextLevel: PathForTwoLevelOptions['nextLevel'];
+  private say: PathForTwoLevelOptions['say']; private nextLevel: PathForTwoLevelOptions['nextLevel']; private canStartStory:PathForTwoLevelOptions['canStartStory'];
   private room: PathRoomId = 'entry'; private objects: Phaser.GameObjects.GameObject[]=[]; private colliders: Phaser.Physics.Arcade.Collider[]=[];
   private bodies: Phaser.Physics.Arcade.StaticBody[]=[]; private doorImages = new Map<string,Phaser.GameObjects.Image>();
   private doorBraceImages=new Map<string,Phaser.GameObjects.Image>();
@@ -39,21 +39,48 @@ export class PathForTwoLevel {
   private route: PathRoutePoint[]=[]; private routeIndex=0; private assignment='follow'; private lumoRoom:PathRoomId='entry';
   private pendingClose=new Set<string>(); private roomTitle?:Phaser.GameObjects.Text; private roomObjective?:Phaser.GameObjects.Text; private routeGraphics?:Phaser.GameObjects.Graphics;
   private hintIndex=0; private hintStage=''; private destroyed=false; private lastLantern=false;
-  private lastCheckpoint=0;
-  constructor(o:PathForTwoLevelOptions){this.scene=o.scene;this.progress=o.progress;this.player=o.player;this.lumo=o.lumo;this.interactions=o.interactions;this.lantern=o.lantern;this.save=o.save;this.say=o.say;this.nextLevel=o.nextLevel;this.lastLantern=this.lantern.lanternOn;}
+  private pendingStoryBeats:Array<{lines:DialogueLine[];onComplete?:()=>void}>=[];
+  private lastCheckpoint=0; private roomStatus?:Phaser.GameObjects.Text; private roomControls?:Phaser.GameObjects.Text; private beckoningQueued=false;
+  constructor(o:PathForTwoLevelOptions){this.scene=o.scene;this.progress=o.progress;this.player=o.player;this.lumo=o.lumo;this.interactions=o.interactions;this.lantern=o.lantern;this.save=o.save;this.say=o.say;this.nextLevel=o.nextLevel;this.canStartStory=o.canStartStory;this.lastLantern=this.lantern.lanternOn;}
   private get lanternOn(){return this.lantern.lanternOn;}
   public build():void{
-    this.normalizeProgress(); this.room=this.getSavedRoom(); this.assignment=this.getAssignment(); this.route=this.readRoute(); this.routeIndex=Math.max(0,Math.min(this.route.length,Math.floor(this.progress.counters['l4-route-index']??0)));
-    this.lumoRoom=this.readLumoRoom(); const lp=this.getLumoPosition();
-    this.lumo.sprite.setPosition(lp.x,lp.y); this.lumo.setVisible(this.lumoRoom===this.room);
+    this.normalizeProgress();
+    this.room=this.getSavedRoom();
+    this.assignment=this.getAssignment();
+    this.route=this.readRoute();
+    if(!isPathRouteValid(this.route))this.route=[];
+    this.routeIndex=Math.max(0,Math.min(this.route.length,Math.floor(this.progress.counters['l4-route-index']??0)));
+    const hasLumoRoomMetadata=['entry','relay','ink'].includes(String(this.progress.flags['l4-lumo-room']));
+    this.lumoRoom=this.readLumoRoom();
+    const savedLumo=this.getLumoPosition();
+    this.lumo.sprite.setPosition(savedLumo.x,savedLumo.y);
     this.player.setFootPlacement(PATH_BODY.feetY,21+PATH_BODY.y,18+PATH_BODY.x,PATH_BODY.width,PATH_BODY.height);
     const saved=this.progress.counters['player-level']===4&&Number.isFinite(this.progress.counters['player-x'])&&Number.isFinite(this.progress.counters['player-y'])?{x:this.progress.counters['player-x'],y:this.progress.counters['player-y']}:undefined;
-    const spawn=nearestSafePathSpawn(this.room,saved,this.isSafe.bind(this)); this.player.setPosition(spawn.x,spawn.y); this.drawRoom(); this.refresh();
+    const spawn=nearestSafePathSpawn(this.room,saved,this.isSafe.bind(this));
+    this.player.setPosition(spawn.x,spawn.y);
+    const arrived=['practice','a','b','c'].some(mark=>this.hasPower(mark as 'practice'|'a'|'b'|'c'));
+    if(shouldRestorePathFollower({hasRoomMetadata:hasLumoRoomMetadata,assignment:this.assignment,travelling:this.isTravelling(),actuallyArrived:arrived})){
+      this.assignment='follow';
+      this.lumoRoom=this.room;
+      this.lumo.sprite.setPosition(Phaser.Math.Clamp(spawn.x-22,30,610),Phaser.Math.Clamp(spawn.y-18,88,300));
+      this.route=[];
+      this.routeIndex=0;
+      this.progress.flags['l4-assignment']='follow';
+      this.progress.flags['l4-route']='';
+      this.progress.counters['l4-route-index']=0;
+      this.progress.flags['l4-lumo-room']=this.room;
+    }
+    this.progress.flags['l4-room']=this.room;
+    for(const mark of ['practice','a','b','c'] as const)this.progress.flags[`l4-at-${mark}`]=this.hasPower(mark);
+    this.lumo.setVisible(this.lumoRoom===this.room);
+    this.drawRoom();
+    this.refresh();
   }
   public startOpeningDialogue():void{this.say(INTRO);}
   public destroy():void{if(this.destroyed)return;this.destroyed=true;this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.interactions.clear();this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();}
   public update(dt:number):void{
     if(this.destroyed)return; this.advanceLumo(dt); this.updateDoors(); this.updateInkProgress(); this.updateReunion();
+    this.flushPendingStoryBeat();
     if(this.scene.time.now-this.lastCheckpoint>=600){this.lastCheckpoint=this.scene.time.now;if(this.isSafe(this.room,{x:this.player.x,y:this.player.y})){this.progress.flags['l4-room']=this.room;this.progress.counters['player-level']=4;this.progress.counters['player-x']=Math.round(this.player.x);this.progress.counters['player-y']=Math.round(this.player.y);this.save();}}
     this.refreshArt();this.roomTitle?.setText(`05  ${PATH_ROOMS[this.room].title}`); this.roomObjective?.setText(this.getObjectiveText()); this.refreshStatus();
   }
@@ -63,18 +90,22 @@ export class PathForTwoLevel {
       if(this.assignment==='practice'&&this.isTravelling())return'Chờ Lumo tới ấn thử.';
       if(this.assignment==='practice'&&this.hasPower('practice'))return'Cửa thử đã mở. Quan sát rồi gọi Lumo về mốc.';
       if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return'Thử gọi Lumo ở mốc gần cậu, rồi chờ cậu ấy xác nhận.';
-      if(this.hasPower('a'))return'Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.';
+      if(this.isDoorOpen('a'))return'Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.';
       return'Gọi Lumo tới ấn A sau cửa đầu.';
     }
-    if(this.room==='relay')return !this.progress.flags['l4-latch-a']?'Gài chốt A ở mặt bên kia trước khi gọi Lumo tới B.':this.hasPower('b')?'Qua cửa B tới hành lang mực.':'Gọi Lumo tới ấn B.';
+    if(this.room==='relay')return !this.progress.flags['l4-latch-a']?'Gài chốt A ở mặt bên kia trước khi gọi Lumo tới B.':this.isDoorOpen('b')?'Qua cửa B tới hành lang mực.':'Gọi Lumo tới ấn B.';
     if(!this.progress.flags['l4-latch-b'])return 'Gài chốt B trước khi gọi Lumo tới cuối hành lang.';
-    if(!this.progress.flags['l4-ink-revealed'])return 'Tắt đèn bằng F rồi bước lên vạch mực trong hành lang.';
-    if(!this.hasPower('c'))return 'Gọi Lumo tới ấn C ở đầu kia của hành lang.';
+    if(!this.progress.flags['l4-ink-revealed'])return 'Tắt đèn bằng F. Từ mốc bên trái, gọi Lumo tới ấn C rồi theo vạch mực.';
+    if(!this.hasPower('c'))return 'Từ mốc bên trái, gọi Lumo tới ấn C trước khi đi tới cuối hành lang.';
     if(!this.progress.flags['l4-latch-c'])return 'Tới tay gài C và giữ cửa ra.';
     if(!this.progress.flags['l4-reunited'])return 'Gọi Lumo trở lại, rồi chờ cậu ấy tới gần.';
     return 'Tới bậc thang và nhấn E.';
   }
-  public getStatusText():string{return `Buồng ${PATH_ROOMS[this.room].title} · A ${this.progress.flags['l4-latch-a']?'giữ':'mở khi Lumo tới'} · B ${this.progress.flags['l4-latch-b']?'giữ':'chờ'} · C ${this.progress.flags['l4-latch-c']?'giữ':'chờ'} · Lumo: ${this.isTravelling()?'đang đi':this.hasPower('a')||this.hasPower('b')||this.hasPower('c')||this.hasPower('practice')?'đã tới':'theo Nhinh'}`;}
+  public getStatusText():string{
+    const arrival=(['practice','a','b','c'] as const).find(mark=>this.hasPower(mark));
+    const lumoState=this.isTravelling()?'đang đi':arrival?`đã tới ${arrival.toUpperCase()}`:'theo Nhinh';
+    return `Buồng ${PATH_ROOMS[this.room].title} · A ${this.progress.flags['l4-latch-a']?'giữ':'mở khi Lumo tới'} · B ${this.progress.flags['l4-latch-b']?'giữ':'chờ'} · C ${this.progress.flags['l4-latch-c']?'giữ':'chờ'} · Lumo: ${lumoState}`;
+  }
   public showHint():void{
     const stage=this.room==='entry'?'practice':this.room==='relay'?this.progress.flags['l4-latch-a']?'b':'a':!this.progress.flags['l4-latch-b']?'latch-b':!this.progress.flags['l4-ink-revealed']?'ink':!this.hasPower('c')?'c':'exit';
     if(stage!==this.hintStage){this.hintStage=stage;this.hintIndex=0;} const hints=['Dây rễ từ mốc gọi nối tới ấn bên kia cửa. Trong mỗi buồng còn có một tay chốt.','Tôi giữ ấn để cậu qua cửa. Cậu gài chốt rồi tôi mới có thể sang nơi khác.','Gọi tôi tới ấn đang mở cửa trước mặt, đi qua và gài chốt. Tại hành lang cuối, tắt đèn để đọc vạch nền.'];
@@ -100,7 +131,13 @@ export class PathForTwoLevel {
   private getAssignment():string{const a=this.progress.flags['l4-assignment'];return typeof a==='string'?a:'follow';}
   private readLumoRoom():PathRoomId{const r=this.progress.flags['l4-lumo-room'];return r==='relay'||r==='ink'?r:'entry';}
   private readRoute():PathRoutePoint[]{const raw=this.progress.flags['l4-route'];if(typeof raw!=='string')return[];try{const v=JSON.parse(raw);return Array.isArray(v)?v.filter((p):p is PathRoutePoint=>p&&['entry','relay','ink'].includes(p.room)&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=24&&p.x<=616&&p.y>=80&&p.y<=310):[];}catch{return[];}}
-  private getLumoPosition():PathPoint{return{x:this.progress.counters['l4-lumo-x']??this.progress.counters['lumo-x']??180,y:this.progress.counters['l4-lumo-y']??this.progress.counters['lumo-y']??250};}
+  private getLumoPosition():PathPoint{
+    const x=this.progress.counters['l4-lumo-x']??this.progress.counters['lumo-x'];
+    const y=this.progress.counters['l4-lumo-y']??this.progress.counters['lumo-y'];
+    return Number.isFinite(x)&&Number.isFinite(y)
+      ?{x:Phaser.Math.Clamp(x as number,24,616),y:Phaser.Math.Clamp(y as number,80,310)}
+      :{x:180,y:250};
+  }
   private isSafe(room:PathRoomId,p:PathPoint):boolean{return isPathPositionSafe(room,p,{latches:{a:this.progress.flags['l4-latch-a']===true||this.hasPower('a'),b:this.progress.flags['l4-latch-b']===true||this.hasPower('b'),c:this.progress.flags['l4-latch-c']===true||this.hasPower('c'),practice:this.hasPower('practice')}});}
   private drawRoom():void{
     this.interactions.clear();this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.colliders=[];this.bodies=[];this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();this.protected=[];
@@ -118,7 +155,14 @@ export class PathForTwoLevel {
     }else{
       this.addNativeArt('tube-mouth',156,190,0);this.addNativeArt('tube-mouth',480,190,0);
     }
-    for(const e of def.elements){const key=getLevelArtKey(4,e.art);if(!key)continue;const centerY=e.id==='spiral'?e.y:e.y-e.height/2;const image=this.scene.add.image(e.x,centerY,key).setDisplaySize(e.width,e.height).setDepth(e.art.startsWith('call')||e.art.startsWith('latch')?this.depthAt(e.y):5);this.track(image);if(e.id.startsWith('call')||e.id.startsWith('latch')||e.id==='spiral')this.protected.push(image);image.setData('path-id',e.id);}
+    for(const e of def.elements){
+      const key=getLevelArtKey(4,e.art);if(!key)continue;
+      const centerY=e.id.startsWith('plate-')||e.id==='spiral'?e.y:e.y-e.height/2;
+      const image=this.scene.add.image(e.x,centerY,key).setDisplaySize(e.width,e.height).setDepth(e.art.startsWith('call')||e.art.startsWith('latch')?this.depthAt(e.y):5);
+      this.track(image);
+      if(e.id.startsWith('call')||e.id.startsWith('latch')||e.id==='spiral')this.protected.push(image);
+      image.setData('path-id',e.id);
+    }
     this.addDoors();this.drawRoomHud();this.registerRoomInteractions();this.refreshArt();
   }
   private drawTubeRoutes():void{
@@ -129,7 +173,7 @@ export class PathForTwoLevel {
       this.room==='relay'?
       [[{x:360,y:256},{x:420,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}],
        [{x:110,y:280},{x:140,y:280},{x:220,y:280},{x:320,y:250},{x:420,y:220},{x:480,y:190}]]:
-      [[{x:82,y:280},{x:122,y:242},{x:122,y:210},{x:180,y:242},{x:360,y:242},{x:558,y:244}]];
+      [[{x:82,y:280},{x:122,y:242},{x:122,y:210},{x:180,y:200},{x:360,y:200},{x:520,y:200},{x:558,y:244}]];
     for(const points of routes){
       this.routeGraphics.lineStyle(10,0x403328,0.88);
       this.routeGraphics.beginPath();this.routeGraphics.moveTo(points[0].x,points[0].y);
@@ -148,7 +192,7 @@ export class PathForTwoLevel {
       this.addCable('b',routes[0][0],routes[0][routes[0].length-1]);
       this.addCable('a',routes[1][0],routes[1][routes[1].length-1]);
     }else{
-      this.addCable('c',{x:180,y:242},{x:558,y:244});
+      this.addCable('c',{x:180,y:200},{x:520,y:200});
     }
   }
   private addTubeModules(points:PathPoint[]):void{
@@ -214,18 +258,56 @@ export class PathForTwoLevel {
     image.setData('door-brace',face.id);this.track(image);this.doorBraceImages.set(face.id,image);
   }
   private isDoorLatched(id:string):boolean{return id==='a'?this.progress.flags['l4-latch-a']===true:id==='b'?this.progress.flags['l4-latch-b']===true:id==='c'?this.progress.flags['l4-latch-c']===true:false;}
-  private isDoorPowered(id:string):boolean{return id==='practice'?this.hasPower('practice'):id==='a'?this.hasPower('a'):id==='b'?this.hasPower('b'):this.hasPower('c');}
-  private drawRoomHud():void{const t=this.scene.add.text(16,13,`05  ${PATH_ROOMS[this.room].title}`,{fontFamily:'Segoe UI, sans-serif',fontSize:'13px',fontStyle:'bold',color:'#f7dfaa',backgroundColor:'#07151cbb',padding:{x:8,y:5}}).setDepth(86);this.track(t);this.roomTitle=t;this.roomObjective=this.scene.add.text(16,42,'',{fontFamily:'Segoe UI, sans-serif',fontSize:'11px',color:'#e5eee8',backgroundColor:'#07151cbb',padding:{x:8,y:5}}).setDepth(86);this.track(this.roomObjective);const status=this.scene.add.text(16,320,'',{fontFamily:'Segoe UI, sans-serif',fontSize:'9px',color:'#d3e5dc',backgroundColor:'#07151cbb',padding:{x:8,y:4}}).setDepth(86);this.track(status);this.scene.add.text(624,320,'H · Gợi ý     J · Sổ tay',{fontFamily:'Segoe UI, sans-serif',fontSize:'9px',color:'#ffe680',backgroundColor:'#07151cbb',padding:{x:8,y:4}}).setOrigin(1,0).setDepth(86);}
+  private isDoorPowered(id:string):boolean{return id==='practice'?this.hasPower('practice'):this.hasPower(id as 'a'|'b'|'c')||this.isDoorLatched(id);}
+  private drawRoomHud():void{
+    this.roomTitle=this.scene.add.text(16,13,`05  ${PATH_ROOMS[this.room].title}`,{fontFamily:'Segoe UI, sans-serif',fontSize:'13px',fontStyle:'bold',color:'#f7dfaa',backgroundColor:'#07151cbb',padding:{x:8,y:5}}).setDepth(86);
+    this.track(this.roomTitle);
+    this.roomObjective=this.scene.add.text(16,42,'',{fontFamily:'Segoe UI, sans-serif',fontSize:'11px',color:'#e5eee8',backgroundColor:'#07151cbb',padding:{x:8,y:5}}).setDepth(86);
+    this.track(this.roomObjective);
+    this.roomStatus=this.scene.add.text(16,320,'',{fontFamily:'Segoe UI, sans-serif',fontSize:'9px',color:'#d3e5dc',backgroundColor:'#07151cbb',padding:{x:8,y:4}}).setDepth(86);
+    this.track(this.roomStatus);
+    this.roomControls=this.scene.add.text(624,340,'Di chuyển: WASD / mũi tên   F: đèn   H: gợi ý   J: sổ tay',{fontFamily:'Segoe UI, sans-serif',fontSize:'8px',color:'#ffe680',backgroundColor:'#07151cbb',padding:{x:7,y:2}}).setOrigin(1,0).setDepth(86);
+    this.track(this.roomControls);
+  }
   private registerRoomInteractions():void{
     const reg=(c:InteractableConfig)=>this.interactions.register(c);const def=PATH_ROOMS[this.room];
     for(const e of def.elements){if(e.id.startsWith('plate-'))continue;reg({id:`l4-${e.id}`,x:e.stand.x,y:e.stand.y,radius:22,getPrompt:()=>this.prompt(e.id),getPromptBounds:()=>this.imageFor(e.id)?.getBounds()??null,isEnabled:()=>this.interactionEnabled(e.id),onInteract:()=>this.interact(e.id)});}
     const doors=this.room==='entry'?[['practice',156,221],['a',480,221]]:this.room==='relay'?[['a',110,280],['b',480,221]]:[['b',82,280],['c',574,188]];
     for(const [id,x,y] of doors as Array<[string,number,number]>)reg({id:`l4-door-${id}`,x,y,radius:34,getPrompt:()=>id==='practice'?'E · Thử cửa thấp':id==='c'?'E · Lên tháp':`E · Qua cửa ${id.toUpperCase()}`,getPromptBounds:()=>this.doorImages.get(id)?.getBounds()??null,onInteract:()=>this.useDoor(id),isEnabled:()=>true});
   }
-  private prompt(id:string):string{if(id.includes('call'))return this.assignment==='follow'?'E · Gọi Lumo qua ống':'E · Gọi Lumo về mốc';if(id==='latch-a')return this.progress.flags['l4-latch-a']?'Cửa A đã giữ':'E · Gài chốt A';if(id==='latch-b')return this.progress.flags['l4-latch-b']?'Cửa B đã giữ':'E · Gài chốt B';if(id==='latch-c')return this.progress.flags['l4-latch-c']?'E · Gọi Lumo về':'E · Gài chốt cửa ra';if(id==='spiral')return 'E · Đọc vết xoắn';return 'E · Tương tác';}
+  private prompt(id:string):string{
+    const mark=this.callMark(id);
+    if(mark)return choosePathCallAction(this.assignment,mark,this.callEligible(mark))==='recall'?'E · Gọi Lumo về mốc':'E · Gọi Lumo qua ống';
+    if(id==='latch-a')return this.progress.flags['l4-latch-a']?'Cửa A đã giữ':'E · Gài chốt A';
+    if(id==='latch-b')return this.progress.flags['l4-latch-b']?'Cửa B đã giữ':'E · Gài chốt B';
+    if(id==='latch-c')return this.progress.flags['l4-latch-c']?'E · Gọi Lumo về':'E · Gài chốt cửa ra';
+    if(id==='spiral')return 'E · Đọc vết xoắn';
+    return 'E · Tương tác';
+  }
+  private callMark(id:string):'practice'|'a'|'b'|'c'|undefined{
+    if(id==='inner-call'||id==='practice-call')return'practice';
+    if(id.includes('call-a'))return'a';
+    if(id.includes('call-b'))return'b';
+    if(id.includes('call-c'))return'c';
+    return undefined;
+  }
+  private callEligible(mark:'practice'|'a'|'b'|'c'):boolean{
+    if(mark==='b')return this.progress.flags['l4-latch-a']===true;
+    if(mark==='c')return this.progress.flags['l4-latch-b']===true;
+    return true;
+  }
   private interactionEnabled(id:string):boolean{if(id==='latch-a')return this.room==='relay'&&this.progress.flags['l4-latch-a']!==true;if(id==='latch-b')return this.room==='ink'&&this.progress.flags['l4-latch-b']!==true;if(id==='latch-c')return this.room==='ink'&&(this.progress.flags['l4-latch-c']===true||this.hasPower('c')&&this.progress.flags['l4-latch-b']===true&&this.progress.flags['l4-ink-revealed']===true);if(id==='spiral')return this.progress.flags['l4-latch-c']===true;return true;}
   private interact(id:string):void{
-    if(id.startsWith('call')||id==='inner-call'){if(this.assignment!=='follow'){this.recallToCall(id);return;}if(id==='practice-call'||id==='inner-call')this.send('practice');else if(id.includes('call-a'))this.send('a');else if(id.includes('call-b')){if(!this.progress.flags['l4-latch-a']){this.say([{speaker:'Nhinh',text:'Mình nên giữ cửa A trước khi Lumo rời ấn.'}]);return;}this.send('b');}else if(id.includes('call-c')){if(!this.progress.flags['l4-latch-b']){this.say([{speaker:'Nhinh',text:'Cửa B cần được gài trước.'}]);return;}this.send('c');}return;}
+    const mark=this.callMark(id);
+    if(mark){
+      if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]===true){this.send(mark);return;}
+      const action=choosePathCallAction(this.assignment,mark,this.callEligible(mark));
+      if(action==='recall'){this.recallToCall(id);return;}
+      if(mark==='b'&&!this.progress.flags['l4-latch-a']){this.say([{speaker:'Nhinh',text:'Mình nên giữ cửa A trước khi Lumo rời ấn.'}]);return;}
+      if(mark==='c'&&!this.progress.flags['l4-latch-b']){this.say([{speaker:'Nhinh',text:'Cửa B cần được gài trước.'}]);return;}
+      this.send(mark);
+      return;
+    }
     if(id==='latch-a'){if(this.room==='relay'&&this.progress.flags['l4-visited-relay']&&this.hasPower('a')){this.progress.flags['l4-latch-a']=true;this.progress.flags['l4-at-a']=false;this.say([{speaker:'Nhinh',text:'Cửa đã giữ được rồi. Cậu qua mốc tiếp theo nhé.'},{speaker:'Lumo',text:'Lần này cậu giữ đường cho tôi.'}]);this.save();}return;}
     if(id==='latch-b'){if(this.room==='ink'&&this.progress.flags['l4-visited-ink']&&this.hasPower('b')){this.progress.flags['l4-latch-b']=true;this.progress.flags['l4-at-b']=false;this.save();}return;}
     if(id==='latch-c'){if(!this.progress.flags['l4-latch-c']){if(this.hasPower('c')&&this.progress.flags['l4-latch-b']&&this.progress.flags['l4-ink-revealed']){this.progress.flags['l4-latch-c']=true;this.save();if(!this.progress.flags['l4-memo'])this.say(MEMORY,()=>{this.progress.flags['l4-memo']=true;this.save();});}}else this.recallToCall(id);return;}
@@ -248,7 +330,7 @@ export class PathForTwoLevel {
     if(mark==='practice')return[{room,x:110,y:220},{room,x:156,y:190},{room,x:180,y:146},{room,...plate}];
     if(mark==='a')return[{room,x:440,y:232},{room,x:480,y:190},{room,x:520,y:150},{room,...plate}];
     if(mark==='b')return[{room,x:420,y:232},{room,x:480,y:190},{room,x:520,y:150},{room,...plate}];
-    return[{room,x:180,y:242},{room,x:360,y:242},{room,...plate}];
+    return[{room,x:180,y:200},{room,x:360,y:200},{room,x:520,y:200},{room,...plate}];
   }
   private pipeRoute(from:PathRoomId,to:PathRoomId):PathRoutePoint[]{
     const route:PathRoutePoint[]=[];let current=from;
@@ -257,7 +339,7 @@ export class PathForTwoLevel {
         route.push({room:'entry',x:440,y:232},{room:'entry',x:480,y:190,pipe:'a',end:'out'},
           {room:'relay',x:110,y:280,pipe:'a',end:'in'},{room:'relay',x:140,y:280});current='relay';
       }else if(current==='ink'){
-        route.push({room:'ink',x:558,y:244},{room:'ink',x:360,y:242},{room:'ink',x:180,y:242},
+        route.push({room:'ink',x:558,y:244},{room:'ink',x:520,y:200},{room:'ink',x:360,y:200},{room:'ink',x:180,y:200},
           {room:'ink',x:122,y:210},{room:'ink',x:122,y:242},{room:'ink',x:82,y:280,pipe:'b',end:'out'},
           {room:'relay',x:480,y:190,pipe:'b',end:'in'},{room:'relay',x:420,y:220});current='relay';
       }else if(to==='entry'){
@@ -265,7 +347,7 @@ export class PathForTwoLevel {
           {room:'entry',x:480,y:190,pipe:'a',end:'in'},{room:'entry',x:440,y:232});current='entry';
       }else{
         route.push({room:'relay',x:320,y:250},{room:'relay',x:420,y:232},{room:'relay',x:480,y:190,pipe:'b',end:'out'},
-          {room:'ink',x:82,y:280,pipe:'b',end:'in'},{room:'ink',x:122,y:242},{room:'ink',x:122,y:210});current='ink';
+          {room:'ink',x:82,y:280,pipe:'b',end:'in'},{room:'ink',x:122,y:242},{room:'ink',x:122,y:210},{room:'ink',x:180,y:200});current='ink';
       }
     }
     return route;
@@ -339,23 +421,33 @@ export class PathForTwoLevel {
     if(mark==='practice'||mark==='a'||mark==='b'||mark==='c'){
       this.progress.flags[`l4-at-${mark}`]=true;
       this.progress.flags['l4-lumo-arrived']=mark;
-      this.say([
+      this.queueStoryBeat([
         {speaker:'Lumo',text:'Tôi tới rồi. Cửa có mở không?'},
         {speaker:'Nhinh',text:'Có. Khi cậu rời dấu, nó sẽ đóng lại đúng không?'},
         {speaker:'Lumo',text:'Vậy trước khi gọi tôi về, hãy xem cậu có cần nó nữa không.'},
       ]);
     }
   }
+  private queueStoryBeat(lines:DialogueLine[],onComplete?:()=>void):void{
+    this.pendingStoryBeats.push({lines,onComplete});
+    this.flushPendingStoryBeat();
+  }
+  private flushPendingStoryBeat():void{
+    if(!this.pendingStoryBeats.length||!this.canStartStory())return;
+    const next=this.pendingStoryBeats.shift();
+    if(next)this.say(next.lines,next.onComplete);
+  }
   private isTravelling():boolean{return this.routeIndex<this.route.length;}
   private getPowerState(){return{assignment:this.assignment,lumoRoom:this.lumoRoom,lumoX:this.lumo.sprite.x,lumoY:this.lumo.sprite.y};}
-  private hasPower(mark:'practice'|'a'|'b'|'c'):boolean{if(this.progress.flags[`l4-latch-${mark}`]===true)return true;return hasDoorPower(mark,this.getPowerState());}
+  private hasPower(mark:'practice'|'a'|'b'|'c'):boolean{return hasDoorPower(mark,this.getPowerState());}
+  private isDoorOpen(mark:'practice'|'a'|'b'|'c'):boolean{return this.hasPower(mark)||(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]===true);}
   private useDoor(id:string):void{
     if(id==='practice'){if(!this.hasPower('practice'))this.say([{speaker:'Nhinh',text:'Cửa thử chỉ mở khi Lumo đã tới ấn bên kia.'}]);else this.say([{speaker:'Nhinh',text:'Cửa thử đã mở. Mình có thể đi qua rồi gọi Lumo về.'}]);return;}
-    if(id==='c'){if(this.progress.flags['l4-latch-c']&&this.progress.flags['l4-reunited']&&this.progress.flags['l4-memo'])this.nextLevel(ENDING);return;}
-    const mark=id as 'a'|'b';if(!this.hasPower(mark)){this.say([{speaker:'Nhinh',text:`Cần Lumo ở ấn ${mark.toUpperCase()} trước khi qua cửa.`}]);return;}
-    if(mark==='a'&&this.room==='entry'&&this.lumoRoom==='entry'){this.transition('relay',{x:110,y:251},'l4-visited-relay');return;}
+    if(id==='c'){if(this.progress.flags['l4-latch-c']&&this.progress.flags['l4-reunited']&&this.progress.flags['l4-memo'])this.prepareLevelExit();return;}
+    const mark=id as 'a'|'b';if(!this.isDoorOpen(mark)){this.say([{speaker:'Nhinh',text:`Cần Lumo ở ấn ${mark.toUpperCase()} trước khi qua cửa.`}]);return;}
+    if(mark==='a'&&this.room==='entry'){this.transition('relay',{x:110,y:251},'l4-visited-relay');return;}
     if(mark==='a'&&this.room==='relay'){this.transition('entry',{x:180,y:280},'l4-room');return;}
-    if(mark==='b'&&this.room==='relay'&&this.lumoRoom==='relay'){this.transition('ink',{x:82,y:251},'l4-visited-ink');return;}
+    if(mark==='b'&&this.room==='relay'){this.transition('ink',{x:82,y:251},'l4-visited-ink');return;}
     if(mark==='b'&&this.room==='ink'){this.transition('relay',{x:110,y:251},'l4-room');return;}
   }
   private transition(to:PathRoomId,spawn:PathPoint,visitFlag:string):void{
@@ -409,7 +501,29 @@ export class PathForTwoLevel {
       this.doorBraceImages.get(id)?.setVisible(latched);
     }
   }
-  private updateInkProgress():void{if(this.room==='ink'&&!this.lanternOn&&!this.progress.flags['l4-ink-revealed']&&rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),{x:184,y:218,width:348,height:48})){this.progress.flags['l4-ink-revealed']=true;this.save();this.say([{speaker:'Lumo',text:'Ở đây, Nhinh! Cậu sắp tới rồi.'},{speaker:'Nhinh',text:'Thấy cậu rồi.'}]);}if(this.lastLantern!==this.lanternOn){this.lastLantern=this.lanternOn;const i=this.objects.find(o=>o instanceof Phaser.GameObjects.Image&&o.getData('path-id')==='ink-route');if(i instanceof Phaser.GameObjects.Image){const k=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');if(k)i.setTexture(k);}}}
+  private updateInkProgress():void{
+    const corridor={x:184,y:218,width:348,height:48};
+    const atCorridor=rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),corridor);
+    if(this.room==='ink'&&!this.lanternOn&&!this.progress.flags['l4-ink-revealed']&&atCorridor){
+      this.progress.flags['l4-ink-revealed']=true;
+      this.save();
+    }
+    if(this.room==='ink'&&this.player.x>=500&&this.hasPower('c')&&!this.progress.flags['l4-beckoned']&&!this.beckoningQueued){
+      this.beckoningQueued=true;
+      this.queueStoryBeat(
+        [{speaker:'Lumo',text:'Ở đây, Nhinh! Cậu sắp tới rồi.'},{speaker:'Nhinh',text:'Thấy cậu rồi.'}],
+        ()=>{this.progress.flags['l4-beckoned']=true;this.beckoningQueued=false;this.save();},
+      );
+    }
+    if(this.lastLantern!==this.lanternOn){
+      this.lastLantern=this.lanternOn;
+      const ink=this.objects.find(o=>o instanceof Phaser.GameObjects.Image&&o.getData('path-id')==='ink-route');
+      if(ink instanceof Phaser.GameObjects.Image){
+        const key=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');
+        if(key)ink.setTexture(key);
+      }
+    }
+  }
   private updateReunion():void{if(this.progress.flags['l4-return-called']&&!this.progress.flags['l4-reunited']&&this.room===this.lumoRoom&&Math.hypot(this.player.x-this.lumo.sprite.x,this.player.y-this.lumo.sprite.y)<36){this.progress.flags['l4-reunited']=true;this.save();}}
   private refresh():void{this.refreshArt();this.updateDoors();this.refreshStatus();}
   private refreshArt():void{
@@ -440,7 +554,18 @@ export class PathForTwoLevel {
       if(texture)object.setTexture(texture);
     }
   }
-  private refreshStatus():void{const status=this.objects.find(o=>o instanceof Phaser.GameObjects.Text&&o.y===320);if(status instanceof Phaser.GameObjects.Text)status.setText(this.getStatusText());}
+  private refreshStatus():void{this.roomStatus?.setText(this.getStatusText());}
+  private prepareLevelExit():void{
+    const position=this.getLumoPosition();
+    this.progress.counters['lumo-x']=position.x;
+    this.progress.counters['lumo-y']=position.y;
+    this.progress.counters['lumo-target-x']=position.x;
+    this.progress.counters['lumo-target-y']=position.y;
+    this.progress.flags['l4-route']='';
+    this.progress.counters['l4-route-index']=0;
+    this.save();
+    this.nextLevel(ENDING);
+  }
   private imageFor(id:string):Phaser.GameObjects.Image|undefined{return this.objects.find(o=>o instanceof Phaser.GameObjects.Image&&o.getData('path-id')===id) as Phaser.GameObjects.Image|undefined;}
   private addCollider(rect:PathRect):void{const o=this.scene.add.rectangle(rect.x+rect.width/2,rect.y+rect.height/2,rect.width,rect.height,0,0).setVisible(false);this.scene.physics.add.existing(o,true);const body=o.body as Phaser.Physics.Arcade.StaticBody;this.track(o);this.bodies.push(body);this.colliders.push(this.scene.physics.add.collider(this.player.sprite,o));}
   private depthAt(y:number):number{return 10+y/10;}

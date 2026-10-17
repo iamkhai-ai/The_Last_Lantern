@@ -12,7 +12,7 @@ Flow: entry → safe send/arrival/recall practice → send A → enter relay →
 
 ## Shared geometry contract
 
-- Floor foot bounds: x=24..616, y=80..310. Top UI ends above y=70; status/help begins y=320. Actor frame remains 36×42. Feet = center+(0,19), Arcade body 14×6 with offset (11,37), rectangle relative to center (-7,+16,14,6). Both pure geometry and actual physics consume the same rectangles.
+- Main floor foot bounds: x=24..616, y=80..310. Relay and ink have one bounded reverse-door pocket each: only the 44px opening at the southwest portal reaches y=318, with cut wall segments at y=310..318 and a solid cap from y=318 down. The pocket is walkable only while that face's A/B latch keeps its threshold open; a closed threshold blocks it. The runtime static walls, threshold body, and pure restore bounds use the same face and opening. This lets reverse-side arrivals leave the portal while keeping the rest of the HUD/out-of-room band inaccessible. Top UI ends above y=70; status/help begins y=320. Actor frame remains 36×42. Feet = center+(0,19), Arcade body 14×6 with offset (11,37), rectangle relative to center (-7,+16,14,6). Both pure geometry and actual physics consume the same rectangles.
 - Main routes have at least 48px floor width. Door clear opening is 44px, with 14px actor body accounted for. Controls need reachable clear standing space; target radius normally 22px. Local interaction predicates must constrain room and intended approach side, in addition to nearest range. Revalidate on E.
 - Every full standing prop silhouette footprint is solid from north/south/east/west. Do not use only the bottom few pixels of a call pedestal or standing latch. Floor pressure marks, root cables and ink are walkable. Pipe mouths in a wall use that wall's solid shape; pipes are not human passages.
 - Draw stone floor from `ground_stone`, explicit masonry walls, existing pillars and Level 05 modules. Do not reuse the opaque scenic base as playable geometry: its baked intake, tanks and stairs contradict these rooms. Do not regenerate/edit PNGs or character frames. Keep native aspect ratio and nearest filtering.
@@ -37,7 +37,7 @@ Main A call need not be hard-gated by practice completion: the practice area is 
 
 ## Room 2 — relay / Buồng Chuyển Dòng
 
-Door A's reverse face is the southwest entrance (x=110,base y=318), arrival center (110,251), north of its threshold. The lower hall is broad and leads east to call B and north to door B (x=480,base y=210). The north partition y=180..210 has spans x=24..448 and512..616. Plate B is (546,114). All other edges are closed, including the south wall except the A opening.
+Door A's reverse face is the southwest entrance (x=110,base y=318), arrival center (110,251), north of its threshold. The lower hall is broad and leads east to call B and north to door B (x=480,base y=210). The north partition y=180..210 has spans x=24..448 and512..616. Plate B is (546,114). All other edges are closed. At the south edge, only the A opening has a bounded floor pocket: the remaining wall segments stop at y=318 and the cap below it prevents walking into the UI band.
 
 | Element | Art anchor | Stand / behavior |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ Do not put latch A on the entry side in Room 1. Room changes alone never set lat
 
 ## Room 3 — ink / Hành Lang Mực
 
-Door B's reverse face is southwest (x=82,base318); arrival center (82,251). West foyer is x=24..184. East foyer is x=532..616. A real horizontal corridor connects them at foot y=218..266, width48. Visible solid masonry blocks occupy [184,80,348,138] above and [184,266,348,44] below; the floor through the middle stays safe regardless of lighting. Render ink at native scale in overlapping/trimmed segments along that actual corridor, not as a route over an obstacle.
+Door B's reverse face is southwest (x=82,base318); arrival center (82,251). West foyer is x=24..184. East foyer is x=532..616. A real horizontal corridor connects them at foot y=218..266, width48. Visible solid masonry blocks occupy [184,80,348,138] above and [184,266,348,44] below; the floor through the middle stays safe regardless of lighting. The C tube and Lumo route run across the upper masonry at y=200, then descend at the east foyer to plate C. Keep ink artwork centered at floor y=242 and visible across the open corridor; the upper tube/cable must not cover that floor route. The southwest reverse door uses the same bounded y=310..318 pocket and cap as relay's A entrance.
 
 | Element | Art anchor / target | Stand / behavior |
 | --- | --- | --- |

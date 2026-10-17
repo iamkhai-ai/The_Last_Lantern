@@ -273,6 +273,7 @@ export class CampaignScene extends Phaser.Scene {
       [
         ...(this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : []),
         ...(this.libraryLevel?.getProtectedPromptBounds() ?? []),
+        ...(this.pathForTwoLevel?.getProtectedPromptBounds() ?? []),
       ],
     );
     this.libraryLevel?.update();
@@ -438,7 +439,7 @@ export class CampaignScene extends Phaser.Scene {
     } else if (level === 4) {
       this.pathForTwoLevel = new PathForTwoLevel({ scene: this, progress: this.progress, player: this.player, lumo: this.lumo,
         interactions: this.interactions, lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
-        nextLevel: (lines) => this.nextLevel(lines) });
+        nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen() });
       this.pathForTwoLevel.build();
     } else {
       this.addNarrativeProps(level);
