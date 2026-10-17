@@ -82,3 +82,29 @@ The source and regression changes are committed as `9f7bc90a6c3645482faa4bf287da
 
 - The focused script verifies the route and state predicates but does not execute live Phaser movement or dialogue timing. Root's runtime check and independent review remain the next gates.
 - No user save or Observatory `roomId` was changed, and the changes remain scoped to Level 05 controller/geometry and its focused check.
+
+## Round 3 review corrections
+
+Source revision: `ddf7e152b74bcf25dba1a7302053ff8742a93151` (parent `adf3ac8f82e3ca0b47fb26ea84a51b7ac2564a85`). This revision addresses Reviewer B's malformed saved-pipe route finding.
+
+- Saved routes are now parsed atomically: unknown pipe/end labels, unpaired labels, invalid coordinates, and invalid cross-room endpoints reject the whole route. The controller then restores Lumo visibly beside Nhinh as a same-room follower, including when saved assignment metadata says follow or points to an off-room companion.
+- Pure pipe-hop and endpoint proximity predicates reject unknown labels before endpoint lookup. Missing endpoint data cannot throw during route recovery.
+- Focused regressions cover unknown labels, malformed endpoint coordinates, whole-route rejection, valid same-room route parsing, and invalid-route follower recovery.
+- The requested R3 review-note path was not present in the workspace (`Get-Content C:/Users/Admin/AppData/Local/Temp/last-lantern-level05-root-r3.md` returned “Cannot find path”). Implementation followed the concrete findings relayed by root in the task message.
+
+## Round 3 verification
+
+| Status | Command / review | Result |
+| --- | --- | --- |
+| PASS | `node scripts/check-path-for-two.mjs` | Geometry/state checks and R3 malformed-route regressions passed. |
+| PASS | `npm run build` | TypeScript and Vite production build passed; generated `dist/index.html` was restored afterward. |
+| PASS | `git diff --check` | No whitespace errors before source commit. |
+| NOT_RUN | Browser review and human end-to-end playthrough | Root owns runtime inspection; human playthrough remains open. |
+| NOT_RUN | Independent review of this revision | Root will run independent reviews on the frozen R3 revision. |
+
+The source and regression changes are committed as `ddf7e152b74bcf25dba1a7302053ff8742a93151`. The report update is committed separately after this entry is written.
+
+## Remaining limits
+
+- The focused script validates malformed saved route recovery and endpoint predicates but does not execute live Phaser movement or browser rendering. Root's runtime and review gates remain outstanding.
+- No user save was modified. The R3 changes remain scoped to the Level 05 route parser/recovery and focused check.
