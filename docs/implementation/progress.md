@@ -2,7 +2,15 @@
 
 ## Scope
 
-Current slice: rebuild **Level 02 only**, per the user's subsequent request; another chat owns Level 01. Isolated managed worktree `level-02-spatial-rebuild`, branch `codex/level-02-spatial-rebuild`, from `797c594` including main `f3c23de`. Earlier Level 01 history below is retained as context. Main checkout contains unrelated edits and remains untouched.
+Current slice: rebuild **Level 04 only**, per the user's 2026-10-17 request. Level 02 was accepted and integrated into main at `0446554`; another chat owns Level 03. Reuse the managed `level-02-spatial-rebuild` worktree on `codex/level-04-spatial-rebuild`, based on main `0446554`. Earlier Level 01/02 history below is retained as context. Main checkout contains unrelated edits and remains untouched.
+
+## Level 04 — 2026-10-17
+
+- Root designed the safe practice group, three banks, two true reflected-light routes, near-side latches, return route for the lantern, relief and station entrance before Luna High implementation. Decisions are in [04-layout.md](04-layout.md).
+- Source correction `7886ba5` and spatial-requirements freeze `7fa651d` include shared exit-post solids, compact ground footprints, source-recovery guidance and clear practice captions.
+- **PASS** root production build, five pure scripts, diff checks and the independent post-aware route/restore probe on `7fa651d`. Both independent Luna High reviewers re-reviewed that revision with no open actionable findings. The first-round P2 post omission was corrected and closed.
+- **NOT_RUN** live browser/gameplay/visual verification and human acceptance: Work browser control is disabled. Existing mechanism bridge art remains schematic. Dedicated human preview serves `http://127.0.0.1:5192/?level=4`; HTTP200/bootstrap presence is serving evidence only.
+- Full evidence and limits: [level-04-report.md](level-04-report.md). This Level04 slice is local; publication is not included.
 
 ## Decisions
 
