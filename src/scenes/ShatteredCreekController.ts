@@ -251,7 +251,11 @@ export class ShatteredCreekController {
   }
 
   private hintsFor(live: CreekLiveState): string[] {
+    if (live.step === 'practice' && this.state.source === 'practice' && !this.state.lanternOn) return ['Đèn thử đang tắt. Nhấn F để bật tia sáng.'];
+    if (live.step === 'main' && this.state.source === null) return ['Đèn đang ở trong tay. Tới bệ chính ở bờ Tây và nhấn E để đặt xuống.', 'Đặt đèn lên bệ chính bằng E; khi nằm yên, đèn sẽ giữ đường tia.'];
+    if (live.step === 'main' && this.state.source === 'main' && !this.state.lanternOn) return ['Đèn chính đang tắt. Nhấn F để bật tia sáng.'];
     if (live.step === 'main') return ['Bệ chính ở bờ Tây. Tia cần tới G1.', `G1 ${this.state.g1 === 2 ? 'đã hướng tới G2' : 'cần chuyển sang /'}, G2 ${this.state.g2 === 1 ? 'đang hướng về mắt A' : 'chưa hướng về mắt A'}.`, 'Dẫn tia qua G1 / tới G2, rồi xoay G2 sang \\ để chiếu vào mắt A.'];
+    if (live.step === 'reroute' && this.state.source === 'main' && !this.state.lanternOn) return ['Đèn đang tắt. Nhấn F để bật tia rồi tiếp tục dẫn sáng tới G3.'];
     if (live.step === 'reroute') return ['Giữ cầu A bằng chốt trước khi đổi tia.', 'Xoay G2 sang / để gửi tia tới G3.', `G3 ${this.state.g3 === 2 ? 'đang hướng về mắt B' : 'cần xoay sang \\'}.`];
     if (live.step === 'retrieve' && this.state.source === null) return ['Hai chốt đã giữ cầu. Bệ đèn chính ở bờ Tây.', 'Đặt đèn lên bệ chính rồi nhấn E lần nữa để thu hồi.'];
     return HINTS[live.step];
@@ -378,7 +382,9 @@ export class ShatteredCreekController {
   private updateHud(live: CreekLiveState): void {
     if (!this.hud.length) return;
     const goals: Record<CreekLiveState['step'], string> = { practice: 'Thử đặt đèn và gương nhỏ cạnh lối vào.', pickup: 'Thu hồi đèn bằng E.', main: 'Đặt đèn chính rồi điều hướng tia qua gương.', 'latch-a': 'Gài chốt cầu đầu bên bờ Tây.', reroute: 'Giữ cầu đầu rồi điều hướng tia sang gương trên đảo.', 'latch-b': 'Gài chốt cầu thứ hai trên đảo.', retrieve: this.state.source ? 'Thu hồi đèn khỏi bệ.' : 'Đặt đèn lên bệ chính rồi thu hồi.', relief: 'Đọc phù điêu bờ Đông.', exit: 'Đến trạm dẫn nước.' };
-    this.hud[1].setText(goals[live.step]);
+    const placedPowerStep = ['practice', 'main', 'latch-a', 'reroute', 'latch-b'].includes(live.step) && this.state.source !== null;
+    const goal = !this.state.lanternOn && placedPowerStep ? 'Đèn đang tắt. Nhấn F để bật tia sáng.' : live.step === 'main' && this.state.source === null ? 'Đặt đèn lên bệ chính bằng E.' : goals[live.step];
+    this.hud[1].setText(goal);
     const glyph = (id: 'g1' | 'g2' | 'g3'): string => this.state[id] === 0 ? '—' : id === 'g3' ? this.state[id] === 1 ? '/' : '\\' : this.state[id] === 1 ? '\\' : '/';
     this.hud[2].setText(`Tập: ${this.state.practiceComplete ? 'xong' : 'thử'} · Cầu: ${Number(this.state.latchA) + Number(this.state.latchB)}/2 · G1 ${glyph('g1')} / G2 ${glyph('g2')} / G3 ${glyph('g3')}`);
     if (this.stepKey !== live.step) { this.stepKey = live.step; this.hintIndex = 0; }
