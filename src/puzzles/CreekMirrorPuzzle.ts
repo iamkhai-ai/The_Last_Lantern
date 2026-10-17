@@ -78,6 +78,7 @@ export class CreekMirrorPuzzle {
       id: 'creek_pedestal',
       x: this.pedestalPos.x,
       y: this.pedestalPos.y + 6,
+      getPromptBounds: () => this.pedestalSprite.getBounds(),
       radius: 48,
       isEnabled: () => !this.questSystem.progress.creekBridgeActive,
       getPrompt: () =>
@@ -117,6 +118,7 @@ export class CreekMirrorPuzzle {
         id: `creek_mirror_${idx}`,
         x: pos.x,
         y: pos.y + 8,
+        getPromptBounds: () => sp.getBounds(),
         radius: 48,
         isEnabled: () => !this.questSystem.progress.creekBridgeActive,
         getPrompt: () => {
@@ -168,6 +170,7 @@ export class CreekMirrorPuzzle {
       id: 'creek_mural_tablet',
       x: 548,
       y: 220,
+      getPromptBounds: () => mural.getBounds(),
       radius: 48,
       getPrompt: () => '[E] Xem phù điêu Người Bảo Vệ Cổ Xưa',
       onInteract: () => {
@@ -234,6 +237,7 @@ export class CreekMirrorPuzzle {
       id: 'crystal_hope_pickup',
       x: 508,
       y: 120,
+      getPromptBounds: () => this.crystalSprite?.getBounds() ?? null,
       radius: 48,
       isEnabled: () =>
         this.questSystem.progress.creekBridgeActive &&

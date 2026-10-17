@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { InteractableConfig } from '../types/gameTypes';
+import { layoutInteractionPrompt } from './interactionPromptLayout';
+import type { PromptRect } from './interactionPromptLayout';
 
 export class InteractionSystem {
   private scene: Phaser.Scene;
@@ -21,6 +23,7 @@ export class InteractionSystem {
       color: '#f7dfaa',
       fontStyle: 'bold',
     });
+    this.promptText.setWordWrapWidth(360);
     this.promptText.setOrigin(0.5, 0.5);
 
     this.promptContainer = scene.add.container(0, 0, [this.promptBg, this.promptText]);
@@ -38,7 +41,7 @@ export class InteractionSystem {
     this.interactables.push(config);
   }
 
-  public update(playerX: number, playerY: number, canInteract: boolean): void {
+  public update(playerX: number, playerY: number, canInteract: boolean, playerBounds?: PromptRect, protectedBounds: PromptRect[] = []): void {
     this.lastPlayerPosition = { x: playerX, y: playerY };
     if (!canInteract) {
       this.activeTarget = null;
@@ -66,8 +69,8 @@ export class InteractionSystem {
     if (best) {
       const label = best.getPrompt() ?? '';
       this.promptText.setText(label);
-      const w = Math.max(68, this.promptText.width + 18);
-      const h = 20;
+      const w = Math.min(378, Math.max(68, this.promptText.width + 18));
+      const h = Math.max(24, this.promptText.height + 10);
 
       this.promptBg.clear();
       this.promptBg.fillStyle(0x091921, 0.92);
@@ -75,9 +78,9 @@ export class InteractionSystem {
       this.promptBg.fillRoundedRect(-w / 2, -h / 2, w, h, 5);
       this.promptBg.strokeRoundedRect(-w / 2, -h / 2, w, h, 5);
 
-      const px = Math.max(w / 2 + 8, Math.min(640 - w / 2 - 8, best.x));
-      const py = best.promptY ?? Math.max(24, best.y - 32);
-      this.promptContainer.setPosition(px, py);
+      const actorBounds = playerBounds ?? { x: playerX - 18, y: playerY - 21, width: 36, height: 42 };
+      const promptBounds = layoutInteractionPrompt(best.getPromptBounds?.() ?? null, actorBounds, w, h, undefined, protectedBounds);
+      this.promptContainer.setPosition(promptBounds.x + w / 2, promptBounds.y + h / 2);
       this.promptContainer.setVisible(true);
     } else {
       this.promptContainer.setVisible(false);

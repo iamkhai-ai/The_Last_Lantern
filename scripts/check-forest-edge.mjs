@@ -22,13 +22,25 @@ assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.objects.gate.exit, false), t
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 127 }, false), false, 'closed threshold blocks the north approach');
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 130 }, false), true, 'south side remains walkable up to the threshold');
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 128 }, false), true, 'actual closed-threshold contact remains a valid saved position');
+for (const gateOpen of [false, true]) {
+  assert.equal(isForestEdgeCenterWalkable({ x: 454, y: 140 }, gateOpen), false, 'left rim inner stone is solid');
+  assert.equal(isForestEdgeCenterWalkable({ x: 518, y: 140 }, gateOpen), false, 'right rim inner stone is solid');
+  assert.equal(isForestEdgeCenterWalkable({ x: 404, y: 140 }, gateOpen), false, 'left outer pillar approach is solid');
+  assert.equal(isForestEdgeCenterWalkable({ x: 568, y: 140 }, gateOpen), false, 'right outer pillar approach is solid');
+  assert.equal(isForestEdgeCenterWalkable({ x: 468, y: 140 }, gateOpen), true, 'left side of centered passage remains clear');
+  assert.equal(isForestEdgeCenterWalkable({ x: 504, y: 140 }, gateOpen), true, 'right side of centered passage remains clear');
+}
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 110 }, false), false, 'arch backing blocks a saved position behind the closed gate');
+assert.equal(isForestEdgeCenterWalkable({ x: 416, y: 109 }, true), false, 'expanded backing blocks walking behind the outer left post');
+assert.equal(isForestEdgeCenterWalkable({ x: 556, y: 109 }, true), false, 'expanded backing blocks walking behind the outer right post');
 assert.equal(isForestEdgeCenterWalkable({ x: 570, y: 110 }, false), true, 'empty northern forest strip remains walkable beyond the arch backing');
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 110 }, true), true, 'open passage permits travel to the backing wall');
 assert.equal(isForestEdgeCenterWalkable({ x: 486, y: 109 }, true), false, 'arch backing remains a permanent north limit after opening');
 assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.checkpoints.gate, true), true);
 assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.checkpoints.gate, false), true);
 assert.deepEqual(resolveForestEdgeSpawn({ x: 486, y: 128 }, { gateOpen: false }), { x: 486, y: 128 }, 'save at actual closed-gate contact restores in place');
+assert.deepEqual(resolveForestEdgeSpawn({ x: 454, y: 140 }, { gateOpen: false, footprintsFound: true }), FOREST_EDGE.checkpoints.ring, 'stale save inside the new left rim resolves to the reachable ring checkpoint');
+assert.deepEqual(resolveForestEdgeSpawn({ x: 518, y: 140 }, { gateOpen: true }), FOREST_EDGE.checkpoints.gate, 'stale save inside the new right rim resolves to the open-gate approach');
 
 function reachableWithin(start, target, gateOpen) {
   const step = 4;

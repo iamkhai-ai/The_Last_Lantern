@@ -3,7 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_POEM_PROMPT_OFFSET_Y, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, WOODS_RUNE_PROMPT_OFFSET_Y, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
+import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -255,7 +255,13 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshObservatoryDoors();
       this.refreshObservatoryPuzzle();
     }
-    this.interactions.update(this.player.x, this.player.y, !locked);
+    this.interactions.update(
+      this.player.x,
+      this.player.y,
+      !locked,
+      this.player.sprite.getBounds(),
+      this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : [],
+    );
     this.updatePuzzle(dt);
     this.updateCampaignCrossingState();
     this.updateCampaignBarriers();
@@ -527,8 +533,23 @@ export class CampaignScene extends Phaser.Scene {
 
   private registerObservatoryInteractable(item: (typeof OBSERVATORY_ROOMS)[ObservatoryRoomId]['interactables'][number]): void {
     const { id, interactionPoint } = item;
+    const visual = this.roomObjects.find((object): object is Phaser.GameObjects.Image =>
+      object instanceof Phaser.GameObjects.Image && object.visible
+      && Math.abs(object.x - item.position.x) < 0.1 && Math.abs(object.y - item.position.y) < 0.1,
+    );
+    const getPromptBounds = (): { x: number; y: number; width: number; height: number } | null => {
+      if (id === 'root-bed') {
+        const bounds = this.observatoryBridgeBounds;
+        return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+      }
+      if (id === 'root-bridge') {
+        const bridge = this.observatoryPuzzleVisuals.get('root-bridge');
+        return bridge instanceof Phaser.GameObjects.Image && bridge.visible ? bridge.getBounds() : null;
+      }
+      return visual?.getBounds() ?? null;
+    };
     const register = (onInteract: () => void, getPrompt: () => string, isEnabled?: () => boolean): void => {
-      this.interactions.register({ id: `observatory-${id}`, x: interactionPoint.x, y: interactionPoint.y, radius: 34, getPrompt, isEnabled, onInteract });
+      this.interactions.register({ id: `observatory-${id}`, x: interactionPoint.x, y: interactionPoint.y, radius: 34, getPromptBounds, getPrompt, isEnabled, onInteract });
     };
 
     if (id === 'g0' || id === 'g1' || id === 'g2') {
@@ -834,6 +855,7 @@ export class CampaignScene extends Phaser.Scene {
     this.roomDoors.set(exit.id, { image, body, exit });
     this.interactions.register({
       id: `observatory-exit-${exit.id}`, x: exit.interactionPoint.x, y: exit.interactionPoint.y, radius: 38,
+      getPromptBounds: () => image.getBounds(),
       getPrompt: () => this.isObservatoryExitOpen(exit) ? `E · Enter ${OBSERVATORY_ROOMS[exit.toRoom].title}` : 'E · Door is locked',
       onInteract: () => this.transitionObservatory(exit.id),
     });
@@ -1710,12 +1732,35 @@ export class CampaignScene extends Phaser.Scene {
       );
       if (!hasGateProp) this.addProp(texture, x, y, 0.8);
     }
-    const glyph=id==='poem'||id.startsWith('rune-');
-    const glyphAnchor=id==='poem'?WHISPERING_WOODS.anchors.poem:id.startsWith('rune-')?WHISPERING_WOODS.anchors[id.slice(5) as RuneId]:undefined;
-    const promptY = this.progress.level===1&&id==='stairs' ? WHISPERING_WOODS.gate.promptY
-      : this.progress.level===1&&glyph&&glyphAnchor ? glyphAnchor.y+(id==='poem' ? WOODS_POEM_PROMPT_OFFSET_Y : WOODS_RUNE_PROMPT_OFFSET_Y)
-      : id === 'gate' && this.progress.level === 0 ? 76 : undefined;
-    this.interactions.register({ id, x, y, promptY, radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
+    this.interactions.register({ id, x, y, getPromptBounds: this.getActionPromptBounds(id, x, y), radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
+  }
+
+  private getActionPromptBounds(id: string, x: number, y: number): (() => { x: number; y: number; width: number; height: number } | null) | undefined {
+    if (this.progress.level === 0) {
+      if (id === 'lamp' || id === 'lantern-inscription') return () => ({ x: 214, y: 210, width: 20, height: 28 });
+      if (id === 'tablet') return () => ({ x: 276, y: 170, width: 48, height: 60 });
+      if (id === 'gate') return () => ({ x: 410, y: 10, width: 152, height: 156 });
+    }
+
+    if (this.progress.level === 1) {
+      const woodsId = id === 'stairs' ? 'gate-base' : id;
+      const target = this.objects.find((object): object is Phaser.GameObjects.Image =>
+        object instanceof Phaser.GameObjects.Image && object.getData('woodsId') === woodsId,
+      );
+      return () => target?.scene && target.active && target.visible ? target.getBounds() : null;
+    }
+
+    const target = this.objects
+      .filter((object): object is Phaser.GameObjects.Image =>
+        object instanceof Phaser.GameObjects.Image && object.active && object.visible && object !== this.player.sprite,
+      )
+      .map((object) => ({ object, bounds: object.getBounds() }))
+      .filter(({ bounds }) => bounds.width <= 140 && bounds.height <= 140
+        && Math.abs(bounds.centerX - x) <= 56 && Math.abs(bounds.centerY - y) <= 56,
+      )
+      .sort((a, b) => Math.hypot(a.bounds.centerX - x, a.bounds.centerY - y) - Math.hypot(b.bounds.centerX - x, b.bounds.centerY - y))[0]?.object;
+    if (!target) return undefined;
+    return () => target.scene && target.active && target.visible ? target.getBounds() : null;
   }
 
   private clearCampaignColliders(): void {

@@ -147,6 +147,7 @@ export class WorldScene extends Phaser.Scene {
         id: portal.id,
         x: portal.x,
         y: portal.y,
+        getPromptBounds: () => marker.getBounds(),
         radius: 46,
         getPrompt: () => portal.label,
         onInteract: () => this.tryTransitionZone(portal.targetZone),
@@ -202,6 +203,7 @@ export class WorldScene extends Phaser.Scene {
       id: 'intro_beacon',
       x: 235,
       y: 268,
+      getPromptBounds: () => this.introBeaconSprite?.getBounds() ?? null,
       radius: 48,
       getPrompt: () =>
         this.questSystem.progress.stage === 'intro' &&
@@ -258,6 +260,7 @@ export class WorldScene extends Phaser.Scene {
       id: 'heart_tree_interact',
       x: 315,
       y: 178,
+      getPromptBounds: () => this.heartTreeSprite?.getBounds() ?? null,
       radius: 56,
       isEnabled: () => this.questSystem.progress.stage !== 'finale_overload',
       getPrompt: () => {
@@ -611,7 +614,9 @@ export class WorldScene extends Phaser.Scene {
     this.interactionSystem.update(
       this.player.x,
       this.player.y,
-      canMove && !this.dialogueSystem.isActive()
+      canMove && !this.dialogueSystem.isActive(),
+      this.player.sprite.getBounds(),
+      this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : [],
     );
 
     this.hud.update(

@@ -9,8 +9,7 @@ export class LanternSystem {
   private haloSprite: Phaser.GameObjects.Image;
   private pulseGraphics: Phaser.GameObjects.Graphics;
   private vignetteImage: Phaser.GameObjects.Image;
-  private forestEdgeReveal?: Phaser.GameObjects.Image;
-  private forestEdgeMask?: Phaser.Display.Masks.BitmapMask;
+  private forestEdgeShade?: Phaser.GameObjects.Image;
   private readonly forestEdgeLighting: boolean;
 
   public lanternOn = true;
@@ -49,13 +48,10 @@ export class LanternSystem {
     this.vignetteImage = scene.add.image(320, 180, 'vignette');
     this.vignetteImage.setDepth(71);
     this.vignetteImage.setScrollFactor(0);
-
-    if (forestEdgeLighting && scene.game.renderer.type === Phaser.WEBGL && scene.textures.exists('light_reveal_mask')) {
-      this.forestEdgeReveal = scene.add.image(0, 0, 'light_reveal_mask').setVisible(false);
-      this.forestEdgeMask = this.forestEdgeReveal.createBitmapMask();
-      this.forestEdgeMask.invertAlpha = true;
-      this.darknessOverlay.setMask(this.forestEdgeMask);
-      this.vignetteImage.setMask(this.forestEdgeMask);
+    if (forestEdgeLighting) {
+      this.vignetteImage.setVisible(false);
+      if (!scene.textures.exists('level01_darkness_falloff')) throw new Error('Missing Level 01 darkness falloff texture');
+      this.forestEdgeShade = scene.add.image(0, 0, 'level01_darkness_falloff').setDepth(68.5);
     }
   }
 
@@ -143,17 +139,16 @@ export class LanternSystem {
       this.darknessOverlay.fillRect(0, 0, 640, 360);
     } else if (this.forestEdgeLighting) {
       const activeLantern = this.lanternOn && (this.lanternInHand || this.lanternPlaced);
-      const localRevealAvailable = this.forestEdgeMask !== undefined;
       this.haloSprite.setVisible(true);
       this.haloSprite.setPosition(lightX, lightY);
-      this.haloSprite.setScale((localRevealAvailable ? (activeLantern ? 0.68 : 0.28) : (activeLantern ? 0.95 : 0.38)) * flicker);
-      this.haloSprite.setAlpha(localRevealAvailable ? (activeLantern ? 0.42 : 0.12) : (activeLantern ? 0.88 : 0.32));
-      this.darknessOverlay.fillStyle(0x03080c, localRevealAvailable ? (activeLantern ? 0.92 : 0.94) : (activeLantern ? 0.24 : 0.44));
-      this.darknessOverlay.fillRect(0, 0, 640, 360);
-      if (this.forestEdgeReveal) {
-        this.forestEdgeReveal.setPosition(lightX, lightY);
-        this.forestEdgeReveal.setDisplaySize(activeLantern ? 232 : 76, activeLantern ? 232 : 76);
-      }
+      this.haloSprite.setScale((activeLantern ? 0.68 : 0.28) * flicker);
+      this.haloSprite.setAlpha(activeLantern ? 0.42 : 0.12);
+      const darknessAlpha = activeLantern ? 0.92 : 0.94;
+      const size = activeLantern ? 232 : 76;
+      const shadeX = Math.round(lightX);
+      const shadeY = Math.round(lightY);
+      this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);
+      this.fillForestEdgeDarknessOutside(shadeX, shadeY, size, darknessAlpha);
     } else if (this.lanternOn && (this.lanternInHand || this.lanternPlaced)) {
       // Night mode with warm lantern light active (radius ~115 world px)
       this.haloSprite.setVisible(true);
@@ -192,5 +187,18 @@ export class LanternSystem {
         this.pulseGraphics.strokeCircle(this.pulseOriginX, this.pulseOriginY, Math.max(4, radius - 8));
       }
     }
+  }
+
+  private fillForestEdgeDarknessOutside(centerX: number, centerY: number, size: number, alpha: number): void {
+    const half = size / 2;
+    const left = Phaser.Math.Clamp(centerX - half, 0, 640);
+    const right = Phaser.Math.Clamp(centerX + half, 0, 640);
+    const top = Phaser.Math.Clamp(centerY - half, 0, 360);
+    const bottom = Phaser.Math.Clamp(centerY + half, 0, 360);
+    this.darknessOverlay.fillStyle(0x03080c, alpha);
+    if (top > 0) this.darknessOverlay.fillRect(0, 0, 640, top);
+    if (bottom < 360) this.darknessOverlay.fillRect(0, bottom, 640, 360 - bottom);
+    if (left > 0 && bottom > top) this.darknessOverlay.fillRect(0, top, left, bottom - top);
+    if (right < 640 && bottom > top) this.darknessOverlay.fillRect(right, top, 640 - right, bottom - top);
   }
 }
