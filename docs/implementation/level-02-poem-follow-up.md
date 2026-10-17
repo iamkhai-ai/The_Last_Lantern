@@ -1,5 +1,7 @@
 # Level 02 poem access correction
 
+> Superseded by `level-02-poem-first.md`; retained as decision history only. Do not use its practice-adjacent coordinates as current requirements.
+
 User feedback: the reading stone is too far from the start. Base `9c50579`. Narrow correction: relocate the poem to the entry path, immediately right of practice. Existing autonomous decisions and native Luna high delegation apply. Other levels and puzzle rules stay as authored.
 
 ## Implementation brief

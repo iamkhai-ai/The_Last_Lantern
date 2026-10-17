@@ -19,20 +19,17 @@ Màn khuyến khích quan sát và thử lại. Ký ức xuất hiện cuối m�
 **Lumo:** “Tôi biết cảm giác của nó. Có tiếng lá, tiếng trẻ con… Nhưng khi cố nhớ thì chỉ còn tiếng lá.”\
 **Nhinh:** “Mình cứ xem chúng muốn chỉ gì đã.”
 
-*Nhinh tới gần cổng. Một hốc trống dưới chân cổng chứa mẩu bia có thơ.*
+*Nhinh tới gần hốc đá bên lối vào. Mẩu bia có thơ nằm ngay trước mặt.*
 
 **Bài thơ:** “Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.”\
 **Nhinh:** “Trăng, lá, sao. Ba hình này cũng có ở những bia ngoài kia.”\
 **Lumo:** “Nếu còn thấy được chúng. Nét khắc đã ngủ lâu lắm rồi.”
 
-## 3. Khu thử an toàn — bia đơn bên lối vào
+## 3. Soi ba bia cổ tự
 
-Một mảnh bia ngoài vòng chính có nét khắc hình chiếc lá. Pulse làm nét khắc hiện rõ; E khi nét còn sáng khiến bia ngân một tiếng. Mảnh bia này không tính vào chuỗi câu đố.
+Nhinh đã học Light Pulse ở bìa rừng. Sau khi đọc mẩu thơ, Lumo chỉ tới ba bia trong khoảng đất trống. Pulse làm ký hiệu gần đó hiện rõ; E khi nét còn sáng khiến bia ngân một tiếng. Ký hiệu đã thấy vẫn được lưu vào sổ khi ánh sáng dịu đi; một bia chưa kích hoạt sẽ ngủ lại cho tới lần Pulse kế tiếp.
 
-**Nhinh:** “Xung sáng làm hiện ký hiệu. Chạm vào thì nó trả lời.”\
-**Lumo:** “Những bia còn lại chắc cũng đang chờ như vậy.”
-
-Ký hiệu thấy được lưu vào sổ. Khi hiệu ứng Pulse hết, thông tin đã ghi vẫn đọc được; người chơi có thể phát lại Pulse trước khi tương tác.
+**Lumo:** “Ba bia nằm trong khoảng đất trống phía trước. Dùng SPACE gần bia để soi nét khắc, rồi chạm bia sáng bằng E.”
 
 ## 4. Câu đố chính — Trăng, Lá, Sao
 
@@ -45,7 +42,7 @@ Ký hiệu thấy được lưu vào sổ. Khi hiệu ứng Pulse hết, thông 
 
 *Sau bia đúng đầu tiên:*
 
-**Nhinh:** “Âm thanh này khác lúc thử.”\
+**Nhinh:** “Xung sáng làm nét khắc hiện rõ. Bia vừa đáp lại.”\
 **Lumo:** “Một tiếng gọi đã được nghe thấy.”
 
 *Sau bia đúng thứ hai:*
@@ -79,7 +76,7 @@ Chỉ đặt lại chuỗi bia; không xóa ký hiệu, bài thơ hoặc thông 
 
 Sau khi cổng mở, tương tác với bia: **Nhinh:** “Chúng vẫn sáng. Đường này sẽ còn mở cho người đến sau.”
 
-- **Mức 1 — quan sát:** “Đàn đom đóm dừng ở ba bia theo một đường cố định. Bài thơ cạnh cổng cũng nhắc ba hình.”
+- **Mức 1 — quan sát:** “Đàn đom đóm dừng ở ba bia theo một đường cố định. Mẩu thơ ở lối vào cũng nhắc ba hình.”
 - **Mức 2 — quan hệ:** “Thứ tự trong bài thơ trùng với đường bay. Hãy dùng Pulse để biết bia nào mang hình nào.”
 - **Mức 3 — bước tiếp:** “Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.”
 
