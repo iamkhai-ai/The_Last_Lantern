@@ -119,7 +119,7 @@ export class LibraryLevel {
   }
 
   public getObjectiveText(): string {
-    if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'Bước vào ô giữa giếng và nhận Tinh thể Ký Ức bằng E.';
+    if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'Đứng ở mép nam bệ giữa và nhận Tinh thể Ký Ức bằng E.';
     if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'Đọc bức tranh sau vách rễ bằng E.';
     if (this.isExitOpen()) return 'Tới lối phía Đông và nhấn E.';
     if (!this.progress.flags['l2-book-practice']) return 'Đọc trang thử bằng E, rồi đổi đèn bằng F.';
@@ -146,7 +146,7 @@ export class LibraryLevel {
       book: ['Trang sách ở bàn cho thấy mực thay đổi khi cậu tắt đèn.', 'Trang có hai lớp hình chồng lên nhau.', 'Đứng cạnh sách và nhấn E khi đèn bật, rồi thử lại khi đèn tắt.'],
       clues: ['Mỗi phiến có thể được đọc dưới cả hai trạng thái đèn.', 'Bật đèn để nhận ra thiên thể và vị trí. Tắt đèn để xem đường chuyển động.', 'Hốc phía trên giếng khắc hình mặt trời mọc — đó là điểm bắt đầu. Đặt Chim, Lá, Thuyền rồi Hạt theo chiều kim đồng hồ.'],
       arrange: ['Hốc phía trên giếng (khắc hình mặt trời) là điểm bắt đầu của vòng.', 'Lần theo các mũi tên quanh giếng theo chiều kim đồng hồ.', 'Từ hốc mặt trời, đặt Chim, Lá, Thuyền rồi Hạt; xong thì kiểm tra ở bệ giữa.'],
-      crystal: ['Giếng đã mở ở giữa vòng.', 'Bước vào ô giữa giếng để tới tinh thể.', 'Nhấn E tại bệ giữa để nhận Tinh thể Ký Ức.'],
+      crystal: ['Giếng đã mở ở giữa vòng.', 'Đứng ở mép phía nam của bệ giữa để tới tinh thể.', 'Nhấn E tại bệ giữa để nhận Tinh thể Ký Ức.'],
       mural: ['Ánh sáng đã mở vách sau rễ cây.', 'Tới trước tấm vách ở phía đông bắc.', 'Đứng trước vách và nhấn E để đọc bức tranh thứ năm.'],
       exit: ['Đường rễ cây dẫn ra phía đông.', 'Lối đi nằm dưới bức tranh thứ năm.', 'Tới cổng ở góc đông nam và nhấn E để đi tiếp.'],
     };
@@ -303,13 +303,12 @@ export class LibraryLevel {
       onInteract: () => this.interactWithSeat(seatIndex),
       isEnabled: () => true,
     }));
-    this.register({ id: 'library-confirm', x: LIBRARY_LAYOUT.core.x, y: LIBRARY_LAYOUT.core.y, radius: 40,
-      getPrompt: () => this.isPlayerInCell(LIBRARY_LAYOUT.core, LIBRARY_CELL_HALF)
-        ? (this.progress.flags['l2-memory'] ? 'Vòng ngày đêm đã phục hồi' : 'E · Kiểm tra vòng ngày đêm') : '',
+    this.register({ id: 'library-confirm', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: 22,
+      getPrompt: () => this.progress.flags['l2-memory'] ? 'Vòng ngày đêm đã phục hồi' : 'E · Kiểm tra vòng ngày đêm',
       getPromptBounds: () => ({ x: 314, y: 182, width: 12, height: 12 }),
       onInteract: () => this.checkMemory(), isEnabled: () => this.progress.flags['l2-memory'] !== true });
-    this.register({ id: 'library-crystal', x: LIBRARY_LAYOUT.core.x, y: LIBRARY_LAYOUT.core.y, radius: 40,
-      getPrompt: () => this.isPlayerInCell(LIBRARY_LAYOUT.core, LIBRARY_CELL_HALF) ? 'E · Nhận Tinh thể Ký Ức' : '',
+    this.register({ id: 'library-crystal', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: 22,
+      getPrompt: () => 'E · Nhận Tinh thể Ký Ức',
       getPromptBounds: () => this.objects.find((object) => object.getData('library-crystal') === true) instanceof Phaser.GameObjects.Image
         ? (this.objects.find((object) => object.getData('library-crystal') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.collectCrystal(), isEnabled: () => this.progress.flags['l2-memory'] === true && this.progress.flags['l2-crystal'] !== true });
