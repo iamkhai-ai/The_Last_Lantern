@@ -2505,9 +2505,7 @@ export class CampaignScene extends Phaser.Scene {
       };
       const choices=hints[step],message=choices[Math.min(this.hintIndex,choices.length-1)];this.hintIndex=Math.min(this.hintIndex+1,choices.length-1);this.say([{speaker:'Hệ thống',text:message}]);return;
     }
-    const hints = this.progress.level === 9 && this.progress.flags['l9-roots']
-      ? (this.progress.flags['l9-overload'] ? ['Tắt đèn bằng F để giải phóng nguồn sáng đang quá tải.'] : ['Nhận lại đèn ở bệ dẫn sáng để đưa nguồn sáng trở về tay Nhinh.', 'Khi ánh sáng dâng quá ngưỡng, nhấn F để tắt đèn và khép vòng.'])
-      : CAMPAIGN_LEVELS[this.progress.level].hint;
+    const hints = CAMPAIGN_LEVELS[this.progress.level].hint;
     const message = hints[Math.min(this.hintIndex, hints.length - 1)];
     this.hintIndex = Math.min(this.hintIndex + 1, hints.length - 1);
     this.say([{ speaker: 'Hệ thống', text: message }]);
