@@ -1,9 +1,14 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { inflateSync } from 'node:zlib';
 import {
   canLatchRuinsSanctuary, deriveRuinsPracticeState, deriveRuinsPuzzleState, getRuinsExitBlock, getRuinsSolid,
-  getRuinsStage, isRuinsExitReady, isRuinsPositionSafe, resolveRuinsSpawn, RUINS_BLOCKERS, RUINS_BODY,
-  RUINS_CHECKPOINTS, RUINS_FLOOR, RUINS_MIRROR_SOLUTION, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_SHADOW_QUADS,
-  RUINS_SPAWN, RUINS_STANDS, RUINS_STATUE_SOLUTION, RUINS_WALLS, ruinsActorBody, ruinsPointInQuad, ruinsQuadContainsRect,
+  getRuinsStage, isRuinsExitReady, isRuinsMainPuzzleEngaged, isRuinsPositionSafe, resolveRuinsSpawn, RUINS_BEAMS,
+  RUINS_BLOCKERS, RUINS_BODY,
+  RUINS_CHECKPOINTS, RUINS_ENTRY_COUNTERS, RUINS_FLOOR, RUINS_MIRROR_SOLUTION, RUINS_MIRROR_STATES, RUINS_PRACTICE,
+  RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH, RUINS_SHADOW_OVERLAY, RUINS_SHADOW_QUADS, RUINS_SOLVED_CONFIGURATION,
+  RUINS_SPAWN, RUINS_STANDS, RUINS_STATUE_SOLUTION, RUINS_WALL_FIXTURES, RUINS_WALLS, ruinsActorBody, ruinsDepthAt,
+  ruinsNormalizeCounters, ruinsPointInQuad, ruinsQuadContainsRect,
   ruinsRectsOverlap, ruinsSegmentIntersectsQuad,
 } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 
@@ -285,14 +290,31 @@ assert.equal(isRuinsExitReady({ latched: true, lanternRetrieved: true, metShadow
 assert.equal(isRuinsExitReady({ latched: true, lanternRetrieved: true, metShadow: true }), true, 'the exit opens on the scenario completion conditions');
 
 // The staging that drives objective text and hints follows the same live state.
-assert.equal(getRuinsStage({ practiceSeen: false, lanternPlaced: false, puzzle: solvedState, latched: false, lanternRetrieved: false, metShadow: false }), 'practice');
-assert.equal(getRuinsStage({ practiceSeen: true, lanternPlaced: false, puzzle: solvedState, latched: false, lanternRetrieved: false, metShadow: false }), 'place');
-assert.equal(getRuinsStage({ practiceSeen: true, lanternPlaced: true, puzzle: deriveRuinsPuzzleState({ ...solved, statue: 1 }), latched: false, lanternRetrieved: false, metShadow: false }), 'moon');
-assert.equal(getRuinsStage({ practiceSeen: true, lanternPlaced: true, puzzle: deriveRuinsPuzzleState({ ...solved, leftMirror: 2 }), latched: false, lanternRetrieved: false, metShadow: false }), 'suns');
-assert.equal(getRuinsStage({ practiceSeen: true, lanternPlaced: true, puzzle: solvedState, latched: false, lanternRetrieved: false, metShadow: false }), 'confirm');
-assert.equal(getRuinsStage({ practiceSeen: true, lanternPlaced: true, puzzle: solvedState, latched: true, lanternRetrieved: false, metShadow: false }), 'retrieve');
-assert.equal(getRuinsStage({ practiceSeen: true, lanternPlaced: false, puzzle: solvedState, latched: true, lanternRetrieved: true, metShadow: false }), 'shadow');
-assert.equal(getRuinsStage({ practiceSeen: true, lanternPlaced: false, puzzle: solvedState, latched: true, lanternRetrieved: true, metShadow: true }), 'exit');
+const stage = (over) => getRuinsStage({
+  practiceSeen: true, lanternPlaced: false, puzzle: solvedState, latched: false,
+  lanternRetrieved: false, metShadow: false, mainPuzzleEngaged: true, ...over,
+});
+assert.equal(stage({ practiceSeen: false, mainPuzzleEngaged: false }), 'practice');
+assert.equal(stage({ practiceSeen: false, mainPuzzleEngaged: true }), 'place',
+  'a player who walks past the practice forecourt is no longer held on the tutorial objective');
+assert.equal(stage({ practiceSeen: false, mainPuzzleEngaged: true, latched: true, lanternPlaced: true }), 'retrieve',
+  'the tutorial stage never overrides the latched/retrieve flow');
+assert.equal(stage({ practiceSeen: true, lanternPlaced: false }), 'place');
+assert.equal(stage({ practiceSeen: true, lanternPlaced: true, puzzle: deriveRuinsPuzzleState({ ...solved, statue: 1 }) }), 'moon');
+assert.equal(stage({ practiceSeen: true, lanternPlaced: true, puzzle: deriveRuinsPuzzleState({ ...solved, leftMirror: 2 }) }), 'suns');
+assert.equal(stage({ practiceSeen: true, lanternPlaced: true, puzzle: solvedState }), 'confirm');
+assert.equal(stage({ practiceSeen: true, lanternPlaced: true, puzzle: solvedState, latched: true, lanternRetrieved: false }), 'retrieve');
+assert.equal(stage({ practiceSeen: true, lanternPlaced: false, puzzle: solvedState, latched: true, lanternRetrieved: true }), 'shadow');
+assert.equal(stage({ practiceSeen: true, lanternPlaced: false, puzzle: solvedState, latched: true, lanternRetrieved: true, metShadow: true }), 'exit');
+
+// The tutorial is released exactly when the player reaches the main puzzle.
+assert.equal(isRuinsMainPuzzleEngaged({ lanternPlaced: false, statue: 1, leftMirror: 3, rightMirror: 2 }), false,
+  'a fresh save has not engaged the main puzzle');
+assert.equal(isRuinsMainPuzzleEngaged({ lanternPlaced: true, statue: 1, leftMirror: 3, rightMirror: 2 }), true);
+for (const [statue, left, right] of [[0, 3, 2], [1, 0, 2], [1, 3, 1]]) {
+  assert.equal(isRuinsMainPuzzleEngaged({ lanternPlaced: false, statue, leftMirror: left, rightMirror: right }), true,
+    `statue ${statue} / mirrors ${left},${right} counts as engaged`);
+}
 
 /* -------------------------------------------------------------------------- */
 /* 11. v1 save compatibility with the existing `l7-` flags                     */
@@ -321,5 +343,287 @@ assert.equal(deriveRuinsPuzzleState({
 // And the safe restore of a legacy save never lands in a solid.
 assert.equal(safe(resolveRuinsSpawn({ x: 120, y: 205 }, { exitReady: false })), true,
   'a legacy saved coordinate resolves to a walkable centre');
+
+// A committed latch keeps the configuration that solved the temple (scenario §7), so a resumed
+// session re-derives the solution instead of showing a dark temple behind a latched ring.
+const resumed = { statue: 2, 'ruins-left': 2, 'ruins-right': 1 };
+ruinsNormalizeCounters({ 'l7-solved': true }, resumed);
+assert.deepEqual(resumed, {
+  statue: RUINS_SOLVED_CONFIGURATION.statue,
+  'ruins-left': RUINS_SOLVED_CONFIGURATION.leftMirror,
+  'ruins-right': RUINS_SOLVED_CONFIGURATION.rightMirror,
+  practice: RUINS_ENTRY_COUNTERS.practice,
+}, 'a latched save is restored onto the solving configuration');
+assert.equal(deriveRuinsPuzzleState({
+  lanternPlaced: true, lanternOn: true, statue: resumed.statue,
+  leftMirror: resumed['ruins-left'], rightMirror: resumed['ruins-right'],
+}).confirmReady, true, 'the restored configuration still reads as the live solved condition');
+// Snapping is not a shortcut past the puzzle: without the latch the counters keep the player's own values.
+const unlatched = { statue: 2, 'ruins-left': 2, 'ruins-right': 1 };
+ruinsNormalizeCounters({}, unlatched);
+assert.deepEqual(unlatched, { statue: 2, 'ruins-left': 2, 'ruins-right': 1, practice: RUINS_ENTRY_COUNTERS.practice },
+  'an unlatched save keeps its own (unsolved) configuration');
+assert.equal(deriveRuinsPuzzleState({
+  lanternPlaced: true, lanternOn: true, statue: unlatched.statue,
+  leftMirror: unlatched['ruins-left'], rightMirror: unlatched['ruins-right'],
+}).confirmReady, false, 'an unlatched save still has to be solved at the altar');
+// A fresh save lands on the entry values: nothing is pre-solved and nothing is pre-shadowed.
+const fresh = {};
+ruinsNormalizeCounters({}, fresh);
+assert.deepEqual(fresh, {
+  statue: RUINS_ENTRY_COUNTERS.statue, 'ruins-left': RUINS_ENTRY_COUNTERS.leftMirror,
+  'ruins-right': RUINS_ENTRY_COUNTERS.rightMirror, practice: RUINS_ENTRY_COUNTERS.practice,
+});
+assert.equal(deriveRuinsPracticeState({ practiceNotch: fresh.practice, lanternOn: true }).slabShadowed, false,
+  'a fresh save starts with the practice slab lit, so the lesson still has something to teach');
+assert.equal(deriveRuinsPuzzleState({
+  lanternPlaced: true, lanternOn: true, statue: fresh.statue,
+  leftMirror: fresh['ruins-left'], rightMirror: fresh['ruins-right'],
+}).confirmReady, false, 'a fresh save starts unsolved');
+
+/* -------------------------------------------------------------------------- */
+/* 12. the drawn shadow overlay is the tested shadow region                    */
+/* -------------------------------------------------------------------------- */
+
+const SPRITES = new URL('../assets/levels/08-ruins-of-two-halves/sprites/', import.meta.url);
+
+/** Minimal 8-bit PNG reader: alpha per pixel, so the drawn mask can be compared to the quad. */
+const readAlphaMask = (file, threshold = 8) => {
+  const buffer = readFileSync(file);
+  let offset = 8;
+  let width = 0; let height = 0; let bitDepth = 0; let colorType = 0; let interlace = 0;
+  let palette = null; let transparency = null;
+  const chunks = [];
+  while (offset < buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const name = buffer.toString('ascii', offset + 4, offset + 8);
+    const data = buffer.subarray(offset + 8, offset + 8 + length);
+    if (name === 'IHDR') {
+      width = data.readUInt32BE(0); height = data.readUInt32BE(4);
+      bitDepth = data[8]; colorType = data[9]; interlace = data[12];
+    } else if (name === 'IDAT') chunks.push(data);
+    else if (name === 'PLTE') palette = data;
+    else if (name === 'tRNS') transparency = data;
+    else if (name === 'IEND') break;
+    offset += 12 + length;
+  }
+  assert.equal(bitDepth, 8, `${file} is an 8-bit PNG`);
+  assert.equal(interlace, 0, `${file} is not interlaced`);
+  const channels = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[colorType];
+  assert.ok(channels, `${file} has a readable colour type (${colorType})`);
+  const raw = inflateSync(Buffer.concat(chunks));
+  const stride = width * channels;
+  const out = Buffer.alloc(stride * height);
+  let cursor = 0;
+  for (let y = 0; y < height; y += 1) {
+    const filter = raw[cursor]; cursor += 1;
+    const line = raw.subarray(cursor, cursor + stride); cursor += stride;
+    const previous = y === 0 ? null : out.subarray((y - 1) * stride, y * stride);
+    const current = out.subarray(y * stride, (y + 1) * stride);
+    for (let x = 0; x < stride; x += 1) {
+      const a = x >= channels ? current[x - channels] : 0;
+      const b = previous ? previous[x] : 0;
+      const c = previous && x >= channels ? previous[x - channels] : 0;
+      let value = line[x];
+      if (filter === 1) value = (value + a) & 255;
+      else if (filter === 2) value = (value + b) & 255;
+      else if (filter === 3) value = (value + ((a + b) >> 1)) & 255;
+      else if (filter === 4) {
+        const p = a + b - c;
+        const pa = Math.abs(p - a); const pb = Math.abs(p - b); const pc = Math.abs(p - c);
+        value = (value + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c)) & 255;
+      }
+      current[x] = value;
+    }
+  }
+  const alphaAt = (x, y) => {
+    const i = y * stride + x * channels;
+    if (colorType === 6) return out[i + 3];
+    if (colorType === 4) return out[i + 1];
+    if (colorType === 3) return transparency && transparency[out[i]] !== undefined ? transparency[out[i]] : 255;
+    if (colorType === 0) return transparency && out[i] === 0 ? 0 : 255;
+    return 255;
+  };
+  const rowSpans = [];
+  let minX = Infinity; let minY = Infinity; let maxX = -1; let maxY = -1; let count = 0;
+  for (let y = 0; y < height; y += 1) {
+    let first = -1; let last = -1;
+    for (let x = 0; x < width; x += 1) {
+      if (alphaAt(x, y) > threshold) {
+        count += 1;
+        if (first < 0) first = x;
+        last = x;
+        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+      }
+    }
+    rowSpans.push([first, last]);
+  }
+  return { width, height, alphaAt, rowSpans, minX, minY, maxX, maxY, count, palette };
+};
+
+const quadEdgeAt = (quad, y) => {
+  const [tl, tr, br, bl] = quad.points;
+  const t = (y - tl.y) / (bl.y - tl.y);
+  return [tl.x + (bl.x - tl.x) * t, tr.x + (br.x - tr.x) * t];
+};
+
+for (const [notch, quad] of RUINS_SHADOW_QUADS.entries()) {
+  const mask = readAlphaMask(new URL(`shadow-notch-${notch}.png`, SPRITES));
+  assert.equal(mask.width, 640, `shadow-notch-${notch} is a full 640px-wide overlay`);
+  assert.equal(mask.height, 360, `shadow-notch-${notch} is a full 360px-tall overlay`);
+  // The authored quad is the drawn mask, not an approximation of it.
+  const quadBox = {
+    minX: Math.min(...quad.points.map((point) => point.x)),
+    minY: Math.min(...quad.points.map((point) => point.y)),
+    maxX: Math.max(...quad.points.map((point) => point.x)),
+    maxY: Math.max(...quad.points.map((point) => point.y)),
+  };
+  assert.deepEqual(
+    { minX: mask.minX, minY: mask.minY, maxX: mask.maxX, maxY: mask.maxY },
+    quadBox,
+    `notch ${notch}: the shadow quad is the drawn overlay's bounding box`,
+  );
+  for (let y = mask.minY; y <= mask.maxY; y += 1) {
+    const [left, right] = quadEdgeAt(quad, y);
+    const [drawnLeft, drawnRight] = mask.rowSpans[y];
+    assert.ok(Math.abs(drawnLeft - left) <= 1.5, `notch ${notch}: row ${y} left edge ${drawnLeft} matches the quad ${left.toFixed(1)}`);
+    assert.ok(Math.abs(drawnRight - right) <= 1.5, `notch ${notch}: row ${y} right edge ${drawnRight} matches the quad ${right.toFixed(1)}`);
+  }
+  // The overlay must actually darken the receivers rather than be a transparent decal.
+  const centroid = quad.points.reduce((acc, point) => ({ x: acc.x + point.x / 4, y: acc.y + point.y / 4 }), { x: 0, y: 0 });
+  const probe = mask.alphaAt(Math.round(centroid.x), Math.round(centroid.y));
+  assert.ok(probe > 128, `notch ${notch}: the drawn shadow is opaque (alpha ${probe} at its centre)`);
+}
+
+// Only the solving orientation paints the middle Moon eye, and it paints neither outer Sun eye.
+const solutionMask = readAlphaMask(new URL(`shadow-notch-${RUINS_STATUE_SOLUTION}.png`, SPRITES));
+const maskCoversRect = (mask, rect) => {
+  for (let y = rect.y; y < rect.y + rect.height; y += 1) {
+    for (let x = rect.x; x < rect.x + rect.width; x += 1) if (mask.alphaAt(x, y) <= 8) return false;
+  }
+  return true;
+};
+const maskTouchesRect = (mask, rect) => {
+  for (let y = rect.y; y < rect.y + rect.height; y += 1) {
+    for (let x = rect.x; x < rect.x + rect.width; x += 1) if (mask.alphaAt(x, y) > 8) return true;
+  }
+  return false;
+};
+assert.equal(maskCoversRect(solutionMask, RUINS_RECEIVERS.moon), true,
+  'the solving shadow paints the whole middle Moon receiver');
+assert.equal(maskTouchesRect(solutionMask, RUINS_RECEIVERS.left), false,
+  'the solving shadow never paints the outer left Sun receiver');
+assert.equal(maskTouchesRect(solutionMask, RUINS_RECEIVERS.right), false,
+  'the solving shadow never paints the outer right Sun receiver');
+for (const notch of [1, 2, 3]) {
+  const mask = readAlphaMask(new URL(`shadow-notch-${notch}.png`, SPRITES));
+  assert.equal(maskCoversRect(mask, RUINS_RECEIVERS.moon), false, `notch ${notch} leaves the Moon receiver lit`);
+}
+// The overlay sits above the receivers and the beams and below every standing prop, so the shadow
+// genuinely darkens what it covers and the statue never hides its own shadow's contact edge.
+assert.ok(RUINS_RECEIVER_DEPTH < RUINS_SHADOW_OVERLAY.depth, 'the shadow is drawn above the receivers');
+assert.ok(RUINS_BEAMS.depth < RUINS_SHADOW_OVERLAY.depth, 'the shadow is drawn above the beams');
+for (const prop of Object.values(RUINS_PROPS)) {
+  assert.ok(ruinsDepthAt(prop.groundAnchor.y) > RUINS_SHADOW_OVERLAY.depth,
+    `${prop.id} is drawn above the shadow overlay`);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 13. RULE_GAMES §1 — a control only answers from the object's south edge      */
+/* -------------------------------------------------------------------------- */
+
+const artBoxes = {};
+for (const prop of Object.values(RUINS_PROPS)) {
+  artBoxes[prop.stand.id] = {
+    x: prop.artCenter.x - prop.artWidth / 2, y: prop.artCenter.y - prop.artHeight / 2,
+    width: prop.artWidth, height: prop.artHeight,
+  };
+}
+for (const fixture of RUINS_WALL_FIXTURES) {
+  artBoxes[fixture.stand.id] = {
+    x: fixture.artCenter.x - fixture.artWidth / 2, y: fixture.artCenter.y - fixture.artHeight / 2,
+    width: fixture.artWidth, height: fixture.artHeight,
+  };
+}
+
+for (const stand of RUINS_STANDS) {
+  const art = artBoxes[stand.id];
+  const artBottom = art.y + art.height;
+  let fromAbove = 0; let fromBeside = 0; let fromSouth = 0;
+  const reach = Math.ceil(stand.radius) + 1;
+  for (let y = stand.y - reach; y <= stand.y + reach; y += 1) {
+    for (let x = stand.x - reach; x <= stand.x + reach; x += 1) {
+      if (Math.hypot(x - stand.x, y - stand.y) > stand.radius) continue;
+      if (!safe({ x, y })) continue;
+      const body = ruinsActorBody({ x, y });
+      const overlapsArtX = body.x + body.width > art.x && body.x < art.x + art.width;
+      if (body.y + body.height <= artBottom) fromAbove += 1;
+      else if (!overlapsArtX) fromBeside += 1;
+      else fromSouth += 1;
+    }
+  }
+  assert.ok(fromSouth > 0, `${stand.id}: the control is reachable from its own south edge`);
+  assert.equal(fromAbove, 0,
+    `${stand.id}: no walkable position above the object's art bottom can reach the trigger (radius ${stand.radius})`);
+  assert.equal(fromBeside, 0,
+    `${stand.id}: no walkable position beside the object's art span can reach the trigger (radius ${stand.radius})`);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 14. every solid tracks the art a player can see                             */
+/* -------------------------------------------------------------------------- */
+
+const artFiles = {
+  statue: 'statue-notch-0.png',
+  'mirror-left': null,
+  'mirror-right': null,
+  'practice-column': 'test-pedestal.png',
+  'seedling-bed': 'seedling-curtain-open.png',
+};
+for (const [id, file] of Object.entries(artFiles)) {
+  const prop = RUINS_PROPS[id];
+  const solid = getRuinsSolid(id);
+  if (!file) {
+    // The mirrors are the shared 36x48 cards from `src/assets`; each state is fully opaque.
+    const shared = readAlphaMask(new URL(`../src/assets/mirror_${RUINS_MIRROR_SOLUTION[id === 'mirror-left' ? 'left' : 'right']}.png`, import.meta.url));
+    assert.equal(shared.width, prop.artWidth, `${id}: shared mirror art width matches the declared art`);
+    assert.equal(shared.height, prop.artHeight, `${id}: shared mirror art height matches the declared art`);
+    continue;
+  }
+  const mask = readAlphaMask(new URL(file, SPRITES));
+  assert.equal(mask.width, prop.artWidth, `${id}: drawn art width matches the declared art`);
+  assert.equal(mask.height, prop.artHeight, `${id}: drawn art height matches the declared art`);
+  const artLeft = prop.artCenter.x - prop.artWidth / 2;
+  const artTop = prop.artCenter.y - prop.artHeight / 2;
+  const overhangTop = solid.y - (artTop + mask.minY);
+  const overhangBottom = (artTop + mask.maxY) - (solid.y + solid.height);
+  const overhangLeft = solid.x - (artLeft + mask.minX);
+  const overhangRight = (artLeft + mask.maxX) - (solid.x + solid.width);
+  assert.ok(overhangTop <= 8 && overhangBottom <= 4, `${id}: the solid tracks the art vertically (top ${overhangTop}, bottom ${overhangBottom})`);
+  assert.ok(overhangLeft <= 1 && overhangRight <= 1, `${id}: the solid tracks the art horizontally (left ${overhangLeft}, right ${overhangRight})`);
+}
+// The composite practice column: the pedestal carries the collision while the column art rises out
+// of it, and every wide/narrow face still sits inside the composite silhouette the player sees.
+for (const notch of [0, 1, 2, 3]) {
+  const column = readAlphaMask(new URL(`test-column-notch-${notch}.png`, SPRITES));
+  const artLeft = RUINS_PROPS['practice-column'].overlay.artCenter.x - RUINS_PROPS['practice-column'].overlay.artWidth / 2;
+  const artTop = RUINS_PROPS['practice-column'].overlay.artCenter.y - RUINS_PROPS['practice-column'].overlay.artHeight / 2;
+  const solid = getRuinsSolid('practice-column');
+  assert.ok(artLeft + column.minX >= solid.x - 8 && artLeft + column.maxX <= solid.x + solid.width + 8,
+    `practice column notch ${notch} stays within the composite base width`);
+  assert.ok(artTop + column.maxY >= solid.y, `practice column notch ${notch} reaches down into the solid base`);
+}
+// Procedurally drawn props have no PNG to measure; their solid must at least stay inside the art box.
+for (const id of ['pedestal', 'shadow-npc']) {
+  const prop = RUINS_PROPS[id];
+  const solid = getRuinsSolid(id);
+  const artLeft = prop.artCenter.x - prop.artWidth / 2;
+  const artTop = prop.artCenter.y - prop.artHeight / 2;
+  assert.ok(solid.x >= artLeft && solid.x + solid.width <= artLeft + prop.artWidth,
+    `${id}: the solid is inside the drawn art box horizontally`);
+  assert.ok(solid.y >= artTop && solid.y + solid.height <= artTop + prop.artHeight,
+    `${id}: the solid is inside the drawn art box vertically`);
+}
 
 console.log('Level 08 geometry/state checks passed.');

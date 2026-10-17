@@ -231,6 +231,67 @@ export const RUINS_BEAMS = {
 export const RUINS_MIRROR_SOLUTION: Record<RuinsSide, number> = { left: 1, right: 0 };
 export const RUINS_MIRROR_STATES = 4;
 
+/**
+ * Entry counters for a fresh or legacy save. The mirrors start on the two "plank" faces
+ * (`mirror_3` upright, `mirror_2` flat) so neither branch is aimed, and the statue starts
+ * edge-on so the Moon lock is outside its shadow. Nothing is pre-solved on arrival.
+ */
+export const RUINS_ENTRY_COUNTERS = {
+  statue: RUINS_STATUE_START_NOTCH,
+  leftMirror: 3,
+  rightMirror: 2,
+  practice: RUINS_PRACTICE.startNotch,
+} as const;
+
+/**
+ * The configuration that produced the scenario's simultaneous condition. Once the latch is
+ * committed the scenario asks for it to be kept ("Giữ cấu hình tượng, gương, màn che và cửa Bắc"),
+ * so a resumed session re-derives the live state from this configuration instead of from a stale
+ * counter that would leave the three locks dark behind an already-latched ring.
+ */
+export const RUINS_SOLVED_CONFIGURATION = {
+  statue: RUINS_STATUE_SOLUTION,
+  leftMirror: RUINS_MIRROR_SOLUTION.left,
+  rightMirror: RUINS_MIRROR_SOLUTION.right,
+} as const;
+
+/** Writes the solved statue/mirror configuration into a progress counter bag. */
+export function ruinsSnapSolvedConfiguration(counters: Record<string, number>): void {
+  counters['statue'] = RUINS_SOLVED_CONFIGURATION.statue;
+  counters['ruins-left'] = RUINS_SOLVED_CONFIGURATION.leftMirror;
+  counters['ruins-right'] = RUINS_SOLVED_CONFIGURATION.rightMirror;
+}
+
+/**
+ * Brings a saved counter bag onto this level's entry values, and — only when the latch is already
+ * committed — onto the configuration that solved the temple. Reading the latch from either of the
+ * two durable flag names keeps a v1 save that only carries `l7-solved` working unchanged.
+ */
+export function ruinsNormalizeCounters(
+  flags: Record<string, boolean | string>,
+  counters: Record<string, number>,
+): void {
+  counters['statue'] = ruinsNormalizeNotch(counters['statue'] ?? RUINS_ENTRY_COUNTERS.statue);
+  counters['ruins-left'] = ruinsNormalizeNotch(counters['ruins-left'] ?? RUINS_ENTRY_COUNTERS.leftMirror);
+  counters['ruins-right'] = ruinsNormalizeNotch(counters['ruins-right'] ?? RUINS_ENTRY_COUNTERS.rightMirror);
+  counters['practice'] = ruinsNormalizeNotch(counters['practice'] ?? RUINS_ENTRY_COUNTERS.practice);
+  if (flags['l7-route-latched'] === true || flags['l7-solved'] === true) ruinsSnapSolvedConfiguration(counters);
+}
+
+/**
+ * True as soon as the player has touched the main puzzle, so the tutorial objective stops
+ * nagging someone who walked past the practice forecourt straight to the pedestal.
+ * The practice lesson still teaches whoever follows the intended order.
+ */
+export function isRuinsMainPuzzleEngaged(input: {
+  lanternPlaced: boolean; statue: number; leftMirror: number; rightMirror: number;
+}): boolean {
+  return input.lanternPlaced
+    || ruinsNormalizeNotch(input.statue) !== RUINS_ENTRY_COUNTERS.statue
+    || ruinsNormalizeNotch(input.leftMirror) !== RUINS_ENTRY_COUNTERS.leftMirror
+    || ruinsNormalizeNotch(input.rightMirror) !== RUINS_ENTRY_COUNTERS.rightMirror;
+}
+
 /* -------------------------------------------------------------------------- */
 /* Pure geometry helpers                                                      */
 /* -------------------------------------------------------------------------- */
@@ -407,8 +468,10 @@ export type RuinsStage = 'practice' | 'place' | 'suns' | 'moon' | 'confirm' | 'r
 export function getRuinsStage(state: {
   practiceSeen: boolean; lanternPlaced: boolean; puzzle: RuinsPuzzleState;
   latched: boolean; lanternRetrieved: boolean; metShadow: boolean;
+  /** the player has already touched the main puzzle, so the tutorial stage no longer applies */
+  mainPuzzleEngaged: boolean;
 }): RuinsStage {
-  if (!state.practiceSeen) return 'practice';
+  if (!state.practiceSeen && !state.mainPuzzleEngaged) return 'practice';
   if (state.metShadow) return 'exit';
   if (state.latched) {
     if (!state.lanternRetrieved) return 'retrieve';

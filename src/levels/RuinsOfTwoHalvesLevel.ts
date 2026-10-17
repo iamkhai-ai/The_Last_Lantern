@@ -10,10 +10,11 @@ import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
   canLatchRuinsSanctuary, deriveRuinsPracticeState, deriveRuinsPuzzleState, getRuinsExitBlock, getRuinsSolid,
-  getRuinsStage, isRuinsExitReady, resolveRuinsSpawn, RUINS_BEAMS, RUINS_CONDUIT, RUINS_DEPTH, RUINS_FOOT_PLACEMENT,
+  getRuinsStage, isRuinsExitReady, isRuinsMainPuzzleEngaged, resolveRuinsSpawn, RUINS_BEAMS, RUINS_CONDUIT,
+  RUINS_DEPTH, RUINS_FOOT_PLACEMENT,
   RUINS_MIRROR_STATES, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
-  RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_STATUE_START_NOTCH, RUINS_WALL_FIXTURES,
-  RUINS_WALLS, ruinsDepthAt,
+  RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
+  RUINS_WALLS, ruinsDepthAt, ruinsNormalizeCounters,
   ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsStage,
 } from '../data/ruinsOfTwoHalvesLayout';
 
@@ -212,11 +213,11 @@ export class RuinsOfTwoHalvesLevel {
   /* ---------------------------------------------------------------------- */
 
   private normalizeProgress(): void {
-    const counters = this.progress.counters;
-    counters['statue'] = ruinsNormalizeNotch(counters['statue'] ?? RUINS_STATUE_START_NOTCH);
-    counters['ruins-left'] = ruinsNormalizeNotch(counters['ruins-left'] ?? 3);
-    counters['ruins-right'] = ruinsNormalizeNotch(counters['ruins-right'] ?? 2);
-    counters['practice'] = ruinsNormalizeNotch(counters['practice'] ?? RUINS_PRACTICE.startNotch);
+    // Counter defaults, and — once the latch is committed — the configuration that solved the temple
+    // ("Giữ cấu hình tượng, gương, màn che và cửa Bắc", scenario §7). A resumed session therefore
+    // re-derives its live state from the solved configuration, so the three receivers still read the
+    // way the player left them instead of showing a dark temple behind an already-latched ring.
+    ruinsNormalizeCounters(this.progress.flags, this.progress.counters);
     // A committed latch always keeps `l7-solved` and the slid curtain, whichever of the two flags a save carries.
     if (this.progress.flags['l7-route-latched'] === true) this.progress.flags['l7-solved'] = true;
     if (this.progress.flags['l7-solved'] === true) this.progress.flags['l7-route-latched'] = true;
@@ -256,6 +257,12 @@ export class RuinsOfTwoHalvesLevel {
       latched: this.progress.flags['l7-route-latched'] === true,
       lanternRetrieved: this.progress.flags['l7-lantern-retrieved'] === true || !this.lantern.lanternPlaced,
       metShadow: this.progress.flags['l7-met-shadow'] === true,
+      mainPuzzleEngaged: isRuinsMainPuzzleEngaged({
+        lanternPlaced: this.lantern.lanternPlaced,
+        statue: this.progress.counters['statue'] ?? 0,
+        leftMirror: this.progress.counters['ruins-left'] ?? 0,
+        rightMirror: this.progress.counters['ruins-right'] ?? 0,
+      }),
     });
   }
 
@@ -265,9 +272,11 @@ export class RuinsOfTwoHalvesLevel {
     this.lantern.placedY = 0;
     if (this.progress.flags['l7-lantern-placed'] !== true) return;
     if (this.progress.flags['l7-lantern-retrieved'] === true) return;
-    const savedLampOn = this.progress.lanternOn;
+    // A lamp sitting on the altar is lit by construction: `placeLanternAt` turns it on and
+    // `LanternSystem.toggleLantern` refuses to switch it off while it is placed. Restoring a stale
+    // `lanternOn: false` would leave the lamp on the altar, switched off and impossible to relight
+    // ("Tắt đèn … hai Nhật mất sáng; không giải được"), so the invariant is enforced here.
     this.lantern.placeLanternAt(RUINS_PEDESTAL_LAMP.x, RUINS_PEDESTAL_LAMP.y);
-    this.lantern.lanternOn = savedLampOn;
   }
 
   /** Lumo follows the player through the scene's generic follower; this only fixes the entry position. */
@@ -613,10 +622,11 @@ export class RuinsOfTwoHalvesLevel {
   }
 
   private pedestalPrompt(): string {
+    const latched = this.progress.flags['l7-route-latched'] === true;
+    if (latched) return this.lantern.lanternPlaced ? 'E · Nhận lại đèn' : 'E · Bệ chính (đèn đã thu hồi)';
     if (!this.lantern.lanternPlaced) {
       return this.lantern.lanternInHand ? 'E · Đặt đèn lên bệ' : 'E · Bệ chính (cần đèn trong tay)';
     }
-    if (this.progress.flags['l7-route-latched'] === true) return 'E · Nhận lại đèn';
     return this.getPuzzleState().confirmReady ? 'E · Gài điện thờ' : 'E · Kiểm tra bàn xác nhận';
   }
 
@@ -666,6 +676,12 @@ export class RuinsOfTwoHalvesLevel {
   }
 
   private rotateMirror(side: 'left' | 'right'): void {
+    if (this.progress.flags['l7-route-latched'] === true) {
+      // Scenario §7 keeps the configuration that solved the temple. Turning a mirror now would
+      // drop a Sun receiver that the latched ring already accounts for.
+      this.say([{ speaker: 'Nhinh', text: 'Vòng trên bệ đã giữ. Hai gương đang đúng hướng, mình để nguyên vậy.' }]);
+      return;
+    }
     const key = side === 'left' ? 'ruins-left' : 'ruins-right';
     this.progress.counters[key] = (ruinsNormalizeNotch(this.progress.counters[key] ?? 0) + 1) % RUINS_MIRROR_STATES;
     this.save();
@@ -691,6 +707,22 @@ export class RuinsOfTwoHalvesLevel {
   }
 
   private usePedestal(): void {
+    if (this.progress.flags['l7-route-latched'] === true) {
+      if (this.lantern.lanternPlaced) {
+        this.lantern.retrieveLantern();
+        this.progress.lanternOn = true;
+        this.progress.flags['l7-lantern-placed'] = false;
+        this.progress.flags['l7-lantern-retrieved'] = true;
+        this.save();
+        this.refresh();
+        this.say([{ speaker: 'Nhinh', text: 'Đèn đã về tay. Tới The Shadow thôi.' }]);
+        return;
+      }
+      // The temple is already latched, so the lamp stays in hand: re-placing it would undo the
+      // scenario's retrieval step and re-lock the north door the player has already opened.
+      this.say([{ speaker: 'Nhinh', text: 'Điện thờ đã gài. Đèn ở trong tay rồi, mình tới The Shadow.' }]);
+      return;
+    }
     if (!this.lantern.lanternPlaced) {
       if (!this.lantern.lanternInHand) {
         this.say([{ speaker: 'Nhinh', text: 'Đèn không nằm trong tay. Mình cần tìm lại nó.' }]);
@@ -703,16 +735,6 @@ export class RuinsOfTwoHalvesLevel {
       this.save();
       this.refresh();
       this.say([{ speaker: 'Lumo', text: 'Bộ chia tia đã hiện đường nhánh. Hai nhánh bên đi qua hai gương.' }]);
-      return;
-    }
-    if (this.progress.flags['l7-route-latched'] === true) {
-      this.lantern.retrieveLantern();
-      this.progress.lanternOn = true;
-      this.progress.flags['l7-lantern-placed'] = false;
-      this.progress.flags['l7-lantern-retrieved'] = true;
-      this.save();
-      this.refresh();
-      this.say([{ speaker: 'Nhinh', text: 'Đèn đã về tay. Tới The Shadow thôi.' }]);
       return;
     }
     const state = this.getPuzzleState();
@@ -931,7 +953,14 @@ export class RuinsOfTwoHalvesLevel {
     const state = this.getPuzzleState();
     const latched = this.progress.flags['l7-route-latched'] === true;
     const ring = latched ? 'đã gài' : state.confirmReady ? 'sáng đều' : 'đang chờ';
-    return `Nhật ${state.sunsLit}/2 · Nguyệt ${state.moonDark ? 'tối' : 'sáng'} · Bệ ${ring} · Cửa Bắc ${latched ? 'mở' : 'khóa'}`;
+    // The door leaf is drawn open as soon as the ring latches, but leaving also needs the lamp back
+    // in hand and the Shadow conversation, so the row names whichever step is still outstanding.
+    const block = getRuinsExitBlock(this.getExitInput());
+    const north = block === undefined ? 'mở'
+      : block === 'lamp' ? 'mở · cần đèn'
+        : block === 'shadow' ? 'mở · chờ The Shadow'
+          : 'khóa';
+    return `Nhật ${state.sunsLit}/2 · Nguyệt ${state.moonDark ? 'tối' : 'sáng'} · Bệ ${ring} · Cửa Bắc ${north}`;
   }
 
   public showHint(): void {
