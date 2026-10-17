@@ -6,6 +6,7 @@ import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { LIBRARY_LAYOUT, resolveLibrarySpawn } from '../data/libraryLayout';
 import { LibraryLevel } from '../levels/LibraryLevel';
+import { PathForTwoLevel } from '../levels/PathForTwoLevel';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -89,6 +90,7 @@ export class CampaignScene extends Phaser.Scene {
   private woodsCueStage?: WoodsTutorialStage;
   private libraryLevel?: LibraryLevel;
   private shatteredCreek?: ShatteredCreekController;
+  private pathForTwoLevel?: PathForTwoLevel;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -173,6 +175,7 @@ export class CampaignScene extends Phaser.Scene {
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
       else if (this.progress.level === 8) this.showObservatoryJournal();
       else if (this.progress.level === 2) this.libraryLevel?.showJournal();
+      else if (this.progress.level === 4) this.pathForTwoLevel?.showJournal();
       else if (this.progress.level === 1) this.showRuneJournal();
       else if (this.progress.level === 0) this.showOpeningJournal();
     });
@@ -234,8 +237,8 @@ export class CampaignScene extends Phaser.Scene {
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
-    else this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
-    if (this.time.now - this.lastLumoSave >= 600) {
+    else if (this.progress.level !== 4) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+    if (this.progress.level !== 4 && this.time.now - this.lastLumoSave >= 600) {
       this.lastLumoSave = this.time.now;
       const x = Math.round(this.lumo.sprite.x);
       const y = Math.round(this.lumo.sprite.y);
@@ -247,7 +250,7 @@ export class CampaignScene extends Phaser.Scene {
         this.save();
       }
     }
-    if (this.time.now - this.lastPlayerSave >= 600) {
+    if (this.progress.level !== 4 && this.time.now - this.lastPlayerSave >= 600) {
       this.lastPlayerSave = this.time.now;
       const x = Math.round(this.player.x);
       const y = Math.round(this.player.y);
@@ -281,10 +284,12 @@ export class CampaignScene extends Phaser.Scene {
       [
         ...(this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : []),
         ...(this.libraryLevel?.getProtectedPromptBounds() ?? []),
+        ...(this.pathForTwoLevel?.getProtectedPromptBounds() ?? []),
       ],
     );
     this.libraryLevel?.update();
-    if (this.progress.level !== 3) {
+    this.pathForTwoLevel?.update(dt);
+    if (this.progress.level !== 3 && this.progress.level !== 4) {
       this.updatePuzzle(dt);
       this.updateCampaignCrossingState();
       this.updateCampaignBarriers();
@@ -355,6 +360,8 @@ export class CampaignScene extends Phaser.Scene {
     this.libraryLevel = undefined;
     this.shatteredCreek?.destroy();
     this.shatteredCreek = undefined;
+    this.pathForTwoLevel?.destroy();
+    this.pathForTwoLevel = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.memoryLayerLabels.clear();
@@ -363,11 +370,13 @@ export class CampaignScene extends Phaser.Scene {
     const level = this.progress.level;
     const definition = CAMPAIGN_LEVELS[level];
     this.selectedStone = -1;
-    if (level !== 2 && level !== 3) this.drawRoom(definition.biome);
-    this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-    this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-    this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
-    this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
+    if (level !== 2 && level !== 3 && level !== 4) this.drawRoom(definition.biome);
+    if (level !== 4) {
+      this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
+      this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
+      this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
+      this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
+    }
     this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
     if (level === 2) {
       this.controlsText = this.track(this.add.text(320, 344,
@@ -415,7 +424,7 @@ export class CampaignScene extends Phaser.Scene {
         this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true,
       );
       this.player.setPosition(spawn.x, spawn.y);
-    } else {
+    } else if (level !== 4) {
       this.player.setFootPlacement(0, 27);
       this.player.setPosition(
         overloadCheckpoint ? 130 : typeof savedPlayerX === 'number' ? Phaser.Math.Clamp(savedPlayerX, 24, 616) : defaultPlayerX,
@@ -452,6 +461,11 @@ export class CampaignScene extends Phaser.Scene {
         nextLevel: (lines) => this.nextLevel(lines),
       });
       this.libraryLevel.build();
+    } else if (level === 4) {
+      this.pathForTwoLevel = new PathForTwoLevel({ scene: this, progress: this.progress, player: this.player, lumo: this.lumo,
+        interactions: this.interactions, lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
+        nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen() });
+      this.pathForTwoLevel.build();
     } else {
       this.addNarrativeProps(level);
       this.registerLevel(level);
@@ -463,6 +477,7 @@ export class CampaignScene extends Phaser.Scene {
       if (level === 2) this.progress.flags['l2-inscription-read'] = true;
       this.save();
       if (level === 2) this.libraryLevel?.startOpeningDialogue();
+      else if (level === 4) this.pathForTwoLevel?.startOpeningDialogue();
       else {
         const woodsStage = level === 1 ? this.getWoodsTutorialStage() : undefined;
         const woodsDirection = woodsStage === 'exit' ? 'Cổng đã mở. Đi theo lối phía đông tới bậc thang.'
@@ -2427,6 +2442,7 @@ export class CampaignScene extends Phaser.Scene {
 
   private showHint(): void {
     if (this.progress.level === 2) { this.libraryLevel?.showHint(); return; }
+    if (this.progress.level === 4) { this.pathForTwoLevel?.showHint(); return; }
     if (this.progress.level === 0) {
       const step = this.getForestEdgeStep();
       if (this.forestEdgeHintStep !== step) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
@@ -2471,6 +2487,10 @@ export class CampaignScene extends Phaser.Scene {
   private refreshHud(): void {
     if (this.progress.level === 3) { this.shatteredCreek?.refreshHud(); return; }
     const level = CAMPAIGN_LEVELS[this.progress.level];
+    if (this.progress.level === 4 && this.pathForTwoLevel) {
+      if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về');
+      return;
+    }
     if (this.progress.level === 0) {
       const step = this.getForestEdgeStep();
       if (step !== this.forestEdgeHintStep) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
