@@ -76,18 +76,10 @@ export function insideLibraryFloor(center: LibraryPoint): boolean {
     && body.y >= LIBRARY_LAYOUT.floor.top && body.y + body.height <= LIBRARY_LAYOUT.floor.bottom;
 }
 
-export function isLibraryCoreBlocked(center: LibraryPoint): boolean {
-  const body = libraryActorBody(center);
-  const closestX = Math.max(body.x, Math.min(LIBRARY_LAYOUT.core.x, body.x + body.width));
-  const closestY = Math.max(body.y, Math.min(LIBRARY_LAYOUT.core.y, body.y + body.height));
-  return Math.hypot(LIBRARY_LAYOUT.core.x - closestX, LIBRARY_LAYOUT.core.y - closestY) < LIBRARY_LAYOUT.core.radius;
-}
-
 export function isLibraryPositionSafe(center: LibraryPoint, exitOpen: boolean): boolean {
   return insideLibraryFloor(center)
     && !LIBRARY_SOLID_RECTS.some((rect) => overlapsLibraryRect(center, rect))
-    && (exitOpen || !overlapsLibraryRect(center, LIBRARY_EXIT_THRESHOLD))
-    && !isLibraryCoreBlocked(center);
+    && (exitOpen || !overlapsLibraryRect(center, LIBRARY_EXIT_THRESHOLD));
 }
 
 export function resolveLibrarySpawn(saved: LibraryPoint | undefined, exitOpen: boolean): LibraryPoint {
