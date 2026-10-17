@@ -1,6 +1,6 @@
 # Level 05 — A Path for Two: spatial design
 
-Source: `docs/scenario/05-a-path-for-two.md`. Scope: Level 05 only (campaign index 4). Base: local main `6bc3c00`, which includes the accepted Level 03 merge; origin/main was `0446554` at intake. Level 04 is being implemented in another worktree. Vietnamese story and UI, English filenames, current character frames and existing PNG assets remain authoritative.
+Source: `docs/scenario/05-a-path-for-two.md`. Scope: Level 05 only (campaign index 4). Implementation base: `64d8e63`. Vietnamese story and UI, English filenames, current character frames and existing PNG assets remain authoritative.
 
 The user has delegated routine design decisions and asked for careful planning followed by Luna high implementation. This document records those decisions without another approval round.
 
@@ -18,7 +18,7 @@ Flow: entry → safe send/arrival/recall practice → send A → enter relay →
 - Draw stone floor from `ground_stone`, explicit masonry walls, existing pillars and Level 05 modules. Do not reuse the opaque scenic base as playable geometry: its baked intake, tanks and stairs contradict these rooms. Do not regenerate/edit PNGs or character frames. Keep native aspect ratio and nearest filtering.
 - Ground route, plates, ink and cables stay below feet (depth 0..7). Standing objects use 10+groundY/10. Door floor/base stays below Nhinh; header and side-post crops occlude only their actual visible strips. Never raise all actor sprites to hide layering errors. Label panels use measured prompt placement and protect current critical props and Lumo.
 
-Coordinates below use player centers for stands/spawns and ground anchors (bottom-center) for standing art. Native call=40×48, door=64×88, latch=28×32, pressure=44×28. A door centered x with base y has bounds [x-32,y-88,64,88], 10px permanent post strips, a 44px inner opening, and a conditional lower 30px threshold. Render and collide those exact strips; the header must not occlude the whole opening.
+Coordinates below use player centers for stands/spawns and ground anchors (bottom-center) for standing art. Native call=40×48, door=64×88, latch=28×32, pressure=44×28. A door centered x with base y has bounds [x-32,y-88,64,88], 10px permanent post strips, a 44px inner opening, and a conditional lower 30px threshold. Render and collide those exact strips; the header must not occlude the whole opening. The header is visual overhead masonry; only side posts and the powered threshold collide, so a reverse-side spawn or open practice gate can be walked through.
 
 ## Room 1 — entry / Buồng Dẫn Nước
 
@@ -28,7 +28,7 @@ Spawn (180,280). Main lower hall is foot y=210..310. A partition at y=180..210 s
 | --- | --- | --- |
 | Practice call | (76,254), full 40×48 prop | (76,268). E send, then E recall. Entire thin-pipe route and plate can be seen from the hall. Main progress untouched. |
 | Practice plate | (212,114), floor | Only Lumo powers it. Practice gate opens on actual arrival. |
-| Inside practice call | (244,114), full 40×48 prop | (244,144). Same send/recall behavior from inside alcove, so no trap if player explores it. |
+| Inside practice call | (244,130), full 40×48 prop | (244,150). Moved 16px down so its native 48px art begins below the y=70 HUD and its standing body remains above the y=180 partition. |
 | Call A | (384,232), full 40×48 prop | (384,256). Practice teaches states; A remains the first main assignment. |
 | Plate A | (546,114), floor behind door A | Visible cable/tube connects A call and plate. E doorway transfers to relay only when door is live or latched. |
 | Door A approach | open arch around (480,187), locked feedback below arch | E clearly says enter next room; locked feedback identifies Lumo/plate. |
@@ -54,22 +54,22 @@ Door B's reverse face is southwest (x=82,base318); arrival center (82,251). West
 
 | Element | Art anchor / target | Stand / behavior |
 | --- | --- | --- |
-| Far-side call B | (48,194) | (48,218), restores the B assignment before latching; no overlap with south exit. |
+| Far-side call B | (68,176) | (68,198), restores the B assignment before latching. Shifted west into a clear part of the west foyer to separate its art and interaction radius from call C. |
 | Latch B | (148,240) | (148,264), holds B before Lumo moves to C. |
 | Call C | (122,190) | (122,210), sends Lumo through the clearly drawn pipe to east foyer. |
 | Plate/beacon C | (558,244), floor | Lumo's actual arrival is shown; only the dedicated seal is powered. |
 | Final door / stairs C | x=574,base180 | Exit stand (574,188), distinct from latch/memory. Side wall segments x=532..542,606..616,y=150..180 close the flanks. Stairs/floor never cover Nhinh. |
-| Latch C / recall handle | (550,192), full 28×32 | (550,218), reachable from corridor on this side. First E latches C after B, ink discovery and C arrival; afterward this same reachable handle recalls Lumo. Do not add a pedestal that narrows the east foyer. |
+| Latch C / recall handle | (540,192), full 28×32 | (550,218), reachable from corridor on this side. Shifted the art 10px west so it ends at x=554 and leaves a 42px route to the right gatepost at x=596. First E latches C after B, ink discovery and C arrival; afterward this same reachable handle recalls Lumo. Do not add a pedestal that narrows the east foyer. |
 | Spiral engraving | right boundary wall at (612,282), 40×40 uniformly reduced if needed | Repeat stand (588,262). Wall already supplies collision; no phantom block for a shallow engraving. |
 
 At corridor entrance, first lamp-on observation uses the scenario exchange about disappearing lines. With lamp off, physically entering the corridor records `l4-ink-revealed`; it is not set merely from a remote E. Turning the lamp back on dims ink only. Arrival at C and the far latch's physical approach are still required; lamp need not remain off after ink was actually discovered.
 
-Latch C triggers the full eight-line spiral conversation once, then records `l4-memo` at completion. The separate wall inscription allows repeat reading. Recalling Lumo starts visible travel back to Nhinh; `l4-reunited` requires actual proximity after recall. Exit requires latch C and actual reunion; an unplayed memory scene is completed before leaving. Preserve all three ending lines from the scenario.
+Latch C triggers the full seven-line spiral conversation once, then records `l4-memo` at completion. The separate wall inscription allows repeat reading. Recalling Lumo starts visible travel back to Nhinh; `l4-reunited` requires actual proximity after recall. Exit requires latch C and actual reunion; an unplayed memory scene is completed before leaving. Preserve all three ending lines from the scenario.
 
 ## Lumo, doors and saves
 
 - Controller owns all Level 05 Lumo updates; skip legacy CampaignScene Level05 `called/at` update logic and generic beams/props/controls. Pass existing Lumo actor through the focused controller interface; do not change Lumo behavior in other levels.
-- Use explicit assignment follow/practice/a/b/c and authored pipe waypoints with room IDs. Move the real sprite along these points, compensating for Lumo.update's (+18,-12) hover target. Room-hop only at authored pipe endpoints; hide the sprite when its simulated room differs from the player's room. Movement continues remotely, allowing real arrival without teleporting at command time. No elapsed-time power flags.
+- Use explicit assignment follow/practice/a/b/c and authored pipe waypoints with room IDs. Move the real sprite along these points, compensating for Lumo.update's (+18,-12) hover target. Room-hop only at matching authored pipe endpoints; hide the sprite when its simulated room differs from the player's room. Draw native tube modules and stateful cable art along the same routes. Movement continues remotely, allowing real arrival without teleporting at command time. No elapsed-time power flags.
 - A live plate requires matching assignment, matching simulated plate room and actual sprite proximity. Called/at history is never sufficient. Recall loses unlatched power immediately. When the foot body overlaps an open threshold, defer closure until it leaves; if power returns meanwhile clear pending closure. Occupancy protects only that threshold, not a permanent latch.
 - Store Level05 room/assignment/route progress under `l4-*` flags/counters, not the Observatory-only `roomId`. Preserve existing `l4-latch-a/b/c`, `l4-ink-revealed`, `l4-memo`, `l4-return-called`, `l4-reunited`, called/at compatibility and v1 save key. New state can be local to this controller. Clear generic route coordinates when finally leaving Level05 so Level06 does not inherit this assignment.
 - Normalize durable latch hierarchy C→B→A and B→A without erasing achievements. Legacy saves without local room metadata choose ink for B/C, relay for A, otherwise entry. Reconstruct an old assignment from latest relevant called mark if not reunited; sanitize coordinates and re-evaluate actual arrival. Unknown room/assignment data falls back safely.
@@ -77,6 +77,6 @@ Latch C triggers the full eight-line spiral conversation once, then records `l4-
 
 ## Feedback, story and completion evidence
 
-All complete scenario dialogue must be present at its appropriate beat, including opening, practice arrival, latch-A role exchange, ink observation, beckoning at corridor end, eight-line memory, hints and three-line ending. H advances through the scenario's three helpful levels without recalling Lumo. J retains learned calling/ink/memory facts and current assignment. HUD gives current room, next physical action and travelling/arrived/held status; it cannot claim arrival from a command. Prompt placement must protect active call/latch/door art and actors.
+All complete scenario dialogue must be present at its appropriate beat, including opening, practice arrival, latch-A role exchange, ink observation, beckoning at corridor end, seven-line memory, hints and three-line ending. H advances through the scenario's three helpful levels without recalling Lumo. J retains learned calling/ink/memory facts and current assignment. HUD gives current room, next physical action and travelling/arrived/held status; it cannot claim arrival from a command. Prompt placement must protect active call/latch/door art and actors.
 
 Required checks: production build; focused geometry/state checks for four-direction solids, reachable intended-side stands, graph reachability of every stage, thresholds losing power while occupied, actual arrival/recall, legacy/current safe restore and correct next-level index. Inspect runtime visuals on a separate localhost origin if browser tooling is available. Never touch the player's existing save. Human end-to-end puzzle acceptance remains the user's review.
