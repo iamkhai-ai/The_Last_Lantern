@@ -13,13 +13,13 @@ World 640×360; retain the existing feet/body/depth contract and floor limits. G
 | Object | Ground anchor | Player center target | Base collider |
 | --- | --- | --- | --- |
 | Fresh spawn | n/a | `(136,286)` | Existing player foot body |
-| Poem | `(136,270)` | `(136,276)`, radius 24 | `[119,259,34,11]` |
+| Poem | `(136,270)`, displayed 96×80 from native 48×40 | `(136,276)`, radius 24 | `[102,256,68,14]` |
 | Moon | `(232,242)` | `(232,248)`, radius 24 | `[219,230,26,12]` |
 | Leaf | `(326,174)` | `(326,180)`, radius 24 | `[313,162,26,12]` |
 | Star | `(408,266)` | `(408,272)`, radius 24 | `[395,254,26,12]` |
 | Gate | `(510,190)` | `(510,181)`, radius 24 | Existing backing, posts and closed threshold |
 
-Poem art remains 48×40; the three symbol stones remain 60×78. The poem and Moon silhouettes have a 42px horizontal gap. Star's right edge is x438, leaving 8px to the gate canvas at x446. Poem is the only E target within the fresh spawn's radius: it is 10px away. The player sees the poem immediately above the entry position without a canopy hiding either object. Do not place a foreground bush, bright decoration or symbol stone in this entry pocket.
+The poem slab displays at 96×80 from its unchanged native 48×40 source; the three symbol stones remain 60×78. The poem and Moon silhouettes have an 18px horizontal gap. Star's right edge is x438, leaving 8px to the gate canvas at x446. Poem is the only E target within the fresh spawn's radius: it is 10px away. The player sees the poem immediately above the entry position without a canopy hiding either object. Do not place a foreground bush, bright decoration or symbol stone in this entry pocket. The poem prompt sits 24px above the enlarged art top. Widen its visible base footprint to `[102,256,68,14]`; the southern collision contact remains walkable and within E radius.
 
 The entry dirt path comes from the southern edge into the poem nook. From there a continuous broad path bends east into the clearing near Moon. An irregular clearing connects all three main stones without drawn arrows, numbered labels or a line that gives away their order. A separate east-side path reaches the gate from the south. Use the existing masked dirt texture. Clear widths are at least 48px; important stands and the actor's feet remain on visible ground. Keep existing trees/rocks only where they neither hide the entry clue nor block these routes. Trees/rocks stay solid at their bases; foliage remains passable; feet determine actor/prop ordering. Gate stairs stay below the actor and arch posts/header retain their established front layers.
 
@@ -60,6 +60,10 @@ Rewrote `docs/implementation/02-layout.md` as the current poem-first specificati
 - Real browser runtime — NOT_RUN; browser automation is disabled in Work settings. No server or browser session was started.
 
 The first build attempt found a TypeScript widening error in the new dynamic opening dialogue array. Annotating it as `DialogueLine[]` resolved the error; the completed build above passed. The final source revision is recorded by its commit SHA in the implementation task report.
+
+## Follow-up decision — 2026-10-17
+
+User review found the poem slab too small to show its Moon, Leaf, and Star glyphs clearly. Existing high-resolution generated source art already contains all three glyphs, so no image regeneration or raster edit is needed. Enlarge only its runtime display to 96×80 (2× native), keeping anchor `(136,270)`, spawn `(136,286)`, stand `(136,276)`, and interaction radius 24 unchanged. Set the shared prompt offset to `-104`, which places its label above art top y=190. Widen the visible base collider to `[102,256,68,14]` while keeping bottom y=270; this preserves southern contact y=254 and E range. Widen only the poem cue ellipse to 86px. Keep tree anchors, story, flow, puzzle, saves, and other levels unchanged.
 
 ## Root verification and review — 2026-10-17
 

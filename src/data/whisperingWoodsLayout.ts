@@ -12,15 +12,16 @@ const point = (x: number, y: number): WoodsPoint => Object.freeze({ x, y });
 const rect = (x: number, y: number, width: number, height: number): WoodsRect => Object.freeze({ x, y, width, height });
 const stands = Object.freeze({ spawn: point(136, 286), poem: point(136, 276), moon: point(232, 248), leaf: point(326, 180), star: point(408, 272), exit: point(510, 181) });
 export const WOODS_RUNE_ART = Object.freeze({ sourceWidth: 40, sourceHeight: 52, width: 60, height: 78 });
+export const WOODS_POEM_ART = Object.freeze({ sourceWidth: 48, sourceHeight: 40, width: 96, height: 80 });
 export const WOODS_RUNE_PROMPT_OFFSET_Y = -92;
-export const WOODS_POEM_PROMPT_OFFSET_Y = -64;
+export const WOODS_POEM_PROMPT_OFFSET_Y = -104;
 
 export const WHISPERING_WOODS = Object.freeze({
   size: point(640, 360),
   player: Object.freeze({ footOffsetY: 19, body: Object.freeze({ width: 14, height: 6, offsetX: 11, offsetY: 37 }) }),
   anchors: Object.freeze({ poem: point(136, 270), moon: point(232, 242), leaf: point(326, 174), star: point(408, 266), gate: point(510, 190) }),
   stands,
-  footprints: Object.freeze({ poem: rect(119, 259, 34, 11), moon: rect(219, 230, 26, 12), leaf: rect(313, 162, 26, 12), star: rect(395, 254, 26, 12) }),
+  footprints: Object.freeze({ poem: rect(102, 256, 68, 14), moon: rect(219, 230, 26, 12), leaf: rect(313, 162, 26, 12), star: rect(395, 254, 26, 12) }),
   gate: Object.freeze({ backing: rect(446, 96, 128, 60), leftPost: rect(456, 156, 20, 34), rightPost: rect(544, 156, 20, 34), threshold: rect(476, 156, 68, 22), promptY: 94, openStopY: 140, closedStopY: 162 }),
   trees: Object.freeze([[48,142],[125,112],[240,106],[350,108],[600,130],[48,230],[600,240],[65,310],[568,310]].map(([x,y], i) => Object.freeze({ id:`tree-${i}`, x, y, footprint:rect(x-9,y-14,18,14) }))),
   rocks: Object.freeze([[100,195],[552,292]].map(([x,y], i) => Object.freeze({ id:`rock-${i}`, x, y, footprint:rect(x-13,y-14,26,14) }))),

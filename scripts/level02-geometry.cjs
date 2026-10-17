@@ -27,6 +27,7 @@ const sample=(focusWoodsId)=>page.evaluate((focusWoodsId)=>{
 try{
  await launch(entry({}, {'player-level':0}));
  const spawn=await read();assert.ok(Math.abs(spawn.x-136)<1&&Math.abs(spawn.y-286)<1,`Poem-side spawn ${JSON.stringify(spawn)}`);assert.equal(spawn.target,'poem');assert.ok(spawn.objective.includes('thơ'));assert.deepEqual(spawn.tutorialCue,{visible:true,stage:'poem',target:'poem'});
+ const poem=spawn.objects.find(o=>o.id==='poem');assert.ok(poem);assert.equal(poem.width,96);assert.equal(poem.height,80);
  const stones=spawn.objects.filter(o=>/^rune-(moon|leaf|star)$/.test(o.id));assert.equal(stones.length,3,'Exactly three main rune stones');for(const stone of stones){assert.equal(stone.width,60);assert.equal(stone.height,78)}
  assert.ok(!spawn.objects.some(o=>o.id==='practice-leaf'||o.id==='practice-name'||o.id==='practice-rune'));
  const spawnPixels=await sample();assert.equal(spawnPixels.covered,0,`Spawn must remain unobscured: ${JSON.stringify(spawnPixels)}`);await page.screenshot({path:path.join(out,'level02-poem-entry.png')});results.push({name:'poem-first entry, exactly three enlarged stones and clear spawn',status:'PASS',data:spawn});

@@ -3,7 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { activateWoodsRune, canActivateWoodsRune, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_PROMPT_OFFSET_Y, WOODS_RUNE_ART, WOODS_RUNE_PROMPT_OFFSET_Y, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
+import { activateWoodsRune, canActivateWoodsRune, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_POEM_PROMPT_OFFSET_Y, WOODS_RUNE_ART, WOODS_RUNE_PROMPT_OFFSET_Y, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -1215,7 +1215,7 @@ export class CampaignScene extends Phaser.Scene {
     } else if (level === 1) {
       this.addWoodsGate();
       for (const id of RUNE_ORDER) this.addWoodsArt(`rune-${id}`, `runestone_${id}_sleeping`, WHISPERING_WOODS.anchors[id], WOODS_RUNE_ART.width, WOODS_RUNE_ART.height);
-      this.addWoodsArt('poem', 'poem_fragment', WHISPERING_WOODS.anchors.poem, 48, 40);
+      this.addWoodsArt('poem', 'poem_fragment', WHISPERING_WOODS.anchors.poem, WOODS_POEM_ART.width, WOODS_POEM_ART.height);
       this.createWoodsTutorialCue();
       this.updateRuneRevealVisuals();
     } else if (level === 2) {
@@ -2375,7 +2375,7 @@ export class CampaignScene extends Phaser.Scene {
     if (!target) return;
     const color = 0xb4dfb2;
     this.woodsTutorialCue.fillStyle(color, 0.12);
-    this.woodsTutorialCue.fillEllipse(target.x, target.y - 2, 46, 18);
+    this.woodsTutorialCue.fillEllipse(target.x, target.y - 2, 86, 18);
     this.woodsTutorialCue.lineStyle(2, color, 0.55);
     this.woodsTutorialCue.strokeEllipse(target.x, target.y - 2, 46, 18);
   }

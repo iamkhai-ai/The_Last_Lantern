@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {
-  WHISPERING_WOODS, WOODS_RUNE_ART, WOODS_RUNE_PROMPT_OFFSET_Y, WOODS_POEM_PROMPT_OFFSET_Y,
+  WHISPERING_WOODS, WOODS_RUNE_ART, WOODS_POEM_ART, WOODS_RUNE_PROMPT_OFFSET_Y, WOODS_POEM_PROMPT_OFFSET_Y,
   RUNE_ORDER, feetAt, getWoodsTutorialStage, isWoodsCenterWalkable, isWoodsPointSafe,
   resolveWoodsSpawn, normalizeRuneProgress, activateWoodsRune, canActivateWoodsRune,
 } from '../src/data/whisperingWoodsLayout.ts';
@@ -10,7 +10,7 @@ assert.deepEqual(WHISPERING_WOODS.player.body, { width: 14, height: 6, offsetX: 
 assert.deepEqual(WHISPERING_WOODS.stands.spawn,{x:136,y:286});
 assert.deepEqual(WHISPERING_WOODS.anchors.poem,{x:136,y:270});
 assert.deepEqual(WHISPERING_WOODS.stands.poem,{x:136,y:276});
-assert.deepEqual(WHISPERING_WOODS.footprints.poem,{x:119,y:259,width:34,height:11});
+assert.deepEqual(WHISPERING_WOODS.footprints.poem,{x:102,y:256,width:68,height:14});
 assert.deepEqual(WHISPERING_WOODS.anchors.moon,{x:232,y:242});
 assert.deepEqual(WHISPERING_WOODS.stands.moon,{x:232,y:248});
 assert.deepEqual(WHISPERING_WOODS.footprints.moon,{x:219,y:230,width:26,height:12});
@@ -25,6 +25,9 @@ assert.equal('practice' in WHISPERING_WOODS.anchors,false,'runtime layout has no
 assert.equal(Math.hypot(WHISPERING_WOODS.stands.spawn.x-WHISPERING_WOODS.stands.poem.x,WHISPERING_WOODS.stands.spawn.y-WHISPERING_WOODS.stands.poem.y)<=24,true,'fresh spawn starts inside poem interaction range');
 for(const id of ['moon','leaf','star']) assert.ok(Math.hypot(WHISPERING_WOODS.stands.spawn.x-WHISPERING_WOODS.stands[id].x,WHISPERING_WOODS.stands.spawn.y-WHISPERING_WOODS.stands[id].y)>24,`poem is the only fresh-spawn target, not ${id}`);
 assert.deepEqual(WOODS_RUNE_ART,{sourceWidth:40,sourceHeight:52,width:60,height:78});
+assert.deepEqual(WOODS_POEM_ART,{sourceWidth:48,sourceHeight:40,width:96,height:80});
+assert.equal(WOODS_POEM_ART.width/WOODS_POEM_ART.sourceWidth,2);
+assert.equal(WOODS_POEM_ART.height/WOODS_POEM_ART.sourceHeight,2);
 assert.equal(WOODS_RUNE_ART.width/WOODS_RUNE_ART.sourceWidth,1.5);
 assert.equal(WOODS_RUNE_ART.height/WOODS_RUNE_ART.sourceHeight,1.5);
 for (const stand of Object.values(WHISPERING_WOODS.stands)) assert.equal(isWoodsCenterWalkable(stand), true, `stand ${stand.x},${stand.y}`);
@@ -55,9 +58,15 @@ const connectorCenter={x:184,y:259},connectorNormal={x:0.224,y:0.975};
 for(const sign of [-1,1]) assert.equal(onAnyGroundPath({x:connectorCenter.x+connectorNormal.x*25*sign,y:connectorCenter.y+connectorNormal.y*25*sign}),true,'poem-to-clearing connector preserves a broad 50px path');
 const eastCenter={x:466,y:284},eastNormal={x:-0.136,y:0.991};
 for(const sign of [-1,1]) assert.equal(onAnyGroundPath({x:eastCenter.x+eastNormal.x*25*sign,y:eastCenter.y+eastNormal.y*25*sign}),true,'eastern gate approach preserves a broad 50px path');
-const poemRight=WHISPERING_WOODS.anchors.poem.x+24;
+const poemLeft=WHISPERING_WOODS.anchors.poem.x-WOODS_POEM_ART.width/2;
+const poemRight=WHISPERING_WOODS.anchors.poem.x+WOODS_POEM_ART.width/2;
 const moonLeft=WHISPERING_WOODS.anchors.moon.x-WOODS_RUNE_ART.width/2;
-assert.equal(moonLeft-poemRight,42,'poem and Moon silhouettes remain clearly separate');
+assert.equal(moonLeft-poemRight,18,'enlarged poem and Moon silhouettes retain a visible gap');
+assert.equal(poemLeft,88,'enlarged poem stays inside the entry pocket');
+assert.equal(WHISPERING_WOODS.anchors.poem.y-WOODS_POEM_ART.height,190,'enlarged poem art top remains below HUD');
+assert.equal(WHISPERING_WOODS.anchors.poem.y+WOODS_POEM_PROMPT_OFFSET_Y,166,'poem prompt stays above enlarged art');
+assert.equal(isWoodsCenterWalkable({x:136,y:254}),true,'southern stone contact remains walkable after widening the base');
+assert.equal(Math.hypot(136-136,254-276)<=24,true,'E remains in range at enlarged poem base contact');
 assert.equal(WHISPERING_WOODS.anchors.star.x+WOODS_RUNE_ART.width/2<WHISPERING_WOODS.gate.backing.x,true,'star artwork clears the gate arch');
 function reachableClosedGateInterior(){
   const step=2,start=WHISPERING_WOODS.stands.spawn,queue=[start],seen=new Set([`${start.x},${start.y}`]);

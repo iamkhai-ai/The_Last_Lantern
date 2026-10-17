@@ -34,13 +34,13 @@ One focused `src/data/whisperingWoodsLayout.ts` owns anchors, stands, visible ba
 | Object | Art and ground anchor | Center / target | Base footprint |
 | --- | --- | --- | --- |
 | Fresh spawn | Nhinh’s current frames | `(136,286)` | Existing player body |
-| Poem | Native 48×40, `(136,270)` | `(136,276)`, radius 24 | `[119,259,34,11]` |
+| Poem | 2× native 48×40 (96×80), `(136,270)` | `(136,276)`, radius 24 | `[102,256,68,14]` |
 | Moon | 60×78, `(232,242)` | `(232,248)`, radius 24 | `[219,230,26,12]` |
 | Leaf | 60×78, `(326,174)` | `(326,180)`, radius 24 | `[313,162,26,12]` |
 | Star | 60×78, `(408,266)` | `(408,272)`, radius 24 | `[395,254,26,12]` |
 | Gate | Existing fitted 128×126 art, `(510,190)` | `(510,181)`, radius 24; prompt y=94 | Existing backing/posts/threshold |
 
-Poem and Moon silhouettes have a 42px horizontal gap. Star ends at x=438, 8px from the gate canvas. Keep all stands and the actor’s feet on visible ground. The southern entry dirt path runs from the world edge to the poem nook, bends east toward Moon, then joins an irregular clearing that contains all three runes. An eastern path reaches the open gate from the south. Use the existing masked dirt texture with natural edges, minimum 48px clear widths, and no arrows, numbered labels, or drawn solution line. Keep the poem pocket clear of canopies, bright decor, rune art, and extra stones. Gate geometry and layers stay as previously authored.
+The enlarged poem ends at x=184, leaving an 18px visible gap before Moon artwork begins at x=202. Its prompt sits 24px above the art top; the restrained unread-poem ground cue widens to fit the slab. Keep all stands and the actor’s feet on visible ground. The southern entry dirt path runs from the world edge to the poem nook, bends east toward Moon, then joins an irregular clearing that contains all three runes. An eastern path reaches the open gate from the south. Use the existing masked dirt texture with natural edges, minimum 48px clear widths, and no arrows, numbered labels, or drawn solution line. Keep the poem pocket clear of canopies, bright decor, rune art, and extra stones. Gate geometry and layers stay as previously authored.
 
 Floor bounds and solid trees/rocks remain in the shared module. Preserve body-to-foot agreement, trunk collision, passable foliage, actor/prop depth ordering, and the closed-gate center contact at y=162. The closed threshold blocks the arch; the open passage allows the center to y=140. Gate backing, posts, prompt, and save guard remain unchanged.
 
