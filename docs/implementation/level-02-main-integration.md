@@ -16,4 +16,6 @@ Merged candidate: woods, forest-edge, campaign-start-intent and shared prompt-la
 
 ## Publication approach
 
+Frozen integration revision `94ffe8f42ce35b785c3b4328327f2e74278386ed`: root independently reran all four pure checks, both fixture syntax checks and diff check, PASS. Build completed with 407 modules in 9.42s before freezing, and the frozen source is unchanged from that build. Two independent read-only Luna High final integration reviews A and B checked this same revision against `7997c43` and reported no actionable findings. The incoming Level01 layout, procedural textures, puzzles, WorldScene, InteractionSystem, shared prompt-placement helper and LanternSystem match remote main exactly. User gameplay acceptance and explicit merge authorization are recorded above. This evidence addition is documentation only.
+
 Fetch main again before publishing. A normal fast-forward push of the reviewed integration commit to main preserves all current remote main commits; never force-push. If main advances, synchronize and recheck affected evidence before publication. If repository protection rejects direct publication, preserve the rejection and use the repository's required pull-request route without bypassing protection. Keep the existing preview worktree and server available for the user's continued review.
