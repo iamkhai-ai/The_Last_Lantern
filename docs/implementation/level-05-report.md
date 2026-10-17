@@ -54,3 +54,31 @@ The source and verification changes are committed as `fa4e71df43837f2f14d761e4dc
 
 - The geometry/state check covers the configured layout and controller decisions, but does not exercise Phaser's live input timing or inspect rendered layering. Root's independent runtime/review pass and human end-to-end acceptance remain outstanding.
 - No changes were made to player saves or Observatory `roomId`; no other level's behavior was intentionally changed.
+
+## Round 2 review corrections
+
+Source revision: `9f7bc90a6c3645482faa4bf287da9d0864df340a` (parent `6a466f5f26c26c666c09779d80f2ea0265ac854c`). This revision addresses R13/R14, Reviewer A's lit-observation and legacy-assignment findings, and Reviewer B's exact-pipe-endpoint finding.
+
+- Final objective and exit gating now use Lumo's current assignment, route state, room, and proximity. The stairs explain whether C is unlatched, the spiral memory is unread, or Lumo has not actually returned. After C is latched, an unread memory objective points to the accessible spiral. First reading marks the memory complete only when its dialogue finishes; repeat readings preserve completion.
+- Following Lumo now travels through authored paired pipe waypoints when Nhinh changes rooms, including while a recall route was already in progress. Lumo assigned to a plate stays there while Nhinh crosses rooms.
+- The full lit-ink observation exchange is queued once when the player first sees the ink room lit, including when the lantern is switched on later. Existing dialogue/pause deferral remains in use.
+- Legacy assignment reconstruction is separate from player-room selection. A known, eligible, active A/B/C assignment with no Level 05 companion-room metadata starts from a safe position beside Nhinh and follows an authored route to its mark. Returning/reunited, ineligible, or ambiguous state uses the safe follower recovery. Player room still resolves only from saved room, visited rooms, and durable latches; `called-b` does not imply the player crossed into ink.
+- A/B pipe endpoint coordinates now come from one shared definition used by runtime routes and validation. Cross-room hops require both exact authored endpoints and Lumo within 8px of the outgoing endpoint. Invalid routes recover Lumo visibly beside the safe player position.
+- The focused checks cover wrong endpoint coordinates, wrong outgoing Lumo position, legacy assignment reconstruction and player-room preservation, follower versus plate-holder transition policy, current reunion, locked-exit priority, and unread memory stage.
+
+## Round 2 verification on source revision `9f7bc90a6c3645482faa4bf287da9d0864df340a`
+
+| Status | Command / review | Result |
+| --- | --- | --- |
+| PASS | `node scripts/check-path-for-two.mjs` | Geometry/state and new R2 regressions passed, including endpoint coordinates/proximity, legacy player and companion state, room-follow policy, actual reunion, and exit requirements. |
+| PASS | `npm run build` | `tsc --noEmit` and Vite production build passed; generated `dist/index.html` was restored afterward. |
+| PASS | `git diff --check` | No whitespace errors before source commit. |
+| NOT_RUN | Browser review and human end-to-end playthrough | Root owns the fixture review; human playthrough remains open. |
+| NOT_RUN | Independent review of this revision | Root will run both independent reviews on the frozen revision. |
+
+The source and regression changes are committed as `9f7bc90a6c3645482faa4bf287da9d0864df340a`. The report update is committed separately after this entry is written.
+
+## Remaining limits
+
+- The focused script verifies the route and state predicates but does not execute live Phaser movement or dialogue timing. Root's runtime check and independent review remain the next gates.
+- No user save or Observatory `roomId` was changed, and the changes remain scoped to Level 05 controller/geometry and its focused check.
