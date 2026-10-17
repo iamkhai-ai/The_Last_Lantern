@@ -18,6 +18,7 @@ import { SoundSystem } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
 import { PauseMenu } from '../ui/PauseMenu';
 import { ShatteredCreekController } from './ShatteredCreekController';
+import { SleeplessTowerLevel } from '../levels/SleeplessTowerLevel';
 
 type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: Phaser.Input.Keyboard.Key; j: Phaser.Input.Keyboard.Key; space: Phaser.Input.Keyboard.Key; esc: Phaser.Input.Keyboard.Key };
 
@@ -89,6 +90,7 @@ export class CampaignScene extends Phaser.Scene {
   private woodsCueStage?: WoodsTutorialStage;
   private libraryLevel?: LibraryLevel;
   private shatteredCreek?: ShatteredCreekController;
+  private sleeplessTower?: SleeplessTowerLevel;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -102,10 +104,6 @@ export class CampaignScene extends Phaser.Scene {
     }
     if (!newGameRequested && this.progress.flags['l9-complete'] === true) {
       this.scene.start('EndingScene', { campaign: true });
-      return;
-    }
-    if (this.progress.level >= 4) {
-      this.scene.start('ComingSoonScene');
       return;
     }
     this.hintIndex = 0;
@@ -154,6 +152,10 @@ export class CampaignScene extends Phaser.Scene {
         if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen() && this.shatteredCreek?.toggleLantern()) this.player.playLanternAction(this.lantern.lanternOn);
         return;
       }
+      if (this.progress.level === 5) {
+        if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen() && this.sleeplessTower?.toggleLantern()) this.player.playLanternAction(this.lantern.lanternOn);
+        return;
+      }
       const finalToggleAvailable = this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && this.lantern.lanternInHand && this.lantern.lanternOn;
       if ((!this.dialogue.isInputLocked(performance.now()) || finalToggleAvailable) && !this.pauseMenu.isOpen()) {
         if (this.lantern.toggleLantern(performance.now())) {
@@ -167,10 +169,11 @@ export class CampaignScene extends Phaser.Scene {
         }
       }
     });
-    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.showHint(); });
+    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.showHint(); });
     keyboard.on('keydown-J', () => {
       if (this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
+      else if (this.progress.level === 5) this.sleeplessTower?.showJournal();
       else if (this.progress.level === 8) this.showObservatoryJournal();
       else if (this.progress.level === 2) this.libraryLevel?.showJournal();
       else if (this.progress.level === 1) this.showRuneJournal();
@@ -215,7 +218,7 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshHud();
     });
     this.buildLevel();
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shatteredCreek?.destroy());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.shatteredCreek?.destroy(); this.sleeplessTower?.destroy(); });
   }
 
   public update(_time: number, delta: number): void {
@@ -234,7 +237,7 @@ export class CampaignScene extends Phaser.Scene {
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
-    else this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+    else if (this.progress.level !== 5) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.time.now - this.lastLumoSave >= 600) {
       this.lastLumoSave = this.time.now;
       const x = Math.round(this.lumo.sprite.x);
@@ -273,6 +276,7 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshObservatoryPuzzle();
     }
     if (this.progress.level === 3) this.shatteredCreek?.update();
+    if (this.progress.level === 5) this.sleeplessTower?.update(dt);
     this.interactions.update(
       this.player.x,
       this.player.y,
@@ -281,10 +285,11 @@ export class CampaignScene extends Phaser.Scene {
       [
         ...(this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : []),
         ...(this.libraryLevel?.getProtectedPromptBounds() ?? []),
+        ...(this.sleeplessTower?.getProtectedPromptBounds() ?? []),
       ],
     );
     this.libraryLevel?.update();
-    if (this.progress.level !== 3) {
+    if (this.progress.level !== 3 && this.progress.level !== 5) {
       this.updatePuzzle(dt);
       this.updateCampaignCrossingState();
       this.updateCampaignBarriers();
@@ -355,6 +360,8 @@ export class CampaignScene extends Phaser.Scene {
     this.libraryLevel = undefined;
     this.shatteredCreek?.destroy();
     this.shatteredCreek = undefined;
+    this.sleeplessTower?.destroy();
+    this.sleeplessTower = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.memoryLayerLabels.clear();
@@ -363,7 +370,7 @@ export class CampaignScene extends Phaser.Scene {
     const level = this.progress.level;
     const definition = CAMPAIGN_LEVELS[level];
     this.selectedStone = -1;
-    if (level !== 2 && level !== 3) this.drawRoom(definition.biome);
+    if (level !== 2 && level !== 3 && level !== 5) this.drawRoom(definition.biome);
     this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
     this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
     this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
@@ -384,6 +391,19 @@ export class CampaignScene extends Phaser.Scene {
       const saved = this.progress.counters['player-level'] === level && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
         ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] } : undefined;
       this.shatteredCreek.build(saved);
+      this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
+      this.refreshHud();
+      return;
+    }
+    if (level === 5) {
+      this.titleText.destroy(); this.objectiveText.destroy(); this.statusText.destroy(); this.hintText.destroy(); this.lumoStatusText.destroy();
+      this.sleeplessTower = new SleeplessTowerLevel({
+        scene: this, progress: this.progress, player: this.player, lumo: this.lumo, interactions: this.interactions,
+        lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done), nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive(),
+      });
+      const saved = this.progress.counters['player-level'] === level && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
+        ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] } : undefined;
+      this.sleeplessTower.build(saved);
       this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
       this.refreshHud();
       return;
@@ -2470,6 +2490,7 @@ export class CampaignScene extends Phaser.Scene {
 
   private refreshHud(): void {
     if (this.progress.level === 3) { this.shatteredCreek?.refreshHud(); return; }
+    if (this.progress.level === 5) { this.sleeplessTower?.refreshHud(); return; }
     const level = CAMPAIGN_LEVELS[this.progress.level];
     if (this.progress.level === 0) {
       const step = this.getForestEdgeStep();

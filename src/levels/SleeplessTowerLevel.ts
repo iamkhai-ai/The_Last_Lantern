@@ -1,0 +1,721 @@
+import Phaser from 'phaser';
+import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
+import { TOWER, TOWER_SOLIDS, canCompleteTower, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, type G0Pose, type MirrorPose, type Point, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
+import type { Player } from '../actors/Player';
+import type { Lumo } from '../actors/Lumo';
+import type { CampaignProgress } from '../systems/CampaignSaveSystem';
+import type { InteractionSystem } from '../systems/InteractionSystem';
+import type { LanternSystem } from '../systems/LanternSystem';
+import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
+import type { PromptRect } from '../systems/interactionPromptLayout';
+
+export interface SleeplessTowerLevelOptions {
+  scene: Phaser.Scene;
+  progress: CampaignProgress;
+  player: Player;
+  lumo: Lumo;
+  interactions: InteractionSystem;
+  lantern: LanternSystem;
+  save: () => void;
+  say: (lines: DialogueLine[], onComplete?: () => void) => void;
+  nextLevel: (lines: DialogueLine[]) => void;
+  canStartStory: () => boolean;
+}
+
+const OPENING: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Nước đang biến thành ánh sáng ở đây.' },
+  { speaker: 'Lumo', text: 'Ngọn tháp dẫn đường cho người đi rừng. Nó từng chỉ sáng khi trời tối.' },
+  { speaker: 'Nhinh', text: 'Giờ nó lấy cả phần nước của Cây Mẹ.' },
+  { speaker: 'Lumo', text: 'Nếu dừng nó… người lạc đường sẽ tìm về bằng gì?' },
+  { speaker: 'Nhinh', text: 'Mình xem cách máy hoạt động trước. Có thể nó vẫn còn một chế độ khác.' },
+];
+
+const BENCH_LESSON: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Một tia có thể chia làm hai.' },
+  { speaker: 'Lumo', text: 'Nhưng nếu xoay gương đầu vào đi chỗ khác, cả hai nhánh đều mất.' },
+  { speaker: 'Nhinh', text: 'Vậy phải nhìn cả hệ thống, không chỉ chiếc gương đang xoay.' },
+];
+
+const ONE_CIRCUIT: DialogueLine[] = [
+  { speaker: 'Lumo', text: 'Một vòng máy đã chạy. Hai vòng còn lại vẫn đứng.' },
+  { speaker: 'Nhinh', text: 'Và vòng trước dừng khi mình đổi tia. Chúng cần hoạt động cùng nhau.' },
+];
+
+const CALL_C: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Cậu giữ ấn cuối nhé. Tôi chỉnh hai nhánh này.' },
+  { speaker: 'Lumo', text: 'Tôi ở đây. Cậu cứ thử từng gương.' },
+];
+
+const THREE_CIRCUITS: DialogueLine[] = [
+  { speaker: 'Lumo', text: 'Cả ba vòng đều đang quay!' },
+  { speaker: 'Nhinh', text: 'Tôi sẽ chuyển cần. Cậu giữ nguyên một chút.' },
+];
+
+const SWITCH_NARRATION: DialogueLine[] = [
+  { speaker: 'Hệ thống', text: 'Bánh răng khóa ở chế độ Trả dòng. Đèn tháp dịu xuống, nước đổi hướng chảy xuống rừng. Cửa buồng tinh thể mở.' },
+];
+
+const SWITCHED: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Xong rồi. Máy tự giữ chế độ mới. Cậu về được rồi, Lumo.' },
+  { speaker: 'Lumo', text: 'Tôi nghe tiếng suối!' },
+];
+
+const RECORD: DialogueLine[] = [
+  { speaker: 'Người Bảo Vệ', text: 'Đội tìm kiếm đã trở về. Con bé vẫn chưa có mặt.' },
+  { speaker: 'Người Bảo Vệ', text: 'Tôi sẽ giữ ngọn tháp sáng thêm một đêm. Nếu con nhìn thấy, cứ đi về phía ánh đèn. Cha ở đây.' },
+  { speaker: 'Nhinh', text: 'Ông ấy đang đợi con gái.' },
+  { speaker: 'Lumo', text: 'Tôi nhớ chiếc khăn này. Nó từng đỏ.' },
+  { speaker: 'Nhinh', text: 'Cậu có nhớ cô bé trở về không?' },
+  { speaker: 'Lumo', text: 'Không. Tôi chỉ nhớ ánh đèn không được tắt.' },
+  { speaker: 'Nhinh', text: 'Mình đã trả nước cho rừng. Nhưng vẫn cần biết chuyện gì xảy ra ở Cây Mẹ.' },
+];
+
+const RECORD_REPEAT: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Ông đã đứng ở đây qua bao nhiêu đêm?' },
+];
+
+const ENDING: DialogueLine[] = [
+  { speaker: 'Lumo', text: 'Nước đã trở lại. Sao những cây nhỏ vẫn cúi đầu?' },
+  { speaker: 'Nhinh', text: 'Mình xuống gần xem.' },
+];
+
+const HINTS: Record<TowerStep, DialogueLine[]> = {
+  practice: [
+    { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
+    { speaker: 'Lumo', text: 'Đặt đèn vào bệ bàn thử rồi xoay gương đầu vào cho tia đi qua lăng kính.' },
+  ],
+  place: [
+    { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
+    { speaker: 'Lumo', text: 'Nhấc đèn khỏi bàn thử rồi đặt lên bệ chính giữa phòng.' },
+  ],
+  main: [
+    { speaker: 'Lumo', text: 'Gương chung phải cấp cho lăng kính để hai nhánh cùng sáng. Tôi giữ điều kiện thứ ba.' },
+    { speaker: 'Lumo', text: 'Hướng G0 vào lăng kính, G1 vào A, G2 vào B. Gọi tôi tới C rồi dùng cần Trả dòng khi cả ba sáng.' },
+  ],
+  call: [
+    { speaker: 'Lumo', text: 'Gương chung phải cấp cho lăng kính để hai nhánh cùng sáng. Tôi giữ điều kiện thứ ba.' },
+    { speaker: 'Lumo', text: 'Nhấn E ở mốc gọi bên phải để đưa tôi lên ấn C.' },
+  ],
+  switch: [
+    { speaker: 'Lumo', text: 'Hướng G0 vào lăng kính, G1 vào A, G2 vào B. Gọi tôi tới C rồi dùng cần Trả dòng khi cả ba sáng.' },
+    { speaker: 'Lumo', text: 'Cả ba vòng đang sáng. Dùng E với cần Trả dòng ở cửa buồng.' },
+  ],
+  retrieve: [
+    { speaker: 'Nhinh', text: 'Máy đã tự giữ chế độ mới. Thu hồi đèn khỏi bệ bằng E.' },
+  ],
+  crystal: [
+    { speaker: 'Nhinh', text: 'Buồng đã mở. Nhấn E trước buồng để nhận Tinh thể Hy Vọng.' },
+  ],
+  record: [
+    { speaker: 'Nhinh', text: 'Ngăn bản ghi dưới cửa sổ đã mở. Chạm vào để nghe.' },
+  ],
+  recall: [
+    { speaker: 'Nhinh', text: 'Nhấn E ở mốc gọi để gọi Lumo trở về.' },
+  ],
+  exit: [
+    { speaker: 'Nhinh', text: 'Hai đứa xuống theo bậc thang góc dưới bên trái.' },
+  ],
+};
+
+const OBJECTIVE: Record<TowerStep, string> = {
+  practice: 'Góc trên bên trái có bàn thử: đặt đèn và xoay gương đầu vào cho tia qua lăng kính.',
+  place: 'Đặt đèn lên bệ chính giữa phòng bằng E.',
+  main: 'Điều hướng G0, G1, G2 để nhánh A và B cùng sáng.',
+  call: 'A và B đã sáng. Gọi Lumo tới ấn C.',
+  switch: 'Cả ba mạch đang sáng. Gạt cần Trả dòng ở cửa buồng.',
+  retrieve: 'Máy đã giữ chế độ mới. Thu hồi đèn khỏi bệ bằng E.',
+  crystal: 'Tới buồng bên phải, nhận Tinh thể Hy Vọng.',
+  record: 'Nghe bản ghi dưới cửa sổ.',
+  recall: 'Gọi Lumo trở về bằng E ở mốc gọi.',
+  exit: 'Xuống khu vườn bằng bậc thang góc dưới bên trái.',
+};
+
+const EXIT_REFUSAL: Record<'power' | 'lamp' | 'crystal' | 'record' | 'companion', string> = {
+  power: 'Máy vẫn đang hút nước lên. Mình cần chuyển cần Trả dòng trước.',
+  lamp: 'Đèn còn nằm trên bệ. Mình cần thu hồi đèn đã.',
+  crystal: 'Buồng đã mở rồi. Mình cần nhận Tinh thể Hy Vọng.',
+  record: 'Còn bản ghi dưới cửa sổ chưa nghe.',
+  companion: 'Gọi Lumo trở về cùng rồi hãy xuống.',
+};
+
+export class SleeplessTowerLevel {
+  private objects: Phaser.GameObjects.GameObject[] = [];
+  private colliders: Phaser.Physics.Arcade.Collider[] = [];
+  private bodies: Phaser.Physics.Arcade.StaticBody[] = [];
+  private visuals = new Map<string, Phaser.GameObjects.Image>();
+  private beams?: Phaser.GameObjects.Graphics;
+  private panel?: Phaser.GameObjects.Image;
+  private hud: Phaser.GameObjects.Text[] = [];
+  private state!: TowerState;
+  private route: Point[] = [];
+  private routeIndex = 0;
+  private hintIndex = 0;
+  private stepKey: TowerStep | '' = '';
+  private cleaned = false;
+  private pendingStoryBeats: Array<{ lines: DialogueLine[]; onComplete?: () => void }> = [];
+
+  constructor(private readonly ctx: SleeplessTowerLevelOptions) {}
+
+  public build(savedCenter?: Point): void {
+    const { progress, lantern, lumo, player, save } = this.ctx;
+    this.state = migrateTowerProgress(progress);
+    progress.flags['l5-layout-v2'] = true;
+    lantern.lanternInHand = this.state.source === null;
+    lantern.lanternPlaced = this.state.source !== null;
+    if (this.state.source) {
+      const source = this.state.source === 'practice' ? TOWER.objects.benchSource : TOWER.objects.source;
+      lantern.placeLanternAt(source.ground.x, source.optical.y + 6);
+    }
+    lantern.lanternOn = this.state.lanternOn;
+    progress.lanternOn = this.state.lanternOn;
+    if (this.state.lumoAssign === 'to-c') {
+      this.route = [{ x: lumo.sprite.x, y: lumo.sprite.y }, ...TOWER.lumo.route.map((point) => ({ x: point.x, y: point.y }))];
+      this.routeIndex = 0;
+    } else if (this.state.lumoAssign === 'at-c') {
+      lumo.sprite.setPosition(TOWER.lumo.seal.x - 18, TOWER.lumo.seal.y + 12);
+    }
+    const spawn = resolveTowerSpawn(savedCenter);
+    player.setFootPlacement(19, 37, 11, 14, 6);
+    player.setPosition(spawn.x, spawn.y);
+    this.drawBackdrop();
+    this.drawMachine();
+    this.addSolids();
+    this.registerActions();
+    this.drawHud();
+    this.updateVisuals(deriveTowerLive(this.state, this.lumoPoint()));
+    this.saveState();
+    lumo.setVisible(true);
+    if (!progress.flags['intro-5']) {
+      progress.flags['intro-5'] = true;
+      save();
+      this.ctx.say(OPENING);
+    }
+  }
+
+  public update(dt: number): void {
+    if (this.cleaned) return;
+    this.advanceLumo(dt);
+    const live = deriveTowerLive(this.state, this.lumoPoint());
+    this.updateVisuals(live);
+    this.updateProgress(live);
+    this.flushPendingStoryBeat();
+    this.updateHud(live);
+  }
+
+  public refreshHud(): void { this.updateHud(deriveTowerLive(this.state, this.lumoPoint())); }
+
+  public getObjectiveText(): string { return this.objectiveFor(deriveTowerLive(this.state, this.lumoPoint())); }
+
+  public getStatusText(): string { return this.statusFor(deriveTowerLive(this.state, this.lumoPoint())); }
+
+  public getProtectedPromptBounds(): PromptRect[] {
+    return ['call', 'lever', 'chamber', 'record']
+      .map((id) => this.visuals.get(id))
+      .filter((image): image is Phaser.GameObjects.Image => Boolean(image?.active && image.visible))
+      .map((image) => image.getBounds());
+  }
+
+  public toggleLantern(): boolean {
+    if (this.ctx.lantern.lanternPlaced) {
+      this.state.lanternOn = !this.state.lanternOn;
+      this.ctx.lantern.lanternOn = this.state.lanternOn;
+      this.saveState();
+      return true;
+    }
+    if (!this.ctx.lantern.lanternInHand) return false;
+    if (!this.ctx.lantern.toggleLantern(performance.now())) return false;
+    this.state.lanternOn = this.ctx.lantern.lanternOn;
+    this.saveState();
+    return true;
+  }
+
+  public showHint(): void {
+    const live = deriveTowerLive(this.state, this.lumoPoint());
+    if (this.stepKey !== live.step) { this.stepKey = live.step; this.hintIndex = 0; }
+    const choices = this.hintsFor(live);
+    const line = choices[Math.min(this.hintIndex, choices.length - 1)];
+    this.hintIndex = Math.min(this.hintIndex + 1, choices.length - 1);
+    this.ctx.say([line]);
+  }
+
+  public showJournal(): void {
+    const entries: DialogueLine[] = [
+      { speaker: 'Nhinh', text: 'Bảng điều tiết ghi: ba mạch cùng ổn định, sau đó mới chuyển từ giữ sáng sang trả dòng.' },
+    ];
+    if (this.state.practiceDone) entries.push({ speaker: 'Nhinh', text: 'Lăng kính chia một tia thành hai; xoay gương đầu vào đi chỗ khác thì cả hai nhánh tắt.' });
+    if (this.state.waterReturned) entries.push({ speaker: 'Lumo', text: 'Ba vòng cùng sáng khi G0 vào lăng kính, G1 vào A, G2 vào B, và tôi giữ ấn C.' });
+    if (this.state.recordRead) entries.push({ speaker: 'Nhinh', text: 'Bản ghi: người cha giữ đèn sáng thêm một đêm, đợi con theo ánh sáng về.' });
+    this.ctx.say(entries);
+  }
+
+  public destroy(): void {
+    if (this.cleaned) return;
+    this.cleaned = true;
+    this.colliders.forEach((collider) => { if (collider.active) collider.destroy(); });
+    this.objects.forEach((object) => { if (object.active) object.destroy(); });
+    this.hud.forEach((text) => { if (text.active) text.destroy(); });
+    this.colliders = []; this.objects = []; this.hud = []; this.visuals.clear(); this.bodies = [];
+    this.panel = undefined;
+    this.ctx.interactions.clear();
+  }
+
+  private point(): Point { return { x: this.ctx.player.x, y: this.ctx.player.y }; }
+
+  private lumoPoint(): Point { return { x: this.ctx.lumo.sprite.x, y: this.ctx.lumo.sprite.y }; }
+
+  private advanceLumo(dt: number): void {
+    const { lumo, player } = this.ctx;
+    if (this.state.lumoAssign === 'to-c') {
+      if (this.routeIndex >= this.route.length) {
+        this.state.lumoAssign = 'at-c';
+        this.saveState();
+      } else {
+        const target = this.route[this.routeIndex];
+        lumo.update(dt, target.x - 18, target.y + 12, true);
+        if (Math.hypot(lumo.sprite.x - target.x, lumo.sprite.y - target.y) < 8) this.routeIndex += 1;
+        return;
+      }
+    }
+    if (this.state.lumoAssign === 'at-c') {
+      const seal = TOWER.lumo.seal;
+      lumo.update(dt, seal.x - 18, seal.y + 12, true);
+      return;
+    }
+    const targetX = Phaser.Math.Clamp(player.x - 20, 32, 608);
+    const targetY = Phaser.Math.Clamp(player.y - 6, 92, 302);
+    lumo.update(dt, targetX, targetY, true);
+  }
+
+  private updateProgress(live: TowerLiveState): void {
+    if (live.practiceLit && !this.state.practiceDone) {
+      this.state.practiceDone = true;
+      this.saveState();
+    }
+    const distance = Math.hypot(this.ctx.player.x - this.ctx.lumo.sprite.x, this.ctx.player.y - this.ctx.lumo.sprite.y);
+    const canReunite = this.state.lumoAssign === 'follow';
+    const reunited = this.state.reunited
+      ? canReunite && distance <= TOWER.lumo.reuniteRange + 8
+      : canReunite && distance <= TOWER.lumo.reuniteRange;
+    if (reunited !== this.state.reunited) {
+      this.state.reunited = reunited;
+      this.saveState();
+    }
+    const circuits = Number(live.liveA) + Number(live.liveB) + Number(live.lumoAtC);
+    if (this.state.source === 'main' && circuits === 1 && this.ctx.progress.flags['l5-one-seen'] !== true) {
+      this.ctx.progress.flags['l5-one-seen'] = true;
+      this.ctx.save();
+      this.queueStoryBeat(ONE_CIRCUIT);
+    }
+    if (this.state.source === 'main' && live.liveA && live.liveB && live.lumoAtC && this.ctx.progress.flags['l5-three-seen'] !== true) {
+      this.ctx.progress.flags['l5-three-seen'] = true;
+      this.ctx.save();
+      this.queueStoryBeat(THREE_CIRCUITS);
+    }
+  }
+
+  private queueStoryBeat(lines: DialogueLine[], onComplete?: () => void): void {
+    this.pendingStoryBeats.push({ lines, onComplete });
+  }
+
+  private flushPendingStoryBeat(): void {
+    if (!this.pendingStoryBeats.length || !this.ctx.canStartStory()) return;
+    const beat = this.pendingStoryBeats.shift();
+    if (beat) this.ctx.say(beat.lines, beat.onComplete);
+  }
+
+  private registerActions(): void {
+    const { interactions } = this.ctx;
+    const add = (id: string, stand: Point, prompt: () => string, onInteract: () => void, artId: string, enabled: () => boolean = () => true) => {
+      const config: InteractableConfig = {
+        id: `tower-${id}`,
+        x: stand.x,
+        y: stand.y,
+        radius: TOWER.interactionRange,
+        getPrompt: () => (towerCanApproach(this.point(), stand) ? prompt() : null),
+        getPromptBounds: () => this.visuals.get(artId)?.getBounds() ?? null,
+        isEnabled: () => towerCanApproach(this.point(), stand) && enabled(),
+        onInteract: () => { if (towerCanApproach(this.point(), stand)) onInteract(); },
+      };
+      interactions.register(config);
+    };
+    const o = TOWER.objects;
+    add('bench-source', o.benchSource.stand, () => this.sourcePrompt('practice'), () => this.useSource('practice'), 'bench-source');
+    add('bench-mirror', o.benchMirror.stand, () => 'E · Xoay gương đầu vào', () => this.rotateBench(), 'bench-mirror');
+    add('source', o.source.stand, () => this.sourcePrompt('main'), () => this.useSource('main'), 'source');
+    add('g0', o.g0.stand, () => 'E · Xoay gương chung G0', () => this.rotateG0(), 'g0');
+    add('g1', o.g1.stand, () => 'E · Xoay gương nhánh G1', () => this.rotateBranch('g1'), 'g1');
+    add('g2', o.g2.stand, () => 'E · Xoay gương nhánh G2', () => this.rotateBranch('g2'), 'g2');
+    add('call', o.call.stand, () => (this.state.lumoAssign === 'follow' ? 'E · Gọi Lumo tới ấn C' : 'E · Gọi Lumo về'), () => this.useCall(), 'call');
+    add('lever', o.lever.stand, () => (this.state.waterReturned ? 'E · Cần đang giữ chế độ Trả dòng' : 'E · Gạt cần Trả dòng'), () => this.useLever(), 'lever');
+    add('chamber', o.chamber.stand, () => (!this.state.waterReturned ? 'E · Buồng tinh thể còn khóa' : !this.state.crystal ? 'E · Nhận Tinh thể Hy Vọng' : 'E · Ngăn chứa đã trống'), () => this.useChamber(), 'chamber');
+    add('record', o.record.stand, () => (this.state.recordRead ? 'E · Nghe lại bản ghi' : 'E · Nghe bản ghi bên cửa sổ'), () => this.useRecord(), 'record', () => this.state.crystal);
+    add('exit', TOWER.stairsStand, () => (canCompleteTower(this.state) ? 'E · Xuống khu vườn' : 'E · Kiểm tra lối xuống'), () => this.useExit(), 'exit');
+  }
+
+  private sourcePrompt(which: 'practice' | 'main'): string {
+    if (this.state.source && this.state.source !== which) return `E · Đèn đang ở bệ ${this.state.source === 'practice' ? 'thử' : 'chính'}`;
+    if (this.state.source === which) return 'E · Thu hồi đèn';
+    return 'E · Đặt đèn';
+  }
+
+  private useSource(which: 'practice' | 'main'): void {
+    const { lantern } = this.ctx;
+    if (this.state.source && this.state.source !== which) {
+      this.ctx.say([{ speaker: 'Nhinh', text: `Đèn vẫn nằm trên bệ ${this.state.source === 'practice' ? 'thử' : 'chính'}.` }]);
+      return;
+    }
+    if (this.state.source === which) {
+      const isOn = this.state.lanternOn;
+      lantern.retrieveLantern();
+      lantern.lanternOn = isOn;
+      this.state.source = null;
+      this.state.lanternRetrieved = true;
+      this.ctx.progress.lanternPickedUp = true;
+      this.saveState();
+      return;
+    }
+    const source = which === 'practice' ? TOWER.objects.benchSource : TOWER.objects.source;
+    lantern.placeLanternAt(source.ground.x, source.optical.y + 6);
+    lantern.lanternOn = this.state.lanternOn;
+    this.state.source = which;
+    this.state.lanternRetrieved = false;
+    this.saveState();
+    if (which === 'practice' && this.ctx.progress.flags['l5-bench-seen'] !== true) {
+      this.ctx.progress.flags['l5-bench-seen'] = true;
+      this.ctx.save();
+      this.ctx.say(BENCH_LESSON);
+    }
+  }
+
+  private rotateBench(): void {
+    this.state.practice = ((this.state.practice + 1) % 3) as MirrorPose;
+    this.saveState();
+  }
+
+  private rotateG0(): void {
+    this.state.g0 = ((this.state.g0 + 1) % 3) as G0Pose;
+    this.saveState();
+  }
+
+  private rotateBranch(id: 'g1' | 'g2'): void {
+    this.state[id] = ((this.state[id] + 1) % 3) as MirrorPose;
+    this.saveState();
+  }
+
+  private useCall(): void {
+    if (this.state.lumoAssign === 'follow') {
+      const lumo = this.ctx.lumo;
+      this.route = [{ x: lumo.sprite.x, y: lumo.sprite.y }, ...TOWER.lumo.route.map((point) => ({ x: point.x, y: point.y }))];
+      this.routeIndex = 0;
+      this.state.lumoAssign = 'to-c';
+      this.ctx.progress.flags['l5-called-high'] = true;
+      this.saveState();
+      this.ctx.say(CALL_C);
+      return;
+    }
+    this.state.lumoAssign = 'follow';
+    this.state.reunited = false;
+    this.ctx.progress.flags['l5-return-called'] = true;
+    this.route = [];
+    this.routeIndex = 0;
+    this.saveState();
+  }
+
+  private useLever(): void {
+    if (this.state.waterReturned) {
+      this.ctx.say([{ speaker: 'Nhinh', text: 'Máy đang tự giữ chế độ Trả dòng. Không cần chuyển lại.' }]);
+      return;
+    }
+    const live = deriveTowerLive(this.state, this.lumoPoint());
+    if (!live.canSwitch) {
+      const missing: string[] = [];
+      if (this.state.source === null) missing.push('đặt đèn lên bệ chính');
+      else if (this.state.source === 'practice') missing.push('đưa đèn sang bệ chính');
+      else if (!this.state.lanternOn) missing.push('bật đèn');
+      if (!live.liveA) missing.push('nối nhánh A');
+      if (!live.liveB) missing.push('nối nhánh B');
+      if (!live.lumoAtC) missing.push('giữ ấn C');
+      this.ctx.say([{ speaker: 'Nhinh', text: `Máy vẫn đang chờ. Mình còn thiếu: ${missing.join(', ')}.` }]);
+      return;
+    }
+    this.state.waterReturned = true;
+    this.saveState();
+    this.ctx.say([...SWITCH_NARRATION, ...SWITCHED]);
+  }
+
+  private useChamber(): void {
+    if (!this.state.waterReturned) {
+      this.ctx.say([{ speaker: 'Nhinh', text: 'Buồng tinh thể chỉ mở khi máy chuyển sang chế độ Trả dòng.' }]);
+      return;
+    }
+    if (this.state.crystal) {
+      this.ctx.say([{ speaker: 'Nhinh', text: 'Ngăn chứa đã trống.' }]);
+      return;
+    }
+    this.state.crystal = true;
+    this.visuals.get('crystal')?.destroy();
+    this.visuals.delete('crystal');
+    this.saveState();
+  }
+
+  private useRecord(): void {
+    if (!this.state.crystal) return;
+    this.showPanel();
+    if (this.state.recordRead) {
+      this.ctx.say(RECORD_REPEAT, () => this.hidePanel());
+      return;
+    }
+    this.state.recordRead = true;
+    this.saveState();
+    this.ctx.say(RECORD, () => this.hidePanel());
+  }
+
+  private useExit(): void {
+    const block = getTowerExitBlock(this.state);
+    if (block === null) {
+      this.prepareLevelExit();
+      return;
+    }
+    this.ctx.say([{ speaker: 'Nhinh', text: EXIT_REFUSAL[block] }]);
+  }
+
+  private prepareLevelExit(): void {
+    const position = this.lumoPoint();
+    this.ctx.progress.counters['lumo-x'] = Math.round(position.x);
+    this.ctx.progress.counters['lumo-y'] = Math.round(position.y);
+    this.ctx.progress.counters['lumo-target-x'] = Math.round(position.x);
+    this.ctx.progress.counters['lumo-target-y'] = Math.round(position.y);
+    this.ctx.save();
+    this.ctx.nextLevel(ENDING);
+  }
+
+  private hintsFor(live: TowerLiveState): DialogueLine[] {
+    if (this.state.source !== null && !this.state.lanternOn && ['practice', 'place', 'main', 'call', 'switch'].includes(live.step)) {
+      return [{ speaker: 'Nhinh', text: 'Đèn trên bệ đang tắt. Nhấn F để bật tia sáng.' }];
+    }
+    return HINTS[live.step];
+  }
+
+  private objectiveFor(live: TowerLiveState): string {
+    const placedPower = this.state.source !== null && ['practice', 'place', 'main', 'call', 'switch'].includes(live.step);
+    if (placedPower && !this.state.lanternOn) return 'Đèn trên bệ đang tắt. Nhấn F để bật lại.';
+    return OBJECTIVE[live.step];
+  }
+
+  private statusFor(live: TowerLiveState): string {
+    const glyph = (on: boolean): string => (on && !this.state.waterReturned ? '●' : '○');
+    const source = this.state.source === 'main' ? 'bệ chính' : this.state.source === 'practice' ? 'bàn thử' : 'trong tay';
+    const lumo = this.state.lumoAssign === 'follow' ? 'theo Nhinh' : this.state.lumoAssign === 'to-c' ? 'đang tới C' : 'ở ấn C';
+    return `Mạch A ${glyph(live.liveA)} · B ${glyph(live.liveB)} · C ${glyph(live.lumoAtC)} · Đèn: ${source} · Nước: ${this.state.waterReturned ? 'trả dòng' : 'đang hút'} · Lumo: ${lumo}`;
+  }
+
+  private drawBackdrop(): void {
+    const key = getLevelArtKey(5, 'tower-scene-base');
+    if (!key || !this.ctx.scene.textures.exists(key)) return;
+    const background = this.ctx.scene.add.image(0, 0, key).setOrigin(0, 0).setDisplaySize(640, 360).setDepth(0);
+    this.keep(background);
+  }
+
+  private drawMachine(): void {
+    const art5 = (filename: string): string | null => getLevelArtKey(5, filename);
+    const art4 = (filename: string): string | null => getLevelArtKey(4, filename);
+    const shared = (filename: string): string | null => getSharedMechanismKey(filename);
+    const o = TOWER.objects;
+    this.addImage('fountain', art5('fountain-up'), 307, 100, 56, 112, 8.0, 0.5);
+    this.addImage('lamp', art5('tower-lamp-white'), 307, 84, 72, 72, 8.1, 0.5);
+    this.addImage('ring-a', art5('ring-A-off'), 368, 100, 40, 40, 8.4, 0.5);
+    this.addImage('ring-b', art5('ring-B-off'), 410, 100, 40, 40, 8.4, 0.5);
+    this.addImage('ring-c', art5('ring-C-off'), 452, 100, 40, 40, 8.4, 0.5);
+    this.addImage('strip', art5('waiting-for-live-circuits'), 410, 130, 104, 28, 8.5, 0.5);
+    this.addImage('window', art5('window-faded-red-scarf'), 582, 92, 112, 112, 8.2, 0.5);
+    this.addImage('record', art5('record-compartment-closed'), 582, 156, 88, 32, 8.3, 0.5);
+    this.addImage('intake', art5('tower-intake'), 66, 200, 112, 32, 6, 0.5);
+    this.addImage('outflow', art5('tower-outflow'), 150, 302, 112, 32, 6, 0.5);
+    this.visuals.get('outflow')?.setVisible(false);
+    const tubeKey = art4('tube-straight');
+    if (tubeKey && this.ctx.scene.textures.exists(tubeKey)) {
+      const tube = this.ctx.scene.add.image(350, 266, tubeKey).setDisplaySize(38, 12).setRotation(Math.PI / 2).setDepth(6);
+      this.visuals.set('tube', tube);
+      this.keep(tube);
+    }
+    this.addImage('plate', art4('pressure-empty'), 350, 290, 44, 28, 6, 0.5);
+    this.addImage('bench-source', shared('source-empty'), o.benchSource.ground.x, o.benchSource.ground.y, 32, 44, this.depthAt(o.benchSource.ground.y));
+    this.addImage('bench-mirror', shared('mirror-1-horizontal'), o.benchMirror.ground.x, o.benchMirror.ground.y, 32, 40, this.depthAt(o.benchMirror.ground.y));
+    this.addImage('bench-prism', shared('prism-dark'), o.benchPrism.center.x, 140, 48, 48, this.depthAt(140));
+    this.addImage('bench-eye-a', shared('receiver-off'), o.benchEyeA.ground.x, o.benchEyeA.ground.y, 24, 24, this.depthAt(o.benchEyeA.ground.y));
+    this.addImage('bench-eye-b', shared('receiver-off'), o.benchEyeB.ground.x, o.benchEyeB.ground.y, 24, 24, this.depthAt(o.benchEyeB.ground.y));
+    this.addImage('source', shared('source-empty'), o.source.ground.x, o.source.ground.y, 32, 44, this.depthAt(o.source.ground.y));
+    this.addImage('g0', art5('G0-to-splitter'), o.g0.ground.x, o.g0.ground.y, 40, 48, this.depthAt(o.g0.ground.y));
+    this.addImage('prism', shared('prism-dark'), o.prism.center.x, o.prism.center.y + 24, 48, 48, this.depthAt(o.prism.center.y + 24));
+    this.addImage('g1', shared('mirror-1-horizontal'), o.g1.ground.x, o.g1.ground.y, 32, 40, this.depthAt(o.g1.ground.y));
+    this.addImage('g2', shared('mirror-2-horizontal'), o.g2.ground.x, o.g2.ground.y, 32, 40, this.depthAt(o.g2.ground.y));
+    this.addImage('eye-a', shared('receiver-off'), o.eyeA.ground.x, o.eyeA.ground.y, 24, 24, this.depthAt(o.eyeA.ground.y));
+    this.addImage('eye-b', shared('receiver-off'), o.eyeB.ground.x, o.eyeB.ground.y, 24, 24, this.depthAt(o.eyeB.ground.y));
+    this.addImage('call', art4('call-idle'), o.call.ground.x, o.call.ground.y, 40, 48, this.depthAt(o.call.ground.y));
+    this.addImage('lever', art5('return-flow-waiting'), o.lever.ground.x, o.lever.ground.y, 40, 48, this.depthAt(o.lever.ground.y));
+    this.addImage('chamber', art5('chamber-open'), o.chamber.stand.x, 284, 80, 104, this.depthAt(284));
+    this.addImage('grille', art5('chamber-grille-overlay'), o.chamber.stand.x, 284, 80, 104, this.depthAt(284) + 0.2);
+    if (!this.state.crystal) {
+      const crystalKey = 'crystal_hope';
+      if (this.ctx.scene.textures.exists(crystalKey)) {
+        const crystal = this.ctx.scene.add.image(o.chamber.crystal.x, o.chamber.crystal.y, crystalKey).setDepth(this.depthAt(284) + 0.1);
+        this.visuals.set('crystal', crystal);
+        this.keep(crystal);
+      }
+    }
+    this.addLabel('label-bench', 'Bàn thử', 140, 86);
+    this.addLabel('label-g0', 'G0', 212, 190);
+    this.addLabel('label-g1', 'G1', 251, 145);
+    this.addLabel('label-g2', 'G2', 287, 258);
+    this.addLabel('label-a', 'A', 477, 152);
+    this.addLabel('label-b', 'B', 477, 261);
+    this.beams = this.keep(this.ctx.scene.add.graphics().setDepth(7));
+  }
+
+  private addSolids(): void {
+    const bounds = TOWER.bounds;
+    this.addWorldCollider('bounds-n', bounds.x + bounds.width / 2, bounds.y - 6, bounds.width, 12);
+    this.addWorldCollider('bounds-s', bounds.x + bounds.width / 2, bounds.y + bounds.height + 6, bounds.width, 12);
+    this.addWorldCollider('bounds-w', bounds.x - 3, bounds.y + bounds.height / 2, 6, bounds.height);
+    this.addWorldCollider('bounds-e', bounds.x + bounds.width + 3, bounds.y + bounds.height / 2, 6, bounds.height);
+    for (const [index, solid] of TOWER_SOLIDS.entries()) {
+      this.addWorldCollider(`solid-${index}`, solid.x + solid.width / 2, solid.y + solid.height / 2, solid.width, solid.height);
+    }
+  }
+
+  private updateVisuals(live: TowerLiveState): void {
+    const art5 = (filename: string): string | null => getLevelArtKey(5, filename);
+    const art4 = (filename: string): string | null => getLevelArtKey(4, filename);
+    const shared = (filename: string): string | null => getSharedMechanismKey(filename);
+    const benchDirection = (pose: MirrorPose): string => (pose === 1 ? 'slash' : pose === 2 ? 'backslash' : 'horizontal');
+    const branchDirection = (pose: MirrorPose): string => (pose === 1 ? 'backslash' : pose === 2 ? 'slash' : 'horizontal');
+    const set = (id: string, texture: string | null): void => {
+      const image = this.visuals.get(id);
+      if (image && texture && this.ctx.scene.textures.exists(texture) && image.texture.key !== texture) image.setTexture(texture);
+    };
+    const sourceTexture = (placed: boolean): string | null => shared(!placed ? 'source-empty' : this.state.lanternOn ? 'source-lit' : 'source-off-source');
+    set('bench-source', sourceTexture(this.state.source === 'practice'));
+    set('source', sourceTexture(this.state.source === 'main'));
+    set('bench-mirror', shared(`mirror-1-${benchDirection(this.state.practice)}`));
+    set('g1', shared(`mirror-1-${branchDirection(this.state.g1)}`));
+    set('g2', shared(`mirror-2-${branchDirection(this.state.g2)}`));
+    set('g0', art5(`G0-to-${this.state.g0 === 0 ? 'splitter' : this.state.g0 === 1 ? 'A' : 'B'}`));
+    const benchFeed = this.state.source === 'practice' && this.state.lanternOn && this.state.practice === 1;
+    const prismFeed = this.state.source === 'main' && this.state.lanternOn && this.state.g0 === 0;
+    set('bench-prism', shared(benchFeed ? 'prism-receiving' : 'prism-dark'));
+    set('prism', shared(prismFeed ? 'prism-receiving' : 'prism-dark'));
+    set('bench-eye-a', shared(live.practiceLit ? 'receiver-on' : 'receiver-off'));
+    set('bench-eye-b', shared(live.practiceLit ? 'receiver-on' : 'receiver-off'));
+    set('eye-a', shared(live.liveA ? 'receiver-on' : 'receiver-off'));
+    set('eye-b', shared(live.liveB ? 'receiver-on' : 'receiver-off'));
+    const ring = (id: 'a' | 'b' | 'c', on: boolean): void => set(`ring-${id}`, art5(`ring-${id.toUpperCase()}-${on ? 'on' : 'off'}`));
+    ring('a', live.liveA && !this.state.waterReturned);
+    ring('b', live.liveB && !this.state.waterReturned);
+    ring('c', live.lumoAtC && !this.state.waterReturned);
+    const strip = this.visuals.get('strip');
+    if (strip) {
+      strip.setVisible(!this.state.waterReturned);
+      if (!this.state.waterReturned) set('strip', art5(live.liveA && live.liveB && live.lumoAtC ? 'all-currently-powered' : 'waiting-for-live-circuits'));
+    }
+    set('lamp', art5(this.state.waterReturned ? 'tower-lamp-dim' : 'tower-lamp-white'));
+    set('fountain', art5(this.state.waterReturned ? 'fountain-down' : 'fountain-up'));
+    this.visuals.get('intake')?.setVisible(!this.state.waterReturned);
+    this.visuals.get('outflow')?.setVisible(this.state.waterReturned);
+    set('call', art4(this.state.lumoAssign === 'follow' ? 'call-idle' : this.state.lumoAssign === 'to-c' ? 'call-sent' : 'call-arrived'));
+    set('plate', art4(live.lumoAtC ? 'pressure-occupied' : 'pressure-empty'));
+    set('lever', art5(this.state.waterReturned ? 'return-flow-held' : 'return-flow-waiting'));
+    set('record', art5(this.state.crystal ? 'record-compartment-open' : 'record-compartment-closed'));
+    this.visuals.get('grille')?.setVisible(!this.state.waterReturned);
+    this.beams?.clear();
+    if (this.beams) {
+      for (const beam of live.beams) {
+        this.beams.lineStyle(beam.live ? 3 : 2, beam.live ? 0xffdf83 : 0x8ca7a8, beam.live ? 0.9 : 0.45);
+        this.beams.lineBetween(beam.from.x, beam.from.y, beam.to.x, beam.to.y);
+        if (!beam.live) { this.beams.fillStyle(0x8ca7a8, 0.6); this.beams.fillCircle(beam.to.x, beam.to.y, 3); }
+      }
+    }
+  }
+
+  private updateHud(live: TowerLiveState): void {
+    if (!this.hud.length) return;
+    this.hud[1].setText(this.objectiveFor(live));
+    this.hud[2].setText(this.statusFor(live));
+    if (this.stepKey !== live.step) { this.stepKey = live.step; this.hintIndex = 0; }
+  }
+
+  private drawHud(): void {
+    const { scene } = this.ctx;
+    this.hud.push(this.keep(scene.add.text(16, 13, '06  Ngọn Tháp Không Ngủ · Hy vọng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86)));
+    this.hud.push(this.keep(scene.add.text(16, 42, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86)));
+    this.hud.push(this.keep(scene.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86)));
+    this.hud.push(this.keep(scene.add.text(624, 320, 'E Tương tác · F Đèn · H Gợi ý · J Ghi chép · ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 5, y: 3 } }).setOrigin(1, 0).setDepth(86)));
+  }
+
+  private showPanel(): void {
+    if (this.panel) return;
+    const key = getLevelArtKey(5, 'voice-record-panel');
+    if (!key || !this.ctx.scene.textures.exists(key)) return;
+    this.panel = this.ctx.scene.add.image(320, 205, key).setDepth(80);
+    this.keep(this.panel);
+  }
+
+  private hidePanel(): void {
+    this.panel?.destroy();
+    this.panel = undefined;
+  }
+
+  private addWorldCollider(id: string, x: number, y: number, width: number, height: number): void {
+    const object = this.ctx.scene.add.rectangle(x, y, width, height, 0, 0);
+    this.ctx.scene.physics.add.existing(object, true);
+    const body = object.body as Phaser.Physics.Arcade.StaticBody;
+    this.bodies.push(body);
+    this.colliders.push(this.ctx.scene.physics.add.collider(this.ctx.player.sprite, object));
+    object.setName(id);
+    this.keep(object);
+  }
+
+  private addImage(id: string, texture: string | null, x: number, y: number, width: number, height: number, depth: number, originY = 1): void {
+    if (!texture || !this.ctx.scene.textures.exists(texture)) return;
+    const image = this.ctx.scene.add.image(x, y, texture).setOrigin(0.5, originY).setDisplaySize(width, height).setDepth(depth);
+    this.visuals.set(id, image);
+    this.keep(image);
+  }
+
+  private addLabel(id: string, text: string, x: number, y: number): void {
+    const label = this.ctx.scene.add.text(x, y, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#f2ddb0', backgroundColor: '#07151c88', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(15 + y / 10);
+    label.setData('towerLabel', id);
+    this.keep(label);
+  }
+
+  private depthAt(y: number): number { return 10 + y / 10; }
+
+  private keep<T extends Phaser.GameObjects.GameObject>(object: T): T {
+    this.objects.push(object);
+    return object;
+  }
+
+  private saveState(): void {
+    const { progress, lantern } = this.ctx;
+    this.state.lanternOn = lantern.lanternOn;
+    progress.lanternOn = this.state.lanternOn;
+    progress.flags['l5-layout-v2'] = true;
+    progress.counters['tower-g0'] = this.state.g0;
+    progress.counters['tower-g1'] = this.state.g1;
+    progress.counters['tower-g2'] = this.state.g2;
+    progress.counters['l5-practice'] = this.state.practice;
+    progress.flags['l5-practice-ok'] = this.state.practiceDone;
+    if (this.state.source !== null) progress.flags['l5-lamp-source'] = this.state.source;
+    else delete progress.flags['l5-lamp-source'];
+    progress.flags['l5-lantern-placed'] = this.state.source !== null;
+    progress.flags['l5-lantern-retrieved'] = this.state.lanternRetrieved;
+    if (this.state.waterReturned) {
+      progress.flags['l5-water-returned'] = true;
+      progress.flags['l5-power'] = true;
+    }
+    progress.flags['l5-crystal'] = this.state.crystal;
+    progress.flags['l5-record-read'] = this.state.recordRead;
+    progress.flags['l5-reunited'] = this.state.reunited;
+    progress.flags['l5-lumo-assign'] = this.state.lumoAssign;
+    this.ctx.save();
+  }
+}

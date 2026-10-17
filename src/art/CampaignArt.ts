@@ -44,10 +44,8 @@ const levelArtModules = import.meta.glob([
   '../../assets/levels/04-shattered-moonlit-creek/sprites/test-flower-closed.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/test-flower-open.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/*.png',
-  '../../assets/levels/05-a-path-for-two/sprites/station-scene-base.png',
-  '../../assets/levels/05-a-path-for-two/sprites/call-idle.png',
-  '../../assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png',
-  '../../assets/levels/06-the-sleepless-tower/sprites/tower-lamp-dim.png',
+  '../../assets/levels/05-a-path-for-two/sprites/*.png',
+  '../../assets/levels/06-the-sleepless-tower/sprites/*.png',
   '../../assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png',
   '../../assets/levels/07-the-sleeping-garden/sprites/reservoir-shutter-closed-overlay.png',
   '../../assets/levels/07-the-sleeping-garden/sprites/reservoir-open.png',
@@ -113,6 +111,7 @@ const sharedMechanismModules = import.meta.glob([
   '../../assets/levels/shared/mechanisms/mirror-3-horizontal.png',
   '../../assets/levels/shared/mechanisms/mirror-3-slash.png',
   '../../assets/levels/shared/mechanisms/mirror-3-backslash.png',
+  '../../assets/levels/shared/beam-splitter/*.png',
 ], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 
 function normalize(value: string): string {
