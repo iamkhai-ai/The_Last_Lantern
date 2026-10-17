@@ -1,5 +1,7 @@
 # Level 02 clarity follow-up
 
+Latest location amendment: [level-02-poem-follow-up.md](level-02-poem-follow-up.md) moves the poem from the northern gate to the entry path. Earlier gate-location wording and verification in this historical record are superseded for the poem's placement.
+
 User review: symbol stones are too small and the entry does not communicate where to begin. Base `90ffec0`; bounded Level 02 correction. Existing autonomous-design and Luna-high implementation authorization applies. No other-level, raster, save-schema or dependency changes. Root stops its preview before edits and restarts the human preview after actual checks.
 
 ## Concrete changes

@@ -26,3 +26,9 @@ Verification on the implementation revision:
 - Real browser/runtime automation — NOT_RUN because Work browser control is disabled; no server or UI was started.
 
 No raster, dependency, save-format, or other-level changes.
+
+## Root closure — 2026-10-17
+
+Checked frozen revision `2fa3b851e5bc3bdda5a91f1c3be55bf28fde73ae`. Root independently ran Level02, forest-edge and campaign-start pure checks, both browser script syntax checks, `npm run build` (406 modules) and diff check: PASS, exit 0. Restored generated tracked dist. Independent read-only Luna high reviewers A/B examined the same revision: PASS, no actionable findings. Both confirmed shared poem geometry/cue/action, direct near-entry access, distinct radius24 targets, unchanged poem/puzzle/save semantics and safe old positions. Browser runtime/visual verification: NOT_RUN because Work browser control remains disabled; earlier browser results are not reused.
+
+Human preview is relaunched on localhost5190. The external preview config's poem-v3 marker initializes a fresh Level02 test entry, backing up prior test progress under `level02-human-preview-backup-poem-v3`; other origins are untouched. HTTP serving is checked separately from runtime gameplay. No remote publication. Closure commit is documentation only.

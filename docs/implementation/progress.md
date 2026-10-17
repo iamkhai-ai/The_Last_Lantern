@@ -49,6 +49,11 @@ Current slice: rebuild **Level 02 only**, per the user's subsequent request; ano
 - Root pure/syntax/build/diff checks PASS. Two independent Luna high reviews PASS, no actionable source findings. Static spawn/tree alpha diagnostic PASS. New browser gameplay/visual fixtures NOT_RUN because Work browser control is disabled; earlier browser results remain historical. Human acceptance pending.
 - Human preview reopened on 5190 with a fresh flow-v2 test save and backup of the prior test progress. Latest decisions/evidence/limits: [level-02-flow-follow-up.md](level-02-flow-follow-up.md). No remote publication.
 
+## Level 02 nearby poem — 2026-10-17
+
+- User requested easier access to the poem. Moved it to `(236,278)` with stand `(236,284)`, directly right of practice on the entry path; all active directions and related geometry/fixtures updated. Radius24 and puzzle/save rules preserved.
+- Frozen source `2fa3b851`: root pure/syntax/build/diff checks PASS; two independent Luna high reviews PASS. Browser runtime NOT_RUN because Work browser control is disabled. Human preview relaunched with poem-v3 test-entry marker and prior test save backup. Evidence and ruling: [level-02-poem-follow-up.md](level-02-poem-follow-up.md).
+
 ## Level 01 lighting follow-up — 2026-10-16
 
 - Decision: Level 01 uses a cached 256×256 radial alpha mask, inverted over the dark overlay and vignette so the nearby world is revealed through a soft actual transparency falloff. With lantern lit, the display diameter is 232px (about a 33px clear core, fading to about 116px); before pickup or with lantern off, it is 76px (about a 38px outer pool). Darkness opacity is 0.92 lit / 0.94 off, with the existing additive halo reduced. The mask is generated once with other procedural textures and reused; no pulse, save, gate, HUD, or other-level behavior changes are intended.
