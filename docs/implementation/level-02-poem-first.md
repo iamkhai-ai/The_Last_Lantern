@@ -65,6 +65,8 @@ The first build attempt found a TypeScript widening error in the new dynamic ope
 
 User review found the poem slab too small to show its Moon, Leaf, and Star glyphs clearly. Existing high-resolution generated source art already contains all three glyphs, so no image regeneration or raster edit is needed. Enlarge only its runtime display to 96×80 (2× native), keeping anchor `(136,270)`, spawn `(136,286)`, stand `(136,276)`, and interaction radius 24 unchanged. Set the shared prompt offset to `-104`, which places its label above art top y=190. Widen the visible base collider to `[102,256,68,14]` while keeping bottom y=270; this preserves southern contact y=254 and E range. Widen only the poem cue ellipse to 86px. Keep tree anchors, story, flow, puzzle, saves, and other levels unchanged.
 
+Both independent reviews of the enlarged-slab revision `e48fb8deb9f8a7df42df7c503037f82f1ee096ff` reported the same P2: the cue fill was 86px wide but its outline remained 46px. Resolution: derive one local `cueWidth` from `WOODS_POEM_ART.width - 10` and use it for both fill and stroke ellipses. This keeps the cue centered and consistently outlined as the slab dimensions change.
+
 ## Root verification and review — 2026-10-17
 
 Checked frozen source revision `2e8a91754ff1a8b59594c8b556c9cb4365258fc0`. Root independently ran the woods, forest-edge and campaign-start-intent checks, both browser fixture syntax checks, `npm run build` (406 modules, Vite 9.39s), and `git diff --check 252aef0 HEAD`: PASS. Only generated tracked `dist/index.html` changed during build and was restored. Source scope is restricted to the Level02 module and Level02-specific CampaignScene branches; character frames and raster assets are unchanged.

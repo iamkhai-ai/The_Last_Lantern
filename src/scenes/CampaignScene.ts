@@ -2374,10 +2374,11 @@ export class CampaignScene extends Phaser.Scene {
     this.woodsTutorialCue.setVisible(Boolean(target));
     if (!target) return;
     const color = 0xb4dfb2;
+    const cueWidth = WOODS_POEM_ART.width - 10;
     this.woodsTutorialCue.fillStyle(color, 0.12);
-    this.woodsTutorialCue.fillEllipse(target.x, target.y - 2, 86, 18);
+    this.woodsTutorialCue.fillEllipse(target.x, target.y - 2, cueWidth, 18);
     this.woodsTutorialCue.lineStyle(2, color, 0.55);
-    this.woodsTutorialCue.strokeEllipse(target.x, target.y - 2, 46, 18);
+    this.woodsTutorialCue.strokeEllipse(target.x, target.y - 2, cueWidth, 18);
   }
 
   private getWoodsTutorialStage(): WoodsTutorialStage {
