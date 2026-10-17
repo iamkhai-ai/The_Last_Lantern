@@ -60,3 +60,13 @@ Rewrote `docs/implementation/02-layout.md` as the current poem-first specificati
 - Real browser runtime — NOT_RUN; browser automation is disabled in Work settings. No server or browser session was started.
 
 The first build attempt found a TypeScript widening error in the new dynamic opening dialogue array. Annotating it as `DialogueLine[]` resolved the error; the completed build above passed. The final source revision is recorded by its commit SHA in the implementation task report.
+
+## Root verification and review — 2026-10-17
+
+Checked frozen source revision `2e8a91754ff1a8b59594c8b556c9cb4365258fc0`. Root independently ran the woods, forest-edge and campaign-start-intent checks, both browser fixture syntax checks, `npm run build` (406 modules, Vite 9.39s), and `git diff --check 252aef0 HEAD`: PASS. Only generated tracked `dist/index.html` changed during build and was restored. Source scope is restricted to the Level02 module and Level02-specific CampaignScene branches; character frames and raster assets are unchanged.
+
+Two independent read-only Luna High tasks reviewed the same frozen revision. Review B reported no actionable findings. Review A initially reported P2: the connector-to-clearing polygon overlap appeared narrower than the 48px path contract. Root sampled a perpendicular 48px swath along the connecting centerline across the join, at 0.5px intervals: all 12,901 points were inside the union of visible ground paths. Review A independently reproduced that result and withdrew the finding: polygon overlap width is not traversable union width. Review A then reported no other actionable findings. No source correction was needed for this finding; its disposition is preserved here rather than silently removed.
+
+Browser runtime/visual verification: NOT_RUN because Work browser control is disabled. The historical playthrough is not reused. Human visual acceptance remains pending. The external localhost5190 preview configuration now uses `level02-human-preview-poem-first-v4`; on the next load of `?level=2` it backs up the previous test save under `level02-human-preview-backup-poem-first-v4` and initializes a legitimate fresh Level02 entry once. HTTP serving returned 200 and included the new marker. HTTP checks do not establish gameplay correctness. The preview configuration is outside the repository. No push, merge or remote publication.
+
+This closure is evidence only. The product source, requirements, scripts and assets checked above remain at the reviewed revision.
