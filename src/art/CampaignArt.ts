@@ -26,6 +26,7 @@ const levelArtModules = import.meta.glob([
   '../../assets/levels/04-shattered-moonlit-creek/sprites/storm-relief.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/test-flower-closed.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/test-flower-open.png',
+  '../../assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/*.png',
   '../../assets/levels/05-a-path-for-two/sprites/station-scene-base.png',
   '../../assets/levels/05-a-path-for-two/sprites/call-idle.png',
   '../../assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png',

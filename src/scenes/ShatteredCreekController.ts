@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getSharedMechanismKey, getLevelArtKey } from '../art/CampaignArt';
+import { getLevelArtKey } from '../art/CampaignArt';
 import { SHATTERED_CREEK, canApproach, canCompleteCreek, deriveCreekState, migrateV1Creek, resolveCreekSpawn, unsafePowerChange, type CreekLiveState, type CreekState, type MirrorPose, type Point, type RaySegment } from '../data/shatteredCreekLayout';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
@@ -9,6 +9,7 @@ import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 
 type Say = (lines: DialogueLine[], done?: () => void) => void;
+const creekMechanismArt = (filename: string): string | null => getLevelArtKey(3, `mechanisms/${filename}`);
 type Context = { scene: Phaser.Scene; player: Player; lumo: Lumo; lantern: LanternSystem; interactions: InteractionSystem; progress: CampaignProgress; save: () => void; say: Say; nextLevel: (lines: DialogueLine[]) => void; isDialogueActive: () => boolean };
 
 const OPENING: DialogueLine[] = [
@@ -45,8 +46,6 @@ export class ShatteredCreekController {
   private visuals = new Map<string, Phaser.GameObjects.Image>();
   private beams?: Phaser.GameObjects.Graphics;
   private hintIndex = 0;
-  private bridgeStoneA?: Phaser.GameObjects.TileSprite;
-  private bridgeStoneB?: Phaser.GameObjects.TileSprite;
   private state!: CreekState;
   private cleaned = false;
   private hud: Phaser.GameObjects.Text[] = [];
@@ -275,27 +274,24 @@ export class ShatteredCreekController {
     if (backdropKey && scene.textures.exists(backdropKey)) {
       const background = scene.add.image(0, 0, backdropKey).setOrigin(0, 0).setDisplaySize(640, 360).setCrop(0, 0, 640, 88).setDepth(0); this.keep(background);
     }
-    const { bounds, water, bridges } = SHATTERED_CREEK;
+    const { bounds, water } = SHATTERED_CREEK;
     this.keep(scene.add.tileSprite(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, bounds.width, bounds.height, 'ground_stone').setTint(0x9ea895).setDepth(0));
     for (const river of water) this.keep(scene.add.tileSprite(river.x + river.width / 2, river.y + river.height / 2, river.width, river.height, 'tile_water').setTint(0x8cc0c5).setDepth(0.1));
     for (const river of water) for (const x of [river.x, river.x + river.width]) this.keep(scene.add.tileSprite(x, river.y + river.height / 2, 4, river.height, 'stepping_stone').setTint(0x8c988b).setDepth(1));
-    const gapA = bridges.a.gap; const gapB = bridges.b.gap;
-    this.bridgeStoneA = this.keep(scene.add.tileSprite(gapA.x + gapA.width / 2, gapA.y + gapA.height / 2, gapA.width, gapA.height, 'stepping_stone').setDepth(2).setVisible(false));
-    this.bridgeStoneB = this.keep(scene.add.tileSprite(gapB.x + gapB.width / 2, gapB.y + gapB.height / 2, gapB.width, gapB.height, 'stepping_stone').setDepth(2).setVisible(false));
     this.addBridge('a', 'west'); this.addBridge('b', 'east');
   }
 
   private drawMechanisms(): void {
     const { objects } = SHATTERED_CREEK;
-    this.addImage('practice-source', getSharedMechanismKey('source-empty'), objects.practiceSource.ground, 32, 44);
-    this.addImage('practice-mirror', getSharedMechanismKey('mirror-1-backslash'), objects.practiceMirror.ground, 32, 40);
-    this.addImage('practice-eye', getLevelArtKey(3, 'test-flower-closed'), objects.practiceEye.ground, 28, 28);
-    this.addImage('source', getSharedMechanismKey('source-empty'), objects.source.ground, 32, 44);
+    this.addImage('practice-source', creekMechanismArt('source-empty'), objects.practiceSource.ground, 32, 44);
+    this.addImage('practice-mirror', creekMechanismArt('mirror-1-backslash'), objects.practiceMirror.ground, 32, 40);
+    this.addImage('practice-eye', creekMechanismArt('test-flower-closed'), objects.practiceEye.ground, 28, 28);
+    this.addImage('source', creekMechanismArt('source-empty'), objects.source.ground, 32, 44);
     for (const [id, mirrorIndex] of [['g1', 1], ['g2', 2], ['g3', 3]] as const) this.addImage(id, this.mirrorTexture(id, this.state[id]), objects[id].ground, 32, 40);
-    this.addImage('eyeA', getSharedMechanismKey('receiver-off'), objects.eyeA.ground, 24, 24);
-    this.addImage('eyeB', getSharedMechanismKey('receiver-off'), objects.eyeB.ground, 24, 24);
-    this.addImage('latch-latchA', getSharedMechanismKey('latch-west-unlatched'), objects.latchA.ground, 28, 32);
-    this.addImage('latch-latchB', getSharedMechanismKey('latch-east-unlatched'), objects.latchB.ground, 28, 32);
+    this.addImage('eyeA', creekMechanismArt('receiver-off'), objects.eyeA.ground, 24, 24);
+    this.addImage('eyeB', creekMechanismArt('receiver-off'), objects.eyeB.ground, 24, 24);
+    this.addImage('latch-latchA', creekMechanismArt('latch-west-unlatched'), objects.latchA.ground, 28, 32);
+    this.addImage('latch-latchB', creekMechanismArt('latch-east-unlatched'), objects.latchB.ground, 28, 32);
     this.addImage('relief', getLevelArtKey(3, 'storm-relief'), objects.relief.ground, 128, 80);
     this.addImage('exit', getLevelArtKey(1, 'woods_arch_open_passage'), objects.exit.ground, 88, 86.625, 5);
     for (const [id, name, x, y] of [['g1', 'G1 · •', 202, 150], ['g2', 'G2 · ••', 202, 84], ['g3', 'G3 · •••', 350, 84]] as const) this.addLabel(id, name, x, y);
@@ -307,26 +303,25 @@ export class ShatteredCreekController {
 
   private addBridge(id: 'a' | 'b', side: 'west' | 'east'): void {
     const entry = SHATTERED_CREEK.bridges[id];
-    const image = this.image(`bridge-${id}`, getSharedMechanismKey(`bridge-${side}-absent`), entry.art, 100, 36, 3);
+    const image = this.image(`bridge-${id}`, creekMechanismArt(`bridge-${side}-absent`), entry.art, 100, 36, 3);
     if (image) image.setOrigin(0.5, 0.5).setData('bridgeSide', side);
   }
 
   private updateVisuals(): void {
     const live = deriveCreekState(this.state);
     for (const id of ['g1', 'g2', 'g3'] as const) this.setImage(id, this.mirrorTexture(id, this.state[id]));
-    this.setImage('practice-mirror', getSharedMechanismKey(`mirror-1-${this.state.practice === 0 ? 'horizontal' : this.state.practice === 1 ? 'backslash' : 'slash'}`));
-    this.setImage('practice-eye', getLevelArtKey(3, live.practiceLit ? 'test-flower-open' : 'test-flower-closed'));
-    this.setImage('source', getSharedMechanismKey(this.state.source === 'main' ? this.state.lanternOn ? 'source-lit' : 'source-off-source' : 'source-empty'));
-    this.setImage('practice-source', getSharedMechanismKey(this.state.source === 'practice' ? this.state.lanternOn ? 'source-lit' : 'source-off-source' : 'source-empty'));
-    this.setImage('eyeA', getSharedMechanismKey(live.eyeA ? 'receiver-on' : 'receiver-off'));
-    this.setImage('eyeB', getSharedMechanismKey(live.eyeB ? 'receiver-on' : 'receiver-off'));
-    this.setImage('latch-latchA', getSharedMechanismKey(`latch-west-${this.state.latchA ? 'latched' : 'unlatched'}`));
-    this.setImage('latch-latchB', getSharedMechanismKey(`latch-east-${this.state.latchB ? 'latched' : 'unlatched'}`));
+    this.setImage('practice-mirror', creekMechanismArt(`mirror-1-${this.state.practice === 0 ? 'horizontal' : this.state.practice === 1 ? 'backslash' : 'slash'}`));
+    this.setImage('practice-eye', creekMechanismArt(live.practiceLit ? 'test-flower-open' : 'test-flower-closed'));
+    this.setImage('source', creekMechanismArt(this.state.source === 'main' ? this.state.lanternOn ? 'source-lit' : 'source-off-source' : 'source-empty'));
+    this.setImage('practice-source', creekMechanismArt(this.state.source === 'practice' ? this.state.lanternOn ? 'source-lit' : 'source-off-source' : 'source-empty'));
+    this.setImage('eyeA', creekMechanismArt(live.eyeA ? 'receiver-on' : 'receiver-off'));
+    this.setImage('eyeB', creekMechanismArt(live.eyeB ? 'receiver-on' : 'receiver-off'));
+    this.setImage('latch-latchA', creekMechanismArt(`latch-west-${this.state.latchA ? 'latched' : 'unlatched'}`));
+    this.setImage('latch-latchB', creekMechanismArt(`latch-east-${this.state.latchB ? 'latched' : 'unlatched'}`));
     for (const [id, side, ready, latched] of [['a', 'west', live.bridgeA, this.state.latchA], ['b', 'east', live.bridgeB, this.state.latchB]] as const) {
       const image = this.visuals.get(`bridge-${id}`); if (!image) continue;
-      const key = getSharedMechanismKey(`bridge-${side}-${latched ? 'latched' : ready ? 'powered' : 'absent'}`); if (key && this.ctx.scene.textures.exists(key) && image.texture.key !== key) image.setTexture(key);
+      const key = creekMechanismArt(`bridge-${side}-${latched ? 'latched' : ready ? 'powered' : 'absent'}`); if (key && this.ctx.scene.textures.exists(key) && image.texture.key !== key) image.setTexture(key);
     }
-    this.bridgeStoneA?.setVisible(live.bridgeA); this.bridgeStoneB?.setVisible(live.bridgeB);
     this.beams?.clear();
     if (this.beams) {
       this.drawRay(this.beams, live.practiceSegments); this.drawRay(this.beams, live.mainSegments);
@@ -343,7 +338,7 @@ export class ShatteredCreekController {
 
   private mirrorTexture(id: 'g1' | 'g2' | 'g3', pose: MirrorPose): string | null {
     const direction = pose === 0 ? 'horizontal' : id === 'g3' ? pose === 1 ? 'slash' : 'backslash' : pose === 1 ? 'backslash' : 'slash';
-    return getSharedMechanismKey(`mirror-${id === 'g1' ? '1' : id === 'g2' ? '2' : '3'}-${direction}`);
+    return creekMechanismArt(`mirror-${id === 'g1' ? '1' : id === 'g2' ? '2' : '3'}-${direction}`);
   }
 
   private addImage(id: string, texture: string | null, ground: Point, width: number, height: number, depth = 10 + ground.y / 10): void {

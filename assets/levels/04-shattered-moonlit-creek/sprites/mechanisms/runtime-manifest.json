@@ -1,0 +1,400 @@
+{
+  "source_empty_alignment": {
+    "input": "sources/source-empty-before-normalization.png",
+    "resize": [
+      32,
+      30
+    ],
+    "paste": [
+      0,
+      14
+    ],
+    "canvas": [
+      32,
+      44
+    ],
+    "sampling": "nearest"
+  },
+  "sprites": [
+    {
+      "file": "bridge-east-absent.png",
+      "size": [
+        100,
+        36
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        100,
+        36
+      ],
+      "sha256": "71dc95509e562cb6a35ce1e5ce078ab135eefd4e35ad399991f91b725c2e1404",
+      "central_gap_alpha_bbox": null
+    },
+    {
+      "file": "bridge-east-latched.png",
+      "size": [
+        100,
+        36
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        100,
+        36
+      ],
+      "sha256": "4d3abec561630b50606df478f84cdc681850bd184f867218c1da96eab89a41c5"
+    },
+    {
+      "file": "bridge-east-powered.png",
+      "size": [
+        100,
+        36
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        100,
+        36
+      ],
+      "sha256": "3821d93c752eab66402438d6821ee2bf806c5a30929f7c2e44a4967051128a2a"
+    },
+    {
+      "file": "bridge-west-absent.png",
+      "size": [
+        100,
+        36
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        100,
+        36
+      ],
+      "sha256": "71dc95509e562cb6a35ce1e5ce078ab135eefd4e35ad399991f91b725c2e1404",
+      "central_gap_alpha_bbox": null
+    },
+    {
+      "file": "bridge-west-latched.png",
+      "size": [
+        100,
+        36
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        100,
+        36
+      ],
+      "sha256": "4d3abec561630b50606df478f84cdc681850bd184f867218c1da96eab89a41c5"
+    },
+    {
+      "file": "bridge-west-powered.png",
+      "size": [
+        100,
+        36
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        100,
+        36
+      ],
+      "sha256": "3821d93c752eab66402438d6821ee2bf806c5a30929f7c2e44a4967051128a2a"
+    },
+    {
+      "file": "latch-east-latched.png",
+      "size": [
+        28,
+        32
+      ],
+      "alpha_bbox": [
+        0,
+        9,
+        28,
+        32
+      ],
+      "sha256": "4acc68d6d4e4be5c4b7c5effad23351ed8a878b255c310c50f8b07c585f7115b"
+    },
+    {
+      "file": "latch-east-unlatched.png",
+      "size": [
+        28,
+        32
+      ],
+      "alpha_bbox": [
+        0,
+        3,
+        28,
+        32
+      ],
+      "sha256": "60f320c70e4e5f32f0af995227fb40384ffbed684fa0dec4042764325e336166"
+    },
+    {
+      "file": "latch-west-latched.png",
+      "size": [
+        28,
+        32
+      ],
+      "alpha_bbox": [
+        0,
+        9,
+        28,
+        32
+      ],
+      "sha256": "4e047a3e5fd5eadaa739648a02c6149188a1c988fa800e676c83d67a9c1ae45e"
+    },
+    {
+      "file": "latch-west-unlatched.png",
+      "size": [
+        28,
+        32
+      ],
+      "alpha_bbox": [
+        0,
+        3,
+        28,
+        32
+      ],
+      "sha256": "6cafe1c96fd46bd145054f994d8d2b633140856a227aeac855ea8a863a86d6f4"
+    },
+    {
+      "file": "mirror-1-backslash.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "22b443f35b77cda77c362e06d05c4f8de56d19b4634cdf51d5c75c3200195b32"
+    },
+    {
+      "file": "mirror-1-horizontal.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "d6b2614a8c14f9d6e99c6fe3a3af9cff15bd7f2716d57dd42c732938a3d1c444"
+    },
+    {
+      "file": "mirror-1-slash.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "4d111d6cd9c689255c6bc4a6c75a3379021a7df5d11dd56fc556496d6930c77a"
+    },
+    {
+      "file": "mirror-2-backslash.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "7807040ecbbff10eb7b3f51a233fd7e1f01686765cc47303d0bee33dc3c98b5a"
+    },
+    {
+      "file": "mirror-2-horizontal.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "90f914be6fe1a62481770af7060535c907c05be28176743c07f568d647141397"
+    },
+    {
+      "file": "mirror-2-slash.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "a6377eb5849da38b8bd8b06cce908239cd54913593a407e7aef518a23dad0d5f"
+    },
+    {
+      "file": "mirror-3-backslash.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "cd67838b8ab25425e9b781307c041eb386b6068b4ccbc423df3ac5168c1290a1"
+    },
+    {
+      "file": "mirror-3-horizontal.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "6f88f2b24cc5933a059fab953935eee7b2ee78b0dbbac6760d89a60de8f6d5d7"
+    },
+    {
+      "file": "mirror-3-slash.png",
+      "size": [
+        32,
+        40
+      ],
+      "alpha_bbox": [
+        2,
+        3,
+        30,
+        40
+      ],
+      "sha256": "70fa2ebb0c41397b7b203082848bae35eee1c7fd391da333178004ecbcc59766"
+    },
+    {
+      "file": "receiver-energized.png",
+      "size": [
+        24,
+        24
+      ],
+      "alpha_bbox": [
+        2,
+        0,
+        22,
+        24
+      ],
+      "sha256": "61cd9579762e02d7c40b5181baa1a94d6313f39936dc53c143b744f55a418a5b"
+    },
+    {
+      "file": "receiver-off.png",
+      "size": [
+        24,
+        24
+      ],
+      "alpha_bbox": [
+        2,
+        0,
+        22,
+        24
+      ],
+      "sha256": "98c81a4fe05df90cee71e421e7a28b72e392442ce6bffd68753ba20eab2e05f1"
+    },
+    {
+      "file": "receiver-on.png",
+      "size": [
+        24,
+        24
+      ],
+      "alpha_bbox": [
+        2,
+        0,
+        22,
+        24
+      ],
+      "sha256": "de2c00e4c3248e4d15cdef2f1e82095a01339c4cc5d7854a2ee351ef9742b16c"
+    },
+    {
+      "file": "source-empty.png",
+      "size": [
+        32,
+        44
+      ],
+      "alpha_bbox": [
+        0,
+        14,
+        32,
+        44
+      ],
+      "sha256": "d052e343890304dc2b35a3a22f3da32c0fe79aebd3e2d84c33a6adb505fcec47"
+    },
+    {
+      "file": "source-lit.png",
+      "size": [
+        32,
+        44
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        32,
+        44
+      ],
+      "sha256": "95f67d1a377815b31018b76930d8f6b12ad357ff22ecdf8a9a35474ca8b13397"
+    },
+    {
+      "file": "source-off-source.png",
+      "size": [
+        32,
+        44
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        32,
+        44
+      ],
+      "sha256": "3d6e98fe3bfd4b892f87a5a5e32e72096a8d502c0d98faa21bfa93371e8fb77b"
+    },
+    {
+      "file": "test-flower-closed.png",
+      "size": [
+        28,
+        28
+      ],
+      "alpha_bbox": [
+        3,
+        1,
+        25,
+        27
+      ],
+      "sha256": "0a4ab43a9cf0c8c718556de739029564b9429f2434aa16049971368d06861f64"
+    },
+    {
+      "file": "test-flower-open.png",
+      "size": [
+        28,
+        28
+      ],
+      "alpha_bbox": [
+        2,
+        0,
+        26,
+        28
+      ],
+      "sha256": "aca6565fac55d4b16fc71b369f073106b140b395d05f69d4a593f99d6c80a5fc"
+    }
+  ]
+}

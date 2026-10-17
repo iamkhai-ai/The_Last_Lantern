@@ -11,6 +11,7 @@ The long-term request is a deliberate rebuild of Levels 01–10 from the existin
 - [Level 01 spatial layout](01-layout.md), retained as context; ongoing work belongs to another chat.
 - [Level 02 spatial layout](02-layout.md), [implementation plan](level-02-plan.md), [implementation report](level-02-report.md), and [final verification](level-02-verification.md).
 - [Level 04 spatial layout](04-layout.md), [implementation plan](level-04-plan.md), and [implementation report](level-04-report.md). Levels 05–10 remain deferred.
+- [Level 04 item art upgrade](level-04-prop-art.md):27 detailed mechanism states; local preview available, independent reviews blocked by the Luna usage limit.
 - [Asset audit](asset-layout-audit.md), produced by a read-only Luna high task before the scope was narrowed. Its later-level notes are reference only.
 - [Progress and decisions](progress.md)
 - [Level 01 verification and review](level-01-verification.md)

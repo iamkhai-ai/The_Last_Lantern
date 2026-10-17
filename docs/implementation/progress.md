@@ -6,6 +6,8 @@ Current slice: rebuild **Level 04 only**, per the user's 2026-10-17 request. Lev
 
 ## Level 04 — 2026-10-17
 
+- Item-art follow-up:27 generated mechanism sprites now use detailed mossy stone and brass. Root integrated and visually inspected the replacement set; compilation PASS(463 modules). Automated tests/full playthrough NOT_RUN for this slice. Required independent Luna High reviews are blocked by the worker's usage-limit failure; earlier geometry reviews do not cover the new art. Preview:`http://127.0.0.1:5194/?level=4`. See [art report](level-04-prop-art.md).
+
 - Root designed the safe practice group, three banks, two true reflected-light routes, near-side latches, return route for the lantern, relief and station entrance before Luna High implementation. Decisions are in [04-layout.md](04-layout.md).
 - Source correction `7886ba5` and spatial-requirements freeze `7fa651d` include shared exit-post solids, compact ground footprints, source-recovery guidance and clear practice captions.
 - **PASS** root production build, five pure scripts, diff checks and the independent post-aware route/restore probe on `7fa651d`. Both independent Luna High reviewers re-reviewed that revision with no open actionable findings. The first-round P2 post omission was corrected and closed.
