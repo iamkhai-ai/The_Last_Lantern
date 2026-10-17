@@ -1855,7 +1855,7 @@ export class CampaignScene extends Phaser.Scene {
       for (const [id,r] of [['woods-gate-left',WHISPERING_WOODS.gate.leftPost],['woods-gate-right',WHISPERING_WOODS.gate.rightPost],['woods-gate-backing',WHISPERING_WOODS.gate.backing],['woods-gate-threshold',WHISPERING_WOODS.gate.threshold]] as const) {
         this.addCampaignBarrier(id,r.x+r.width/2,r.y+r.height/2,r.width,r.height,id==='woods-gate-threshold'?!this.progress.flags['l1-open']:true);
       }
-    } else if (level === 6) {    } else if (level === 6) {
+    } else if (level === 6) {
       // The retractable root bridge and latched stone return path are the only canal crossings.
       this.addCampaignBarrier('garden-west-water', 135, 260, 270, 30);
       // The return latch opens a separate stone crossing, independent of the retractable root bridge.
