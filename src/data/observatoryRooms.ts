@@ -69,6 +69,7 @@ export type ObservatoryInteractableId =
   | 'g1'
   | 'lumo-tube'
   | 'lumo-seal'
+  | 'door-a-control'
   | 'sun-door-control'
   | 'g2'
   | 'splitter'
@@ -304,6 +305,7 @@ export const OBSERVATORY_ROOMS: Record<ObservatoryRoomId, ObservatoryRoomDefinit
       { id: 'g1', kind: 'mirror', position: element('g1').anchor, interactionPoint: element('g1').stand, textureKey: 'mirror_1', label: 'G1' },
       { id: 'lumo-tube', kind: 'tube', position: element('lumo-tube').anchor, interactionPoint: element('lumo-tube').stand, label: 'Ống dẫn Lumo' },
       { id: 'lumo-seal', kind: 'seal', position: element('lumo-seal').anchor, interactionPoint: element('lumo-seal').stand, label: 'Ấn Lumo' },
+      { id: 'door-a-control', kind: 'door-control', position: element('door-a-control').anchor, interactionPoint: element('door-a-control').stand, label: 'Chốt cửa A' },
       { id: 'sun-door-control', kind: 'lock', position: element('sun-door-control').anchor, interactionPoint: element('sun-door-control').stand, label: 'Khóa Nhật' },
     ],
     waypoints: [
