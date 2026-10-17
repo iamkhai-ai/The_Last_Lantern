@@ -36,14 +36,15 @@ export const LIBRARY_LAYOUT = {
 } as const;
 
 export const LIBRARY_SOLID_RECTS: LibraryRect[] = [
-  { x: 28, y: 260, width: 76, height: 14 },
-  { x: 22, y: 178, width: 56, height: 14 },
-  { x: 570, y: 148, width: 56, height: 14 },
-  { x: 116, y: 146, width: 32, height: 8 },
-  { x: 164, y: 146, width: 32, height: 8 },
-  { x: 116, y: 256, width: 32, height: 8 },
-  { x: 164, y: 256, width: 32, height: 8 },
-  { x: 480, y: 188, width: 40, height: 12 },
+  // Solid footprints fill the visible prop faces, so their sides and backs block too.
+  { x: 28, y: 223, width: 76, height: 50 },
+  { x: 12, y: 112, width: 76, height: 78 },
+  { x: 560, y: 82, width: 76, height: 78 },
+  { x: 108, y: 102, width: 48, height: 48 },
+  { x: 156, y: 102, width: 48, height: 48 },
+  { x: 108, y: 212, width: 48, height: 48 },
+  { x: 156, y: 212, width: 48, height: 48 },
+  { x: 458, y: 90, width: 84, height: 110 },
   // Full visible side-post strips from the 152x156 split frame at 110px wide.
   { x: 511, y: 199, width: 37, height: 113 },
   { x: 585, y: 199, width: 37, height: 113 },
