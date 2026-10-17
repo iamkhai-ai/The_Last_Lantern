@@ -24,6 +24,8 @@ const levelArtModules = import.meta.glob([
   '../../assets/levels/03-library-beneath-the-roots/sprites/room-mural-fifth.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/creek-scene-base.png',
   '../../assets/levels/04-shattered-moonlit-creek/sprites/storm-relief.png',
+  '../../assets/levels/04-shattered-moonlit-creek/sprites/test-flower-closed.png',
+  '../../assets/levels/04-shattered-moonlit-creek/sprites/test-flower-open.png',
   '../../assets/levels/05-a-path-for-two/sprites/station-scene-base.png',
   '../../assets/levels/05-a-path-for-two/sprites/call-idle.png',
   '../../assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png',
@@ -67,6 +69,34 @@ const characterModules = import.meta.glob([
   import: 'default',
 }) as Record<string, string>;
 
+const sharedMechanismModules = import.meta.glob([
+  '../../assets/levels/shared/mechanisms/bridge-west-absent.png',
+  '../../assets/levels/shared/mechanisms/bridge-west-powered.png',
+  '../../assets/levels/shared/mechanisms/bridge-west-latched.png',
+  '../../assets/levels/shared/mechanisms/bridge-east-absent.png',
+  '../../assets/levels/shared/mechanisms/bridge-east-powered.png',
+  '../../assets/levels/shared/mechanisms/bridge-east-latched.png',
+  '../../assets/levels/shared/mechanisms/latch-west-unlatched.png',
+  '../../assets/levels/shared/mechanisms/latch-west-latched.png',
+  '../../assets/levels/shared/mechanisms/latch-east-unlatched.png',
+  '../../assets/levels/shared/mechanisms/latch-east-latched.png',
+  '../../assets/levels/shared/mechanisms/source-empty.png',
+  '../../assets/levels/shared/mechanisms/source-lit.png',
+  '../../assets/levels/shared/mechanisms/source-off-source.png',
+  '../../assets/levels/shared/mechanisms/receiver-off.png',
+  '../../assets/levels/shared/mechanisms/receiver-energized.png',
+  '../../assets/levels/shared/mechanisms/receiver-on.png',
+  '../../assets/levels/shared/mechanisms/mirror-1-horizontal.png',
+  '../../assets/levels/shared/mechanisms/mirror-1-backslash.png',
+  '../../assets/levels/shared/mechanisms/mirror-1-slash.png',
+  '../../assets/levels/shared/mechanisms/mirror-2-horizontal.png',
+  '../../assets/levels/shared/mechanisms/mirror-2-backslash.png',
+  '../../assets/levels/shared/mechanisms/mirror-2-slash.png',
+  '../../assets/levels/shared/mechanisms/mirror-3-horizontal.png',
+  '../../assets/levels/shared/mechanisms/mirror-3-slash.png',
+  '../../assets/levels/shared/mechanisms/mirror-3-backslash.png',
+], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+
 function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 }
@@ -96,7 +126,16 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
     key: path.slice(path.lastIndexOf('/') + 1, -4),
     url,
   })),
+  ...Object.entries(sharedMechanismModules).map(([path, url]) => ({
+    key: `shared_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
+    url,
+  })),
 ];
+
+export function getSharedMechanismKey(filename: string): string | null {
+  const key = `shared_${normalize(filename.replace(/\.png$/i, ''))}`;
+  return CAMPAIGN_ART_FILES.some((asset) => asset.key === key) ? key : null;
+}
 
 export function getLevelArtKey(levelIndex: number, filename: string): string | null {
   const directory = levelDirectories[levelIndex];

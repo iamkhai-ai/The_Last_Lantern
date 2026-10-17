@@ -15,6 +15,7 @@ import { deriveObservatoryState } from '../systems/ObservatoryPuzzle';
 import { SoundSystem } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
 import { PauseMenu } from '../ui/PauseMenu';
+import { ShatteredCreekController } from './ShatteredCreekController';
 
 type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: Phaser.Input.Keyboard.Key; j: Phaser.Input.Keyboard.Key; space: Phaser.Input.Keyboard.Key; esc: Phaser.Input.Keyboard.Key };
 
@@ -47,9 +48,6 @@ export class CampaignScene extends Phaser.Scene {
   private campaignColliders: Phaser.Physics.Arcade.Collider[] = [];
   private campaignBodies = new Map<string, Phaser.Physics.Arcade.StaticBody>();
   private lastCampaignPlayerPosition = { x: 0, y: 0 };
-  private creekBridgeBPendingRemoval = false;
-  private creekBridgeBWasPassable = false;
-  private creekBridgeBTraversalSide: 'west' | 'east' | null = null;
   private gardenBridgePendingRemoval = false;
   private gardenBridgeWasReady = false;
   private gardenTraversalSide: 'north' | 'south' | null = null;
@@ -87,6 +85,7 @@ export class CampaignScene extends Phaser.Scene {
   private woodsMemoryOverlay?: Phaser.GameObjects.Graphics;
   private woodsTutorialCue?: Phaser.GameObjects.Graphics;
   private woodsCueStage?: WoodsTutorialStage;
+  private shatteredCreek?: ShatteredCreekController;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -144,6 +143,10 @@ export class CampaignScene extends Phaser.Scene {
         && this.lantern.triggerPulse(this.player.x, this.player.y)) this.player.playPulseAction();
     });
     keyboard.on('keydown-F', () => {
+      if (this.progress.level === 3) {
+        if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen() && this.shatteredCreek?.toggleLantern()) this.player.playLanternAction(this.lantern.lanternOn);
+        return;
+      }
       const finalToggleAvailable = this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && this.lantern.lanternInHand && this.lantern.lanternOn;
       if ((!this.dialogue.isInputLocked(performance.now()) || finalToggleAvailable) && !this.pauseMenu.isOpen()) {
         if (this.lantern.toggleLantern(performance.now())) {
@@ -157,10 +160,11 @@ export class CampaignScene extends Phaser.Scene {
         }
       }
     });
-    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.showHint(); });
+    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.showHint(); });
     keyboard.on('keydown-J', () => {
       if (this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
-      if (this.progress.level === 8) this.showObservatoryJournal();
+      if (this.progress.level === 3) this.shatteredCreek?.showJournal();
+      else if (this.progress.level === 8) this.showObservatoryJournal();
       else if (this.progress.level === 1) this.showRuneJournal();
       else if (this.progress.level === 0) this.showOpeningJournal();
     });
@@ -203,6 +207,7 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshHud();
     });
     this.buildLevel();
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shatteredCreek?.destroy());
   }
 
   public update(_time: number, delta: number): void {
@@ -216,6 +221,7 @@ export class CampaignScene extends Phaser.Scene {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 28, 610), y: Phaser.Math.Clamp(this.player.y - 24, 72, 295) };
       this.updateWoodsFirefly(dt);
     }
+    if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
     else this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.time.now - this.lastLumoSave >= 600) {
@@ -255,6 +261,7 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshObservatoryDoors();
       this.refreshObservatoryPuzzle();
     }
+    if (this.progress.level === 3) this.shatteredCreek?.update();
     this.interactions.update(
       this.player.x,
       this.player.y,
@@ -262,10 +269,12 @@ export class CampaignScene extends Phaser.Scene {
       this.player.sprite.getBounds(),
       this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : [],
     );
-    this.updatePuzzle(dt);
-    this.updateCampaignCrossingState();
-    this.updateCampaignBarriers();
-    this.refreshCampaignPuzzleVisuals();
+    if (this.progress.level !== 3) {
+      this.updatePuzzle(dt);
+      this.updateCampaignCrossingState();
+      this.updateCampaignBarriers();
+      this.refreshCampaignPuzzleVisuals();
+    }
     this.dialogue.update(dt);
     this.refreshHud();
     if (Phaser.Input.Keyboard.JustDown(this.keys.esc) && !locked && !this.pauseMenu.isOpen()) this.pauseMenu.open();
@@ -327,6 +336,8 @@ export class CampaignScene extends Phaser.Scene {
       return;
     }
     this.clearCampaignColliders();
+    this.shatteredCreek?.destroy();
+    this.shatteredCreek = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.memoryLayerLabels.clear();
@@ -335,12 +346,25 @@ export class CampaignScene extends Phaser.Scene {
     const level = this.progress.level;
     const definition = CAMPAIGN_LEVELS[level];
     this.selectedStone = -1;
-    this.drawRoom(definition.biome);
+    if (level !== 3) this.drawRoom(definition.biome);
     this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
     this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
     this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
     this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
     this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
+    if (level === 3) {
+      this.titleText.destroy(); this.objectiveText.destroy(); this.statusText.destroy(); this.hintText.destroy(); this.lumoStatusText.destroy();
+      this.shatteredCreek = new ShatteredCreekController({
+        scene: this, player: this.player, lumo: this.lumo, lantern: this.lantern, interactions: this.interactions,
+        progress: this.progress, save: () => this.save(), say: (lines, done) => this.say(lines, done), nextLevel: (lines) => this.nextLevel(lines), isDialogueActive: () => this.dialogue.isActive(),
+      });
+      const saved = this.progress.counters['player-level'] === level && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
+        ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] } : undefined;
+      this.shatteredCreek.build(saved);
+      this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
+      this.refreshHud();
+      return;
+    }
     const overloadCheckpoint = level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'];
     const savedPlayerX = this.progress.counters['player-level'] === level ? this.progress.counters['player-x'] : undefined;
     const savedPlayerY = this.progress.counters['player-level'] === level ? this.progress.counters['player-y'] : undefined;
@@ -379,7 +403,6 @@ export class CampaignScene extends Phaser.Scene {
     this.lantern.isOverloadMode = false;
     if (level === 9 && this.progress.flags['l9-overload']) this.lantern.isOverloadMode = true;
     if (level === 7 && this.progress.flags['l7-lantern-placed']) this.lantern.placeLanternAt(120, 205);
-    if (level === 3 && this.progress.flags['l3-lantern-placed'] && !this.progress.flags['l3-lantern-retrieved']) this.lantern.placeLanternAt(120, 205);
     if (level === 5 && this.progress.flags['l5-lantern-placed'] && !this.progress.flags['l5-lantern-retrieved']) this.lantern.placeLanternAt(120, 205);
     const heartLanternShouldBePlaced = this.progress.flags['l9-lantern-placed'] === true
       || (this.progress.flags['l9-lantern-placed'] === undefined && this.progress.flags['l9-roots'] === true && !this.progress.flags['l9-lantern-retrieved']);
@@ -1212,7 +1235,6 @@ export class CampaignScene extends Phaser.Scene {
     const props: Array<[string, number, number]> = level === 0 ? [['beacon_stone', 300, 230], ['woods_arch_locked', 486, 166], ['pedestal_empty', 410, 225]]
       : level === 1 ? []
       : level === 2 ? [['mural_tablet', 320, 72], ['pedestal_empty', 320, 190], ['receiver_off', 530, 194]]
-      : level === 3 ? [['pedestal_lit', 120, 205], ['mirror_1', 180, 165], ['mirror_2', 220, 120], ['mirror_3', 345, 236], ['receiver_off', 220, 180], ['stepping_stone', 280, 236], ['stepping_stone', 372, 236]]
       : level === 4 ? [['receiver_off', 320, 85], ['lock_moon_off', 220, 130], ['lock_moon_off', 420, 130], ['lock_sun_off', 320, 218]]
       : level === 5 ? [['pedestal_lit', 120, 205], ['mirror_0', 160, 170], ['mirror_1', 250, 170], ['mirror_2', 350, 170], ['receiver_off', 470, 145], ['receiver_off', 470, 205], ['lock_sun_off', 320, 80], ['mural_tablet', 535, 86]]
       : level === 6 ? [['ruins_flower', 220, 160], ['ruins_flower', 420, 160], ['receiver_off', 320, 100]]
@@ -1248,8 +1270,6 @@ export class CampaignScene extends Phaser.Scene {
       this.addLevelArt('room-mural-fifth', 432, 92, 62 * 96 / 136, 62, 4);
       this.addLevelArt(this.progress.flags['l2-secret'] ? 'room-panel-open' : 'room-panel-closed', 432, 152, 58 * 116 / 148, 58, 4);
       this.addLevelArt(this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed', 548, 194, 112, 112, 4);
-    } else if (level === 3) {
-      this.addLevelArt('storm-relief', 560, 85, 96, 64, 8);
     } else if (level === 4) {
       this.addLevelArt('call-idle', 320, 85, 26, 26, 8);
     } else if (level === 5) {
@@ -1329,18 +1349,6 @@ export class CampaignScene extends Phaser.Scene {
         this.say([{ speaker: 'Nhinh', text: 'Người này đang giữ bánh xe lại.' }, { speaker: 'Lumo', text: 'Tôi nghe thấy mưa. Và ai đó bảo đừng để đèn tắt.' }, { speaker: 'Nhinh', text: 'Giống dòng chữ trên chiếc đèn. Mình mang ký ức này theo, chưa cần đoán phần còn thiếu.' }]);
       }, () => this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] !== true, 'shadow_npc');
       action('library-exit', 'E · Qua lối rễ cây', 530, 194, () => this.nextLevel([{ speaker: 'Lumo', text: 'Đường nước tới Cây Mẹ nằm phía đó. Tinh thể tiếp theo chắc ở ngọn tháp cuối dòng.' }, { speaker: 'Nhinh', text: 'Vậy trước hết mình phải tìm đường qua suối.' }]), () => this.progress.flags['l2-fifth-viewed'] === true, 'receiver_on');
-    } else if (level === 3) {
-      this.registerMirror('g1', 'G1', 180, 165, 2);
-      this.registerMirror('g2', 'G2', 220, 120, 1);
-      this.registerMirror('g3', 'G3', 345, 236, 2);
-      action('place-creek-lantern', 'E · Đặt đèn đang bật lên bệ', 120, 205, () => { this.lantern.placeLanternAt(120, 205); this.progress.lanternOn = true; this.progress.flags['l3-lantern-placed'] = true; this.progress.flags['l3-lantern-retrieved'] = false; this.save(); }, () => this.lantern.lanternInHand && this.lantern.lanternOn && !this.lantern.lanternPlaced && !this.progress.flags['l3-lantern-retrieved'], 'pedestal_lit');
-      action('receiver-a', 'E · Kiểm tra mắt A', 220, 180, () => { if (this.lantern.lanternPlaced && this.lantern.lanternOn && this.value('g1') === 2 && this.value('g2') === 1) { this.progress.flags['l3-bridge-a'] = true; this.say([{ speaker: 'Lumo', text: 'Có đường rồi! Nhưng mới tới hòn đảo.' }]); this.save(); } else this.say([{ speaker: 'Nhinh', text: 'Đặt đèn đang bật lên bệ rồi dẫn tia qua G1 và G2.' }]); }, () => !this.progress.flags['l3-latch-a'], 'receiver_off');
-      action('latch-a', 'E · Gài chốt cầu đầu', 295, 243, () => { this.progress.flags['l3-latch-a'] = true; this.save(); }, () => this.progress.flags['l3-bridge-a'] === true && this.isCreekBridgeAReady() && !this.progress.flags['l3-latch-a'], 'stepping_stone');
-      action('receiver-b', 'E · Kiểm tra mắt B', 325, 243, () => { if (this.isCreekBridgeBReady()) { this.progress.flags['l3-bridge-b'] = true; this.save(); } else this.say([{ speaker: 'Nhinh', text: 'Đèn vẫn phải sáng trên bệ; đổi đường từ G2 qua G3 tới mắt B.' }]); }, () => this.progress.flags['l3-bridge-a-crossed'] === true && !this.progress.flags['l3-latch-b'], 'receiver_off');
-      action('latch-b', 'E · Gài chốt cầu hai', 410, 243, () => { this.progress.flags['l3-latch-b'] = true; this.save(); }, () => this.progress.flags['l3-bridge-b-crossed'] === true && !this.progress.flags['l3-latch-b'], 'stepping_stone');
-      action('retrieve-creek-lantern', 'E · Thu hồi đèn', 120, 205, () => { this.lantern.retrieveLantern(); this.progress.lanternOn = true; this.progress.flags['l3-lantern-retrieved'] = true; this.save(); }, () => this.lantern.lanternPlaced && this.progress.flags['l3-latch-a'] && this.progress.flags['l3-latch-b'] && this.progress.flags['l3-bridge-a-crossed'] && this.progress.flags['l3-bridge-b-crossed'], 'pedestal_lit');
-      action('mural', 'E · Đọc phù điêu', 560, 85, () => { this.progress.flags['l3-memo'] = true; this.save(); this.say([{ speaker: 'Nhinh', text: 'Tất cả tia sáng đều hướng về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Đêm ấy có một cơn bão rất lớn. Tôi nhớ tiếng chuông trên tháp.' }]); }, () => this.progress.flags['l3-lantern-retrieved'] === true && this.progress.flags['l3-bridge-b-crossed'] === true, 'mural_tablet');
-      action('creek-exit', 'E · Qua trạm dẫn nước', 560, 300, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Có lẽ lần này họ đang đợi cậu.' }, { speaker: 'Lumo', text: 'Tôi sẽ thử đi trước.' }]), () => this.progress.flags['l3-memo'] === true, 'receiver_on');
     } else if (level === 4) {
       action('call-a', 'E · Gọi Lumo tới mốc A', 220, 130, () => this.callLumo('a', 220, 130), () => !this.progress.flags['l4-latch-a'], 'lock_moon_on');
       action('call-b', 'E · Gọi Lumo tới mốc B', 420, 130, () => this.callLumo('b', 420, 130), () => this.progress.flags['l4-latch-a'] === true && !this.progress.flags['l4-latch-b'], 'lock_moon_on');
@@ -1767,8 +1775,6 @@ export class CampaignScene extends Phaser.Scene {
     for (const collider of this.campaignColliders) collider.destroy();
     this.campaignColliders = [];
     this.campaignBodies.clear();
-    this.creekBridgeBPendingRemoval = false;
-    this.creekBridgeBWasPassable = false;
     this.gardenBridgePendingRemoval = false;
     this.gardenBridgeWasReady = false;
     this.gardenTraversalSide = null;
@@ -1807,38 +1813,7 @@ export class CampaignScene extends Phaser.Scene {
       for (const [id,r] of [['woods-gate-left',WHISPERING_WOODS.gate.leftPost],['woods-gate-right',WHISPERING_WOODS.gate.rightPost],['woods-gate-backing',WHISPERING_WOODS.gate.backing],['woods-gate-threshold',WHISPERING_WOODS.gate.threshold]] as const) {
         this.addCampaignBarrier(id,r.x+r.width/2,r.y+r.height/2,r.width,r.height,id==='woods-gate-threshold'?!this.progress.flags['l1-open']:true);
       }
-    } else if (level === 3) {
-      // The creek runs from the top to the bottom edge; the only crossing is its narrow stone lane.
-      this.addCampaignBarrier('creek-upper-water', 332.5, 110, 175, 220);
-      this.addCampaignBarrier('creek-lower-water', 332.5, 306, 175, 108);
-      this.addCampaignBarrier('creek-bridge-a-gate', 315, 236, 12, 32, !this.progress.flags['l3-latch-a']);
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-      const playerOnBridgeB = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
-        new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height),
-        new Phaser.Geom.Rectangle(335, 220, 75, 32),
-      ));
-      const savedCreekSide = this.progress.flags['l3-bridge-b-crossing-side'];
-      this.creekBridgeBTraversalSide = playerOnBridgeB && (savedCreekSide === 'west' || savedCreekSide === 'east')
-        ? savedCreekSide
-        : null;
-      const creekPendingFlag = this.progress.flags['l3-bridge-b-pending'] === true;
-      this.creekBridgeBWasPassable = this.isCreekBridgeBOpen();
-      this.creekBridgeBPendingRemoval = playerOnBridgeB && !this.creekBridgeBWasPassable
-        && creekPendingFlag && this.creekBridgeBTraversalSide !== null;
-      if (!playerOnBridgeB && savedCreekSide) {
-        delete this.progress.flags['l3-bridge-b-crossing-side'];
-        this.creekBridgeBTraversalSide = null;
-        this.save();
-      }
-      if (this.creekBridgeBPendingRemoval && !creekPendingFlag) {
-        this.progress.flags['l3-bridge-b-pending'] = true;
-        this.savePlayerCheckpoint();
-      } else if (!playerOnBridgeB && this.progress.flags['l3-bridge-b-pending']) {
-        delete this.progress.flags['l3-bridge-b-pending'];
-        this.save();
-      }
-      this.addCampaignBarrier('creek-bridge-b-gate', 370, 236, 12, 32, !this.isCreekBridgeBOpen() && !this.creekBridgeBPendingRemoval);
-    } else if (level === 6) {
+    } else if (level === 6) {    } else if (level === 6) {
       // The retractable root bridge and latched stone return path are the only canal crossings.
       this.addCampaignBarrier('garden-west-water', 135, 260, 270, 30);
       // The return latch opens a separate stone crossing, independent of the retractable root bridge.
@@ -1872,21 +1847,6 @@ export class CampaignScene extends Phaser.Scene {
       && !this.lantern.lanternOn;
   }
 
-  private isCreekBridgeAReady(): boolean {
-    return this.lantern.lanternPlaced && this.lantern.lanternOn && this.value('g1') === 2 && this.value('g2') === 1;
-  }
-
-  private isCreekBridgeBReady(): boolean {
-    return this.progress.flags['l3-bridge-a-crossed'] === true
-      && this.lantern.lanternPlaced && this.lantern.lanternOn
-      && this.value('g2') === 3 && this.value('g3') === 2;
-  }
-
-  private isCreekBridgeBOpen(): boolean {
-    return (this.progress.flags['l3-bridge-b'] === true && this.isCreekBridgeBReady()) || this.progress.flags['l3-latch-b'] === true
-      || (this.progress.flags['l3-bridge-b-crossed'] === true && this.player.x > 370);
-  }
-
   private updateCampaignBarriers(): void {
     const setEnabled = (id: string, enabled: boolean): void => {
       const body = this.campaignBodies.get(id);
@@ -1899,24 +1859,6 @@ export class CampaignScene extends Phaser.Scene {
       else setEnabled('woods-gate-threshold',true);
       setEnabled('woods-gate-backing',true);
       setEnabled('woods-gate-left',true); setEnabled('woods-gate-right',true);
-    } else if (this.progress.level === 3) {
-      setEnabled('creek-bridge-a-gate', !this.progress.flags['l3-latch-a']);
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-      const playerOnBridgeB = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
-        new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height),
-        new Phaser.Geom.Rectangle(335, 220, 75, 32),
-      ));
-      if (!this.isCreekBridgeBOpen() && playerOnBridgeB && this.creekBridgeBTraversalSide !== null && !this.creekBridgeBPendingRemoval) {
-        this.creekBridgeBPendingRemoval = true;
-        this.progress.flags['l3-bridge-b-pending'] = true;
-        this.savePlayerCheckpoint();
-      }
-      if (this.isCreekBridgeBOpen() && this.creekBridgeBPendingRemoval) {
-        this.creekBridgeBPendingRemoval = false;
-        delete this.progress.flags['l3-bridge-b-pending'];
-        this.save();
-      }
-      setEnabled('creek-bridge-b-gate', !this.isCreekBridgeBOpen() && !this.creekBridgeBPendingRemoval);
     } else if (this.progress.level === 6) {
       const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
       const playerOnBridge = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
@@ -1932,54 +1874,13 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private updateCampaignCrossingState(): void {
-    const previous = this.lastCampaignPlayerPosition;
-    const x = this.player.x;
-    const y = this.player.y;
-    const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-    const bodyOffsetX = body ? body.x - x : 0;
-    const bodyOffsetY = body ? body.y - y : 0;
-    const bodyHeight = body?.height ?? 0;
-    const bodyLeft = body?.left ?? 0;
-    const bodyRight = body?.right ?? 0;
-    const playerOnBridgeB = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
-      new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height),
-      new Phaser.Geom.Rectangle(335, 220, 75, 32),
-    ));
-    const creekLaneOverlaps = (playerY: number): boolean => playerY + bodyOffsetY < 252
-      && playerY + bodyOffsetY + bodyHeight > 220;
-    if (this.progress.level === 3 && playerOnBridgeB && this.creekBridgeBTraversalSide === null
-      && (this.isCreekBridgeBOpen() || this.creekBridgeBWasPassable || this.creekBridgeBPendingRemoval)) {
-      const previousBodyLeft = previous.x + bodyOffsetX;
-      const previousBodyRight = previousBodyLeft + (body?.width ?? 0);
-      this.creekBridgeBTraversalSide = previousBodyRight <= 335 ? 'west'
-        : previousBodyLeft >= 410 ? 'east'
-          : x > previous.x ? 'west' : 'east';
-      this.progress.flags['l3-bridge-b-crossing-side'] = this.creekBridgeBTraversalSide;
-      this.savePlayerCheckpoint();
-    }
-    if (this.progress.level === 3 && body && creekLaneOverlaps(y) && creekLaneOverlaps(previous.y)) {
-      if (!this.progress.flags['l3-bridge-a-crossed'] && previous.x < 315 && x >= 315 && this.progress.flags['l3-latch-a']) {
-        this.progress.flags['l3-bridge-a-crossed'] = true;
-        this.save();
-      }
-      const reachedCreekFarBank = this.creekBridgeBTraversalSide === 'west' && bodyLeft >= 410;
-      if (!this.progress.flags['l3-bridge-b-crossed'] && reachedCreekFarBank
-        && (this.progress.flags['l3-bridge-b'] === true || this.progress.flags['l3-bridge-b-pending'] === true)) {
-        this.progress.flags['l3-bridge-b-crossed'] = true;
-        this.save();
-      }
-      const reachedCreekBank = this.creekBridgeBTraversalSide === 'west'
-        ? bodyLeft >= 410 || bodyRight <= 335
-        : this.creekBridgeBTraversalSide === 'east' && (bodyRight <= 335 || bodyLeft >= 410);
-      if (reachedCreekBank) {
-        this.creekBridgeBTraversalSide = null;
-        this.creekBridgeBPendingRemoval = false;
-        delete this.progress.flags['l3-bridge-b-crossing-side'];
-        delete this.progress.flags['l3-bridge-b-pending'];
-        this.save();
-      }
-    } else if (this.progress.level === 6) {
+    if (this.progress.level === 6) {
+      const previous = this.lastCampaignPlayerPosition;
+      const x = this.player.x;
+      const y = this.player.y;
       const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
+      const bodyOffsetY = body ? body.y - y : 0;
+      const bodyHeight = body?.height ?? 0;
       const playerOnBridge = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
         new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height),
         new Phaser.Geom.Rectangle(270, 245, 100, 30),
@@ -2006,10 +1907,9 @@ export class CampaignScene extends Phaser.Scene {
         delete this.progress.flags['l6-crossing-side'];
         this.save();
       }
+      this.lastCampaignPlayerPosition = { x, y };
+      this.gardenBridgeWasReady = this.isGardenBridgeReady();
     }
-    this.lastCampaignPlayerPosition = { x, y };
-    if (this.progress.level === 3) this.creekBridgeBWasPassable = this.isCreekBridgeBOpen();
-    if (this.progress.level === 6) this.gardenBridgeWasReady = this.isGardenBridgeReady();
   }
 
   private addProp(key: string, x: number, y: number, scale: number): void {
@@ -2245,16 +2145,7 @@ export class CampaignScene extends Phaser.Scene {
       return;
     }
     const light = this.lantern.lanternPlaced && this.lantern.lanternOn;
-    if (level === 3) {
-      const a = light && this.value('g1') === 2 && this.value('g2') === 1;
-      const b = light && this.progress.flags['l3-bridge-a-crossed'] === true && this.value('g2') === 3 && this.value('g3') === 2;
-      const bridgeA = (this.progress.flags['l3-bridge-a'] === true && this.isCreekBridgeAReady()) || this.progress.flags['l3-latch-a'] === true;
-      const bridgeB = this.isCreekBridgeBOpen() || this.creekBridgeBPendingRemoval;
-      line([[120, 205], [180, 165], [220, 120], [220, 180]], a);
-      line([[220, 120], [345, 236], [325, 243]], b);
-      graphics.fillStyle(bridgeA ? 0xffdf83 : 0x38505a, bridgeA ? 0.85 : 0.35); graphics.fillRect(245, 230, 70, 12);
-      graphics.fillStyle(bridgeB ? 0xffdf83 : 0x38505a, bridgeB ? 0.85 : 0.35); graphics.fillRect(335, 230, 75, 12);
-    } else if (level === 4) {
+    if (level === 4) {
       graphics.lineStyle(5, 0x8b8d76, 0.78);
       graphics.lineBetween(295, 80, 295, 280); graphics.lineBetween(440, 80, 440, 280);
       graphics.lineStyle(3, this.progress.flags['l4-latch-a'] ? 0x83d6a2 : 0xffdf83, 0.85); graphics.lineBetween(295, 150, 295, 195);
@@ -2531,6 +2422,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private refreshHud(): void {
+    if (this.progress.level === 3) { this.shatteredCreek?.refreshHud(); return; }
     const level = CAMPAIGN_LEVELS[this.progress.level];
     if (this.progress.level === 0) {
       const step = this.getForestEdgeStep();
