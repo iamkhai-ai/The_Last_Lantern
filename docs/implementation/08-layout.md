@@ -38,13 +38,13 @@ body.x >= 24 && body.x + 14 <= 616 && body.y >= 80 && body.y + 6 <= 310
 | `mirror-left` | `mirror_{0..3}` 36×48 | `240, 238` | `240, 262` | `222, 214, 36, 48` | 36.2 | `240, 286` |
 | `mirror-right` | `mirror_{0..3}` 36×48 | `400, 238` | `400, 262` | `382, 214, 36, 48` | 36.2 | `400, 286` |
 | `pedestal` | `ruins_altar` 104×52 | `480, 236` | `480, 262` | `428, 210, 104, 52` | 36.2 | `480, 286` |
-| `practice-column` | `test-column-notch-{0..3}` 32×44 over `test-pedestal` 48×36 | column `150, 223`, pedestal `150, 234` | `150, 250` | `126, 216, 48, 36` (the composite base) | 35.0 / column 34.3 | `150, 276` |
+| `practice-column` | `test-column-notch-{0..3}` 32×44 over `test-pedestal` 48×36 | column `150, 223`, pedestal `150, 234` | `150, 250` | `126, 216, 48, 36` (the composite base) | 35.0 base / 35.1 column (`overlay.depthOffset` 0.1) | `150, 276` |
 | `seedling-bed` | `seedling-curtain-{open,closed}` 88×48 | `180, 128` | `180, 152` | `136, 104, 88, 48` | 25.2 | `180, 176` |
 | `shadow-npc` | `shadow_npc` 44×56 | `522, 140` | `522, 160` | `508, 124, 28, 36` (the visible cloak) | 26.0 | `522, 184` |
 | `inscription` | `beacon_stone` 34×46, flat on the wall | `430, 57` | wall | none — the north wall is already solid | 18.0 | `430, 106` |
 | `north-door` | `sanctuary-door-{closed,open}` 104×76, flat on the wall | `548, 42` | wall | none | 4.0 (floor band) | `548, 112` (r24) |
 
-The statue's solid is its silhouette bounding box `y 148..212`; its drawn art runs `y 132..220`, and the transparent padding is deliberate so the authored shadow (`shadow-notch-*`, which converges at `320, 220`) lines up with the statue's drawn base.
+The statue's texture box is `y 132..220`; the opaque pixels of `statue-notch-{0..3}` actually run `x 293..347, y 140..215` (measured from the PNGs), so its solid `y 148..212` overhangs the drawn art by 8px at the head and 3px at the foot. The foot body is 6px tall, so it can only reach that head band from `y 124..125`, where the player's own sprite already ends ~13px above the statue's head: nothing visible ever clips. The horizontal overhang is 1px on each side. The authored shadow quads are anchored at `320, 220`, which is 5px below the statue's drawn bottom — the shadow therefore spreads a little past the statue's feet, which reads as contact shade.
 
 `practice-column` is one composite object: the pedestal art carries the collision (the base that actually blocks), the column art is drawn on top at `groundAnchorY/10 + 0.1`. The whole silhouette is solid from north/east/south/west; the base is not a "few bottom pixels" collision box.
 
@@ -61,7 +61,7 @@ The statue's solid is its silhouette bounding box `y 148..212`; its drawn art ru
 | `confirmation-ring` | `confirmation-{waiting,ready,latched}` 48×36 | `480, 236` | 36.3 (on the altar face) |
 | `practice-slab` | `test-moon-{lit,covered}` 16×20 | `206, 224` | 4 |
 | `practice-port` | authored graphics slit `x 24..40, y 216..232` | — | 4 |
-| `practice-shadow-patch` | authored graphics rect over the practice slab | `206, 224` | 3.5 |
+| `practice-shadow-patch` | authored graphics rect over the practice slab | `206, 224` | 4.5 |
 | `conduit` | authored floor groove `(470,258) (410,258) (350,258) (330,252) (320,244)` | — | 3 |
 | `floor` | `ground_stone` tileSprite, tinted, whole screen | — | 0.5 |
 | `backdrop` | `temple-scene-base` 640×360, drawn dark as ambience | `320, 180` | 0 |
@@ -83,7 +83,7 @@ SHADOW_QUADS[2] = (187, 76) (230, 76) (336,220) (304,220)   // shadow-notch-2
 SHADOW_QUADS[3] = (420, 76) (438, 76) (326,220) (314,220)   // shadow-notch-3
 ```
 
-All four converge on the statue's drawn base `(320,220)`; they are the actual opaque extents of the four 640×360 PNGs, measured pixel by pixel, so the drawn overlay and the tested region are the same region.
+All four converge on the authoring anchor `(320,220)` — 5px below the statue's drawn bottom edge (`y 215`). They are the actual opaque extents of the four 640×360 PNGs and were re-measured pixel by pixel: the bounding box and **every row's left/right edge** of each quad match the drawn mask within 1.5px, and the drawn fill is opaque (`#081724`, alpha 220). The check script re-derives that from the PNG bytes, so the drawn overlay and the tested region cannot drift apart.
 
 Rendering: the corresponding `shadow-notch-{statue}` image is drawn full screen at `(320,180)`, depth **6**, above the beams (5) and the locks (4) and below every standing prop and every actor foot. When the statue rotates the overlay is swapped and the newly covered receiver visibly darkens.
 
@@ -139,10 +139,12 @@ The temple courtyard is a ring: the player can always circle the statue via the 
 CHECKPOINTS = [
   { id: 'entrance',   x: 120, y: 288 },                   // spawn
   { id: 'yard',       x: 320, y: 286 },                   // south of the splitter
-  { id: 'east',       x: 500, y: 224 },                   // beside The Shadow
-  { id: 'north-stair',x: 548, y:  44, requiresExit: true} // beyond the north door
+  { id: 'east',       x: 570, y: 200 },                   // east lane, clear of The Shadow and the altar
+  { id: 'north-stair',x: 548, y:  44, requiresExit: true} // a sentinel: inside the north wall, so never a real spawn
 ]
 ```
+
+`north-stair` sits inside the north wall's solid, so the floor test rejects it in *every* state: a restore can never place the player beyond the door even if `exitReady` is true. The gate flag is kept as the second belt on the same braces.
 
 `isRuinsPositionSafe(center)` = the foot body is inside the floor band and clear of every wall and every solid footprint.
 `resolveRuinsSpawn(saved, { exitReady })` = the saved centre when it is safe; otherwise the nearest safe and unlocked checkpoint; otherwise a spiral search around the `entrance` checkpoint.
@@ -155,11 +157,15 @@ Restore order in `RuinsOfTwoHalvesLevel.build()`:
 4. `resolveRuinsSpawn(savedCenter, { exitReady: isRuinsExitReady(...) })`;
 5. draw, register interactions, refresh.
 
-If `l7-solved` is set, the statue/mirror configuration is **preserved** and the curtain stays closed, but the live condition is still re-derived: a stale `l7-solved` cannot make the confirmation ring read "ready" on its own, and the latch flag can never be re-derived from a moved statue.
+If `l7-solved` is set, the statue/mirror configuration is **preserved** and the curtain stays closed, but the live condition is still re-derived: a stale `l7-solved` cannot make the confirmation ring read "ready" on its own, and the latch flag can never be re-derived from a moved statue. "Preserved" means preserved *as the solving configuration*: `ruinsNormalizeCounters` puts a latched save onto `statue 0, left 1, right 0` (`ruinsSnapSolvedConfiguration`) so a resumed session still shows the three receivers reading the way the temple was left, instead of a dark temple behind a latched ring. An *un*latched save keeps whatever the player had.
+
+A lamp that is restored onto the altar is forced lit: `LanternSystem.placeLanternAt` switches it on and `toggleLantern` refuses while it is placed, so restoring a stale `lanternOn: false` would otherwise strand the player with a lamp they cannot relight. The scenario's "tắt đèn … không giải được" is still reachable, because the lamp can be switched off in hand before it is placed.
+
+After the latch the statue and both mirrors freeze (`rotateStatue` / `rotateMirror` answer with the latched line) and the pedestal only ever *returns* the lamp — re-placing it would undo the scenario's retrieval step and re-lock a door the player has already opened.
 
 ## 9. Check script contract (`scripts/check-ruins-of-two-halves.mjs`)
 
-Pure, no Phaser, no DOM. Asserts:
+Pure, no Phaser, no DOM (it does read this level's own PNG bytes with `node:fs` + `node:zlib`). Asserts:
 
 1. body constants and `ruinsActorBody` match the arcade foot body;
 2. every authored stand point is inside the floor, clear of every solid, and **reachable from the spawn** by a collision-aware BFS over the real foot body;
@@ -169,4 +175,9 @@ Pure, no Phaser, no DOM. Asserts:
 6. the Sun locks go dark when the lamp is off, when the mirror is unaimed, or when the shadow crosses their ray, and light only in the intended configuration;
 7. `resolveRuinsSpawn` never returns a position inside a solid or behind the wall, and never returns the `north-stair` checkpoint while the exit is unsolved;
 8. the exit/confirmation control is only enabled when the scenario completion conditions hold (latch + lamp retrieved + Shadow conversation), and the confirmation only latches on the live simultaneous condition;
-9. v1 save compatibility: a legacy progress object with `statue: 2` and `l7-solved: true` still loads, keeps its configuration and stays latched.
+9. v1 save compatibility: a legacy progress object with `statue: 2` and `l7-solved: true` still loads, keeps its configuration and stays latched;
+10. `ruinsNormalizeCounters` snaps a *latched* save onto the solving configuration, leaves an *un*latched save on the player's own values, and lands a fresh save on the entry values (practice slab lit, nothing pre-solved);
+11. `getRuinsStage` releases the tutorial stage as soon as the player engages the main puzzle, and never lets the tutorial override the latched/retrieve flow;
+12. **the drawn `shadow-notch-{0..3}` PNGs are the authored quads**: the bounding box matches exactly, and every row's left/right edge within 1.5px; the fill is opaque; the solving notch paints the whole Moon receiver and neither outer Sun receiver; the depth band puts the overlay above the receivers and the beams and below every standing prop;
+13. **RULE_GAMES §1 is enforced mechanically**: for all nine controls, no walkable position whose foot body sits above the object's art bottom, and none beside the object's art span, falls inside the trigger radius — only the south edge can raise a prompt;
+14. **every solid tracks the art a player can see**: the drawn art's width/height match the declared art, and the collider overhangs the drawn silhouette by ≤8px at the head and ≤4px at the foot, ≤1px on either side (the composite practice column and the procedurally drawn altar/Shadow are checked against their art boxes).
