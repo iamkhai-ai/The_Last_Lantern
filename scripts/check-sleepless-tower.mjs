@@ -23,6 +23,11 @@ assert.equal(atSeal({ ...base, g2: 2 }).liveB, false, 'splitter B requires G2 po
 assert.equal(atSeal({ ...base, source: null }).liveA, false);
 assert.equal(atSeal({ ...base, lanternOn: false }).canSwitch, false);
 assert.equal(atSeal({ ...base, waterReturned: true }).canSwitch, false, 'switch is one-time');
+const dormant = atSeal({ ...base, waterReturned: true });
+assert.equal(dormant.liveA, false, 'optics go dormant after Return Flow');
+assert.equal(dormant.liveB, false, 'optics go dormant after Return Flow');
+assert.ok(dormant.beams.length > 0 && dormant.beams.every((beam) => !beam.live), 'dormant optics keep the routing drawn but unlit');
+assert.equal(atSeal({ ...base, source: 'practice', practice: 1, waterReturned: true }).practiceLit, false, 'the bench is dormant too');
 assert.equal(deriveTowerLive({ ...base, lumoAssign: 'follow' }, seal).liveC, false, 'seal needs the assignment');
 assert.equal(deriveTowerLive({ ...base, lumoAssign: 'to-c' }, seal).liveC, false, 'travelling Lumo does not seal');
 assert.equal(deriveTowerLive({ ...base, lumoAssign: 'at-c' }, { x: 350, y: 282 }).liveC, true, 'edge of seal tolerance');

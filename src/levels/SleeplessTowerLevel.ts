@@ -534,7 +534,7 @@ export class SleeplessTowerLevel {
     this.visuals.get('outflow')?.setVisible(false);
     const tubeKey = art4('tube-straight');
     if (tubeKey && this.ctx.scene.textures.exists(tubeKey)) {
-      const tube = this.ctx.scene.add.image(350, 266, tubeKey).setDisplaySize(38, 12).setRotation(Math.PI / 2).setDepth(6);
+      const tube = this.ctx.scene.add.image(350, 266, tubeKey).setDisplaySize(38, 19).setRotation(Math.PI / 2).setDepth(6);
       this.visuals.set('tube', tube);
       this.keep(tube);
     }
@@ -600,8 +600,8 @@ export class SleeplessTowerLevel {
     set('g1', shared(`mirror-1-${branchDirection(this.state.g1)}`));
     set('g2', shared(`mirror-2-${branchDirection(this.state.g2)}`));
     set('g0', art5(`G0-to-${this.state.g0 === 0 ? 'splitter' : this.state.g0 === 1 ? 'A' : 'B'}`));
-    const benchFeed = this.state.source === 'practice' && this.state.lanternOn && this.state.practice === 1;
-    const prismFeed = this.state.source === 'main' && this.state.lanternOn && this.state.g0 === 0;
+    const benchFeed = this.state.source === 'practice' && this.state.lanternOn && this.state.practice === 1 && !this.state.waterReturned;
+    const prismFeed = this.state.source === 'main' && this.state.lanternOn && this.state.g0 === 0 && !this.state.waterReturned;
     set('bench-prism', shared(benchFeed ? 'prism-receiving' : 'prism-dark'));
     set('prism', shared(prismFeed ? 'prism-receiving' : 'prism-dark'));
     set('bench-eye-a', shared(live.practiceLit ? 'receiver-on' : 'receiver-off'));
@@ -631,7 +631,7 @@ export class SleeplessTowerLevel {
       for (const beam of live.beams) {
         this.beams.lineStyle(beam.live ? 3 : 2, beam.live ? 0xffdf83 : 0x8ca7a8, beam.live ? 0.9 : 0.45);
         this.beams.lineBetween(beam.from.x, beam.from.y, beam.to.x, beam.to.y);
-        if (!beam.live) { this.beams.fillStyle(0x8ca7a8, 0.6); this.beams.fillCircle(beam.to.x, beam.to.y, 3); }
+        if (!beam.live && !this.state.waterReturned) { this.beams.fillStyle(0x8ca7a8, 0.6); this.beams.fillCircle(beam.to.x, beam.to.y, 3); }
       }
     }
   }

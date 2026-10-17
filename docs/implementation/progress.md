@@ -11,6 +11,7 @@ Current slice: rebuild **Level 06 (The Sleepless Tower, campaign index 5)** on b
 - Corrections during implementation: bench practice-2 dead stub `(118,155)` -> `(140,175)` with a check assertion; one controller TS fix (outflow hide via the visuals map). Opening dialogue runs from `build()` under `intro-5` (no `startOpeningDialogue`), matching Level 04.
 - **PASS** `node scripts/check-sleepless-tower.mjs` and `npm run build` (531 modules) on the working tree; `npm ci` needed first in the fresh worktree. Generated `dist/index.html` restored per plan.
 - **NOT_RUN** live browser/gameplay/visual verification and human acceptance (Work browser control disabled). Independent root reviews not yet performed; branch is local. Full evidence and limits: [06-report.md](06-report.md).
+- User-requested deep audit after the first commit (offline composites + per-file PNG dimension/alpha checks; no browser): tube chute corrected to uniform 38×19 and the optics now render dormant after Return Flow (grey routing without end marks, dark prisms, receiver heads off) to match the `after-return-flow` study; check script pins it. Check + build re-PASS in the follow-up commit; browser/gameplay audit still NOT_RUN.
 
 ## Level 04 — 2026-10-17
 

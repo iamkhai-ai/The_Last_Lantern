@@ -50,7 +50,7 @@ Authored beam paths (engine graphics, never baked):
 - direct A (G0 pose 1): (212,215)→(247,180)→(292,180)→(292,162)→(460,162). The jog passes above the prism and clears G1's art and the status strip.
 - direct B (G0 pose 2): (212,215)→(240,243)→(440,243)→(440,275)→(460,275).
 
-Live conditions are recomputed every frame, never remembered: `liveA = (source main && on) && (g0==1 || (g0==0 && g1==2))`; `liveB = (source main && on) && (g0==2 || (g0==0 && g2==1))`; `liveC = Lumo assignment at-C && Lumo within 8px of plate C`. Direct configurations light exactly one eye (scenario §4).
+Live conditions are recomputed every frame, never remembered, and go dormant after the Return Flow: `liveA = (source main && on && !waterReturned) && (g0==1 || (g0==0 && g1==2))`; `liveB = (source main && on && !waterReturned) && (g0==2 || (g0==0 && g2==1))`; `liveC = Lumo assignment at-C && Lumo within 8px of plate C`. Direct configurations light exactly one eye (scenario §4). After the switch the whole optics renders dormant — the authored routes stay drawn in the dim style without end marks, prisms return to dark and both receiver heads go off, matching the `after-return-flow` study; retrieving the lantern clears the beams entirely.
 
 ## Zone C — indicators, Lumo seal and lever (right side)
 
@@ -62,7 +62,7 @@ Live conditions are recomputed every frame, never remembered: `liveA = (source m
 | Fountain column | `tower_fountain_up/down` 56×112 | center (307,100), depth 20 (behind the lamp) | Up flow while pumping; down after the switch. |
 | Intake / outflow chevrons | `tower_tower_intake` / `tower_tower_outflow` 112×32 | (66,200) and (150,302), depth 6 | Intake (up) while pumping; outflow (down, toward the stairs/forest) after. |
 | Call mark | `call-idle/sent/arrived` (level 05 reuse) 40×48 | (350,252) | (350,272). E sends Lumo to seal C; E again recalls. |
-| Seal C + tube | `pressure-empty/occupied` 44×28 + tube straights/mouth (level 05 reuse) | plate (350,290); tube chute drawn under the pedestal, depth 6 | Lumo's live third circuit. Instead of recalling mid-puzzle, the player may rotate G0 to keep A/B lit while Lumo holds C. |
+| Seal C + tube | `pressure-empty/occupied` 44×28 + tube straights/mouth (level 05 reuse) | plate (350,290); tube chute drawn under the pedestal, depth 6, rotated at 38×19 (uniform 0.594 scale keeps the sprite aspect) | Lumo's live third circuit. Instead of recalling mid-puzzle, the player may rotate G0 to keep A/B lit while Lumo holds C. |
 | Return-Flow lever | `tower_return_flow_waiting/held` 40×48 | (540,232) | (540,254), at the chamber door. E switches only while all three circuits are live; otherwise the machine waits and Nhinh explains what is missing. After the switch it is held (persistent) and E only reports the mode. |
 | Chamber | body `chamber-open` + `chamber-grille-overlay` while closed + `hope` crystal inside | ground (600,284), full body solid (560,180,80,104), crystal center (600,232) | Crystal visible behind the grille (README composition). Opens on Return Flow. E at (600,288) collects Hope once open. |
 | Window + record | `window-faded-red-scarf` 112×112 center (582,92); `record-compartment-closed/open` 88×32 center (582,156) | wall visuals | Record stand (530,182). Locked before the crystal; after collection plays the §5 exchange and repeat line. |

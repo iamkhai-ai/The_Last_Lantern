@@ -20,6 +20,16 @@ Rebuilt The Sleepless Tower, campaign index5, on `codex/level-06-spatial-rebuild
 - One TypeScript build error fixed in the controller: `addImage` returns void, so the initial outflow hide now goes through the visuals map (`this.visuals.get('outflow')?.setVisible(false)`).
 - Contract adjustment vs `06-plan.md`: the controller exposes no `startOpeningDialogue()`; OPENING fires from `build()` behind the `intro-5` flag, matching the Level04 pattern where the scene never calls it.
 
+## Post-audit corrections (follow-up commit)
+
+After the first commit, a read-only visual audit (per-file PNG dimension and alpha-bbox checks for every referenced sprite, plus offline pixel composites of the room at authored coordinates with the real game transforms) found two deviations from the studies; both are fixed in a follow-up commit:
+
+- Tube chute: after the 90° rotation the chute was drawn 38×12 — anisotropic (0.594 along the pipe vs 0.375 across). It is now 38×19, a uniform 0.594 scale; the offline composite (variants 38×12 / 38×19 / 64×32 side by side) shows it reads as a proper pipe between the call pedestal and the pressure plate. The layout doc records the size.
+- Post-switch optics: with the lantern still on the pedestal after Return Flow, beams, receiver heads and prism art stayed lit (gold) while the rings, status strip, tower lamp, fountain and chevrons already rendered dormant — contradicting `after-return-flow-640x360.png` (grey pipelines). `deriveTowerLive` now gates beam liveness, `liveA/liveB` and `practiceLit` with `!waterReturned`, end marks are suppressed in the dormant state, and the prisms return to dark. The check script pins the dormant optics.
+- Audited as correct, no change: HUD rows sit on their own dark backdrops so the long objectives stay readable over the tower art; bench and right-side (lever, record, chamber, crystal-behind-grille) compositions match the studies; labels read cleanly at 1× and 3×.
+
+Re-verification after the corrections: `node scripts/check-sleepless-tower.mjs` **PASS** (new dormant-optics assertions included) and `npm run build` **PASS**. Browser/gameplay status remains NOT_RUN.
+
 ## Verification
 
 - **PASS** `node scripts/check-sleepless-tower.mjs` — "Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn and migration checks passed". Covers both optical systems' truth tables including the corrected bench stub, reachable routes to every stand against full body geometry, four-direction solid contacts, C-only-on-presence, switch/exit gating, spawn fallbacks and one-time legacy migration.

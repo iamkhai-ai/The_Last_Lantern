@@ -94,46 +94,47 @@ export function deriveTowerLive(state: TowerState, lumo?: Point): TowerLiveState
   const o = TOWER.objects;
   let liveA = false;
   let liveB = false;
+  const opticsLive = !state.waterReturned;
   if (state.source === 'main' && state.lanternOn) {
-    beams.push({ from: o.source.optical, to: o.g0.optical, live: true, kind: 'main' });
+    beams.push({ from: o.source.optical, to: o.g0.optical, live: opticsLive, kind: 'main' });
     if (state.g0 === 0) {
-      beams.push({ from: o.g0.optical, to: o.prism.input, live: true, kind: 'main' });
-      beams.push({ from: o.prism.left, to: o.g1.optical, live: true, kind: 'main' });
+      beams.push({ from: o.g0.optical, to: o.prism.input, live: opticsLive, kind: 'main' });
+      beams.push({ from: o.prism.left, to: o.g1.optical, live: opticsLive, kind: 'main' });
       if (state.g1 === 2) {
-        beams.push({ from: o.g1.optical, to: o.eyeA.optical, live: true, kind: 'main' });
-        liveA = true;
+        beams.push({ from: o.g1.optical, to: o.eyeA.optical, live: opticsLive, kind: 'main' });
+        liveA = opticsLive;
       } else if (state.g1 === 1) {
         beams.push({ from: o.g1.optical, to: p(253, 162), live: false, kind: 'main' });
       }
-      beams.push({ from: o.prism.right, to: o.g2.optical, live: true, kind: 'main' });
+      beams.push({ from: o.prism.right, to: o.g2.optical, live: opticsLive, kind: 'main' });
       if (state.g2 === 1) {
-        beams.push({ from: o.g2.optical, to: o.eyeB.optical, live: true, kind: 'main' });
-        liveB = true;
+        beams.push({ from: o.g2.optical, to: o.eyeB.optical, live: opticsLive, kind: 'main' });
+        liveB = opticsLive;
       } else if (state.g2 === 2) {
         beams.push({ from: o.g2.optical, to: p(287, 275), live: false, kind: 'main' });
       }
     } else if (state.g0 === 1) {
-      beams.push({ from: o.g0.optical, to: p(247, 180), live: true, kind: 'main' });
-      beams.push({ from: p(247, 180), to: p(292, 180), live: true, kind: 'main' });
-      beams.push({ from: p(292, 180), to: p(292, 162), live: true, kind: 'main' });
-      beams.push({ from: p(292, 162), to: o.eyeA.optical, live: true, kind: 'main' });
-      liveA = true;
+      beams.push({ from: o.g0.optical, to: p(247, 180), live: opticsLive, kind: 'main' });
+      beams.push({ from: p(247, 180), to: p(292, 180), live: opticsLive, kind: 'main' });
+      beams.push({ from: p(292, 180), to: p(292, 162), live: opticsLive, kind: 'main' });
+      beams.push({ from: p(292, 162), to: o.eyeA.optical, live: opticsLive, kind: 'main' });
+      liveA = opticsLive;
     } else {
-      beams.push({ from: o.g0.optical, to: p(240, 243), live: true, kind: 'main' });
-      beams.push({ from: p(240, 243), to: p(440, 243), live: true, kind: 'main' });
-      beams.push({ from: p(440, 243), to: p(440, 275), live: true, kind: 'main' });
-      beams.push({ from: p(440, 275), to: o.eyeB.optical, live: true, kind: 'main' });
-      liveB = true;
+      beams.push({ from: o.g0.optical, to: p(240, 243), live: opticsLive, kind: 'main' });
+      beams.push({ from: p(240, 243), to: p(440, 243), live: opticsLive, kind: 'main' });
+      beams.push({ from: p(440, 243), to: p(440, 275), live: opticsLive, kind: 'main' });
+      beams.push({ from: p(440, 275), to: o.eyeB.optical, live: opticsLive, kind: 'main' });
+      liveB = opticsLive;
     }
   }
   let practiceLit = false;
   if (state.source === 'practice' && state.lanternOn) {
-    beams.push({ from: o.benchSource.optical, to: o.benchMirror.optical, live: true, kind: 'practice' });
+    beams.push({ from: o.benchSource.optical, to: o.benchMirror.optical, live: opticsLive, kind: 'practice' });
     if (state.practice === 1) {
-      beams.push({ from: o.benchMirror.optical, to: o.benchPrism.input, live: true, kind: 'practice' });
-      beams.push({ from: o.benchPrism.left, to: o.benchEyeA.optical, live: true, kind: 'practice' });
-      beams.push({ from: o.benchPrism.right, to: o.benchEyeB.optical, live: true, kind: 'practice' });
-      practiceLit = true;
+      beams.push({ from: o.benchMirror.optical, to: o.benchPrism.input, live: opticsLive, kind: 'practice' });
+      beams.push({ from: o.benchPrism.left, to: o.benchEyeA.optical, live: opticsLive, kind: 'practice' });
+      beams.push({ from: o.benchPrism.right, to: o.benchEyeB.optical, live: opticsLive, kind: 'practice' });
+      practiceLit = opticsLive;
     } else if (state.practice === 2) {
       beams.push({ from: o.benchMirror.optical, to: p(140, 175), live: false, kind: 'practice' });
     }
