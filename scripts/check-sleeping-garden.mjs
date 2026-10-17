@@ -1,18 +1,41 @@
+// Pure checks for Level 07 (The Sleeping Garden, campaign index 6).
+// Covers: state derive/sanitize, body math, light model, held spans, crossings, per-stage
+// collision-aware reachability from the entry, prompt-side rules, safe restore (safe AND
+// still connected to the entry), art/footprint correspondence, icons clear of pot art and
+// of the bottom HUD band, and the exit gating. No Phaser, no browser.
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
-  GARDEN_BAR_BEAM, GARDEN_BRIDGE, GARDEN_SIDE_PATH, GARDEN_SPANS, GARDEN_SPAWN, GARDEN_STAGE_ANCHORS, GARDEN_STANDS,
-  GARDEN_STATIC_SOLIDS, NO_HELD_SPANS, barRaised, bridgeWalkable, crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody,
-  gardenActorDepth, gardenCompletionBlock, gardenExitReady, gardenPropDepth, inGateCorridor, isGardenPositionSafe,
+  GARDEN_BAR_BEAM, GARDEN_BOUNDS, GARDEN_BRIDGE, GARDEN_ICONS, GARDEN_MODULES, GARDEN_REACH_ORIGIN, GARDEN_REACH_STEP,
+  GARDEN_SIDE_PATH, GARDEN_SIDE_STRIP, GARDEN_SPANS, GARDEN_SPAWN, GARDEN_STAGE_ANCHORS, GARDEN_STANDS,
+  GARDEN_STATIC_SOLIDS, GARDEN_WATER, NO_HELD_SPANS, barRaised, bridgeWalkable, crossingSideFor, crossedToFarBank,
+  effectiveLight, gardenActorBody, gardenActorDepth, gardenCellCenter, gardenCellOf, gardenCompletionBlock,
+  gardenDrainEnabled, gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled,
+  gardenPropDepth, gardenReachableRegion, gardenRegionReaches, inGateCorridor, isGardenPositionSafe,
   nearestSafeGardenSpawn, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed, sanitizeGardenState,
   sidePathOpen, sunOpen, updateHeldSpans,
 } from '../src/data/sleepingGardenLayout.ts';
 
+const ROOT = path.resolve(import.meta.dirname, '..');
+const HUD_TOP = 58;      // shared top HUD band (CampaignScene: title y13 / objective y42 panels)
+const HUD_BOTTOM = 320;  // shared bottom status/help strip starts here (statusText y320, controls y344)
+
 const stateOf = (o) => sanitizeGardenState({ canopyShut: false, sunLatched: false, waterFlowing: false, returnLatched: false, lumoRealized: false, bridgeCrossed: false, crossingSide: null, ...o });
 
+// ---------------------------------------------------------------- state model
 assert.deepEqual(readGardenState({ 'l6-canopy-shut': true, 'l6-crossing-side': 'west' }).crossingSide, null, 'crossing side without a completed crossing is dropped');
 assert.equal(readGardenState({ 'l6-return-latched': true }).waterFlowing, true, 'return latch implies water');
 assert.equal(readGardenState({ 'l6-water-flowing': true, 'l6-sun-latched': true }).canopyShut, true, 'sun latch implies a closed canopy');
 assert.equal(readGardenState({ 'l6-moon-open': true }).canopyShut, false, 'compat moon flag alone does not close the canopy');
+// live conditions are never derived from stale/legacy arrival flags
+const legacy = readGardenState({ 'l6-at-nursery': true, 'l6-solved': true, 'l6-at-bridge': true, 'l5-power': true, 'l6-sun-open': true });
+assert.deepEqual(
+  [legacy.canopyShut, legacy.sunLatched, legacy.waterFlowing, legacy.returnLatched, legacy.lumoRealized],
+  [false, false, false, false, false],
+  'foreign/legacy flags never gate a garden mechanism',
+);
+assert.equal(gardenExitReady(legacy), false, 'legacy arrival flags cannot open the exit');
 
 assert.deepEqual(gardenActorBody({ x: 274, y: 229 }), { x: 267, y: 245, width: 14, height: 6 });
 assert.equal(rectsOverlap(gardenActorBody({ x: 330, y: 220 }), GARDEN_BRIDGE), true);
@@ -37,8 +60,7 @@ assert.equal(bridgeWalkable('s1', latched, false, NO_HELD_SPANS), true);
 assert.equal(bridgeWalkable('s1', shut, true, NO_HELD_SPANS), false);
 const heldBoth = updateHeldSpans(NO_HELD_SPANS, shut, true, gardenActorBody({ x: 330, y: 220 }));
 assert.deepEqual(heldBoth, { s1: true, s2: false }, 'only the overlapped span is held');
-const heldBoth2 = updateHeldSpans(heldBoth, shut, true, gardenActorBody({ x: 330, y: 220 }));
-assert.deepEqual(heldBoth2, { s1: true, s2: false }, 'held span persists while overlapping');
+assert.deepEqual(updateHeldSpans(heldBoth, shut, true, gardenActorBody({ x: 330, y: 220 })), { s1: true, s2: false }, 'held span persists while overlapping');
 assert.deepEqual(updateHeldSpans(heldBoth, shut, true, gardenActorBody({ x: 460, y: 260 })), { s1: false, s2: false }, 'held span releases after leaving');
 assert.deepEqual(updateHeldSpans({ s1: true, s2: true }, shut, false, gardenActorBody({ x: 460, y: 260 })), { s1: false, s2: false }, 'deployed roots clear held spans');
 assert.equal(bridgeWalkable('s1', shut, true, heldBoth), true, 'held span stays walkable with the lantern on');
@@ -64,166 +86,238 @@ assert.equal(gardenCompletionBlock(stateOf({ canopyShut: true, sunLatched: true,
 assert.ok(gardenPropDepth(300) < gardenPropDepth(310));
 assert.ok(gardenActorDepth(280) > gardenPropDepth(290), 'actor standing below a prop draws in front of it');
 
+// ---------------------------------------------------------------- mechanism gating (live state, exclusive targets)
 assert.equal(inGateCorridor({ x: 132, y: 134 }), true);
 assert.equal(inGateCorridor({ x: 140, y: 132 }), true);
 assert.equal(inGateCorridor({ x: 142, y: 144 }), false, 'body-space corridor coordinates are not player centers');
 assert.equal(inGateCorridor({ x: 142, y: 160 }), false, 'standing south of the wall is not in the gap');
-assert.ok(Math.hypot(132 - GARDEN_STANDS.handle.x, 134 - GARDEN_STANDS.handle.y) <= GARDEN_STANDS.handle.radius, 'handle zone reachable from the gap');
-assert.ok(Math.hypot(140 - GARDEN_STANDS.latchWest.x, 132 - GARDEN_STANDS.latchWest.y) <= GARDEN_STANDS.latchWest.radius, 'latch zone reachable from the gap');
-assert.ok(Math.hypot(150 - GARDEN_STANDS.latchWest.x, 120 - GARDEN_STANDS.latchWest.y) > GARDEN_STANDS.latchWest.radius, 'latch cannot be worked from the reservoir nook');
-
-const STEP = 4;
-const gridX0 = 14;
-const gridY0 = 12;
-const key = (x, y) => `${x}:${y}`;
-function flood(state, lanternOn, held, start = GARDEN_SPAWN) {
-  const startKey = key(Math.round((start.x - gridX0) / STEP), Math.round((start.y - gridY0) / STEP));
-  const seen = new Set([startKey]);
-  const queue = [[Math.round((start.x - gridX0) / STEP), Math.round((start.y - gridY0) / STEP)]];
-  while (queue.length) {
-    const [i, j] = queue.pop();
-    for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const ni = i + di; const nj = j + dj;
-      const center = { x: gridX0 + ni * STEP, y: gridY0 + nj * STEP };
-      if (center.x < 14 || center.x > 626 || center.y < 12 || center.y > 348) continue;
-      const k = key(ni, nj);
-      if (seen.has(k)) continue;
-      if (!isGardenPositionSafe(state, lanternOn, held, center)) continue;
-      seen.add(k); queue.push([ni, nj]);
-    }
-  }
-  return {
-    size: seen.size,
-    near(p, radius, pred) {
-      for (const k of seen) {
-        const [i, j] = k.split(':').map(Number);
-        const center = { x: gridX0 + i * STEP, y: gridY0 + j * STEP };
-        if (Math.hypot(center.x - p.x, center.y - p.y) <= radius && (!pred || pred(center))) return true;
-      }
-      return false;
-    },
-  };
+for (const canopy of [false, true]) for (const sun of [false, true]) for (const lanternOn of [true, false]) {
+  const state = stateOf({ canopyShut: canopy, sunLatched: sun });
+  const handle = gardenHandleEnabled(state);
+  const latch = gardenLatchWestEnabled(state, lanternOn);
+  assert.equal(handle && latch, false, `handle and west latch are never both live (${JSON.stringify({ canopy, sun, lanternOn })})`);
+  assert.equal(handle, !state.canopyShut, 'the shutter handle is live exactly while the canopy is open');
+  assert.equal(latch, canopy && !sun && barRaised(state, lanternOn), 'the west latch needs a shut canopy and a raised bar');
 }
+assert.equal(gardenLatchWestEnabled(shut, true), true, 'latch live with the lantern on and the bar raised');
+assert.equal(gardenLatchWestEnabled(shut, false), false, 'latch dead with the bar lowered');
+assert.equal(gardenDrainEnabled(stateOf({ canopyShut: true, sunLatched: true })), false, 'a latched bar alone does not open the drain');
+assert.equal(gardenDrainEnabled(stateOf({ canopyShut: true, sunLatched: true, bridgeCrossed: true })), true, 'the drain needs a completed crossing');
+assert.equal(gardenDrainEnabled(stateOf({ canopyShut: true, sunLatched: true, returnLatched: true })), false, 'the committed side path already implies water, so the drain reads as open');
+assert.equal(gardenDrainEnabled(stateOf({ canopyShut: true, sunLatched: true, bridgeCrossed: true, waterFlowing: true })), false, 'the drain opens once');
+assert.equal(gardenLatchEastEnabled(stateOf({ canopyShut: true, sunLatched: true })), false, 'the east latch needs water first');
+assert.equal(gardenLatchEastEnabled(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true })), true);
+assert.equal(gardenLatchEastEnabled(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true })), false, 'the east latch commits once');
+
+// ---------------------------------------------------------------- reachability from the entry
+function region(state, lanternOn, held = NO_HELD_SPANS, start = GARDEN_SPAWN) {
+  return gardenReachableRegion(state, lanternOn, held, start);
+}
+const near = (r, p, radius, pred) => gardenRegionReaches(r, p, radius, pred);
+const reachable = (state, lanternOn, point, held = NO_HELD_SPANS, start = GARDEN_SPAWN) =>
+  region(state, lanternOn, held, start).has(`${gardenCellOf(point).i}:${gardenCellOf(point).j}`);
 
 const spawnSafe = (state, lanternOn, held) => isGardenPositionSafe(state, lanternOn, held, GARDEN_SPAWN);
-assert.equal(spawnSafe(fresh, true, NO_HELD_SPANS), true, 'spawn is valid in every queried state');
+for (const canopy of [false, true]) for (const sun of [false, true]) for (const water of [false, true]) for (const ret of [false, true]) for (const lanternOn of [true, false]) {
+  assert.equal(spawnSafe(stateOf({ canopyShut: canopy, sunLatched: sun, waterFlowing: water, returnLatched: ret }), lanternOn, NO_HELD_SPANS), true, 'the entry is walkable in every state');
+}
 
-const freshFlood = flood(fresh, true, NO_HELD_SPANS);
-assert.equal(freshFlood.near(GARDEN_STANDS.handle, GARDEN_STANDS.handle.radius, inGateCorridor), true, 'handle zone reachable before the canopy is shut');
-assert.equal(freshFlood.near(GARDEN_STANDS.drain, 30), false, 'the nursery is sealed off while the canopy is open');
+const freshRegion = region(fresh, true);
+assert.equal(near(freshRegion, GARDEN_STANDS.handle, GARDEN_STANDS.handle.radius, inGateCorridor), true, 'handle zone reachable before the canopy is shut');
+assert.equal(near(freshRegion, GARDEN_STANDS.drain, 30), false, 'the nursery is sealed off while the canopy is open');
+assert.equal(near(freshRegion, GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), false, 'the shrine arch is out of reach before the puzzle is solved');
+assert.equal(near(freshRegion, GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), true, 'the gap is walkable before the canopy is shut, but the latch prompt is suppressed by its live guard');
+assert.equal(gardenLatchWestEnabled(fresh, true), false, 'the west latch cannot be worked before the canopy is shut');
+assert.equal(reachable(fresh, true, GARDEN_STAGE_ANCHORS[0]), true, 'the entry anchor belongs to its own region');
 
-const shutLight = flood(shut, true, NO_HELD_SPANS);
-assert.equal(shutLight.near(GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), true, 'latch zone reachable with the lantern on');
-assert.equal(shutLight.near(GARDEN_STANDS.drain, 30), false, 'lantern light alone must not open the canal crossing');
+const shutLight = region(shut, true);
+assert.equal(near(shutLight, GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), true, 'latch zone reachable with the lantern on');
+assert.equal(near(shutLight, GARDEN_STANDS.drain, 30), false, 'lantern light alone must not open the canal crossing');
 
-const deployed = flood(shut, false, NO_HELD_SPANS);
-assert.equal(deployed.near(GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), false, 'the lowered bar seals the gap while roots are out');
-assert.equal(deployed.near(GARDEN_STANDS.drain, GARDEN_STANDS.drain.radius), true, 'deployed roots carry the player to the drain');
-for (let x = 312; x <= 356; x += STEP) {
+const deployed = region(shut, false);
+assert.equal(near(deployed, GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), false, 'the lowered bar seals the gap while roots are out');
+assert.equal(near(deployed, GARDEN_STANDS.drain, GARDEN_STANDS.drain.radius), true, 'deployed roots carry the player to the drain');
+for (let x = 312; x <= 356; x += GARDEN_REACH_STEP) {
   assert.equal(isGardenPositionSafe(shut, false, NO_HELD_SPANS, { x, y: 220 }), true, `bridge crossing open at x=${x}`);
   assert.equal(isGardenPositionSafe(shut, true, NO_HELD_SPANS, { x, y: 220 }), false, `retracted spans seal the crossing at x=${x}`);
 }
 assert.equal(isGardenPositionSafe(shut, false, NO_HELD_SPANS, { x: 334, y: 260 }), false, 'canal water stays lethal below the bridge');
 
-const latchedFlood = flood(latched, false, NO_HELD_SPANS);
-assert.equal(latchedFlood.near(GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), true, 'held bar keeps the gap walkable in the dark');
-assert.equal(latchedFlood.near(GARDEN_STANDS.drain, GARDEN_STANDS.drain.radius), true, 'held bar and roots together connect both approaches');
+const latchedRegion = region(latched, false);
+assert.equal(near(latchedRegion, GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), true, 'held bar keeps the gap walkable in the dark');
+assert.equal(near(latchedRegion, GARDEN_STANDS.drain, GARDEN_STANDS.drain.radius), true, 'held bar and roots together connect both approaches');
+assert.equal(near(latchedRegion, GARDEN_STANDS.sprout, GARDEN_STANDS.sprout.radius), true, 'the sprout is inspectable while the nursery is dark');
 
 const sideClosed = stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true });
-const sideClosedFlood = flood(sideClosed, true, NO_HELD_SPANS);
-assert.equal(sideClosedFlood.near(GARDEN_STANDS.drain, 30), false, 'with light on and no side path the nursery is out of reach');
+const sideClosedRegion = region(sideClosed, true);
+assert.equal(near(sideClosedRegion, GARDEN_STANDS.drain, 30), false, 'with light on and no side path the nursery is out of reach');
+assert.equal(near(sideClosedRegion, GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), false, 'the arch stays out of reach while the side path is shut');
 
 const sideOpen = stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true });
-const sideOpenFlood = flood(sideOpen, true, NO_HELD_SPANS);
-assert.equal(sideOpenFlood.near(GARDEN_STANDS.latchEast, GARDEN_STANDS.latchEast.radius), true, 'side path connects the nursery back to the lawn');
-assert.equal(sideOpenFlood.near(GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), true, 'the shrine gate is reachable once the garden is restored');
-assert.equal(sideOpenFlood.near(GARDEN_STANDS.handle, GARDEN_STANDS.handle.radius), true, 'the old approach stays walkable after restoration');
-const westFromSide = flood(sideOpen, true, NO_HELD_SPANS, { x: 500, y: 280 });
-assert.equal(westFromSide.near(GARDEN_SPAWN, 30), true, 'the side path is a true two-way return');
+const sideOpenRegion = region(sideOpen, true);
+assert.equal(near(sideOpenRegion, GARDEN_STANDS.latchEast, GARDEN_STANDS.latchEast.radius), true, 'side path connects the nursery back to the lawn');
+assert.equal(near(sideOpenRegion, GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), true, 'the shrine gate is reachable once the garden is restored');
+assert.equal(near(sideOpenRegion, GARDEN_STANDS.handle, GARDEN_STANDS.handle.radius), true, 'the old approach stays walkable after restoration');
+assert.equal(near(region(sideOpen, true, NO_HELD_SPANS, { x: 500, y: 280 }), GARDEN_SPAWN, 30), true, 'the side path is a true two-way return');
 
-for (let x = 308; x <= 392; x += STEP) {
+// the 80x32 plank covers the canal and still separates the banks while closed
+assert.equal(GARDEN_SIDE_PATH.width, 80, 'the closed plank solid is the visible plank art width');
+assert.equal(GARDEN_SIDE_PATH.height, 32, 'the closed plank solid is the visible plank art height');
+assert.equal(GARDEN_SIDE_PATH.y + GARDEN_SIDE_PATH.height, 316);
+for (const wall of [GARDEN_STATIC_SOLIDS.find((s) => s.id === 'canal-west-wall-b').rect, GARDEN_STATIC_SOLIDS.find((s) => s.id === 'canal-east-wall-b').rect]) {
+  assert.equal(rectsOverlap(GARDEN_SIDE_PATH, { ...wall, y: 248, height: 36 }), false, 'the plank never overlaps the canal side walls');
+}
+for (let x = 308; x <= 380; x += GARDEN_REACH_STEP) {
   assert.equal(isGardenPositionSafe(sideClosed, true, NO_HELD_SPANS, { x, y: 280 }), false, `closed plank blocks the side strip at x=${x}`);
   assert.equal(isGardenPositionSafe(sideOpen, true, NO_HELD_SPANS, { x, y: 280 }), true, `opened plank clears the side strip at x=${x}`);
 }
-const sideOpenState = sideOpen;
-assert.equal(isGardenPositionSafe(sideClosed, true, NO_HELD_SPANS, { x: 310, y: 280 }), false, 'west mouth of the closed plank is blocked');
-assert.equal(isGardenPositionSafe(sideOpenState, true, NO_HELD_SPANS, { x: 310, y: 280 }), true, 'west mouth opens with the plank');
-assert.equal(isGardenPositionSafe(sideClosed, true, NO_HELD_SPANS, { x: 390, y: 280 }), false, 'east mouth of the closed plank is blocked');
-assert.equal(isGardenPositionSafe(sideOpenState, true, NO_HELD_SPANS, { x: 390, y: 280 }), true, 'east mouth opens with the plank');
+assert.equal(reachable(sideClosed, true, { x: 288, y: 280 }), true, 'the west bank of the side strip is reachable with the plank closed');
+assert.equal(reachable(sideClosed, true, { x: 392, y: 280 }), false, 'the east landing is NOT reachable with the plank closed (no 12px leak past the plank)');
+assert.equal(reachable(sideOpen, true, { x: 392, y: 280 }), true, 'the east landing opens with the plank');
+assert.equal(isGardenPositionSafe(sideOpen, true, NO_HELD_SPANS, { x: 392, y: 280 }), true);
 
+// ---------------------------------------------------------------- prompt side rule (RULE_GAMES 1)
+const STAND_OBJECTS = [
+  { id: 'shutter-handle', stand: GARDEN_STANDS.handle, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'shutter-handle').rect },
+  { id: 'latch-west', stand: GARDEN_STANDS.latchWest, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'latch-west').rect },
+  { id: 'drain', stand: GARDEN_STANDS.drain, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'drain').rect },
+  { id: 'latch-east', stand: GARDEN_STANDS.latchEast, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'latch-east').rect },
+  { id: 'sprout', stand: GARDEN_STANDS.sprout, rect: GARDEN_MODULES.find((m) => m.id === 'sprout').rect },
+];
+for (const { id, stand, rect } of STAND_OBJECTS) {
+  const cx = rect.x + rect.width / 2;
+  const cy = rect.y + rect.height / 2;
+  assert.ok(stand.y > rect.y + rect.height, `${id}: stand sits on the south side of the object`);
+  assert.ok(stand.x >= rect.x && stand.x <= rect.x + rect.width, `${id}: stand is inside the object's x span`);
+  assert.ok(stand.y - (rect.y + rect.height) <= 20, `${id}: stand hugs the south edge (<=20px gap)`);
+  const probes = { north: { x: cx, y: rect.y - 12 }, east: { x: rect.x + rect.width + 12, y: cy }, west: { x: rect.x - 12, y: cy } };
+  for (const [side, probe] of Object.entries(probes)) {
+    assert.ok(Math.hypot(probe.x - stand.x, probe.y - stand.y) > stand.radius, `${id}: standing at the ${side} face is outside the prompt radius`);
+  }
+  assert.ok(stand.y + stand.radius < HUD_BOTTOM, `${id}: the prompt zone stays clear of the bottom HUD strip`);
+}
+// documented gate-arch exception (RULE_GAMES 3): trigger under the arch, approached from inside
+assert.equal(GARDEN_STANDS.exit.x > 552 && GARDEN_STANDS.exit.x < 596, true, 'arch trigger sits inside the gate opening');
+assert.equal(GARDEN_STANDS.exit.y < 96, true, 'arch trigger sits under the arch');
+
+// ---------------------------------------------------------------- every solid blocks the 14x6 foot body from all four sides
+function approachCenters(rect) {
+  const cx = rect.x + rect.width / 2;
+  const midY = rect.y + rect.height / 2 - 19;
+  return {
+    north: { x: cx, y: rect.y - 21 },
+    south: { x: cx, y: rect.y + rect.height - 17 },
+    west: { x: rect.x - 6, y: midY },
+    east: { x: rect.x + rect.width + 6, y: midY },
+  };
+}
+function overlapsAny(rects, center) {
+  const body = gardenActorBody(center);
+  return rects.filter((r) => rectsOverlap(body, r));
+}
+const dynamicSolids = (state, lanternOn, held) => [
+  { id: 'bar-beam', rect: GARDEN_BAR_BEAM, enabled: !barRaised(state, lanternOn) },
+  { id: 'side-plank', rect: GARDEN_SIDE_PATH, enabled: !sidePathOpen(state) },
+  { id: 'bridge-s1', rect: GARDEN_SPANS.s1, enabled: !rootsDeployed(state, lanternOn) && !held.s1 },
+  { id: 'bridge-s2', rect: GARDEN_SPANS.s2, enabled: !rootsDeployed(state, lanternOn) && !held.s2 },
+];
+let blockDirections = 0;
+let isolatedDirections = 0;
+function assertSolidBlocks(id, rect, state, lanternOn, held, relaxed = false) {
+  let isolated = 0;
+  for (const [dir, center] of Object.entries(approachCenters(rect))) {
+    const inBounds = center.x >= GARDEN_BOUNDS.minX && center.x <= GARDEN_BOUNDS.maxX && center.y >= GARDEN_BOUNDS.minY && center.y <= GARDEN_BOUNDS.maxY;
+    if (!inBounds) continue; // the approach face lies outside the world; nothing to block
+    blockDirections += 1;
+    assert.equal(rectsOverlap(gardenActorBody(center), rect), true, `${id} ${dir}: the foot body really presses into the prop`);
+    assert.equal(isGardenPositionSafe(state, lanternOn, held, center), false, `${id} blocks the 14x6 foot body from the ${dir}`);
+    // the ONLY reason this cell is unsafe should be this solid (otherwise the test proves nothing)
+    const rest = GARDEN_STATIC_SOLIDS.filter((s) => s.id !== id).map((s) => s.rect)
+      .concat(GARDEN_WATER)
+      .concat(dynamicSolids(state, lanternOn, held).filter((d) => d.enabled).map((d) => d.rect))
+      .filter((r) => r !== rect);
+    if (overlapsAny(rest, center).length === 0) isolated += 1;
+  }
+  if (!relaxed) assert.ok(isolated >= 1, `${id}: proves it is the blocker on at least one side (isolated faces: ${isolated})`);
+  isolatedDirections += isolated;
+}
+// Stand-alone props must be provably the blocker on at least one face. The world bands/walls
+// and controls that are deliberately packed together (handle beside the stone latch, posts in
+// the gate wall, wall hugging the south band) may share their approach cells.
+const WORLD_EDGE_IDS = new Set(['band-north-a', 'band-north-b', 'band-west', 'band-south-west', 'band-south-east', 'south-east-band',
+  'east-band', 'pond-railing', 'gate-west-wall', 'gate-east-wall', 'wall-nw', 'wall-nw-east', 'wall-lawn-north-west',
+  'wall-lawn-north-east-a', 'wall-lawn-north-east-b', 'wall-canal-north', 'wall-walkway-west', 'balu-south', 'canal-west-wall-a',
+  'canal-west-wall-b', 'canal-west-wall-c', 'canal-east-wall-a', 'canal-east-wall-b', 'canal-east-wall-c', 'tree-trunk-sw',
+  'wall-lawn-south-west', 'bar-post-west', 'bar-post-east', 'shutter-handle', 'platform-stone']);
+for (const solid of GARDEN_STATIC_SOLIDS) assertSolidBlocks(solid.id, solid.rect, fresh, true, NO_HELD_SPANS, WORLD_EDGE_IDS.has(solid.id));
+for (const d of dynamicSolids(shut, false, NO_HELD_SPANS)) if (d.enabled) assertSolidBlocks(`${d.id}(live)`, d.rect, shut, false, NO_HELD_SPANS);
+for (const d of dynamicSolids(sideClosed, true, NO_HELD_SPANS)) if (d.id === 'side-plank' && d.enabled) assertSolidBlocks('side-plank(closed)', d.rect, sideClosed, true, NO_HELD_SPANS);
+for (const d of dynamicSolids(fresh, true, NO_HELD_SPANS)) if (d.id.startsWith('bridge') && d.enabled) assertSolidBlocks(`${d.id}(retracted)`, d.rect, fresh, true, NO_HELD_SPANS);
+for (const d of dynamicSolids(shut, false, NO_HELD_SPANS)) if (d.id === 'bar-beam' && d.enabled) assertSolidBlocks('bar-beam(lowered)', d.rect, shut, false, NO_HELD_SPANS);
+assert.ok(blockDirections >= 140, `four-direction blocking tested ${blockDirections} approach cells`);
+assert.ok(isolatedDirections >= 40, `four-direction blocking proved ${isolatedDirections} isolated (non-vacuous) approach cells`);
+
+// ---------------------------------------------------------------- eject targets
 const ejectNorth = { x: 132, y: GARDEN_BAR_BEAM.y - 24 };
 const ejectSouth = { x: 132, y: GARDEN_BAR_BEAM.y + GARDEN_BAR_BEAM.height + 8 };
 assert.equal(isGardenPositionSafe(shut, false, NO_HELD_SPANS, ejectNorth), true, 'north eject target is safe');
 assert.equal(isGardenPositionSafe(shut, false, NO_HELD_SPANS, ejectSouth), true, 'south eject target is safe');
 assert.equal(isGardenPositionSafe(shut, false, NO_HELD_SPANS, { x: 132, y: 134 }), false, 'corridor itself is sealed for the eject to matter');
+assert.equal(reachable(shut, false, ejectSouth), true, 'the south eject target stays connected to the entry');
+// ejected north of the beam the player lands in the nook pocket, which the lowered bar seals:
+// the recovery is the lantern toggle the player always owns, so the pocket must reopen then.
+assert.equal(reachable(shut, true, ejectNorth), true, 'the north eject target is reachable again as soon as the lantern raises the bar');
+assert.equal(isGardenPositionSafe(shut, true, NO_HELD_SPANS, ejectNorth), true, 'the north eject target stays collision-free with the bar raised');
+assert.equal(reachable(stateOf({ canopyShut: true, sunLatched: true }), false, ejectNorth), true, 'a latched bar leaves the north eject target reachable in the dark too');
+assert.equal(reachable(shut, false, ejectNorth), false, 'with the bar down and roots out the nook pocket is sealed (reopened by F, tested above)');
 
 for (const anchor of GARDEN_STAGE_ANCHORS) {
-  const comboStates = [
-    [fresh, true], [shut, true], [shut, false], [latched, false], [latched, true],
-    [sideClosed, true], [sideClosed, false], [sideOpen, true], [sideOpen, false],
-  ];
-  assert.equal(comboStates.some(([state, lanternOn]) => isGardenPositionSafe(state, lanternOn, NO_HELD_SPANS, anchor)), true, `anchor ${anchor.x},${anchor.y} is safe somewhere`);
+  const combos = [[fresh, true], [shut, true], [shut, false], [latched, false], [latched, true], [sideClosed, true], [sideClosed, false], [sideOpen, true], [sideOpen, false]];
+  assert.equal(combos.some(([state, lanternOn]) => isGardenPositionSafe(state, lanternOn, NO_HELD_SPANS, anchor)), true, `anchor ${anchor.x},${anchor.y} is safe somewhere`);
+  assert.equal(combos.some(([state, lanternOn]) => reachable(state, lanternOn, anchor)), true, `anchor ${anchor.x},${anchor.y} is reachable from the entry in some state`);
 }
 
-const savedPoints = [{ x: 327, y: 232 }, { x: 460, y: 240 }, { x: 130, y: 134 }, { x: 160, y: 112 }, { x: 574, y: 64 }, { x: 238, y: 336 }];
-for (const canopy of [false, true]) for (const sun of [false, true]) for (const water of [false, true]) for (const ret of [false, true]) for (const lanternOn of [true, false]) {
-  const state = stateOf({ canopyShut: canopy, sunLatched: sun, waterFlowing: water, returnLatched: ret });
+// ---------------------------------------------------------------- safe restore: safe AND still connected to the entry
+const savedPoints = [
+  { x: 327, y: 232 },   // mid bridge
+  { x: 460, y: 240 },   // inside the drain
+  { x: 130, y: 134 },   // the wall gap
+  { x: 160, y: 112 },   // the nook
+  { x: 574, y: 64 },    // the shrine arch
+  { x: 238, y: 300 },   // the entry
+  { x: 450, y: 280 },   // nursery floor, east of the canal
+  { x: 576, y: 150 },   // the walkway
+  { x: 600, y: 300 },   // east band water
+  { x: 20, y: 40 },     // north-west wood
+];
+const STAGE_STATES = [
+  ['fresh', fresh, true], ['canopy-shut', shut, true], ['dark', shut, false], ['latched-dark', latched, false],
+  ['latched-light', latched, true], ['watered', sideClosed, true], ['watered-dark', sideClosed, false],
+  ['restored', sideOpen, true], ['restored-dark', sideOpen, false],
+];
+let restoreCases = 0;
+for (const [label, state, lanternOn] of STAGE_STATES) {
+  const entryRegion = region(state, lanternOn);
   for (const saved of savedPoints) {
     const resolved = nearestSafeGardenSpawn(state, lanternOn, NO_HELD_SPANS, saved);
-    assert.equal(isGardenPositionSafe(state, lanternOn, NO_HELD_SPANS, resolved), true, `resolved spawn ${resolved.x},${resolved.y} safe for ${JSON.stringify({ canopy, sun, water, ret, lanternOn })}`);
+    restoreCases += 1;
+    assert.equal(isGardenPositionSafe(state, lanternOn, NO_HELD_SPANS, resolved), true, `${label}: resolved spawn ${resolved.x},${resolved.y} is not inside a solid/water`);
+    assert.equal(entryRegion.has(`${gardenCellOf(resolved).i}:${gardenCellOf(resolved).j}`), true,
+      `${label}: resolved spawn ${resolved.x},${resolved.y} must be reachable from the level entry (stale save from ${saved.x},${saved.y})`);
+    assert.ok(resolved.y < HUD_BOTTOM - 4, `${label}: resolved spawn ${resolved.x},${resolved.y} is not hidden under the bottom HUD`);
+    assert.ok(resolved.y > HUD_TOP, `${label}: resolved spawn ${resolved.x},${resolved.y} is not hidden under the top HUD`);
   }
 }
-assert.deepEqual(nearestSafeGardenSpawn(shut, true, NO_HELD_SPANS, { x: 327, y: 232 }), GARDEN_STAGE_ANCHORS[0], 'mid-bridge stale save returns to the west lawn');
+// a legacy save parked in the nursery while the garden is still lit must fall back to the west lawn
+assert.deepEqual(nearestSafeGardenSpawn(fresh, true, NO_HELD_SPANS, { x: 450, y: 280 }), GARDEN_STAGE_ANCHORS[0], 'a sealed nursery save restores to the lawn');
+assert.deepEqual(nearestSafeGardenSpawn(fresh, true, NO_HELD_SPANS, { x: 576, y: 150 }), GARDEN_STAGE_ANCHORS[0], 'a sealed walkway save restores to the lawn');
+assert.deepEqual(nearestSafeGardenSpawn(fresh, true, NO_HELD_SPANS, { x: 574, y: 64 }), GARDEN_STAGE_ANCHORS[0], 'a save past the closed shrine gate restores to the lawn');
+// …but a save in the nursery with the crossing committed stays where the player was
+assert.deepEqual(nearestSafeGardenSpawn(sideOpen, true, NO_HELD_SPANS, { x: 450, y: 280 }), { x: 450, y: 280 }, 'a reachable nursery save is kept');
+assert.deepEqual(nearestSafeGardenSpawn(restoreMidBridgeState(), true, NO_HELD_SPANS, { x: 327, y: 232 }), { x: 238, y: 300 }, 'mid-bridge stale save returns to the lawn');
+function restoreMidBridgeState() { return shut; }
 
-const latchedNoWater = stateOf({ canopyShut: true, sunLatched: true });
-const crossFlood = flood(latchedNoWater, false, NO_HELD_SPANS);
-assert.equal(crossFlood.near(GARDEN_STANDS.drain, 30), true, 'pre-water crossing still lands in the nursery');
-assert.equal(crossFlood.near(GARDEN_STANDS.sprout, GARDEN_STANDS.sprout.radius), true, 'the sprout is inspectable while the nursery is dark');
-
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 238, y: 342 }), true, 'spawn mouth is walkable');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 640, y: 180 }), false, 'east boundary holds');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 574, y: 64 }), true, 'gate opening is empty before completion');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 574, y: 20 }), true, 'the gate opening is the way out to the north edge');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 546, y: 20 }), false, 'the bands flanking the gate stay solid');
-
-assert.equal(GARDEN_SIDE_PATH.y + GARDEN_SIDE_PATH.height, 308);
-assert.equal(barRaised(latched, true) && rootsDeployed(latched, true), false, 'bar up and roots out never coexist while the lantern is on');
-
-// --- Every solid prop blocks the 14x6 foot body from all four cardinal directions ---
-// "Blocks" = a foot body pushed 1px into a face must be reported unsafe; the test also
-// refuses trivially-passing (out-of-bounds) approach centers.
-function approachCenters(rect) {
-  const cx = rect.x + rect.width / 2;
-  const midY = rect.y + rect.height / 2 - 19; // body vertical center sits on the prop's center
-  return {
-    north: { x: cx, y: rect.y - 21 },               // body bottom intrudes 1px from above
-    south: { x: cx, y: rect.y + rect.height - 17 }, // body top intrudes 1px from below
-    west: { x: rect.x - 6, y: midY },               // body right intrudes 1px from the left
-    east: { x: rect.x + rect.width + 6, y: midY },  // body left intrudes 1px from the right
-  };
-}
-function assertPropBlocks(label, state, lanternOn, held, rect) {
-  const centers = approachCenters(rect);
-  for (const [dir, center] of Object.entries(centers)) {
-    const inBounds = center.x >= 14 && center.x <= 626 && center.y >= 12 && center.y <= 348;
-    assert.equal(inBounds, true, `${label} ${dir} approach center is inside the world`);
-    assert.equal(rectsOverlap(gardenActorBody(center), rect), true, `${label} ${dir} approach body overlaps the prop`);
-    assert.equal(isGardenPositionSafe(state, lanternOn, held, center), false, `${label} blocks the foot body from the ${dir}`);
-  }
-}
-const PROP_SOLIDS = ['bar-post-west', 'bar-post-east', 'reservoir', 'shutter-handle', 'sun-main', 'latch-west',
-  'moon-main', 'drain', 'latch-east', 'practice-sun-pot', 'practice-moon-pot', 'tower', 'tree-trunk-sw', 'platform-stone'];
-for (const id of PROP_SOLIDS) {
-  const solid = GARDEN_STATIC_SOLIDS.find((entry) => entry.id === id);
-  assert.ok(solid, `static prop ${id} exists`);
-  assertPropBlocks(id, fresh, true, NO_HELD_SPANS, solid.rect);
-}
-assertPropBlocks('bar-beam(lowered)', shut, false, NO_HELD_SPANS, GARDEN_BAR_BEAM);
-assertPropBlocks('side-plank(closed)', sideClosed, true, NO_HELD_SPANS, GARDEN_SIDE_PATH);
-assertPropBlocks('root-bridge span s1(retracted)', fresh, true, NO_HELD_SPANS, GARDEN_SPANS.s1);
-assertPropBlocks('root-bridge span s2(retracted)', fresh, true, NO_HELD_SPANS, GARDEN_SPANS.s2);
-
-// --- Live conditions (not stale flags) gate the final exit ---
+// ---------------------------------------------------------------- exit gating
 assert.equal(gardenExitReady(fresh), false, 'exit locked before the garden is touched');
 assert.equal(gardenExitReady(shut), false, 'exit locked before the bar is latched');
 assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true })), false, 'exit locked before the nursery is watered');
@@ -231,7 +325,105 @@ assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, water
 assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true })), false, 'exit locked before Lumo realizes');
 assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true })), true, 'exit opens only on full completion');
 assert.equal(gardenExitReady(latched), false, 'a latched bar alone never opens the exit');
-const noCrossing = stateOf({ canopyShut: true, sunLatched: true });
-assert.equal(flood(noCrossing, true, NO_HELD_SPANS).near(GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), false, 'the shrine gate stand is unreachable while both canal crossings are closed in the light');
-assert.equal(sideOpenFlood.near(GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), true, 'the shrine gate stand becomes reachable once the garden is restored');
-console.log('Sleeping Garden state, geometry, reachability, held-span, eject, spawn and completion checks passed');
+assert.equal(near(region(stateOf({ canopyShut: true, sunLatched: true }), true), GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), false, 'the shrine gate stand is unreachable while both canal crossings are closed in the light');
+
+// ---------------------------------------------------------------- art / footprint correspondence
+// Every module art is drawn at native size: the placement rect IS the art box, so nothing is
+// squeezed. Also asserts the layout table is truthful for the shipped initial variant and that
+// a state change (moon extended) never shifts the pot sideways.
+function pngSize(file) {
+  const candidates = [
+    path.join(ROOT, 'assets/levels/07-the-sleeping-garden/sprites', `${file}.png`),
+    path.join(ROOT, 'assets/levels/shared/garden-mechanisms', `${file}.png`),
+    path.join(ROOT, 'assets/levels/shared/mechanisms', `${file}.png`),
+  ];
+  const found = candidates.find((c) => fs.existsSync(c));
+  assert.ok(found, `art file for "${file}" exists`);
+  const buf = fs.readFileSync(found);
+  assert.equal(buf.readUInt32BE(0), 0x89504e47, `${file}: real PNG header`);
+  return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+}
+function artBox(spec, variantKey, png) {
+  const rect = variantKey === 'extended' && spec.extendedRect ? spec.extendedRect : spec.rect;
+  if (spec.origin === 'topleft') return { x: rect.x, y: rect.y, width: png.width, height: png.height };
+  if (spec.origin === 'bottom') return { x: rect.x + rect.width / 2 - png.width / 2, y: rect.y + rect.height - png.height, width: png.width, height: png.height };
+  return { x: rect.x + rect.width / 2 - png.width / 2, y: rect.y + rect.height / 2 - png.height / 2, width: png.width, height: png.height };
+}
+let artChecks = 0;
+for (const spec of GARDEN_MODULES) {
+  const entries = Object.entries(spec.variants);
+  for (const [variantKey, variant] of entries) {
+    const png = pngSize(variant.file);
+    const box = artBox(spec, variantKey, png);
+    const declared = variantKey === 'extended' && spec.extendedRect ? spec.extendedRect : spec.rect;
+    artChecks += 1;
+    if (variantKey !== 'extended') {
+      assert.deepEqual({ x: box.x, y: box.y, width: box.width, height: box.height }, { x: declared.x, y: declared.y, width: declared.width, height: declared.height },
+        `${spec.id}/${variantKey}: declared art box equals the drawn native box (no stretch/squeeze)`);
+    } else {
+      assert.equal(box.width, png.width, `${spec.id}/${variantKey}: extended art keeps its native width`);
+      assert.equal(box.x + box.width / 2, declared.x + declared.width / 2, `${spec.id}/${variantKey}: extended art stays centred on the pot`);
+    }
+    if (!spec.floorArt) continue;
+    assert.ok(box.y + box.height <= GARDEN_BOUNDS.maxY + 12, `${spec.id}: floor art stays inside the world`);
+  }
+}
+for (const icon of Object.values(GARDEN_ICONS)) assert.deepEqual(pngSize(icon.file), { width: 16, height: 16 }, `${icon.file} is a 16x16 state sticker`);
+assert.ok(artChecks >= 24, `art/native-size checks ran ${artChecks} times`);
+assert.deepEqual(pngSize('root-bridge-off'), { width: 48, height: 32 }, 'the retracted bridge stub art is 48x32');
+assert.deepEqual(pngSize('side-stone-path-closed'), { width: 80, height: 32 }, 'the closed plank art is 80x32, matching GARDEN_SIDE_PATH');
+
+// state stickers must be visible in the dark: inside their pot's clear floor, off the pot art
+const iconHosts = [
+  { module: 'sun-main', pot: ['sun-main'] },
+  { module: 'moon-main', pot: ['moon-main'] },
+  { module: 'practice-sun', pot: ['practice-sun'] },
+  { module: 'practice-moon', pot: ['practice-moon'] },
+];
+for (const host of iconHosts) {
+  const spec = GARDEN_MODULES.find((m) => m.id === host.module);
+  assert.ok(spec.icon, `${host.module} declares a state sticker`);
+  const box = { x: spec.icon.x - 8, y: spec.icon.y - 8, width: 16, height: 16 };
+  const artBoxes = [];
+  for (const id of host.pot) {
+    const pot = GARDEN_MODULES.find((m) => m.id === id);
+    for (const [variantKey, variant] of Object.entries(pot.variants)) {
+      const png = pngSize(variant.file);
+      artBoxes.push(artBox(pot, variantKey, png));
+    }
+  }
+  for (const art of artBoxes) {
+    const overlap = Math.max(0, Math.min(box.x + box.width, art.x + art.width) - Math.max(box.x, art.x))
+      * Math.max(0, Math.min(box.y + box.height, art.y + art.height) - Math.max(box.y, art.y));
+    assert.equal(overlap, 0, `${spec.id} state sticker never sits under its own pot art (${overlap}px)`);
+  }
+  assert.ok(box.y + box.height <= HUD_BOTTOM, `${spec.id} state sticker stays above the bottom HUD strip`);
+  assert.ok(box.y > HUD_TOP, `${spec.id} state sticker stays below the top HUD strip`);
+  // and it must sit on open floor, not on a wall / canal / obstacle footprint
+  const solidsAtRest = GARDEN_STATIC_SOLIDS.map((s) => s.rect).concat(GARDEN_WATER)
+    .concat(dynamicSolids(fresh, true, NO_HELD_SPANS).filter((d) => d.enabled).map((d) => d.rect));
+  for (const solidRect of solidsAtRest) {
+    assert.equal(rectsOverlap(box, solidRect), false, `${spec.id} state sticker is drawn on open floor, not on a solid`);
+  }
+}
+// the practice demo pair is a side lesson: the test gap stays walkable and the lawn route around it is never blocked
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 126, y: 306 }), true, 'the teaching gap between the practice pots is walkable (14px body fits the 22px gap)');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 106, y: 268 }), true, 'the lawn north of the practice pots stays open');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 206, y: 268 }), true, 'the lawn route past the pots stays open');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 206, y: 304 }), true, 'the teaching bridge line is walkable');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 196, y: 336 }), false, 'the wall west of the entry mouth stays solid');
+
+// ---------------------------------------------------------------- HUD / floor contract
+for (const anchor of [GARDEN_SPAWN, ...GARDEN_STAGE_ANCHORS]) {
+  assert.ok(anchor.y > HUD_TOP && anchor.y < HUD_BOTTOM, `anchor ${anchor.x},${anchor.y} sits in the playable band`);
+}
+for (const stand of Object.values(GARDEN_STANDS)) {
+  assert.ok(stand.y > HUD_TOP && stand.y < HUD_BOTTOM, `stand ${stand.x},${stand.y} sits in the playable band`);
+}
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 238, y: 342 }), true, 'the spawn mouth is walkable');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 640, y: 180 }), false, 'east boundary holds');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 574, y: 20 }), true, 'the gate opening is the way out to the north edge');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 546, y: 20 }), false, 'the bands flanking the gate stay solid');
+assert.equal(barRaised(latched, true) && rootsDeployed(latched, true), false, 'bar up and roots out never coexist while the lantern is on');
+
+console.log(`Sleeping Garden checks passed (${restoreCases} restore cases, ${artChecks} art boxes, ${blockDirections} 4-way block cells, ${GARDEN_REACH_STEP}px reach grid from ${GARDEN_REACH_ORIGIN.x},${GARDEN_REACH_ORIGIN.y})`);

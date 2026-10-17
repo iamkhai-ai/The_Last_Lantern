@@ -10,7 +10,8 @@ import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
   GARDEN_ACTOR, GARDEN_BAR_BEAM, GARDEN_BRIDGE, GARDEN_ICONS, GARDEN_MODULES, GARDEN_SIDE_PATH, GARDEN_SPANS,
   GARDEN_SPAWN, GARDEN_STANDS, GARDEN_STATIC_SOLIDS, GARDEN_WATER, NO_HELD_SPANS, barRaised, bridgeWalkable,
-  crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody, gardenCompletionBlock, gardenExitReady, gardenPropDepth, inGateCorridor,
+  crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody, gardenCompletionBlock, gardenDrainEnabled,
+  gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled, gardenPropDepth, inGateCorridor,
   isGardenPositionSafe, nearestSafeGardenSpawn, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed,
   sanitizeGardenState, sidePathOpen, sunOpen, updateHeldSpans,
   type GardenArtVariant, type GardenHeldSpans, type GardenModuleSpec, type GardenPoint, type GardenSpanId, type GardenState,
@@ -29,11 +30,13 @@ export interface SleepingGardenLevelOptions {
   canStartStory: () => boolean;
 }
 
+// Scenario §2 (source of truth): the opening poses the mystery and points at the shutter,
+// without handing over the light/dark rule that the practice pots are there to teach.
 const INTRO: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Khu vườn đã ngủ quá lâu. Cây nắng và rễ trăng vẫn còn đây.' },
-  { speaker: 'Lumo', text: 'Chúng cần hai điều khác nhau: ánh sáng ấm và một khoảng tối dịu.' },
-  { speaker: 'Nhinh', text: 'Bể tích quang vẫn đang hứng sáng. Khu vườn nhờ nó mà thức.' },
-  { speaker: 'Lumo', text: 'Hai chậu nhỏ trước mặt là bản thử. Mình xem chúng trước nhé.' },
+  { speaker: 'Lumo', text: 'Hoa ở đây vẫn nở. Tôi tưởng vậy là tốt.' },
+  { speaker: 'Nhinh', text: 'Nhưng cây non dưới này không có lá mới.' },
+  { speaker: 'Lumo', text: 'Nước đã về rồi mà.' },
+  { speaker: 'Nhinh', text: 'Ánh từ bể kia vẫn chiếu xuống. Thử che nó lại xem.' },
 ];
 const CANOPY_BEAT: DialogueLine[] = [
   { speaker: 'Lumo', text: 'Tối đi thật.' },
@@ -513,22 +516,22 @@ export class SleepingGardenLevel {
   }
 
   private canPullHandle(): boolean {
-    if (this.state.canopyShut) return false;
+    if (!gardenHandleEnabled(this.state)) return false;
     return inGateCorridor({ x: this.player.x, y: this.player.y })
       && this.distanceTo(GARDEN_STANDS.handle.x, GARDEN_STANDS.handle.y) <= GARDEN_STANDS.handle.radius;
   }
 
   private canLatchWest(): boolean {
-    return this.state.canopyShut && !this.state.sunLatched && barRaised(this.state, this.lanternOn)
+    return gardenLatchWestEnabled(this.state, this.lanternOn)
       && inGateCorridor({ x: this.player.x, y: this.player.y });
   }
 
   private canOpenDrain(): boolean {
-    return !this.state.waterFlowing && (this.state.bridgeCrossed || sidePathOpen(this.state));
+    return gardenDrainEnabled(this.state);
   }
 
   private canLatchEast(): boolean {
-    return this.state.waterFlowing && !this.state.returnLatched;
+    return gardenLatchEastEnabled(this.state);
   }
 
   private exitReady(): boolean {
@@ -589,6 +592,13 @@ export class SleepingGardenLevel {
   }
 
   private inspectSprout(): void {
+    // The "talk to Lumo by the sprout" objective row must be satisfiable from this stand, so a
+    // post-water re-read also commits the realization if the queued nursery scene was missed.
+    if (this.state.waterFlowing && !this.state.lumoRealized) {
+      this.state.lumoRealized = true;
+      this.progress.flags['l6-lumo-realized'] = true;
+      this.save();
+    }
     this.say(this.state.waterFlowing ? SPROUT_AFTER : SPROUT_BEFORE);
   }
 
