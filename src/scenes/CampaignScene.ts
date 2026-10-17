@@ -104,6 +104,10 @@ export class CampaignScene extends Phaser.Scene {
       this.scene.start('EndingScene', { campaign: true });
       return;
     }
+    if (this.progress.level >= 4) {
+      this.scene.start('ComingSoonScene');
+      return;
+    }
     this.hintIndex = 0;
     this.selectedStone = -1;
     this.heartEnd = false;

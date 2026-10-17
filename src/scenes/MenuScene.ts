@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getNhinhTexture } from '../art/CampaignArt';
+import { getLevelArtKey, getNhinhTexture } from '../art/CampaignArt';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
@@ -23,25 +23,35 @@ export class MenuScene extends Phaser.Scene {
     this.menuButtons = [];
     this.actions = [];
 
-    // Build atmospheric Heart Tree Night scene matching 00_cover.png
-    WorldFactory.buildZone(this, 'hub', 0, false);
+    const backdropKey = getLevelArtKey(9, 'sanctuary-base');
+    if (backdropKey && this.textures.exists(backdropKey)) {
+      const backdrop = this.add.image(320, 180, backdropKey);
+      backdrop.setDepth(0);
+      this.tweens.add({ targets: backdrop, scale: 1.06, duration: 16000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      const veil = this.add.graphics().setDepth(10);
+      veil.fillStyle(0x04121a, 0.22);
+      veil.fillRect(0, 0, 640, 360);
+      veil.fillStyle(0x04121a, 0.38);
+      veil.fillRect(0, 0, 252, 360);
+    } else {
+      WorldFactory.buildZone(this, 'hub', 0, false);
+    }
 
-    // Nhinh & Lumo standing before the Heart Tree with warm lantern glow
-    const halo = this.add.image(312, 298, 'light_radial');
+    const halo = this.add.image(330, 294, 'light_radial');
     halo.setDepth(19);
-    halo.setScale(0.85);
-    halo.setAlpha(0.85);
+    halo.setScale(0.9);
+    halo.setAlpha(0.8);
 
     const menuNhinh = getNhinhTexture('idle_lit', 'right', 0);
     if (!menuNhinh) throw new Error('Missing required Nhinh menu frame: idle_lit/right/0');
-    const linh = this.add.sprite(306, 295, menuNhinh);
+    const linh = this.add.sprite(334, 292, menuNhinh);
     linh.setDepth(22);
 
-    const lumo = this.add.sprite(362, 268, 'lumo_0');
+    const lumo = this.add.sprite(382, 264, 'lumo_0');
     lumo.setDepth(25);
     this.tweens.add({
       targets: lumo,
-      y: 262,
+      y: 258,
       duration: 1200,
       yoyo: true,
       repeat: -1,
@@ -73,7 +83,7 @@ export class MenuScene extends Phaser.Scene {
       hudDecor.fillPath();
     }
 
-    const topRightTitle = this.add.text(476, 27, 'THE HEART TREE', {
+    const topRightTitle = this.add.text(476, 27, 'PLAYTEST · MÀN 01–04', {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '11px',
       fontStyle: 'bold',
@@ -172,6 +182,11 @@ export class MenuScene extends Phaser.Scene {
 
     this.refreshMenuHighlight();
 
+    const footerBackdrop = this.add.graphics();
+    footerBackdrop.setDepth(81);
+    footerBackdrop.fillStyle(0x07151c, 0.72);
+    footerBackdrop.fillRoundedRect(24, 331, 336, 21, 4);
+
     const footerHint = this.add.text(
       28,
       338,
@@ -183,6 +198,14 @@ export class MenuScene extends Phaser.Scene {
       }
     );
     footerHint.setDepth(82);
+
+    const buildTag = this.add.text(626, 350, 'PLAYTEST BUILD · MÀN 01–04', {
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: '9px',
+      color: '#7f9a94',
+    });
+    buildTag.setOrigin(1, 1);
+    buildTag.setDepth(82);
 
     if (this.input.keyboard) {
       this.input.keyboard.on('keydown-UP', () => this.moveSelection(-1));
