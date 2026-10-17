@@ -7,6 +7,7 @@ import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutor
 import { LIBRARY_LAYOUT, resolveLibrarySpawn } from '../data/libraryLayout';
 import { LibraryLevel } from '../levels/LibraryLevel';
 import { PathForTwoLevel } from '../levels/PathForTwoLevel';
+import { HeartOfElariaLevel } from '../levels/HeartOfElariaLevel';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -91,6 +92,7 @@ export class CampaignScene extends Phaser.Scene {
   private libraryLevel?: LibraryLevel;
   private shatteredCreek?: ShatteredCreekController;
   private pathForTwoLevel?: PathForTwoLevel;
+  private heartLevel?: HeartOfElariaLevel;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -1301,7 +1303,7 @@ export class CampaignScene extends Phaser.Scene {
       : level === 6 ? [['ruins_flower', 220, 160], ['ruins_flower', 420, 160], ['receiver_off', 320, 100]]
       : level === 7 ? [['guardian_statue', 320, 170], ['lock_sun_off', 200, 126], ['lock_sun_off', 440, 126], ['lock_moon_off', 320, 222], ['ruins_altar', 320, 82], ['pedestal_empty', 120, 205], ['mirror_1', 220, 175], ['mirror_1', 420, 175], ['receiver_off', 200, 126], ['receiver_off', 440, 126], ...(this.progress.flags['l7-solved'] ? [['shadow_npc', 320, 98] as [string, number, number]] : [])]
       : level === 8 ? [['mirror_0', 220, 175], ['mirror_2', 420, 175], ['shadow_npc', 320, 114], ['crystal_balance', 320, 68]]
-      : [['heart_tree_0', 320, 157], ['crystal_memory', 190, 260], ['crystal_hope', 320, 260], ['crystal_balance', 450, 260], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
+      : [['heart_tree_0', 320, 157], ['crystal_memory', 158, 192], ['crystal_hope', 320, 200], ['crystal_balance', 480, 192], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
     for (const [key, x, y] of props) {
       if (level === 9 && key === 'heart_tree_0') continue;
       this.addProp(key, x, y, level === 0 || key === 'woods_arch_locked' || key === 'heart_tree_0' ? 1 : 0.9);
@@ -1339,12 +1341,12 @@ export class CampaignScene extends Phaser.Scene {
       this.addLevelArt(this.progress.flags['l6-canopy-shut'] ? 'reservoir-shutter-closed-overlay' : 'reservoir-open', 320, 236, 80, 72, 5);
       this.addLevelArt(this.progress.flags['l6-water-flowing'] ? 'nursery-water-delivered' : 'nursery-drain-closed', 480, 178, 88, 20, 8);
     } else if (level === 9) {
-      for (const [name, x] of [['memory', 190], ['hope', 320], ['balance', 450]] as const) {
+      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
         const state = this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty';
-        this.addLevelArt(`${name}-alcove-${state}`, x, 260, 52, 52, 8);
+        this.addLevelArt(`${name}-alcove-${state}`, x, y, 52, 52, 8);
       }
       const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.addLevelArt(core, 320, 154, 46, 46, 8);
+      this.addLevelArt(core, 320, 115, 46, 46, 8);
     }
     if (level === 1) this.drawFireflyRoute();
     if (level === 2 && this.progress.flags['l2-memory'] === true) this.addProp('crystal_memory', 320, 190, 0.9);
@@ -1494,7 +1496,7 @@ export class CampaignScene extends Phaser.Scene {
       action('balance-crystal', 'E · Nhận Tinh thể Cân Bằng', 320, 68, () => { this.progress.flags['l8-crystal'] = true; this.save(); }, () => this.progress.flags['l8-room-three'] && !this.progress.flags['l8-crystal'], 'crystal_balance');
       action('observatory-exit', 'E · Trở về Cây Mẹ', 560, 300, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Ba tinh thể đã trở lại. Mình hãy đưa chúng về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Tôi sẽ không để cậu đi một mình.' }]), () => this.progress.flags['l8-crystal'], 'woods_arch_open');
     } else {
-      (['memory', 'hope', 'balance'] as const).forEach((name, i) => action(`heart-${name}`, `E · Đặt tinh thể ${name === 'memory' ? 'Ký Ức' : name === 'hope' ? 'Hy Vọng' : 'Cân Bằng'}`, [190, 320, 450][i], 260, () => this.setFlag(`l9-${name}`), () => !this.progress.flags[`l9-${name}`], `crystal_${name}`));
+      (['memory', 'hope', 'balance'] as const).forEach((name, i) => action(`heart-${name}`, `E · Đặt tinh thể ${name === 'memory' ? 'Ký Ức' : name === 'hope' ? 'Hy Vọng' : 'Cân Bằng'}`, [158, 320, 480][i], [192, 200, 192][i], () => this.setFlag(`l9-${name}`), () => !this.progress.flags[`l9-${name}`], `crystal_${name}`));
       action('heart-lantern-place', 'E · Đặt đèn lên bệ dẫn sáng', 100, 205, () => { this.lantern.placeLanternAt(100, 205); this.progress.lanternOn = true; this.progress.flags['l9-lantern-placed'] = true; this.save(); this.say([{ speaker: 'Nhinh', text: 'Ánh sáng đã được đặt ở tâm dẫn.' }]); }, () => this.lantern.lanternInHand && !this.lantern.lanternPlaced && !this.progress.flags['l9-roots'], 'pedestal_empty');
       this.registerMirror('heart-memory', 'Gương Ký Ức', 220, 220, 1);
       this.registerMirror('heart-balance', 'Gương Cân Bằng', 420, 220, 2);
@@ -1899,6 +1901,21 @@ export class CampaignScene extends Phaser.Scene {
         this.save();
       }
       this.addCampaignBarrier('garden-root-bridge-gate', 320, 260, 100, 30, !bridgeReady && !this.gardenBridgePendingRemoval);
+    } else if (level === 9) {
+      this.addCampaignBarrier('heart-north-boundary', 320, 91, 640, 10);
+      this.addCampaignBarrier('heart-south-boundary', 320, 315, 640, 10);
+      this.addCampaignBarrier('heart-west-boundary', 2.5, 200, 5, 220);
+      this.addCampaignBarrier('heart-east-boundary', 637.5, 200, 5, 220);
+      // Mother Tree trunk blocks passage.
+      this.addCampaignBarrier('heart-tree-trunk', 320, 182, 68, 20);
+      // Standing props and mechanisms block passage; alcoves/eyes remain approachable.
+      this.addCampaignBarrier('heart-pedestal', 100, 205, 34, 24);
+      this.addCampaignBarrier('heart-mirror-memory', 220, 220, 34, 40);
+      this.addCampaignBarrier('heart-mirror-balance', 420, 220, 34, 40);
+      this.addCampaignBarrier('heart-prism', 320, 200, 30, 34);
+      this.addCampaignBarrier('heart-statue', 400, 125, 30, 34);
+      this.addCampaignBarrier('heart-receiver-left', 180, 145, 26, 24);
+      this.addCampaignBarrier('heart-receiver-right', 460, 145, 26, 24);
     }
   }
 
@@ -2129,11 +2146,11 @@ export class CampaignScene extends Phaser.Scene {
     } else if (level === 7) {
       this.setLevelArtAt(320, 170, `statue-notch-${this.value('statue') % 4}`);
     } else if (level === 9) {
-      for (const [name, x] of [['memory', 190], ['hope', 320], ['balance', 450]] as const) {
-        this.setLevelArtAt(x, 260, `${name}-alcove-${this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty'}`);
+      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
+        this.setLevelArtAt(x, y, `${name}-alcove-${this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty'}`);
       }
       const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.setLevelArtAt(320, 154, core);
+      this.setLevelArtAt(320, 115, core);
     }
   }
 

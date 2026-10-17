@@ -80,16 +80,8 @@ const levelArtModules = import.meta.glob([
   '../../assets/levels/09-dark-moon-observatory/sprites/learned-marks-miniature.png',
   '../../assets/levels/09-dark-moon-observatory/sprites/star-chart.png',
   '../../assets/levels/09-dark-moon-observatory/sprites/wheel-stopped-sun-among-stars.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/sanctuary-base.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/memory-alcove-empty.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/memory-alcove-inserted.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/hope-alcove-empty.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/hope-alcove-inserted.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/balance-alcove-empty.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/balance-alcove-inserted.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/core-night.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/core-ready.png',
-  '../../assets/levels/10-the-heart-of-elaria/sprites/core-latched.png',
+  // Level 10 keeps every authored sprite on one 640x360 registration grid.
+  '../../assets/levels/10-the-heart-of-elaria/sprites/*.png',
 ], {
   eager: true,
   query: '?url',
@@ -131,6 +123,7 @@ const sharedMechanismModules = import.meta.glob([
   '../../assets/levels/shared/mechanisms/mirror-3-horizontal.png',
   '../../assets/levels/shared/mechanisms/mirror-3-slash.png',
   '../../assets/levels/shared/mechanisms/mirror-3-backslash.png',
+  '../../assets/levels/shared/beam-splitter/*.png',
 ], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 
 function normalize(value: string): string {
