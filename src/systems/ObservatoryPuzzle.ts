@@ -44,7 +44,13 @@ export interface ObservatoryDerivedState {
 }
 
 const ROTATION_COUNT = 4;
-const LUMO_SEAL_RADIUS = 20;
+/**
+ * Lumo comes to rest at the seal waypoint with the authored hover offset
+ * (-18, +12), i.e. 21.6px away. The seal must accept that resting pose, or the
+ * whole beam network past Door A would read as unpowered while he visibly holds
+ * the seal.
+ */
+const LUMO_SEAL_RADIUS = 28;
 
 function normalizeRotation(rotation: number): number {
   return ((rotation % ROTATION_COUNT) + ROTATION_COUNT) % ROTATION_COUNT;

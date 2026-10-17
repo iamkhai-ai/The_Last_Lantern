@@ -18,6 +18,9 @@
  *  - every locked door and disabled control has a non-empty prerequisite message.
  */
 import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import {
   OBSERVATORY_ALCOVES,
   OBSERVATORY_BODY,
@@ -218,22 +221,22 @@ assert.ok(OBSERVATORY_FINAL_DOOR_HEAD.width >= 48, 'the final door opening is at
  * 3. Solids block the foot body from every cardinal direction
  * ------------------------------------------------------------------ */
 for (const roomId of ROOMS) {
-  const stage = STAGES.finished;
-  const solids = observatorySolidRects(roomId, stage);
-  const contacts = (solid) => [
-    { name: 'north', center: { x: solid.x + solid.width / 2, y: solid.y - 20 } },
-    { name: 'south', center: { x: solid.x + solid.width / 2, y: solid.y + solid.height - 20 } },
-    { name: 'west', center: { x: solid.x - 1, y: solid.y + solid.height - 20 } },
-    { name: 'east', center: { x: solid.x + solid.width + 1, y: solid.y + solid.height - 20 } },
-  ];
-  // Sample a few props per room (walls are trivially blocking) to keep the run fast.
-  const sample = solids.filter((solid, index) => index % 3 === 0);
-  for (const solid of sample) {
-    for (const { name, center } of contacts(solid)) {
-      const body = observatoryBody(center);
-      assert.ok(rectsOverlap(body, solid), `${roomId} ${name} contact overlaps the solid under test`);
-      assert.equal(isObservatoryPositionSafe(roomId, center, stage), false,
-        `${roomId} solid at ${solid.x},${solid.y} blocks the body from the ${name}`);
+  for (const [stageName, stage] of [['arrival', STAGES.arrival], ['finished', STAGES.finished]]) {
+    const solids = observatorySolidRects(roomId, stage);
+    const contacts = (solid) => [
+      { name: 'north', center: { x: solid.x + solid.width / 2, y: solid.y - 20 } },
+      { name: 'south', center: { x: solid.x + solid.width / 2, y: solid.y + solid.height - 20 } },
+      { name: 'west', center: { x: solid.x - 1, y: solid.y + solid.height - 20 } },
+      { name: 'east', center: { x: solid.x + solid.width + 1, y: solid.y + solid.height - 20 } },
+    ];
+    for (const solid of solids) {
+      for (const { name, center } of contacts(solid)) {
+        const body = observatoryBody(center);
+        assert.ok(rectsOverlap(body, solid),
+          `${roomId}@${stageName} ${name} contact overlaps the solid at ${solid.x},${solid.y}`);
+        assert.equal(isObservatoryPositionSafe(roomId, center, stage), false,
+          `${roomId}@${stageName} solid at ${solid.x},${solid.y} blocks the body from the ${name}`);
+      }
     }
   }
 }
@@ -493,9 +496,163 @@ for (const alcove of OBSERVATORY_ALCOVES) {
   }
 }
 
+/* * ------------------------------------------------------------------ *
+ * 9. Art: every collider has visible art and every art reference resolves
+ * ------------------------------------------------------------------ */
+const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
+const campaignArtSource = readFileSync(join(rootDir, 'src/art/CampaignArt.ts'), 'utf8');
+/** import.meta.glob patterns declared in CampaignArt.ts, as matchable regexes. */
+const artGlobs = [...campaignArtSource.matchAll(/'\.\.\/\.\.\/(assets\/[^']+\.png)'/g)]
+  .map((match) => new RegExp(`^${match[1].replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*')}$`));
+const artIsRegistered = (relative) => artGlobs.some((pattern) => pattern.test(relative));
+const LEVEL_DIRECTORIES = [
+  '01-forgotten-forest-edge', '02-whispering-woods', '03-library-beneath-the-roots',
+  '04-shattered-moonlit-creek', '05-a-path-for-two', '06-the-sleepless-tower',
+  '07-the-sleeping-garden', '08-ruins-of-two-halves', '09-dark-moon-observatory',
+  '10-the-heart-of-elaria',
+];
+/** Procedural/manifest texture keys the observatory is allowed to reference. */
+const KNOWN_TEXTURE_KEYS = new Set([
+  'mirror_0', 'mirror_1', 'mirror_2', 'mirror_3',
+  'pedestal_empty', 'pedestal_lit', 'receiver_off', 'ruins_altar', 'crystal_balance',
+  'lock_sun_on', 'lock_sun_off', 'ground_stone', 'stepping_stone', 'woods_arch_locked', 'woods_arch_open',
+]);
+for (const element of OBSERVATORY_ELEMENTS) {
+  const art = element.art;
+  if (art.kind === 'texture') {
+    // 'root-bed' is drawn procedurally by CampaignScene.buildObservatoryRootBed().
+    assert.ok(element.id === 'root-bed' || KNOWN_TEXTURE_KEYS.has(art.key),
+      `${element.id} texture key ${art.key} exists in the manifest/procedural set`);
+    continue;
+  }
+  const files = art.kind === 'level' ? [art.file] : art.files;
+  for (const file of files) {
+    const relative = `assets/levels/${LEVEL_DIRECTORIES[art.level]}/sprites/${file}.png`;
+    assert.ok(existsSync(join(rootDir, relative)), `${element.id} art file exists: ${relative}`);
+    assert.ok(artIsRegistered(relative), `${element.id} art is registered in CampaignArt.ts: ${relative}`);
+  }
+}
+for (const base of ['lobby-base', 'star-chart-base', 'observatory-clean-base', 'learned-marks-miniature']) {
+  const relative = `assets/levels/09-dark-moon-observatory/sprites/${base}.png`;
+  assert.ok(existsSync(join(rootDir, relative)), `room base exists: ${relative}`);
+  assert.ok(artIsRegistered(relative), `room base is registered: ${relative}`);
+}
+// The hand-off base with the baked caption strip must never reach the runtime.
+{
+  const mapping = campaignArtSource.slice(campaignArtSource.indexOf('export function getLevelBackgroundKey'));
+  const levelEightBlock = mapping.slice(mapping.indexOf('if (levelIndex === 8)'), mapping.indexOf('return backgrounds[levelIndex]'));
+  assert.equal(levelEightBlock.includes("'observatory-base'"), false,
+    'the observatory never loads the hand-off base; only observatory-clean-base');
+  for (const room of ['entrance', 'corridor', 'observatory']) {
+    assert.ok(levelEightBlock.includes(`roomId === '${room}'`), `level 08 maps a base for the ${room} room`);
+  }
+}
+// Depth: no world sprite may out-rank the HUD (86) or the prompt container (82).
+for (const element of OBSERVATORY_ELEMENTS) {
+  if (element.radius === 0) continue;
+  const depth = element.mount === 'ground' ? 3 : 10 + element.anchor.y / 10;
+  assert.ok(depth < 82, `${element.id} sorts below the prompt/HUD layers (${depth})`);
+  const rect = observatoryArtRect(element);
+  assert.ok(rect.y + rect.height <= 320, `${element.id} art stays out of the bottom status band`);
+}
+
+/* ------------------------------------------------------------------ *
+ * 10. Every authored control is registered, and every registration is authored
+ * ------------------------------------------------------------------ */
+for (const roomId of ROOMS) {
+  const room = OBSERVATORY_ROOMS[roomId];
+  const ids = new Set(room.interactables.map((item) => item.id));
+  for (const element of observatoryElements(roomId)) {
+    if (element.radius === 0) continue;
+    assert.ok(ids.has(element.id), `${roomId} registers an interactable for the authored control ${element.id}`);
+  }
+  for (const id of ids) {
+    const element = OBSERVATORY_ELEMENTS.find((candidate) => candidate.id === id);
+    assert.ok(element, `${roomId} interactable ${id} is backed by authored geometry`);
+    assert.equal(element.roomId, roomId, `${roomId} interactable ${id} uses its own room's geometry`);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 11. Runtime wiring: the scene consumes the verified layout
+ * ------------------------------------------------------------------ */
+const sceneSource = readFileSync(join(rootDir, 'src/scenes/CampaignScene.ts'), 'utf8');
+const observatorySource = sceneSource.slice(
+  sceneSource.indexOf('public buildObservatoryRoom('),
+  sceneSource.indexOf('private drawRoom('),
+);
+assert.ok(observatorySource.length > 4000, 'the observatory controller block was found in CampaignScene.ts');
+for (const symbol of [
+  'observatoryPrompt(', 'isObservatoryApproachAllowed(', 'isObservatoryGateApproachAllowed(',
+  'observatoryDoorOpen(', 'nearestSafeObservatorySpawn(', 'observatoryGuidance(',
+  'observatoryCompletionReady(', 'syncObservatorySolids(', 'observatorySolidRects(',
+]) {
+  assert.ok(sceneSource.includes(symbol), `CampaignScene uses ${symbol}`);
+}
+// Two live-state bugs that a text scan can catch: no oversized trigger radius and
+// no English prompt strings in the observatory block.
+assert.equal(/radius:\s*3[0-9]/.test(observatorySource), false,
+  'no observatory trigger uses an oversized 30px+ radius');
+assert.equal(/E · (Door is locked|Enter |Rotate |Turn statue|Inspect |Place lantern|Retrieve lantern)/.test(observatorySource), false,
+  'no observatory prompt string is English');
+assert.equal(observatorySource.includes("'observatory-lumo-call-point'"), false,
+  'no undocumented extra control point exists beside the lantern pedestal');
+const solidSyncCalls = (sceneSource.match(/this\.syncObservatorySolids\(\)/g) ?? []).length;
+assert.ok(solidSyncCalls >= 2, `dynamic solids are synchronised at build and per frame (${solidSyncCalls} call sites)`);
+
+/* ------------------------------------------------------------------ *
+ * 12. Guidance language: Vietnamese, with the missing condition named
+ * ------------------------------------------------------------------ */
+const nonAscii = /[^\x00-\x7F]/;
+for (const roomId of ROOMS) {
+  for (const stage of Object.values(STAGES)) {
+    const guidance = observatoryGuidance(roomId, stage);
+    assert.ok(nonAscii.test(guidance.objective) && nonAscii.test(guidance.status),
+      `${roomId} objective/status are Vietnamese sentences`);
+    for (const hint of guidance.hints) assert.ok(nonAscii.test(hint), `${roomId} hint is Vietnamese`);
+    for (const element of observatoryElements(roomId)) {
+      if (element.radius === 0) continue;
+      const prompt = observatoryPrompt(element.id, stage);
+      assert.ok(nonAscii.test(prompt), `${element.id} prompt is Vietnamese in every stage`);
+    }
+  }
+}
+for (const doorId of ['door-a', 'sun-door', 'return-loop']) {
+  for (const stage of Object.values(STAGES)) {
+    if (observatoryDoorOpen(doorId, stage)) continue;
+    const reason = observatoryDoorBlockReason(doorId, stage);
+    assert.ok(reason.length > 12 && nonAscii.test(reason),
+      `${doorId} names its missing prerequisite while locked ("${reason}")`);
+  }
+}
+// The lantern's own prompts must never claim the network is live from history.
+for (const stage of Object.values(STAGES)) {
+  assert.ok(observatoryPrompt('lumo-seal', stage).length > 0, 'the seal always answers');
+}
+
+/* ------------------------------------------------------------------ *
+ * 13. Save compatibility (v1): the observatory validations stay in place
+ * ------------------------------------------------------------------ */
+const saveSource = readFileSync(join(rootDir, 'src/systems/CampaignSaveSystem.ts'), 'utf8');
+for (const guard of [
+  "'entrance', 'corridor', 'observatory'",
+  "'l8-lumo-room'", "'l8-lumo-destination'", "'l8-lumo-arrived'",
+  "'l8-lumo-route-json'", "'l8-lumo-route-index'", "'l8-lumo-x'", "'l8-lantern-x'",
+  'roomSpawn', 'version !== 1',
+]) {
+  assert.ok(saveSource.includes(guard), `CampaignSaveSystem still validates ${guard}`);
+}
+assert.equal(saveSource.includes('roomId') && saveSource.includes('validRooms'), true,
+  'roomId is still restricted to the three observatory rooms');
+
 console.log('Level 09 observatory geometry/state checks passed:');
 console.log(`  rooms        : ${ROOMS.length}`);
 console.log(`  elements     : ${OBSERVATORY_ELEMENTS.length}`);
 console.log(`  alcoves      : ${OBSERVATORY_ALCOVES.length}`);
 console.log(`  stages       : ${Object.keys(STAGES).length}`);
 console.log('  reachability : collision-aware flood fill over every stage');
+console.log('  solids       : every collider blocks the 14x6 body from 4 directions');
+console.log('  art          : every collider maps to a registered, existing PNG');
+console.log('  controls     : every authored control is registered and vice versa');
+console.log('  wiring       : CampaignScene consumes the verified layout symbols');
+console.log('  save         : v1 observatory validations intact');

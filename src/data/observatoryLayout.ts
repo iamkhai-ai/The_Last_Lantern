@@ -268,7 +268,12 @@ const pedestal: ObsArtRef = { kind: 'texture', key: 'pedestal_empty' };
 const receiver: ObsArtRef = { kind: 'texture', key: 'receiver_off' };
 const lockSun: ObsArtRef = { kind: 'level', level: 7, file: 'lock-sun-off' };
 const latchWest: ObsArtRef = { kind: 'level', level: 4, file: 'latch-unlatched' };
-const latchEast: ObsArtRef = { kind: 'level', level: 7, file: 'latch-east-unlatched' };
+/**
+ * The final-door plate reuses the creek mechanism pack (level index 3), which is
+ * the only registered level folder that ships latch-east-* : level index 7 has no
+ * such file, so pointing there would silently draw nothing.
+ */
+const latchEast: ObsArtRef = { kind: 'level', level: 3, file: 'mechanisms/latch-east-unlatched' };
 const altar: ObsArtRef = { kind: 'texture', key: 'ruins_altar' };
 const crystal: ObsArtRef = { kind: 'texture', key: 'crystal_balance' };
 const tubeMouth: ObsArtRef = { kind: 'level', level: 4, file: 'tube-mouth' };
@@ -388,9 +393,15 @@ export function observatoryElement(id: string): ObsElement | undefined {
   return OBSERVATORY_ELEMENTS.find((element) => element.id === id);
 }
 
+/**
+ * Standing props are the level's real obstacles: anything drawn as a standing
+ * object is solid, matching its visible art exactly. Wall-mounted art, walkable
+ * floor art, the root bed (dynamic) and the two latch plates drawn on a door sill
+ * are excluded, and so are ground mounts such as the practice miniature.
+ */
 export function observatoryElementSolids(roomId: ObservatoryRoomKey): readonly ObsRect[] {
   return observatoryElements(roomId)
-    .filter((element) => element.radius > 0 && !(OBSERVATORY_NON_SOLID_IDS as readonly string[]).includes(element.id))
+    .filter((element) => element.mount !== 'ground' && !(OBSERVATORY_NON_SOLID_IDS as readonly string[]).includes(element.id))
     .map((element) => observatoryElementSolid(element));
 }
 
