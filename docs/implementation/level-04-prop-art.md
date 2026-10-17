@@ -22,7 +22,9 @@ The root rejected the worker's first bridge export: a three-column atlas had bee
 
 An initial export accidentally created two new directories in the dirty primary D: checkout. The worker confirmed those exact directories were task-created and no other D: file was written. Root archived all34 task-created files outside the project, then confirmed both primary paths were clean. Other primary-checkout changes were preserved. Final assets live in the assigned C: worktree.
 
-On the final artwork/source content:
+Checked artwork/source revision: `c472cbd84d42340f637a0e79f5342e23b44b5054`. The following evidence-documentation commit changes no checked source or image bytes.
+
+On that artwork/source content:
 
 - **PASS** `npm run build`: TypeScript and Vite,463 modules;9,197.90kB output. Generated dist restored afterward.
 - **PASS** `git diff --check`.
