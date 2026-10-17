@@ -6,20 +6,20 @@ Rebuild Level 02 only: `progress.level === 1` (Library is index 2). Source story
 
 ## Player flow
 
-Arrive beside the practice stone at player center `(138,286)` carrying the lantern. Hear the scenario's four opening lines, followed by a short contextual Lumo instruction pointing to the practice stone directly ahead. The active E prompt, a subtle ground halo and a specific SPACE objective identify this first action immediately. A live practice reveal changes the objective to E. On practice completion, remove its halo and direct attention to the separate poem stone LEFT of the northeastern gate. Reading the poem then moves the objective to observing the firefly order and revealing/activating the three main stones. Neither practice nor reading the poem is a hard prerequisite for a player who already understands the puzzle; partial/solved saves prioritize puzzle progress or exit over tutorial guidance.
+Arrive beside the practice stone at player center `(138,286)` carrying the lantern. Hear the scenario's four opening lines, followed by a short contextual Lumo instruction pointing to the practice stone directly ahead. The active E prompt, a subtle ground halo and a specific SPACE objective identify this first action immediately. A live practice reveal changes the objective to E. On practice completion, remove its halo and direct attention to the separate poem stone immediately RIGHT of the practice area at `(236,278)`, on the same southern path. Reading the poem then moves the objective to observing the firefly order and revealing/activating the three main stones. Neither practice nor reading the poem is a hard prerequisite for a player who already understands the puzzle; partial/solved saves prioritize puzzle progress or exit over tutorial guidance.
 
 Walk around the three tablets: Moon left, Leaf upper middle, Star right. Pulse locally identifies a sleeping tablet; E while revealed activates it. Correct tablets stay gold without a timer for the whole sequence. A wrong pick resets only sequence/activation, preserving discoveries and poem. Re-touching a correct tablet is harmless. On the third correct tablet the northern gate opens, roots release, a warm memory vignette and the exact scenario dialogue play once. The player then walks to the distinct gate approach and presses E to descend to Library. Reading the poem can never intercept this exit.
 
 ```text
 NORTH — vegetation and gate backing
              tree             tree              tree
-                        Leaf             poem        GATE
-                        (320,174)       (402,161)    (510,190)
+                        Leaf                        GATE
+                        (320,174)                  (510,190)
 
             Moon                                    Star
           (180,248)                               (450,248)
     practice
-   (120,276) spawn (138,286)
+   (120,276) spawn (138,286)  poem (236,278)
 SOUTH — HUD/status margin
 ```
 
@@ -36,7 +36,7 @@ One focused module `src/data/whisperingWoodsLayout.ts` owns anchors, stand point
 | Moon | L02 `runestone_moon_*`, `(180,248)` | `(180,254)`, radius 24 | `[167,236,26,12]`; display 60×78 |
 | Leaf | L02 `runestone_leaf_*`, `(320,174)` | `(320,180)`, radius 24 | `[307,162,26,12]`; display 60×78, separated from gate |
 | Star | L02 `runestone_star_*`, `(450,248)` | `(450,254)`, radius 24 | `[437,236,26,12]`; display 60×78 |
-| Poem | L02 `poem_fragment`, native 48×40, `(402,161)` bottom center | `(402,167)`, radius 24; repeat full poem; exact first-reading dialogue | `[385,150,34,11]`; separate target, no duplicate mural at gate |
+| Poem | L02 `poem_fragment`, native 48×40, `(236,278)` bottom center | `(236,284)`, radius 24; repeat full poem; first-reading dialogue refers to this near-entry stone | `[219,267,34,11]`; separate target, no duplicate mural at gate |
 | Gate | Closed existing arch / L02 open-passage, fitted uniformly bottom center `(510,190)` into common 128×126 canvas | `(510,181)`, radius 24; closed E gives useful locked feedback; open E descends; prompt y=94 | Posts `[456,156,20,34]`, `[544,156,20,34]`; backing `[446,96,128,60]`; closed threshold `[476,156,68,22]`. Open central corridor remains walkable. Stairs depth 3; front header/post crops at ground depth 29; full actor visible on central approach |
 | Memory | Existing `memory_vignette` | Transient warm tint and two figures during completion dialogue only | Effects above world, below dialogue/HUD; clear on completion/shutdown; no permanent duplicate figures |
 
@@ -66,6 +66,10 @@ Use existing grass/dirt/stone textures, with an irregular circular clearing and 
 User found the symbol stones too small and the starting flow unclear. Supersedes prior generic observe/practice objective and distant `(280,286)` spawn. Store rune display size and tutorial stage computation in the focused Level 02 module. Stage priority: open exit, existing sequence progress, practice (SPACE or E according to its live reveal), poem, then main observation/sequence. Old saves with solved/partial progress must not be sent back to practice. Stage-specific H should reinforce the same current action; reset its escalation on stage changes. Existing correct/wrong/expiry/memory/save semantics stay intact.
 
 Use one subtle ground cue only for the current practice/poem target; remove it when moving to the main puzzle. Do not light a sleeping glyph or label a correct main rune merely to provide direction. Preserve the firefly clue and discovery. Keep full original practice dialogue, then add one directional Lumo sentence about the poem. Initial opening may add one sentence about the nearby practice stone; no full-order spoiler. Add a visible low-key `Bia tập` label if needed to distinguish the lone training stone from the three principal stones.
+
+### Near-entry poem correction — 2026-10-17
+
+User found the poem too far away. Move only poem anchor/stand/base to the southern entry path as specified above. Update Lumo direction, HUD, H, route/checkpoint data and affected fixture coordinates together; remove active guidance that still says left of the northern gate. The practice-to-poem stand distance is about 116px, around one second of walking; require an unobstructed direct segment at y=284..286, distinct interaction radii and no art overlap with the enlarged Moon stone. Keep E local at radius 24 rather than enabling remote reading. Existing poem-read flags remain valid and the main puzzle/gate is unchanged. This supersedes the earlier scenario-location choice near the gate; the poem text and puzzle solution are preserved.
 
 ## Save restoration
 
