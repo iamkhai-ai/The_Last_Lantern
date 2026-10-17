@@ -4,7 +4,7 @@ import {
   type ObservatoryBeamRouteId,
   type ObservatoryRoomPoint,
   type ObservatoryWaypointId,
-} from '../data/observatoryRooms';
+} from '../data/observatoryRooms.ts';
 
 export interface ObservatoryPuzzleInput {
   /** Four-way mirror rotations, where 0=east, 1=south, 2=west, 3=north. */

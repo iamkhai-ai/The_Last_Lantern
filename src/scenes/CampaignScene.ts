@@ -9,6 +9,33 @@ import { LibraryLevel } from '../levels/LibraryLevel';
 import { PathForTwoLevel } from '../levels/PathForTwoLevel';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
+import {
+  OBSERVATORY_BODY,
+  OBSERVATORY_BRIDGE_LANE,
+  OBSERVATORY_ELEMENTS,
+  OBSERVATORY_FLOORS,
+  OBSERVATORY_ROOT_BED,
+  OBSERVATORY_STAMPS,
+  OBSERVATORY_WALLS,
+  fitObservatoryArt,
+  isObservatoryApproachAllowed,
+  isObservatoryGateApproachAllowed,
+  nearestSafeObservatorySpawn,
+  observatoryAlcoves,
+  observatoryArtRect,
+  observatoryDoorBlockReason,
+  observatoryDoorOpen,
+  observatoryElement,
+  observatoryElements,
+  observatoryGuidance,
+  observatoryPrompt,
+  observatorySolidRects,
+  rectsOverlap,
+  type ObsAlcove,
+  type ObsElement,
+  type ObsRect,
+  type ObsWorldState,
+} from '../data/observatoryLayout';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem } from '../systems/LanternSystem';
@@ -57,14 +84,16 @@ export class CampaignScene extends Phaser.Scene {
   private activeObservatoryRoom: ObservatoryRoomId | null = null;
   private roomDoors = new Map<string, { image: Phaser.GameObjects.Image; body: Phaser.Physics.Arcade.StaticBody; exit: ObservatoryExit }>();
   private observatoryPuzzleVisuals = new Map<string, Phaser.GameObjects.GameObject>();
+  private observatoryElementVisuals = new Map<string, Phaser.GameObjects.Image>();
+  /** Every Level 09 collider, keyed by id, mirrored from observatorySolidRects(). */
+  private observatorySolids = new Map<string, { rect: ObsRect; body: Phaser.Physics.Arcade.StaticBody }>();
   private footprintTrail?: Phaser.GameObjects.Graphics;
   private memoryLayerLabels = new Map<string, Phaser.GameObjects.Text>();
   private memorySocketLabels = new Map<number, Phaser.GameObjects.Text>();
   private campaignBeamGraphics?: Phaser.GameObjects.Graphics;
-  private observatoryRootBody: Phaser.Physics.Arcade.StaticBody | null = null;
-  private observatoryBridgeBounds = new Phaser.Geom.Rectangle(330, 280, 132, 40);
   private observatoryBridgePendingRemoval = false;
   private observatoryBridgeTraversalSide: 'near' | 'far' | null = null;
+  private observatoryMiniatureIndex = 0;
   private hintIndex = 0;
   private selectedStone = -1;
   private heartEnd = false;
@@ -506,46 +535,18 @@ export class CampaignScene extends Phaser.Scene {
       this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
     }
     this.titleText.setText(`09  ${room.title} · ${CAMPAIGN_LEVELS[8].chapter}`);
+    // The actor's foot body must match the authored 36x42 frame, baseline 40.
+    this.player.setFootPlacement(OBSERVATORY_BODY.feetY, OBSERVATORY_BODY.bodyOffsetY,
+      OBSERVATORY_BODY.bodyOffsetX, OBSERVATORY_BODY.width, OBSERVATORY_BODY.height);
+    this.observatoryMiniatureIndex = 0;
     this.drawObservatoryBackground(roomId);
-    if (roomId === 'entrance') this.addObservatoryArt('learned-marks-miniature', 320, 150, 128, 64);
-    if (roomId === 'corridor') {
-      this.addObservatoryArt('star-chart', 320, 162, 124, 73);
-      this.addObservatoryArt('wheel-stopped-sun-among-stars', 500, 128, 72, 56);
-    }
-    this.buildObservatoryRootBed(roomId);
-
-    for (const obstacle of room.obstacles) {
-      if (obstacle.dynamic) continue;
-      const texture = obstacle.kind === 'statue' ? 'guardian_statue' : obstacle.kind === 'pillar' ? 'ruin_pillar' : 'rock_blocker';
-      const image = this.add.image(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2, texture)
-        .setDisplaySize(obstacle.width, obstacle.height).setDepth(8 + Math.floor((obstacle.y + obstacle.height) / 10));
-      this.roomObjects.push(image);
-      const bodyObject = this.add.rectangle(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2, obstacle.width, obstacle.height, 0x000000, 0);
-      this.physics.add.existing(bodyObject, true);
-      const body = bodyObject.body as Phaser.Physics.Arcade.StaticBody;
-      body.setSize(obstacle.width, obstacle.height);
-      this.roomObjects.push(bodyObject);
-      this.roomColliders.push(this.physics.add.collider(this.player.sprite, bodyObject));
-    }
-
-    for (const item of room.interactables) {
-      if (item.textureKey && item.id !== 'statue') {
-        const image = this.add.image(item.position.x, item.position.y, item.textureKey).setScale(0.9).setDepth(8 + Math.floor(item.position.y / 10));
-        if (item.id !== 'balance-crystal' || this.progress.flags['l8-balance-crystal'] !== true) this.roomObjects.push(image);
-        else image.destroy();
-        if (item.id === 'g0' || item.id === 'g1' || item.id === 'g2' || item.id === 'sun-lock' || item.id === 'lantern-pedestal') this.observatoryPuzzleVisuals.set(item.id, image);
-      }
-      if (item.id === 'statue') {
-        const statue = this.add.image(item.position.x, item.position.y, 'guardian_statue').setScale(0.9).setDepth(8 + Math.floor(item.position.y / 10));
-        this.roomObjects.push(statue);
-        this.observatoryPuzzleVisuals.set('statue', statue);
-      }
-      if (roomId === 'corridor' && (item.id === 'door-a-control' || item.id === 'sun-door-control')) {
-        const control = this.add.image(item.position.x, item.position.y, 'receiver_off').setScale(0.62).setDepth(9 + Math.floor(item.position.y / 10));
-        this.roomObjects.push(control);
-      }
-      this.registerObservatoryInteractable(item);
-    }
+    this.drawObservatoryWalls(roomId);
+    this.drawObservatoryWallArt(roomId);
+    this.buildObservatoryStamps(roomId);
+    this.buildObservatoryElements(roomId);
+    this.buildObservatoryDoors(roomId);
+    this.buildObservatorySolids(roomId);
+    this.buildObservatoryBeams();
 
     for (const exit of room.exits) this.addObservatoryExit(exit);
     const safeSpawn = this.resolveObservatorySpawn(room, spawnId);
@@ -566,6 +567,145 @@ export class CampaignScene extends Phaser.Scene {
       this.dialogue.startDialogue(OPENING[8]);
     }
     this.refreshHud();
+  }
+
+  /** Visible masonry for every permanent solid, so colliders always match art. */
+  private drawObservatoryWalls(roomId: ObservatoryRoomId): void {
+    const rects: ObsRect[] = [
+      ...OBSERVATORY_WALLS[roomId],
+      ...observatoryAlcoves(roomId).flatMap((alcove) => [...alcove.jambs, alcove.threshold]),
+    ];
+    const walls = this.add.graphics().setDepth(1);
+    for (const rect of rects) {
+      walls.fillStyle(0x232a34, 1);
+      walls.fillRect(rect.x, rect.y, rect.width, rect.height);
+      walls.fillStyle(0x39485a, 0.95);
+      walls.fillRect(rect.x, rect.y, rect.width, Math.min(8, rect.height));
+      walls.lineStyle(1, 0x12friendly as unknown as number, 0);
+    }
+    this.roomObjects.push(walls);
+    const floors = this.add.graphics().setDepth(0.6);
+    for (const stamp of OBSERVATORY_STAMPS[roomId]) {
+      floors.fillStyle(stamp.id.startsWith('pipe') ? 0x7a6a49 : 0x8fa8b5, stamp.id.startsWith('pipe') ? 0.55 : 0.3);
+      floors.fillRoundedRect(stamp.x, stamp.y, stamp.width, stamp.height, 4);
+    }
+    this.roomObjects.push(floors);
+  }
+
+  private drawObservatoryWallArt(roomId: ObservatoryRoomId): void {
+    if (roomId === 'corridor') {
+      this.addObservatoryArt('star-chart', 320, 48, 136, 80);
+      this.addObservatoryArt('wheel-stopped-sun-among-stars', 524, 44, 113, 88);
+    }
+    if (roomId === 'observatory') {
+      this.addObservatoryArt('wheel-stopped-sun-among-stars', 272, 96, 144, 112);
+    }
+  }
+
+  private buildObservatoryStamps(roomId: ObservatoryRoomId): void {
+    const stamps = new Phaser.GameObjects.Graphics();
+    for (const stamp of OBSERVATORY_STAMPS[roomId]) stamps.fillRect(stamp.x, stamp.y, stamp.width, stamp.height);
+    stamps.setDepth(2).setAlpha(0.18);
+    this.roomObjects.push(stamps);
+  }
+
+  private buildObservatoryElements(roomId: ObservatoryRoomId): void {
+    for (const element of observatoryElements(roomId)) {
+      const rect = observatoryArtRect(element);
+      const texture = this.resolveObservatoryTexture(element);
+      if (!texture || !this.textures.exists(texture)) continue;
+      const image = this.add.image(element.anchor.x, element.anchor.y, texture)
+        .setOrigin(0.5, 1)
+        .setDisplaySize(rect.width, rect.height)
+        .setDepth(element.mount === 'ground' ? 3 : 10 + element.anchor.y / 10);
+      this.roomObjects.push(image);
+      this.observatoryElementVisuals.set(element.id, image);
+      if (['g0', 'g1', 'g2', 'sun-lock', 'lantern-pedestal', 'statue', 'root-bed', 'splitter', 'lumo-seal'].includes(element.id)) {
+        this.observatoryPuzzleVisuals.set(element.id, image);
+      }
+    }
+    if (roomId === 'observatory') {
+      const bridge = this.add.image(OBSERVATORY_BRIDGE_LANE.x + OBSERVATORY_BRIDGE_LANE.width / 2,
+        OBSERVATORY_BRIDGE_LANE.y + OBSERVATORY_BRIDGE_LANE.height / 2, 'stepping_stone')
+        .setDisplaySize(OBSERVATORY_BRIDGE_LANE.width, OBSERVATORY_BRIDGE_LANE.height)
+        .setDepth(4)
+        .setVisible(false);
+      this.roomObjects.push(bridge);
+      this.observatoryPuzzleVisuals.set('root-bridge', bridge);
+    }
+  }
+
+  private resolveObservatoryTexture(element: ObsElement): string | null {
+    const art = element.art;
+    if (art.kind === 'texture') {
+      if (element.rotatesWith === 'g0' || element.rotatesWith === 'g1' || element.rotatesWith === 'g2') {
+        const index = ((this.value(`l8-${element.rotatesWith}`) % 4) + 4) % 4;
+        return `mirror_${index}`;
+      }
+      if (element.id === 'sun-lock') return this.getObservatoryState().sunDoorUnlocked ? 'lock_sun_on' : 'lock_sun_off';
+      if (element.id === 'lantern-pedestal') return this.lantern.lanternPlaced ? 'pedestal_lit' : 'pedestal_empty';
+      if (element.id === 'crystal_balance' || element.id === 'balance-crystal') return 'crystal_balance';
+      return art.key;
+    }
+    if (art.kind === 'level') return getLevelArtKey(art.level, art.file);
+    const variant = element.rotatesWith === 'statue' ? ((this.value('l8-statue') % 4) + 4) % 4 : 0;
+    const file = art.files[Math.min(variant, art.files.length - 1)];
+    return getLevelArtKey(art.level, file);
+  }
+
+  private buildObservatoryDoors(roomId: ObservatoryRoomId): void {
+    for (const alcove of observatoryAlcoves(roomId)) {
+      const archTexture = observatoryDoorOpen(alcove.doorId, this.getObservatoryWorldState()) ? 'woods_arch_open' : 'woods_arch_locked';
+      const fit = fitObservatoryArt(128, 126, Math.min(alcove.arch.width / 128, alcove.arch.height / 126));
+      const image = this.add.image(alcove.arch.x + alcove.arch.width / 2, alcove.arch.y + alcove.arch.height, archTexture)
+        .setOrigin(0.5, 0.5)
+        .setDisplaySize(fit.width, fit.height)
+        .setPosition(alcove.arch.x + alcove.arch.width / 2, alcove.arch.y + alcove.arch.height / 2)
+        .setDepth(3);
+      this.roomObjects.push(image);
+      this.roomDoors.set(alcove.id, { image, body: null as unknown as Phaser.Physics.Arcade.StaticBody, exit: roomId === this.activeObservatoryRoom ? (OBSERVATORY_ROOMS[roomId].exits.find((exit) => exit.interactionPoint.x === alcove.trigger.x && exit.interactionPoint.y === alcove.trigger.y) ?? OBSERVATORY_ROOMS[roomId].exits[0]) : OBSERVATORY_ROOMS[roomId].exits[0] });
+    }
+  }
+
+  private buildObservatorySolids(roomId: ObservatoryRoomId): void {
+    const state = this.getObservatoryWorldState();
+    const rects = observatorySolidRects(roomId, state, []);
+    rects.forEach((rect, index) => {
+      const object = this.add.rectangle(rect.x + rect.width / 2, rect.y + rect.height / 2, rect.width, rect.height, 0x000000, 0);
+      this.physics.add.existing(object, true);
+      const body = object.body as Phaser.Physics.Arcade.StaticBody;
+      this.roomObjects.push(object);
+      this.roomColliders.push(this.physics.add.collider(this.player.sprite, object));
+      this.observatorySolids.set(`${roomId}-solid-${index}`, { rect, body });
+    });
+    for (const entry of this.observatorySolids.values()) entry.body.enable = true;
+    this.roomObjects.push(this.add.text(320, 344, 'WASD / ←↑→↓ Di chuyển    E Tương tác    F Đèn    H Gợi ý    J Sổ tay    ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
+  }
+
+  private buildObservatoryBeams(): void {
+    const beams = this.add.graphics().setDepth(7);
+    this.roomObjects.push(beams);
+    this.observatoryPuzzleVisuals.set('beams', beams);
+  }
+
+  /** Mirror every authored solid into the live Arcade bodies for the current state. */
+  private syncObservatorySolids(): void {
+    const roomId = this.activeObservatoryRoom;
+    if (!roomId) return;
+    const state = this.getObservatoryWorldState();
+    const body = this.player.sprite.body as Phaser.Physics.Arcade.Body | null;
+    const occupied = body ? [{ x: body.x, y: body.y, width: body.width, height: body.height }] : [];
+    const solids = observatorySolidRects(roomId, state, occupied);
+    for (const entry of this.observatorySolids.values()) {
+      const rect = entry.rect;
+      const active = solids.some((candidate) => Math.abs(candidate.x - rect.x) < 0.01
+        && Math.abs(candidate.y - rect.y) < 0.01
+        && candidate.width === rect.width && candidate.height === rect.height);
+      if (entry.body.enable !== active) {
+        entry.body.enable = active;
+        entry.body.updateFromGameObject();
+      }
+    }
   }
 
   public clearActiveRoom(): void {
