@@ -80,7 +80,7 @@ fs.mkdirSync(out,{recursive:true});
     assert.equal((await state()).tutorialCue.stage,'exit');assert.ok((await state()).objective.includes('Cổng đã mở'));await mark('third correct opens gate and plays full one-time memory');
     await page.waitForTimeout(5200);const postOpenObserved=new Set(observed);observed.clear();await interact();await sequence(3);assert.ok(!observed.has('Mai mình lại ra đây nhé?'));await mark('open rune remains active and does not replay memory');for(const x of postOpenObserved)observed.add(x);
     await southThen(236,284);await interact();assert.equal((await state()).level,1);assert.ok((await state()).target==='poem');await mark('post-open poem cannot intercept gate exit');
-    await axis('y',286);await move(510,181);await shot('gate-exit');assert.notEqual((await state()).target,'poem');await interact();
+    await axis('x',510);await move(510,181);await shot('gate-exit');assert.notEqual((await state()).target,'poem');await interact();
     assert.equal((await state()).level,2,'E at distinct stairs must enter Library');assert.ok(observed.has('Vậy xuống xem rừng đã ghi lại những gì.'));await mark('physical E at opened gate enters Library');
     await tap('Escape');const bounds=await page.locator('canvas').boundingBox();await page.mouse.click(bounds.x+320*bounds.width/640,bounds.y+241*bounds.height/360);await page.waitForFunction(()=>window.__LAST_LANTERN_GAME__?.scene.isActive('MenuScene'));await tap('Enter');await page.waitForFunction(()=>window.__LAST_LANTERN_GAME__?.scene.isActive('CampaignScene'));await dismiss();assert.equal((await state()).level,2);await mark('same-runtime Continue preserves Library progress');
     assert.deepEqual(errors,[]);results.push({name:'browser console',status:'PASS',errors});
