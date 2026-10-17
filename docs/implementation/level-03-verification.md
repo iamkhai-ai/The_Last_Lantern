@@ -1,5 +1,7 @@
 # Level 03 verification record
 
+The original implementation evidence below is historical. The later user-requested four-direction collision correction is recorded in the final section and supersedes the earlier shallow prop footprints.
+
 ## Revision and scope
 
 - Branch: `codex/level-03-spatial-rebuild`.
@@ -31,3 +33,18 @@ The arch underlay was also changed to share the same normalized canvas as its fo
 Root then identified that moving a source tablet left a collider without visible stand art. `f1d070d` adds a neutral backing visible exactly when the identity is in a well seat. Both reviewers re-reviewed that final revision, including source/seat swapping, restoration, depth and prompt bounds, without actionable findings. Current-round reviewer results were kept separate until both completed.
 
 The final documentation commit changes evidence records only; it does not alter the reviewed source or requirements. The branch is local. No push or merge was performed.
+
+## Four-direction prop collision correction
+
+Source revision: `aab0e662442608bb15d9395f37894fec1c5577ea`, relative to `7a685f59aebb0a4c212f440d49f105b29b452a9f`.
+
+The player reported inadequate object collision during their Level03 review. Inspection found that Arcade already enables collision on all four sides by default, but desk, shelf, source-rack and mural blockers covered only narrow bottom strips. The correction replaces these strips with full inset object footprints in `LIBRARY_SOLID_RECTS`. The Arcade bodies and saved-position resolver consume that same list. The walkable well ring and seats, blocked core, gate posts and threshold are preserved. Exact bounds are recorded in `03-layout.md`.
+
+- Root `npm run build`: **PASS**, exit 0; TypeScript and Vite, 425 modules, 9,037.11 kB bundle. Generated `dist/index.html` was restored afterward.
+- Root `git diff 7a685f5..aab0e66 --check`: **PASS**, exit 0.
+- Independent Luna high reviewer A: **PASS**, bounded source review on the exact source revision; no actionable findings. Examined footprints, shared restore geometry, foot body and interaction reachability.
+- Independent Luna high reviewer B: **PASS**, bounded source review on the same exact revision; no actionable findings. Examined static bodies, footprints, restore and routes to controls. Findings were kept separate until both completed. Both reviewers share a model family.
+- Runtime collision inspection: **NOT_RUN**. The local browser tool again returned `Local browser use is disabled in Work settings`. These source/build results are not a claim that four-direction movement was exercised in a browser.
+- Automated tests: **NOT_RUN**; none were added or run.
+
+The existing player-review server remains running on port 5193 with the untracked `.level03-play.html` fixture preserved. Root did not access or replace browser storage. A reload loads the corrected source and recovers any saved location now inside an expanded blocker through the existing resolver. No changes were pushed or merged. The accompanying evidence-only documentation commit leaves the reviewed source and layout requirements unchanged.
