@@ -28,7 +28,7 @@ authored root paths from each socket up to the core are rendered with the packag
 | # | Stage | Where | Player action | Live result |
 | --- | --- | --- | --- | --- |
 | 0 | Reload gate | — | — | `l9-complete` → `EndingScene` immediately (never replays the puzzle) |
-| 1 | Arrival | South path, spawn `(360,284)` | — | Opening dialogue (§2 four lines). Lumo follows beside Nhinh |
+| 1 | Arrival | South path, spawn `(250,284)` | — | Opening dialogue (§2 four lines). Lumo follows beside Nhinh |
 | 2 | Three placements | Memory / Hope / Balance sockets | Walk into each socket cell, E | `l9-memory`, `l9-hope`, `l9-balance`; scenario's two follow-up lines after the third |
 | 3 | Safe teaching area | Root-rule reminder table, south-west | E cycles the four mini-models; SPACE (Pulse) near the table | Rules recalled, moss-covered root lanes revealed for a few seconds, journal note. Never solves the main net |
 | 4 | Light source | Lantern pedestal, west | E with the lantern in hand | Lantern placed and lit → the shared beam leaves the pedestal |
