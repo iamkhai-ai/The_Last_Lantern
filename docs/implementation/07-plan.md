@@ -35,15 +35,15 @@ Failure/order recovery, no time pressure: if the player turns the lantern back O
 See `07-layout.md` for the full coordinate table. Summary of what is on top of what and what hides what:
 - Base scenic image at depth 0. Walkable floor art (teaching waterline, delivered-water chevrons, bridge deck while retracted stubs are not floor) at depth 4–5, below feet.
 - Standing props (reservoir, shutter handle, bar posts + beam, both latches, both Moon Root pots, both Sun Flower pots, drain, east latch) use `10 + groundAnchorY/10` so the player y-sorts against them.
-- The bar beam is a special case: lowered it collides (solid x106..194, y150..162); raised/held it is overhead art (depth 70) so the player walks beneath it and never occludes wrong.
+- The bar beam is a special case: lowered it collides (solid 107,136,87,26); raised/held it is overhead art (depth 70) so the player walks beneath it and never occludes wrong. Flipping the light inside the corridor while the beam is solid ejects the player to (x,y112) north or (x,y170) south, whichever side is safe.
 - Bar posts, tower, walls, balustrades and canal side-walls occlude the player only above their own painted footprint; no blanket depth raise.
-- The canopy modify only dims the scene: a darkness overlay below HUD, above floor; the lantern's own glow stays above it so the puzzle reads in the dark.
+- The canopy only dims the scene via the shared LanternSystem (`lantern.isDawnMode = !canopyShut`); the lantern's own glow stays bright so the puzzle reads in the dark.
 - Icons (16×16 state stickers) sit at depth 6 beside their pot, on floor pixels, never over the actor.
 
 ## Collision contract
 
 - Shared actor body: 14×6 at `center + (-7, +16)`; feet line `center + (0,19)`. Pure layout, Arcade bodies and safe-restore all consume the same rectangles.
-- Canals are water: solid everywhere except an open crossing. Crossings: root bridge strip `(304..364, y228..248)` walkable only while deployed or held under the feet; side path strip `(304..396, y284..312)` walkable only after `l6-return-latched` (before that a solid plank closes it); the sluice crossing over the horizontal canal `(x148..190, y218..258)` is permanent stone.
+- Canals are water: solid everywhere except an open crossing. Crossings: root bridge strip `(y228..248)` with spans `s1 304..350`, `s2 347..396` walkable only while deployed or held under the feet; side path strip `(304..396, y284..308)` walkable only after `l6-return-latched` (before that a solid plank `304,284,92,24` closes it); the sluice crossing over the horizontal canal `(x148..190, y218..258)` is permanent stone.
 - Standing props are solid from all four directions using their full silhouette footprint (RULE_GAMES). Flat art (waterline, water chevrons, icons, sprout) is walkable.
 - Every interaction trigger sits at the object's south edge with radius 20–24 and a `canApproach` guard where the object can be reached from more than one side (west latch: only from inside the gate corridor). Gate arch exit trigger follows the documented arch exception.
 - Backtracking stays open: held bar, retracted plank and opened drain are permanent. A save inside a closed area (canal without a crossing, gate corridor with the bar lowered, nursery with both crossings closed) restores to the nearest safe point with the same body/solid predicate.
@@ -62,7 +62,7 @@ Opening 4 lines; canopy beat 2 lines; practice observation 4 lines (once); retra
 
 ## Persistence
 
-- Reuse v1 save key and existing flag names for compatibility: `l6-canopy-shut`, `l6-sun-latched`, `l6-water-flowing`, `l6-return-latched`, `l6-lumo-realized`, `l6-bridge-crossed`, `l6-crossing-side`. Plant states are always derived, never stored. Legacy saves that set old flags load safely; unknown values are ignored.
+- Reuse v1 save key and existing flag names for compatibility: `l6-canopy-shut`, `l6-sun-latched`, `l6-water-flowing`, `l6-return-latched`, `l6-lumo-realized`, `l6-bridge-crossed`, `l6-crossing-side`, plus the one-shot beats `l6-practice-observed`, `l6-retract-cue`, `l6-held-beat`; `l6-sun-open`/`l6-moon-open` are still written as compat mirrors. Plant states are always derived, never stored. Legacy saves that set old flags load safely; unknown values are ignored.
 - Checkpoints: `player-level`/`player-x/y`, `lumo-x/y` saved on the existing cadence; restore uses `nearestSafeSpawn` with the current crossing states.
 
 ## Integration (CampaignScene, index 6 only)
@@ -73,13 +73,13 @@ Opening 4 lines; canopy beat 2 lines; practice observation 4 lines (once); retra
 
 ## Tasks
 
-- [ ] Write layout spec `07-layout.md` with zones, solids, crossings, module table, stands and depth rules (this commit).
-- [ ] Create `src/data/sleepingGardenLayout.ts`: zones/solids/crossings/modules/stands, predicates (`effectiveLight`, `barRaised`, `bridgeDeployed`, `bridgeWalkable`, `sidePathOpen`, `isPositionSafe`, `nearestSafeSpawn`, `completionBlock`, crossing-side state, save sanitize).
-- [ ] Create `src/levels/SleepingGardenLevel.ts`: render, physics solids, interactions (E/F/H/J), story beats, HUD/objective/status/controls, light→plant visuals, bridge occupancy holding, checkpoints, destroy.
-- [ ] Integrate index 6 in `CampaignScene.ts`; raise the coming-soon gate; keep every other level's behavior identical.
-- [ ] Create `scripts/check-sleeping-garden.mjs`: geometry (solids vs stands, reachability flood-fill by stage), crossings by state, prompt side rules, state machine (light model, held moments, latch permanence), completion gating, restore safety.
-- [ ] Verify: `node scripts/check-sleeping-garden.mjs`, `npx tsc --noEmit`, `npm run build`. Attempt a local runtime screenshot pass with a seeded `level:6` save; otherwise record runtime/human playtest as NOT_RUN.
-- [ ] Write `docs/implementation/level-07-report.md` with exact commands/results and coordinate adjustments.
+- [x] Write layout spec `07-layout.md` with zones, solids, crossings, module table, stands and depth rules (this commit).
+- [x] Create `src/data/sleepingGardenLayout.ts`: zones/solids/crossings/modules/stands, predicates (`effectiveLight`, `barRaised`, `bridgeDeployed`, `bridgeWalkable`, `sidePathOpen`, `isPositionSafe`, `nearestSafeSpawn`, `completionBlock`, crossing-side state, save sanitize).
+- [x] Create `src/levels/SleepingGardenLevel.ts`: render, physics solids, interactions (E/F/H/J), story beats, HUD/objective/status/controls, light→plant visuals, bridge occupancy holding, checkpoints, destroy.
+- [x] Integrate index 6 in `CampaignScene.ts`; raise the coming-soon gate; keep every other level's behavior identical. The legacy index-6 barriers/crossing/visual routines were removed with it.
+- [x] Create `scripts/check-sleeping-garden.mjs`: geometry (solids vs stands, reachability flood-fill by stage), crossings by state, prompt side rules, state machine (light model, held moments, latch permanence), completion gating, restore safety. Fixes found by the script: moon pot moved to 252,186 so the west bridge approach is walkable; anchor (160,300) sat inside the practice moon pot and moved to (200,300).
+- [x] Verify: `node scripts/check-sleeping-garden.mjs`, `npx tsc --noEmit`, `npm run build`. Runtime smoke with a seeded `level:6` save passed (boot, intro dialogue, walk, lantern toggle, no page errors); screenshots in `%TEMP%\opencode\ll07_shots`.
+- [x] Write `docs/implementation/level-07-report.md` with exact commands/results and coordinate adjustments.
 - [ ] Self-review the diff; no push, no merge, no save resets, no PNG/character edits.
 
 ## Risks and decisions
