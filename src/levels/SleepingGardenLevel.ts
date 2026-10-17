@@ -10,7 +10,7 @@ import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
   GARDEN_ACTOR, GARDEN_BAR_BEAM, GARDEN_BRIDGE, GARDEN_ICONS, GARDEN_MODULES, GARDEN_SIDE_PATH, GARDEN_SPANS,
   GARDEN_SPAWN, GARDEN_STANDS, GARDEN_STATIC_SOLIDS, GARDEN_WATER, NO_HELD_SPANS, barRaised, bridgeWalkable,
-  crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody, gardenPropDepth, inGateCorridor,
+  crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody, gardenCompletionBlock, gardenExitReady, gardenPropDepth, inGateCorridor,
   isGardenPositionSafe, nearestSafeGardenSpawn, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed,
   sanitizeGardenState, sidePathOpen, sunOpen, updateHeldSpans,
   type GardenArtVariant, type GardenHeldSpans, type GardenModuleSpec, type GardenPoint, type GardenSpanId, type GardenState,
@@ -506,9 +506,9 @@ export class SleepingGardenLevel {
     reg({
       id: 'l6-exit', x: GARDEN_STANDS.exit.x, y: GARDEN_STANDS.exit.y, radius: GARDEN_STANDS.exit.radius,
       getPromptBounds: () => null,
-      getPrompt: () => this.exitReady() ? 'E · Qua cổng điện thờ' : null,
-      isEnabled: () => this.exitReady(),
-      onInteract: () => this.nextLevel(ENDING),
+      getPrompt: () => this.exitReady() ? 'E · Qua cổng điện thờ' : 'Cổng điện thờ đang khép · chăm khu vườn trước',
+      isEnabled: () => true,
+      onInteract: () => this.tryExit(),
     });
   }
 
@@ -532,8 +532,18 @@ export class SleepingGardenLevel {
   }
 
   private exitReady(): boolean {
-    const state = this.state;
-    return state.canopyShut && state.sunLatched && state.waterFlowing && state.returnLatched && state.lumoRealized;
+    return gardenExitReady(this.state);
+  }
+
+  private tryExit(): void {
+    if (this.exitReady()) { this.nextLevel(ENDING); return; }
+    const block = gardenCompletionBlock(this.state);
+    const text = block === 'canopy' ? 'Cổng còn khép. Mình phải che bể tích quang trước đã.'
+      : block === 'bar' ? 'Thanh chắn chưa được giữ. Cần gài chốt trước khi cổng mở.'
+        : block === 'drain' ? 'Vườn ươm còn thiếu nước. Mở cống rồi quay lại.'
+          : block === 'side' ? 'Chưa gài chốt lối đá phụ. Lối về cần được giữ.'
+            : 'Lumo vẫn đang đợi bên mầm cây.';
+    this.say([{ speaker: 'Nhinh', text }]);
   }
 
   private distanceTo(x: number, y: number): number {

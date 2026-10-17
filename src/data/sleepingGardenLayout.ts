@@ -235,6 +235,11 @@ export function gardenCompletionBlock(state: GardenState): 'canopy' | 'bar' | 'd
   return null;
 }
 
+/** The shrine gate opens only when every committed puzzle state is present (live, not stale). */
+export function gardenExitReady(state: GardenState): boolean {
+  return gardenCompletionBlock(state) === null;
+}
+
 export function crossingSideFor(center: GardenPoint): GardenCrossingSide {
   return center.x < 334 ? 'west' : 'east';
 }

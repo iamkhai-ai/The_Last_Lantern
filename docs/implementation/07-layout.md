@@ -82,6 +82,23 @@ Conventions: 640×360, native scale, nearest filtering. Actor center coordinates
 | teaching waterline | graphics y306, runs 186..202 · 208..224 + spark | none | "khe thử không cản lối đi" — walkable |
 | teaching bridge | root-bridge-on 182,288 48×32 | none | appears with the first dark state, demo only |
 
+## Draw order & occlusion
+
+Depth = `10 + groundAnchorY/10` for standing props and actor feet; ground stamps are 0..7; the raised bar beam is overhead at 70; effects 68..71; prompts 82; dialogue 95; HUD 86+. Sorted explicitly:
+
+- **Ground stamps (0..7, always below feet):** base scenic image (0), teaching waterline + delivered-water chevrons (4–5), root-bridge deck + side-stone-path tiles while not solid (4), state icons (6).
+- **Standing props (10 + groundY/10):** reservoir, shutter handle, bar posts, both latches, both Moon Root pots, both Sun Flower pots, drain, tower, tree trunk, quiet platform. The player y-sorts against every one of them: standing north of a prop draws behind it, walking south past its ground anchor draws in front.
+- **Overhead (70):** the raised/held bar beam only, so the player walks under the doorway and is never wrongly hidden by it. Lowered, the beam drops to `10 + groundY/10` and is solid.
+- **Occludes the player:** bar posts (99..107 / 194..202 × y136..176), tower (192..218 × y198..262), tree trunk (40..64 × y296..320), walls, balustrades and canal side-walls — each only above its own painted footprint; no blanket depth raise and no canopy replaces a trunk collider.
+- **Never occludes / walkable ground:** waterline, delivered water, icons, the sprout, bridge deck and side-path tiles (flat art), the gate header (kept above the traversable doorway).
+
+## Solid blockers vs walkable ground
+
+- **Solid (blocks the 14×6 foot body from all four sides):** every rect in `GARDEN_STATIC_SOLIDS` with visible art — bar posts, reservoir, shutter handle, sun flower body, both latches, moon pot body, drain, tower, tree trunk, quiet platform, both practice pots, plus walls/bands/balustrades/canal side-walls. Water rects (`GARDEN_WATER`) are lethal. Checked 4-directionally by `check-sleeping-garden.mjs`.
+- **Dynamic solids:** the lowered bar beam, the retracted bridge spans, and the closed side plank — solid only while their live condition is unmet.
+- **Walkable ground (no collider):** practice lawn/forecourt/terrace/walkway/nursery zones, gate corridor, sluice crossing, entry mouth, teaching waterline, delivered-water chevrons, sprout, icons, gate opening, and the bridge/side strips once their condition is met.
+- **Every solid footprint has matching visible art**; no invisible blocker sits over open floor.
+
 ## State model (pure, in `sleepingGardenLayout.ts`)
 
 - `canopyShut = flags['l6-canopy-shut']`; `effectiveLight = !canopyShut || lanternOn`.
@@ -91,7 +108,7 @@ Conventions: 640×360, native scale, nearest filtering. Actor center coordinates
 - `sidePathOpen = flags['l6-return-latched']`; `drainOpen = flags['l6-water-flowing']`; `realized = flags['l6-lumo-realized']`.
 - Sanitize on load: `returnLatched ⇒ waterFlowing`; `waterFlowing && returnLatched ⇒ bridgeCrossed`; `sunLatched || returnLatched ⇒ canopyShut`; `crossingSide` is dropped unless `bridgeCrossed`. Compat: `l6-sun-open` / `l6-moon-open` are still written for older readers.
 - Crossing bookkeeping: entering the bridge strip records `l6-crossing-side` = west/east by body center (x<334); leaving at the far bank sets `l6-bridge-crossed`; clearing the strip deletes the side flag (legacy-compatible).
-- `completionBlock`: canopy → bar(latch) → drain → side → scene; the exit needs all five.
+- `completionBlock`: canopy → bar(latch) → drain → side → scene; `gardenExitReady = completionBlock === null` gates the shrine arch. The archive never advances until every committed state is present, and the locked prompt names the missing step.
 
 ## Prompt rules (RULE_GAMES audit)
 

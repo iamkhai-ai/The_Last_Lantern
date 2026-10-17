@@ -1,38 +1,63 @@
 # Level 07 — The Sleeping Garden: implementation report
 
-Branch `codex/level-07-spatial-rebuild`, base `1928ae6` (test-develop). Layout spec: `07-layout.md` (amended to match implementation), flow plan: `07-plan.md`. Runtime: `src/data/sleepingGardenLayout.ts` (pure) + `src/levels/SleepingGardenLevel.ts` (controller) + `scripts/check-sleeping-garden.mjs`.
+Branch `codex/level-07-spatial-rebuild`. Scenario 07 = campaign index 6. Layout spec: `07-layout.md`; flow plan: `07-plan.md`. Runtime: `src/data/sleepingGardenLayout.ts` (pure geometry/state) + `src/levels/SleepingGardenLevel.ts` (focused controller) + `scripts/check-sleeping-garden.mjs` (pure check script), matching the level-05 pattern.
 
-## Scope and decisions
+## What was delivered
 
-- Campaign index 6 is rebuilt on the level-05 pattern: one pure layout module owns zones, solids, stands, the light model, ride/held-span rules, spawn resolution and state sanitize; the controller owns rendering, Arcade physics, interactions (E/F/H/J), dialogue beats, HUD strings and checkpoints. `CampaignScene` keeps only the level-6 hooks (construct, update, hint, journal, objective/status/lumo-status, protected prompt bounds, destroy).
-- The legacy index-6 code path was removed from `CampaignScene` so nothing runs twice: the action block (8 actions), `buildCampaignBarriers`/`updateCampaignBarriers`/`isGardenBridgeReady`, `updateCampaignCrossingState`, narrative props/art clauses, `refreshCampaignArtVisuals` clause and the HUD status clause. `clearCampaignColliders` no longer carries garden bridge fields.
-- The playtest coming-soon gate changed `>= 4` → `>= 7` so index 6 (level 07) is playable in this branch; other indices' behavior is unchanged. This must reconcile when branches 05/06 land (they own indices 4/5).
-- Darkness uses the shared LanternSystem: the controller sets `lantern.isDawnMode = !canopyShut` each frame; no level-local overlay was added. Plant state swaps get a 120 ms 1.12 scale pulse.
-- Bridge art is drawn as two images (`bridge-s1`/`bridge-s2`) anchored to the span centers from `GARDEN_SPANS`; the generic module loop skips the `bridge` module spec so the retracted/held/on texture swap happens only in the state sync.
-- Compat mirrors are still written (`l6-sun-open`, `l6-moon-open`) for older readers; sanitize derives implications on load (`returnLatched ⇒ waterFlowing`, latches `⇒ canopyShut`, `crossingSide` dropped unless `bridgeCrossed`).
-- One new one-shot beat flag was introduced: `l6-held-beat` (fires on the first lantern-on→off while roots still hold the spans and the player is off the bridge).
+### Player flow (spawn → exit)
 
-## Coordinate adjustments made during implementation
+1. **Spawn** `(238,336)` on the south practice lawn, walking in from the entry mouth `(216,348,42,12)`; Lumo follows. Opening dialogue (scenario §2, 4 lines).
+2. **Safe teaching area** — the two practice pots are beside the spawn (Sun Flower `70,266`, Moon Root `132,284`) with state-blossom/curl icons, so the two-plant rule is learned in a walled corner that never blocks the route. The teaching waterline (walkable) shows the "khe thử không cản lối đi" idea.
+3. **Clue / first fixed control** — the shutter handle `stand (132,138)` in the west wall gap. `E` closes the reservoir canopy over the garden, the room darkens (`lantern.isDawnMode = false`) and the bar lowers. Two-line beat. The first lantern toggle after that plays the 4-line practice observation and pulses the pots.
+4. **Main puzzle** — with the lantern ON the Sun Flower opens and raises the bar; walk north through the gate corridor (posts `99,136` / `194,136`), then `E` at the west latch `stand (142,144)` holds the bar (`l6-sun-latched`). Turn the lantern OFF: Moon Root extends and the root bridge spans the vertical canal (`s1 304..350`, `s2 347..396`, y228..248). Cross in the dark.
+5. **Reward / story beat** — `E` at the drain `stand (462,286)` sends water around the sprout, one leaf opens and the 7-line nursery scene sets `l6-lumo-realized`. The distant Sun Flower visibly folds.
+6. **Return & exit** — `E` at the east latch `stand (414,286)` opens the light-independent side stone path (`l6-return-latched`). Optional sprout re-read at `stand (500,280)`. Then leave the nursery east, up the steps into the walkway and north to the shrine gate; when every state holds, `E` under the arch `stand (574,64)` plays the shadow ending and advances to Level 08.
 
-- **Moon pot moved to the top of the forecourt** — `moon-main` solid and art `252,206,48,44` → `252,186,48,44` (extended `200,186,112,44`, icon `262,212`). At y206 the pot left a 4 px gap to the canal wall; the 14×6 body could never step from the forecourt onto the bridge, making the dark-phase crossing unreachable. The move opens a 20 px walk band under the pot, verified by the flood-fill.
-- **Corridor guard corrected** — west-latch reachability uses player centers `104 ≤ x ≤ 196, 100 ≤ y ≤ 136`; the earlier draft band (`128..158`) admitted centers south of the wall where the latch must not prompt.
-- **Bar beam** — authoritative solid is `GARDEN_BAR_BEAM {107,136,87,26}`; light flips inside the gap eject the player north `y112` or south `y170` (both verified safe).
-- **Side path junction** — `GARDEN_SIDE_PATH {304,284,92,24}` (was 28 tall), `balu-south {396,308,216,20}` (was y292), side-path module/zone matched; canal side opening is y284..308.
-- **East span width** — `s2 {347,228,49,20}`.
-- **Exit stand radius** — 26 → 24 to satisfy the 20–24 rule (arch exception keeps the trigger under the arch).
-- **Stage anchor** — `(160,300)` sat inside the practice moon-pot solid; replaced with `(200,300)`. All six anchors are verified safe as fallback spawns in every queried state.
-- **HUD copy** — objective now `…để đóng màn che bể tích quang.` and the open-canopy status suffix reads `bể còn sáng` (both were garbled).
-- `CampaignArt`: the five explicit level-07 sprite lines were replaced by the `07-the-sleeping-garden/sprites/*.png` glob and the shared `garden-mechanisms/*.png` glob was added to the shared mechanism list.
+Order recovery, no time pressure: flipping the lantern ON while on the bridge keeps only the span under the feet (held overlay) and lets the player finish the crossing to a bank; turning it OFF restores the full bridge. The first retract-before-crossing plays a 3-line cue once.
+
+### Object collision model
+
+- **Solid blockers (block the 14×6 foot body from all four cardinal directions; each has matching visible art):** bar posts, reservoir, shutter handle, Sun Flower body, both latches, Moon Root body, drain, tower, tree trunk, quiet platform, both practice pots, plus all walls/bands/balustrades/canal side-walls. Arena water rects are lethal, not walk-through.
+- **Dynamic solids (solid only while their live condition is unmet):** the lowered bar beam `107,136,87,26`; the retracted bridge spans; the closed side plank `304,284,92,24`.
+- **Walkable ground (no collider):** every authored zone (lawn, forecourt, terrace, west field, connector, reservoir nook, sluice crossing, nursery, steps, walkway, gate corridor, entry mouth), the teaching waterline, delivered-water chevrons, the sprout, state icons, the gate opening, and the bridge/side strips **once** their condition is met.
+- Every stand point sits at the object's **south (front) edge** per `RULE_GAMES.md`, radius 22–24, with a `canApproach` guard where the object can be reached from more than one side (west latch: only inside the gate corridor). The arch exit uses the documented gate exception. `InteractionSystem.tryInteract` re-validates enabled state and range at E, so nothing fires stale.
+- Occlusion: standing props sort by base (`10 + groundY/10`); the raised/held bar beam is overhead (70); ground stamps stay below feet. Bar posts, tower, trunk and walls occlude the player only above their own painted footprint.
+
+### Readable guidance
+
+- `getObjectiveText()` states the immediate physical action per stage (see the "Guidance per step" table in `07-plan.md`).
+- H walks a plain 3-rung ladder per stage (observe → relation → next step) following scenario §6, with the two special cases (handle first before the canopy is shut; side path + gate after the drain).
+- Prompts are action-first Vietnamese. The exit never disappears: while locked it reads `Cổng điện thờ đang khép · chăm khu vườn trước` and E returns the specific missing step instead of silently showing nothing.
+- J journal records the three learned facts; the 1.12× pot pulse and state icons read in the dark.
+
+## Integration & the test-develop merge
+
+- The worktree checkpoint was committed (`wip(level-07): checkpoint before merging test-develop`), then `test-develop` was merged. Conflicts in `src/scenes/CampaignScene.ts` were resolved keeping **both** the level-07 (`gardenLevel`) hooks and test-develop's level-05 (`pathForTwoLevel`) hooks — never discarding either side. `CampaignArt.ts` auto-merged (level-07 sprite glob + shared `garden-mechanisms/*.png` glob coexist with the level-05 globs).
+- The merged update loop runs both controllers and skips the generic puzzle/barrier/visual pass for `level !== 3 && level !== 4 && level !== 6`.
+- `CampaignScene` keeps the level-06 hooks isolated: construct/update/hint/journal/objective/status/protected-prompt-bounds/destroy. The legacy index-6 action, barrier, crossing and visual routines were removed so nothing runs twice.
+- **Playtest gate** (`create()`): `if (this.progress.level >= 4 && this.progress.level !== 6) { this.scene.start('ComingSoonScene'); return; }` — a single documented line that lets index 6 through and leaves every other index unchanged. Other branches add their own index to the same line; reconciled at integration. Known limit: **finishing index 6 still routes to the coming-soon screen** until all levels are integrated.
 
 ## Verification
 
-Commands run from the worktree, all on the final working revision:
+Commands from the worktree on the final revision:
 
-- **PASS** `npx tsc --noEmit` (no output).
-- **PASS** `node scripts/check-sleeping-garden.mjs` — state derive/sanitize, body math, light model, held spans, bridge/side walkability, per-stage flood-fill reachability (fresh → handle; light → latch; dark → drain over the deployed bridge, latch unreachable behind the beam; side path two-way after `l6-return-latched`), eject targets, 96 stale-save spawn resolutions, completion order. The script found and closed the moon-pot bridge block and the bad anchor listed above.
-- **PASS** `node scripts/check-interaction-prompt-layout.mjs`, `node scripts/check-shattered-creek.mjs`, `node scripts/check-forest-edge.mjs`, `node scripts/check-whispering-woods.mjs` — no cross-level regressions.
-- **PASS** `npm run build` (tsc + vite, 511 modules).
-- **PASS** runtime smoke with a seeded `level:6` save via headless Chromium (Playwright module resolved from a local codex worktree; preview port 5197, closed afterwards): boots into `CampaignScene` at index 6, all six probed level-07/shared textures present, intro dialogue plays and dismisses, keyboard walking moves the player north from spawn, `F` toggles the lantern, zero page errors and zero 404s. Screenshots: `%TEMP%\opencode\ll07_shots\level07-intro.png`, `level07-lawn.png`, `level07-lantern.png`. The garden base, sun/moon pots, raised bar, drain grate and closed side plank all render in their authored rects.
-- Generated `dist/index.html` was restored and is not part of the source change.
+| check | result |
+| --- | --- |
+| `node scripts/check-sleeping-garden.mjs` | **PASS** |
+| `npm run build` (`tsc --noEmit` + Vite, 531 modules) | **PASS** |
+| `git diff --check` | **PASS** (clean) |
+| `node scripts/check-path-for-two.mjs` | **PASS** |
+| `node scripts/check-interaction-prompt-layout.mjs` | **PASS** |
+| `node scripts/check-shattered-creek.mjs` | **PASS** |
+| `node scripts/check-forest-edge.mjs` | **PASS** |
+| `node scripts/check-whispering-woods.mjs` | **PASS** |
+| `node scripts/check-campaign-start-intent.mjs` | **PASS** |
+| full human playthrough of all five puzzle stages | **NOT_RUN** |
 
-**NOT_RUN**: full human playthrough and the complete in-browser puzzle solve (all five stages). Logic coverage comes from the flood-fill check script; render/boot/input from the smoke run above. No PNG, character frame, save, other-level source or the primary checkout was modified. No push or merge authorized for this slice.
+`check-sleeping-garden.mjs` covers: state derive/sanitize, body math, light model, held spans, bridge/side walkability, per-stage collision-aware flood-fill from the spawn (handle reachable before the canopy; latch reachable with light on and unreachable with the bar down; the drain reachable only across deployed roots; the side path a true two-way return), **every solid prop blocking the 14×6 body from all four cardinal directions**, safe restore (96 stale-save spawn resolutions never land in a solid or past an unsolved gate), live-condition gating of each mechanism including `gardenExitReady` (the exit is locked on every partial state and open only on full completion; the gate stand is unreachable while both canal crossings are closed in the light and reachable after restoration), and the eject targets. No PNG, character frame, save schema, other-level source or the primary checkout was modified. No push.
+
+## Remaining limits
+
+- Full human puzzle/ending playthrough is the user's review; logic coverage is from the pure flood-fill script and the previous branch's boot/input smoke run.
+- Index 6 still ends at the coming-soon screen until all levels are integrated (the gate line reconciles at integration).
+- The garden is one packed scenic room, not a multi-room level; the base art supplies the terrain while the authored zones/solids are authoritative.

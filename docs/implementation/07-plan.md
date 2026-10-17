@@ -56,6 +56,23 @@ See `07-layout.md` for the full coordinate table. Summary of what is on top of w
 - Prompt labels are action-first Vietnamese (`E · Kéo màn che bể tích quang`, `E · Gài chốt thanh chắn`, `E · Mở cống vườn ươm`, `E · Gài chốt lối đá phụ`, `E · Qua cổng điện thờ`, `E · Ngắm mầm cây`).
 - Controls bar lists WASD / E / F / H / J / ESC. Prompts protect the actor, Lumo and the active prop art via `getProtectedPromptBounds`.
 
+## Guidance per step (objective row · H ladder · toast)
+
+`getObjectiveText()` picks the row from live state + lantern; `showHint()` walks a 3-rung ladder per stage (rung text is plain Vietnamese, no solution spoiler); the exit gives locked feedback instead of a silent prompt.
+
+| stage | objective row | H rung 1 (observe) | H rung 2 (relation) | H rung 3 (next step) | toast |
+| --- | --- | --- | --- | --- | --- |
+| canopy open | *Tới tay màn che trong khe tường phía tây bắc và nhấn E để đóng màn che bể tích quang.* | Cả khu vườn đang được bể tích quang nuôi sáng. | Có một tay màn che ở khe tường phía tây bắc, cạnh bể. | Đi vòng lên phía bắc, vào khe tường và nhấn E ở tay màn che. | "Tối đi thật." / "Nghe kìa." |
+| canopy shut, bar not held, lantern ON | *Thanh chắn đang nâng. Vào khe tường phía tây và nhấn E ở tay chốt để giữ nó.* | Thanh chắn đang được Hoa Nhật nâng lên. | Đi qua khe tường khi thanh chắn còn nâng. | Vào trong khe tường và nhấn E ở tay chốt để giữ thanh chắn. | "Chốt đá đã giữ thanh chắn." |
+| bar not held, lantern OFF | *Bật đèn (F) cho Hoa Nhật mở, nâng thanh chắn, rồi gài chốt trong khe tường.* | Vườn đã tối đi. Hai chậu thử cho thấy cây cần hai điều kiện khác nhau. | Hoa Nhật chỉ mở khi có ánh sáng. | Bật đèn bằng F rồi tới khe tường phía tây. | first toggle after shut → 4-line practice observation |
+| bar held, drain not open, lantern ON | *Tắt đèn (F) cho Rễ Nguyệt bắc cầu qua mương, rồi sang vườn ươm.* | Thanh chắn đã được giữ. Giờ chỉ bóng tối mới đánh thức được Rễ Nguyệt. | Rễ Nguyệt vươn ra khi đèn tắt. | Tắt đèn bằng F rồi qua cầu rễ bắc ngang mương ở giữa vườn. | first retract-before-cross → 3-line "Mở được cửa thì lại mất cầu." |
+| bar held, drain not open, lantern OFF | *Bóng tối đang giữ. Qua cầu rễ giữa vườn tới vườn ươm và mở cống.* (west bank) / *Nhấn E ở cống vườn ươm để mở đường nước.* (east bank) | Cầu rễ chỉ bắc khi đèn tắt. | Vườn ươm nằm bên kia mương, phía đông. | Qua cầu rễ tới vườn ươm và nhấn E ở cống để mở đường nước. | 7-line nursery scene (sets `l6-lumo-realized`) |
+| drain open, side not latched | *Gài chốt lối đá phụ cạnh cống để mở lối về không cần ánh sáng.* | Nước đã chảy tới vườn ươm. | Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm. | Nhấn E ở chốt để mở lối về không cần ánh sáng. | "Chốt đá đã gài. Lối đá phụ mở rồi." |
+| side latched, scene pending | *Nói với Lumo bên mầm cây trong vườn ươm.* | cả vườn đã chăm lại… | …cổng điện thờ nằm ở góc đông bắc… | …đi theo vườn ươm lên bậc đá rồi rẽ lên walkway. | sprout re-read: 2 lines |
+| complete | *Tới cổng điện thờ ở góc đông bắc và nhấn E.* | Cả vườn đã được chăm lại. Cổng điện thờ nằm ở góc đông bắc. | Đi theo vườn ươm lên bậc đá phía đông rồi rẽ lên walkway. | Tới cổng và nhấn E. | 5-line ending |
+
+The exit interaction never disappears: while `gardenExitReady()` is false it shows `Cổng điện thờ đang khép · chăm khu vườn trước` and E returns the specific missing step instead of advancing.
+
 ## Dialogue beats (complete scenario text)
 
 Opening 4 lines; canopy beat 2 lines; practice observation 4 lines (once); retract-before-crossing 3 lines (once); held+roots-rejoined 2 lines (once after latching then dark); nursery 7 lines (once, sets `l6-lumo-realized`); sprout re-read 2 lines (repeatable trigger, one-shot autoplay); ending 5 lines + shadow crossing at the gate. Cricket ambience noted in text only ("Nghe kìa."), no new audio.
@@ -69,7 +86,7 @@ Opening 4 lines; canopy beat 2 lines; practice observation 4 lines (once); retra
 
 - Construct `SleepingGardenLevel` in `buildLevel` for `level === 6` (LibraryLevel/ShatteredCreek pattern); skip generic `addNarrativeProps`, `registerLevel`, `buildCampaignBarriers`, generic spawn block and the generic `intro-6` dialogue for this level.
 - Delegate `update`, H (`showHint`), J (`showJournal`), objective/status/controls text and protected prompt bounds to the controller. Remove the legacy index-6 routines so no second garden barrier/crossing/visual pass runs.
-- The playtest coming-soon gate is raised from `>= 4` to `>= 7` in this branch so index 6 is reachable; final gate value reconciles at integration (other branches own 05/06). Recorded in the report.
+- The playtest coming-soon gate is set to `if (this.progress.level >= 4 && this.progress.level !== 6)` in this branch so index 6 is reachable; other indices keep showing ComingSoon. Final gate value reconciles at integration (other branches own 05/06 and add their own index to the same line). Recorded in the report. Known limit: finishing index 6 still routes to the coming-soon screen until every level is integrated.
 
 ## Tasks
 

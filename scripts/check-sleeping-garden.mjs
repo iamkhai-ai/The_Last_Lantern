@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {
   GARDEN_BAR_BEAM, GARDEN_BRIDGE, GARDEN_SIDE_PATH, GARDEN_SPANS, GARDEN_SPAWN, GARDEN_STAGE_ANCHORS, GARDEN_STANDS,
-  NO_HELD_SPANS, barRaised, bridgeWalkable, crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody,
-  gardenActorDepth, gardenCompletionBlock, gardenPropDepth, inGateCorridor, isGardenPositionSafe,
+  GARDEN_STATIC_SOLIDS, NO_HELD_SPANS, barRaised, bridgeWalkable, crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody,
+  gardenActorDepth, gardenCompletionBlock, gardenExitReady, gardenPropDepth, inGateCorridor, isGardenPositionSafe,
   nearestSafeGardenSpawn, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed, sanitizeGardenState,
   sidePathOpen, sunOpen, updateHeldSpans,
 } from '../src/data/sleepingGardenLayout.ts';
@@ -188,4 +188,50 @@ assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 546, y: 20 })
 
 assert.equal(GARDEN_SIDE_PATH.y + GARDEN_SIDE_PATH.height, 308);
 assert.equal(barRaised(latched, true) && rootsDeployed(latched, true), false, 'bar up and roots out never coexist while the lantern is on');
+
+// --- Every solid prop blocks the 14x6 foot body from all four cardinal directions ---
+// "Blocks" = a foot body pushed 1px into a face must be reported unsafe; the test also
+// refuses trivially-passing (out-of-bounds) approach centers.
+function approachCenters(rect) {
+  const cx = rect.x + rect.width / 2;
+  const midY = rect.y + rect.height / 2 - 19; // body vertical center sits on the prop's center
+  return {
+    north: { x: cx, y: rect.y - 21 },               // body bottom intrudes 1px from above
+    south: { x: cx, y: rect.y + rect.height - 17 }, // body top intrudes 1px from below
+    west: { x: rect.x - 6, y: midY },               // body right intrudes 1px from the left
+    east: { x: rect.x + rect.width + 6, y: midY },  // body left intrudes 1px from the right
+  };
+}
+function assertPropBlocks(label, state, lanternOn, held, rect) {
+  const centers = approachCenters(rect);
+  for (const [dir, center] of Object.entries(centers)) {
+    const inBounds = center.x >= 14 && center.x <= 626 && center.y >= 12 && center.y <= 348;
+    assert.equal(inBounds, true, `${label} ${dir} approach center is inside the world`);
+    assert.equal(rectsOverlap(gardenActorBody(center), rect), true, `${label} ${dir} approach body overlaps the prop`);
+    assert.equal(isGardenPositionSafe(state, lanternOn, held, center), false, `${label} blocks the foot body from the ${dir}`);
+  }
+}
+const PROP_SOLIDS = ['bar-post-west', 'bar-post-east', 'reservoir', 'shutter-handle', 'sun-main', 'latch-west',
+  'moon-main', 'drain', 'latch-east', 'practice-sun-pot', 'practice-moon-pot', 'tower', 'tree-trunk-sw', 'platform-stone'];
+for (const id of PROP_SOLIDS) {
+  const solid = GARDEN_STATIC_SOLIDS.find((entry) => entry.id === id);
+  assert.ok(solid, `static prop ${id} exists`);
+  assertPropBlocks(id, fresh, true, NO_HELD_SPANS, solid.rect);
+}
+assertPropBlocks('bar-beam(lowered)', shut, false, NO_HELD_SPANS, GARDEN_BAR_BEAM);
+assertPropBlocks('side-plank(closed)', sideClosed, true, NO_HELD_SPANS, GARDEN_SIDE_PATH);
+assertPropBlocks('root-bridge span s1(retracted)', fresh, true, NO_HELD_SPANS, GARDEN_SPANS.s1);
+assertPropBlocks('root-bridge span s2(retracted)', fresh, true, NO_HELD_SPANS, GARDEN_SPANS.s2);
+
+// --- Live conditions (not stale flags) gate the final exit ---
+assert.equal(gardenExitReady(fresh), false, 'exit locked before the garden is touched');
+assert.equal(gardenExitReady(shut), false, 'exit locked before the bar is latched');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true })), false, 'exit locked before the nursery is watered');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true })), false, 'exit locked before the side path is latched');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true })), false, 'exit locked before Lumo realizes');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true })), true, 'exit opens only on full completion');
+assert.equal(gardenExitReady(latched), false, 'a latched bar alone never opens the exit');
+const noCrossing = stateOf({ canopyShut: true, sunLatched: true });
+assert.equal(flood(noCrossing, true, NO_HELD_SPANS).near(GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), false, 'the shrine gate stand is unreachable while both canal crossings are closed in the light');
+assert.equal(sideOpenFlood.near(GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), true, 'the shrine gate stand becomes reachable once the garden is restored');
 console.log('Sleeping Garden state, geometry, reachability, held-span, eject, spawn and completion checks passed');
