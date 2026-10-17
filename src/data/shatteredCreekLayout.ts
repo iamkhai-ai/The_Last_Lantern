@@ -28,7 +28,7 @@ export const SHATTERED_CREEK = {
     latchA: { ground: p(224, 284), stand: p(224, 252), base: rect(214, 274, 20, 10) },
     latchB: { ground: p(374, 284), stand: p(374, 252), base: rect(364, 274, 20, 10) },
     relief: { ground: p(546, 182), stand: p(546, 188), base: rect(498, 170, 96, 12) },
-    exit: { ground: p(568, 300), stand: p(568, 286), posts: [rect(530, 222, 22, 78), rect(584, 222, 22, 78)] },
+    exit: { ground: p(568, 300), stand: p(568, 286), posts: [rect(530, 278, 22, 22), rect(584, 278, 22, 22)] },
   },
   spawn: p(68, 286),
   practice: { mirror: 'practiceMirror', source: 'practiceSource', receiver: 'practiceEye' },
@@ -113,7 +113,7 @@ export function deriveCreekState(state: CreekState): CreekLiveState {
   const bridgeB = state.latchB || eyeB;
   const step: CreekLiveState['step'] = state.latchB
     ? state.source !== null || !state.lanternRetrieved ? 'retrieve' : !state.memo ? 'relief' : 'exit'
-    : state.latchA ? eyeB ? 'latch-b' : 'reroute'
+    : state.latchA ? state.source === 'practice' ? 'pickup' : state.source === null ? 'main' : eyeB ? 'latch-b' : 'reroute'
       : eyeA ? 'latch-a'
         : state.source === 'practice' && state.practiceComplete ? 'pickup'
           : state.source === 'practice' || (!state.practiceComplete && !state.lanternRetrieved && !state.source) ? 'practice'
@@ -145,7 +145,7 @@ export function overlaps(a: Rect, b: Rect): boolean { return a.x < b.x + b.width
 export function pointOnBank(center: Point, bank: keyof typeof SHATTERED_CREEK.banks): boolean { return overlaps(bodyRect(center), SHATTERED_CREEK.banks[bank]); }
 export function canApproach(center: Point, target: Point, bank: keyof typeof SHATTERED_CREEK.banks): boolean { return pointOnBank(center, bank) && Math.hypot(center.x - target.x, center.y - target.y) <= 24; }
 
-export function creekCenterWalkable(center: Point, live: CreekLiveState, obstacles: Rect[] = Object.values(SHATTERED_CREEK.objects).flatMap((item) => 'base' in item ? [item.base] : [])): boolean {
+export function creekCenterWalkable(center: Point, live: CreekLiveState, obstacles: Rect[] = Object.values(SHATTERED_CREEK.objects).flatMap((item) => 'base' in item ? [item.base] : 'posts' in item ? [...item.posts] : [])): boolean {
   const body = bodyRect(center);
   if (body.x < SHATTERED_CREEK.bounds.x || body.y < SHATTERED_CREEK.bounds.y || body.x + body.width > SHATTERED_CREEK.bounds.x + SHATTERED_CREEK.bounds.width || body.y + body.height > SHATTERED_CREEK.bounds.y + SHATTERED_CREEK.bounds.height) return false;
   const containedBy = (outer: Rect, inner: Rect): boolean => inner.x >= outer.x && inner.y >= outer.y && inner.x + inner.width <= outer.x + outer.width && inner.y + inner.height <= outer.y + outer.height;

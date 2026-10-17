@@ -30,6 +30,7 @@ assert.equal(creekCenterWalkable({ x: 350, y: 100 }, a, [{ x: 345, y: 100, width
 assert.equal(creekCenterWalkable({ x: 18, y: 100 }, walkLive), false, 'whole body must remain inside left bounds');
 assert.equal(creekCenterWalkable({ x: 622, y: 100 }, walkLive), false, 'whole body must remain inside right bounds');
 assert.deepEqual(bodyRect({ x: 274, y: 229 }), { x: 267, y: 245, width: 14, height: 6 });
+assert.equal(creekCenterWalkable({ x: 540, y: 264 }, walkLive), false, 'body cannot overlap exit sidepost');
 
 for (const stand of [SHATTERED_CREEK.spawn, ...Object.values(SHATTERED_CREEK.objects).filter((o) => 'stand' in o).map((o) => o.stand)]) {
   assert.equal(creekCenterWalkable(stand, walkLive), true, `walkable authored stand ${JSON.stringify(stand)}`);
@@ -48,7 +49,7 @@ const pathIsWalkable = (waypoints) => waypoints.slice(1).every((to, i) => {
 assert.equal(pathIsWalkable([{ x: 68, y: 286 }, { x: 100, y: 288 }, { x: 100, y: 229 }, { x: 76, y: 229 }, SHATTERED_CREEK.objects.source.stand]), true, 'practice-to-main detour clears the pedestal');
 assert.equal(pathIsWalkable([{ x: 76, y: 229 }, { x: 202, y: 229 }, SHATTERED_CREEK.objects.g1.stand, { x: 168, y: 205 }, { x: 168, y: 139 }, SHATTERED_CREEK.objects.g2.stand, { x: 168, y: 139 }, { x: 168, y: 205 }, { x: 224, y: 205 }, SHATTERED_CREEK.objects.latchA.stand]), true, 'west puzzle route clears G1 and reaches latch A');
 assert.equal(pathIsWalkable([SHATTERED_CREEK.objects.latchA.stand, { x: 228, y: 229 }, { x: 350, y: 229 }, { x: 320, y: 229 }, { x: 320, y: 139 }, SHATTERED_CREEK.objects.g3.stand, { x: 320, y: 139 }, { x: 320, y: 229 }, { x: 350, y: 229 }, SHATTERED_CREEK.objects.latchB.stand]), true, 'island route clears bridge and G3/receiver bases');
-assert.equal(pathIsWalkable([SHATTERED_CREEK.objects.latchB.stand, { x: 374, y: 229 }, { x: 480, y: 229 }, SHATTERED_CREEK.objects.relief.stand, SHATTERED_CREEK.objects.exit.stand]), true, 'east route clears second bridge to station');
+assert.equal(pathIsWalkable([SHATTERED_CREEK.objects.latchB.stand, { x: 374, y: 229 }, { x: 480, y: 229 }, SHATTERED_CREEK.objects.relief.stand, { x: 568, y: 188 }, SHATTERED_CREEK.objects.exit.stand]), true, 'east route clears relief and enters the open station lane');
 
 const noA = deriveCreekState({ ...base, lanternOn: false });
 assert.equal(unsafePowerChange({ x: 274, y: 229 }, a, noA), 'occupied-bridge');
@@ -65,6 +66,7 @@ const committedA = deriveCreekState({ ...base, source: null, latchA: true });
 assert.deepEqual(resolveCreekSpawn({ x: 350, y: 150 }, committedA), { x: 350, y: 150 });
 const committedBoth = deriveCreekState({ ...base, source: null, latchA: true, latchB: true });
 assert.ok(resolveCreekSpawn({ x: 500, y: 150 }, committedBoth).x >= 456, 'completed east save resolves to a safe east checkpoint');
+assert.notDeepEqual(resolveCreekSpawn({ x: 540, y: 264 }, committedBoth), { x: 540, y: 264 }, 'completed save inside an exit post is relocated');
 
 const oldPractice = { flags: { 'l3-lantern-placed': true, 'l3-lamp-source': 'practice', 'l3-lantern-retrieved': false }, counters: { g2: 3, 'l3-practice': 2 }, lanternOn: false };
 assert.equal(migrateV1Creek(oldPractice).source, 'practice'); assert.equal(migrateV1Creek(oldPractice).lanternOn, false); assert.equal(migrateV1Creek(oldPractice).g2, 2);
@@ -78,6 +80,9 @@ assert.equal(canCompleteCreek(complete), true);
 for (const change of [{ source: 'main' }, { source: 'practice' }, { latchA: false }, { latchB: false }, { lanternRetrieved: false }, { memo: false }]) assert.equal(canCompleteCreek({ ...complete, ...change }), false, `completion gate rejects ${JSON.stringify(change)}`);
 assert.equal(deriveCreekState({ ...base, latchA: true, latchB: true }).step, 'retrieve');
 assert.equal(deriveCreekState({ ...base, source: 'practice', practiceComplete: true }).step, 'pickup');
-assert.equal(deriveCreekState({ ...base, source: null, lanternRetrieved: true, latchA: true }).step, 'reroute');
+assert.equal(deriveCreekState({ ...base, source: null, lanternRetrieved: true, latchA: true }).step, 'main');
+assert.equal(deriveCreekState({ ...base, source: 'practice', latchA: true, lanternRetrieved: true }).step, 'pickup', 'practice lamp must be retrieved before main routing resumes');
+assert.equal(deriveCreekState({ ...base, source: null, latchA: true, lanternRetrieved: true }).step, 'main', 'held lamp must be placed back on the main source before rerouting');
+assert.equal(deriveCreekState({ ...base, source: 'main', latchA: true, lanternRetrieved: false }).step, 'reroute', 'main source identity resumes the reroute stage');
 assert.notEqual(deriveCreekState({ ...base, latchA: true, source: 'main' }).step, 'practice', 'latched partial saves must not fall back to tutorial');
 console.log('Shattered Creek geometry, route, state, migration, spawn and completion checks passed');

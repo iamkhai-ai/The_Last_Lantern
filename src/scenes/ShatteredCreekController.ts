@@ -159,7 +159,7 @@ export class ShatteredCreekController {
     if (this.ctx.progress.flags['l3-eye-b-discovered']) discoveries.push({ speaker: 'Hệ thống', text: 'Ghi chép — cấu hình B: G1 /, G2 / rồi G3 \\ dẫn tia tới mắt nhận B.' });
     if (this.state.memo) discoveries.push(
       { speaker: 'Hệ thống', text: 'Ghi chép — phù điêu: những tia sáng đều hướng về Cây Mẹ. Đêm ấy có một cơn bão lớn và tiếng chuông tháp còn in trong ký ức.' },
-      { speaker: 'Hệ thống', text: 'Ghi chép — dòng nước vẫn chảy sau đó; trạm phía trước có thể giữ thêm manh mối.' },
+      { speaker: 'Hệ thống', text: 'Ghi chép — trong phù điêu, dòng nước vẫn chảy. Chưa rõ điều gì xảy ra sau đó; trạm phía trước có thể giữ thêm manh mối.' },
     );
     this.ctx.say(discoveries.length ? discoveries : [{ speaker: 'Hệ thống', text: 'Chưa có ghi chép mới từ suối.' }]);
   }
@@ -298,8 +298,9 @@ export class ShatteredCreekController {
     this.addImage('latch-latchB', getSharedMechanismKey('latch-east-unlatched'), objects.latchB.ground, 28, 32);
     this.addImage('relief', getLevelArtKey(3, 'storm-relief'), objects.relief.ground, 128, 80);
     this.addImage('exit', getLevelArtKey(1, 'woods_arch_open_passage'), objects.exit.ground, 88, 86.625, 5);
-    for (const [id, name, x, y] of [['practice-mirror', 'Gương thử', 132, 299], ['g1', 'G1 · •', 202, 150], ['g2', 'G2 · ••', 202, 84], ['g3', 'G3 · •••', 350, 84]] as const) this.addLabel(id, name, x, y);
-    this.addLabel('practice-source-label', 'Bệ thử', 112, 285);
+    for (const [id, name, x, y] of [['g1', 'G1 · •', 202, 150], ['g2', 'G2 · ••', 202, 84], ['g3', 'G3 · •••', 350, 84]] as const) this.addLabel(id, name, x, y);
+    this.addLabel('practice-source-label', 'Bệ thử', 68, 238, 7);
+    this.addLabel('practice-mirror-label', 'Gương thử', 132, 238, 7);
     this.addLabel('source-label', 'Bệ đèn', 40, 214);
     this.beams = this.keep(this.ctx.scene.add.graphics().setDepth(6));
   }
@@ -364,8 +365,8 @@ export class ShatteredCreekController {
   }
   private saveState(): void { this.state.lanternOn = this.ctx.lantern.lanternOn; this.ctx.progress.lanternOn = this.state.lanternOn; this.ctx.progress.counters.g1 = this.state.g1; this.ctx.progress.counters.g2 = this.state.g2; this.ctx.progress.counters.g3 = this.state.g3; this.ctx.progress.counters['l3-practice'] = this.state.practice; this.ctx.progress.flags['l3-practice-complete'] = this.state.practiceComplete; this.ctx.progress.flags['l3-latch-a'] = this.state.latchA; this.ctx.progress.flags['l3-latch-b'] = this.state.latchB; if (this.state.source) this.ctx.progress.flags['l3-lamp-source'] = this.state.source; else delete this.ctx.progress.flags['l3-lamp-source']; this.ctx.progress.flags['l3-lantern-retrieved'] = this.state.lanternRetrieved; this.ctx.save(); }
 
-  private addLabel(id: string, text: string, x: number, y: number): void {
-    const label = this.ctx.scene.add.text(x, y, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#f2ddb0', backgroundColor: '#07151c88', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(15 + y / 10);
+  private addLabel(id: string, text: string, x: number, y: number, depth = 15 + y / 10): void {
+    const label = this.ctx.scene.add.text(x, y, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#f2ddb0', backgroundColor: '#07151c88', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(depth);
     label.setData('creekLabel', id); this.keep(label);
   }
 
