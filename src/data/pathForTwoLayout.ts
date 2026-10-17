@@ -133,9 +133,9 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
       ...doorWalls(156, 210), ...doorWalls(480, 210),
     ],
     solids: [
-      standingSolid('practice-call',76,254,40,48), standingSolid('inner-call',244,130,40,48), standingSolid('call-a',384,232,40,48), ...doorPosts(156,210), ...doorPosts(480,210),
+      standingSolid('practice-call',76,254,40,48), standingSolid('inner-call',244,140,40,48), standingSolid('call-a',384,232,40,48), ...doorPosts(156,210), ...doorPosts(480,210),
     ],
-    elements: [element('practice-call','call-idle',76,254,40,48,76,268), element('practice-plate','pressure-empty',212,114,44,28,212,146), element('inner-call','call-idle',244,130,40,48,244,150), element('call-a','call-idle',384,232,40,48,384,256), element('plate-a','pressure-empty',546,114,44,28,546,146)],
+    elements: [element('practice-call','call-idle',76,254,40,48,76,268), element('practice-plate','pressure-empty',212,114,44,28,212,146), element('inner-call','call-idle',244,140,40,48,244,150), element('call-a','call-idle',384,232,40,48,384,256), element('plate-a','pressure-empty',546,114,44,28,546,146)],
   },
   relay: {
     id: 'relay', title: 'Buồng Chuyển Dòng', spawn: { x: 110, y: 251 }, entrySpawn: { x: 110, y: 251 },
@@ -156,8 +156,8 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
       {x:24,y:150,width:10,height:30},{x:130,y:150,width:54,height:30}, {x:532,y:150,width:10,height:30},{x:606,y:150,width:10,height:30},
       ...doorWalls(82,318), ...doorWalls(574,180),
     ],
-    solids: [standingSolid('call-b-far',68,176,40,48),standingSolid('latch-b',148,240,28,32),standingSolid('call-c',122,190,40,48),standingSolid('latch-c',540,192,28,32),...doorPosts(82,318),...doorPosts(574,180)],
-    elements: [element('call-b-far','call-idle',68,176,40,48,68,198),element('latch-b','latch-unlatched',148,240,28,32,148,264),element('call-c','call-idle',122,190,40,48,122,210),element('plate-c','pressure-empty',558,244,44,28,558,276),element('latch-c','latch-unlatched',540,192,28,32,550,218),element('spiral','swirl-memory-scratch',612,282,30,30,588,262)],
+    solids: [standingSolid('call-b-far',68,176,40,48),standingSolid('latch-b',158,240,28,32),standingSolid('call-c',122,190,40,48),standingSolid('latch-c',540,192,28,32),...doorPosts(82,318),...doorPosts(574,180)],
+    elements: [element('call-b-far','call-idle',68,176,40,48,68,198),element('latch-b','latch-unlatched',158,240,28,32,158,264),element('call-c','call-idle',122,190,40,48,122,210),element('plate-c','pressure-empty',558,244,44,28,558,276),element('latch-c','latch-unlatched',540,192,28,32,550,218),element('spiral','swirl-memory-scratch',612,282,30,30,588,262)],
   },
 };
 

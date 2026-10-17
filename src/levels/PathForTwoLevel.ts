@@ -101,7 +101,7 @@ export class PathForTwoLevel {
     if(this.room==='entry'){
       if(this.assignment==='practice'&&this.isTravelling())return'Nhấn E ở mốc gần cậu để gọi Lumo, rồi chờ cậu ấy tới ấn sau cửa thấp.';
       if(this.assignment==='practice'&&this.hasPower('practice'))return'Cửa thử đã mở. Bước vào trong và nhấn E ở mốc trong để gọi Lumo về mốc.';
-      if(isInsidePracticeAlcove(this.room,{x:this.player.x,y:this.player.y})&&!this.isDoorOpen('practice'))return'Cửa thử đang đóng. Nhấn E ở mốc trong để gọi Lumo quay lại ấn, cửa sẽ mở cho cậu ra.';
+      if(isInsidePracticeAlcove(this.room,{x:this.player.x,y:this.player.y})&&pathDoorShouldClose(this.hasPower('practice'),this.thresholdOccupied('practice'),false))return'Cửa thử đang đóng. Nhấn E ở mốc trong để gọi Lumo quay lại ấn, cửa sẽ mở cho cậu ra.';
       if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return'Nhấn E ở mốc đứng gần cậu để gọi Lumo tới ấn sau cửa thấp.';
       if(this.isDoorOpen('a'))return'Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.';
       return'Nhấn E ở mốc A trong sảnh để gọi Lumo tới ấn A, rồi qua cửa A.';
@@ -213,7 +213,7 @@ export class PathForTwoLevel {
   private drawTubeRoutes():void{
     if(!this.routeGraphics)return;
     const routes:PathPoint[][]=this.room==='entry'?
-      [[{x:76,y:268},{x:110,y:220},{x:156,y:190},{x:180,y:146},{x:212,y:114}],
+      [[{x:76,y:268},{x:110,y:220},{x:156,y:186},{x:156,y:110},{x:212,y:114}],
        [{x:384,y:256},{x:440,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}]]:
       this.room==='relay'?
       [[{x:360,y:256},{x:420,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}],
@@ -318,11 +318,11 @@ export class PathForTwoLevel {
     const reg=(c:InteractableConfig)=>this.interactions.register(c);const def=PATH_ROOMS[this.room];
     for(const e of def.elements){if(e.id.startsWith('plate-'))continue;reg({id:`l4-${e.id}`,x:e.stand.x,y:e.stand.y,radius:22,getPrompt:()=>this.prompt(e.id),getPromptBounds:()=>this.imageFor(e.id)?.getBounds()??null,isEnabled:()=>this.interactionEnabled(e.id),onInteract:()=>this.interact(e.id)});}
     const doors=this.room==='entry'?[['practice',156,221],['a',480,221]]:this.room==='relay'?[['a',110,280],['b',480,221]]:[['b',82,280],['c',574,188]];
-    for(const [id,x,y] of doors as Array<[string,number,number]>)reg({id:`l4-door-${id}`,x,y,radius:34,getPrompt:()=>id==='practice'?'E · Thử cửa thấp':id==='c'?'E · Lên tháp':`E · Qua cửa ${id.toUpperCase()}`,getPromptBounds:()=>this.doorImages.get(id)?.getBounds()??null,onInteract:()=>this.useDoor(id),isEnabled:()=>true});
+    for(const [id,x,y] of doors as Array<[string,number,number]>)reg({id:`l4-door-${id}`,x,y,radius:24,getPrompt:()=>id==='practice'?'E · Thử cửa thấp':id==='c'?'E · Lên tháp':`E · Qua cửa ${id.toUpperCase()}`,getPromptBounds:()=>this.doorImages.get(id)?.getBounds()??null,onInteract:()=>this.useDoor(id),isEnabled:()=>true});
   }
   private prompt(id:string):string{
     const mark=this.callMark(id);
-    if(mark)return choosePathCallAction(this.assignment,mark,this.callEligible(mark))==='recall'?'E · Gọi Lumo về mốc':'E · Gọi Lumo qua ống';
+    if(mark)return choosePathCallAction(this.assignment,mark,this.callEligible(mark))==='recall'?'E · Gọi Lumo về mốc':PLATE_ROOMS[mark]===this.lumoRoom?'E · Gọi Lumo tới ấn':'E · Gọi Lumo qua ống';
     if(id==='latch-a')return this.progress.flags['l4-latch-a']?'Cửa A đã giữ':'E · Gài chốt A';
     if(id==='latch-b')return this.progress.flags['l4-latch-b']?'Cửa B đã giữ':'E · Gài chốt B';
     if(id==='latch-c')return this.progress.flags['l4-latch-c']?'E · Gọi Lumo về':'E · Gài chốt cửa ra';
@@ -337,6 +337,7 @@ export class PathForTwoLevel {
     return undefined;
   }
   private callEligible(mark:'practice'|'a'|'b'|'c'):boolean{
+    if(mark==='a')return this.progress.flags['l4-practice-complete']===true||this.progress.flags['l4-called-a']===true;
     if(mark==='b')return this.progress.flags['l4-latch-a']===true;
     if(mark==='c')return this.progress.flags['l4-latch-b']===true;
     return true;
@@ -348,6 +349,7 @@ export class PathForTwoLevel {
       if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]===true){this.send(mark);return;}
       const action=choosePathCallAction(this.assignment,mark,this.callEligible(mark));
       if(action==='recall'){this.recallToCall(id);return;}
+      if(mark==='a'&&!this.callEligible('a')){this.say([{speaker:'Nhinh',text:'Mình thử cửa thấp trước đã, để biết Lumo rời ấn thế nào.'}]);return;}
       if(mark==='b'&&!this.progress.flags['l4-latch-a']){this.say([{speaker:'Nhinh',text:'Mình nên giữ cửa A trước khi Lumo rời ấn.'}]);return;}
       if(mark==='c'&&!this.progress.flags['l4-latch-b']){this.say([{speaker:'Nhinh',text:'Cửa B cần được gài trước.'}]);return;}
       this.send(mark);
@@ -385,7 +387,7 @@ export class PathForTwoLevel {
   }
   private localRoute(mark:'practice'|'a'|'b'|'c'):PathRoutePoint[]{
     const room=PLATE_ROOMS[mark], plate=PLATE_POINTS[mark];
-    if(mark==='practice')return[{room,x:110,y:220},{room,x:156,y:190},{room,x:180,y:146},{room,...plate}];
+    if(mark==='practice')return[{room,x:110,y:220},{room,x:156,y:186},{room,x:156,y:110},{room,...plate}];
     if(mark==='a')return[{room,x:440,y:232},{room,x:480,y:190},{room,x:520,y:150},{room,...plate}];
     if(mark==='b')return[{room,x:420,y:232},{room,x:480,y:190},{room,x:520,y:150},{room,...plate}];
     return[{room,x:180,y:200},{room,x:360,y:200},{room,x:520,y:200},{room,...plate}];
