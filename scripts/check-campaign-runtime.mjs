@@ -40,7 +40,9 @@ import {
   observatorySolidRects,
 } from '../src/data/observatoryLayout.ts';
 import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
-import { HEART_SEAL_RADIUS } from '../src/data/heartOfElariaLayout.ts';
+import {
+  getHeartPrerequisiteFeedback, HEART_CONFIRM_ID, HEART_MAT_ID, HEART_SEAL_ID, HEART_SEAL_RADIUS, resolveHeartLumoMode,
+} from '../src/data/heartOfElariaLayout.ts';
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -196,6 +198,27 @@ function runHeartDrive(scene) {
   return heartDrive(scene);
 }
 
+/**
+ * The free identifiers `interact()` reads on the way to its confirmation-node branch. Its `element`
+ * parameter is part of the signature, not the extracted body, so the pressed control comes in as a
+ * symbol: this case presses the central confirmation node.
+ */
+const LATCH_SYMBOLS = {
+  HEART_MAT_ID, HEART_SEAL_ID, HEART_CONFIRM_ID, LATCHED_LINES: [], getHeartPrerequisiteFeedback,
+  element: { id: HEART_CONFIRM_ID },
+};
+
+let heartLatch = null;
+/**
+ * Level 10's latch path — the shipped `interact()` body, pressed at the central confirmation node.
+ * Latching ends the Lumo assignment the way a recall does, so the flags it clears must be cleared
+ * before the save it writes, or a reload resurrects a phantom assignment.
+ */
+function runHeartLatch(scene) {
+  if (!heartLatch) heartLatch = bind(methodSource('interact', heartSourceFile, 'HeartOfElariaLevel'), LATCH_SYMBOLS, 'HeartOfElariaLevel.interact()');
+  return heartLatch(scene);
+}
+
 /** A chainable stand-in for the one Phaser game object the strip refresh builds. */
 function makeStrip(x, y, width, height, texture) {
   return {
@@ -341,6 +364,25 @@ function makeHeartDriveScene({ lumoMode, x, y }) {
     save() { calls.save += 1; },
     say(lines) { calls.say.push(lines); },
   };
+}
+
+/**
+ * A recording stand-in for the ports Level 10's `interact()` touches on the confirmation-node branch:
+ * the derived state (readiness is the puzzle's own concern), the flags, `save()`, `say()` and
+ * `refresh()`. `save()` snapshots the flags, so the case can prove the clears land *before* the save.
+ */
+function makeHeartLatchScene({ lumoMode = 'holding', flags = {}, ready = true, latched = false } = {}) {
+  const calls = { save: 0, say: [], refresh: 0, savedFlags: null };
+  const scene = {
+    lumoMode,
+    progress: { flags },
+    calls,
+    state() { return { ready, latched }; },
+    save() { calls.save += 1; calls.savedFlags = { ...scene.progress.flags }; },
+    say(lines) { calls.say.push(lines); },
+    refresh() { calls.refresh += 1; },
+  };
+  return scene;
 }
 
 /* ------------------------------------------------------------------ *
@@ -813,6 +855,39 @@ const CASES = [
       assert.equal(travelling.progress.flags['l9-at-heart'], true, 'the arrival marks him at the seal');
       assert.equal(travelling.calls.save, 1, 'the arrival saves once');
       assert.equal(travelling.calls.say.length, 1, 'the arrival plays its one exchange');
+    },
+  },
+  {
+    name: 'heart_latch_ends_the_assignment_before_it_saves',
+    run: () => {
+      // The shipped `interact()` at the confirmation node. Latching ends the assignment the way a recall
+      // does: `l9-called-heart` is the *current* assignment, so it is cleared with the arrival mark and
+      // both clears are in the save the latch writes — a latched reload cannot resurrect a phantom one.
+      const scene = makeHeartLatchScene({
+        lumoMode: 'holding',
+        flags: { 'l9-called-heart': true, 'l9-at-heart': true, 'l9-lantern-placed': true },
+      });
+      runHeartLatch(scene);
+      assert.equal(scene.progress.flags['l9-roots'], true, 'the latch still latches the root loop');
+      assert.equal(scene.lumoMode, 'follow', 'the latch returns Lumo to following');
+      assert.equal(scene.progress.flags['l9-called-heart'], false, 'the latch clears the current assignment');
+      assert.equal(scene.progress.flags['l9-at-heart'], false, 'the latch clears the arrival mark');
+      assert.equal(scene.calls.save, 1, 'the latch saves once');
+      assert.equal(scene.calls.refresh, 1, 'the latch repaints once');
+      assert.deepEqual(scene.calls.savedFlags, scene.progress.flags,
+        'the latch saves the cleared flags, never the assignment it just ended');
+      assert.equal(scene.calls.savedFlags['l9-called-heart'], false,
+        'the saved assignment is already false — the clears precede the save');
+      // Read back the way `build()` does: the latched save reloads Lumo following, with the roots holding.
+      assert.equal(resolveHeartLumoMode({ called: scene.calls.savedFlags['l9-called-heart'] === true, distanceToSeal: 0 }), 'follow',
+        'the latched save reloads Lumo following, not holding the seal');
+
+      // A latch that is not ready still refuses and writes nothing.
+      const refused = makeHeartLatchScene({ lumoMode: 'holding', flags: { 'l9-called-heart': true }, ready: false });
+      runHeartLatch(refused);
+      assert.equal(refused.progress.flags['l9-roots'], undefined, 'an unready configuration never latches');
+      assert.equal(refused.calls.save, 0, 'an unready configuration saves nothing');
+      assert.equal(refused.progress.flags['l9-called-heart'], true, 'an unready press leaves the assignment alone');
     },
   },
 ];

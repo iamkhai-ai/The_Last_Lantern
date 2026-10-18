@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   auditHeartGaps, auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartExitBlock, getHeartPrerequisiteFeedback,
-  getHeartSolid, getHeartStage, heartArtCandidates, heartArtNativeSize, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CHECKPOINTS, HEART_CONTROL_ORDER, HEART_ELEMENTS, HEART_FLOOR, HEART_MOON_SHADOW,
+  getHeartSolid, getHeartStage, heartArtCandidates, heartArtNativeSize, heartSealPlateArt, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CHECKPOINTS, HEART_CONTROL_ORDER, HEART_ELEMENTS, HEART_FLOOR, HEART_MOON_SHADOW,
   HEART_OVERLOAD_CHECKPOINT, HEART_PROPS, HEART_SEAL_RADIUS, HEART_SPAWN, HEART_STATUE_SHADOW, HEART_WORLD, heartActorBody, heartRectsOverlap,
   canExtinguishHeartLantern, isHeartFinalActionAvailable, isHeartPositionSafe, isInsideHeartGate, nearestSafeHeartSpawn, normalizeHeartProgress,
   resolveHeartLumoMode, resolveHeartRestoreState, shouldPersistHeartOverload,
@@ -229,10 +229,10 @@ assert.ok(getHeartPrerequisiteFeedback(followOnSeal).some((line) => line.include
 const travellingAtSeal = deriveHeartPuzzle({ ...baseInput(), lumoHolding: false, lumo: { x: 320, y: 244 } });
 assert.equal(travellingAtSeal.lumoAtSeal, false, 'a travelling Lumo at the seal coordinates does not power the seal yet');
 assert.equal(travellingAtSeal.ready, false, 'the puzzle is not ready while Lumo is still travelling');
-// The Hope plate art keys off this same predicate, so the plate is never drawn occupied for a Lumo
-// that is only following or travelling.
-assert.equal(followOnSeal.lumoAtSeal || travellingAtSeal.lumoAtSeal, false,
-  'the Hope plate is never drawn occupied while Lumo only follows or travels');
+// The Hope plate art is the derived predicate named by a helper: a following or travelling Lumo paints
+// the plate empty, and only a holding Lumo inside the radius paints it occupied.
+assert.equal(heartSealPlateArt(followOnSeal), 'pressure-empty', 'the Hope plate paints empty while Lumo only follows');
+assert.equal(heartSealPlateArt(travellingAtSeal), 'pressure-empty', 'the Hope plate paints empty while Lumo only travels');
 // Holding, and genuinely within the radius, is the only configuration that powers Hope.
 assert.equal(deriveHeartPuzzle({ ...baseInput(), lumoHolding: true, lumo: { x: 320, y: 244 } }).hope, true,
   'a holding Lumo inside the seal radius powers Hope');
@@ -240,6 +240,11 @@ assert.equal(deriveHeartPuzzle({ ...baseInput(), lumoHolding: true, lumo: { x: 3
   'a holding Lumo inside the seal radius lets the roots latch');
 assert.equal(deriveHeartPuzzle({ ...baseInput(), lumoHolding: true, lumo: { x: 320, y: 214 } }).hope, false,
   'holding but 30px away from the seal does not power Hope (the radius is still required)');
+assert.equal(heartSealPlateArt(deriveHeartPuzzle({ ...baseInput(), lumoHolding: true, lumo: { x: 320, y: 244 } })), 'pressure-occupied',
+  'the Hope plate paints occupied only for a holding Lumo inside the radius');
+assert.equal(heartSealPlateArt(solved), 'pressure-occupied', 'the solved configuration paints the plate occupied');
+assert.equal(heartSealPlateArt(deriveHeartPuzzle({ ...baseInput(), lumoHolding: true, lumo: { x: 320, y: 184 } })), 'pressure-empty',
+  'holding from 60px away paints the plate empty, matching the unpowered seal');
 
 /* ------------------------------------------------------------------ T03: recall / reload synchronisation */
 
@@ -269,6 +274,25 @@ assert.equal(deriveHeartPuzzle({ ...baseInput(), lumoHolding: false, lumo: { x: 
   'a travelling reload far from the seal does not power it');
 assert.equal(resolveHeartLumoMode({ called: true, distanceToSeal: HEART_SEAL_RADIUS }), 'holding',
   'a reload that restores Lumo inside the seal radius restores him holding');
+
+// Reload after a latch. Latching ends the assignment the way a recall does, so the save it writes must
+// carry `{'l9-roots': true, 'l9-called-heart': false}`; a reload from it — even with Lumo's last
+// checkpointed position sitting on the seal — restores him following and paints the plate unoccupied.
+// `l9-called-heart` is the *current* assignment, never "was once called", so the latch cannot leave
+// history behind in it.
+const afterLatch = { 'l9-roots': true, 'l9-called-heart': false, 'l9-at-heart': false };
+normalizeHeartProgress(afterLatch);
+assert.equal(afterLatch['l9-roots'], true, 'a latch survives the normaliser');
+assert.equal(resolveHeartLumoMode({ called: afterLatch['l9-called-heart'] === true, distanceToSeal: 0 }), 'follow',
+  'a reload after a latch restores Lumo following, never holding the seal again');
+const latchedReload = deriveHeartPuzzle({
+  ...baseInput(), latched: true, lumoHolding: false, lumo: { x: 320, y: 244 },
+});
+assert.equal(latchedReload.memory && latchedReload.hope && latchedReload.balance, true,
+  'a latched reload still holds all three branches mechanically');
+assert.equal(latchedReload.ready, true, 'a latched reload is still ready');
+assert.equal(heartSealPlateArt(latchedReload), 'pressure-empty',
+  'a latched reload with Lumo at the seal paints the Hope plate unoccupied, matching the live follow state');
 
 // A mechanically latched root survives a recall; a live pre-latch loop drops the instant it is recalled.
 const latchedThroughRecall = deriveHeartPuzzle({ ...baseInput(), latched: true, lumoHolding: false, lumo: { x: 120, y: 300 } });

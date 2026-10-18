@@ -649,6 +649,14 @@ export function resolveHeartLumoMode(saved: { called: boolean; distanceToSeal: n
   return saved.distanceToSeal <= HEART_SEAL_RADIUS ? 'holding' : 'travelling';
 }
 
+/**
+ * The Hope seal plate's texture for a derived state. The plate is painted occupied only while Lumo
+ * actually holds the seal, so the art and the branch the seal powers can never disagree.
+ */
+export function heartSealPlateArt(state: Pick<HeartPuzzleState, 'lumoAtSeal'>): 'pressure-occupied' | 'pressure-empty' {
+  return state.lumoAtSeal ? 'pressure-occupied' : 'pressure-empty';
+}
+
 /** The campaign-level equivalent of the v1 `finale_overload → hub_final` write-back. */
 export function shouldPersistHeartOverload(stage: string): string {
   return stage === 'finale_overload' ? 'hub_final' : stage;

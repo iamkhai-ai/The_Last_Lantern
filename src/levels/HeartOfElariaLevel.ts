@@ -9,7 +9,7 @@ import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
   auditHeartStands, canExtinguishHeartLantern, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
-  getHeartStage, heartArtCandidates, heartArtNativeSize, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
+  getHeartStage, heartArtCandidates, heartArtNativeSize, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
   HEART_G0_ID, HEART_LANE_COLORS, HEART_MAT_ID, HEART_MOON_SHADOW, HEART_OVERLOAD_CHECKPOINT, HEART_PROPS,
   HEART_RING_LANES, HEART_ROOT_LANES, HEART_SEAL_ID, HEART_SEAL_RADIUS, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
   HEART_STATUE_SHADOW, isHeartPositionSafe, nearestSafeHeartSpawn, normalizeHeartProgress,
@@ -836,9 +836,13 @@ export class HeartOfElariaLevel {
         }
         if (state.ready) {
           this.progress.flags['l9-roots'] = true;
-          this.save();
+          // Latching ends the assignment the same way a recall does: the roots hold the configuration
+          // mechanically now, so `l9-called-heart` — the *current* assignment — is cleared alongside the
+          // arrival mark, and both clears land before the save so a latched reload cannot re-hold the seal.
           this.lumoMode = 'follow';
+          this.progress.flags['l9-called-heart'] = false;
           this.progress.flags['l9-at-heart'] = false;
+          this.save();
           this.refresh();
           this.say(LATCHED_LINES);
           return;
@@ -1020,7 +1024,7 @@ export class HeartOfElariaLevel {
     const sealElement = getHeartElement(HEART_SEAL_ID);
     // The plate reads occupied only while Lumo is actually holding it and settled inside the radius;
     // a travelling Lumo still paints empty, matching the state the seal itself powers from.
-    if (sealElement) this.swapArt(HEART_SEAL_ID, state.lumoAtSeal ? 'pressure-occupied' : 'pressure-empty', sealElement);
+    if (sealElement) this.swapArt(HEART_SEAL_ID, heartSealPlateArt(state), sealElement);
 
     const wheel = this.images.get('wheel');
     if (wheel) {
