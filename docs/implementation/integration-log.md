@@ -266,3 +266,91 @@ observatory runtime now consumes the pure layout module.
   feet fall behind the status band. No sprite overlaps the HUD, but it is not pretty.
 - Level 09 records one new flag, `l8-sun-door-latched`, alongside the existing `l8-*` set. No v1 save
   validation was weakened or removed.
+
+## Merge 5 — `codex/level-10-spatial-rebuild` (Level 10, campaign index 9)
+
+- Branch merged: `codex/level-10-spatial-rebuild`, tip `301f0d3`. This is the last level merge.
+- Before its review pass, index 9 still ran the old inline room and the coming-soon gate blocked it,
+  and three defects made the puzzle unsolvable even if entered: the guardian statue was registered as
+  a collider with no visible art (an invisible wall) so the Balance branch was impossible, the Hope
+  pressure plate resolved to a non-existent `art_10_*` key so it never prompted, and two state
+  textures were swapped with a fixed `setDisplaySize`, distorting the art. All three are fixed on the
+  branch and covered by `scripts/check-heart-of-elaria.mjs`.
+
+### Conflicts and resolutions
+
+**`src/art/CampaignArt.ts`** — two hunks.
+
+1. The branch listed Levels 05–09 file by file and used a glob only for Level 10; `test-develop` had
+   globs for 05–09 and a ten-file list for Level 10. Resolution: one glob per level, 05 through 10.
+2. The branch side of the shared-package hunk was empty; resolution keeps
+   `shared/garden-mechanisms/*.png` (Level 07) next to `shared/beam-splitter/*.png` (Level 06).
+
+**`src/scenes/CampaignScene.ts`** — fourteen hunks.
+
+1. Imports: kept `RuinsOfTwoHalvesLevel` + `isRuinsPositionSafe` and added `HeartOfElariaLevel`.
+2. Controller field: kept `sleeplessTower`, `ruinsLevel` and added `heartLevel`.
+3. Playtest gate: the branch added `level >= 4 && level !== 9`. Resolution: dropped. With every level
+   implemented there is no gated index left, and `ComingSoonScene` is now unreachable from the
+   campaign.
+4. `F` handler: kept the Level 06 early branch (`sleeplessTower.toggleLantern()`) and the Level 10
+   early branch (`heartLevel.handleLanternKey()`), then the generic toggle. The branch's own removal
+   of the old `finalToggleAvailable` special case for index 9 was kept, because index 9 now returns
+   before reaching the generic path.
+5. `J` handler: kept Levels 5, 6 and 9.
+6. Lumo update and Lumo position save: index 9 joins index 4 (and, for the update, index 5) in being
+   excluded from the generic path, because `HeartOfElariaLevel` owns Lumo for its level.
+7. Protected prompt bounds: `sleeplessTower`, `ruinsLevel` and `heartLevel` all contribute.
+8. End of `update()`: all three controllers update in order, and the generic puzzle pass is skipped
+   for levels 3, 4, 5, 6, 7 and 9.
+9. `buildLevel()` teardown: all three controllers destroyed and cleared.
+10. Generic spawn placement: `} else if (level !== 4 && level !== 6 && level !== 9) {`, taking the
+    branch's removal of the legacy overload checkpoint (the Heart level now owns its own safe spawn
+    and overload checkpoint) and adding the Level 06 garden exclusion.
+11. Lantern restore on load: kept the branch's Level 07 line and its deliberate removal of the
+    scene-level `l9-overload` restore, because `HeartOfElariaLevel` restores the overload checkpoint
+    itself.
+12. Build branches: kept the Level 06 garden, Level 07 ruins and Level 09 Heart branches together.
+13. Opening-dialogue dispatch: kept Levels 6, 7 and 9.
+14. `buildCampaignBarriers()`: kept only the branch's new `level === 9` early return. The garden
+    barrier block that the branch still carried was NOT reintroduced, because the Level 07 merge had
+    deliberately deleted it along with `gardenBridgeWasReady`, `gardenTraversalSide` and
+    `gardenBridgePendingRemoval`; restoring it would have resurrected removed fields and contradicted
+    `SleepingGardenLevel`, which registers those colliders itself.
+15. `showHint()`: kept both the Level 09 observatory branch and the Level 10 `heartLevel.showHint()`
+    branch.
+
+### One check script needed a correction
+
+`scripts/check-heart-of-elaria.mjs` resolved runtime art by asserting that the literal path
+`<level-dir>/sprites/<file>.png` appears in the `CampaignArt.ts` source text. After this merge the
+Level 08 sprites that Level 10 reuses (`statue-notch-*`, the Sun and Moon locks, the fixed splitter,
+the sanctuary door) are registered by the Level 08 directory glob rather than by name, so the literal
+assertion failed even though the file is registered and exists on disk:
+
+```
+AssertionError [ERR_ASSERTION]: runtime art "statue-notch-0" resolves to a real file or texture
+    at scripts/check-heart-of-elaria.mjs:396:10
+```
+
+The resolver now accepts either the literal file path or the directory glob
+(`<level-dir>/sprites/*.png`), and still requires the PNG to exist on disk, so the assertion keeps its
+meaning. The Level 10 branch already used this glob idiom for its own level.
+
+### Verification on the merged revision
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `npm run build` | PASS | `tsc --noEmit` clean, Vite build 625 modules. |
+| All eleven `scripts/check-*.mjs` | PASS | Adds `check-heart-of-elaria.mjs`: 14 controls, 5 solids, 5 scenery blockers, 47 art states verified on disk. |
+| Conflict-marker scan | PASS | No `<<<<<<<` or `>>>>>>>` left in either shared file. |
+| Browser playthrough | NOT_RUN | No browser automation available in this environment. |
+
+### Known limits after this merge
+
+- `ComingSoonScene` remains in `src/config/gameConfig.ts` but nothing starts it any more; the
+  campaign now dispatches every index from 0 to 9 to a real implementation.
+- Legacy inline level code for indices 4–9 is still present in `CampaignScene.ts` but is unreachable:
+  the build dispatch only falls through to `registerLevel()`/`buildCampaignBarriers()` for indices 0,
+  1 and 3. The earlier branches kept it deliberately so the diffs stayed reviewable.
+- Level 10 records `NOT_RUN` for browser playthrough and human playthrough.

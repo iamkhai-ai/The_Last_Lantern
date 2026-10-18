@@ -9,6 +9,7 @@ import { LibraryLevel } from '../levels/LibraryLevel';
 import { PathForTwoLevel } from '../levels/PathForTwoLevel';
 import { RuinsOfTwoHalvesLevel } from '../levels/RuinsOfTwoHalvesLevel';
 import { isRuinsPositionSafe } from '../data/ruinsOfTwoHalvesLayout';
+import { HeartOfElariaLevel } from '../levels/HeartOfElariaLevel';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import {
@@ -140,6 +141,7 @@ export class CampaignScene extends Phaser.Scene {
   private pathForTwoLevel?: PathForTwoLevel;
   private sleeplessTower?: SleeplessTowerLevel;
   private ruinsLevel?: RuinsOfTwoHalvesLevel;
+  private heartLevel?: HeartOfElariaLevel;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -205,16 +207,16 @@ export class CampaignScene extends Phaser.Scene {
         if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen() && this.sleeplessTower?.toggleLantern()) this.player.playLanternAction(this.lantern.lanternOn);
         return;
       }
-      const finalToggleAvailable = this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && this.lantern.lanternInHand && this.lantern.lanternOn;
-      if ((!this.dialogue.isInputLocked(performance.now()) || finalToggleAvailable) && !this.pauseMenu.isOpen()) {
+      // Level 10 owns F: the final action must work the instant the overload starts, even mid-dialogue.
+      if (this.progress.level === 9) {
+        if (!this.pauseMenu.isOpen()) this.heartLevel?.handleLanternKey();
+        return;
+      }
+      if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen()) {
         if (this.lantern.toggleLantern(performance.now())) {
           this.player.playLanternAction(this.lantern.lanternOn);
           this.progress.lanternOn = this.lantern.lanternOn;
           this.save();
-          if (this.progress.level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'] && !this.lantern.lanternOn) {
-            this.lantern.isOverloadMode = true;
-            this.finishHeart();
-          }
         }
       }
     });
@@ -224,6 +226,7 @@ export class CampaignScene extends Phaser.Scene {
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
       else if (this.progress.level === 5) this.sleeplessTower?.showJournal();
       else if (this.progress.level === 6) this.gardenLevel?.showJournal();
+      else if (this.progress.level === 9) this.heartLevel?.showJournal();
       else if (this.progress.level === 8) this.showObservatoryJournal();
       else if (this.progress.level === 2) this.libraryLevel?.showJournal();
       else if (this.progress.level === 4) this.pathForTwoLevel?.showJournal();
@@ -265,6 +268,9 @@ export class CampaignScene extends Phaser.Scene {
         for (const [id, pos] of Object.entries(this.getRunePositions())) {
           if (Math.hypot(pos.x - x, pos.y - y) <= radius) this.progress.flags[`revealed-${id}`] = true;
         }
+      } else if (this.progress.level === 9) {
+        // Scenario §3: Pulse near the root-rule table reveals the moss-covered root lanes.
+        this.heartLevel?.onPulse(x, y);
       }
       this.save();
       this.refreshHud();
@@ -291,8 +297,8 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 330) };
     if (this.progress.level === 7) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 30, 610), y: Phaser.Math.Clamp(this.player.y - 22, 84, 302) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
-    else if (this.progress.level !== 4 && this.progress.level !== 5) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
-    if (this.progress.level !== 4 && this.time.now - this.lastLumoSave >= 600) {
+    else if (this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 9) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
+    if (this.progress.level !== 4 && this.progress.level !== 9 && this.time.now - this.lastLumoSave >= 600) {
       this.lastLumoSave = this.time.now;
       const x = Math.round(this.lumo.sprite.x);
       const y = Math.round(this.lumo.sprite.y);
@@ -304,7 +310,7 @@ export class CampaignScene extends Phaser.Scene {
         this.save();
       }
     }
-    if (this.progress.level !== 4 && this.time.now - this.lastPlayerSave >= 600) {
+    if (this.progress.level !== 4 && this.progress.level !== 9 && this.time.now - this.lastPlayerSave >= 600) {
       this.lastPlayerSave = this.time.now;
       const x = Math.round(this.player.x);
       const y = Math.round(this.player.y);
@@ -352,6 +358,7 @@ export class CampaignScene extends Phaser.Scene {
         ...(this.pathForTwoLevel?.getProtectedPromptBounds() ?? []),
         ...(this.sleeplessTower?.getProtectedPromptBounds() ?? []),
         ...(this.ruinsLevel?.getProtectedPromptBounds() ?? []),
+        ...(this.heartLevel?.getProtectedPromptBounds() ?? []),
       ],
     );
     this.libraryLevel?.update();
@@ -359,7 +366,8 @@ export class CampaignScene extends Phaser.Scene {
     this.pathForTwoLevel?.update(dt);
     this.sleeplessTower?.update(dt);
     this.ruinsLevel?.update(dt);
-    if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 6 && this.progress.level !== 7) {
+    this.heartLevel?.update(dt);
+    if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 6 && this.progress.level !== 7 && this.progress.level !== 9) {
       this.updatePuzzle(dt);
       this.updateCampaignBarriers();
       this.refreshCampaignPuzzleVisuals();
@@ -437,6 +445,8 @@ export class CampaignScene extends Phaser.Scene {
     this.sleeplessTower = undefined;
     this.ruinsLevel?.destroy();
     this.ruinsLevel = undefined;
+    this.heartLevel?.destroy();
+    this.heartLevel = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.memoryLayerLabels.clear();
@@ -483,7 +493,6 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshHud();
       return;
     }
-    const overloadCheckpoint = level === 9 && this.progress.flags['l9-roots'] && this.progress.flags['l9-overload'];
     const savedPlayerX = this.progress.counters['player-level'] === level ? this.progress.counters['player-x'] : undefined;
     const savedPlayerY = this.progress.counters['player-level'] === level ? this.progress.counters['player-y'] : undefined;
     const defaultPlayerX = [320, 320, 320, 90, 90, 90, 90, 320, 320, 320][level];
@@ -510,34 +519,28 @@ export class CampaignScene extends Phaser.Scene {
         this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true,
       );
       this.player.setPosition(spawn.x, spawn.y);
-    } else if (level !== 4 && level !== 6) {
+    } else if (level !== 4 && level !== 6 && level !== 9) {
       this.player.setFootPlacement(0, 27);
       this.player.setPosition(
-        overloadCheckpoint ? 130 : typeof savedPlayerX === 'number' ? Phaser.Math.Clamp(savedPlayerX, 24, 616) : defaultPlayerX,
-        overloadCheckpoint ? 205 : typeof savedPlayerY === 'number' ? Phaser.Math.Clamp(savedPlayerY, 58, 305) : 290,
+        typeof savedPlayerX === 'number' ? Phaser.Math.Clamp(savedPlayerX, 24, 616) : defaultPlayerX,
+        typeof savedPlayerY === 'number' ? Phaser.Math.Clamp(savedPlayerY, 58, 305) : 290,
       );
     }
+    // Level 10 (index 9) owns its own foot body, lantern state, Lumo and safe spawn: HeartOfElariaLevel.build().
     (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.updateFromGameObject();
     this.lumoTarget = level === 2
       ? { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) }
-      : overloadCheckpoint ? { x: 165, y: 205 } : this.getSavedLumoTarget();
-    this.lumo.sprite.setPosition(level === 2 ? this.lumoTarget.x : overloadCheckpoint ? this.lumoTarget.x : this.progress.counters['lumo-x'] ?? this.lumoTarget.x,
-      level === 2 ? this.lumoTarget.y : overloadCheckpoint ? this.lumoTarget.y : this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
+      : this.getSavedLumoTarget();
+    this.lumo.sprite.setPosition(level === 2 ? this.lumoTarget.x : this.progress.counters['lumo-x'] ?? this.lumoTarget.x,
+      level === 2 ? this.lumoTarget.y : this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
     this.lumo.setVisible(level !== 0 || this.progress.lanternPickedUp || this.progress.flags['l0-gate-open'] === true || this.progress.flags['l0-lumo-met'] === true);
     this.lantern.lanternInHand = this.progress.lanternPickedUp || level > 0;
     this.lantern.lanternOn = this.progress.lanternOn;
     this.lantern.lanternPlaced = false;
     this.lantern.isDawnMode = false;
     this.lantern.isOverloadMode = false;
-    if (level === 9 && this.progress.flags['l9-overload']) this.lantern.isOverloadMode = true;
+    if (level === 7 && this.progress.flags['l7-lantern-placed']) this.lantern.placeLanternAt(120, 205);
     if (level === 5 && this.progress.flags['l5-lantern-placed'] && !this.progress.flags['l5-lantern-retrieved']) this.lantern.placeLanternAt(120, 205);
-    const heartLanternShouldBePlaced = this.progress.flags['l9-lantern-placed'] === true
-      || (this.progress.flags['l9-lantern-placed'] === undefined && this.progress.flags['l9-roots'] === true && !this.progress.flags['l9-lantern-retrieved']);
-    if (level === 9 && heartLanternShouldBePlaced && !this.progress.flags['l9-lantern-retrieved'] && !this.progress.flags['l9-overload']) {
-      const savedLampState = this.progress.lanternOn;
-      this.lantern.placeLanternAt(100, 205);
-      this.lantern.lanternOn = savedLampState;
-    }
     if (level === 2) {
       this.libraryLevel = new LibraryLevel({
         scene: this, progress: this.progress, player: this.player, interactions: this.interactions,
@@ -563,6 +566,17 @@ export class CampaignScene extends Phaser.Scene {
         interactions: this.interactions, lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
         nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen() });
       this.ruinsLevel.build();
+    } else if (level === 9) {
+      // Level 10 owns the whole room: art, colliders, interactions, Lumo, HUD text and the ending.
+      this.heartLevel = new HeartOfElariaLevel({
+        scene: this, progress: this.progress, player: this.player, lumo: this.lumo, interactions: this.interactions,
+        lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
+        isDialogueLocked: () => this.dialogue.isInputLocked(performance.now()),
+        isPaused: () => this.pauseMenu.isOpen(),
+        playLanternAction: (on) => this.player.playLanternAction(on),
+        finish: () => this.finishHeartCampaign(),
+      });
+      this.heartLevel.build();
     } else {
       this.addNarrativeProps(level);
       this.registerLevel(level);
@@ -577,6 +591,7 @@ export class CampaignScene extends Phaser.Scene {
       else if (level === 4) this.pathForTwoLevel?.startOpeningDialogue();
       else if (level === 6) this.gardenLevel?.startOpeningDialogue();
       else if (level === 7) this.ruinsLevel?.startOpeningDialogue();
+      else if (level === 9) this.heartLevel?.startOpeningDialogue();
       else {
         const woodsStage = level === 1 ? this.getWoodsTutorialStage() : undefined;
         const woodsDirection = woodsStage === 'exit' ? 'Cổng đã mở. Đi theo lối phía đông tới bậc thang.'
@@ -1750,7 +1765,7 @@ export class CampaignScene extends Phaser.Scene {
       : level === 5 ? [['pedestal_lit', 120, 205], ['mirror_0', 160, 170], ['mirror_1', 250, 170], ['mirror_2', 350, 170], ['receiver_off', 470, 145], ['receiver_off', 470, 205], ['lock_sun_off', 320, 80], ['mural_tablet', 535, 86]]
       : level === 7 ? [['guardian_statue', 320, 170], ['lock_sun_off', 200, 126], ['lock_sun_off', 440, 126], ['lock_moon_off', 320, 222], ['ruins_altar', 320, 82], ['pedestal_empty', 120, 205], ['mirror_1', 220, 175], ['mirror_1', 420, 175], ['receiver_off', 200, 126], ['receiver_off', 440, 126], ...(this.progress.flags['l7-solved'] ? [['shadow_npc', 320, 98] as [string, number, number]] : [])]
       : level === 8 ? [['mirror_0', 220, 175], ['mirror_2', 420, 175], ['shadow_npc', 320, 114], ['crystal_balance', 320, 68]]
-      : [['heart_tree_0', 320, 157], ['crystal_memory', 190, 260], ['crystal_hope', 320, 260], ['crystal_balance', 450, 260], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
+      : [['heart_tree_0', 320, 157], ['crystal_memory', 158, 192], ['crystal_hope', 320, 200], ['crystal_balance', 480, 192], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
     for (const [key, x, y] of props) {
       if (level === 9 && key === 'heart_tree_0') continue;
       this.addProp(key, x, y, level === 0 || key === 'woods_arch_locked' || key === 'heart_tree_0' ? 1 : 0.9);
@@ -1785,12 +1800,12 @@ export class CampaignScene extends Phaser.Scene {
     } else if (level === 5) {
       this.addLevelArt('tower-lamp-dim', 541, 108, 48, 48, 8);
     } else if (level === 9) {
-      for (const [name, x] of [['memory', 190], ['hope', 320], ['balance', 450]] as const) {
+      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
         const state = this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty';
-        this.addLevelArt(`${name}-alcove-${state}`, x, 260, 52, 52, 8);
+        this.addLevelArt(`${name}-alcove-${state}`, x, y, 52, 52, 8);
       }
       const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.addLevelArt(core, 320, 154, 46, 46, 8);
+      this.addLevelArt(core, 320, 115, 46, 46, 8);
     }
     if (level === 1) this.drawFireflyRoute();
     if (level === 2 && this.progress.flags['l2-memory'] === true) this.addProp('crystal_memory', 320, 190, 0.9);
@@ -1933,7 +1948,7 @@ export class CampaignScene extends Phaser.Scene {
       action('balance-crystal', 'E · Nhận Tinh thể Cân Bằng', 320, 68, () => { this.progress.flags['l8-crystal'] = true; this.save(); }, () => this.progress.flags['l8-room-three'] && !this.progress.flags['l8-crystal'], 'crystal_balance');
       action('observatory-exit', 'E · Trở về Cây Mẹ', 560, 300, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Ba tinh thể đã trở lại. Mình hãy đưa chúng về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Tôi sẽ không để cậu đi một mình.' }]), () => this.progress.flags['l8-crystal'], 'woods_arch_open');
     } else {
-      (['memory', 'hope', 'balance'] as const).forEach((name, i) => action(`heart-${name}`, `E · Đặt tinh thể ${name === 'memory' ? 'Ký Ức' : name === 'hope' ? 'Hy Vọng' : 'Cân Bằng'}`, [190, 320, 450][i], 260, () => this.setFlag(`l9-${name}`), () => !this.progress.flags[`l9-${name}`], `crystal_${name}`));
+      (['memory', 'hope', 'balance'] as const).forEach((name, i) => action(`heart-${name}`, `E · Đặt tinh thể ${name === 'memory' ? 'Ký Ức' : name === 'hope' ? 'Hy Vọng' : 'Cân Bằng'}`, [158, 320, 480][i], [192, 200, 192][i], () => this.setFlag(`l9-${name}`), () => !this.progress.flags[`l9-${name}`], `crystal_${name}`));
       action('heart-lantern-place', 'E · Đặt đèn lên bệ dẫn sáng', 100, 205, () => { this.lantern.placeLanternAt(100, 205); this.progress.lanternOn = true; this.progress.flags['l9-lantern-placed'] = true; this.save(); this.say([{ speaker: 'Nhinh', text: 'Ánh sáng đã được đặt ở tâm dẫn.' }]); }, () => this.lantern.lanternInHand && !this.lantern.lanternPlaced && !this.progress.flags['l9-roots'], 'pedestal_empty');
       this.registerMirror('heart-memory', 'Gương Ký Ức', 220, 220, 1);
       this.registerMirror('heart-balance', 'Gương Cân Bằng', 420, 220, 2);
@@ -2310,6 +2325,10 @@ export class CampaignScene extends Phaser.Scene {
       for (const [id,r] of [['woods-gate-left',WHISPERING_WOODS.gate.leftPost],['woods-gate-right',WHISPERING_WOODS.gate.rightPost],['woods-gate-backing',WHISPERING_WOODS.gate.backing],['woods-gate-threshold',WHISPERING_WOODS.gate.threshold]] as const) {
         this.addCampaignBarrier(id,r.x+r.width/2,r.y+r.height/2,r.width,r.height,id==='woods-gate-threshold'?!this.progress.flags['l1-open']:true);
       }
+    } else if (level === 9) {
+      // Level 10 registers its own colliders from HeartOfElariaLevel's layout (props + scenery bands),
+      // so the generic campaign barriers must not add a second, contradictory set of walls here.
+      return;
     }
   }
 
@@ -2481,11 +2500,11 @@ export class CampaignScene extends Phaser.Scene {
     } else if (level === 7) {
       this.setLevelArtAt(320, 170, `statue-notch-${this.value('statue') % 4}`);
     } else if (level === 9) {
-      for (const [name, x] of [['memory', 190], ['hope', 320], ['balance', 450]] as const) {
-        this.setLevelArtAt(x, 260, `${name}-alcove-${this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty'}`);
+      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
+        this.setLevelArtAt(x, y, `${name}-alcove-${this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty'}`);
       }
       const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.setLevelArtAt(320, 154, core);
+      this.setLevelArtAt(320, 115, core);
     }
   }
 
@@ -2518,6 +2537,14 @@ export class CampaignScene extends Phaser.Scene {
       this.save();
       this.scene.restart();
     });
+  }
+
+  /** Level 10's ending: HeartOfElariaLevel has already saved `l9-complete`, so only the scene switch is left. */
+  private finishHeartCampaign(): void {
+    this.progress.flags['l9-complete'] = true;
+    this.save();
+    this.heartEnd = true;
+    this.scene.start('EndingScene', { campaign: true });
   }
 
   private finishHeart(): void {
@@ -2772,6 +2799,7 @@ export class CampaignScene extends Phaser.Scene {
   private showHint(): void {
     if (this.progress.level === 2) { this.libraryLevel?.showHint(); return; }
     if (this.progress.level === 4) { this.pathForTwoLevel?.showHint(); return; }
+    if (this.progress.level === 9) { this.heartLevel?.showHint(); return; }
     if (this.progress.level === 8 && this.activeObservatoryRoom) {
       const guidance = observatoryGuidance(this.activeObservatoryRoom, this.getObservatoryWorldState());
       if (this.observatoryHintKey !== guidance.objective) {
@@ -2817,9 +2845,7 @@ export class CampaignScene extends Phaser.Scene {
       };
       const choices=hints[step],message=choices[Math.min(this.hintIndex,choices.length-1)];this.hintIndex=Math.min(this.hintIndex+1,choices.length-1);this.say([{speaker:'Hệ thống',text:message}]);return;
     }
-    const hints = this.progress.level === 9 && this.progress.flags['l9-roots']
-      ? (this.progress.flags['l9-overload'] ? ['Tắt đèn bằng F để giải phóng nguồn sáng đang quá tải.'] : ['Nhận lại đèn ở bệ dẫn sáng để đưa nguồn sáng trở về tay Nhinh.', 'Khi ánh sáng dâng quá ngưỡng, nhấn F để tắt đèn và khép vòng.'])
-      : CAMPAIGN_LEVELS[this.progress.level].hint;
+    const hints = CAMPAIGN_LEVELS[this.progress.level].hint;
     const message = hints[Math.min(this.hintIndex, hints.length - 1)];
     this.hintIndex = Math.min(this.hintIndex + 1, hints.length - 1);
     this.say([{ speaker: 'Hệ thống', text: message }]);
@@ -2849,6 +2875,13 @@ export class CampaignScene extends Phaser.Scene {
     const level = CAMPAIGN_LEVELS[this.progress.level];
     if (this.progress.level === 4 && this.pathForTwoLevel) {
       if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về');
+      return;
+    }
+    if (this.progress.level === 9 && this.heartLevel) {
+      this.objectiveText?.setText(this.heartLevel.getObjectiveText());
+      if (this.titleText) this.titleText.setText(`${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
+      this.statusText?.setText(this.heartLevel.getStatusText());
+      if (this.lumoStatusText) this.lumoStatusText.setText(this.heartLevel.getLumoStatusText());
       return;
     }
     if (this.progress.level === 0) {
