@@ -1,7 +1,21 @@
 /**
  * Authored layout and named route data for the three-room Level 09 Observatory.
  * All positions are in the fixed 640×360 room coordinate system.
+ *
+ * Static collision footprints (walls and standing props) are derived from
+ * `observatoryLayout.ts` so the drawn art, the Arcade bodies, the pure restore
+ * predicate and `scripts/check-observatory.mjs` all consume one rectangle set.
  */
+import {
+  OBSERVATORY_ELEMENTS,
+  OBSERVATORY_FINAL_DOOR_HEAD,
+  OBSERVATORY_ROOT_BED,
+  OBSERVATORY_WALLS,
+  observatoryAlcove,
+  observatoryElementSolids,
+  type ObsRect,
+} from './observatoryLayout.ts';
+
 export type ObservatoryRoomId = 'entrance' | 'corridor' | 'observatory';
 
 export interface RoomPoint {
@@ -26,13 +40,16 @@ export interface ObservatoryExit {
   doorId: ObservatoryDoorId;
   fromRoom: ObservatoryRoomId;
   toRoom: ObservatoryRoomId;
+  /** Deep alcove trigger used by the room transition. */
   interactionPoint: RoomPoint;
   destinationSpawnId: string;
+  /** Room-facing control that explains a locked door and latches Door A. */
+  inspectPoint?: RoomPoint;
   /** If true, the door can be latched from this side after entering. */
   latchControl?: RoomPoint;
 }
 
-export type ObservatoryObstacleKind = 'pillar' | 'furniture' | 'statue' | 'root-bed';
+export type ObservatoryObstacleKind = 'wall' | 'pillar' | 'furniture' | 'statue' | 'root-bed';
 
 export interface ObservatoryObstacle {
   id: string;
@@ -48,17 +65,17 @@ export interface ObservatoryObstacle {
 export type ObservatoryInteractableId =
   | 'lantern-pedestal'
   | 'g0'
-  | 'door-a-control'
+  | 'learned-marks'
   | 'g1'
   | 'lumo-tube'
   | 'lumo-seal'
+  | 'door-a-control'
   | 'sun-door-control'
   | 'g2'
   | 'splitter'
   | 'statue'
   | 'sun-lock'
   | 'root-bed'
-  | 'root-bridge'
   | 'final-door-control'
   | 'stone-return-loop'
   | 'final-record'
@@ -67,6 +84,7 @@ export type ObservatoryInteractableId =
 export type ObservatoryInteractableKind =
   | 'pedestal'
   | 'mirror'
+  | 'marks'
   | 'door-control'
   | 'tube'
   | 'seal'
@@ -74,15 +92,15 @@ export type ObservatoryInteractableKind =
   | 'statue'
   | 'lock'
   | 'roots'
-  | 'bridge'
   | 'record'
   | 'crystal';
 
 export interface ObservatoryInteractable {
   id: ObservatoryInteractableId;
   kind: ObservatoryInteractableKind;
+  /** Ground anchor (bottom-centre) of the drawn art; equals the element anchor. */
   position: RoomPoint;
-  /** The E interaction is registered here, which may be offset from the art. */
+  /** The E interaction is registered here: the object's south edge (RULE_GAMES). */
   interactionPoint: RoomPoint;
   textureKey?: string;
   label: string;
@@ -176,129 +194,169 @@ export const OBSERVATORY_LUMO_WAYPOINTS = {
   'lumo-seal': { roomId: 'corridor', x: 320, y: 80 },
 } as const satisfies Record<'lumo-tube-entry' | 'lumo-seal', ObservatoryRoomPoint>;
 
+const wallObstacles = (roomId: ObservatoryRoomId): ObservatoryObstacle[] =>
+  OBSERVATORY_WALLS[roomId].map((rect: ObsRect, index) => ({
+    id: `${roomId}-wall-${index}`, kind: 'wall' as const, ...rect,
+  }));
+
+const propObstacles = (roomId: ObservatoryRoomId): ObservatoryObstacle[] =>
+  observatoryElementSolids(roomId).map((rect, index) => ({
+    id: `${roomId}-prop-${index}`, kind: 'furniture' as const, ...rect,
+  }));
+
+/**
+ * Static solids for a room: permanent masonry plus the exact visible footprint
+ * of every standing prop. Dynamic structures (door thresholds, the root bed and
+ * the bridge lane) are supplied by `observatoryLayout` per live puzzle state.
+ */
+export const OBSERVATORY_STATIC_OBSTACLES: Record<ObservatoryRoomId, readonly ObservatoryObstacle[]> = {
+  entrance: [...wallObstacles('entrance'), ...propObstacles('entrance')],
+  corridor: [...wallObstacles('corridor'), ...propObstacles('corridor')],
+  observatory: [
+    ...wallObstacles('observatory'),
+    ...propObstacles('observatory'),
+    { id: 'observatory-root-bed', kind: 'root-bed', ...OBSERVATORY_ROOT_BED, dynamic: true },
+    { id: 'observatory-final-door-head', kind: 'furniture', ...OBSERVATORY_FINAL_DOOR_HEAD, dynamic: true },
+  ],
+};
+
+const element = (id: string): (typeof OBSERVATORY_ELEMENTS)[number] => {
+  const found = OBSERVATORY_ELEMENTS.find((candidate) => candidate.id === id);
+  if (!found) throw new Error(`Missing Level 09 element geometry for ${id}`);
+  return found;
+};
+
+const doorTrigger = (alcoveId: string): RoomPoint => {
+  const alcove = observatoryAlcove(alcoveId);
+  if (!alcove) throw new Error(`Missing Level 09 alcove ${alcoveId}`);
+  return { ...alcove.trigger };
+};
+
+const doorInspect = (alcoveId: string): RoomPoint => {
+  const alcove = observatoryAlcove(alcoveId);
+  if (!alcove) throw new Error(`Missing Level 09 alcove ${alcoveId}`);
+  return { ...alcove.inspect };
+};
+
 export const OBSERVATORY_ROOMS: Record<ObservatoryRoomId, ObservatoryRoomDefinition> = {
   entrance: {
     id: 'entrance',
-    title: 'Entrance Hall',
+    title: 'Tiền sảnh',
     width: 640,
     height: 360,
     backgroundBiome: 'observatory',
     entrySpawnId: 'entrance-start',
     spawns: [
-      { id: 'entrance-start', position: { x: 72, y: 180 }, safe: true },
-      { id: 'entrance-from-corridor', position: { x: 566, y: 180 }, safe: true },
-      { id: 'entrance-from-return-loop', position: { x: 238, y: 224 }, safe: true },
+      { id: 'entrance-start', position: { x: 100, y: 268 }, safe: true },
+      { id: 'entrance-from-corridor', position: { x: 500, y: 180 }, safe: true },
+      { id: 'entrance-from-return-loop', position: { x: 176, y: 268 }, safe: true },
     ],
     exits: [
       {
         id: 'entrance-to-corridor', doorId: 'door-a', fromRoom: 'entrance', toRoom: 'corridor',
-        interactionPoint: { x: 602, y: 180 }, destinationSpawnId: 'corridor-from-entrance',
+        interactionPoint: doorTrigger('door-a-entrance'),
+        inspectPoint: doorInspect('door-a-entrance'),
+        destinationSpawnId: 'corridor-from-entrance',
       },
       {
         id: 'entrance-return-loop-to-observatory', doorId: 'return-loop', fromRoom: 'entrance', toRoom: 'observatory',
-        interactionPoint: { x: 238, y: 224 }, destinationSpawnId: 'observatory-far-bank',
+        interactionPoint: doorTrigger('return-loop-entrance'),
+        inspectPoint: doorInspect('return-loop-entrance'),
+        destinationSpawnId: 'observatory-far-bank',
       },
     ],
-    obstacles: [
-      { id: 'entrance-north-pillar', kind: 'pillar', x: 24, y: 44, width: 30, height: 54 },
-      { id: 'entrance-south-pillar', kind: 'pillar', x: 24, y: 262, width: 30, height: 54 },
-      { id: 'pedestal-base', kind: 'furniture', x: 148, y: 150, width: 46, height: 44 },
-    ],
+    obstacles: OBSERVATORY_STATIC_OBSTACLES.entrance,
     interactables: [
-      { id: 'lantern-pedestal', kind: 'pedestal', position: { x: 170, y: 166 }, interactionPoint: { x: 170, y: 202 }, textureKey: 'pedestal_empty', label: 'Lantern pedestal' },
-      { id: 'g0', kind: 'mirror', position: { x: 448, y: 146 }, interactionPoint: { x: 448, y: 184 }, textureKey: 'mirror_0', label: 'G0' },
-      { id: 'door-a-control', kind: 'door-control', position: { x: 560, y: 142 }, interactionPoint: { x: 555, y: 190 }, label: 'Door A' },
+      { id: 'lantern-pedestal', kind: 'pedestal', position: element('lantern-pedestal').anchor, interactionPoint: element('lantern-pedestal').stand, textureKey: 'pedestal_empty', label: 'Bệ đèn' },
+      { id: 'g0', kind: 'mirror', position: element('g0').anchor, interactionPoint: element('g0').stand, textureKey: 'mirror_0', label: 'G0' },
+      { id: 'learned-marks', kind: 'marks', position: element('learned-marks').anchor, interactionPoint: element('learned-marks').stand, label: 'Mô hình các dấu đã học' },
     ],
     waypoints: [
-      { id: 'lantern-source', position: { roomId: 'entrance', x: 170, y: 154 } },
-      { id: 'door-a-eye', position: { roomId: 'entrance', x: 586, y: 145 } },
+      { id: 'lantern-source', position: { roomId: 'entrance', x: 188, y: 176 } },
+      { id: 'door-a-eye', position: { roomId: 'entrance', x: 604, y: 168 } },
     ],
   },
   corridor: {
     id: 'corridor',
-    title: 'Star-map Corridor',
+    title: 'Hành lang phòng sao',
     width: 640,
     height: 360,
     backgroundBiome: 'library',
     entrySpawnId: 'corridor-from-entrance',
     spawns: [
-      { id: 'corridor-from-entrance', position: { x: 42, y: 180 }, safe: true },
-      { id: 'corridor-from-observatory', position: { x: 596, y: 180 }, safe: true },
+      { id: 'corridor-from-entrance', position: { x: 152, y: 180 }, safe: true },
+      { id: 'corridor-from-observatory', position: { x: 516, y: 190 }, safe: true },
     ],
     exits: [
       {
         id: 'corridor-to-entrance', doorId: 'door-a', fromRoom: 'corridor', toRoom: 'entrance',
-        interactionPoint: { x: 24, y: 180 }, destinationSpawnId: 'entrance-from-corridor',
-        latchControl: { x: 72, y: 180 },
+        interactionPoint: doorTrigger('door-a-corridor'), destinationSpawnId: 'entrance-from-corridor',
+        latchControl: element('door-a-control').stand,
       },
       {
         id: 'corridor-to-observatory', doorId: 'sun-door', fromRoom: 'corridor', toRoom: 'observatory',
-        interactionPoint: { x: 616, y: 180 }, destinationSpawnId: 'observatory-from-corridor',
+        interactionPoint: doorTrigger('sun-door-corridor'),
+        inspectPoint: doorInspect('sun-door-corridor'),
+        destinationSpawnId: 'observatory-from-corridor',
       },
     ],
-    obstacles: [
-      { id: 'corridor-north-pillar', kind: 'pillar', x: 180, y: 22, width: 34, height: 48 },
-      { id: 'corridor-south-pillar', kind: 'pillar', x: 180, y: 290, width: 34, height: 48 },
-      { id: 'star-map-table', kind: 'furniture', x: 282, y: 250, width: 88, height: 30 },
-    ],
+    obstacles: OBSERVATORY_STATIC_OBSTACLES.corridor,
     interactables: [
-      { id: 'g1', kind: 'mirror', position: { x: 235, y: 136 }, interactionPoint: { x: 235, y: 176 }, textureKey: 'mirror_1', label: 'G1' },
-      { id: 'lumo-tube', kind: 'tube', position: { x: 105, y: 78 }, interactionPoint: { x: 105, y: 112 }, label: 'Lumo tube' },
-      { id: 'lumo-seal', kind: 'seal', position: { x: 320, y: 80 }, interactionPoint: { x: 320, y: 112 }, label: 'Lumo seal' },
-      { id: 'door-a-control', kind: 'door-control', position: { x: 68, y: 142 }, interactionPoint: { x: 72, y: 180 }, label: 'Door A latch' },
-      { id: 'sun-door-control', kind: 'door-control', position: { x: 568, y: 142 }, interactionPoint: { x: 560, y: 180 }, label: 'Sun Door' },
+      { id: 'g1', kind: 'mirror', position: element('g1').anchor, interactionPoint: element('g1').stand, textureKey: 'mirror_1', label: 'G1' },
+      { id: 'lumo-tube', kind: 'tube', position: element('lumo-tube').anchor, interactionPoint: element('lumo-tube').stand, label: 'Ống dẫn Lumo' },
+      { id: 'lumo-seal', kind: 'seal', position: element('lumo-seal').anchor, interactionPoint: element('lumo-seal').stand, label: 'Ấn Lumo' },
+      { id: 'door-a-control', kind: 'door-control', position: element('door-a-control').anchor, interactionPoint: element('door-a-control').stand, label: 'Chốt cửa A' },
+      { id: 'sun-door-control', kind: 'lock', position: element('sun-door-control').anchor, interactionPoint: element('sun-door-control').stand, label: 'Khóa Nhật' },
     ],
     waypoints: [
-      { id: 'g1', position: { roomId: 'corridor', x: 235, y: 136 } },
+      { id: 'g1', position: { roomId: 'corridor', x: 240, y: 190 } },
       { id: 'lumo-tube-entry', position: OBSERVATORY_LUMO_WAYPOINTS['lumo-tube-entry'] },
       { id: 'lumo-seal', position: OBSERVATORY_LUMO_WAYPOINTS['lumo-seal'] },
     ],
   },
   observatory: {
     id: 'observatory',
-    title: 'Observatory',
+    title: 'Phòng thiên văn',
     width: 640,
     height: 360,
     backgroundBiome: 'ruins',
     entrySpawnId: 'observatory-from-corridor',
     spawns: [
-      { id: 'observatory-from-corridor', position: { x: 44, y: 180 }, safe: true },
-      { id: 'observatory-near-bridge', position: { x: 270, y: 276 }, safe: true },
-      { id: 'observatory-far-bank', position: { x: 470, y: 276 }, safe: true },
+      { id: 'observatory-from-corridor', position: { x: 128, y: 200 }, safe: true },
+      { id: 'observatory-near-bridge', position: { x: 280, y: 276 }, safe: true },
+      { id: 'observatory-far-bank', position: { x: 452, y: 276 }, safe: true },
     ],
     exits: [
       {
         id: 'observatory-to-corridor', doorId: 'sun-door', fromRoom: 'observatory', toRoom: 'corridor',
-        interactionPoint: { x: 24, y: 180 }, destinationSpawnId: 'corridor-from-observatory',
+        interactionPoint: doorTrigger('sun-door-observatory'),
+        inspectPoint: doorInspect('sun-door-observatory'),
+        destinationSpawnId: 'corridor-from-observatory',
       },
       {
         id: 'observatory-return-loop-to-entrance', doorId: 'return-loop', fromRoom: 'observatory', toRoom: 'entrance',
-        interactionPoint: { x: 520, y: 316 }, destinationSpawnId: 'entrance-from-return-loop',
+        interactionPoint: doorTrigger('return-loop-observatory'),
+        inspectPoint: doorInspect('return-loop-observatory'),
+        destinationSpawnId: 'entrance-from-return-loop',
       },
     ],
-    obstacles: [
-      { id: 'observatory-west-pillar', kind: 'pillar', x: 74, y: 28, width: 34, height: 48 },
-      { id: 'observatory-east-pillar', kind: 'pillar', x: 578, y: 28, width: 34, height: 48 },
-      { id: 'observatory-statue', kind: 'statue', x: 292, y: 122, width: 44, height: 62 },
-      { id: 'root-bed', kind: 'root-bed', x: 330, y: 220, width: 132, height: 54, dynamic: true },
-    ],
+    obstacles: OBSERVATORY_STATIC_OBSTACLES.observatory,
     interactables: [
-      { id: 'g2', kind: 'mirror', position: { x: 144, y: 118 }, interactionPoint: { x: 144, y: 158 }, textureKey: 'mirror_2', label: 'G2' },
-      { id: 'splitter', kind: 'splitter', position: { x: 240, y: 112 }, interactionPoint: { x: 240, y: 158 }, label: 'Fixed splitter' },
-      { id: 'statue', kind: 'statue', position: { x: 314, y: 128 }, interactionPoint: { x: 314, y: 192 }, textureKey: 'guardian_statue', label: 'Statue' },
-      { id: 'sun-lock', kind: 'lock', position: { x: 520, y: 96 }, interactionPoint: { x: 520, y: 132 }, textureKey: 'lock_sun_off', label: 'Sun lock' },
-      { id: 'root-bed', kind: 'roots', position: { x: 396, y: 244 }, interactionPoint: { x: 396, y: 288 }, label: 'Root bed' },
-      { id: 'root-bridge', kind: 'bridge', position: { x: 398, y: 300 }, interactionPoint: { x: 398, y: 326 }, label: 'Root bridge' },
-      { id: 'final-door-control', kind: 'door-control', position: { x: 552, y: 226 }, interactionPoint: { x: 552, y: 260 }, label: 'Final door latch' },
-      { id: 'stone-return-loop', kind: 'door-control', position: { x: 552, y: 282 }, interactionPoint: { x: 520, y: 316 }, label: 'Stone return loop' },
-      { id: 'final-record', kind: 'record', position: { x: 488, y: 166 }, interactionPoint: { x: 488, y: 204 }, textureKey: 'ruins_altar', label: 'Final record' },
-      { id: 'balance-crystal', kind: 'crystal', position: { x: 574, y: 164 }, interactionPoint: { x: 574, y: 204 }, textureKey: 'crystal_balance', label: 'Balance Crystal' },
+      { id: 'g2', kind: 'mirror', position: element('g2').anchor, interactionPoint: element('g2').stand, textureKey: 'mirror_2', label: 'G2' },
+      { id: 'splitter', kind: 'splitter', position: element('splitter').anchor, interactionPoint: element('splitter').stand, label: 'Khung chia tia' },
+      { id: 'statue', kind: 'statue', position: element('statue').anchor, interactionPoint: element('statue').stand, label: 'Tượng chắn sáng' },
+      { id: 'sun-lock', kind: 'lock', position: element('sun-lock').anchor, interactionPoint: element('sun-lock').stand, label: 'Khóa Nhật' },
+      { id: 'root-bed', kind: 'roots', position: element('root-bed').anchor, interactionPoint: element('root-bed').stand, label: 'Luống rễ' },
+      { id: 'final-door-control', kind: 'door-control', position: element('final-door-control').anchor, interactionPoint: element('final-door-control').stand, label: 'Chốt cửa cuối' },
+      { id: 'stone-return-loop', kind: 'door-control', position: element('stone-return-loop').anchor, interactionPoint: element('stone-return-loop').stand, label: 'Lối đá vòng' },
+      { id: 'final-record', kind: 'record', position: element('final-record').anchor, interactionPoint: element('final-record').stand, textureKey: 'ruins_altar', label: 'Bản ghi cuối' },
+      { id: 'balance-crystal', kind: 'crystal', position: element('balance-crystal').anchor, interactionPoint: element('balance-crystal').stand, textureKey: 'crystal_balance', label: 'Tinh thể Cân Bằng' },
     ],
     waypoints: [
-      { id: 'g2', position: { roomId: 'observatory', x: 144, y: 118 } },
-      { id: 'sun-lock', position: { roomId: 'observatory', x: 520, y: 96 } },
-      { id: 'splitter', position: { roomId: 'observatory', x: 240, y: 112 } },
-      { id: 'root-branch', position: { roomId: 'observatory', x: 396, y: 244 } },
+      { id: 'g2', position: { roomId: 'observatory', x: 168, y: 226 } },
+      { id: 'sun-lock', position: { roomId: 'observatory', x: 176, y: 133 } },
+      { id: 'splitter', position: { roomId: 'observatory', x: 240, y: 220 } },
+      { id: 'root-branch', position: { roomId: 'observatory', x: 362, y: 226 } },
     ],
   },
 };

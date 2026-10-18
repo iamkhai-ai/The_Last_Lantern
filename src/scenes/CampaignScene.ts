@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getLevelArtKey, getLevelBackgroundKey } from '../art/CampaignArt';
+import { getLevelArtKey, getLevelBackgroundKey, getShadowArtKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
@@ -11,6 +11,38 @@ import { RuinsOfTwoHalvesLevel } from '../levels/RuinsOfTwoHalvesLevel';
 import { isRuinsPositionSafe } from '../data/ruinsOfTwoHalvesLayout';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
+import {
+  OBSERVATORY_ALCOVES,
+  OBSERVATORY_BODY,
+  OBSERVATORY_BRIDGE_LANE,
+  OBSERVATORY_ELEMENTS,
+  OBSERVATORY_FLOORS,
+  OBSERVATORY_ROOT_BED,
+  OBSERVATORY_STAMPS,
+  OBSERVATORY_WALLS,
+  fitObservatoryArt,
+  isObservatoryApproachAllowed,
+  isObservatoryGateApproachAllowed,
+  nearestSafeObservatorySpawn,
+  observatoryAlcoves,
+  observatoryArtRect,
+  observatoryBody,
+  observatoryBridgeBlockReason,
+  observatoryCompletionReady,
+  observatoryDoorBlockReason,
+  observatoryDoorOpen,
+  observatoryElement,
+  observatoryElements,
+  observatoryFinalDoorBlockReason,
+  observatoryGuidance,
+  observatoryPrompt,
+  observatorySolidRects,
+  rectsOverlap,
+  type ObsAlcove,
+  type ObsElement,
+  type ObsRect,
+  type ObsWorldState,
+} from '../data/observatoryLayout';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem } from '../systems/LanternSystem';
@@ -56,15 +88,29 @@ export class CampaignScene extends Phaser.Scene {
   private campaignBodies = new Map<string, Phaser.Physics.Arcade.StaticBody>();
   private activeObservatoryRoom: ObservatoryRoomId | null = null;
   private roomDoors = new Map<string, { image: Phaser.GameObjects.Image; body: Phaser.Physics.Arcade.StaticBody; exit: ObservatoryExit }>();
+  /** Door-arch scenery per alcove (never a collider; the sill carries collision). */
+  private observatoryAlcoveVisuals = new Map<string, Phaser.GameObjects.Image>();
   private observatoryPuzzleVisuals = new Map<string, Phaser.GameObjects.GameObject>();
+  private observatoryElementVisuals = new Map<string, Phaser.GameObjects.Image>();
+  /** Every Level 09 collider, keyed by id, mirrored from observatorySolidRects(). */
+  private observatorySolids = new Map<string, { rect: ObsRect; body: Phaser.Physics.Arcade.StaticBody }>();
+  /** The authored crossing lane: the only walkable cut through the root bed. */
+  private readonly observatoryBridgeBounds = new Phaser.Geom.Rectangle(
+    OBSERVATORY_BRIDGE_LANE.x, OBSERVATORY_BRIDGE_LANE.y, OBSERVATORY_BRIDGE_LANE.width, OBSERVATORY_BRIDGE_LANE.height);
+  /** The root bed's crossing-lane body, removed once the bridge holds. */
+  private observatoryRootBody: Phaser.Physics.Arcade.StaticBody | null = null;
+  private observatoryShadowVisual?: Phaser.GameObjects.Image;
+  private observatoryMemoryOverlay?: Phaser.GameObjects.Rectangle;
+  private observatoryBridgeStones: Phaser.GameObjects.Image[] = [];
   private footprintTrail?: Phaser.GameObjects.Graphics;
   private memoryLayerLabels = new Map<string, Phaser.GameObjects.Text>();
   private memorySocketLabels = new Map<number, Phaser.GameObjects.Text>();
   private campaignBeamGraphics?: Phaser.GameObjects.Graphics;
-  private observatoryRootBody: Phaser.Physics.Arcade.StaticBody | null = null;
-  private observatoryBridgeBounds = new Phaser.Geom.Rectangle(330, 280, 132, 40);
   private observatoryBridgePendingRemoval = false;
   private observatoryBridgeTraversalSide: 'near' | 'far' | null = null;
+  private observatoryMiniatureIndex = 0;
+  /** Objective row that the current hint ladder belongs to. */
+  private observatoryHintKey = '';
   private hintIndex = 0;
   private selectedStone = -1;
   private heartEnd = false;
@@ -559,46 +605,19 @@ export class CampaignScene extends Phaser.Scene {
       this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
     }
     this.titleText.setText(`09  ${room.title} · ${CAMPAIGN_LEVELS[8].chapter}`);
+    // The actor's foot body must match the authored 36x42 frame, baseline 40.
+    this.player.setFootPlacement(OBSERVATORY_BODY.feetY, OBSERVATORY_BODY.bodyOffsetY,
+      OBSERVATORY_BODY.bodyOffsetX, OBSERVATORY_BODY.width, OBSERVATORY_BODY.height);
+    this.observatoryMiniatureIndex = 0;
     this.drawObservatoryBackground(roomId);
-    if (roomId === 'entrance') this.addObservatoryArt('learned-marks-miniature', 320, 150, 128, 64);
-    if (roomId === 'corridor') {
-      this.addObservatoryArt('star-chart', 320, 162, 124, 73);
-      this.addObservatoryArt('wheel-stopped-sun-among-stars', 500, 128, 72, 56);
-    }
+    this.drawObservatoryWalls(roomId);
+    this.drawObservatoryWallArt(roomId);
+    this.buildObservatoryStamps(roomId);
+    this.buildObservatoryElements(roomId);
     this.buildObservatoryRootBed(roomId);
-
-    for (const obstacle of room.obstacles) {
-      if (obstacle.dynamic) continue;
-      const texture = obstacle.kind === 'statue' ? 'guardian_statue' : obstacle.kind === 'pillar' ? 'ruin_pillar' : 'rock_blocker';
-      const image = this.add.image(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2, texture)
-        .setDisplaySize(obstacle.width, obstacle.height).setDepth(8 + Math.floor((obstacle.y + obstacle.height) / 10));
-      this.roomObjects.push(image);
-      const bodyObject = this.add.rectangle(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2, obstacle.width, obstacle.height, 0x000000, 0);
-      this.physics.add.existing(bodyObject, true);
-      const body = bodyObject.body as Phaser.Physics.Arcade.StaticBody;
-      body.setSize(obstacle.width, obstacle.height);
-      this.roomObjects.push(bodyObject);
-      this.roomColliders.push(this.physics.add.collider(this.player.sprite, bodyObject));
-    }
-
-    for (const item of room.interactables) {
-      if (item.textureKey && item.id !== 'statue') {
-        const image = this.add.image(item.position.x, item.position.y, item.textureKey).setScale(0.9).setDepth(8 + Math.floor(item.position.y / 10));
-        if (item.id !== 'balance-crystal' || this.progress.flags['l8-balance-crystal'] !== true) this.roomObjects.push(image);
-        else image.destroy();
-        if (item.id === 'g0' || item.id === 'g1' || item.id === 'g2' || item.id === 'sun-lock' || item.id === 'lantern-pedestal') this.observatoryPuzzleVisuals.set(item.id, image);
-      }
-      if (item.id === 'statue') {
-        const statue = this.add.image(item.position.x, item.position.y, 'guardian_statue').setScale(0.9).setDepth(8 + Math.floor(item.position.y / 10));
-        this.roomObjects.push(statue);
-        this.observatoryPuzzleVisuals.set('statue', statue);
-      }
-      if (roomId === 'corridor' && (item.id === 'door-a-control' || item.id === 'sun-door-control')) {
-        const control = this.add.image(item.position.x, item.position.y, 'receiver_off').setScale(0.62).setDepth(9 + Math.floor(item.position.y / 10));
-        this.roomObjects.push(control);
-      }
-      this.registerObservatoryInteractable(item);
-    }
+    this.buildObservatoryDoors(roomId);
+    this.buildObservatorySolids(roomId);
+    this.buildObservatoryBeams();
 
     for (const exit of room.exits) this.addObservatoryExit(exit);
     const safeSpawn = this.resolveObservatorySpawn(room, spawnId);
@@ -621,6 +640,174 @@ export class CampaignScene extends Phaser.Scene {
     this.refreshHud();
   }
 
+  /** Visible masonry for every permanent solid, so colliders always match art. */
+  private drawObservatoryWalls(roomId: ObservatoryRoomId): void {
+    const rects: ObsRect[] = [
+      ...OBSERVATORY_WALLS[roomId],
+      ...observatoryAlcoves(roomId).flatMap((alcove) => [...alcove.jambs, alcove.threshold]),
+    ];
+    const walls = this.add.graphics().setDepth(1);
+    for (const rect of rects) {
+      walls.fillStyle(0x232a34, 0.85);
+      walls.fillRect(rect.x, rect.y, rect.width, rect.height);
+      walls.fillStyle(0x39485a, 0.95);
+      walls.fillRect(rect.x, rect.y, rect.width, Math.min(8, rect.height));
+      walls.lineStyle(1, 0x0d1a22, 0.65);
+      walls.strokeRect(rect.x, rect.y, rect.width, rect.height);
+    }
+    this.roomObjects.push(walls);
+  }
+
+  private drawObservatoryWallArt(roomId: ObservatoryRoomId): void {
+    if (roomId === 'corridor') {
+      this.addObservatoryArt('star-chart', 320, 48, 136, 80);
+      this.addObservatoryArt('wheel-stopped-sun-among-stars', 524, 44, 113, 88);
+    }
+    if (roomId === 'observatory') {
+      this.addObservatoryArt('wheel-stopped-sun-among-stars', 272, 96, 144, 112);
+    }
+  }
+
+  private buildObservatoryStamps(roomId: ObservatoryRoomId): void {
+    for (const stamp of OBSERVATORY_STAMPS[roomId]) {
+      const graphic = this.add.graphics().setDepth(stamp.depth ?? 2).setAlpha(0.3);
+      graphic.fillStyle(stamp.id.startsWith('pipe') ? 0x7a6a49 : 0x8fa8b5, 1);
+      graphic.fillRoundedRect(stamp.x, stamp.y, stamp.width, stamp.height, 4);
+      this.roomObjects.push(graphic);
+    }
+  }
+
+  private buildObservatoryElements(roomId: ObservatoryRoomId): void {
+    for (const element of observatoryElements(roomId)) {
+      const rect = observatoryArtRect(element);
+      const texture = this.resolveObservatoryTexture(element);
+      if (!texture || !this.textures.exists(texture)) continue;
+      const image = this.add.image(element.anchor.x, element.anchor.y, texture)
+        .setOrigin(0.5, 1)
+        .setDisplaySize(rect.width, rect.height)
+        .setDepth(element.mount === 'ground' ? 3 : 10 + element.anchor.y / 10);
+      this.roomObjects.push(image);
+      this.observatoryElementVisuals.set(element.id, image);
+      if (['g0', 'g1', 'g2', 'sun-lock', 'lantern-pedestal', 'statue', 'splitter', 'lumo-seal', 'final-door'].includes(element.id)) {
+        this.observatoryPuzzleVisuals.set(element.id, image);
+      }
+    }
+    if (roomId === 'observatory') {
+      // The Shadow waits beside the final record; the translucent memory frame
+      // replaces the waiting pose once the record has been read.
+      const shadowKey = getShadowArtKey(this.progress.flags['l8-record-read'] === true ? 'memory-overlay' : 'waiting');
+      if (shadowKey && this.textures.exists(shadowKey)) {
+        const shadow = this.add.image(468, 250, shadowKey).setOrigin(0.5, 1).setDisplaySize(36, 48)
+          .setDepth(10 + 250 / 10).setAlpha(0.9);
+        this.roomObjects.push(shadow);
+        this.observatoryShadowVisual = shadow;
+      }
+      const overlay = this.add.rectangle(320, 180, 640, 360, 0xf0b463, 0.14).setDepth(94).setVisible(false);
+      this.roomObjects.push(overlay);
+      this.observatoryMemoryOverlay = overlay;
+    }
+  }
+
+  private resolveObservatoryTexture(element: ObsElement): string | null {
+    const art = element.art;
+    // The root bed is drawn procedurally by buildObservatoryRootBed() so its
+    // art and its dynamic solid always share the authored rectangle.
+    if (element.id === 'root-bed') return null;
+    if (art.kind === 'texture') {
+      if (element.rotatesWith === 'g0' || element.rotatesWith === 'g1' || element.rotatesWith === 'g2') {
+        const index = ((this.value(`l8-${element.rotatesWith}`) % 4) + 4) % 4;
+        return `mirror_${index}`;
+      }
+      if (element.id === 'sun-lock') return this.getObservatoryState().sunDoorUnlocked ? 'lock_sun_on' : 'lock_sun_off';
+      if (element.id === 'lantern-pedestal') return this.lantern.lanternPlaced ? 'pedestal_lit' : 'pedestal_empty';
+      if (element.id === 'balance-crystal') return 'crystal_balance';
+      return art.key;
+    }
+    if (art.kind === 'level') {
+      // Lumo's seal reads its own live state: covered while he holds it.
+      if (element.id === 'lumo-seal') return getLevelArtKey(art.level, this.getObservatoryState().lumoAtSeal ? 'lock-moon-lit' : art.file);
+      return getLevelArtKey(art.level, art.file);
+    }
+    // Set art: the statue follows its saved facing, the final door follows its
+    // latch, everything else keeps the first frame until its state flips.
+    let variant = 0;
+    if (element.rotatesWith === 'statue') variant = ((this.value('l8-statue') % 4) + 4) % 4;
+    else if (element.id === 'final-door') variant = this.getObservatoryWorldState().finalDoorLatched ? 1 : 0;
+    const file = art.files[Math.min(variant, art.files.length - 1)];
+    return getLevelArtKey(art.level, file);
+  }
+
+  private buildObservatoryDoors(roomId: ObservatoryRoomId): void {
+    // The arch is scenery: the passage itself is blocked by the alcove threshold
+    // inside observatorySolidRects(), which is what the restore/check model uses.
+    for (const alcove of observatoryAlcoves(roomId)) {
+      const archTexture = observatoryDoorOpen(alcove.doorId, this.getObservatoryWorldState()) ? 'woods_arch_open' : 'woods_arch_locked';
+      const fit = fitObservatoryArt(128, 126, Math.min(alcove.arch.width / 128, alcove.arch.height / 126));
+      const image = this.add.image(alcove.arch.x + alcove.arch.width / 2, alcove.arch.y + alcove.arch.height / 2, archTexture)
+        .setDisplaySize(fit.width, fit.height)
+        .setDepth(3);
+      this.roomObjects.push(image);
+      this.observatoryAlcoveVisuals.set(alcove.id, image);
+    }
+  }
+
+  private buildObservatorySolids(roomId: ObservatoryRoomId): void {
+    // Build every collider the room can ever need (all doors shut), then let
+    // syncObservatorySolids() enable exactly the ones the live state allows.
+    const state = this.closedObservatoryWorldState(this.getObservatoryWorldState());
+    const rects = observatorySolidRects(roomId, state, []);
+    rects.forEach((rect, index) => {
+      const object = this.add.rectangle(rect.x + rect.width / 2, rect.y + rect.height / 2, rect.width, rect.height, 0x000000, 0);
+      this.physics.add.existing(object, true);
+      const body = object.body as Phaser.Physics.Arcade.StaticBody;
+      this.roomObjects.push(object);
+      this.roomColliders.push(this.physics.add.collider(this.player.sprite, object));
+      this.observatorySolids.set(`${roomId}-solid-${index}`, { rect, body });
+    });
+    this.syncObservatorySolids();
+    this.roomObjects.push(this.add.text(320, 344, 'WASD / ←↑→↓ Di chuyển    E Tương tác    F Đèn    H Gợi ý    J Sổ tay    ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
+  }
+
+  /** Every door shut, for building the full collider set once. */
+  private closedObservatoryWorldState(state: ObsWorldState): ObsWorldState {
+    return {
+      ...state,
+      doorAUnlocked: false,
+      doorALatched: false,
+      sunDoorUnlocked: false,
+      sunDoorLatched: false,
+      finalDoorLatched: false,
+      returnLoopOpen: false,
+      bridgeEligible: false,
+    };
+  }
+
+  private buildObservatoryBeams(): void {
+    const beams = this.add.graphics().setDepth(7);
+    this.roomObjects.push(beams);
+    this.observatoryPuzzleVisuals.set('beams', beams);
+  }
+
+  /** Mirror every authored solid into the live Arcade bodies for the current state. */
+  private syncObservatorySolids(): void {
+    const roomId = this.activeObservatoryRoom;
+    if (!roomId) return;
+    const state = this.getObservatoryWorldState();
+    const body = this.player.sprite.body as Phaser.Physics.Arcade.Body | null;
+    const occupied = body ? [{ x: body.x, y: body.y, width: body.width, height: body.height }] : [];
+    const solids = observatorySolidRects(roomId, state, occupied);
+    for (const entry of this.observatorySolids.values()) {
+      const rect = entry.rect;
+      const active = solids.some((candidate) => Math.abs(candidate.x - rect.x) < 0.01
+        && Math.abs(candidate.y - rect.y) < 0.01
+        && candidate.width === rect.width && candidate.height === rect.height);
+      if (entry.body.enable !== active) {
+        entry.body.enable = active;
+        entry.body.updateFromGameObject();
+      }
+    }
+  }
+
   public clearActiveRoom(): void {
     for (const collider of this.roomColliders) collider.destroy();
     this.roomColliders = [];
@@ -628,6 +815,12 @@ export class CampaignScene extends Phaser.Scene {
     this.observatoryBridgePendingRemoval = false;
     this.observatoryBridgeTraversalSide = null;
     this.observatoryPuzzleVisuals.clear();
+    this.observatoryElementVisuals.clear();
+    this.observatoryAlcoveVisuals.clear();
+    this.observatorySolids.clear();
+    this.observatoryBridgeStones = [];
+    this.observatoryShadowVisual = undefined;
+    this.observatoryMemoryOverlay = undefined;
     for (const object of this.roomObjects) object.destroy();
     this.roomObjects = [];
     this.roomDoors.clear();
@@ -635,58 +828,90 @@ export class CampaignScene extends Phaser.Scene {
     this.interactions.clear();
   }
 
+  /**
+   * The root bed is a full-depth divider: its two solid masses are drawn exactly
+   * on top of their colliders, and the crossing lane cut between them is the only
+   * place the player may pass. The bed sorts so its southern mass occludes a
+   * player standing in the lane.
+   */
   private buildObservatoryRootBed(roomId: ObservatoryRoomId): void {
     if (roomId !== 'observatory') return;
-    const roots = this.add.graphics().setDepth(15);
-    roots.fillStyle(0x385044, 1);
-    roots.fillRoundedRect(this.observatoryBridgeBounds.x, this.observatoryBridgeBounds.y, this.observatoryBridgeBounds.width, this.observatoryBridgeBounds.height, 8);
-    roots.lineStyle(3, 0x83a65f, 0.9);
-    for (let x = this.observatoryBridgeBounds.x + 12; x < this.observatoryBridgeBounds.right; x += 24) {
-      roots.lineBetween(x, this.observatoryBridgeBounds.y + 4, x + 10, this.observatoryBridgeBounds.bottom - 4);
+    const laneTop = OBSERVATORY_BRIDGE_LANE.y;
+    const laneBottom = OBSERVATORY_BRIDGE_LANE.y + OBSERVATORY_BRIDGE_LANE.height;
+    const bedBottom = OBSERVATORY_ROOT_BED.y + OBSERVATORY_ROOT_BED.height;
+    const masses: ObsRect[] = [
+      { ...OBSERVATORY_ROOT_BED, height: laneTop - OBSERVATORY_ROOT_BED.y },
+      { ...OBSERVATORY_ROOT_BED, y: laneBottom, height: bedBottom - laneBottom },
+    ];
+    const visual = this.add.graphics();
+    for (const mass of masses) {
+      visual.fillStyle(0x385044, 1);
+      visual.fillRoundedRect(mass.x, mass.y, mass.width, mass.height, 6);
+      visual.lineStyle(2, 0x83a65f, 0.85);
+      for (let y = mass.y + 10; y < mass.y + mass.height; y += 18) {
+        visual.lineBetween(mass.x + 3, y, mass.x + mass.width - 3, y + 7);
+      }
     }
-    this.roomObjects.push(roots);
-    this.observatoryPuzzleVisuals.set('root-bed', roots);
+    visual.setDepth(10 + bedBottom / 10);
+    this.roomObjects.push(visual);
+    this.observatoryPuzzleVisuals.set('root-bed', visual);
 
-    const rootBodyObject = this.add.rectangle(
-      this.observatoryBridgeBounds.centerX,
-      this.observatoryBridgeBounds.centerY,
-      this.observatoryBridgeBounds.width,
-      this.observatoryBridgeBounds.height,
-      0x000000,
-      0,
-    );
-    this.physics.add.existing(rootBodyObject, true);
-    this.observatoryRootBody = rootBodyObject.body as Phaser.Physics.Arcade.StaticBody;
-    this.roomObjects.push(rootBodyObject);
-    this.roomColliders.push(this.physics.add.collider(this.player.sprite, rootBodyObject));
+    // The lane itself carries the collider that disappears once the bridge holds.
+    const laneObject = this.add.rectangle(
+      OBSERVATORY_BRIDGE_LANE.x + OBSERVATORY_BRIDGE_LANE.width / 2,
+      OBSERVATORY_BRIDGE_LANE.y + OBSERVATORY_BRIDGE_LANE.height / 2,
+      OBSERVATORY_BRIDGE_LANE.width, OBSERVATORY_BRIDGE_LANE.height, 0x000000, 0);
+    this.physics.add.existing(laneObject, true);
+    this.observatoryRootBody = laneObject.body as Phaser.Physics.Arcade.StaticBody;
+    this.roomObjects.push(laneObject);
+    this.roomColliders.push(this.physics.add.collider(this.player.sprite, laneObject));
 
-    const bridge = this.add.image(this.observatoryBridgeBounds.centerX, this.observatoryBridgeBounds.centerY, 'stepping_stone')
-      .setDisplaySize(this.observatoryBridgeBounds.width, this.observatoryBridgeBounds.height)
-      .setDepth(16)
-      .setVisible(false);
-    this.roomObjects.push(bridge);
-    this.observatoryPuzzleVisuals.set('root-bridge', bridge);
+    // The deployed bridge deck: floor decor under the feet, never a standing prop.
+    const deck = this.add.graphics().setDepth(6).setVisible(false);
+    deck.fillStyle(0x6b7f5c, 0.95);
+    deck.fillRoundedRect(OBSERVATORY_BRIDGE_LANE.x - 4, OBSERVATORY_BRIDGE_LANE.y, OBSERVATORY_BRIDGE_LANE.width + 8, OBSERVATORY_BRIDGE_LANE.height, 5);
+    this.roomObjects.push(deck);
+    this.observatoryPuzzleVisuals.set('root-bridge', deck);
+    // Native-size stones (34x24) laid along the lane: the sprite is never stretched.
+    for (let index = 0; index < 2; index += 1) {
+      const stone = this.add.image(
+        OBSERVATORY_BRIDGE_LANE.x + OBSERVATORY_BRIDGE_LANE.width / 2,
+        OBSERVATORY_BRIDGE_LANE.y + 12 + index * 24,
+        'stepping_stone',
+      ).setDepth(6.1).setVisible(false);
+      this.roomObjects.push(stone);
+      this.observatoryBridgeStones.push(stone);
+    }
   }
 
   private registerObservatoryInteractable(item: (typeof OBSERVATORY_ROOMS)[ObservatoryRoomId]['interactables'][number]): void {
     const { id, interactionPoint } = item;
+    const element = observatoryElement(id);
     const visual = this.roomObjects.find((object): object is Phaser.GameObjects.Image =>
       object instanceof Phaser.GameObjects.Image && object.visible
       && Math.abs(object.x - item.position.x) < 0.1 && Math.abs(object.y - item.position.y) < 0.1,
     );
     const getPromptBounds = (): { x: number; y: number; width: number; height: number } | null => {
-      if (id === 'root-bed') {
-        const bounds = this.observatoryBridgeBounds;
-        return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
-      }
-      if (id === 'root-bridge') {
-        const bridge = this.observatoryPuzzleVisuals.get('root-bridge');
-        return bridge instanceof Phaser.GameObjects.Image && bridge.visible ? bridge.getBounds() : null;
-      }
+      if (id === 'root-bed') return { ...OBSERVATORY_ROOT_BED };
       return visual?.getBounds() ?? null;
     };
-    const register = (onInteract: () => void, getPrompt: () => string, isEnabled?: () => boolean): void => {
-      this.interactions.register({ id: `observatory-${id}`, x: interactionPoint.x, y: interactionPoint.y, radius: 34, getPromptBounds, getPrompt, isEnabled, onInteract });
+    /**
+     * RULE_GAMES.md 1: the prompt exists only from the authored approach side, at
+     * the object's south edge (or its documented side). Radius and approach both
+     * come from observatoryLayout, the same rectangles the checks verify.
+     */
+    const register = (onInteract: () => void): void => {
+      const radius = element && element.radius > 0 ? element.radius : 24;
+      this.interactions.register({
+        id: `observatory-${id}`,
+        x: interactionPoint.x,
+        y: interactionPoint.y,
+        radius,
+        getPromptBounds,
+        getPrompt: () => observatoryPrompt(id, this.getObservatoryWorldState()),
+        isEnabled: () => (element ? isObservatoryApproachAllowed(element, { x: this.player.x, y: this.player.y }) : true),
+        onInteract,
+      });
     };
 
     if (id === 'g0' || id === 'g1' || id === 'g2') {
@@ -694,18 +919,41 @@ export class CampaignScene extends Phaser.Scene {
       const counter = `l8-${mirror}`;
       register(
         () => { this.progress.counters[counter] = (this.value(counter) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
-        () => `E · Rotate ${mirror.toUpperCase()} (${this.value(counter)} · 0 east, 1 south, 2 west, 3 north)`,
       );
     } else if (id === 'statue') {
       const counter = 'l8-statue';
       register(
         () => { this.progress.counters[counter] = (this.value(counter) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
-        () => `E · Turn statue (${this.value(counter)})`,
       );
     } else if (id === 'splitter') {
       register(
-        () => this.say([{ speaker: 'Nhinh', text: 'Bộ chia cố định gửi một nhánh tới khóa Mặt Trời, nhánh kia qua bóng pho tượng.' }]),
-        () => 'E · Inspect fixed splitter',
+        () => this.say([{ speaker: 'Nhinh', text: 'Bộ chia cố định gửi một nhánh lên khóa Nhật, nhánh giữa đi qua vị trí tượng tới luống rễ.' }]),
+      );
+    } else if (id === 'learned-marks') {
+      // The safe practice model recalls marks the player already met: it teaches
+      // nothing new and never touches a puzzle flag beyond "viewed".
+      const captions: DialogueLine[][] = [
+        [{ speaker: 'Nhinh', text: 'Dấu gương: một tia vào, nhiều hướng ra tuỳ nấc xoay.' }],
+        [{ speaker: 'Nhinh', text: 'Dấu chốt: chốt giữ được cửa, nhưng cảm biến và ấn thì không tự giữ.' }],
+        [{ speaker: 'Lumo', text: 'Dấu ấn: chỉ khi tôi thật sự đứng ở đó thì đường sáng mới đi tiếp.' }],
+        [{ speaker: 'Nhinh', text: 'Dấu tượng: mặt rộng của tượng che được nhánh giữa, phía sau nó là một khoảng tối.' }],
+        [{ speaker: 'Nhinh', text: 'Dấu rễ: rễ chỉ nối lại khi có bóng, có ấn và khóa còn sáng.' }],
+      ];
+      register(
+        () => {
+          const lines = captions[this.observatoryMiniatureIndex % captions.length];
+          this.observatoryMiniatureIndex = (this.observatoryMiniatureIndex + 1) % captions.length;
+          if (this.progress.flags['l8-miniature-viewed'] !== true && this.observatoryMiniatureIndex === 0) {
+            this.progress.flags['l8-miniature-viewed'] = true;
+            this.save();
+            this.say([...lines,
+              { speaker: 'Nhinh', text: 'Một đường vào, một người giữ ấn, một khoảng tối để rễ nối lại.' },
+              { speaker: 'Lumo', text: 'Và chiếc đèn phải đi qua cùng những chiếc gương. Mình không thể giải mỗi phòng rồi quên phòng trước.' },
+              { speaker: 'Nhinh', text: 'Vậy mình đi từng bước và giữ lại từng chốt.' }]);
+            return;
+          }
+          this.say(lines);
+        },
       );
     } else if (id === 'lantern-pedestal') {
       register(
@@ -713,9 +961,11 @@ export class CampaignScene extends Phaser.Scene {
           if (this.lantern.lanternPlaced) {
             this.lantern.retrieveLantern();
             this.progress.flags['l8-lantern-placed'] = false;
+            this.progress.flags['l8-lantern-retrieved'] = true;
           } else if (this.lantern.lanternInHand) {
             this.lantern.placeLanternAt(item.position.x, item.position.y);
             this.progress.flags['l8-lantern-placed'] = true;
+            this.progress.flags['l8-lantern-retrieved'] = false;
           }
           this.progress.lanternOn = this.lantern.lanternOn;
           this.progress.counters['l8-lantern-x'] = this.lantern.placedX;
@@ -723,119 +973,162 @@ export class CampaignScene extends Phaser.Scene {
           this.save();
           this.refreshObservatoryPuzzle();
         },
-        () => this.lantern.lanternPlaced ? 'E · Retrieve lantern' : this.lantern.lanternInHand ? 'E · Place lantern on pedestal' : 'Lantern unavailable',
-        () => this.lantern.lanternPlaced || this.lantern.lanternInHand,
       );
-      this.interactions.register({
-        id: 'observatory-lumo-call-point', x: interactionPoint.x + 48, y: interactionPoint.y, radius: 30,
-        getPrompt: () => this.getObservatoryState().lumoAtSeal ? 'E · Recall Lumo to the lantern' : 'E · Call Lumo to the seal',
-        onInteract: () => this.callObservatoryLumo(this.getObservatoryState().lumoAtSeal ? 'recall' : 'seal'),
-      });
     } else if (id === 'lumo-tube' || id === 'lumo-seal') {
       register(
         () => {
-          if (id === 'lumo-tube' && this.getObservatoryState().lumoAtSeal) this.callObservatoryLumo('recall');
-          else if (this.getObservatoryState().lumoAtSeal) this.say([{ speaker: 'Lumo', text: 'Tôi đang giữ ấn. Gọi tôi về bệ đèn khi cần.' }]);
-          else this.callObservatoryLumo('seal');
+          if (this.getObservatoryState().lumoAtSeal) {
+            if (id === 'lumo-tube') this.callObservatoryLumo('recall');
+            else this.say([{ speaker: 'Lumo', text: 'Tôi đang giữ ấn. Đứng ở đầu ống hoặc gài xong cửa cuối rồi gọi tôi về nhé.' }]);
+          } else this.callObservatoryLumo('seal');
         },
-        () => id === 'lumo-tube' && this.getObservatoryState().lumoAtSeal ? 'E · Recall Lumo through the tube' : this.getObservatoryState().lumoAtSeal ? 'Lumo holds the seal' : 'E · Call Lumo through the tube',
       );
     } else if (id === 'door-a-control') {
       register(
-        () => { this.progress.flags['l8-door-a-latched'] = true; this.save(); this.refreshObservatoryDoors(); },
-        () => this.progress.flags['l8-door-a-latched'] ? 'Door A is latched open' : 'E · Latch Door A from this side',
-        () => this.activeObservatoryRoom === 'corridor' && !this.progress.flags['l8-door-a-latched'],
+        () => {
+          const state = this.getObservatoryWorldState();
+          if (observatoryDoorOpen('door-a', state)) {
+            this.progress.flags['l8-door-a-latched'] = true;
+            this.save();
+            this.refreshObservatoryDoors();
+            this.say([{ speaker: 'Nhinh', text: 'Chốt đã gài. Cửa A giữ mở dù tia sáng đi hướng khác.' }]);
+            return;
+          }
+          this.say([{ speaker: 'Nhinh', text: `Chốt chưa gài được. ${observatoryDoorBlockReason('door-a', state)}` }]);
+        },
       );
     } else if (id === 'sun-door-control') {
       register(
-        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().sunDoorUnlocked ? 'Cánh cửa đã nhận ánh sáng.' : 'Cánh cửa vẫn đòi hỏi một đường sáng hoàn chỉnh.' }]),
-        () => this.getObservatoryState().sunDoorUnlocked ? 'Sun Door is open' : 'Sun Door is sealed',
+        () => {
+          const state = this.getObservatoryWorldState();
+          this.say([{ speaker: 'Nhinh', text: observatoryDoorOpen('sun-door', state)
+            ? 'Cửa Mặt Trời đã nhận ánh sáng và đang mở.'
+            : `Cửa Mặt Trời còn khép. ${observatoryDoorBlockReason('sun-door', state)}` }]);
+        },
       );
     } else if (id === 'sun-lock') {
       register(
-        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().sunDoorUnlocked ? 'Khóa Mặt Trời đang được chiếu sáng.' : 'Khóa cần tia sáng đi tới đây.' }]),
-        () => this.getObservatoryState().sunDoorUnlocked ? 'Sun lock lit' : 'E · Inspect Sun lock',
-      );
-    } else if (id === 'root-bridge') {
-      register(
-        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().bridgeEligible ? 'Bóng rễ đã kết thành cầu.' : 'Cầu chỉ thành hình khi khóa Mặt Trời sáng, rễ nằm trong bóng và Lumo giữ ấn.' }]),
-        () => this.getObservatoryState().bridgeEligible ? 'Root bridge is stable' : 'E · Inspect root bridge',
+        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().sunDoorUnlocked
+          ? 'Khóa Nhật đang sáng.'
+          : 'Khóa Nhật cần một đường tia đi tới đây.' }]),
       );
     } else if (id === 'root-bed') {
       register(
-        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().rootBedShadowed ? 'Pho tượng đã che bóng lên rễ.' : 'Rễ vẫn đang cản lối.' }]),
-        () => this.getObservatoryState().rootBedShadowed ? 'Roots are in shadow' : 'E · Inspect root bed',
+        () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().rootBedShadowed
+          ? 'Bóng của tượng đã phủ kín luống rễ.'
+          : `Luống rễ vẫn còn sáng. ${observatoryBridgeBlockReason(this.getObservatoryWorldState())}` }]),
       );
     } else if (id === 'final-door-control') {
       register(
         () => {
+          const state = this.getObservatoryWorldState();
           if (!this.progress.flags['l8-final-door-latched']) {
+            if (!state.bridgeCrossed) {
+              this.say([{ speaker: 'Nhinh', text: observatoryFinalDoorBlockReason(state) }]);
+              return;
+            }
             this.progress.flags['l8-final-door-latched'] = true;
             this.save();
-            this.say([{ speaker: 'Nhinh', text: 'Chốt đá đã gài. Lối vòng có thể được mở từ bên này.' }]);
+            this.refreshObservatoryDoors();
+            this.say([{ speaker: 'Nhinh', text: 'Chốt đá đã gài. Lối đá vòng có thể mở ngay từ bệ này.' }]);
             return;
           }
           if (this.isObservatoryCompletionReady()) {
-            this.nextLevel([{ speaker: 'Nhinh', text: 'Bản ghi đã được giữ, Lumo trở về và Tinh thể Cân Bằng đã sáng. Mình hãy đưa nó về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Lần này mình đi cùng nhau.' }]);
+            this.nextLevel([
+              { speaker: 'Nhinh', text: 'Bản ghi đã được giữ, Lumo đã trở về và Tinh thể Cân Bằng đang sáng trong tay mình.' },
+              { speaker: 'Lumo', text: 'Lần này mình đi cùng nhau.' },
+            ]);
           } else {
-            this.say([{ speaker: 'Nhinh', text: 'Lối vòng vẫn mở. Mình cần thu hồi đèn, gọi Lumo về, đọc bản ghi và nhận Tinh thể Cân Bằng trước khi rời đài.' }]);
+            this.say([{ speaker: 'Nhinh', text: observatoryFinalDoorBlockReason(state) }]);
           }
         },
-        () => this.progress.flags['l8-final-door-latched'] ? (this.isObservatoryCompletionReady() ? 'E · Trở về Cây Mẹ' : 'E · Kiểm tra hành trình trở về') : 'E · Gài chốt cửa cuối',
-        () => this.progress.flags['l8-bridge-crossed'] === true,
       );
     } else if (id === 'stone-return-loop') {
-      this.interactions.register({
-        id: 'observatory-stone-return-loop-control', x: 500, y: 286, radius: 30,
-        getPrompt: () => this.progress.flags['l8-return-loop-open'] ? 'The stone return loop is open' : 'E · Open the stone return loop',
-        isEnabled: () => this.progress.flags['l8-final-door-latched'] === true,
-        onInteract: () => {
-          if (!this.progress.flags['l8-return-loop-open']) {
-            this.progress.flags['l8-return-loop-open'] = true;
-            this.save();
-            this.refreshObservatoryDoors();
-            this.say([{ speaker: 'Nhinh', text: 'Lối đá đã khớp vào vòng. Đường về bệ đèn vẫn thông ngay cả khi ánh sáng tắt.' }]);
+      register(
+        () => {
+          const state = this.getObservatoryWorldState();
+          if (!observatoryDoorOpen('return-loop', state)) {
+            this.say([{ speaker: 'Nhinh', text: `Lối đá vòng chưa mở được. ${observatoryDoorBlockReason('return-loop', state)}` }]);
+            return;
           }
+          this.say([{ speaker: 'Nhinh', text: 'Lối đá vòng đang mở. Đường về bệ đèn thông suốt.' }]);
         },
-      });
+      );
     } else if (id === 'final-record') {
       register(
         () => {
-          if (this.progress.flags['l8-record-read']) {
-            this.say([{ speaker: 'Nhinh', text: 'Bản ghi đã được chép vào sổ. The Shadow chỉ là ký ức mắc lại trong đêm cuối.' }]);
+          if (this.progress.flags['l8-record-read'] === true) {
+            this.say([{ speaker: 'Nhinh', text: 'Bản ghi đã được chép vào sổ. The Shadow là phần ký ức còn mắc lại trong đêm cuối.' }]);
             return;
           }
+          const state = this.getObservatoryWorldState();
           const missing: string[] = [];
-          if (!this.lantern.lanternInHand || this.lantern.lanternPlaced) missing.push('thu hồi đèn về tay');
-          if (this.progress.flags['l8-lumo-recalled'] !== true || this.progress.flags['l8-lumo-arrived'] !== 'lantern-source') missing.push('chờ Lumo về tới nguồn đèn');
+          if (this.lantern.lanternPlaced || !this.lantern.lanternInHand) missing.push('thu hồi đèn về tay');
+          if (!state.lumoRecalled || state.lumoAtSeal) missing.push('gọi Lumo về bên đèn');
+          if (!state.returnLoopOpen) missing.push('mở lối đá vòng');
           if (missing.length) {
-            this.say([{ speaker: 'Nhinh', text: `Bản ghi chưa mở. Còn cần: ${missing.join(' và ')}.` }, { speaker: 'Lumo', text: 'Tôi sẽ báo khi đã về tới đèn.' }]);
+            this.say([{ speaker: 'Nhinh', text: `Bản ghi chưa mở. Còn cần: ${missing.join(' và ')}.` },
+              { speaker: 'Lumo', text: 'Tôi sẽ ở cạnh cậu khi mọi thứ đã sẵn sàng.' }]);
             return;
           }
           this.progress.flags['l8-record-read'] = true;
           this.save();
-          this.say([
-            { speaker: 'Nhinh', text: 'E · Bản ghi cuối. Người Bảo Vệ đã nhờ Lumo giữ mạch phía Bắc thêm một đêm, nhưng nỗi sợ đã giữ cả khu rừng trong bóng tối.' },
-            { speaker: 'Lumo', text: 'Tôi tưởng mình đang giúp ông ấy đưa mọi người về. Tôi đã quên rằng khu rừng cũng cần được nghỉ.' },
-            { speaker: 'The Shadow', text: 'Ta là phần ký ức còn mắc lại trong đêm ấy. Ta muốn dẫn một người về nhà, rồi giữ mọi người ở lại cùng nỗi chờ của mình.' },
-          ]);
+          this.playObservatoryMemory();
         },
-        () => this.progress.flags['l8-record-read'] ? 'E · Đọc lại bản ghi cuối' : 'E · Đọc bản ghi với The Shadow',
-        () => this.progress.flags['l8-return-loop-open'] === true,
       );
     } else if (id === 'balance-crystal') {
       register(
         () => {
+          const state = this.getObservatoryWorldState();
+          if (state.crystalTaken) {
+            this.say([{ speaker: 'Nhinh', text: 'Tinh thể Cân Bằng đã nằm trong tay mình.' }]);
+            return;
+          }
+          if (!state.recordRead) {
+            this.say([{ speaker: 'The Shadow', text: 'Khoan đã. Nghe bản ghi của ta trước rồi hãy nhận vòng ngày đêm.' }]);
+            return;
+          }
           this.progress.flags['l8-balance-crystal'] = true;
           this.save();
-          const image = this.roomObjects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && object.texture.key === 'crystal_balance');
-          image?.destroy();
-          this.say([{ speaker: 'The Shadow', text: 'Đưa vòng ngày đêm đi tiếp. Khi tới lúc buông tay, đừng để nỗi sợ giữ tay con lại.' }, { speaker: 'Lumo', text: 'Tinh thể Cân Bằng. Bây giờ mình có thể trở về Cây Mẹ.' }]);
+          this.observatoryElementVisuals.get('balance-crystal')?.destroy();
+          this.observatoryElementVisuals.delete('balance-crystal');
+          // The Shadow stays beside the record until dawn (scenario §6).
+          this.observatoryShadowVisual?.setAlpha(0.95);
+          this.say([
+            { speaker: 'The Shadow', text: 'Hãy đưa vòng ngày đêm đi tiếp. Khi tới lúc buông tay, đừng để nỗi sợ giữ tay con lại.' },
+            { speaker: 'Lumo', text: 'Ông có đi cùng chúng tôi không?' },
+            { speaker: 'The Shadow', text: 'Ta sẽ ở lại tới khi đêm này kết thúc.' },
+          ]);
         },
-        () => 'E · Nhận Tinh thể Cân Bằng',
-        () => this.progress.flags['l8-record-read'] === true && this.progress.flags['l8-balance-crystal'] !== true,
       );
     }
+  }
+
+  /**
+   * The last record: the room stays visible under a translucent amber memory
+   * layer while the Guardian's exchange plays (scenario §5), and The Shadow
+   * takes the Guardian's place beside the pedestal afterwards.
+   */
+  private playObservatoryMemory(): void {
+    this.observatoryMemoryOverlay?.setVisible(true);
+    const shadowKey = getShadowArtKey('memory-overlay');
+    if (shadowKey && this.textures.exists(shadowKey) && this.observatoryShadowVisual) {
+      this.observatoryShadowVisual.setTexture(shadowKey);
+    }
+    this.say([
+      { speaker: 'Ký Ức', text: 'Bão đã tan. Họ bảo tôi để bánh xe ngày đêm chạy lại.' },
+      { speaker: 'Ký Ức', text: 'Nhưng nếu đèn tắt đúng lúc con tìm được đường thì sao?' },
+      { speaker: 'Ký Ức', text: 'Lumo, bay qua đường ống. Giữ mạch phía Bắc cho tôi. Chỉ thêm một đêm nữa.' },
+      { speaker: 'Ký Ức', text: 'Tôi giữ được. Ông cứ chờ ở cửa sổ.' },
+      { speaker: 'Lumo', text: 'Tôi đã giữ ấn. Tôi tưởng mình đang giúp ông ấy đưa mọi người về.' },
+      { speaker: 'Nhinh', text: 'Cậu nhớ lại rồi.' },
+      { speaker: 'Lumo', text: 'Khi Cây Mẹ vỡ, mọi thứ trong đầu tôi cũng vỡ theo. Nhưng tôi vẫn nhớ rằng phải giữ đèn sáng.' },
+      { speaker: 'Nhinh', text: 'Ông là Người Bảo Vệ.' },
+      { speaker: 'The Shadow', text: 'Ta là phần ký ức còn mắc lại trong đêm ấy. Ta đã đợi lâu đến mức quên cả việc cho khu rừng nghỉ.' },
+      { speaker: 'The Shadow', text: 'Ta muốn dẫn một người về nhà. Rồi giữ cả khu rừng ở lại cùng nỗi chờ của mình.' },
+      { speaker: 'Nhinh', text: 'Con gái ông đã trở về chưa?' },
+      { speaker: 'The Shadow', text: 'Phần ký ức này không có câu trả lời đó.' },
+    ], () => this.observatoryMemoryOverlay?.setVisible(false));
   }
 
   public callObservatoryLumo(destination: 'seal' | 'recall'): void {
@@ -881,12 +1174,9 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level !== 8 || !this.activeObservatoryRoom) return;
     const exit = OBSERVATORY_ROOMS[this.activeObservatoryRoom].exits.find((item) => item.id === exitId);
     if (!exit) return;
-    const state = this.getObservatoryState();
-    const unlocked = exit.doorId === 'door-a' ? state.doorAUnlocked
-      : exit.doorId === 'sun-door' ? state.sunDoorUnlocked
-      : this.progress.flags['l8-return-loop-open'] === true;
-    if (!unlocked) {
-      this.say([{ speaker: 'Nhinh', text: exit.doorId === 'door-a' ? 'Door A đang khóa từ phía này.' : exit.doorId === 'sun-door' ? 'Cánh cửa Mặt Trời vẫn đang khép.' : 'Lối đá vẫn chưa hiện ra.' }]);
+    const state = this.getObservatoryWorldState();
+    if (!observatoryDoorOpen(exit.doorId, state)) {
+      this.say([{ speaker: 'Nhinh', text: observatoryDoorBlockReason(exit.doorId, state) }]);
       return;
     }
     const destination = OBSERVATORY_ROOMS[exit.toRoom].spawns.find((spawn) => spawn.id === exit.destinationSpawnId);
@@ -912,36 +1202,28 @@ export class CampaignScene extends Phaser.Scene {
     return [entry.position.x, entry.position.y];
   }
 
+  /**
+   * Restore safety is delegated to the pure predicate the checks verify: the
+   * result is never inside a solid, never on the retractable root bridge and
+   * never outside the room. A save taken on the bridge is moved to the near-bank
+   * stone (documented restore case 1/2).
+   */
   private resolveSafeObservatoryCheckpoint(roomId: ObservatoryRoomId, x: number, y: number): { x: number; y: number } | null {
     const room = OBSERVATORY_ROOMS[roomId];
     if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
-    const exactSpawn = room.spawns.find((spawn) => Math.hypot(spawn.position.x - x, spawn.position.y - y) < 2);
-    if (exactSpawn) return { ...exactSpawn.position };
-
-    const playerBody = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-    const playerBounds = new Phaser.Geom.Rectangle(
-      x + playerBody.x - this.player.x,
-      y + playerBody.y - this.player.y,
-      playerBody.width,
-      playerBody.height,
-    );
-
-    const nearestSpawn = (): { x: number; y: number } => {
-      const spawn = [...room.spawns].sort((a, b) => Math.hypot(a.position.x - x, a.position.y - y) - Math.hypot(b.position.x - x, b.position.y - y))[0];
-      return { ...spawn.position };
-    };
-    if (x < 0 || x > room.width || y < 0 || y > room.height) return nearestSpawn();
-    if (roomId === 'observatory' && Phaser.Geom.Rectangle.Overlaps(this.observatoryBridgeBounds, playerBounds)) {
-      const bankId = playerBounds.centerX < this.observatoryBridgeBounds.centerX ? 'observatory-near-bridge' : 'observatory-far-bank';
-      const bank = room.spawns.find((candidate) => candidate.id === bankId)!;
-      return { ...bank.position };
+    if (x < 0 || x > room.width || y < 0 || y > room.height) {
+      return { ...nearestSafeObservatorySpawn(roomId, undefined, this.getObservatoryWorldState(), room.spawns) };
     }
-    if (room.exits.some((exit) => Math.hypot(exit.interactionPoint.x - x, exit.interactionPoint.y - y) < 38)) return nearestSpawn();
-    const intersectsObstacle = room.obstacles.some((obstacle) => !obstacle.dynamic && Phaser.Geom.Rectangle.Overlaps(
-      playerBounds,
-      new Phaser.Geom.Rectangle(obstacle.x, obstacle.y, obstacle.width, obstacle.height),
-    ));
-    return intersectsObstacle ? nearestSpawn() : { x, y };
+    const point = { x, y };
+    const body = observatoryBody(point);
+    if (roomId === 'observatory' && rectsOverlap(body, OBSERVATORY_BRIDGE_LANE)) {
+      const bank = room.spawns.find((spawn) => spawn.id === 'observatory-near-bridge');
+      if (bank) {
+        const safe = nearestSafeObservatorySpawn(roomId, bank.position, this.getObservatoryWorldState(), room.spawns);
+        return safe;
+      }
+    }
+    return { ...nearestSafeObservatorySpawn(roomId, point, this.getObservatoryWorldState(), room.spawns) };
   }
 
   private drawObservatoryBackground(roomId: ObservatoryRoomId): void {
@@ -959,16 +1241,13 @@ export class CampaignScene extends Phaser.Scene {
       }
     }
     if (this.progress.flags['l8-return-loop-open'] === true) {
+      // The opened loop is painted as a continuous stone strip on every room.
       this.roomObjects.push(this.add.tileSprite(44, 286, room.width - 88, 38, 'ground_stone').setOrigin(0).setTint(0x9bd8dd).setAlpha(0.55).setDepth(0.8));
     }
     const decor = this.add.graphics().setDepth(1);
     decor.fillStyle(0x07151c, hasCustomBg ? 0.08 : 0.16);
     decor.fillRect(0, 0, room.width, room.height);
     this.roomObjects.push(decor);
-    const beams = this.add.graphics().setDepth(7);
-    this.roomObjects.push(beams);
-    this.observatoryPuzzleVisuals.set('beams', beams);
-    this.roomObjects.push(this.add.text(320, 344, 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    H Hint    ESC Pause', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
   }
 
   private addObservatoryArt(filename: string, x: number, y: number, width: number, height: number): void {
@@ -977,40 +1256,109 @@ export class CampaignScene extends Phaser.Scene {
     this.roomObjects.push(this.add.image(x, y, key).setDisplaySize(width, height).setDepth(5));
   }
 
+  /**
+   * A door gets two controls: the deep transit trigger inside the alcove (only
+   * reachable once the sill is walkable) and a room-facing inspect control at the
+   * alcove mouth that always names the missing prerequisite in plain Vietnamese.
+   * Collision comes from observatorySolidRects(), never from this method.
+   */
   private addObservatoryExit(exit: ObservatoryExit): void {
-    const horizontalEdge = exit.interactionPoint.x < 50 || exit.interactionPoint.x > 590;
-    const bottomEdge = !horizontalEdge && exit.interactionPoint.y > 310;
-    const x = horizontalEdge ? (exit.interactionPoint.x < 50 ? 14 : 626) : exit.interactionPoint.x;
-    const y = horizontalEdge ? exit.interactionPoint.y : bottomEdge ? 342 : exit.interactionPoint.y;
-    const image = this.add.image(x, y, exit.doorId === 'sun-door' ? 'lock_sun_off' : (this.isObservatoryExitOpen(exit) ? 'woods_arch_open' : 'woods_arch_locked')).setDisplaySize(horizontalEdge || !bottomEdge ? 22 : 54, horizontalEdge || !bottomEdge ? 58 : 22).setDepth(12);
-    this.roomObjects.push(image);
-    const doorBodyObject = this.add.rectangle(x, y, horizontalEdge || !bottomEdge ? 16 : 48, horizontalEdge || !bottomEdge ? 54 : 16, 0x000000, 0);
-    this.physics.add.existing(doorBodyObject, true);
-    const body = doorBodyObject.body as Phaser.Physics.Arcade.StaticBody;
-    this.roomObjects.push(doorBodyObject);
-    this.roomColliders.push(this.physics.add.collider(this.player.sprite, doorBodyObject));
-    this.roomDoors.set(exit.id, { image, body, exit });
+    const alcove = OBSERVATORY_ALCOVES.find((candidate) => candidate.roomId === exit.fromRoom && candidate.doorId === exit.doorId);
+    const archBounds = alcove ? this.observatoryAlcoveVisuals.get(alcove.id)?.getBounds() ?? null : null;
+    const title = OBSERVATORY_ROOMS[exit.toRoom].title;
     this.interactions.register({
-      id: `observatory-exit-${exit.id}`, x: exit.interactionPoint.x, y: exit.interactionPoint.y, radius: 38,
-      getPromptBounds: () => image.getBounds(),
-      getPrompt: () => this.isObservatoryExitOpen(exit) ? `E · Enter ${OBSERVATORY_ROOMS[exit.toRoom].title}` : 'E · Door is locked',
+      id: `observatory-exit-${exit.id}`,
+      x: exit.interactionPoint.x,
+      y: exit.interactionPoint.y,
+      radius: alcove ? alcove.triggerRadius : 28,
+      getPromptBounds: () => archBounds,
+      getPrompt: () => this.isObservatoryExitOpen(exit)
+        ? `E · Đi sang ${title}`
+        : `E · ${alcove?.label ?? 'Cửa'} đang khóa — ${observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState())}`,
+      isEnabled: () => (alcove ? isObservatoryGateApproachAllowed(alcove, { x: this.player.x, y: this.player.y }) : true),
       onInteract: () => this.transitionObservatory(exit.id),
+    });
+    if (!alcove) return;
+    this.interactions.register({
+      id: `observatory-inspect-${alcove.id}`,
+      x: alcove.inspect.x,
+      y: alcove.inspect.y,
+      radius: alcove.inspectRadius,
+      getPromptBounds: () => archBounds,
+      getPrompt: () => (this.isObservatoryExitOpen(exit)
+        ? `E · ${alcove.label} đang mở`
+        : `E · Kiểm tra ${alcove.label} — ${observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState())}`),
+      onInteract: () => this.say([{ speaker: 'Nhinh', text: this.isObservatoryExitOpen(exit)
+        ? `${alcove.label} đã mở. Nhấn E để đi sang ${title}.`
+        : `${alcove.label} còn đóng. ${observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState())}` }]),
     });
   }
 
   private isObservatoryExitOpen(exit: ObservatoryExit): boolean {
-    const state = this.getObservatoryState();
-    return exit.doorId === 'door-a' ? state.doorAUnlocked : exit.doorId === 'sun-door' ? state.sunDoorUnlocked : this.progress.flags['l8-return-loop-open'] === true;
+    return observatoryDoorOpen(exit.doorId, this.getObservatoryWorldState());
   }
 
   private refreshObservatoryDoors(): void {
-    for (const [id, door] of this.roomDoors) {
+    const state = this.getObservatoryWorldState();
+    // The beam latches the Sun Door open the first time it lights it: the player
+    // can never be stranded inside the observatory with the lantern off.
+    if (state.sunDoorUnlocked && this.progress.flags['l8-sun-door-latched'] !== true) {
+      this.progress.flags['l8-sun-door-latched'] = true;
+      this.save();
+    }
+    for (const alcove of OBSERVATORY_ALCOVES) {
+      const image = this.observatoryAlcoveVisuals.get(alcove.id);
+      if (!image) continue;
+      const open = observatoryDoorOpen(alcove.doorId, state);
+      image.setTexture(open ? 'woods_arch_open' : 'woods_arch_locked');
+      image.setAlpha(open ? 0.5 : 1);
+    }
+    for (const door of this.roomDoors.values()) {
       const open = this.isObservatoryExitOpen(door.exit);
       door.body.enable = !open;
       door.image.setTexture(open ? (door.exit.doorId === 'sun-door' ? 'lock_sun_on' : 'woods_arch_open') : (door.exit.doorId === 'sun-door' ? 'lock_sun_off' : 'woods_arch_locked'));
       door.image.setAlpha(open ? 0.45 : 1);
-      if (open) door.body.reset(door.body.x, door.body.y);
     }
+    this.syncObservatorySolids();
+  }
+
+  /**
+   * The single world-state object consumed by observatoryLayout: live gates from
+   * the pure derivation, durable latches from saved flags. Nothing derived is
+   * ever written back to the save.
+   */
+  private getObservatoryWorldState(): ObsWorldState {
+    const puzzle = this.getObservatoryState();
+    const flags = this.progress.flags;
+    const sunDoorWasOpen = flags['l8-sun-door-latched'] === true
+      || flags['l8-bridge-crossed'] === true
+      || flags['l8-final-door-latched'] === true
+      || flags['l8-return-loop-open'] === true;
+    return {
+      doorAUnlocked: puzzle.doorAUnlocked,
+      sunDoorUnlocked: puzzle.sunDoorUnlocked,
+      rootBedShadowed: puzzle.rootBedShadowed,
+      bridgeEligible: puzzle.bridgeEligible,
+      lumoAtSeal: puzzle.lumoAtSeal,
+      activeBeamRoute: puzzle.activeBeamPath.routeId,
+      doorALatched: flags['l8-door-a-latched'] === true,
+      // A door that has accepted the beam once stays usable, so turning the
+      // lantern off can never strand Nhinh behind it.
+      sunDoorLatched: sunDoorWasOpen,
+      finalDoorLatched: flags['l8-final-door-latched'] === true,
+      returnLoopOpen: flags['l8-return-loop-open'] === true,
+      bridgeCrossed: flags['l8-bridge-crossed'] === true,
+      lanternPlaced: this.lantern.lanternPlaced,
+      lanternOn: this.lantern.lanternOn,
+      lanternRetrieved: flags['l8-lantern-retrieved'] === true
+        || (flags['l8-lantern-placed'] !== true && this.lantern.lanternInHand),
+      lumoRecalled: flags['l8-lumo-recalled'] === true || flags['l8-lumo-arrived'] === 'lantern-source',
+      recordRead: flags['l8-record-read'] === true,
+      crystalTaken: flags['l8-balance-crystal'] === true,
+      miniatureViewed: flags['l8-miniature-viewed'] === true,
+      mirrors: { g0: this.value('l8-g0'), g1: this.value('l8-g1'), g2: this.value('l8-g2') },
+      statue: this.value('l8-statue'),
+    };
   }
 
   private getObservatoryState() {
@@ -1086,7 +1434,15 @@ export class CampaignScene extends Phaser.Scene {
       const destination = this.progress.flags['l8-lumo-destination'];
       const destinationWaypoint = destination === 'lumo-seal' ? OBSERVATORY_ROOMS.corridor.waypoints.find((point) => point.id === 'lumo-seal')?.position
         : destination === 'lantern-source' ? OBSERVATORY_ROOMS.entrance.waypoints.find((point) => point.id === 'lantern-source')?.position : undefined;
-      if (destinationWaypoint && destinationWaypoint.roomId === lumoRoom) {
+      const unassigned = !destinationWaypoint || this.progress.flags['l8-lumo-arrived'] === 'lantern-source';
+      if (unassigned) {
+        // Unassigned Lumo follows Nhinh inside the active room, like Levels 01-08.
+        this.lumoTarget = {
+          x: Phaser.Math.Clamp(this.player.x - 20, 28, 610),
+          y: Phaser.Math.Clamp(this.player.y - 22, 58, 300),
+        };
+        this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y, true);
+      } else if (destinationWaypoint.roomId === lumoRoom) {
         this.lumoTarget = { x: destinationWaypoint.x - 18, y: destinationWaypoint.y + 12 };
         this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y, true);
       }
@@ -1115,19 +1471,32 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private isObservatoryCompletionReady(): boolean {
-    return this.progress.flags['l8-return-loop-open'] === true
-      && this.lantern.lanternInHand && !this.lantern.lanternPlaced
-      && this.progress.flags['l8-lumo-recalled'] === true
-      && this.progress.flags['l8-lumo-arrived'] === 'lantern-source'
-      && this.progress.flags['l8-record-read'] === true
-      && this.progress.flags['l8-balance-crystal'] === true;
+    return observatoryCompletionReady(this.getObservatoryWorldState());
   }
 
   private showObservatoryJournal(): void {
-    const text = this.progress.flags['l8-record-read'] === true
-      ? 'Bản ghi cuối: Người Bảo Vệ đã giữ ngày đêm đứng yên vì sợ mất người thân. Lumo đã giữ mạch sáng theo lời ông. The Shadow là ký ức còn mắc lại trong đêm ấy.'
-      : 'Sổ tay chưa ghi bản cuối. Hãy mở lối vòng rồi đọc bản ghi cạnh The Shadow.';
-    this.say([{ speaker: 'Nhinh', text: `Sổ tay của mình.\n${text}` }]);
+    const state = this.getObservatoryWorldState();
+    const room = this.activeObservatoryRoom ? OBSERVATORY_ROOMS[this.activeObservatoryRoom].title : 'tiền sảnh';
+    const facts: string[] = [`Nơi đang đứng: ${room}.`, 'Một nguồn sáng ở tiền sảnh chạy qua cả ba phòng nhờ các gương.'];
+    if (state.miniatureViewed) facts.push('Mô hình ở tiền sảnh: gương đổi hướng tia, chốt giữ cửa, ấn cần Lumo đứng thật, tượng che được nhánh giữa, rễ cần bóng.');
+    facts.push(state.lumoAtSeal ? 'Lumo đang giữ ấn ở hành lang phòng sao.' : 'Ấn chỉ hoạt động khi Lumo thật sự đứng ở đó.');
+    if (state.doorALatched) facts.push('Cửa A đã gài chốt từ bên trong nên giữ mở dù G0 đổi hướng.');
+    facts.push(state.rootBedShadowed
+      ? 'Luống rễ đang nằm trong bóng của mặt tượng rộng.'
+      : 'Luống rễ vẫn cần một khoảng tối để nối lại.');
+    if (state.bridgeEligible) facts.push('Khóa Nhật sáng, rễ trong bóng và Lumo giữ ấn: cầu rễ đã mọc.');
+    if (state.bridgeCrossed) facts.push('Đã qua cầu sang bờ bên kia phòng thiên văn.');
+    if (state.finalDoorLatched) facts.push('Chốt cửa cuối đã gài.');
+    if (state.returnLoopOpen) facts.push('Lối đá vòng đang mở: đường bộ về bệ đèn và mốc gọi Lumo vẫn thông khi mạng sáng tắt.');
+    if (state.lanternPlaced) facts.push('Đèn còn trên bệ đá ở tiền sảnh.');
+    if (state.recordRead) {
+      facts.push('Bản ghi cuối: Người Bảo Vệ đã giữ ngày đêm đứng yên vì sợ mất người thân. Lumo đã giữ mạch phía Bắc theo lời ông, và khi Cây Mẹ vỡ thì ký ức của cậu cũng vỡ theo.');
+      facts.push('The Shadow là phần ký ức còn mắc lại trong đêm ấy; ông ở lại bên cửa sổ tới khi đêm này kết thúc.');
+    } else {
+      facts.push('Bản ghi cuối ở phòng thiên văn chưa được đọc: cần mở lối vòng, thu hồi đèn và gọi Lumo về trước.');
+    }
+    if (state.crystalTaken) facts.push('Tinh thể Cân Bằng đã nằm trong tay Nhinh.');
+    this.say([{ speaker: 'Nhinh', text: `Sổ tay của mình.\n· ${facts.join('\n· ')}` }]);
   }
 
   private restoreObservatoryLanternPlacement(): void {
@@ -1143,34 +1512,62 @@ export class CampaignScene extends Phaser.Scene {
   private refreshObservatoryPuzzle(): void {
     if (!this.activeObservatoryRoom) return;
     const state = this.getObservatoryState();
+    const world = this.getObservatoryWorldState();
     for (const id of ['g0', 'g1', 'g2']) {
       const mirror = this.observatoryPuzzleVisuals.get(id);
       if (mirror instanceof Phaser.GameObjects.Image) mirror.setTexture(`mirror_${((this.value(`l8-${id}`) % 4) + 4) % 4}`);
     }
     const statue = this.observatoryPuzzleVisuals.get('statue');
-    if (statue instanceof Phaser.GameObjects.Image) statue.setAngle(((this.value('l8-statue') % 4) + 4) % 4 * 90);
+    if (statue instanceof Phaser.GameObjects.Image) {
+      // The four authored frames are the facing; the sprite is never rotated.
+      const facing = ((this.value('l8-statue') % 4) + 4) % 4;
+      const statueElement = observatoryElement('statue');
+      if (statueElement && statueElement.art.kind === 'level-set') {
+        const texture = getLevelArtKey(statueElement.art.level, statueElement.art.files[facing]);
+        if (texture && this.textures.exists(texture)) statue.setTexture(texture);
+        else statue.setAngle(facing * 90);
+      }
+    }
     const lock = this.observatoryPuzzleVisuals.get('sun-lock');
     if (lock instanceof Phaser.GameObjects.Image) lock.setTexture(state.sunDoorUnlocked ? 'lock_sun_on' : 'lock_sun_off');
     const pedestal = this.observatoryPuzzleVisuals.get('lantern-pedestal');
     if (pedestal instanceof Phaser.GameObjects.Image) pedestal.setTexture(this.lantern.lanternPlaced ? 'pedestal_lit' : 'pedestal_empty');
+    const seal = this.observatoryPuzzleVisuals.get('lumo-seal');
+    if (seal instanceof Phaser.GameObjects.Image) {
+      const sealTexture = getLevelArtKey(7, state.lumoAtSeal ? 'lock-moon-lit' : 'lock-moon-covered');
+      if (sealTexture && this.textures.exists(sealTexture)) seal.setTexture(sealTexture);
+    }
+    const finalDoor = this.observatoryPuzzleVisuals.get('final-door');
+    if (finalDoor instanceof Phaser.GameObjects.Image) {
+      const doorTexture = getLevelArtKey(7, world.finalDoorLatched ? 'sanctuary-door-open' : 'sanctuary-door-closed');
+      if (doorTexture && this.textures.exists(doorTexture)) finalDoor.setTexture(doorTexture);
+    }
+    const splitter = this.observatoryPuzzleVisuals.get('splitter');
+    if (splitter instanceof Phaser.GameObjects.Image) {
+      const splitterTexture = getLevelArtKey(7, state.activeBeamPath.routeId === 'g2-split' ? 'fixed-three-route-splitter-on' : 'fixed-three-route-splitter-off');
+      if (splitterTexture && this.textures.exists(splitterTexture)) splitter.setTexture(splitterTexture);
+    }
 
     const roots = this.observatoryPuzzleVisuals.get('root-bed');
-    if (roots instanceof Phaser.GameObjects.Graphics) roots.setAlpha(state.rootBedShadowed ? 0.48 : 1);
+    if (roots instanceof Phaser.GameObjects.Graphics) roots.setAlpha(state.rootBedShadowed ? 0.5 : 1);
     const bridge = this.observatoryPuzzleVisuals.get('root-bridge');
-    if (bridge instanceof Phaser.GameObjects.Image) {
+    if (bridge instanceof Phaser.GameObjects.Graphics) {
       const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
       const playerBounds = new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height);
       const playerOnBridge = Phaser.Geom.Rectangle.Overlaps(this.observatoryBridgeBounds, playerBounds);
       if (!state.bridgeEligible && bridge.visible && playerOnBridge) this.observatoryBridgePendingRemoval = true;
       if (state.bridgeEligible) this.observatoryBridgePendingRemoval = false;
-      bridge.setVisible(state.bridgeEligible || this.observatoryBridgePendingRemoval);
+      const deployed = state.bridgeEligible || this.observatoryBridgePendingRemoval;
+      bridge.setVisible(deployed);
+      for (const stone of this.observatoryBridgeStones) stone.setVisible(deployed);
       if (this.observatoryRootBody) {
-        this.observatoryRootBody.enable = !state.bridgeEligible && !this.observatoryBridgePendingRemoval;
+        this.observatoryRootBody.enable = !deployed;
         this.observatoryRootBody.updateFromGameObject();
       }
       if (this.observatoryBridgePendingRemoval && !playerOnBridge) {
         this.observatoryBridgePendingRemoval = false;
         bridge.setVisible(false);
+        for (const stone of this.observatoryBridgeStones) stone.setVisible(false);
         if (this.observatoryRootBody) this.observatoryRootBody.enable = true;
       }
     }
@@ -2375,6 +2772,18 @@ export class CampaignScene extends Phaser.Scene {
   private showHint(): void {
     if (this.progress.level === 2) { this.libraryLevel?.showHint(); return; }
     if (this.progress.level === 4) { this.pathForTwoLevel?.showHint(); return; }
+    if (this.progress.level === 8 && this.activeObservatoryRoom) {
+      const guidance = observatoryGuidance(this.activeObservatoryRoom, this.getObservatoryWorldState());
+      if (this.observatoryHintKey !== guidance.objective) {
+        this.observatoryHintKey = guidance.objective;
+        this.hintIndex = 0;
+      }
+      const index = Math.min(this.hintIndex, guidance.hints.length - 1);
+      const message = guidance.hints[index];
+      this.hintIndex = Math.min(this.hintIndex + 1, guidance.hints.length - 1);
+      this.say([{ speaker: 'Hệ thống', text: message }]);
+      return;
+    }
     if (this.progress.level === 0) {
       const step = this.getForestEdgeStep();
       if (this.forestEdgeHintStep !== step) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
@@ -2427,6 +2836,16 @@ export class CampaignScene extends Phaser.Scene {
     if (objectiveTextChanged) return;
     if (this.progress.level === 3) { this.shatteredCreek?.refreshHud(); return; }
     if (this.progress.level === 5) { this.sleeplessTower?.refreshHud(); return; }
+    if (this.progress.level === 8 && this.activeObservatoryRoom) {
+      const roomId = this.activeObservatoryRoom;
+      const guidance = observatoryGuidance(roomId, this.getObservatoryWorldState());
+      this.titleText?.setText(`09  ${OBSERVATORY_ROOMS[roomId].title}   ·   ${CAMPAIGN_LEVELS[8].chapter}`);
+      this.objectiveText?.setText(guidance.objective);
+      this.statusText?.setText(guidance.status);
+      this.lumoStatusText?.setText(guidance.lumo);
+      this.hintText?.setText('H · Gợi ý');
+      return;
+    }
     const level = CAMPAIGN_LEVELS[this.progress.level];
     if (this.progress.level === 4 && this.pathForTwoLevel) {
       if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về');

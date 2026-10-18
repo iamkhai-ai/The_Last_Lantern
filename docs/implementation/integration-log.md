@@ -206,3 +206,63 @@ store a centre whose foot body sits inside a solid.
 - Index 8 and index 9 still run their pre-rebuild implementations until the Level 09 and Level 10
   merges land. This is transitional.
 - Level 08 records `NOT_RUN` for browser and human playthrough.
+
+## Merge 4 — `codex/level-09-spatial-rebuild` (Level 09, campaign index 8)
+
+- Branch merged: `codex/level-09-spatial-rebuild`, tip `4f02ce7`.
+- This branch repaired a genuinely broken Level 09: before its review pass the level did not compile
+  (`error TS2339`, a leftover `0x12friendly` literal and undeclared fields), crashed on its first
+  frame in `refreshObservatoryDoors()`, had a `door-a-control` that was never registered, and shipped
+  English interaction prompts with a flat 34px radius that ignored `RULE_GAMES.md` §1. All of that is
+  fixed on the branch and covered by `scripts/check-observatory.mjs`.
+- `src/data/observatoryRooms.ts` and `src/systems/ObservatoryPuzzle.ts` auto-merged. Only two shared
+  files conflicted.
+
+### Conflicts and resolutions
+
+**`src/art/CampaignArt.ts`** — one hunk.
+
+- The branch registered its Level 09 sprites one by one and also named every Level 05 sprite, the two
+  Level 06 sprites, the five Level 07 sprites and a set of Level 08 mechanism frames (Sun lock, Moon
+  lock, fixed splitter, sanctuary door, statue notches).
+- Resolution: one glob per level for 05, 06, 07, 08 and 09
+  (`'../../assets/levels/09-dark-moon-observatory/sprites/*.png'` added). The Level 08 glob already
+  covers every Level 08 mechanism frame that Level 09 reuses verbatim, so no per-file entry is
+  needed. The four Level 09 entries that the branch also listed individually outside the conflict
+  (`observatory-clean-base`, `learned-marks-miniature`, `star-chart`,
+  `wheel-stopped-sun-among-stars`) were removed as redundant, because the glob resolves to exactly
+  the same seven files.
+- Note: the branch still registers `observatory-base.png`. It is deliberately never used as a room
+  background — the observatory always renders `observatory-clean-base.png` — and the check script
+  enforces that.
+
+**`src/scenes/CampaignScene.ts`** — two hunks.
+
+1. Playtest gate: the branch added `if (this.progress.level >= 9) { ComingSoonScene }`. Resolution:
+   dropped, because the gate had already been removed; index 9 stays reachable and is replaced by
+   the real Level 10 in the next merge.
+2. `refreshHud()`: kept both the Level 06 delegate (`this.sleeplessTower?.refreshHud()`) and the
+   Level 09 branch that writes the room title, objective, status and Lumo row from
+   `observatoryGuidance(roomId, this.getObservatoryWorldState())`.
+
+The branch's other additions auto-merged: the two shared Shadow sprites
+(`shared/characters/the-shadow/sprites/waiting.png` and `memory-overlay.png`) are registered, and the
+observatory runtime now consumes the pure layout module.
+
+### Verification on the merged revision
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `npm run build` | PASS | `tsc --noEmit` clean, Vite build 593 modules. |
+| All ten `scripts/check-*.mjs` | PASS | Adds `check-observatory.mjs`: 3 rooms, 19 elements, 6 alcoves, 8 stages, collision-aware flood fill per stage, four-direction solid blocking, every collider mapped to a registered existing PNG, every authored control registered and vice versa, 9 authored flow steps, v1 observatory validations intact. |
+| Conflict-marker scan | PASS | No `<<<<<<<` or `>>>>>>>` left in either shared file. |
+| Browser playthrough | NOT_RUN | No browser automation available in this environment. |
+
+### Known limits after this merge
+
+- Index 9 still runs its pre-rebuild implementation until the Level 10 merge lands.
+- Level 09 records `NOT_RUN` for browser playthrough and human playthrough. Its report also notes a
+  cosmetic issue: the observatory's return-loop alcove trigger sits at y≈300–334, so the player's
+  feet fall behind the status band. No sprite overlaps the HUD, but it is not pretty.
+- Level 09 records one new flag, `l8-sun-door-latched`, alongside the existing `l8-*` set. No v1 save
+  validation was weakened or removed.

@@ -48,10 +48,7 @@ const levelArtModules = import.meta.glob([
   '../../assets/levels/06-the-sleepless-tower/sprites/*.png',
   '../../assets/levels/07-the-sleeping-garden/sprites/*.png',
   '../../assets/levels/08-ruins-of-two-halves/sprites/*.png',
-  '../../assets/levels/09-dark-moon-observatory/sprites/observatory-clean-base.png',
-  '../../assets/levels/09-dark-moon-observatory/sprites/learned-marks-miniature.png',
-  '../../assets/levels/09-dark-moon-observatory/sprites/star-chart.png',
-  '../../assets/levels/09-dark-moon-observatory/sprites/wheel-stopped-sun-among-stars.png',
+  '../../assets/levels/09-dark-moon-observatory/sprites/*.png',
   '../../assets/levels/10-the-heart-of-elaria/sprites/sanctuary-base.png',
   '../../assets/levels/10-the-heart-of-elaria/sprites/memory-alcove-empty.png',
   '../../assets/levels/10-the-heart-of-elaria/sprites/memory-alcove-inserted.png',
@@ -107,6 +104,21 @@ const sharedMechanismModules = import.meta.glob([
   '../../assets/levels/shared/garden-mechanisms/*.png',
 ], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 
+/**
+ * The Shadow's shared character frames (Level 08 waiting pose, Level 09 memory
+ * overlay). Explicit keys keep the observatory able to place him beside the
+ * final record without depending on a filename-derived key.
+ */
+const shadowCharacterModules = import.meta.glob([
+  '../../assets/levels/shared/characters/the-shadow/sprites/waiting.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png',
+], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+
+const SHADOW_ART_KEYS: Record<string, string> = {
+  'waiting.png': 'shadow_waiting',
+  'memory-overlay.png': 'shadow_memory_overlay',
+};
+
 function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 }
@@ -140,7 +152,16 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
     key: `shared_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
     url,
   })),
+  ...Object.entries(shadowCharacterModules)
+    .filter(([path]) => Boolean(SHADOW_ART_KEYS[path.slice(path.lastIndexOf('/') + 1)]))
+    .map(([path, url]) => ({ key: SHADOW_ART_KEYS[path.slice(path.lastIndexOf('/') + 1)], url })),
 ];
+
+/** The Shadow's Level 09 frames, or null when the pack is absent. */
+export function getShadowArtKey(frame: 'waiting' | 'memory-overlay'): string | null {
+  const key = SHADOW_ART_KEYS[`${frame}.png`];
+  return CAMPAIGN_ART_FILES.some((asset) => asset.key === key) ? key : null;
+}
 
 export function getSharedMechanismKey(filename: string): string | null {
   const key = `shared_${normalize(filename.replace(/\.png$/i, ''))}`;
@@ -164,7 +185,13 @@ export function getLevelBackgroundKey(levelIndex: number, roomId?: string): stri
     9: 'sanctuary-base',
   };
   if (levelIndex === 8) {
+    // Every observatory room paints its own base: the lobby, the star-map
+    // corridor and the observatory. The observatory always uses the CLEAN base
+    // (observatory-clean-base); the hand-off base with the baked caption strip
+    // is never loaded into the runtime.
     if (roomId === 'observatory') return getLevelArtKey(8, 'observatory-clean-base');
+    if (roomId === 'entrance') return getLevelArtKey(8, 'lobby-base');
+    if (roomId === 'corridor') return getLevelArtKey(8, 'star-chart-base');
     return null;
   }
   return backgrounds[levelIndex] ? getLevelArtKey(levelIndex, backgrounds[levelIndex]) : null;
