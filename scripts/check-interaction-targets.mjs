@@ -25,7 +25,8 @@ import ts from 'typescript';
 
 import { layoutInteractionPrompt } from '../src/systems/interactionPromptLayout.ts';
 import {
-  choosePathCallAction, isPathPositionSafe, PATH_DOOR_FACES, PATH_ROOMS,
+  choosePathCallAction, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe,
+  isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_ROOMS,
 } from '../src/data/pathForTwoLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
 import {
@@ -122,6 +123,8 @@ function compile(file, methodName, owner, params, symbols) {
 const runUpdate = compile(INTERACTION_SOURCE, 'update', 'InteractionSystem',
   ['playerX', 'playerY', 'canInteract', 'playerBounds', 'protectedBounds'], { layoutInteractionPrompt });
 const runTryInteract = compile(INTERACTION_SOURCE, 'tryInteract', 'InteractionSystem', ['now'], {});
+/** The room-change path: `drawRoom()` calls this before a room registers its own controls. */
+const runClear = compile(INTERACTION_SOURCE, 'clear', 'InteractionSystem', [], {});
 
 /**
  * The shipped Level 10 prompt predicate (`getPrompt: () => this.promptFor(element)`), extracted the
@@ -185,6 +188,7 @@ function makeSystem(interactables) {
   system.update = (playerX, playerY, canInteract = true) =>
     runUpdate.call(system, playerX, playerY, canInteract, undefined, []);
   system.tryInteract = (now) => runTryInteract.call(system, now);
+  system.clear = () => runClear.call(system);
   return system;
 }
 
@@ -208,6 +212,13 @@ function selectWith(system, x, y) {
  * 3. Real Level 05 and Level 09 registrations, run against a recorder
  * ------------------------------------------------------------------ */
 
+/**
+ * The ink room's real controls, produced by the shipped `registerRoomInteractions()`. The fixture
+ * shares `PROBE` as the scene's `player`, so every face predicate the shipped `getPrompt`,
+ * `isEnabled`, `ownsPosition` and `onInteract` consult sees one moving player, exactly as at
+ * runtime. Each helper the shipped bodies call is the shipped body too (`compile` above), with the
+ * layout symbols it closes over.
+ */
 function makePathForTwoInkRoom(flags) {
   const registered = [];
   const scene = {
@@ -215,20 +226,32 @@ function makePathForTwoInkRoom(flags) {
     interactions: { register: (config) => registered.push(config) },
     doorImages: new Map(),
     imageFor: () => undefined,
+    player: PROBE,
     progress: { flags: { ...flags }, counters: {} },
     assignment: 'follow',
     lumoRoom: 'ink',
+    interactReleasePending: false,
+    interactKey: { isDown: false },
     hasPower: () => false,
     interact: () => {},
     useDoor: () => {},
     registered,
   };
+  scene.isInteractKeyDown = compile(PATH_SOURCE, 'isInteractKeyDown', 'PathForTwoLevel', [], {});
+  scene.heldInteract = compile(PATH_SOURCE, 'heldInteract', 'PathForTwoLevel', [], { isPathInteractHeld });
+  scene.elementFor = compile(PATH_SOURCE, 'elementFor', 'PathForTwoLevel', ['id'], { PATH_ROOMS });
+  scene.elementApproach = compile(PATH_SOURCE, 'elementApproach', 'PathForTwoLevel', ['id', 'x', 'y'],
+    { PATH_ROOMS, isPathApproachAllowed });
+  scene.doorApproach = compile(PATH_SOURCE, 'doorApproach', 'PathForTwoLevel', ['id', 'x', 'y'], { isPathDoorApproachAllowed });
+  scene.doorPrompt = compile(PATH_SOURCE, 'doorPrompt', 'PathForTwoLevel', ['id'], {});
+  scene.doorEnabled = compile(PATH_SOURCE, 'doorEnabled', 'PathForTwoLevel', ['id'], {});
   scene.prompt = compile(PATH_SOURCE, 'prompt', 'PathForTwoLevel', ['id'],
     { PLATE_ROOMS: localConstant(PATH_SOURCE, 'PLATE_ROOMS'), choosePathCallAction });
   scene.interactionEnabled = compile(PATH_SOURCE, 'interactionEnabled', 'PathForTwoLevel', ['id'], {});
   scene.callMark = compile(PATH_SOURCE, 'callMark', 'PathForTwoLevel', ['id'], {});
   scene.callEligible = compile(PATH_SOURCE, 'callEligible', 'PathForTwoLevel', ['mark'], {});
-  compile(PATH_SOURCE, 'registerRoomInteractions', 'PathForTwoLevel', [], { PATH_ROOMS }).call(scene);
+  compile(PATH_SOURCE, 'registerRoomInteractions', 'PathForTwoLevel', [],
+    { PATH_ROOMS, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, isPathSeal, isPathApproachAllowed }).call(scene);
   assert.ok(registered.length >= 6, `the ink room still registers its controls (got ${registered.length})`);
   return scene;
 }
@@ -507,6 +530,16 @@ const CASES = [
       system.lastPlayerPosition = { x: 400, y: 200 };
       assert.equal(system.tryInteract(4000), false, 'a press after walking out of range is refused');
       assert.equal(hits.value, 1, 'only the one valid press ever ran the action');
+
+      // A room change clears the registry, which is what drops the target a held E could have fired.
+      selectWith(system, 205, 200);
+      assert.equal(system.activeTarget?.id, 'cell', 'a target is held before the room change');
+      system.clear();
+      assert.equal(system.activeTarget, null, 'the room change clears the active target');
+      assert.equal(system.interactables.length, 0, 'and the previous room\'s controls');
+      assert.equal(system.promptContainer.visible, false, 'and hides the prompt, so nothing contradicts E');
+      assert.equal(system.tryInteract(5000), false, 'a press with no target runs nothing');
+      assert.equal(hits.value, 1, 'and still no action fired');
     },
   },
   {

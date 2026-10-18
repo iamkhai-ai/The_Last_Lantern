@@ -35,6 +35,8 @@ Tại buồng đầu, E ở mốc gọi gửi Lumo qua một ống nhìn thấy 
 
 Không dùng bộ đếm thời gian. Lumo ở lại ấn cho tới khi được gọi sang mốc khác. Đèn trên mốc cho biết cậu đang đi hay đã tới nơi.
 
+> **Quyết định D1 — khu thử là tùy chọn.** Mốc A gọi được ngay, không cần hoàn thành khu thử; chỉ một lần gọi Lumo về thật từ ấn thử mới ghi `l4-practice-complete`, và không có cờ hoàn thành giả nào được ghi khi người chơi bỏ qua. Mục tiêu/HUD ở buồng đầu chỉ nhắc mốc thử cho tới khi A đã được bắt đầu. Khi người chơi chọn chơi khu thử thì vẫn đủ bốn nhịp gửi → bay → tới → gọi về, và cửa thử không bao giờ đóng trên chân người chơi đang đứng trong hốc (toàn bộ hốc được tính là đang chiếm ngưỡng).
+
 ## 4. Câu đố chính — giữ cửa, đổi vai
 
 1. Dùng mốc A đưa Lumo tới ấn A sau cửa đầu.
@@ -45,6 +47,8 @@ Không dùng bộ đếm thời gian. Lumo ở lại ấn cho tới khi được
 6. Theo các vạch tới buồng cuối và gài chốt cửa ra. Gọi Lumo trở lại để cùng lên tháp.
 
 Đèn lồng quá sáng làm chìm nét mực trên nền; ánh Lumo đủ dịu để giữ chúng nhìn thấy được. Ánh Lumo chỉ kích hoạt ấn dành riêng cho cậu, không thay đèn trong các cảm biến hoặc câu đố thực vật.
+
+Mục tiêu trên HUD ở bước 6 phải nêu đúng tay điều khiển cần dùng ("Nhấn E ở tay gọi C…") và trạng thái thật của Lumo ("đang về" khi còn bay, "đã về tới nơi" khi đã tới cạnh Nhinh), không chỉ nói chung chung là gọi cậu ấy về.
 
 *Sau khi gài chốt A:*
 
@@ -75,6 +79,8 @@ Bật đèn giữa đường chỉ làm vạch mờ, không gây rơi hoặc đ�
 **Lumo:** “Nếu đứng yên, tôi sợ sẽ quên mất.”\
 **Nhinh:** “Vậy mình ghi lại. Cậu không cần giữ tất cả một mình.”\
 **Lumo:** “Ghi cả vết xoắn này nhé.”
+
+> **Quyết định D2 — cảnh ký ức giữ tại chốt cửa ra (latch C).** Bảy dòng trên phát khi người chơi gài chốt cửa ra, không dời sang nhịp Lumo bay về chỉ để khớp một mô tả cũ. `l4-memo` chỉ được ghi khi hết bảy dòng, nên không mất mốc hội thoại khi thoại khác chen vào. Vết xoắn khắc trên mặt tường phía đông cho phép đọc lại cảnh này về sau, và mục tiêu ở hành lang chỉ vào vết xoắn khi ký ức còn chưa đọc. Trước khi có mực, tay gài chốt cửa ra vẫn trả lời được bằng E và từ chối kèm bước còn thiếu theo đúng thứ tự (chốt B → tắt đèn và đi theo vạch mực → Lumo tới ấn C), để cơ cấu khóa vẫn cho đọc phản hồi hữu ích.
 
 ## 6. Gợi ý H và lời thoại bổ sung
 

@@ -7,7 +7,7 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
-import { choosePathCallAction, getPathBackArrival, getPathDoorFace, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, PATH_BODY, PATH_ROOMS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
+import { choosePathCallAction, buildPathSchematic, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathElementArtRect, getPathExitBlock, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, pathRouteCableSegments, pathRouteCorners, PATH_BODY, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_TUBE_MOUTHS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathElement, type PathMark, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
 
 export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
@@ -37,7 +37,10 @@ export class PathForTwoLevel {
   private doorPostImages=new Map<string,Phaser.GameObjects.Image[]>();
   private doorBodies = new Map<string,Phaser.Physics.Arcade.StaticBody>(); private protected: Phaser.GameObjects.GameObject[]=[];
   private route: PathRoutePoint[]=[]; private routeIndex=0; private assignment='follow'; private lumoRoom:PathRoomId='entry';
-  private pendingClose=new Set<string>(); private roomTitle?:Phaser.GameObjects.Text; private roomObjective?:Phaser.GameObjects.Text; private routeGraphics?:Phaser.GameObjects.Graphics;
+  private roomTitle?:Phaser.GameObjects.Text; private roomObjective?:Phaser.GameObjects.Text; private routeGraphics?:Phaser.GameObjects.Graphics;
+  private inkTrail?:Phaser.GameObjects.TileSprite;
+  /** Held-E guard: armed by a room change, cleared by the E key coming back up (see update()). */
+  private interactReleasePending=false; private interactKey?:Phaser.Input.Keyboard.Key;
   private hintIndex=0; private hintStage=''; private destroyed=false; private lastLantern=false;
   private pendingStoryBeats:Array<{lines:DialogueLine[];onComplete?:()=>void}>=[];
   private lastCheckpoint=0; private roomStatus?:Phaser.GameObjects.Text; private roomControls?:Phaser.GameObjects.Text; private beckoningQueued=false; private litObservationQueued=false;
@@ -45,6 +48,7 @@ export class PathForTwoLevel {
   private get lanternOn(){return this.lantern.lanternOn;}
   public build():void{
     this.normalizeProgress();
+    this.interactKey=this.scene.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.room=this.getSavedRoom();
     this.assignment=this.getAssignment();
     const savedRoute=this.readRoute();
@@ -91,7 +95,8 @@ export class PathForTwoLevel {
   public startOpeningDialogue():void{this.say(INTRO);}
   public destroy():void{if(this.destroyed)return;this.destroyed=true;this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.interactions.clear();this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();}
   public update(dt:number):void{
-    if(this.destroyed)return; this.advanceLumo(dt); this.updateDoors(); this.updateInkProgress(); this.updateReunion();
+    if(this.destroyed)return; this.releaseInteractGuard();
+    this.advanceLumo(dt); this.updateDoors(); this.updateInkProgress(); this.updateReunion();
     this.flushPendingStoryBeat();
     if(this.scene.time.now-this.lastCheckpoint>=600){this.lastCheckpoint=this.scene.time.now;if(this.isSafe(this.room,{x:this.player.x,y:this.player.y})){this.progress.flags['l4-room']=this.room;this.progress.counters['player-level']=4;this.progress.counters['player-x']=Math.round(this.player.x);this.progress.counters['player-y']=Math.round(this.player.y);this.save();}}
     this.refreshArt();this.roomTitle?.setText(`05  ${PATH_ROOMS[this.room].title}`); this.roomObjective?.setText(this.getObjectiveText()); this.refreshStatus();
@@ -101,8 +106,7 @@ export class PathForTwoLevel {
     if(this.room==='entry'){
       if(this.assignment==='practice'&&this.isTravelling())return'Nhấn E ở mốc gần cậu để gọi Lumo, rồi chờ cậu ấy tới ấn sau cửa thấp.';
       if(this.assignment==='practice'&&this.hasPower('practice'))return'Cửa thử đã mở. Bước vào trong và nhấn E ở mốc trong để gọi Lumo về mốc.';
-      if(isInsidePracticeAlcove(this.room,{x:this.player.x,y:this.player.y})&&pathDoorShouldClose(this.hasPower('practice'),this.thresholdOccupied('practice'),false))return'Cửa thử đang đóng. Nhấn E ở mốc trong để gọi Lumo quay lại ấn, cửa sẽ mở cho cậu ra.';
-      if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return'Nhấn E ở mốc đứng gần cậu để gọi Lumo tới ấn sau cửa thấp.';
+      if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return'Nhấn E ở mốc đứng gần cậu để thử cách gọi. Mốc A trong sảnh mở đường đi tiếp khi cậu cần.';
       if(this.isDoorOpen('a'))return'Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.';
       return'Nhấn E ở mốc A trong sảnh để gọi Lumo tới ấn A, rồi qua cửa A.';
     }
@@ -111,7 +115,11 @@ export class PathForTwoLevel {
     if(this.progress.flags['l4-latch-c']){
       const blockedBy=getPathExitBlock({latchC:true,memoRead:this.progress.flags['l4-memo']===true,reunited:this.isActuallyReunited()});
       if(blockedBy==='memo')return 'Đọc vết xoắn để giữ lại mảnh ký ức.';
-      if(blockedBy==='companion')return 'Gọi Lumo trở lại, rồi chờ cậu ấy tới gần.';
+      if(blockedBy==='companion'){
+        if(this.assignment==='c')return 'Nhấn E ở tay gọi C để gọi Lumo về, rồi chờ cậu ấy tới gần.';
+        if(this.isTravelling())return 'Lumo đang về. Chờ cậu ấy tới gần Nhinh rồi lên tháp.';
+        return 'Lumo đã về tới nơi. Chờ cậu ấy tới gần Nhinh rồi lên tháp.';
+      }
       return 'Tới bậc thang và nhấn E.';
     }
     if(!this.progress.flags['l4-ink-revealed'])return 'Tắt đèn bằng F. Từ mốc bên trái, gọi Lumo tới ấn C rồi theo vạch mực.';
@@ -185,25 +193,28 @@ export class PathForTwoLevel {
   }
   private isSafe(room:PathRoomId,p:PathPoint):boolean{return isPathPositionSafe(room,p,{latches:{a:this.progress.flags['l4-latch-a']===true||this.hasPower('a'),b:this.progress.flags['l4-latch-b']===true||this.hasPower('b'),c:this.progress.flags['l4-latch-c']===true||this.hasPower('c'),practice:this.hasPower('practice')}});}
   private drawRoom():void{
-    this.interactions.clear();this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.colliders=[];this.bodies=[];this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();this.protected=[];
+    this.interactions.clear();this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.colliders=[];this.bodies=[];this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();this.protected=[];this.inkTrail=undefined;
     const def=PATH_ROOMS[this.room]; const floor=this.scene.add.tileSprite(0,0,640,360,'ground_stone').setOrigin(0).setTint(this.room==='ink'?0x8f8f87:0xb4a88d).setDepth(0);this.track(floor);
     const graphics=this.scene.add.graphics().setDepth(1);graphics.fillStyle(0x302b28,0.96);for(const wall of def.walls)graphics.fillRect(wall.x,wall.y,wall.width,wall.height);graphics.lineStyle(2,0x716351,0.7);for(const wall of def.walls)graphics.strokeRect(wall.x,wall.y,wall.width,wall.height);this.track(graphics);
     for(const wall of def.walls)this.addCollider(wall);
     for(const solid of def.solids)this.addCollider(solid);
     this.routeGraphics=this.scene.add.graphics().setDepth(5);this.track(this.routeGraphics);this.drawTubeRoutes();
+    this.drawStationSchematic();
     if(this.room==='ink'){
-      for(const x of [304,412]){const ink=this.scene.add.image(x,242,getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark')??'').setDepth(4).setData('path-id','ink-route');this.track(ink);}
-      this.addNativeArt('tube-mouth',82,280,Phaser.Math.DegToRad(180));
-      this.addNativeArt('tube-mouth',574,136,0);
-    }else if(this.room==='relay'){
-      this.addNativeArt('tube-mouth',110,280,Phaser.Math.DegToRad(180));this.addNativeArt('tube-mouth',480,190,0);
-    }else{
-      this.addNativeArt('tube-mouth',156,190,0);this.addNativeArt('tube-mouth',480,190,0);
+      // One continuous 348×48 mark over the whole corridor: the two native 240×48 stamps used to be
+      // 132px out of phase, so the middle third showed two offset dash patterns. The native texture is
+      // tiled at its own size (no scaling), so aspect and dash spacing stay as authored.
+      const key=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');
+      if(key){this.inkTrail=this.scene.add.tileSprite(358,242,348,48,key).setDepth(4);this.track(this.inkTrail);}
+    }
+    for(const mouth of PATH_TUBE_MOUTHS){
+      if(mouth.room!==this.room)continue;
+      this.addNativeArt('tube-mouth',mouth.x,mouth.y,mouth.rotation);
     }
     for(const e of def.elements){
       const key=getLevelArtKey(4,e.art);if(!key)continue;
-      const centerY=e.id.startsWith('plate-')||e.id==='spiral'?e.y:e.y-e.height/2;
-      const image=this.scene.add.image(e.x,centerY,key).setDisplaySize(e.width,e.height).setDepth(e.art.startsWith('call')||e.art.startsWith('latch')?this.depthAt(e.y):5);
+      const art=getPathElementArtRect(e);
+      const image=this.scene.add.image(art.x+art.width/2,art.y+art.height/2,key).setDisplaySize(e.width,e.height).setDepth(e.art.startsWith('call')||e.art.startsWith('latch')?this.depthAt(e.y):5);
       this.track(image);
       if(e.id.startsWith('call')||e.id.startsWith('latch')||e.id==='spiral')this.protected.push(image);
       image.setData('path-id',e.id);
@@ -212,14 +223,9 @@ export class PathForTwoLevel {
   }
   private drawTubeRoutes():void{
     if(!this.routeGraphics)return;
-    const routes:PathPoint[][]=this.room==='entry'?
-      [[{x:76,y:268},{x:110,y:220},{x:156,y:186},{x:156,y:110},{x:212,y:114}],
-       [{x:384,y:256},{x:440,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}]]:
-      this.room==='relay'?
-      [[{x:360,y:256},{x:420,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}],
-       [{x:110,y:280},{x:140,y:280},{x:220,y:280},{x:320,y:250},{x:420,y:220},{x:480,y:190}]]:
-      [[{x:82,y:280},{x:122,y:242},{x:122,y:210},{x:180,y:200},{x:360,y:200},{x:520,y:200},{x:558,y:244}]];
-    for(const points of routes){
+    const lines=PATH_ROUTE_LINES.filter(line=>line.room===this.room);
+    for(const line of lines){
+      const points=line.points;
       this.routeGraphics.lineStyle(10,0x403328,0.88);
       this.routeGraphics.beginPath();this.routeGraphics.moveTo(points[0].x,points[0].y);
       for(const p of points.slice(1))this.routeGraphics.lineTo(p.x,p.y);
@@ -229,18 +235,10 @@ export class PathForTwoLevel {
       for(const p of points.slice(1))this.routeGraphics.lineTo(p.x,p.y);
       this.routeGraphics.strokePath();
       this.addTubeModules(points);
-    }
-    if(this.room==='entry'){
-      this.addCable('practice',routes[0][0],routes[0][routes[0].length-1]);
-      this.addCable('a',routes[1][0],routes[1][routes[1].length-1]);
-    }else if(this.room==='relay'){
-      this.addCable('b',routes[0][0],routes[0][routes[0].length-1]);
-      this.addCable('a',routes[1][0],routes[1][routes[1].length-1]);
-    }else{
-      this.addCable('c',{x:180,y:200},{x:520,y:200});
+      this.addCable(line.mark,points);
     }
   }
-  private addTubeModules(points:PathPoint[]):void{
+  private addTubeModules(points:readonly PathPoint[]):void{
     const key=getLevelArtKey(4,'tube-straight');
     if(!key)return;
     for(let i=1;i<points.length;i++){
@@ -255,12 +253,54 @@ export class PathForTwoLevel {
       }
     }
   }
-  private addCable(mark:'practice'|'a'|'b'|'c',start:PathPoint,end:PathPoint):void{
-    const key=getLevelArtKey(4,'root-cable-rest');
-    if(!key)return;
-    const image=this.scene.add.image((start.x+end.x)/2,(start.y+end.y)/2,key)
-      .setRotation(Math.atan2(end.y-start.y,end.x-start.x)).setDepth(6).setData('path-id','cable').setData('path-cable',mark);
-    this.track(image);
+  /**
+   * The root cable follows the same waypoints as the tube, one stateful 160×40 stamp per ≤160px run,
+   * so it really reaches the call at one end and the plate at the other. Genuine corners get the
+   * elbow module (unused before) instead of a straight piece across the bend.
+   */
+  private addCable(mark:PathMark,points:readonly PathPoint[]):void{
+    const cableKey=getLevelArtKey(4,'root-cable-rest');
+    if(cableKey){
+      for(const piece of pathRouteCableSegments(points)){
+        const image=this.scene.add.image(piece.x,piece.y,cableKey)
+          .setRotation(piece.angle).setDepth(6).setData('path-id','cable').setData('path-cable',mark);
+        this.track(image);
+      }
+    }
+    const elbowKey=getLevelArtKey(4,'tube-elbow');
+    if(!elbowKey)return;
+    for(const corner of pathRouteCorners(points)){
+      const image=this.scene.add.image(corner.x,corner.y,elbowKey).setRotation(corner.angle).setDepth(4.5);
+      this.track(image);
+    }
+  }
+  /**
+   * The station schematic beside this room's call marker: three room cells, the authored seals and
+   * both pipes, projected from `pathForTwoLayout` — geometry only, never a baked background.
+   */
+  private drawStationSchematic():void{
+    const slot=PATH_SCHEMATIC[this.room];
+    const plan=buildPathSchematic();
+    const graphics=this.scene.add.graphics().setDepth(2);
+    this.track(graphics);
+    graphics.fillStyle(0x101617,0.94);graphics.fillRect(slot.x-3,slot.y-3,slot.width+6,slot.height+6);
+    graphics.lineStyle(1,0x716351,0.9);graphics.strokeRect(slot.x-3,slot.y-3,slot.width+6,slot.height+6);
+    for(const room of plan.rooms){
+      const frame={x:slot.x+room.frame.x,y:slot.y+room.frame.y,width:room.frame.width,height:room.frame.height};
+      graphics.fillStyle(room.room===this.room?0x2c4a41:0x212728,1);graphics.fillRect(frame.x,frame.y,frame.width,frame.height);
+      graphics.lineStyle(1,0x8fae9a,0.9);graphics.strokeRect(frame.x,frame.y,frame.width,frame.height);
+      for(const seal of room.seals){
+        graphics.fillStyle(room.room===this.room?0xd8b869:0x6f8a7c,1);
+        graphics.fillRect(slot.x+seal.x-1,slot.y+seal.y-1,3,3);
+      }
+    }
+    for(const pipe of plan.pipes){
+      graphics.lineStyle(2,0x9bb99a,0.85);
+      graphics.beginPath();
+      graphics.moveTo(slot.x+pipe.from.x,slot.y+pipe.from.y);
+      graphics.lineTo(slot.x+pipe.to.x,slot.y+pipe.to.y);
+      graphics.strokePath();
+    }
   }
   private addNativeArt(filename:string,x:number,y:number,rotation=0):void{
     const key=getLevelArtKey(4,filename);if(!key)return;
@@ -316,15 +356,42 @@ export class PathForTwoLevel {
   }
   private registerRoomInteractions():void{
     const reg=(c:InteractableConfig)=>this.interactions.register(c);const def=PATH_ROOMS[this.room];
-    for(const e of def.elements){if(e.id.startsWith('plate-'))continue;reg({id:`l4-${e.id}`,x:e.stand.x,y:e.stand.y,radius:22,getPrompt:()=>this.prompt(e.id),getPromptBounds:()=>this.imageFor(e.id)?.getBounds()??null,isEnabled:()=>this.interactionEnabled(e.id),onInteract:()=>this.interact(e.id)});}
-    const doors=this.room==='entry'?[['practice',156,221],['a',480,221]]:this.room==='relay'?[['a',110,280],['b',480,221]]:[['b',82,280],['c',574,188]];
-    for(const [id,x,y] of doors as Array<[string,number,number]>)reg({id:`l4-door-${id}`,x,y,radius:24,getPrompt:()=>id==='practice'?'E · Thử cửa thấp':id==='c'?'E · Lên tháp':`E · Qua cửa ${id.toUpperCase()}`,getPromptBounds:()=>this.doorImages.get(id)?.getBounds()??null,onInteract:()=>this.useDoor(id),isEnabled:()=>true});
+    // Standing props: prompt, enabled and the action share one layout predicate (`isPathApproachAllowed`,
+    // reached through `elementApproach`) and opt into `ownsPosition`, so the control whose face the
+    // feet are on keeps the standing position in a crowded zone (RULE_GAMES §1).
+    for(const e of def.elements){if(isPathSeal(e))continue;reg({id:`l4-${e.id}`,x:e.stand.x,y:e.stand.y,radius:PATH_ELEMENT_RADIUS,getPrompt:()=>this.prompt(e.id),getPromptBounds:()=>this.imageFor(e.id)?.getBounds()??null,isEnabled:()=>this.interactionEnabled(e.id),ownsPosition:(x:number,y:number)=>isPathApproachAllowed(this.room,e,{x,y}),onInteract:()=>this.interact(e.id)});}
+    // Doors: the documented gate exception (RULE_GAMES §3) — one layout predicate for the room-side
+    // arch approach, shared by prompt, enabled and the action.
+    for(const stand of PATH_CONTROL_STANDS){if(stand.room!==this.room)continue;reg({id:`l4-door-${stand.id}`,x:stand.x,y:stand.y,radius:stand.radius,getPrompt:()=>this.doorPrompt(stand.id),getPromptBounds:()=>this.doorImages.get(stand.id)?.getBounds()??null,isEnabled:()=>this.doorEnabled(stand.id),onInteract:()=>this.useDoor(stand.id)});}
   }
-  private prompt(id:string):string{
+  private heldInteract():boolean{return isPathInteractHeld(this.interactReleasePending,this.isInteractKeyDown());}
+  private isInteractKeyDown():boolean{return this.interactKey?.isDown===true;}
+  /** A room change arms the guard; E coming back up disarms it, so one held press cannot act twice. */
+  private releaseInteractGuard():void{if(!isPathInteractHeld(this.interactReleasePending,this.isInteractKeyDown()))this.interactReleasePending=false;}
+  private elementFor(id:string):PathElement|undefined{return PATH_ROOMS[this.room].elements.find(e=>e.id===id);}
+  /** A floor seal's own mark, whatever its element id is spelled like (`plate-a`, `practice-plate`). */
+  private sealMark(id:string):PathMark{
+    if(id.includes('practice'))return'practice';
+    if(id.includes('-a'))return'a';
+    if(id.includes('-b'))return'b';
+    return'c';
+  }
+  private elementApproach(id:string,x:number,y:number):boolean{
+    const element=this.elementFor(id);
+    return !!element&&isPathApproachAllowed(this.room,element,{x,y});
+  }
+  private doorApproach(id:string,x:number,y:number):boolean{return isPathDoorApproachAllowed(this.room,id,{x,y});}
+  private doorPrompt(id:PathMark):string|null{
+    if(this.heldInteract()||!this.doorApproach(id,this.player.x,this.player.y))return null;
+    return id==='practice'?'E · Thử cửa thấp':id==='c'?'E · Lên tháp':`E · Qua cửa ${id.toUpperCase()}`;
+  }
+  private doorEnabled(id:PathMark):boolean{return !this.heldInteract()&&this.doorApproach(id,this.player.x,this.player.y);}
+  private prompt(id:string):string|null{
+    if(this.heldInteract()||!this.elementApproach(id,this.player.x,this.player.y))return null;
     const mark=this.callMark(id);
     if(mark)return choosePathCallAction(this.assignment,mark,this.callEligible(mark))==='recall'?'E · Gọi Lumo về mốc':PLATE_ROOMS[mark]===this.lumoRoom?'E · Gọi Lumo tới ấn':'E · Gọi Lumo qua ống';
-    if(id==='latch-a')return this.progress.flags['l4-latch-a']?'Cửa A đã giữ':'E · Gài chốt A';
-    if(id==='latch-b')return this.progress.flags['l4-latch-b']?'Cửa B đã giữ':'E · Gài chốt B';
+    if(id==='latch-a')return 'E · Gài chốt A';
+    if(id==='latch-b')return 'E · Gài chốt B';
     if(id==='latch-c')return this.progress.flags['l4-latch-c']?'E · Gọi Lumo về':'E · Gài chốt cửa ra';
     if(id==='spiral')return 'E · Đọc vết xoắn';
     return 'E · Tương tác';
@@ -336,20 +403,39 @@ export class PathForTwoLevel {
     if(id.includes('call-c'))return'c';
     return undefined;
   }
+  /**
+   * The lesson is an optional practice door (D1): A only needs the latch before it, and neither A nor
+   * the lesson waits for `l4-practice-complete`, which one full practice recall writes.
+   */
   private callEligible(mark:'practice'|'a'|'b'|'c'):boolean{
-    if(mark==='a')return this.progress.flags['l4-practice-complete']===true||this.progress.flags['l4-called-a']===true;
     if(mark==='b')return this.progress.flags['l4-latch-a']===true;
     if(mark==='c')return this.progress.flags['l4-latch-b']===true;
     return true;
   }
-  private interactionEnabled(id:string):boolean{if(id==='latch-a')return this.room==='relay'&&this.progress.flags['l4-latch-a']!==true;if(id==='latch-b')return this.room==='ink'&&this.progress.flags['l4-latch-b']!==true;if(id==='latch-c')return this.room==='ink'&&(this.progress.flags['l4-latch-c']===true||this.hasPower('c')&&this.progress.flags['l4-latch-b']===true&&this.progress.flags['l4-ink-revealed']===true);if(id==='spiral')return this.progress.flags['l4-latch-c']===true;return true;}
+  private interactionEnabled(id:string):boolean{
+    if(this.heldInteract()||!this.elementApproach(id,this.player.x,this.player.y))return false;
+    if(id==='latch-a')return this.room==='relay'&&this.progress.flags['l4-latch-a']!==true;
+    if(id==='latch-b')return this.room==='ink'&&this.progress.flags['l4-latch-b']!==true;
+    // Latch C answers before the ink is found too: a locked mechanism still gives useful feedback
+    // naming the step that is missing (campaign-layout-design), and afterwards this same handle recalls.
+    if(id==='latch-c')return this.room==='ink';
+    if(id==='spiral')return this.progress.flags['l4-latch-c']===true;
+    return true;
+  }
+  /** What still blocks the exit latch, in flow order; undefined means the handle may be used. */
+  private latchCBlockReason():string|undefined{
+    if(!this.progress.flags['l4-latch-b'])return'Cửa B cần được gài trước.';
+    if(!this.progress.flags['l4-ink-revealed'])return'Tắt đèn bằng F rồi đi theo vạch mực trong hành lang để tìm dấu trước.';
+    if(!this.hasPower('c'))return'Từ mốc bên trái, gọi Lumo tới ấn C trước khi gài cửa ra.';
+    return undefined;
+  }
   private interact(id:string):void{
+    if(!this.interactionEnabled(id))return;
     const mark=this.callMark(id);
     if(mark){
       if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]===true){this.send(mark);return;}
       const action=choosePathCallAction(this.assignment,mark,this.callEligible(mark));
       if(action==='recall'){this.recallToCall(id);return;}
-      if(mark==='a'&&!this.callEligible('a')){this.say([{speaker:'Nhinh',text:'Mình thử cửa thấp trước đã, để biết Lumo rời ấn thế nào.'}]);return;}
       if(mark==='b'&&!this.progress.flags['l4-latch-a']){this.say([{speaker:'Nhinh',text:'Mình nên giữ cửa A trước khi Lumo rời ấn.'}]);return;}
       if(mark==='c'&&!this.progress.flags['l4-latch-b']){this.say([{speaker:'Nhinh',text:'Cửa B cần được gài trước.'}]);return;}
       this.send(mark);
@@ -357,7 +443,14 @@ export class PathForTwoLevel {
     }
     if(id==='latch-a'){if(this.room==='relay'&&this.progress.flags['l4-visited-relay']&&this.hasPower('a')){this.progress.flags['l4-latch-a']=true;this.progress.flags['l4-at-a']=false;this.say([{speaker:'Nhinh',text:'Cửa đã giữ được rồi. Cậu qua mốc tiếp theo nhé.'},{speaker:'Lumo',text:'Lần này cậu giữ đường cho tôi.'}]);this.save();}return;}
     if(id==='latch-b'){if(this.room==='ink'&&this.progress.flags['l4-visited-ink']&&this.hasPower('b')){this.progress.flags['l4-latch-b']=true;this.progress.flags['l4-at-b']=false;this.save();}return;}
-    if(id==='latch-c'){if(!this.progress.flags['l4-latch-c']){if(this.hasPower('c')&&this.progress.flags['l4-latch-b']&&this.progress.flags['l4-ink-revealed']){this.progress.flags['l4-latch-c']=true;this.save();if(!this.progress.flags['l4-memo'])this.say(MEMORY,()=>{this.progress.flags['l4-memo']=true;this.save();});}}else this.recallToCall(id);return;}
+    if(id==='latch-c'){
+      if(this.progress.flags['l4-latch-c']){this.recallToCall(id);return;}
+      const blocked=this.latchCBlockReason();
+      if(blocked){this.say([{speaker:'Nhinh',text:blocked}]);return;}
+      this.progress.flags['l4-latch-c']=true;this.save();
+      if(!this.progress.flags['l4-memo'])this.say(MEMORY,()=>{this.progress.flags['l4-memo']=true;this.save();});
+      return;
+    }
     if(id==='spiral'){
       if(this.progress.flags['l4-memo']){this.say(MEMORY);return;}
       this.say(MEMORY,()=>{this.progress.flags['l4-memo']=true;this.save();});
@@ -487,7 +580,6 @@ export class PathForTwoLevel {
     this.progress.flags['l4-lumo-room']=room;
     if(mark==='practice'||mark==='a'||mark==='b'||mark==='c'){
       this.progress.flags[`l4-at-${mark}`]=true;
-      this.progress.flags['l4-lumo-arrived']=mark;
       if(mark==='practice')this.queueStoryBeat([
         {speaker:'Lumo',text:'Tôi tới rồi. Cửa có mở không?'},
         {speaker:'Nhinh',text:'Có. Khi cậu rời dấu, nó sẽ đóng lại đúng không?'},
@@ -509,6 +601,9 @@ export class PathForTwoLevel {
   private hasPower(mark:'practice'|'a'|'b'|'c'):boolean{return hasDoorPower(mark,this.getPowerState());}
   private isDoorOpen(mark:'practice'|'a'|'b'|'c'):boolean{return this.hasPower(mark)||(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]===true);}
   private useDoor(id:string):void{
+    // Revalidate the very approach the prompt advertised, and refuse everything while the held-E
+    // guard is armed (the room change has just happened).
+    if(!this.doorEnabled(id as PathMark))return;
     if(id==='practice'){if(!this.hasPower('practice'))this.say([{speaker:'Nhinh',text:'Cửa thử chỉ mở khi Lumo đã tới ấn bên kia.'}]);else this.say([{speaker:'Nhinh',text:'Cửa thử đã mở. Mình có thể đi qua rồi gọi Lumo về.'}]);return;}
     if(id==='c'){
       const blockedBy=getPathExitBlock({latchC:this.progress.flags['l4-latch-c']===true,memoRead:this.progress.flags['l4-memo']===true,reunited:this.isActuallyReunited()});
@@ -533,6 +628,9 @@ export class PathForTwoLevel {
     this.progress.counters['player-y']=spawn.y;
     this.progress.counters['player-level']=4;
     this.player.setPosition(spawn.x,spawn.y);
+    // Arm the held-E guard before the new room registers its controls: the key that opened this door
+    // is still down, and the arrival stand of the door just used must not answer a second time.
+    this.interactReleasePending=true;
     this.save();
     this.drawRoom();
     this.refresh();
@@ -547,7 +645,7 @@ export class PathForTwoLevel {
     this.persistRoute();
   }
   private addDoors():void{
-    const ids=this.room==='entry'?['practice','a']:this.room==='relay'?['a','b']:['b','c'];
+    const ids=PATH_CONTROL_STANDS.filter(stand=>stand.room===this.room).map(stand=>stand.id);
     for(const id of ids){
       const face=getPathDoorFace(id,this.room);
       if(!face)continue;
@@ -579,8 +677,6 @@ export class PathForTwoLevel {
       const latched=this.isDoorLatched(id);
       const occupied=this.thresholdOccupied(id);
       body.enable=pathDoorShouldClose(powered,occupied,latched);
-      if(!powered&&!latched&&occupied)this.pendingClose.add(id);
-      else this.pendingClose.delete(id);
       const image=this.doorImages.get(id);
       const texture=getLevelArtKey(4,powered||latched||occupied?'door-open':'door-closed');
       if(image&&texture){
@@ -617,8 +713,8 @@ export class PathForTwoLevel {
     }
     if(this.lastLantern!==this.lanternOn){
       this.lastLantern=this.lanternOn;
-      const ink=this.objects.find(o=>o instanceof Phaser.GameObjects.Image&&o.getData('path-id')==='ink-route');
-      if(ink instanceof Phaser.GameObjects.Image){
+      const ink=this.inkTrail;
+      if(ink&&ink.active){
         const key=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');
         if(key)ink.setTexture(key);
       }
@@ -651,11 +747,8 @@ export class PathForTwoLevel {
         const mark=id.includes('practice')||id==='inner-call'?'practice':id.includes('-a')?'a':id.includes('-b')?'b':'c';
         const state=this.hasPower(mark as 'practice'|'a'|'b'|'c')?'arrived':this.assignment===mark?'sent':'idle';
         texture=getLevelArtKey(4,`call-${state}`);
-      }else if(id.startsWith('plate-')){
-        const mark=id.slice('plate-'.length) as 'practice'|'a'|'b'|'c';
-        texture=getLevelArtKey(4,this.hasPower(mark)?'pressure-occupied':'pressure-empty');
-      }else if(id==='ink-route'){
-        texture=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');
+      }else if(this.elementFor(id)&&isPathSeal(this.elementFor(id) as PathElement)){
+        texture=getLevelArtKey(4,this.hasPower(this.sealMark(id))?'pressure-occupied':'pressure-empty');
       }else if(id==='cable'){
         const mark=object.getData('path-cable') as 'practice'|'a'|'b'|'c';
         const state=this.hasPower(mark)?'arrived':this.assignment===mark?'flow':'rest';

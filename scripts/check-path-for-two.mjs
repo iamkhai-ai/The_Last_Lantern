@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
-import { choosePathCallAction, getPathBackArrival, getPathDoorFace, getPathElementSolid, getPathExitBlock, getPathPipePoint, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathPositionSafe, isPathRouteValid, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, PATH_BODY, PATH_DOORS, PATH_ROOMS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
+import { readFileSync, readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
+import { buildPathSchematic, choosePathCallAction, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathDoorPassage, getPathElementArtRect, getPathElementSolid, getPathExitBlock, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, pathPolylineLength, pathRouteCableSegments, pathRouteCorners, PATH_BACK_ARRIVAL_OFFSET, PATH_BODY, PATH_CHECKPOINTS, PATH_CONTROL_STANDS, PATH_DOORS, PATH_ELEMENT_RADIUS, PATH_FLOOR_BOUNDS, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_ORDER, PATH_SCHEMATIC_SIZE, PATH_PIPE_ENDPOINTS, PATH_TUBE_MOUTHS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
 
 const allOpen = { a: true, b: true, c: true, practice: true };
 const actor = (room, point, open = allOpen) => isPathPositionSafe(room, point, { latches: open });
@@ -28,6 +32,13 @@ const reachesExact = (room,start,target,open) => {
   return false;
 };
 
+/**
+ * Geometry and world-state invariants: the shipped layout data against the contract (foot body,
+ * solids, thresholds, arrival points, pipe hops, restore resolution). Kept as one named case so that
+ * a regression here is reported on the same summary line and with the same exit code as a controller
+ * regression, instead of aborting the run before the summary is printed.
+ */
+function geometryAndStateChecks() {
 assert.deepEqual(PATH_BODY, { feetY: 19, x: -7, y: 16, width: 14, height: 6 });
 assert.deepEqual(pathActorBody({x:180,y:280}), {x:173,y:296,width:14,height:6});
 for (const [roomId, room] of Object.entries(PATH_ROOMS)) {
@@ -66,11 +77,11 @@ assert.equal(actor('ink',{x:82,y:296},{a:true,b:true,c:false,practice:false}),tr
 assert.equal(reachesExact('ink',PATH_ROOMS.ink.spawn,{x:82,y:296},{a:true,b:true,c:false,practice:false}),true,'reverse B arrival can walk through the open threshold pocket to the cap');
 assert.equal(actor('ink',{x:82,y:320},{a:true,b:true,c:false,practice:false}),false,'portal cap blocks entry into the HUD and out-of-room area');
 assert.equal(actor('relay',{x:150,y:296},{a:true,b:false,c:false,practice:false}),false,'open portal pocket does not widen beyond its visible 44px gap');
-assert.deepEqual(getPathDoorFace('a','entry'),{id:'a',room:'entry',x:480,base:210});
-assert.deepEqual(getPathDoorFace('a','relay'),{id:'a',room:'relay',x:110,base:318});
-assert.deepEqual(getPathDoorFace('b','ink'),{id:'b',room:'ink',x:82,base:318});
-assert.deepEqual(getPathBackArrival('a'),{x:480,y:230},'returning through A lands beside its entry face, not the far room spawn');
-assert.deepEqual(getPathBackArrival('b'),{x:480,y:230},'returning through B lands beside its relay face, not the far room spawn');
+assert.deepEqual(getPathDoorFace('a','entry'),{id:'a',room:'entry',x:480,base:210,approach:'south'});
+assert.deepEqual(getPathDoorFace('a','relay'),{id:'a',room:'relay',x:110,base:318,approach:'north'});
+assert.deepEqual(getPathDoorFace('b','ink'),{id:'b',room:'ink',x:82,base:318,approach:'north'});
+assert.deepEqual(getPathBackArrival('a'),{x:480,y:250},'returning through A lands beside its entry face, not the far room spawn');
+assert.deepEqual(getPathBackArrival('b'),{x:480,y:250},'returning through B lands beside its relay face, not the far room spawn');
 assert.equal(actor('entry',getPathBackArrival('a'),{a:false,b:false,c:false,practice:false}),true,'A return arrival is walkable entry floor while the door is closed');
 assert.equal(actor('relay',getPathBackArrival('b'),{a:true,b:false,c:false,practice:false}),true,'B return arrival is walkable relay floor while the door is closed');
 assert.equal(reach('entry',PATH_ROOMS.entry.spawn,getPathBackArrival('a'),{a:false,b:false,c:false,practice:false}),true,'A return arrival stays connected to the entry hall');
@@ -157,5 +168,722 @@ assert.equal(resolvePathRoom(undefined,true,true,true,true,false),'ink','missing
 assert.equal(resolvePathRoom('entry',true,true,true,true,true),'entry','a legitimately backtracked entry room survives reload with later latches');
 assert.equal(resolvePathRoom('entry',true,false,true,false,false),'entry','a B call does not infer that the player crossed from relay into ink');
 assert.equal(resolvePathRoom('unknown',false,false,false,false,false),'entry','unknown room falls back to entry');
+}
 
+/* ------------------------------------------------------------------ *
+ * The shipped controller
+ *
+ * `src/levels/PathForTwoLevel.ts` imports Phaser, so a plain Node import cannot resolve it (checked
+ * the same way `scripts/check-interaction-targets.mjs` does). The behaviour cases below therefore
+ * pull the *shipped* method bodies out of the source with the TypeScript compiler API, transpile
+ * them and bind them to a recording stand-in for the scene ports — the same technique, and the same
+ * reason, as that check and `scripts/check-campaign-runtime.mjs`.
+ * ------------------------------------------------------------------ */
+
+const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
+const CONTROLLER_FILE = join(rootDir, 'src/levels/PathForTwoLevel.ts');
+const CONTROLLER_SOURCE = readFileSync(CONTROLLER_FILE, 'utf8');
+const controllerAst = ts.createSourceFile(CONTROLLER_FILE, CONTROLLER_SOURCE, ts.ScriptTarget.Latest, true);
+
+const nodeText = (node) => node.getText(node.getSourceFile());
+function walkNode(node, visit) { visit(node); node.forEachChild((child) => walkNode(child, visit)); }
+function findNode(root, predicate) {
+  let found = null;
+  walkNode(root, (node) => { if (!found && predicate(node)) found = node; });
+  return found;
+}
+/** The shipped body of one method, so a rename or a moved gate fails here instead of passing. */
+function methodBody(name) {
+  const method = findNode(controllerAst, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === name);
+  assert.ok(method, `PathForTwoLevel still declares ${name}()`);
+  assert.ok(method.body, `${name}() still has a body`);
+  return nodeText(method.body);
+}
+/** A module-local constant of the controller, read from its source, never hand-copied. */
+function controllerConstant(name) {
+  const declaration = findNode(controllerAst, (node) => ts.isVariableDeclaration(node) && nodeText(node.name) === name);
+  assert.ok(declaration?.initializer, `PathForTwoLevel still authors ${name}`);
+  const js = ts.transpileModule(`const __value = (${nodeText(declaration.initializer)});`,
+    { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
+  return new Function(`"use strict";\n${js}\nreturn __value;`)();
+}
+/** Compile one extracted body into a method, closing over the layout symbols it uses. */
+function compile(name, parameters, symbols) {
+  const names = Object.keys(symbols);
+  const js = ts.transpileModule(`const __unit = function (${parameters.join(', ')}) {\n${methodBody(name)}\n};`,
+    { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
+  let unit;
+  try {
+    unit = new Function(...names, `"use strict";\n${js}\nreturn __unit;`)(...names.map((key) => symbols[key]));
+  } catch (error) {
+    throw new Error(`could not bind the shipped PathForTwoLevel.${name}(): ${error.message}`);
+  }
+  return unit;
+}
+
+/**
+ * A stand-in for the scene ports the shipped Level 05 methods read. `stand()` places the shared
+ * player probe at a standing position; every control predicate below is the shipped method, bound to
+ * the layout symbols it closes over.
+ */
+function makePathScene(room, flags, extra = {}) {
+  const scene = {
+    room,
+    progress: { flags: { ...flags }, counters: {} },
+    player: { x: PATH_ROOMS[room].spawn.x, y: PATH_ROOMS[room].spawn.y },
+    assignment: 'follow',
+    lumoRoom: room,
+    doorImages: new Map(),
+    said: [],
+    saved: 0,
+    sent: [],
+    recalled: 0,
+    power: {},
+    travelling: false,
+    reunited: false,
+    thresholds: {},
+    interactReleasePending: false,
+    interactKey: { isDown: false },
+    ...extra,
+  };
+  scene.stand = (x, y) => { scene.player.x = x; scene.player.y = y; };
+  scene.say = (lines) => scene.said.push(lines);
+  scene.save = () => { scene.saved += 1; };
+  scene.hasPower = (mark) => scene.power[mark] === true;
+  scene.isTravelling = () => scene.travelling;
+  scene.isActuallyReunited = () => scene.reunited;
+  scene.thresholdOccupied = (id) => scene.thresholds[id] === true;
+  scene.isDoorOpen = (mark) => scene.power[mark] === true;
+  scene.imageFor = () => undefined;
+  // The companion stand-in the shipped travel methods steer: it reproduces `Lumo.update()`'s own
+  // spring (the caller passes `target - 18, target + 12` and the actor adds that offset back, so the
+  // sprite converges on the route point itself).
+  scene.lumo = {
+    sprite: {
+      x: PATH_ROOMS[room].spawn.x - 22,
+      y: PATH_ROOMS[room].spawn.y - 18,
+      setPosition(x, y) { this.x = x; this.y = y; },
+    },
+    update(dt, x, y) {
+      const k = Math.min(1, dt * 0.008);
+      this.sprite.x += (x + 18 - this.sprite.x) * k;
+      this.sprite.y += (y - 12 - this.sprite.y) * k;
+    },
+    setVisible() {},
+  };
+  scene.send = (mark) => scene.sent.push(mark);
+  scene.recallToCall = () => { scene.recalled += 1; };
+  scene.isInteractKeyDown = compile('isInteractKeyDown', [], {});
+  scene.heldInteract = compile('heldInteract', [], { isPathInteractHeld });
+  scene.elementFor = compile('elementFor', ['id'], { PATH_ROOMS });
+  scene.elementApproach = compile('elementApproach', ['id', 'x', 'y'], { PATH_ROOMS, isPathApproachAllowed });
+  scene.doorApproach = compile('doorApproach', ['id', 'x', 'y'], { isPathDoorApproachAllowed });
+  scene.doorPrompt = compile('doorPrompt', ['id'], {});
+  scene.doorEnabled = compile('doorEnabled', ['id'], {});
+  scene.callMark = compile('callMark', ['id'], {});
+  scene.callEligible = compile('callEligible', ['mark'], {});
+  scene.latchCBlockReason = compile('latchCBlockReason', [], {});
+  scene.interactionEnabled = compile('interactionEnabled', ['id'], {});
+  scene.prompt = compile('prompt', ['id'], { PLATE_ROOMS: controllerConstant('PLATE_ROOMS'), choosePathCallAction });
+  scene.interact = compile('interact', ['id'], { MEMORY: controllerConstant('MEMORY'), choosePathCallAction });
+  scene.getObjectiveText = compile('getObjectiveText', [], { PATH_ROOMS, getPathExitBlock, isInsidePracticeAlcove, pathDoorShouldClose });
+  scene.useDoor = compile('useDoor', ['id'], { getPathExitBlock, getPathBackArrival });
+  return scene;
+}
+
+const saidText = (scene) => scene.said.flat().map((line) => line.text).join(' | ');
+
+/**
+ * Bind the *shipped* travel pipeline (send → route → advanceLumo → completeRoute → recall) onto a
+ * fixture, replacing the recorder stubs. Used by the lesson case, which has to prove the practice
+ * path really teaches send, travel, arrival and recall rather than asserting it in prose.
+ */
+function bindTravelPipeline(scene) {
+  const plateRooms = controllerConstant('PLATE_ROOMS');
+  const platePoints = controllerConstant('PLATE_POINTS');
+  scene.persistRoute = compile('persistRoute', [], {});
+  scene.localRoute = compile('localRoute', ['mark'], { PLATE_ROOMS: plateRooms, PLATE_POINTS: platePoints });
+  scene.pipeRoute = compile('pipeRoute', ['from', 'to'], { getPathPipePoint });
+  scene.buildAssignmentRoute = compile('buildAssignmentRoute', ['mark', 'playerPoint'], { PLATE_ROOMS: plateRooms });
+  scene.send = compile('send', ['mark'], {});
+  scene.recallToCall = compile('recallToCall', ['id'], {});
+  scene.isPairedPipeHop = compile('isPairedPipeHop', ['target'], { isValidPathPipeHop, isNearPathPipeEndpoint });
+  scene.cancelInvalidRoute = compile('cancelInvalidRoute', [], {});
+  scene.completeRoute = compile('completeRoute', ['room'], {});
+  scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete'], {});
+  scene.flushPendingStoryBeat = compile('flushPendingStoryBeat', [], {});
+  scene.advanceLumo = compile('advanceLumo', ['dt'], {});
+  scene.isTravelling = compile('isTravelling', [], {});
+  scene.pendingStoryBeats = [];
+  scene.canStartStory = () => false;
+  scene.power = {};
+  scene.hasPower = (mark) => hasDoorPower(mark, {
+    assignment: scene.assignment, lumoRoom: scene.lumoRoom, lumoX: scene.lumo.sprite.x, lumoY: scene.lumo.sprite.y,
+  });
+  return scene;
+}
+
+/** Every legal standing position inside a control's own trigger disc. */
+function legalDisc(room, stand, radius, open = allOpen) {
+  const positions = [];
+  for (let x = stand.x - radius; x <= stand.x + radius; x += 1) {
+    for (let y = stand.y - radius; y <= stand.y + radius; y += 1) {
+      if (Math.hypot(x - stand.x, y - stand.y) > radius) continue;
+      if (!actor(room, { x, y }, open)) continue;
+      positions.push({ x, y });
+    }
+  }
+  return positions;
+}
+
+const pointInRect = (point, rect) => point.x >= rect.x && point.x <= rect.x + rect.width
+  && point.y >= rect.y && point.y <= rect.y + rect.height;
+
+/** The four authored contacts of a standing prop, plus its own stand. */
+function fourSides(element) {
+  return {
+    north: { x: element.x, y: element.y - element.height - PATH_BODY.feetY },
+    east: { x: element.x + element.width / 2 + 6, y: element.y - element.height / 2 - 16 },
+    south: { x: element.stand.x, y: element.stand.y },
+    west: { x: element.x - element.width / 2 - 6, y: element.y - element.height / 2 - 16 },
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * Cases: the controller behaviour this task owns
+ * ------------------------------------------------------------------ */
+
+const controllerFailures = [];
+let controllerCaseCount = 0;
+function controllerCase(name, run) {
+  controllerCaseCount += 1;
+  try {
+    run();
+    console.log(`PASS  ${name}`);
+  } catch (error) {
+    controllerFailures.push(name);
+    console.log(`FAIL  ${name}`);
+    for (const line of String(error.message).split('\n')) console.log(`        ${line}`);
+  }
+}
+
+controllerCase('geometry_and_state_invariants', geometryAndStateChecks);
+
+controllerCase('the_whole_lesson_still_teaches_send_travel_arrival_and_recall', () => {
+  // The optional lesson (D1) still teaches its four beats with the shipped code, and the lesson door
+  // never closes on the player standing inside its own alcove.
+  const scene = bindTravelPipeline(makePathScene('entry', {}, { player: { x: 76, y: 268 } }));
+  const lumo = scene.lumo.sprite;
+
+  // Beat 1 — send: E at the near call sends Lumo to the lesson plate behind the low door.
+  scene.interact('practice-call');
+  assert.equal(scene.progress.flags['l4-called-practice'], true, 'the lesson call records the assignment');
+  assert.equal(scene.progress.flags['l4-assignment'], 'practice', 'Lumo is assigned to the lesson plate');
+  assert.ok(scene.route.length > 1, `the shipped send builds a real route (${scene.route.length} waypoints)`);
+  assert.deepEqual({ x: scene.route[scene.route.length - 1].x, y: scene.route[scene.route.length - 1].y }, { x: 212, y: 114 },
+    'the route ends on the authored lesson plate');
+  assert.equal(scene.progress.flags['l4-practice-complete'], undefined, 'sending is not the lesson: nothing completes yet');
+
+  // Beat 2 — travel, beat 3 — arrival: the shipped per-frame travel walks the whole route.
+  let frames = 0;
+  while (scene.isTravelling() && frames < 900) { scene.advanceLumo(16); frames += 1; }
+  assert.equal(scene.isTravelling(), false, `Lumo finishes the taught route (${frames} frames)`);
+  assert.ok(Math.hypot(lumo.x - 212, lumo.y - 114) < 12, `Lumo really arrives at the plate (${lumo.x.toFixed(1)},${lumo.y.toFixed(1)})`);
+  assert.equal(scene.progress.flags['l4-at-practice'], true, 'the arrival is recorded as a real arrival');
+  assert.equal(hasDoorPower('practice', { assignment: scene.assignment, lumoRoom: scene.lumoRoom, lumoX: lumo.x, lumoY: lumo.y }), true,
+    'the standing plate powers the lesson door');
+  assert.equal(scene.progress.flags['l4-practice-complete'], undefined, 'an arrival is not yet a completed lesson');
+  assert.equal(scene.pendingStoryBeats.length, 1, 'the arrival queues the lesson explanation');
+
+  // The door is open and the player can step inside without it closing on their feet.
+  scene.stand(244, 150);
+  assert.equal(isPathThresholdOccupied('entry', 'practice', { x: 244, y: 150 }), true,
+    'standing at the inside lesson call occupies the door threshold');
+  assert.equal(pathDoorShouldClose(false, true, false), false, 'so the lesson door stays open under the player');
+  assert.equal(scene.prompt('inner-call'), 'E · Gọi Lumo về mốc', 'the inside call offers the recall');
+
+  // Beat 4 — recall: E at the far-side call really recalls Lumo and that is what completes the lesson.
+  scene.interact('inner-call');
+  assert.equal(scene.progress.flags['l4-assignment'], 'follow', 'the recall returns Lumo to the player');
+  assert.equal(scene.progress.flags['l4-practice-complete'], true, 'the real recall is the only thing that completes the lesson');
+  assert.equal(scene.progress.flags['l4-at-practice'], false, 'the plate is no longer held');
+  assert.equal(isPathRouteValid(scene.route), true, 'the recall route the lesson teaches is a valid published route');
+  const writers = (CONTROLLER_SOURCE.match(/flags\[['"]l4-practice-complete['"]\]\s*=/g) ?? []).length;
+  assert.equal(writers, 1, 'practice-complete still has exactly one writer, the real lesson recall');
+});
+
+controllerCase('skipping_the_lesson_still_lets_the_player_call_A', () => {
+  const scene = makePathScene('entry', {}, { player: { x: 384, y: 256 } });
+  assert.equal(scene.callEligible('a'), true, 'calling A never requires the optional lesson');
+  assert.equal(scene.interactionEnabled('call-a'), true, 'the A call is enabled without any lesson flag');
+  assert.equal(scene.prompt('call-a'), 'E · Gọi Lumo tới ấn', 'the A call advertises sending Lumo to the plate');
+  scene.interact('call-a');
+  assert.deepEqual(scene.sent, ['a'], 'E at call A sends Lumo instead of refusing him');
+  assert.equal(scene.said.length, 0, `no refusal line is played (${saidText(scene)})`);
+  assert.equal(scene.progress.flags['l4-practice-complete'], undefined,
+    'the skipped lesson writes no fake practice-complete flag');
+  const writers = (CONTROLLER_SOURCE.match(/flags\[['"]l4-practice-complete['"]\]\s*=/g) ?? []).length;
+  assert.equal(writers, 1, 'practice-complete has exactly one writer, the real lesson recall');
+});
+
+controllerCase('the_C_handle_answers_before_the_ink_is_found', () => {
+  const scene = makePathScene('ink', { 'l4-latch-b': true }, { player: { x: 550, y: 218 } });
+  assert.equal(scene.interactionEnabled('latch-c'), true, 'the exit handle answers in its own room before the ink');
+  assert.equal(scene.prompt('latch-c'), 'E · Gài chốt cửa ra', 'the handle advertises its action');
+  scene.interact('latch-c');
+  assert.equal(scene.progress.flags['l4-latch-c'], undefined, 'an early E never latches the exit');
+  assert.equal(scene.said.length, 1, 'an early E gives exactly one inspection line');
+  const text = saidText(scene);
+  assert.ok(text.includes('F'), `the line names the lantern key (${text})`);
+  assert.ok(text.includes('vạch mực'), `the line names the ink trail to walk (${text})`);
+});
+
+controllerCase('the_objective_follows_the_main_progress_once_A_has_started', () => {
+  const fresh = makePathScene('entry', {});
+  assert.ok(fresh.getObjectiveText().includes('Mốc A'),
+    `the opening line names A as a way on, so a skipped lesson is not a dead end (${fresh.getObjectiveText()})`);
+  const started = makePathScene('entry', { 'l4-called-a': true });
+  const startedText = started.getObjectiveText();
+  assert.notEqual(startedText, fresh.getObjectiveText(), 'the lesson line is replaced once A has started');
+  assert.equal(startedText.includes('mốc đứng gần cậu'), false, `the lesson marker stops being named (${startedText})`);
+  assert.ok(startedText.includes('mốc A'), `the objective follows A instead (${startedText})`);
+});
+
+controllerCase('the_reunion_objective_names_the_C_handle_and_lumos_travel', () => {
+  const exitReady = { 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true };
+  const held = makePathScene('ink', exitReady, { assignment: 'c' });
+  assert.ok(held.getObjectiveText().includes('tay gọi C'), `the handle is named (${held.getObjectiveText()})`);
+  const back = makePathScene('ink', exitReady, { travelling: true });
+  assert.ok(back.getObjectiveText().includes('đang về'), `a travelling Lumo is reported (${back.getObjectiveText()})`);
+  const near = makePathScene('ink', exitReady);
+  assert.ok(near.getObjectiveText().includes('đã về'), `an arrived Lumo is reported (${near.getObjectiveText()})`);
+});
+
+controllerCase('the_lesson_door_never_closes_on_the_players_feet', () => {
+  const alcove = [];
+  const queue = [{ x: 244, y: 150 }];
+  const seen = new Set(['244,150']);
+  for (let index = 0; index < queue.length; index += 1) {
+    const point = queue[index];
+    alcove.push(point);
+    for (const [dx, dy] of [[6, 0], [-6, 0], [0, 6], [0, -6]]) {
+      const next = { x: point.x + dx, y: point.y + dy };
+      const key = `${next.x},${next.y}`;
+      if (seen.has(key) || !isInsidePracticeAlcove('entry', next)) continue;
+      if (!actor('entry', next, { ...allOpen, practice: true })) continue;
+      seen.add(key);
+      queue.push(next);
+    }
+  }
+  assert.ok(alcove.length > 200, `the lesson area is walkable (${alcove.length} positions)`);
+  for (const point of alcove) {
+    assert.equal(isInsidePracticeAlcove('entry', point), true, `(${point.x},${point.y}) is inside the lesson alcove`);
+    const occupied = isPathThresholdOccupied('entry', 'practice', point);
+    assert.equal(pathDoorShouldClose(false, occupied, false), false,
+      `the lesson door stays open with Nhinh standing at (${point.x},${point.y})`);
+  }
+  assert.equal(CONTROLLER_SOURCE.includes('Cửa thử đang đóng'), false,
+    'the unreachable "the lesson door is closed" guidance line is gone');
+});
+
+controllerCase('every_standing_prop_answers_only_from_its_own_face', () => {
+  const flags = { 'l4-latch-a': true, 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true, 'l4-ink-revealed': true };
+  let advertised = 0;
+  for (const roomId of ['entry', 'relay', 'ink']) {
+    const scene = makePathScene(roomId, flags);
+    for (const element of PATH_ROOMS[roomId].elements) {
+      if (isPathSeal(element)) continue;
+      const id = element.id;
+      let face = 0;
+      for (const point of legalDisc(roomId, element.stand, PATH_ELEMENT_RADIUS)) {
+        scene.stand(point.x, point.y);
+        const allowed = isPathApproachAllowed(roomId, element, point);
+        assert.equal(scene.elementApproach(element.id, point.x, point.y), allowed,
+          `${roomId}/${element.id}: the shipped approach helper agrees with the layout predicate at (${point.x},${point.y})`);
+        if (allowed) {
+          face += 1;
+          advertised += 1;
+          continue;
+        }
+        // Outside its own face the control must already be silent, disabled, and refuse the press.
+        assert.equal(scene.prompt(id), null,
+          `${roomId}/${element.id} advertises nothing at (${point.x},${point.y})`);
+        assert.equal(scene.interactionEnabled(id), false,
+          `${roomId}/${element.id} is disabled at (${point.x},${point.y})`);
+        const before = JSON.stringify(scene.progress.flags) + scene.sent.length + scene.said.length + scene.recalled;
+        scene.interact(id);
+        assert.equal(JSON.stringify(scene.progress.flags) + scene.sent.length + scene.said.length + scene.recalled, before,
+          `${roomId}/${element.id} refuses E at (${point.x},${point.y})`);
+      }
+      assert.ok(face > 0, `${roomId}/${element.id} still owns a usable south face (${face} legal positions)`);
+      scene.stand(element.stand.x, element.stand.y);
+      assert.ok(isPathApproachAllowed(roomId, element, element.stand), `${roomId}/${element.id} authored stand is on its face`);
+      assert.notEqual(scene.prompt(id), null, `${roomId}/${element.id} advertises at its authored stand`);
+    }
+  }
+  assert.ok(advertised > 400, `the face rule still leaves plenty of usable positions (${advertised})`);
+  console.log(`      L05 faces: ${advertised} legal standing positions advertise the control whose face they are on`);
+});
+
+controllerCase('the_four_sides_of_every_standing_prop_are_quiet', () => {
+  const quiet = [];
+  for (const roomId of ['entry', 'relay', 'ink']) {
+    const scene = makePathScene(roomId, { 'l4-latch-a': true, 'l4-latch-b': true, 'l4-latch-c': true, 'l4-ink-revealed': true });
+    for (const element of PATH_ROOMS[roomId].elements) {
+      if (isPathSeal(element)) continue;
+      const id = element.id;
+      const sides = fourSides(element);
+      // RULE_GAMES §1: a standing prop answers from its own south face and nowhere else.
+      //
+      // The swirl engraving is the documented §3 wall exception: it is scratched into the east wall,
+      // so it has no walkable south face and answers from the floor in front of that wall face —
+      // which, for an east-wall element, is this helper's `west` contact. `fourSides()` describes a
+      // standing prop, so that one contact is the engraving's face rather than a side to be quiet;
+      // its own case (`the_spiral_engraving_sits_on_the_wall_with_a_reachable_stand`) asserts that
+      // face and that it is silent from above. Every other contact, including the engraving's, must
+      // still be silent and disabled here.
+      const faceSide = element.approach === 'side' ? 'west' : 'south';
+      for (const side of ['north', 'east', 'west']) {
+        if (side === faceSide) continue;
+        const point = sides[side];
+        scene.stand(point.x, point.y);
+        const label = `${roomId}/${element.id} ${side} (${point.x},${point.y})`;
+        assert.equal(scene.prompt(id), null, `${label}: no prompt from this side`);
+        assert.equal(scene.interactionEnabled(id), false, `${label}: disabled from this side`);
+        assert.equal(isPathApproachAllowed(roomId, element, point), false, `${label}: the face rule refuses it`);
+        if (actor(roomId, point)) quiet.push(`${label} walkable`);
+        else quiet.push(`${label} masonry`);
+      }
+      const face = sides[faceSide];
+      scene.stand(face.x, face.y);
+      assert.notEqual(scene.prompt(id), null, `${roomId}/${element.id} ${faceSide} face answers`);
+      assert.equal(isPathApproachAllowed(roomId, element, face), true,
+        `${roomId}/${element.id} ${faceSide} face is the authored approach of the layout predicate`);
+      if (element.approach === 'side') {
+        assert.equal(actor(roomId, face), true, `${roomId}/${element.id} answers from walkable floor, not masonry`);
+      }
+    }
+  }
+  console.log(`      L05 four sides: ${quiet.length} contacts checked quiet (the authored face answers on every prop)`);
+});
+
+controllerCase('door_controls_answer_only_from_their_own_room_side', () => {
+  let domains = 0;
+  for (const stand of PATH_CONTROL_STANDS) {
+    const scene = makePathScene(stand.room, { 'l4-latch-a': true, 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true });
+    let usable = 0;
+    for (const point of legalDisc(stand.room, stand, stand.radius)) {
+      scene.stand(point.x, point.y);
+      const allowed = isPathDoorApproachAllowed(stand.room, stand.id, point);
+      assert.equal(scene.doorApproach(stand.id, point.x, point.y), allowed,
+        `${stand.room}/door ${stand.id}: shipped helper agrees with the layout predicate at (${point.x},${point.y})`);
+      if (allowed) { usable += 1; continue; }
+      assert.equal(scene.doorPrompt(stand.id), null, `${stand.room}/door ${stand.id} advertises nothing at (${point.x},${point.y})`);
+      assert.equal(scene.doorEnabled(stand.id), false, `${stand.room}/door ${stand.id} is disabled at (${point.x},${point.y})`);
+      const before = scene.said.length + scene.saved;
+      scene.useDoor(stand.id);
+      assert.equal(scene.said.length + scene.saved, before, `${stand.room}/door ${stand.id} refuses E at (${point.x},${point.y})`);
+    }
+    assert.ok(usable > 0, `${stand.room}/door ${stand.id} keeps a usable room-side domain (${usable} legal positions)`);
+    domains += usable;
+  }
+  // The lens the plan asks this task to measure: both controls there keep their own domain. Measured
+  // with the shipped T05 selector (`scripts/check-interaction-targets.mjs`, case
+  // `l05_latch_c_and_door_c_each_have_a_reachable_domain`): (559,198) selects latch C — the owner
+  // keeps the position against the nearer door — and (567,208) selects door C; latch C then keeps 92
+  // reachable positions and door C 100, so no coordinate had to move and the rejected (578,190)
+  // remains rejected.
+  assert.deepEqual(PATH_ROOMS.ink.elements.find((element) => element.id === 'latch-c').stand, { x: 550, y: 218 },
+    'latch C keeps its authored stand');
+  assert.deepEqual(getPathControlStand('c', 'ink')?.x, 574, 'door C keeps its authored stand');
+  assert.equal(getPathControlStand('c', 'ink')?.y, 188, 'door C keeps its authored stand');
+  console.log(`      L05 door domains: ${domains} room-side legal standing positions across the six door controls`);
+});
+
+controllerCase('a_held_E_cannot_ping_pong_through_the_door_just_used', () => {
+  assert.equal(isPathInteractHeld(true, true), true, 'E is ignored while the key is still held after a room change');
+  assert.equal(isPathInteractHeld(true, false), false, 'releasing the key clears the guard');
+  assert.equal(isPathInteractHeld(false, true), false, 'without a pending release E is never ignored');
+
+  // Geometry: the return arrival stands clear of the trigger radius a held press would fire.
+  for (const [id, room] of [['a', 'entry'], ['b', 'relay']]) {
+    const arrival = getPathBackArrival(id);
+    const stand = getPathControlStand(id, room);
+    assert.ok(stand, `${room} registers the ${id} door`);
+    const distance = Math.hypot(arrival.x - stand.x, arrival.y - stand.y);
+    assert.ok(distance > stand.radius,
+      `the ${id} return arrival (${arrival.x},${arrival.y}) is outside the ${stand.radius}px trigger radius (${distance.toFixed(1)}px)`);
+    assert.equal(arrival.y, 210 + PATH_BACK_ARRIVAL_OFFSET, 'the arrival offset is the authored one');
+  }
+
+  // Wiring: the shipped door gate refuses while the guard is armed, and works again after a release.
+  const scene = makePathScene('entry', {}, { player: { x: 156, y: 221 } });
+  scene.interactReleasePending = true;
+  scene.interactKey.isDown = true;
+  assert.equal(scene.heldInteract(), true, 'the shipped guard reports a held E');
+  assert.equal(scene.doorEnabled('practice'), false, 'the arrived-through door is disabled while E is held');
+  assert.equal(scene.doorPrompt('practice'), null, 'and it advertises nothing, so no prompt can contradict E');
+  scene.useDoor('practice');
+  scene.interact('practice-call');
+  assert.equal(scene.said.length, 0, 'a held E runs no action at all');
+  scene.interactKey.isDown = false;
+  scene.interactReleasePending = false;
+  assert.equal(scene.heldInteract(), false, 'a released key disarms the guard');
+  assert.equal(scene.doorEnabled('practice'), true, 'releasing E restores the door');
+  scene.useDoor('practice');
+  assert.equal(scene.said.length, 1, 'a fresh press works again');
+
+  // The room change itself must also drop the target the player was holding: `transition()` arms the
+  // guard and rebuilds the room, and `drawRoom()` clears the interaction registry — which is what
+  // nulls `activeTarget` — before the new room registers anything.
+  const transitionBody = methodBody('transition');
+  const drawRoomBody = methodBody('drawRoom');
+  assert.ok(drawRoomBody.includes('this.interactions.clear()'), 'the room rebuild clears the interaction registry');
+  assert.ok(transitionBody.includes('this.drawRoom()'), 'a room change rebuilds the room');
+  assert.ok(transitionBody.indexOf('this.interactReleasePending=true') < transitionBody.indexOf('this.drawRoom()'),
+    'the held-E guard is armed before the new room registers its controls');
+});
+
+controllerCase('route_cables_reach_both_ends_and_bend_at_real_corners', () => {
+  const expected = [
+    ['entry', 'practice', 205, 2], ['entry', 'a', 215, 0], ['relay', 'b', 234, 0], ['relay', 'a', 380, 0], ['ink', 'c', 477, 3],
+  ];
+  for (const [room, mark, chord, corners] of expected) {
+    const line = getPathRouteLine(room, mark);
+    assert.ok(line, `${room}/${mark} route is authored in the layout data`);
+    const points = line.points;
+    const length = pathPolylineLength(points);
+    assert.ok(Math.abs(Math.hypot(points[points.length - 1].x - points[0].x, points[points.length - 1].y - points[0].y) - chord) < 1,
+      `${room}/${mark} chord is the published ${chord}px run`);
+    const pieces = pathRouteCableSegments(points);
+    const covered = pieces.reduce((total, piece) => total + piece.length, 0);
+    assert.ok(covered >= length - 1e-6, `${room}/${mark} cable covers the whole ${length.toFixed(1)}px run (${covered.toFixed(1)}px)`);
+    assert.ok(pieces.every((piece) => piece.length <= 160 + 1e-6), `${room}/${mark} cable pieces respect the native 160px stamp`);
+    const first = pieces[0], last = pieces[pieces.length - 1];
+    const firstStart = { x: first.x - Math.cos(first.angle) * first.length / 2, y: first.y - Math.sin(first.angle) * first.length / 2 };
+    const lastEnd = { x: last.x + Math.cos(last.angle) * last.length / 2, y: last.y + Math.sin(last.angle) * last.length / 2 };
+    assert.ok(Math.hypot(firstStart.x - points[0].x, firstStart.y - points[0].y) < 1e-6, `${room}/${mark} cable starts at the call`);
+    assert.ok(Math.hypot(lastEnd.x - points[points.length - 1].x, lastEnd.y - points[points.length - 1].y) < 1e-6, `${room}/${mark} cable ends at the plate`);
+    assert.equal(pathRouteCorners(points).length, corners, `${room}/${mark} elbows sit at its genuine corners`);
+  }
+});
+
+controllerCase('the_ink_mark_is_one_continuous_run_and_the_mouths_leave_the_passages', () => {
+  // One 348×48 tile over the corridor instead of two 240×48 stamps 132px out of phase.
+  const corridor = { x: 184, y: 218, width: 348, height: 48 };
+  assert.equal(corridor.width, 348, 'the corridor mark is one 348px run');
+  assert.equal(CONTROLLER_SOURCE.includes("for(const x of [304,412])"), false, 'the two out-of-phase ink stamps are gone');
+  assert.ok(CONTROLLER_SOURCE.includes('add.tileSprite(358,242,348,48'), 'the mark is one native tile over the corridor');
+  assert.ok(!CONTROLLER_SOURCE.includes("path-id','ink-route'"), 'no second ink stamp object survives');
+
+  for (const mouth of PATH_TUBE_MOUTHS) {
+    const face = getPathDoorFace(mouth.tube, mouth.room);
+    const art = { x: mouth.x - 32, y: mouth.y - 16, width: 64, height: 32 };
+    if (mouth.tube === 'c') {
+      assert.equal(rectsOverlap(art, getPathDoorPassage(face)), false,
+        `the C mouth at (${mouth.x},${mouth.y}) is outside door C's passage`);
+      const doorArt = { x: 574 - 32, y: 180 - 88, width: 64, height: 88 };
+      assert.equal(pointInRect({ x: mouth.x, y: mouth.y }, doorArt), false,
+        'and it is not stamped on the exit door frame itself');
+      continue;
+    }
+    // A room-hop mouth marks its own authored crossing point of the visible pipe; the practice mouth
+    // marks where the lesson tube crosses the partition at the low door.
+    const crossing = PATH_PIPE_ENDPOINTS[mouth.tube]?.[mouth.room] ?? { x: 156, y: 190 };
+    assert.deepEqual({ x: mouth.x, y: mouth.y }, crossing, `the ${mouth.room} ${mouth.tube} mouth marks its authored crossing`);
+    assert.equal(face.approach === 'north' ? rectsOverlap(art, getPathDoorPassage(face)) : false, false,
+      `the ${mouth.room} ${mouth.tube} mouth is outside its reverse-passage opening`);
+  }
+  // The removed position, kept as a regression guard: it really was stamped inside the exit passage.
+  assert.equal(rectsOverlap({ x: 574 - 32, y: 136 - 16, width: 64, height: 32 },
+    getPathDoorPassage(getPathDoorFace('c', 'ink'))), true,
+    'the old (574,136) stamp was inside door C\'s passage');
+  const inkC = PATH_TUBE_MOUTHS.find((mouth) => mouth.room === 'ink' && mouth.tube === 'c');
+  assert.equal(inkC.x, 536, 'the C mouth sits where the C run leaves the corridor masonry');
+  const cLine = getPathRouteLine('ink', 'c');
+  const descent = cLine.points.slice(-2);
+  const expectedAngle = Math.atan2(descent[1].y - descent[0].y, descent[1].x - descent[0].x);
+  assert.ok(Math.abs(inkC.rotation - expectedAngle) < 0.02, 'the C mouth rotation is the descent angle itself');
+  const crossing = descent[0].x + (218 - descent[0].y) / (descent[1].y - descent[0].y) * (descent[1].x - descent[0].x);
+  assert.ok(Math.abs(inkC.x - crossing) < 0.6, `the C mouth x is the masonry crossing (${crossing.toFixed(1)})`);
+});
+
+controllerCase('the_spiral_engraving_sits_on_the_wall_with_a_reachable_stand', () => {
+  const spiral = PATH_ROOMS.ink.elements.find((element) => element.id === 'spiral');
+  assert.equal(spiral.approach, 'side', 'the wall engraving carries its documented side approach in the data');
+  const art = getPathElementArtRect(spiral);
+  // The swirl's opaque content is inset 13/40 and 33/40 of its native 40px frame (measured from
+  // swirl-memory-scratch.png), so the visible ink is what has to land on the wall face.
+  const contentLeft = art.x + 13 / 40 * spiral.width;
+  const contentRight = art.x + 33 / 40 * spiral.width;
+  assert.ok(contentLeft >= 616, `the visible ink starts on the east wall face (${contentLeft.toFixed(2)})`);
+  assert.ok(contentRight <= 640, `and ends inside the wall (${contentRight.toFixed(2)})`);
+  assert.equal(actor('ink', spiral.stand), true, 'the engraving stand is legal floor in front of the wall');
+  assert.equal(reach('ink', PATH_ROOMS.ink.spawn, spiral.stand), true, 'and it is reachable from the ink entrance');
+  assert.equal(isPathApproachAllowed('ink', spiral, { x: spiral.stand.x, y: art.y - 40 }), false,
+    'the engraving stays silent from above its own span on the wall');
+  assert.equal(actor('ink', { x: spiral.stand.x, y: art.y - 40 }), true,
+    'and that position is walkable floor, so only the face rule refuses it');
+  assert.equal(actor('ink', { x: art.x + art.width + 20, y: spiral.stand.y }), false,
+    'behind the engraving is the east wall itself, which has no floor to answer from');
+  assert.equal(isPathApproachAllowed('ink', spiral, spiral.stand), true, 'it answers from the floor in front of the wall');
+  assert.ok(/Documented exception \(RULE_GAMES §3\)/.test(readFileSync(join(rootDir, 'src/data/pathForTwoLayout.ts'), 'utf8')),
+    'the side-approach exception carries its reason in the layout data');
+});
+
+controllerCase('the_small_schematic_comes_from_the_same_layout_data', () => {
+  const plan = buildPathSchematic();
+  assert.deepEqual(plan.rooms.map((room) => room.room), [...PATH_SCHEMATIC_ORDER], 'the schematic shows the three rooms in campaign order');
+  const authoredSeals = PATH_SCHEMATIC_ORDER.reduce((total, room) => total
+    + PATH_ROOMS[room].elements.filter((element) => element.art.startsWith('pressure-')).length, 0);
+  assert.equal(plan.rooms.reduce((total, room) => total + room.seals.length, 0), authoredSeals,
+    `every authored seal appears exactly once (${authoredSeals})`);
+  assert.equal(plan.pipes.length, 2, 'both authored pipes appear');
+  for (const room of plan.rooms) {
+    assert.ok(room.frame.x >= 0 && room.frame.x + room.frame.width <= PATH_SCHEMATIC_SIZE.width, `${room.room} cell fits the schematic`);
+    assert.ok(room.frame.y >= 0 && room.frame.y + room.frame.height <= PATH_SCHEMATIC_SIZE.height, `${room.room} cell fits the schematic`);
+    for (const seal of room.seals) {
+      assert.ok(seal.x >= room.frame.x && seal.x <= room.frame.x + room.frame.width
+        && seal.y >= room.frame.y && seal.y <= room.frame.y + room.frame.height,
+        `${room.room} seal sits inside its own cell`);
+    }
+  }
+  // Each room draws it beside its own call marker, on visible masonry, clear of the walkable corridor
+  // and of every authored control's art.
+  const artRects = PATH_SCHEMATIC_ORDER.flatMap((room) => PATH_ROOMS[room].elements.map((element) => ({ room, element, art: getPathElementArtRect(element) })));
+  for (const room of PATH_SCHEMATIC_ORDER) {
+    const slot = PATH_SCHEMATIC[room];
+    const walls = PATH_ROOMS[room].walls;
+    assert.ok(walls.some((wall) => slot.x >= wall.x && slot.x + slot.width <= wall.x + wall.width
+      && slot.y >= wall.y && slot.y + slot.height <= wall.y + wall.height),
+      `${room} schematic is drawn on an authored masonry face`);
+    for (const entry of artRects.filter((item) => item.room === room)) {
+      assert.equal(rectsOverlap(slot, entry.art), false, `${room} schematic never covers ${entry.element.id}`);
+    }
+  }
+  assert.ok(!/letter|chữ/.test(buildPathSchematic.toString()), 'the schematic carries no lettering');
+});
+
+controllerCase('every_door_swap_lands_on_walkable_floor_that_leads_back', () => {
+  // The route is walked in both directions: for each room-to-room swap, where the shipped `useDoor()`
+  // actually puts the player, whether that landing is legal floor for the 14x6 foot body, whether it
+  // is clear of the trigger of the door just used (a held E must not send the player straight back),
+  // and whether the control that brings the player back answers from a position the landing can walk
+  // to. Reachability is measured with the door open (`allOpen`), which is the state the player is in
+  // when they are standing on the far side of it.
+  //
+  // A reverse portal's registered stand sits inside its own threshold strip (`isPathPositionSafe`
+  // always refuses that strip), so the usable domain of door A in relay and door B in ink is the band
+  // just north of its own stand — measured here, not assumed. The practice door is entry-only and
+  // swaps no rooms; its own approach is asserted by
+  // `a_held_E_cannot_ping_pong_through_the_door_just_used`.
+  const crossings = [
+    { from: 'entry', door: 'a', to: 'relay', spawn: { x: 110, y: 251 } },
+    { from: 'relay', door: 'a', to: 'entry', spawn: getPathBackArrival('a') },
+    { from: 'relay', door: 'b', to: 'ink', spawn: { x: 82, y: 251 } },
+    { from: 'ink', door: 'b', to: 'relay', spawn: getPathBackArrival('b') },
+  ];
+  const answeringStands = (room, stand, door) => legalDisc(room, stand, stand.radius)
+    .filter((point) => isPathDoorApproachAllowed(room, door, point));
+  for (const crossing of crossings) {
+    const label = `${crossing.from} -> ${crossing.to} through ${crossing.door.toUpperCase()}`;
+    const outbound = getPathControlStand(crossing.door, crossing.from);
+    assert.ok(outbound, `${label}: the origin room registers that door control`);
+    const outward = answeringStands(crossing.from, outbound, crossing.door);
+    assert.ok(outward.length > 0, `${label}: usable from its own room side (${outward.length} legal positions)`);
+    assert.equal(reach(crossing.from, PATH_ROOMS[crossing.from].spawn, outward[0]), true,
+      `${label}: the origin stand (${outward[0].x},${outward[0].y}) is on the walked side of its own room`);
+    assert.equal(isPathPositionSafe(crossing.to, crossing.spawn), true,
+      `${label}: lands on walkable floor (${crossing.spawn.x},${crossing.spawn.y})`);
+    const back = getPathControlStand(crossing.door, crossing.to);
+    assert.ok(back, `${label}: the destination room registers the same control to come back`);
+    const distance = Math.hypot(crossing.spawn.x - back.x, crossing.spawn.y - back.y);
+    assert.ok(distance > back.radius,
+      `${label}: the landing is outside the return trigger (${distance.toFixed(1)}px > r${back.radius})`);
+    const homeward = answeringStands(crossing.to, back, crossing.door);
+    assert.ok(homeward.length > 0,
+      `${label}: the destination keeps a usable stand for the return control (${homeward.length} legal positions)`);
+    const nearest = homeward.reduce((best, point) => (Math.hypot(point.x - crossing.spawn.x, point.y - crossing.spawn.y)
+      < Math.hypot(best.x - crossing.spawn.x, best.y - crossing.spawn.y) ? point : best), homeward[0]);
+    assert.equal(reach(crossing.to, crossing.spawn, nearest), true,
+      `${label}: the landing walks back to the return control at (${nearest.x},${nearest.y})`);
+  }
+});
+
+controllerCase('the_two_write_only_flags_stay_retired', () => {
+  // Verified before deletion, at HEAD `ee34eba`: `pendingClose` was a private field written only in
+  // `updateDoors()` (the deferred close is `body.enable` per frame), and `l4-lumo-arrived` was
+  // written in `completeRoute()` and read by nothing in the repository. No external reader existed,
+  // so no compatibility shim is owed and neither name may come back as a write-only flag.
+  const retired = ['pendingClose', 'l4-lumo-arrived'];
+  for (const name of retired) {
+    assert.equal(CONTROLLER_SOURCE.includes(name), false, `PathForTwoLevel.ts no longer mentions ${name}`);
+  }
+  const sources = [];
+  const collect = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) collect(path);
+      else if (entry.name.endsWith('.ts')) sources.push(path);
+    }
+  };
+  collect(join(rootDir, 'src'));
+  assert.ok(sources.length > 40, `the whole src tree is scanned (${sources.length} files)`);
+  for (const name of retired) {
+    const readers = sources.filter((path) => readFileSync(path, 'utf8').includes(name));
+    assert.deepEqual(readers, [], `${name} is gone from src (would be a reader/writer: ${readers.join(', ')})`);
+  }
+});
+
+controllerCase('restore_fallbacks_are_named_safe_checkpoints', () => {
+  for (const room of PATH_SCHEMATIC_ORDER) {
+    const fallback = nearestSafePathSpawn(room, { x: 9999, y: 9999 }, () => false);
+    assert.deepEqual(fallback, PATH_CHECKPOINTS[room].point, `${room} falls back to its own named checkpoint`);
+    assert.equal(actor(room, fallback), true, `${room} checkpoint ${PATH_CHECKPOINTS[room].name} is safe for the foot body`);
+    assert.equal(reach(room, PATH_ROOMS[room].spawn, fallback), true, `${room} checkpoint is on the reached side`);
+  }
+  assert.equal(actor('relay', { x: 180, y: 280 }), false, 'the old shared (180,280) fallback really clips the relay wall band');
+  assert.equal(actor('ink', { x: 180, y: 280 }), false, 'and the ink room too');
+});
+
+controllerCase('saved_positions_restore_safely_in_every_room_and_state', () => {
+  // Mid-threshold: a save inside a closed door's floor pocket must be replaced by a safe point, and
+  // the door must not close on a body that is still standing in its own threshold.
+  for (const stand of PATH_CONTROL_STANDS) {
+    const face = getPathDoorFace(stand.id, stand.room);
+    const inside = { x: face.x, y: face.base - 30 };
+    const safe = nearestSafePathSpawn(stand.room, inside, (room, point) => isPathPositionSafe(room, point, { latches: {} }));
+    assert.equal(isPathPositionSafe(stand.room, safe), true, `${stand.room}/${stand.id}: a mid-threshold save restores safely`);
+    const body = pathActorBody(inside);
+    const occupied = rectsOverlap(body, { x: face.x - 22, y: face.base - 30, width: 44, height: 30 });
+    assert.equal(occupied, true, `${stand.room}/${stand.id}: the threshold strip really contains that body`);
+    assert.equal(pathDoorShouldClose(false, occupied, false), false, `${stand.room}/${stand.id}: the threshold defers closure`);
+  }
+  // Mid-travel: a route interrupted one step in must resume, not be thrown away.
+  const travelled = [
+    { room: 'entry', x: 180, y: 280 },
+    { room: 'entry', x: 480, y: 190, pipe: 'a', end: 'out' },
+    { room: 'relay', x: 110, y: 280, pipe: 'a', end: 'in' },
+    { room: 'relay', x: 480, y: 190 },
+  ];
+  assert.equal(isPathRouteValid(travelled), true, 'a mid-travel route is still valid');
+  assert.equal(shouldRestorePathFollower({ hasRoomMetadata: true, assignment: 'a', travelling: true, actuallyArrived: false }), false,
+    'a mid-travel save resumes its route');
+  assert.deepEqual(parsePathRoute(travelled), travelled, 'a mid-travel route survives the save round trip');
+  // Every room: a legal saved position is kept, an illegal one is replaced.
+  for (const room of PATH_SCHEMATIC_ORDER) {
+    const spawn = PATH_ROOMS[room].spawn;
+    assert.deepEqual(nearestSafePathSpawn(room, spawn), spawn, `${room}: a legal save is kept`);
+    assert.equal(isPathPositionSafe(room, nearestSafePathSpawn(room, { x: 300, y: 150 })), true,
+      `${room}: an impossible save still restores onto safe floor`);
+  }
+});
+
+// One summary, one exit code. A failing case is named here and turns the run red: `14/15 passed`
+// followed by exit 0 would gate nothing.
+console.log(`\nlevel 05 cases: ${controllerCaseCount - controllerFailures.length}/${controllerCaseCount} passed`);
+if (controllerFailures.length) {
+  console.log(`failed: ${controllerFailures.join(', ')}`);
+  process.exit(1);
+}
 console.log('Level 05 geometry/state checks passed.');

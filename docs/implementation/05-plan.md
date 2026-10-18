@@ -56,6 +56,25 @@
 - [ ] Obtain two independent read-only Luna high reviews of that same revision, one emphasizing scenario/flow and one collision/save/integration. Reconcile only after both complete; send confirmed corrections to the worker, then repeat affected checks/reviews.
 - [ ] Record final checked revision, decisions, evidence and limitations. Keep branch available for the user's gameplay review; do not merge/push without a new request.
 
+## Repair round — 2026-10-18 levels 05–10 repair, task T06
+
+Task T06 re-verified this plan's contract against the shipped code and closed the gaps below. It also
+implements the repair plan's decisions **D1 (the lesson is optional)** and **D2 (the memory stays at
+latch C)**; the full coordinate list and the measured numbers live in `05-layout.md`, and the corrected
+flow narrative in `level-05-flow-plan.md`.
+
+- D1: `callEligible('a')` is independent of `l4-practice-complete`, nothing writes that flag except a real recall from the lesson plate, the entry objective/HUD stop naming the practice marker once `l4-called-a` is set, and the lesson still teaches send/travel/arrival/recall while its door never closes on the player inside the alcove.
+- D2: the seven-line memory plays at latch C and the wall engraving replays it; `l4-memo` is written when the dialogue completes.
+- `latch-c` is enabled in the ink room before the ink exists and refuses with the missing step, without latching early; the reunion objective names the C handle and reports travelling/arrived.
+- A room change arms a held-E guard (armed before the new room registers, cleared on key release) and the room rebuild clears the interaction registry, so a held press cannot fire twice through a threshold.
+- Return arrivals move from `+20` (480,230 — 9px inside the door trigger) to `+40` **(480,250)**, 29px clear and still walkable and connected in both rooms.
+- The single shared (180,280) fallback is replaced by per-room named checkpoints (`PATH_CHECKPOINTS`), because (180,280) clips the relay and ink wall bands.
+- The ink mark is one 348×48 tile at (358,242); root cables follow every authored waypoint in ≤160px stamps with elbows at real corners; the C tube mouth leaves door C's passage for (536,214); the spiral engraving is on the visible east wall with a reachable stand.
+- A small geometry-only schematic from the same room/seal/pipe data is drawn beside each call marker; no lettering and no baked staging, and the "pillars" claim is dropped because there are no pillars in this level's wall data.
+- Standing props and door controls now share one layout approach predicate across prompt, `isEnabled`, `ownsPosition` and the action (`isPathApproachAllowed` / `isPathDoorApproachAllowed`), which is what `check-interaction-targets.mjs` §bullet-3 expects of L05.
+- `pendingClose` and `l4-lumo-arrived` were confirmed write-only (no reader anywhere at `ee34eba`) and deleted.
+- `scripts/check-path-for-two.mjs` now counts its geometry/state invariants as a case as well (19 cases) and exits non-zero whenever any case fails, naming it on the summary line.
+
 ## Decisions and risks
 
 Room switching is selected to keep the lesson readable; it adds local companion room/route persistence. The narrowest native door gap is44px and must be checked using body width14. Lumo.update hovers around an offset target, so route/arrival calculations must compensate for that actual behavior. Whole-prop solids must not obstruct the end foyer; the existing latch doubles as recall after C rather than adding another pedestal. The other thread's Level04 changes may later touch CampaignScene; keep index4 integration small and explicit.
