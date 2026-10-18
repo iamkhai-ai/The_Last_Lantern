@@ -40,11 +40,19 @@ import {
   observatorySolidRects,
 } from '../src/data/observatoryLayout.ts';
 import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
+import { HEART_SEAL_RADIUS } from '../src/data/heartOfElariaLayout.ts';
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SCENE_FILE = join(rootDir, 'src/scenes/CampaignScene.ts');
 const sourceFile = ts.createSourceFile(SCENE_FILE, readFileSync(SCENE_FILE, 'utf8'), ts.ScriptTarget.Latest, true);
+/**
+ * Level 10's controller is a separate class, so its own methods are extracted from its own file. The
+ * recall callback lives there, and this is the only place a reload's flag synchronisation is proved
+ * against the shipped code rather than a copy of it.
+ */
+const HEART_FILE = join(rootDir, 'src/levels/HeartOfElariaLevel.ts');
+const heartSourceFile = ts.createSourceFile(HEART_FILE, readFileSync(HEART_FILE, 'utf8'), ts.ScriptTarget.Latest, true);
 
 const OPEN_LOOP_LINE = 'Lối đá đã khớp vào vòng. Đường về bệ đèn thông suốt ngay cả khi ánh sáng tắt.';
 
@@ -52,7 +60,7 @@ const OPEN_LOOP_LINE = 'Lối đá đã khớp vào vòng. Đường về bệ �
  * 1. Extraction: the registered runtime callback, keyed by registry id
  * ------------------------------------------------------------------ */
 
-const nodeText = (node) => node.getText(sourceFile);
+const nodeText = (node) => node.getText(node.getSourceFile());
 
 function walk(node, visit) {
   visit(node);
@@ -93,10 +101,10 @@ function registeredCallbackSource(registryId) {
   return nodeText(callback);
 }
 
-/** One CampaignScene method body, so the cases run the shipped state logic. */
-function methodSource(methodName) {
-  const method = findNode(sourceFile, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === methodName);
-  assert.ok(method, `CampaignScene still declares ${methodName}()`);
+/** One controller method body, so the cases run the shipped state logic. */
+function methodSource(methodName, file = sourceFile, owner = 'CampaignScene') {
+  const method = findNode(file, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === methodName);
+  assert.ok(method, `${owner} still declares ${methodName}()`);
   assert.ok(method.body, `${methodName}() still has a body`);
   return nodeText(method.body);
 }
@@ -164,6 +172,28 @@ function runRegistered(registryId, scene, symbols = {}) {
     compiled.set(key, bind(registeredCallbackSource(registryId), { ...CALLBACK_SYMBOLS, ...symbols }, `the ${registryId} callback`));
   }
   compiled.get(key)(scene);
+}
+
+let heartRecall = null;
+/**
+ * Level 10's recall path — the shipped `callLumoToSeal()` body — run against a fake `this`. The recall
+ * branch is the one the reload depends on, so this proves the real flag synchronisation, not a copy.
+ */
+function runHeartRecall(scene) {
+  if (!heartRecall) heartRecall = bind(methodSource('callLumoToSeal', heartSourceFile, 'HeartOfElariaLevel'), NO_SYMBOLS, 'HeartOfElariaLevel.callLumoToSeal()');
+  return heartRecall(scene);
+}
+
+let heartDrive = null;
+/**
+ * The shipped per-frame Lumo driver. The seal only powers on the real arrival, so the arrival itself —
+ * the mode flip inside `driveLumo` — is proved against the shipped body rather than a copy of it.
+ */
+function runHeartDrive(scene) {
+  if (!heartDrive) {
+    heartDrive = bind(methodSource('driveLumo', heartSourceFile, 'HeartOfElariaLevel'), { Phaser: PHASER_PORTS, dt: 16, HEART_SEAL_RADIUS }, 'HeartOfElariaLevel.driveLumo()');
+  }
+  return heartDrive(scene);
 }
 
 /** A chainable stand-in for the one Phaser game object the strip refresh builds. */
@@ -277,6 +307,40 @@ function makeScene(seed = {}) {
   scene.getObservatoryWorldState = () => sources().world(scene);
   scene.isObservatoryCompletionReady = () => sources().ready(scene);
   return scene;
+}
+
+/**
+ * A recording stand-in for the ports Level 10's `callLumoToSeal()` touches: its own `lumoMode`, the
+ * campaign flags, `save()` and `say()`. The recall body is the shipped one; this only records it.
+ */
+function makeHeartRecallScene({ lumoMode = 'holding', flags = {} } = {}) {
+  const calls = { save: 0, say: [] };
+  return {
+    lumoMode,
+    progress: { flags },
+    calls,
+    save() { calls.save += 1; },
+    say(lines) { calls.say.push(lines); },
+  };
+}
+
+/**
+ * A recording stand-in for the ports Level 10's `driveLumo()` touches: the seal anchor, Nhinh, Lumo's
+ * sprite, `save()` and `say()`. `lumo.update` is a no-op — the case moves the sprite itself, standing
+ * in for the travel that happens over several frames.
+ */
+function makeHeartDriveScene({ lumoMode, x, y }) {
+  const calls = { save: 0, say: [] };
+  return {
+    lumoMode,
+    sealPoint: { x: 320, y: 244 },
+    player: { x: 320, y: 280 },
+    lumo: { sprite: { x, y }, update() {} },
+    progress: { flags: {} },
+    calls,
+    save() { calls.save += 1; },
+    say(lines) { calls.say.push(lines); },
+  };
 }
 
 /* ------------------------------------------------------------------ *
@@ -703,6 +767,52 @@ const CASES = [
         assert.ok(excluded.includes(level),
           `index ${level}: ${field} owns the frame, so the generic pass must not run there`);
       }
+    },
+  },
+  {
+    name: 'heart_recall_drops_assignment_and_route',
+    run: () => {
+      // The shipped recall path: recalling a Lumo who is holding or travelling ends the assignment at
+      // once — the mark and the in-flight route are dropped and the save is written immediately.
+      for (const from of ['holding', 'travelling']) {
+        const scene = makeHeartRecallScene({
+          lumoMode: from,
+          flags: { 'l9-called-heart': true, 'l9-at-heart': from === 'holding' },
+        });
+        runHeartRecall(scene);
+        assert.equal(scene.lumoMode, 'follow', `recall from ${from}: Lumo returns to following`);
+        assert.equal(scene.progress.flags['l9-called-heart'], false, `recall from ${from}: the current assignment is cleared`);
+        assert.equal(scene.progress.flags['l9-at-heart'], false, `recall from ${from}: the arrival mark is cleared`);
+        assert.equal(scene.calls.save, 1, `recall from ${from}: the recall saves immediately, so a reload cannot re-hold`);
+        assert.equal(scene.calls.say.length, 1, `recall from ${from}: the recall answers once`);
+      }
+      // Calling him from follow still assigns the seal: `l9-called-heart` is the current assignment.
+      const called = makeHeartRecallScene({ lumoMode: 'follow', flags: {} });
+      runHeartRecall(called);
+      assert.equal(called.lumoMode, 'travelling', 'calling Lumo from follow starts the route');
+      assert.equal(called.progress.flags['l9-called-heart'], true, 'calling Lumo records the current assignment');
+      assert.equal(called.progress.flags['l9-at-heart'], undefined, 'calling does not mark arrival before he arrives');
+      assert.equal(called.calls.save, 1, 'calling Lumo saves once');
+    },
+  },
+  {
+    name: 'heart_travelling_lumo_promotes_only_on_arrival',
+    run: () => {
+      // A reload can leave Lumo in transit: the frame driver keeps him travelling — no power, no save —
+      // until he is genuinely inside the seal radius, and only then flips him to holding.
+      const travelling = makeHeartDriveScene({ lumoMode: 'travelling', x: 320, y: 184 });
+      runHeartDrive(travelling);
+      assert.equal(travelling.lumoMode, 'travelling', 'a Lumo 60px out is still travelling after a frame');
+      assert.equal(travelling.progress.flags['l9-at-heart'], undefined, 'travel does not mark arrival');
+      assert.equal(travelling.calls.save, 0, 'a frame of travel saves nothing');
+
+      travelling.lumo.sprite.x = 320;
+      travelling.lumo.sprite.y = 244;
+      runHeartDrive(travelling);
+      assert.equal(travelling.lumoMode, 'holding', 'arrival inside the seal radius flips him to holding');
+      assert.equal(travelling.progress.flags['l9-at-heart'], true, 'the arrival marks him at the seal');
+      assert.equal(travelling.calls.save, 1, 'the arrival saves once');
+      assert.equal(travelling.calls.say.length, 1, 'the arrival plays its one exchange');
     },
   },
 ];

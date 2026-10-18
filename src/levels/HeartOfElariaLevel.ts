@@ -11,9 +11,9 @@ import {
   auditHeartStands, canExtinguishHeartLantern, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
   getHeartStage, heartArtCandidates, heartArtNativeSize, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
   HEART_G0_ID, HEART_LANE_COLORS, HEART_MAT_ID, HEART_MOON_SHADOW, HEART_OVERLOAD_CHECKPOINT, HEART_PROPS,
-  HEART_RING_LANES, HEART_ROOT_LANES, HEART_SEAL_ID, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
+  HEART_RING_LANES, HEART_ROOT_LANES, HEART_SEAL_ID, HEART_SEAL_RADIUS, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
   HEART_STATUE_SHADOW, isHeartPositionSafe, nearestSafeHeartSpawn, normalizeHeartProgress,
-  resolveHeartRestoreState, type HeartBranchId, type HeartElement, type HeartPoint, type HeartPuzzleState, type HeartStage,
+  resolveHeartLumoMode, resolveHeartRestoreState, type HeartBranchId, type HeartElement, type HeartPoint, type HeartPuzzleState, type HeartStage,
 } from '../data/heartOfElariaLayout';
 
 export interface HeartOfElariaLevelOptions {
@@ -238,7 +238,9 @@ export class HeartOfElariaLevel {
     this.lumo.setVisible(true);
     const called = this.progress.flags['l9-called-heart'] === true;
     const distanceToSeal = Math.hypot(lumoX - this.sealPoint.x, lumoY - this.sealPoint.y);
-    this.lumoMode = called ? (distanceToSeal <= 20 ? 'holding' : 'travelling') : 'follow';
+    // `l9-called-heart` is the current assignment: a recalled Lumo restores following, one saved in
+    // transit resumes the route, and only a real arrival restores him holding the seal.
+    this.lumoMode = resolveHeartLumoMode({ called, distanceToSeal });
     this.progress.flags['l9-at-heart'] = this.lumoMode === 'holding';
 
     this.drawScene();
@@ -304,6 +306,7 @@ export class HeartOfElariaLevel {
       balanceMirror: this.value('heart-balance'),
       statue: this.value('heart-statue'),
       lumo: { x: this.lumo.sprite.x, y: this.lumo.sprite.y },
+      lumoHolding: this.lumoMode === 'holding',
       latched: this.progress.flags['l9-roots'] === true,
     });
   }
@@ -316,6 +319,8 @@ export class HeartOfElariaLevel {
       lanternPlaced: this.lantern.lanternPlaced,
       lanternInHand: this.lantern.lanternInHand,
       called: this.progress.flags['l9-called-heart'] === true && this.lumoMode !== 'follow',
+      branchesAdjusted: (['heart-g0', 'heart-memory', 'heart-balance', 'heart-statue'] as const)
+        .some((key) => this.progress.counters[key] !== undefined),
       ready: state.ready,
       latched: state.latched,
       retrieved: this.progress.flags['l9-lantern-retrieved'] === true,
@@ -503,7 +508,9 @@ export class HeartOfElariaLevel {
     }
     this.lumo.update(dt, this.sealPoint.x - 18, this.sealPoint.y + 12, true);
     const distance = Math.hypot(this.lumo.sprite.x - this.sealPoint.x, this.lumo.sprite.y - this.sealPoint.y);
-    if (this.lumoMode === 'travelling' && distance <= 8) {
+    // Arrival is "inside the seal radius" — the same threshold the derivation and a reload use — so
+    // the seal powers exactly when the mode flips to holding, and never while he is still travelling.
+    if (this.lumoMode === 'travelling' && distance <= HEART_SEAL_RADIUS) {
       this.lumoMode = 'holding';
       this.progress.flags['l9-at-heart'] = true;
       this.save();
@@ -516,7 +523,10 @@ export class HeartOfElariaLevel {
 
   private callLumoToSeal(): void {
     if (this.lumoMode === 'holding' || this.lumoMode === 'travelling') {
+      // Recall ends the assignment: drop the mark and any in-flight route at once and save, so a
+      // reload right after can never re-hold the seal from a stale `l9-called-heart`.
       this.lumoMode = 'follow';
+      this.progress.flags['l9-called-heart'] = false;
       this.progress.flags['l9-at-heart'] = false;
       this.save();
       this.say([{ speaker: 'Nhinh', text: 'Lumo, về đây với mình một chút.' }, { speaker: 'Lumo', text: 'Tôi về ngay.' }]);
@@ -1008,7 +1018,9 @@ export class HeartOfElariaLevel {
     if (statueElement) this.swapArt('heart-statue', `statue-notch-${this.value('heart-statue')}`, statueElement);
 
     const sealElement = getHeartElement(HEART_SEAL_ID);
-    if (sealElement) this.swapArt(HEART_SEAL_ID, this.lumoMode === 'follow' ? 'pressure-empty' : 'pressure-occupied', sealElement);
+    // The plate reads occupied only while Lumo is actually holding it and settled inside the radius;
+    // a travelling Lumo still paints empty, matching the state the seal itself powers from.
+    if (sealElement) this.swapArt(HEART_SEAL_ID, state.lumoAtSeal ? 'pressure-occupied' : 'pressure-empty', sealElement);
 
     const wheel = this.images.get('wheel');
     if (wheel) {

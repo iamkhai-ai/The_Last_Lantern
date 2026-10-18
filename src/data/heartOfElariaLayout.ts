@@ -282,6 +282,11 @@ export interface HeartPuzzleInput {
   statue: number;
   /** Live companion position; never a saved `at-*` flag. */
   lumo: HeartPoint;
+  /**
+   * The *current* assignment, not a history: true only while Lumo is actually holding the seal.
+   * A following or travelling Lumo is not holding it, so his mere presence can never power Hope.
+   */
+  lumoHolding: boolean;
   /** `l9-roots`: the brass root clips mechanically hold the configuration. */
   latched: boolean;
 }
@@ -508,7 +513,7 @@ export function deriveHeartPuzzle(input: HeartPuzzleInput): HeartPuzzleState {
   const g0Split = input.g0 === 0;
   const memoryRoute = g0Split && input.memoryMirror === HEART_MEMORY_MIRROR_GOAL;
   const balanceRoute = g0Split && input.balanceMirror === HEART_BALANCE_MIRROR_GOAL;
-  const lumoAtSeal = Math.hypot(input.lumo.x - 320, input.lumo.y - 244) <= HEART_SEAL_RADIUS;
+  const lumoAtSeal = input.lumoHolding && Math.hypot(input.lumo.x - 320, input.lumo.y - 244) <= HEART_SEAL_RADIUS;
 
   const eyeLeft = light && balanceRoute && input.statue !== HEART_STATUE_BLOCKS_LEFT_EYE;
   const eyeRight = light && balanceRoute && input.statue !== HEART_STATUE_BLOCKS_RIGHT_EYE;
@@ -556,6 +561,8 @@ export function getHeartStage(input: {
   lanternPlaced: boolean;
   lanternInHand: boolean;
   called: boolean;
+  /** The player has touched a branch control (G0, the two mirrors or the statue). */
+  branchesAdjusted: boolean;
   ready: boolean;
   latched: boolean;
   retrieved: boolean;
@@ -567,7 +574,12 @@ export function getHeartStage(input: {
   if (input.latched) return 'retrieve';
   if (input.ready) return 'confirm';
   if (!input.crystals) return 'crystals';
-  if (!input.taught) return 'teach';
+  // The rule mat is only an entry hint: it belongs to the moment the puzzle has not started yet. Once
+  // the player has placed the lantern, called Lumo or touched a branch control, the ladder must show
+  // the stage that matches that real progress instead of sending them back to the optional mat (M19).
+  // The mat never gates readiness, and skipping it never blocks the route.
+  const started = input.lanternPlaced || input.called || input.branchesAdjusted;
+  if (!input.taught && !started) return 'teach';
   if (input.lanternInHand && !input.lanternPlaced) return 'source';
   if (!input.called) return 'seal';
   return 'route';
@@ -621,6 +633,20 @@ export function normalizeHeartProgress(flags: Record<string, boolean | string>):
   if (flags['l9-lantern-retrieved'] === true) flags['l9-lantern-placed'] = false;
   if (flags['l9-overload'] === true && flags['l9-complete'] === true) flags['l9-overload'] = false;
   if (flags['l9-at-heart'] === true && flags['l9-called-heart'] !== true) flags['l9-at-heart'] = false;
+}
+
+/** How Lumo is currently assigned in the room: following Nhinh, travelling to the seal, or holding it. */
+export type HeartLumoMode = 'follow' | 'travelling' | 'holding';
+
+/**
+ * The assignment a reload restores from the save. `l9-called-heart` is the *current* assignment, never
+ * "was called once", so a recalled Lumo reloads following. A Lumo saved in transit resumes the route
+ * and only a real arrival — his restored position inside the seal radius — restores him holding. A
+ * lone `l9-at-heart` flag can never reconstruct the assignment by itself.
+ */
+export function resolveHeartLumoMode(saved: { called: boolean; distanceToSeal: number }): HeartLumoMode {
+  if (!saved.called) return 'follow';
+  return saved.distanceToSeal <= HEART_SEAL_RADIUS ? 'holding' : 'travelling';
 }
 
 /** The campaign-level equivalent of the v1 `finale_overload → hub_final` write-back. */
