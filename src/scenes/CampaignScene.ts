@@ -18,6 +18,7 @@ import {
   OBSERVATORY_BRIDGE_LANE,
   OBSERVATORY_ELEMENTS,
   OBSERVATORY_FLOORS,
+  OBSERVATORY_RETURN_LOOP_VISUAL_ID,
   OBSERVATORY_ROOT_BED,
   OBSERVATORY_STAMPS,
   OBSERVATORY_WALLS,
@@ -37,6 +38,7 @@ import {
   observatoryFinalDoorBlockReason,
   observatoryGuidance,
   observatoryPrompt,
+  observatoryReturnLoopLane,
   observatorySolidRects,
   rectsOverlap,
   type ObsAlcove,
@@ -102,6 +104,8 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryRootBody: Phaser.Physics.Arcade.StaticBody | null = null;
   private observatoryShadowVisual?: Phaser.GameObjects.Image;
   private observatoryMemoryOverlay?: Phaser.GameObjects.Rectangle;
+  /** The opened return loop's floor strip: exactly one per room, never a collider. */
+  private observatoryReturnLoopVisual?: Phaser.GameObjects.TileSprite;
   private observatoryBridgeStones: Phaser.GameObjects.Image[] = [];
   private footprintTrail?: Phaser.GameObjects.Graphics;
   private memoryLayerLabels = new Map<string, Phaser.GameObjects.Text>();
@@ -625,6 +629,7 @@ export class CampaignScene extends Phaser.Scene {
       OBSERVATORY_BODY.bodyOffsetX, OBSERVATORY_BODY.width, OBSERVATORY_BODY.height);
     this.observatoryMiniatureIndex = 0;
     this.drawObservatoryBackground(roomId);
+    this.refreshObservatoryReturnLoop();
     this.drawObservatoryWalls(roomId);
     this.drawObservatoryWallArt(roomId);
     this.buildObservatoryStamps(roomId);
@@ -836,6 +841,7 @@ export class CampaignScene extends Phaser.Scene {
     this.observatoryBridgeStones = [];
     this.observatoryShadowVisual = undefined;
     this.observatoryMemoryOverlay = undefined;
+    this.observatoryReturnLoopVisual = undefined;
     for (const object of this.roomObjects) object.destroy();
     this.roomObjects = [];
     this.roomDoors.clear();
@@ -1062,11 +1068,21 @@ export class CampaignScene extends Phaser.Scene {
       register(
         () => {
           const state = this.getObservatoryWorldState();
-          if (!observatoryDoorOpen('return-loop', state)) {
+          if (observatoryDoorOpen('return-loop', state)) {
+            this.say([{ speaker: 'Nhinh', text: 'Lối đá vòng đang mở. Đường về bệ đèn thông suốt.' }]);
+            return;
+          }
+          // The loop is purely a floor route: it needs the crossing and the far
+          // latch, never the lantern's current place or Lumo's current position.
+          if (!state.bridgeCrossed || !state.finalDoorLatched) {
             this.say([{ speaker: 'Nhinh', text: `Lối đá vòng chưa mở được. ${observatoryDoorBlockReason('return-loop', state)}` }]);
             return;
           }
-          this.say([{ speaker: 'Nhinh', text: 'Lối đá vòng đang mở. Đường về bệ đèn thông suốt.' }]);
+          this.progress.flags['l8-return-loop-open'] = true;
+          this.save();
+          this.refreshObservatoryDoors();
+          this.refreshObservatoryReturnLoop();
+          this.say([{ speaker: 'Nhinh', text: 'Lối đá đã khớp vào vòng. Đường về bệ đèn thông suốt ngay cả khi ánh sáng tắt.' }]);
         },
       );
     } else if (id === 'final-record') {
@@ -1255,10 +1271,6 @@ export class CampaignScene extends Phaser.Scene {
         this.roomObjects.push(this.add.image(tx, ty, 'ruin_pillar').setAlpha(0.85).setScale(0.9).setDepth(3));
       }
     }
-    if (this.progress.flags['l8-return-loop-open'] === true) {
-      // The opened loop is painted as a continuous stone strip on every room.
-      this.roomObjects.push(this.add.tileSprite(44, 286, room.width - 88, 38, 'ground_stone').setOrigin(0).setTint(0x9bd8dd).setAlpha(0.55).setDepth(0.8));
-    }
     const decor = this.add.graphics().setDepth(1);
     decor.fillStyle(0x07151c, hasCustomBg ? 0.08 : 0.16);
     decor.fillRect(0, 0, room.width, room.height);
@@ -1335,6 +1347,43 @@ export class CampaignScene extends Phaser.Scene {
       door.image.setAlpha(open ? 0.45 : 1);
     }
     this.syncObservatorySolids();
+  }
+
+  /**
+   * Keeps exactly one visual for the opened return loop: a stone strip along the
+   * south edge of the room's own floor band, so the route reads as floor rather
+   * than as a second copy of the background. Collision is not built here — the
+   * loop's alcove thresholds inside observatorySolidRects() are already gated by
+   * observatoryDoorOpen('return-loop', state), the single reader of the flag this
+   * control writes. Safe to call on every E press and on every room build or
+   * restore: it creates, reuses or destroys one id-tracked strip.
+   */
+  public refreshObservatoryReturnLoop(): void {
+    const roomId = this.activeObservatoryRoom;
+    const open = roomId !== null && observatoryDoorOpen('return-loop', this.getObservatoryWorldState());
+    const current = this.observatoryReturnLoopVisual;
+    if (!open || roomId === null) {
+      if (!current) return;
+      this.roomObjects = this.roomObjects.filter((object) => object !== current);
+      current.destroy();
+      this.observatoryReturnLoopVisual = undefined;
+      return;
+    }
+    const lane = observatoryReturnLoopLane(roomId);
+    if (current) {
+      // Same room, same lane: leave the strip alone so repeated presses and
+      // repeated restores never stack a second one.
+      if (current.x !== lane.x || current.y !== lane.y || current.width !== lane.width || current.height !== lane.height) {
+        current.setPosition(lane.x, lane.y);
+        current.setSize(lane.width, lane.height);
+      }
+      return;
+    }
+    const visual = this.add.tileSprite(lane.x, lane.y, lane.width, lane.height, 'ground_stone')
+      .setOrigin(0).setTint(0x9bd8dd).setAlpha(0.55).setDepth(0.8);
+    visual.setName(OBSERVATORY_RETURN_LOOP_VISUAL_ID);
+    this.roomObjects.push(visual);
+    this.observatoryReturnLoopVisual = visual;
   }
 
   /**

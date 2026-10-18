@@ -15,7 +15,10 @@
  *    required for every route beyond Door A;
  *  - nearestSafeObservatorySpawn() never returns a position inside a solid,
  *    inside the bridge rectangle, or outside the room;
- *  - every locked door and disabled control has a non-empty prerequisite message.
+ *  - every locked door and disabled control has a non-empty prerequisite message;
+ *  - the opened return loop's floor strip is inside the room's walkable band and
+ *    the runtime writer of `l8-return-loop-open` still exists (review B1). The
+ *    behaviour behind that writer is executed by scripts/check-campaign-runtime.mjs.
  */
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -29,6 +32,7 @@ import {
   OBSERVATORY_FINAL_DOOR_HEAD,
   OBSERVATORY_FLOORS,
   OBSERVATORY_NON_SOLID_IDS,
+  OBSERVATORY_RETURN_LOOP_VISUAL_ID,
   OBSERVATORY_ROOT_BED,
   OBSERVATORY_STAMPS,
   OBSERVATORY_WALLS,
@@ -48,6 +52,7 @@ import {
   observatoryElements,
   observatoryGuidance,
   observatoryPrompt,
+  observatoryReturnLoopLane,
   observatorySolidRects,
   rectsOverlap,
 } from '../src/data/observatoryLayout.ts';
@@ -334,6 +339,23 @@ assert.ok(reachable('observatory', farBankSpawn, STAGES.finished, pocketTarget, 
 assert.equal(reachable('observatory', entry('observatory'), STAGES.finished, pocketTarget, 12), false,
   'with the lantern back in hand the root bridge is gone, so the near bank cannot reach the far side');
 
+// The opened loop's floor strip is data-owned: it stays inside the room's own
+// walkable band, between the side walls, and clear of the HUD (y<58) and the
+// bottom status band (y>=320).
+for (const roomId of ROOMS) {
+  const lane = observatoryReturnLoopLane(roomId);
+  const band = OBSERVATORY_FLOORS[roomId];
+  assert.ok(lane.y >= band.y && lane.y + lane.height <= band.y + band.height,
+    `${roomId} loop lane stays inside the walkable band (${lane.y}..${lane.y + lane.height})`);
+  assert.ok(lane.x >= band.minX && lane.x + lane.width <= band.maxX,
+    `${roomId} loop lane stays between the side walls (${lane.x}..${lane.x + lane.width})`);
+  assert.ok(lane.y >= 58 && lane.y + lane.height <= 320,
+    `${roomId} loop lane avoids the HUD and status bands`);
+  assert.ok(lane.width > 0 && lane.height > 0, `${roomId} loop lane is a real strip`);
+}
+assert.equal(OBSERVATORY_RETURN_LOOP_VISUAL_ID, 'observatory-return-loop',
+  'the loop strip keeps its stable id for later room restoration');
+
 /* ------------------------------------------------------------------ *
  * 5. Puzzle derivations
  * ------------------------------------------------------------------ */
@@ -600,6 +622,18 @@ assert.equal(observatorySource.includes("'observatory-lumo-call-point'"), false,
   'no undocumented extra control point exists beside the lantern pedestal');
 const solidSyncCalls = (sceneSource.match(/this\.syncObservatorySolids\(\)/g) ?? []).length;
 assert.ok(solidSyncCalls >= 2, `dynamic solids are synchronised at build and per frame (${solidSyncCalls} call sites)`);
+// Review B1: `l8-return-loop-open` had three readers and no writer, so the loop
+// control reported state forever and Level 09 could not be finished. This guard
+// fails loudly if the runtime writer disappears again; the behaviour itself is
+// executed by scripts/check-campaign-runtime.mjs.
+assert.match(sceneSource, /flags\['l8-return-loop-open'\]\s*=\s*true/,
+  "CampaignScene writes l8-return-loop-open; observatoryDoorOpen stays its only reader");
+const loopRefreshCalls = (sceneSource.match(/this\.refreshObservatoryReturnLoop\(\)/g) ?? []).length;
+assert.ok(loopRefreshCalls >= 2,
+  `the loop strip is refreshed by its control and on every room build/restore (${loopRefreshCalls} call sites)`);
+for (const symbol of ['refreshObservatoryReturnLoop(', 'observatoryReturnLoopLane(', 'OBSERVATORY_RETURN_LOOP_VISUAL_ID']) {
+  assert.ok(sceneSource.includes(symbol), `CampaignScene consumes ${symbol}`);
+}
 
 /* ------------------------------------------------------------------ *
  * 12. Guidance language: Vietnamese, with the missing condition named

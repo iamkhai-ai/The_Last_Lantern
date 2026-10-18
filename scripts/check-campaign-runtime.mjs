@@ -1,0 +1,504 @@
+/**
+ * Levels 05-10 — campaign runtime behaviour checks.
+ *
+ * Run with:  node scripts/check-campaign-runtime.mjs
+ *
+ * scripts/check-observatory.mjs is a pure check: it drives synthetic world
+ * states through the layout predicates, which is exactly why a *missing runtime
+ * writer* is structurally invisible to it (review B1: `l8-return-loop-open` had
+ * three readers and no writer, and the level could not be finished).
+ *
+ * This check runs the shipped code instead of a re-implementation of it:
+ *
+ *  - the arrow function a control hands to register() is pulled out of
+ *    src/scenes/CampaignScene.ts with the TypeScript compiler API, keyed by the
+ *    control's registry id, and executed against a recording stand-in for the
+ *    scene's Phaser ports (say / save / flag writes / display list);
+ *  - the observatory state, the observatory world state, the completion
+ *    predicate and the return-loop strip refresh are the scene's own methods,
+ *    extracted the same way and run against that stand-in.
+ *
+ * Grepping the scene for `flags['l8-return-loop-open'] = true` cannot pass these
+ * cases: only behaviour can. A later task adds one entry to CASES.
+ */
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
+import {
+  OBSERVATORY_ALCOVES,
+  OBSERVATORY_RETURN_LOOP_VISUAL_ID,
+  observatoryCompletionReady,
+  observatoryDoorBlockReason,
+  observatoryDoorOpen,
+  observatoryFinalDoorBlockReason,
+  observatoryReturnLoopLane,
+  observatorySolidRects,
+} from '../src/data/observatoryLayout.ts';
+import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
+
+const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
+const SCENE_FILE = join(rootDir, 'src/scenes/CampaignScene.ts');
+const sourceFile = ts.createSourceFile(SCENE_FILE, readFileSync(SCENE_FILE, 'utf8'), ts.ScriptTarget.Latest, true);
+
+const OPEN_LOOP_LINE = 'Lối đá đã khớp vào vòng. Đường về bệ đèn thông suốt ngay cả khi ánh sáng tắt.';
+
+/* ------------------------------------------------------------------ *
+ * 1. Extraction: the registered runtime callback, keyed by registry id
+ * ------------------------------------------------------------------ */
+
+const nodeText = (node) => node.getText(sourceFile);
+
+function walk(node, visit) {
+  visit(node);
+  node.forEachChild((child) => walk(child, visit));
+}
+
+function findNode(root, predicate) {
+  let found = null;
+  walk(root, (node) => { if (!found && predicate(node)) found = node; });
+  return found;
+}
+
+/** True when a dispatch condition tests the local `id` against one registry id. */
+function testsRegistryId(expression, registryId) {
+  let matched = false;
+  walk(expression, (node) => {
+    if (matched || !ts.isBinaryExpression(node)) return;
+    if (node.operatorToken.kind !== ts.SyntaxKind.EqualsEqualsEqualsToken) return;
+    if (nodeText(node.left) !== 'id' || !ts.isStringLiteral(node.right)) return;
+    if (node.right.text === registryId) matched = true;
+  });
+  return matched;
+}
+
+/**
+ * The arrow function the scene hands to register() for one authored control.
+ * Keyed by the registry id the room data uses, so moving or renaming the
+ * dispatch fails with that id instead of silently losing coverage. An id may be
+ * shared by one dispatch (`id === 'a' || id === 'b'`).
+ */
+function registeredCallbackSource(registryId) {
+  const dispatch = findNode(sourceFile, (node) => ts.isIfStatement(node) && testsRegistryId(node.expression, registryId));
+  assert.ok(dispatch, `CampaignScene still dispatches the ${registryId} control with an \`id === '${registryId}'\` test`);
+  const call = findNode(dispatch.thenStatement, (node) => ts.isCallExpression(node) && nodeText(node.expression) === 'register');
+  assert.ok(call, `the ${registryId} dispatch still registers its runtime callback with register(...)`);
+  const [callback] = call.arguments;
+  assert.ok(callback && ts.isArrowFunction(callback), `the ${registryId} control still registers an arrow function`);
+  return nodeText(callback);
+}
+
+/** One CampaignScene method body, so the cases run the shipped state logic. */
+function methodSource(methodName) {
+  const method = findNode(sourceFile, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === methodName);
+  assert.ok(method, `CampaignScene still declares ${methodName}()`);
+  assert.ok(method.body, `${methodName}() still has a body`);
+  return nodeText(method.body);
+}
+
+/**
+ * Compile extracted scene source into a callable bound to a fake `this`: the
+ * source is TypeScript, so it is transpiled first, and every layout symbol the
+ * snippet closes over is passed in as a parameter. A method body runs directly;
+ * an expression (an arrow callback) is created inside the wrapper so it captures
+ * the fake `this` the way it captures the scene at runtime.
+ */
+function bind(source, symbols, label) {
+  const names = Object.keys(symbols);
+  const values = names.map((name) => symbols[name]);
+  const isBlock = source.trimStart().startsWith('{');
+  const wrapper = isBlock ? `function () ${source}` : `function () { return (${source}); }`;
+  let unit;
+  try {
+    const js = ts.transpileModule(`const __unit = ${wrapper};`, {
+      compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext },
+    }).outputText;
+    unit = new Function(...names, `"use strict";\n${js}\nreturn __unit;`)(...values);
+  } catch (error) {
+    throw new Error(`could not compile ${label} extracted from CampaignScene.ts: ${error.message}`);
+  }
+  return isBlock ? (self) => unit.call(self) : (self) => unit.call(self)();
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. The fake scene: recording ports around the real scene logic
+ * ------------------------------------------------------------------ */
+
+const NO_SYMBOLS = {};
+/** Layout symbols the extracted snippets close over. */
+const CALLBACK_SYMBOLS = { observatoryDoorOpen, observatoryDoorBlockReason, observatoryFinalDoorBlockReason };
+const STATE_SYMBOLS = { deriveObservatoryState };
+const READY_SYMBOLS = { observatoryCompletionReady };
+const STRIP_SYMBOLS = { observatoryDoorOpen, observatoryReturnLoopLane, OBSERVATORY_RETURN_LOOP_VISUAL_ID };
+
+let sceneSources = null;
+/** Compiled on first use, so a missing method fails the case that needs it. */
+function sources() {
+  if (!sceneSources) {
+    sceneSources = {
+      lumoRoom: bind(methodSource('getObservatoryLumoRoom'), NO_SYMBOLS, 'getObservatoryLumoRoom()'),
+      state: bind(methodSource('getObservatoryState'), STATE_SYMBOLS, 'getObservatoryState()'),
+      world: bind(methodSource('getObservatoryWorldState'), NO_SYMBOLS, 'getObservatoryWorldState()'),
+      ready: bind(methodSource('isObservatoryCompletionReady'), READY_SYMBOLS, 'isObservatoryCompletionReady()'),
+      callbacks: new Map(),
+    };
+  }
+  return sceneSources;
+}
+
+let loopRefresh = null;
+function refreshReturnLoop(scene) {
+  if (!loopRefresh) loopRefresh = bind(methodSource('refreshObservatoryReturnLoop'), STRIP_SYMBOLS, 'refreshObservatoryReturnLoop()');
+  return loopRefresh(scene);
+}
+
+function runRegistered(registryId, scene, symbols = {}) {
+  const key = `${registryId}\u0000${Object.keys(symbols).sort().join(',')}`;
+  const compiled = sources().callbacks;
+  if (!compiled.has(key)) {
+    compiled.set(key, bind(registeredCallbackSource(registryId), { ...CALLBACK_SYMBOLS, ...symbols }, `the ${registryId} callback`));
+  }
+  compiled.get(key)(scene);
+}
+
+/** A chainable stand-in for the one Phaser game object the strip refresh builds. */
+function makeStrip(x, y, width, height, texture) {
+  return {
+    kind: 'tile-sprite',
+    name: '',
+    destroyed: false,
+    x,
+    y,
+    width,
+    height,
+    texture,
+    setOrigin() { return this; },
+    setTint() { return this; },
+    setAlpha() { return this; },
+    setDepth() { return this; },
+    setName(value) { this.name = value; return this; },
+    setPosition(nextX, nextY) { this.x = nextX; this.y = nextY; return this; },
+    setSize(nextWidth, nextHeight) { this.width = nextWidth; this.height = nextHeight; return this; },
+    destroy() { this.destroyed = true; },
+  };
+}
+
+/**
+ * The scene's display-list port. Anything except a tile sprite is refused, so
+ * "the strip refresh never repaints the room background" is enforced, not just
+ * asserted: building an image or a graphics object throws inside the case.
+ */
+function makeAddPort(calls) {
+  return new Proxy({}, {
+    get(_target, method) {
+      return (...args) => {
+        calls.added.push(String(method));
+        if (method !== 'tileSprite') {
+          throw new Error(`refreshObservatoryReturnLoop built a ${String(method)}: it must only manage its own strip`);
+        }
+        const [x, y, width, height, texture] = args;
+        const strip = makeStrip(x, y, width, height, texture);
+        calls.strips.push(strip);
+        return strip;
+      };
+    },
+  });
+}
+
+/** Where Lumo rests while he holds the seal, and the point he is called back to. */
+const SEAL_AT = { roomId: 'corridor', x: 320, y: 92 };
+const SOURCE_AT = { roomId: 'entrance', x: 188, y: 232 };
+
+/**
+ * A recording stand-in for the CampaignScene ports the observatory callbacks
+ * touch. The observatory state, the world state and the completion predicate are
+ * NOT re-implemented here: they are the scene's own methods, extracted from
+ * CampaignScene.ts and run against this object.
+ */
+function makeScene(seed = {}) {
+  const calls = {
+    say: [], save: 0, flagWrites: [], refreshedDoors: 0, refreshedLoops: 0,
+    refreshedPuzzle: 0, nextLevel: [], memory: 0, lumoRoute: [], added: [], strips: [],
+  };
+  const flags = new Proxy({ ...(seed.flags ?? {}) }, {
+    set(target, key, value) { calls.flagWrites.push({ key, value }); target[key] = value; return true; },
+  });
+  const scene = {
+    progress: { level: 8, flags, counters: { ...(seed.counters ?? {}) }, lanternOn: seed.lanternOn ?? true },
+    lantern: {
+      lanternPlaced: seed.lanternPlaced ?? false,
+      lanternInHand: seed.lanternInHand ?? true,
+      lanternOn: seed.lanternOn ?? true,
+      placedX: 0,
+      placedY: 0,
+      placeLanternAt(x, y) { this.lanternPlaced = true; this.lanternInHand = false; this.placedX = x; this.placedY = y; },
+      retrieveLantern() { this.lanternPlaced = false; this.lanternInHand = true; },
+    },
+    lumo: { sprite: { x: SEAL_AT.x, y: SEAL_AT.y, setPosition(x, y) { this.x = x; this.y = y; } } },
+    activeObservatoryRoom: seed.roomId === null ? null : seed.roomId ?? 'observatory',
+    roomObjects: [],
+    observatoryReturnLoopVisual: undefined,
+    observatoryElementVisuals: new Map([['balance-crystal', { destroyed: false, destroy() { this.destroyed = true; } }]]),
+    observatoryShadowVisual: { alpha: 0.9, setAlpha(value) { this.alpha = value; } },
+    calls,
+    save() { calls.save += 1; },
+    say(lines) { calls.say.push(lines); },
+    value(key) { return this.progress.counters[key] ?? 0; },
+    /** Repainting door textures and colliders is check-observatory.mjs territory; here it is counted. */
+    refreshObservatoryDoors() { calls.refreshedDoors += 1; },
+    refreshObservatoryPuzzle() { calls.refreshedPuzzle += 1; },
+    refreshObservatoryReturnLoop() { calls.refreshedLoops += 1; refreshReturnLoop(this); },
+    nextLevel(lines) { calls.nextLevel.push(lines); },
+    playObservatoryMemory() { calls.memory += 1; },
+    callObservatoryLumo(destination) {
+      calls.lumoRoute.push(destination);
+      flags['l8-lumo-destination'] = destination === 'seal' ? 'lumo-seal' : 'lantern-source';
+      flags['l8-lumo-arrived'] = '';
+      flags['l8-lumo-recalled'] = false;
+    },
+    /** The world moves on its own: Lumo finishes the route the scene handed him. */
+    arriveLumo(roomId, x, y) {
+      flags['l8-lumo-room'] = roomId;
+      flags['l8-lumo-arrived'] = flags['l8-lumo-destination'];
+      flags['l8-lumo-recalled'] = flags['l8-lumo-destination'] === 'lantern-source';
+      flags['l8-lumo-route-json'] = '';
+      scene.lumo.sprite.x = x;
+      scene.lumo.sprite.y = y;
+    },
+    add: makeAddPort(calls),
+  };
+  scene.getObservatoryLumoRoom = () => sources().lumoRoom(scene);
+  scene.getObservatoryState = () => sources().state(scene);
+  scene.getObservatoryWorldState = () => sources().world(scene);
+  scene.isObservatoryCompletionReady = () => sources().ready(scene);
+  return scene;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Shared fixtures
+ * ------------------------------------------------------------------ */
+
+const PEDESTAL_ITEM = { id: 'lantern-pedestal', position: { x: 188, y: 232 } };
+
+/** Mirrors g0=1, g1=2, g2=1 with the wide statue face: the shadowed splitter route. */
+const PUZZLE_COUNTERS = { 'l8-g0': 1, 'l8-g1': 2, 'l8-g2': 1, 'l8-statue': 2 };
+
+const LOOP_PREREQUISITES = { 'l8-bridge-crossed': true, 'l8-final-door-latched': true };
+
+/** The far bank of the observatory with the beam network live and Lumo at the seal. */
+function farBankSeed(extraFlags = {}) {
+  return {
+    flags: { 'l8-lumo-room': SEAL_AT.roomId, 'l8-lumo-destination': 'lumo-seal', 'l8-lumo-arrived': 'lumo-seal', ...extraFlags },
+    counters: { ...PUZZLE_COUNTERS },
+    lanternPlaced: true,
+    lanternInHand: false,
+    lanternOn: true,
+  };
+}
+
+const stripRect = (strip) => ({ x: strip.x, y: strip.y, width: strip.width, height: strip.height });
+const loopThresholds = OBSERVATORY_ALCOVES.filter((alcove) => alcove.doorId === 'return-loop').map((alcove) => alcove.threshold);
+const sameRect = (a, b) => a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+
+/* ------------------------------------------------------------------ *
+ * 4. Cases
+ * ------------------------------------------------------------------ */
+
+const CASES = [
+  {
+    name: 'return_loop_action_commits_and_refreshes',
+    run: () => {
+      const scene = makeScene(farBankSeed(LOOP_PREREQUISITES));
+      const before = scene.getObservatoryWorldState();
+      assert.equal(observatoryDoorOpen('return-loop', before), false, 'the loop starts closed on the far bank');
+      assert.ok(observatorySolidRects('observatory', before).some((rect) => loopThresholds.some((sill) => sameRect(rect, sill))),
+        'a closed loop blocks its authored sill');
+
+      runRegistered('stone-return-loop', scene);
+
+      assert.equal(scene.progress.flags['l8-return-loop-open'], true,
+        'the registered callback latches l8-return-loop-open');
+      assert.deepEqual(scene.calls.flagWrites.map((write) => write.key), ['l8-return-loop-open'],
+        'the action writes the loop flag and nothing else');
+      assert.equal(scene.calls.save, 1, 'the action saves exactly once');
+      assert.equal(scene.calls.refreshedDoors, 1, 'the action refreshes the doors and their colliders');
+      assert.equal(scene.calls.refreshedLoops, 1, 'the action refreshes the return-loop strip');
+      assert.equal(scene.calls.strips.length, 1, 'the action raises exactly one strip');
+
+      const after = scene.getObservatoryWorldState();
+      assert.equal(observatoryDoorOpen('return-loop', after), true, 'the new world state reads the loop as open');
+      assert.equal(observatorySolidRects('observatory', after).some((rect) => loopThresholds.some((sill) => sameRect(rect, sill))), false,
+        'the sill stops colliding once the loop is open');
+      assert.equal(scene.calls.say.length, 1, 'the action answers with one line');
+      assert.equal(scene.calls.say[0].length, 1, 'the answer is a single authored line');
+      assert.equal(scene.calls.say[0][0].text, OPEN_LOOP_LINE, 'the success sentence is the authored Vietnamese line');
+    },
+  },
+  {
+    name: 'return_loop_missing_prerequisite_refuses_and_names_the_step',
+    run: () => {
+      const missing = [
+        { label: 'bridge not crossed', flags: {}, step: 'Phải qua cầu rễ sang bờ bên kia trước.' },
+        { label: 'final door not latched', flags: { 'l8-bridge-crossed': true }, step: 'Gài chốt cửa cuối trên bờ bên kia trước.' },
+      ];
+      for (const entry of missing) {
+        const scene = makeScene(farBankSeed(entry.flags));
+        assert.equal(scene.getObservatoryWorldState().returnLoopOpen, false, `${entry.label}: the loop starts closed`);
+        runRegistered('stone-return-loop', scene);
+        assert.equal(scene.progress.flags['l8-return-loop-open'], undefined, `${entry.label}: E must not latch the loop`);
+        assert.equal(scene.calls.save, 0, `${entry.label}: a refused press saves nothing`);
+        assert.equal(scene.calls.strips.length, 0, `${entry.label}: a refused press raises no strip`);
+        assert.equal(scene.calls.say.length, 1, `${entry.label}: the control answers with one inspection line`);
+        assert.ok(scene.calls.say[0][0].text.includes(entry.step),
+          `${entry.label}: the line names the missing step ("${scene.calls.say[0][0].text}")`);
+      }
+      // Nothing is missing any more, so the inspection itself must be the step.
+      const ready = makeScene(farBankSeed(LOOP_PREREQUISITES)).getObservatoryWorldState();
+      const reason = observatoryDoorBlockReason('return-loop', ready);
+      assert.notEqual(reason, 'Lối đá vòng chưa mở.', 'a closed loop never answers with a bare statement');
+      assert.match(reason, /E/, `a closed loop names the action to take ("${reason}")`);
+    },
+  },
+  {
+    name: 'return_loop_second_press_does_not_double_commit',
+    run: () => {
+      const scene = makeScene(farBankSeed(LOOP_PREREQUISITES));
+      runRegistered('stone-return-loop', scene);
+      const [firstStrip] = scene.calls.strips;
+      const writesAfterFirst = scene.calls.flagWrites.length;
+
+      runRegistered('stone-return-loop', scene);
+
+      assert.equal(scene.progress.flags['l8-return-loop-open'], true, 'the loop stays open');
+      assert.equal(scene.calls.flagWrites.length, writesAfterFirst, 'the second press writes no flag again');
+      assert.equal(scene.calls.save, 1, 'the second press does not save again');
+      assert.equal(scene.calls.strips.length, 1, 'the second press builds no second strip');
+      assert.equal(scene.roomObjects.filter((object) => object.name === OBSERVATORY_RETURN_LOOP_VISUAL_ID).length, 1,
+        'the room keeps exactly one loop strip');
+      assert.equal(scene.roomObjects[0], firstStrip, 'the second press keeps the strip it already has');
+      assert.equal(scene.calls.say.length, 2, 'the second press only reports');
+      assert.match(scene.calls.say[1][0].text, /đang mở/, 'an already-open loop is reported, not re-opened');
+    },
+  },
+  {
+    name: 'return_loop_restore_shows_the_strip_immediately',
+    run: () => {
+      for (const roomId of ['entrance', 'corridor', 'observatory']) {
+        const scene = makeScene({ roomId, flags: { 'l8-return-loop-open': true } });
+        // What buildObservatoryRoom() does right after it paints the background.
+        scene.refreshObservatoryReturnLoop();
+        assert.equal(scene.calls.strips.length, 1, `${roomId}: a save with the loop open restores its strip at once`);
+        assert.deepEqual(stripRect(scene.calls.strips[0]), observatoryReturnLoopLane(roomId),
+          `${roomId}: the strip is the authored lane for this room`);
+        assert.equal(scene.calls.strips[0].name, OBSERVATORY_RETURN_LOOP_VISUAL_ID, `${roomId}: the strip carries its stable id`);
+        assert.deepEqual(scene.calls.added, ['tileSprite'], `${roomId}: the restore repaints no room background`);
+        assert.equal(scene.roomObjects.length, 1, `${roomId}: the restore adds exactly one visual`);
+
+        scene.refreshObservatoryReturnLoop();
+        scene.refreshObservatoryReturnLoop();
+        assert.equal(scene.calls.strips.length, 1, `${roomId}: repeating the refresh never stacks strips`);
+
+        const latched = makeScene({ roomId, flags: { 'l8-lantern-placed': true } });
+        latched.refreshObservatoryReturnLoop();
+        latched.refreshObservatoryReturnLoop();
+        assert.equal(latched.calls.strips.length, 0, `${roomId}: a closed loop paints nothing`);
+      }
+      const reopened = makeScene({ roomId: 'observatory', flags: { 'l8-return-loop-open': true } });
+      reopened.refreshObservatoryReturnLoop();
+      const visual = reopened.observatoryReturnLoopVisual;
+      reopened.progress.flags['l8-return-loop-open'] = false;
+      reopened.refreshObservatoryReturnLoop();
+      assert.equal(visual.destroyed, true, 'a loop that closes again destroys its strip');
+      assert.equal(reopened.observatoryReturnLoopVisual, undefined, 'and drops the destroyed visual');
+      assert.equal(reopened.roomObjects.includes(visual), false, 'the destroyed strip leaves the room object list');
+    },
+  },
+  {
+    name: 'return_loop_needs_no_lamp_and_no_lumo',
+    run: () => {
+      const scene = makeScene({
+        flags: LOOP_PREREQUISITES,
+        counters: { 'l8-g0': 2, 'l8-g1': 0, 'l8-g2': 3, 'l8-statue': 0 },
+        lanternPlaced: false,
+        lanternInHand: false,
+        lanternOn: false,
+      });
+      const before = scene.getObservatoryState();
+      assert.equal(before.sunDoorUnlocked, false, 'the beam network is dark with the lamp off');
+      assert.equal(before.lumoAtSeal, false, 'Lumo is not holding the seal');
+      assert.equal(before.lumoAtSeal || before.bridgeEligible, false, 'nothing downstream of the lamp is available');
+
+      runRegistered('stone-return-loop', scene);
+
+      assert.equal(scene.progress.flags['l8-return-loop-open'], true,
+        'the loop opens with the lamp off, in no hand, and Lumo away');
+      assert.equal(observatoryDoorOpen('return-loop', scene.getObservatoryWorldState()), true,
+        'the state the rest of the level reads is open');
+    },
+  },
+  {
+    name: 'return_loop_action_unlocks_record_crystal_and_completion',
+    run: () => {
+      const scene = makeScene(farBankSeed({ 'l8-door-a-latched': true, 'l8-bridge-crossed': true }));
+
+      // The authored far-bank chain, every step through its own registered callback.
+      runRegistered('final-door-control', scene);
+      assert.equal(scene.progress.flags['l8-final-door-latched'], true, 'the final door latches on the far bank');
+      runRegistered('stone-return-loop', scene);
+      assert.equal(scene.progress.flags['l8-return-loop-open'], true, 'the loop latches through its own control');
+      const afterLoop = scene.getObservatoryWorldState();
+      assert.equal(afterLoop.returnLoopOpen && afterLoop.finalDoorLatched, true, 'the new world state carries both latches');
+
+      // The record is still shut by the two remaining steps, and no longer by the loop.
+      runRegistered('final-record', scene);
+      assert.notEqual(scene.progress.flags['l8-record-read'], true, 'the record is still shut with the lamp placed and Lumo at the seal');
+      const gate = scene.calls.say.at(-1)[0].text;
+      assert.ok(gate.includes('thu hồi đèn về tay') && gate.includes('gọi Lumo về bên đèn'),
+        `the record names the two remaining steps ("${gate}")`);
+      assert.equal(gate.includes('mở lối đá vòng'), false, 'opening the loop removed it from the record gate');
+
+      runRegistered('lantern-pedestal', scene, { item: PEDESTAL_ITEM });
+      assert.equal(scene.lantern.lanternInHand, true, 'the lamp comes back to hand');
+      assert.equal(scene.progress.flags['l8-lantern-retrieved'], true, 'the retrieval is saved as a flag');
+      assert.equal(scene.calls.refreshedPuzzle, 1, 'the retrieval repaints the puzzle');
+      runRegistered('lumo-tube', scene, { id: 'lumo-tube' });
+      assert.deepEqual(scene.calls.lumoRoute, ['recall'], 'the tube calls Lumo home');
+      scene.arriveLumo(SOURCE_AT.roomId, SOURCE_AT.x, SOURCE_AT.y);
+      assert.equal(scene.getObservatoryWorldState().lumoRecalled, true, 'Lumo is back beside the lamp');
+
+      runRegistered('final-record', scene);
+      assert.equal(scene.progress.flags['l8-record-read'], true, 'the record opens once its real prerequisites hold');
+      assert.equal(scene.calls.memory, 1, 'reading the record plays its memory');
+      runRegistered('balance-crystal', scene);
+      assert.equal(scene.progress.flags['l8-balance-crystal'], true, 'the crystal becomes collectible');
+      assert.equal(scene.observatoryElementVisuals.has('balance-crystal'), false, 'the crystal art leaves the room with it');
+      const ready = scene.getObservatoryWorldState();
+      assert.equal(observatoryCompletionReady(ready), true, 'the completion predicate holds on the real world state');
+      runRegistered('final-door-control', scene);
+      assert.equal(scene.calls.nextLevel.length, 1, 'the far-bank control hands over to the next level');
+      assert.equal(scene.calls.nextLevel[0].length, 2, 'the handover plays its two authored lines');
+    },
+  },
+];
+
+/* ------------------------------------------------------------------ *
+ * 5. Runner
+ * ------------------------------------------------------------------ */
+
+const failures = [];
+for (const testCase of CASES) {
+  try {
+    testCase.run();
+    console.log(`PASS  ${testCase.name}`);
+  } catch (error) {
+    failures.push(testCase.name);
+    console.log(`FAIL  ${testCase.name}`);
+    for (const line of String(error.message).split('\n')) console.log(`        ${line}`);
+  }
+}
+console.log(`\ncampaign runtime: ${CASES.length - failures.length}/${CASES.length} cases passed`);
+if (failures.length) {
+  console.log(`failed: ${failures.join(', ')}`);
+  process.exit(1);
+}

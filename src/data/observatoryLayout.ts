@@ -441,6 +441,32 @@ export const OBSERVATORY_STAMPS: Record<ObservatoryRoomKey, readonly ObsStamp[]>
 };
 
 /* ------------------------------------------------------------------ *
+ * Return loop: the opened door's floor strip
+ * ------------------------------------------------------------------ */
+
+/** Height of the return loop's stone strip: floor decor, never a collider. */
+export const OBSERVATORY_RETURN_LOOP_LANE_HEIGHT = 18;
+/** Stable object id for the strip, so room restoration can find the visual. */
+export const OBSERVATORY_RETURN_LOOP_VISUAL_ID = 'observatory-return-loop';
+
+/**
+ * Where the opened return loop reads as floor: a stone lane along the south edge
+ * of the room's walkable band. Drawn from OBSERVATORY_FLOORS, so it never
+ * crosses masonry, the top HUD band (y<58) or the bottom status band (y>=320).
+ * Collision stays in the loop's alcove thresholds, gated by
+ * observatoryDoorOpen('return-loop', state) — this rectangle is decor only.
+ */
+export function observatoryReturnLoopLane(roomId: ObservatoryRoomKey): ObsRect {
+  const floor = OBSERVATORY_FLOORS[roomId];
+  return {
+    x: floor.x + 20,
+    y: floor.y + floor.height - OBSERVATORY_RETURN_LOOP_LANE_HEIGHT,
+    width: floor.width - 40,
+    height: OBSERVATORY_RETURN_LOOP_LANE_HEIGHT,
+  };
+}
+
+/* ------------------------------------------------------------------ *
  * World state
  * ------------------------------------------------------------------ */
 
@@ -639,7 +665,9 @@ export function observatoryDoorBlockReason(doorId: ObservatoryDoorKey, state: Ob
   }
   if (!state.bridgeCrossed) return 'Phải qua cầu rễ sang bờ bên kia trước.';
   if (!state.finalDoorLatched) return 'Gài chốt cửa cuối trên bờ bên kia trước.';
-  return 'Lối đá vòng chưa mở.';
+  // Nothing is missing: the remaining step is the control itself, so the line
+  // has to name it instead of restating that the loop is shut.
+  return 'Nhấn E tại đây để mở lối đá vòng.';
 }
 
 export function observatoryBridgeBlockReason(state: ObsWorldState): string {
