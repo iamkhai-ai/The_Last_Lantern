@@ -51,6 +51,7 @@ export class InteractionSystem {
 
     let best: InteractableConfig | null = null;
     let bestDist = Infinity;
+    let bestOwns = false;
 
     for (const item of this.interactables) {
       if (item.isEnabled && !item.isEnabled()) continue;
@@ -58,10 +59,20 @@ export class InteractionSystem {
       if (!label) continue;
 
       const dist = Math.hypot(playerX - item.x, playerY - item.y);
-      if (dist <= item.radius && dist < bestDist) {
-        best = item;
-        bestDist = dist;
+      if (dist > item.radius) continue;
+
+      // Among the candidates that already pass the gates above, a control that owns the standing
+      // position keeps it even when a neighbouring prop is nearer. Controls that do not opt in are
+      // untouched: nearest wins, ties go to the first registered.
+      const owns = item.ownsPosition ? item.ownsPosition(playerX, playerY) === true : false;
+      if (best) {
+        if (bestOwns && !owns) continue;
+        if (owns === bestOwns && dist >= bestDist) continue;
       }
+
+      best = item;
+      bestDist = dist;
+      bestOwns = owns;
     }
 
     this.activeTarget = best;
@@ -90,7 +101,16 @@ export class InteractionSystem {
   public tryInteract(now: number): boolean {
     if (!this.activeTarget) return false;
     const target = this.activeTarget;
-    if ((target.isEnabled && !target.isEnabled()) || Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > target.radius) {
+    // The press re-validates the whole approach condition the prompt and the selection agreed on:
+    // enabled, a live prompt, the radius, and — for a control that owns the standing position —
+    // that the feet are still inside it. A state change between update() and E can never fire a
+    // control the player has already left or that has since gone quiet.
+    const disabled = target.isEnabled ? !target.isEnabled() : false;
+    const outOfRange = Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > target.radius;
+    const lostOwnership = target.ownsPosition
+      ? target.ownsPosition(this.lastPlayerPosition.x, this.lastPlayerPosition.y) !== true
+      : false;
+    if (disabled || !target.getPrompt() || outOfRange || lostOwnership) {
       this.activeTarget = null;
       this.promptContainer.setVisible(false);
       return false;

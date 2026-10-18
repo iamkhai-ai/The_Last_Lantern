@@ -43,4 +43,12 @@ export interface InteractableConfig {
   getPrompt: () => string | null;
   onInteract: () => void;
   isEnabled?: () => boolean;
+  /**
+   * Optional. True while the player's feet stand inside this control's own domain (a floor cell, a
+   * socket). Among the candidates that already pass enabled/prompt/range, `InteractionSystem`
+   * prefers such a control over a nearer neighbouring prop, and re-checks it when E is pressed.
+   * Absent means the control is an ordinary candidate: nearest wins, ties go to the first
+   * registered. This is not a global priority: only the controls that opt in are affected.
+   */
+  ownsPosition?: (playerX: number, playerY: number) => boolean;
 }
