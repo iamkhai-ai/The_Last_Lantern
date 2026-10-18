@@ -19,6 +19,10 @@
  *  - the opened return loop's floor strip is inside the room's walkable band and
  *    the runtime writer of `l8-return-loop-open` still exists (review B1). The
  *    behaviour behind that writer is executed by scripts/check-campaign-runtime.mjs.
+ *  - every room's authored control list is exact in both directions, and the room
+ *    build registers those controls in a loop over the room's own data — a method
+ *    that exists but is never called cannot hide behind either check. The
+ *    registration itself is executed by scripts/check-campaign-runtime.mjs.
  */
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -580,19 +584,23 @@ for (const element of OBSERVATORY_ELEMENTS) {
 }
 
 /* ------------------------------------------------------------------ *
- * 10. Every authored control is registered, and every registration is authored
+ * 10. Authored control lists: each room lists exactly the controls its own
+ *     geometry defines, and nothing else (pure data)
  * ------------------------------------------------------------------ */
 for (const roomId of ROOMS) {
   const room = OBSERVATORY_ROOMS[roomId];
   const ids = new Set(room.interactables.map((item) => item.id));
-  for (const element of observatoryElements(roomId)) {
-    if (element.radius === 0) continue;
-    assert.ok(ids.has(element.id), `${roomId} registers an interactable for the authored control ${element.id}`);
+  const controls = observatoryElements(roomId).filter((element) => element.radius > 0);
+  assert.equal(room.interactables.length, controls.length,
+    `${roomId} lists exactly one authored control per interactive element (${room.interactables.length} vs ${controls.length})`);
+  for (const element of controls) {
+    assert.ok(ids.has(element.id), `${roomId} lists an interactable for the authored control ${element.id}`);
   }
   for (const id of ids) {
     const element = OBSERVATORY_ELEMENTS.find((candidate) => candidate.id === id);
     assert.ok(element, `${roomId} interactable ${id} is backed by authored geometry`);
     assert.equal(element.roomId, roomId, `${roomId} interactable ${id} uses its own room's geometry`);
+    assert.ok(element.radius > 0, `${roomId} interactable ${id} is a control the player can reach`);
   }
 }
 
@@ -612,6 +620,18 @@ for (const symbol of [
 ]) {
   assert.ok(sceneSource.includes(symbol), `CampaignScene uses ${symbol}`);
 }
+// Section 10 verifies the authored lists. Nothing there can see whether the scene ever hands them to
+// the interaction system — and it did not: `registerObservatoryInteractable()` was declared and never
+// called by any build, so every observatory room registered zero controls (no pedestal, no mirrors, no
+// return loop, no final door) and Level 09 could not be finished. The guard below fails if the room
+// build stops iterating the room's own data; the behaviour it names is executed by
+// scripts/check-campaign-runtime.mjs (observatory_build_registers_every_authored_control).
+const registrationLoop = /for\s*\([^)]*\bof\s+room\.interactables\s*\)[\s\S]{0,120}?this\.registerObservatoryInteractable\(\w+\)/;
+assert.ok(registrationLoop.test(observatorySource),
+  'buildObservatoryRoom() registers the controls of the room it is building, in a loop over room.interactables');
+const selfRegistrationCalls = (observatorySource.match(/this\.registerObservatoryInteractable\(/g) ?? []).length;
+assert.equal(selfRegistrationCalls, 1,
+  `the room's own controls are registered once per build, from the room's own data (${selfRegistrationCalls} call site(s))`);
 // Two live-state bugs that a text scan can catch: no oversized trigger radius and
 // no English prompt strings in the observatory block.
 assert.equal(/radius:\s*3[0-9]/.test(observatorySource), false,
@@ -816,7 +836,8 @@ console.log(`  stages       : ${Object.keys(STAGES).length}`);
 console.log('  reachability : collision-aware flood fill over every stage');
 console.log('  solids       : every collider blocks the 14x6 body from 4 directions');
 console.log('  art          : every collider maps to a registered, existing PNG');
-console.log('  controls     : every authored control is registered and vice versa');
+console.log('  controls     : authored control lists exact both ways, registered by the build loop');
+console.log('                 (the registration itself is executed by scripts/check-campaign-runtime.mjs)');
 console.log('  wiring       : CampaignScene consumes the verified layout symbols');
 console.log(`  flow         : ${FLOW.length} authored steps trace spawn to crystal`);
 console.log('  save         : v1 observatory validations intact');

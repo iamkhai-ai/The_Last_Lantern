@@ -14,6 +14,10 @@
  *    src/scenes/CampaignScene.ts with the TypeScript compiler API, keyed by the
  *    control's registry id, and executed against a recording stand-in for the
  *    scene's Phaser ports (say / save / flag writes / display list);
+ *  - the shipped buildObservatoryRoom() body itself is run, once per room, so the
+ *    registration of the room's own authored controls is proved by execution: a
+ *    method that exists but is never called (review: the whole observatory
+ *    registered zero controls) fails the room-build case instead of hiding;
  *  - the observatory state, the observatory world state, the completion
  *    predicate and the return-loop strip refresh are the scene's own methods,
  *    extracted the same way and run against that stand-in;
@@ -31,14 +35,22 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import {
   OBSERVATORY_ALCOVES,
+  OBSERVATORY_BODY,
   OBSERVATORY_RETURN_LOOP_VISUAL_ID,
+  OBSERVATORY_ROOT_BED,
+  isObservatoryApproachAllowed,
+  observatoryBridgeBlockReason,
   observatoryCompletionReady,
   observatoryDoorBlockReason,
   observatoryDoorOpen,
+  observatoryElement,
   observatoryFinalDoorBlockReason,
+  observatoryPrompt,
   observatoryReturnLoopLane,
   observatorySolidRects,
 } from '../src/data/observatoryLayout.ts';
+import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
+import { CAMPAIGN_LEVELS } from '../src/data/campaignLevels.ts';
 import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import {
   getHeartPrerequisiteFeedback, HEART_CONFIRM_ID, HEART_MAT_ID, HEART_SEAL_ID, HEART_SEAL_RADIUS, resolveHeartLumoMode,
@@ -272,8 +284,12 @@ const SOURCE_AT = { roomId: 'entrance', x: 188, y: 232 };
  * touch. The observatory state, the world state and the completion predicate are
  * NOT re-implemented here: they are the scene's own methods, extracted from
  * CampaignScene.ts and run against this object.
+ *
+ * `ports.add` lets a caller replace the display-list port: the strip cases need
+ * the strict one (makeAddPort), a full room build needs the permissive one
+ * (makeRoomBuildPort).
  */
-function makeScene(seed = {}) {
+function makeScene(seed = {}, ports = {}) {
   const calls = {
     say: [], save: 0, flagWrites: [], refreshedDoors: 0, refreshedLoops: 0,
     refreshedPuzzle: 0, nextLevel: [], memory: 0, lumoRoute: [], added: [], strips: [],
@@ -323,12 +339,141 @@ function makeScene(seed = {}) {
       scene.lumo.sprite.x = x;
       scene.lumo.sprite.y = y;
     },
-    add: makeAddPort(calls),
+    add: (ports.add ?? makeAddPort)(calls),
   };
   scene.getObservatoryLumoRoom = () => sources().lumoRoom(scene);
   scene.getObservatoryState = () => sources().state(scene);
   scene.getObservatoryWorldState = () => sources().world(scene);
   scene.isObservatoryCompletionReady = () => sources().ready(scene);
+  return scene;
+}
+
+/* ------------------------------------------------------------------ *
+ * 2b. The full room build: the shipped buildObservatoryRoom() body
+ * ------------------------------------------------------------------ */
+
+/**
+ * The display-list port a whole room build needs. A room build paints text, art,
+ * graphics, collider stand-ins and the loop strip, so this one is permissive
+ * where makeAddPort is strict — the "the strip refresh builds nothing else"
+ * contract is enforced by the strip cases, which use makeAddPort. Every call is
+ * recorded, and tile sprites land in the same `calls.strips` list the strip cases
+ * read.
+ */
+function makeRoomBuildPort(calls) {
+  const makeObject = () => {
+    const object = {
+      x: 0, y: 0, width: 0, height: 0, name: '', visible: true, scene: {},
+      setOrigin() { return object; },
+      setTint() { return object; },
+      setAlpha() { return object; },
+      setDepth() { return object; },
+      setVisible() { return object; },
+      setText() { return object; },
+      setName(value) { object.name = value; return object; },
+      setPosition(x, y) { object.x = x; object.y = y; return object; },
+      setSize(width, height) { object.width = width; object.height = height; return object; },
+      getBounds() { return { x: object.x, y: object.y, width: object.width, height: object.height }; },
+      destroy() { object.destroyed = true; },
+    };
+    return object;
+  };
+  return new Proxy({}, {
+    get(_target, method) {
+      return (...args) => {
+        calls.added.push(String(method));
+        const object = makeObject();
+        if (method === 'tileSprite') calls.strips.push(object);
+        return object;
+      };
+    },
+  });
+}
+
+/**
+ * Everything registerObservatoryInteractable() closes over. `item` is the room's
+ * own data entry, handed in by the shipped build loop under test — never a list
+ * written here.
+ */
+const REGISTER_SYMBOLS = {
+  OBSERVATORY_ROOT_BED,
+  isObservatoryApproachAllowed,
+  observatoryBridgeBlockReason,
+  observatoryDoorBlockReason,
+  observatoryDoorOpen,
+  observatoryElement,
+  observatoryFinalDoorBlockReason,
+  observatoryPrompt,
+  Phaser: { GameObjects: { Image: class ObservatoryArt {} } },
+  // Registration only builds the callbacks; rotating a mirror is the one sound
+  // port, and no case here presses a mirror.
+  SoundSystem: { playMirrorRotate() {} },
+};
+
+/** The shipped per-item registration body, run against the recording scene. */
+function runRegisteredItem(scene, item) {
+  const run = bind(methodSource('registerObservatoryInteractable'), { ...REGISTER_SYMBOLS, item }, 'registerObservatoryInteractable()');
+  return run(scene);
+}
+
+/** Everything the shipped buildObservatoryRoom() body closes over. `OPENING` is
+ * passed empty because the room-build cases seed the played-intro flag: the
+ * observatory's opening dialogue is not what they measure, so it never runs. */
+const ROOM_BUILD_SYMBOLS = { CAMPAIGN_LEVELS, OBSERVATORY_BODY, OBSERVATORY_ROOMS, OPENING: [] };
+
+/**
+ * The visual builders buildObservatoryRoom() calls, recorded instead of run:
+ * art, colliders and room geometry are check-observatory.mjs's and
+ * check-interaction-targets.mjs's territory. What is *not* stubbed is the room
+ * build itself, the per-item registration and the observatory state logic.
+ */
+const STUBBED_BUILD_PORTS = [
+  'clearActiveRoom', 'drawObservatoryBackground', 'drawObservatoryWalls', 'drawObservatoryWallArt',
+  'buildObservatoryStamps', 'buildObservatoryElements', 'buildObservatoryRootBed', 'buildObservatoryDoors',
+  'buildObservatorySolids', 'buildObservatoryBeams', 'addObservatoryExit', 'restoreObservatoryLanternPlacement',
+];
+
+const roomBuilds = new Map();
+/**
+ * Runs the shipped buildObservatoryRoom() body for one room against the
+ * recording scene. Bound per room because `roomId` is a free identifier of the
+ * extracted body (the method's own parameter is not part of its body).
+ */
+function buildRoom(scene, roomId) {
+  if (!roomBuilds.has(roomId)) {
+    roomBuilds.set(roomId, bind(methodSource('buildObservatoryRoom'), { ...ROOM_BUILD_SYMBOLS, roomId, spawnId: undefined }, 'buildObservatoryRoom()'));
+  }
+  return roomBuilds.get(roomId)(scene);
+}
+
+/**
+ * makeScene()'s shipped observatory logic plus the ports the room build touches.
+ * `calls.sequence` records the order of the build's own steps, so the case can
+ * assert where the registration sits relative to the art and the door refresh.
+ */
+function makeRoomBuildScene(seed) {
+  const scene = makeScene(seed, { add: makeRoomBuildPort });
+  const { calls } = scene;
+  Object.assign(calls, { registrations: [], sequence: [], hud: 0 });
+  // The room's interaction registry, as buildObservatoryRoom() leaves it. `clear()`
+  // is not modelled: clearActiveRoom() is a recorded stub, and no case here builds
+  // two rooms into one scene.
+  scene.interactions = { register: (config) => { calls.sequence.push('register'); calls.registrations.push(config); } };
+  scene.track = (object) => object;
+  scene.titleText = undefined;
+  scene.lumoTarget = { x: 320, y: 265 };
+  scene.player = { x: 0, y: 0, setFootPlacement() {}, setPosition(x, y) { this.x = x; this.y = y; } };
+  scene.lumo.setVisible = () => undefined;
+  scene.refreshHud = () => { calls.hud += 1; };
+  scene.dialogue = { startDialogue: () => undefined };
+  scene.refreshObservatoryDoors = () => { calls.refreshedDoors += 1; calls.sequence.push('refreshObservatoryDoors'); };
+  scene.refreshObservatoryPuzzle = () => { calls.refreshedPuzzle += 1; calls.sequence.push('refreshObservatoryPuzzle'); };
+  for (const name of STUBBED_BUILD_PORTS) scene[name] = () => { calls.sequence.push(name); };
+  scene.resolveObservatorySpawn = (room) => {
+    const [first] = room.spawns;
+    return [first.position.x, first.position.y];
+  };
+  scene.registerObservatoryInteractable = (item) => runRegisteredItem(scene, item);
   return scene;
 }
 
@@ -726,6 +871,86 @@ const CASES = [
       runRegistered('final-door-control', scene);
       assert.equal(scene.calls.nextLevel.length, 1, 'the far-bank control hands over to the next level');
       assert.equal(scene.calls.nextLevel[0].length, 2, 'the handover plays its two authored lines');
+    },
+  },
+  {
+    name: 'observatory_build_registers_every_authored_control',
+    run: () => {
+      // The defect this case exists for: buildObservatoryRoom() declared
+      // registerObservatoryInteractable() and never called it, so the shipped room
+      // registered zero controls — no pedestal, no mirrors, no return loop, no
+      // final door — and Level 09 could not be finished. The authored lists are
+      // pure data (check-observatory.mjs), so only running the shipped build body
+      // can see it.
+      for (const roomId of ['entrance', 'corridor', 'observatory']) {
+        const room = OBSERVATORY_ROOMS[roomId];
+        const scene = makeRoomBuildScene({ roomId, flags: { 'l8-lumo-room': roomId, 'intro-8': true } });
+        buildRoom(scene, roomId);
+
+        const registered = scene.calls.registrations;
+        assert.equal(registered.length, room.interactables.length,
+          `${roomId}: buildObservatoryRoom() must register the room's own ${room.interactables.length} authored controls, but it registered ${registered.length}`);
+        assert.deepEqual(registered.map((item) => item.id), room.interactables.map((item) => `observatory-${item.id}`),
+          `${roomId}: the registered controls are exactly the authored ones, in the authored order`);
+        assert.deepEqual(registered.map((item) => ({ x: item.x, y: item.y })),
+          room.interactables.map((item) => ({ x: item.interactionPoint.x, y: item.interactionPoint.y })),
+          `${roomId}: every registered control stands on its authored interaction point`);
+        assert.deepEqual(registered.map((item) => item.radius),
+          room.interactables.map((item) => observatoryElement(item.id).radius),
+          `${roomId}: every registered control keeps its authored interaction radius`);
+        assert.ok(registered.every((item) => typeof item.onInteract === 'function'
+          && typeof item.isEnabled === 'function' && typeof item.getPrompt === 'function'),
+        `${roomId}: every registered control is a live E control (prompt, approach gate, action)`);
+        for (const item of registered) {
+          assert.ok(String(item.getPrompt()).length > 0, `${roomId}: ${item.id} renders a prompt from the live state`);
+        }
+
+        // The callbacks' first reads need a built world, and the refresh that
+        // consumes them needs them to exist: registration sits between the two.
+        const { sequence } = scene.calls;
+        const registeredAt = sequence.indexOf('register');
+        assert.ok(registeredAt > sequence.indexOf('buildObservatoryElements') && registeredAt > sequence.indexOf('buildObservatorySolids'),
+          `${roomId}: the controls register after the room's art and colliders exist (${sequence.join(' -> ')})`);
+        assert.ok(registeredAt < sequence.indexOf('refreshObservatoryDoors') && registeredAt < sequence.indexOf('refreshObservatoryPuzzle'),
+          `${roomId}: and before the door/puzzle refresh that consumes the registered state (${sequence.join(' -> ')})`);
+
+        assert.deepEqual(scene.calls.flagWrites, [], `${roomId}: registering the room's controls writes nothing to the save`);
+        assert.equal(scene.calls.save, 1, `${roomId}: the room build still saves exactly once`);
+        assert.equal(scene.calls.hud, 1, `${roomId}: the build still runs to its own HUD refresh`);
+        console.log(`      ${roomId}: ${registered.length}/${room.interactables.length} authored controls registered — ${registered.map((item) => item.id).join(', ')}`);
+      }
+    },
+  },
+  {
+    name: 'return_loop_writer_is_reachable_from_the_registered_control',
+    run: () => {
+      // T01 gave the return loop a writer. A writer nothing can reach is no writer:
+      // this presses E through the control the room build itself registered.
+      const scene = makeRoomBuildScene({
+        roomId: 'observatory',
+        flags: { 'l8-lumo-room': 'observatory', 'intro-8': true, ...LOOP_PREREQUISITES },
+        counters: { ...PUZZLE_COUNTERS },
+      });
+      buildRoom(scene, 'observatory');
+
+      const control = scene.calls.registrations.find((item) => item.id === 'observatory-stone-return-loop');
+      assert.ok(control, 'the room build registers the stone-return-loop control');
+      assert.equal(observatoryDoorOpen('return-loop', scene.getObservatoryWorldState()), false, 'the restored room starts with the loop closed');
+      assert.equal(scene.calls.strips.length, 0, 'a closed loop raises no strip while the room is built');
+      const savesBefore = scene.calls.save;
+      const writesBefore = scene.calls.flagWrites.length;
+
+      control.onInteract();
+
+      assert.equal(scene.progress.flags['l8-return-loop-open'], true,
+        'pressing the registered control latches l8-return-loop-open');
+      assert.deepEqual(scene.calls.flagWrites.slice(writesBefore), [{ key: 'l8-return-loop-open', value: true }],
+        'the reachable control writes the loop flag and nothing else');
+      assert.equal(scene.calls.save, savesBefore + 1, 'the action saves exactly once');
+      assert.equal(scene.calls.strips.length, 1, 'the action raises the loop strip through refreshObservatoryReturnLoop()');
+      assert.equal(observatoryDoorOpen('return-loop', scene.getObservatoryWorldState()), true,
+        'the world state the level reads is open, so the return route exists');
+      assert.equal(scene.calls.say.at(-1)[0].text, OPEN_LOOP_LINE, 'and it answers with the authored sentence');
     },
   },
   {

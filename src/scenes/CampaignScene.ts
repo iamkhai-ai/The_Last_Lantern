@@ -638,6 +638,14 @@ export class CampaignScene extends Phaser.Scene {
     this.buildObservatorySolids(roomId);
     this.buildObservatoryBeams();
 
+    // Every control the room authored registers here, from the room's own data:
+    // after the room's art (buildObservatoryElements) and colliders
+    // (buildObservatorySolids) exist, so each control resolves its own visual and
+    // its first reads see a built world, and before the door/puzzle refresh below
+    // consumes the registered state. Without this call the room registers no
+    // controls at all: no pedestal, no mirrors, no return loop, no final door.
+    for (const item of room.interactables) this.registerObservatoryInteractable(item);
+
     for (const exit of room.exits) this.addObservatoryExit(exit);
     const safeSpawn = this.resolveObservatorySpawn(room, spawnId);
     this.player.setPosition(...safeSpawn);
