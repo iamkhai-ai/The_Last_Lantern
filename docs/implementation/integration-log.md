@@ -354,3 +354,62 @@ meaning. The Level 10 branch already used this glob idiom for its own level.
   the build dispatch only falls through to `registerLevel()`/`buildCampaignBarriers()` for indices 0,
   1 and 3. The earlier branches kept it deliberately so the diffs stayed reviewable.
 - Level 10 records `NOT_RUN` for browser playthrough and human playthrough.
+
+## Final state after all five merges
+
+`test-develop` now carries all ten authored levels, each rebuilt as its own spatial slice, and every
+shared file was merged by hand so that no earlier level lost work.
+
+| Index | Scenario | Level | Implementation | Dedicated pure check |
+| --- | --- | --- | --- | --- |
+| 0 | 01 | Forgotten Forest Edge | inline authored path (`resolveForestEdgeSpawn`) | `check-forest-edge.mjs` |
+| 1 | 02 | Whispering Woods | inline authored path (`normalizeAndPersistWoodsProgress`) | `check-whispering-woods.mjs` |
+| 2 | 03 | Library Beneath the Roots | `LibraryLevel` | shared prompt check only |
+| 3 | 04 | Shattered Moonlit Creek | `ShatteredCreekController` | `check-shattered-creek.mjs` |
+| 4 | 05 | A Path for Two | `PathForTwoLevel` | `check-path-for-two.mjs` |
+| 5 | 06 | The Sleepless Tower | `SleeplessTowerLevel` | `check-sleepless-tower.mjs` |
+| 6 | 07 | The Sleeping Garden | `SleepingGardenLevel` | `check-sleeping-garden.mjs` |
+| 7 | 08 | Ruins of Two Halves | `RuinsOfTwoHalvesLevel` | `check-ruins-of-two-halves.mjs` |
+| 8 | 09 | Dark Moon Observatory | three rooms in `CampaignScene` + `ObservatoryPuzzle` | `check-observatory.mjs` |
+| 9 | 10 | The Heart of Elaria | `HeartOfElariaLevel` | `check-heart-of-elaria.mjs` |
+
+### Integration guard
+
+`scripts/check-campaign-levels.mjs` was added to freeze this wiring. It asserts that the campaign
+defines exactly ten levels in order, that `CampaignScene` no longer diverts any index to
+`ComingSoonScene`, that every index is wired to its implementation and ships its layout module and its
+scenario document, that at least nine indices ship a dedicated pure check, that `nextLevel()` advances
+one index at a time and stops at index 9, and that `EndingScene` is still reachable with a completed
+campaign resuming at the ending.
+
+### Small corrections made during integration
+
+- `src/scenes/MenuScene.ts` advertised `PLAYTEST · MÀN 01–04` in the top pill and
+  `PLAYTEST BUILD · MÀN 01–04` in the bottom-right tag. Both now read `MÀN 01–10`, because every level
+  is playable on this branch.
+- `scripts/check-heart-of-elaria.mjs` now accepts a level's sprite-directory glob as registration, in
+  addition to a literal file path (see Merge 5).
+
+### How to verify this branch
+
+```
+npm run build                        # tsc --noEmit + Vite production build
+for %f in (scripts\check-*.mjs) do @node "%f"     # 12 pure checks, all PASS
+```
+
+### Remaining limits, stated plainly
+
+- **No level has been played in a browser or by a human on this branch.** Every piece of evidence is
+  a type check, a production build, a pure geometry/state check or a source-level guard. Renderer
+  behaviour, on-screen prompt placement, dialogue pacing and real save/reload across level transitions
+  are all unverified here.
+- Index 2 has no dedicated geometry check; it relies on the shared prompt-placement check and the
+  build.
+- Legacy inline level code for indices 4–9 still sits in `CampaignScene.ts` and is unreachable: the
+  build dispatch only falls through to `registerLevel()`/`buildCampaignBarriers()` for indices 0, 1
+  and 3. Deleting it is a safe follow-up, deliberately not attempted during the merge series.
+- `ComingSoonScene` is still registered in `src/config/gameConfig.ts` but nothing starts it.
+- Two cosmetic issues reported by the level branches remain open: the Level 09 return-loop alcove
+  trigger sits partly behind the status band, and Level 10 has two geometrically unavoidable
+  nearest-target ties resolved by registration order.
+- Nothing was pushed to `origin`. All five merges exist only in the local `test-develop` branch.

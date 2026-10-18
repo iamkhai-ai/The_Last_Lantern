@@ -2,6 +2,16 @@
 
 Trò chơi **2D Top-Down Pixel Art Cozy Mystery & Light Puzzle Adventure** xây dựng bằng **Phaser 3 + TypeScript + Vite**.
 
+> **Trạng thái hiện tại:** nhánh `test-develop` đã có đủ **10 màn** của campaign (index 0–9). Mỗi màn
+> được rebuild theo không gian riêng: flow người chơi, va chạm vật thể rắn, thứ tự che khuất và hướng
+> dẫn trong game. Luồng chính là `CampaignScene`; bốn vùng cũ của `WorldScene` vẫn nằm trong repo
+> nhưng không còn là luồng chơi chính.
+>
+> Kiểm chứng: `npm run build` và 12 script thuần `scripts/check-*.mjs`. Nhật ký tích hợp 5 lần merge,
+> cách giải quyết từng conflict và **các giới hạn còn lại** nằm ở
+> [docs/implementation/integration-log.md](docs/implementation/integration-log.md). Chưa có lượt chơi
+> trên browser hoặc bởi người thật trên nhánh này.
+
 ## 1. Cách cài đặt & chạy dự án
 
 ```bash

@@ -83,7 +83,7 @@ export class MenuScene extends Phaser.Scene {
       hudDecor.fillPath();
     }
 
-    const topRightTitle = this.add.text(476, 27, 'PLAYTEST · MÀN 01–04', {
+    const topRightTitle = this.add.text(476, 27, 'PLAYTEST · MÀN 01–10', {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '11px',
       fontStyle: 'bold',
@@ -199,7 +199,7 @@ export class MenuScene extends Phaser.Scene {
     );
     footerHint.setDepth(82);
 
-    const buildTag = this.add.text(626, 350, 'PLAYTEST BUILD · MÀN 01–04', {
+    const buildTag = this.add.text(626, 350, 'PLAYTEST BUILD · MÀN 01–10', {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '9px',
       color: '#7f9a94',
