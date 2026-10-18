@@ -6,11 +6,27 @@ import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
 
+/**
+ * The credits menu has two modes. `credits` is the two-choice menu; `confirm`
+ * is the "are you sure" step that guards Play Again. Keeping them in one state
+ * (instead of a second scene) means there is exactly one place that decides what
+ * a highlighted row does.
+ */
+type EndingMenuMode = 'credits' | 'confirm';
+
 export class EndingScene extends Phaser.Scene {
   private effectsSystem!: EffectsSystem;
   private buttons: Phaser.GameObjects.Text[] = [];
   private selectedIndex = 0;
   private campaignEnding = false;
+  private menuMode: EndingMenuMode = 'credits';
+  private restartConfirmed = false;
+  /** Keys that were already down when the credits appeared; ignored until released. */
+  private heldKeys = new Set<string>();
+  private keyListeners: Array<{ event: string; handler: (event: KeyboardEvent) => void }> = [];
+  private bodyText?: Phaser.GameObjects.Text;
+  private quoteText?: Phaser.GameObjects.Text;
+  private confirmText?: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'EndingScene' });
@@ -19,8 +35,13 @@ export class EndingScene extends Phaser.Scene {
   public create(data?: { showCredits?: boolean; campaign?: boolean }): void {
     this.campaignEnding = data?.campaign === true;
     const showCredits = data?.showCredits === true || !this.campaignEnding;
-    this.selectedIndex = 0;
+    // The campaign credits default to the safe row; the legacy ending keeps its
+    // established default because it never pages through closing text first.
+    this.selectedIndex = this.campaignEnding ? 1 : 0;
+    this.menuMode = 'credits';
+    this.restartConfirmed = false;
     this.buttons = [];
+    this.heldKeys.clear();
 
     // Build Dawn Heart Tree backdrop matching 05_final_dawn.png
     WorldFactory.buildZone(this, 'hub', 3, true);
@@ -73,6 +94,7 @@ export class EndingScene extends Phaser.Scene {
     );
     quote.setOrigin(0.5, 0.5);
     quote.setDepth(86);
+    this.quoteText = quote;
 
     const body = this.add.text(
       320,
@@ -88,19 +110,22 @@ export class EndingScene extends Phaser.Scene {
     );
     body.setOrigin(0.5, 0.5);
     body.setDepth(86);
+    this.bodyText = body;
 
-    const options = [
-      {
-        label: 'PLAY AGAIN (CHƠI LẠI TỪ ĐẦU)',
-        action: () => this.playAgain(),
-      },
-      {
-        label: 'MAIN MENU (MÀN HÌNH CHÍNH)',
-        action: () => this.goToMainMenu(),
-      },
-    ];
+    // Confirmation sentence, hidden until Play Again is chosen.
+    const confirmText = this.add.text(320, 304, 'Chơi lại từ đầu sẽ xóa tiến trình hiện tại.', {
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: '10.5px',
+      fontStyle: 'bold',
+      color: '#ffb4a2',
+      align: 'center',
+    });
+    confirmText.setOrigin(0.5, 0.5);
+    confirmText.setDepth(88);
+    confirmText.setVisible(false);
+    this.confirmText = confirmText;
 
-    options.forEach((opt, idx) => {
+    this.inputOptions().forEach((opt, idx) => {
       const btn = this.add.text(320, 248 + idx * 32, opt.label, {
         fontFamily: 'Segoe UI, sans-serif',
         fontSize: '13px',
@@ -115,43 +140,66 @@ export class EndingScene extends Phaser.Scene {
         this.refreshHighlight();
       });
       btn.on('pointerdown', () => {
-        this.selectedIndex = idx;
-        opt.action();
+        this.activateIndex(idx);
       });
       this.buttons.push(btn);
       btn.setVisible(showCredits);
     });
 
-    if (!showCredits && this.input.keyboard) {
-      const pages = [
-        'Nhinh tắt đèn. Những tia sáng cũ rút khỏi Cây Mẹ; vòng ngày đêm lại chuyển động.\n\nNhinh: “Lumo?”\n\nMột tiếng dế vang lên. Nước chảy qua suối, lá khẽ lay.\n\nLumo: “Tôi đây.”  Nhinh: “Tôi vẫn thấy cậu.”',
-        'Bình minh đi qua khu vườn, dòng suối và những ô cửa trên tháp.\n\nThe Shadow nhìn về chân trời.\n\nThe Shadow: “Trời sáng rồi.”\n\nLumo: “Lần này, chúng ta đã để đêm đi hết con đường của nó.”',
-        'Lumo đậu lên quai chiếc đèn đã tắt. Một chiếc lá non mắc trên quai.\n\nNhinh: “Trước hết, mình đi xem khu rừng vào ban ngày.”\n\nLumo: “Tôi đi cùng được không?”\n\nNhinh: “Đó là lối đi cho hai người mà.”',
-      ];
-      let page = 0;
-      body.setText(pages[page]);
-      quote.setText('BÌNH MINH TỰ TÌM ĐƯỢC ĐƯỜNG VỀ');
-      const advance = () => {
-        page += 1;
-        if (page < pages.length) body.setText(pages[page]);
-        else this.scene.restart({ showCredits: true, campaign: this.campaignEnding });
-      };
-      this.input.keyboard.on('keydown-E', advance);
-    } else if (showCredits) {
-      quote.setText('“Even the smallest light can lead us home.”');
-    }
+    this.wireInput(showCredits);
 
     this.refreshHighlight();
+  }
 
-    if (this.input.keyboard && showCredits) {
-      this.input.keyboard.on('keydown-UP', () => this.moveSelection(-1));
-      this.input.keyboard.on('keydown-W', () => this.moveSelection(-1));
-      this.input.keyboard.on('keydown-DOWN', () => this.moveSelection(1));
-      this.input.keyboard.on('keydown-S', () => this.moveSelection(1));
-      this.input.keyboard.on('keydown-ENTER', () => this.triggerSelected());
-      this.input.keyboard.on('keydown-SPACE', () => this.triggerSelected());
-      this.input.keyboard.on('keydown-E', () => this.triggerSelected());
+  /** The rows the menu currently shows: the credits pair, or the confirm pair. */
+  private inputOptions(): Array<{ label: string; action: () => void }> {
+    if (this.menuMode === 'confirm') {
+      return [
+        { label: 'Hủy', action: () => this.cancelPlayAgain() },
+        { label: 'Chơi lại', action: () => this.confirmPlayAgain() },
+      ];
     }
+    return [
+      { label: 'PLAY AGAIN (CHƠI LẠI TỪ ĐẦU)', action: () => this.requestPlayAgain() },
+      { label: 'MAIN MENU (MÀN HÌNH CHÍNH)', action: () => this.goToMainMenu() },
+    ];
+  }
+
+  /** Routes both keyboard and pointer activation through the same confirmation step. */
+  private activateIndex(index: number): void {
+    this.selectedIndex = index;
+    this.inputOptions()[index]?.action();
+  }
+
+  private triggerSelected(): void {
+    this.inputOptions()[this.selectedIndex]?.action();
+  }
+
+  /** Play Again never acts straight away: it opens the confirmation, defaulting to Cancel. */
+  private requestPlayAgain(): void {
+    if (this.menuMode === 'confirm') return;
+    this.menuMode = 'confirm';
+    this.selectedIndex = 0;
+    this.confirmText?.setText('Chơi lại từ đầu sẽ xóa tiến trình hiện tại.');
+    this.confirmText?.setVisible(true);
+    SoundSystem.playMirrorRotate();
+    this.refreshHighlight();
+  }
+
+  private cancelPlayAgain(): void {
+    this.menuMode = 'credits';
+    this.selectedIndex = this.campaignEnding ? 1 : 0;
+    this.confirmText?.setVisible(false);
+    SoundSystem.playMirrorRotate();
+    this.refreshHighlight();
+  }
+
+  /** Only this method may call playAgain, and only once. */
+  private confirmPlayAgain(): void {
+    if (this.menuMode !== 'confirm' || this.restartConfirmed) return;
+    this.restartConfirmed = true;
+    this.confirmText?.setVisible(false);
+    this.playAgain();
   }
 
   private moveSelection(delta: number): void {
@@ -160,24 +208,114 @@ export class EndingScene extends Phaser.Scene {
     this.refreshHighlight();
   }
 
-  private triggerSelected(): void {
-    if (this.selectedIndex === 0) {
-      this.playAgain();
-    } else {
-      this.goToMainMenu();
-    }
-  }
-
   private refreshHighlight(): void {
-    const labels = [
-      'PLAY AGAIN (CHƠI LẠI TỪ ĐẦU)',
-      'MAIN MENU (MÀN HÌNH CHÍNH)',
-    ];
+    const labels = this.inputOptions().map((option) => option.label);
     this.buttons.forEach((btn, idx) => {
       const sel = idx === this.selectedIndex;
       btn.setText(sel ? `▸ ${labels[idx]} ◂` : labels[idx]);
       btn.setColor(sel ? '#ffe680' : '#cddbd8');
     });
+  }
+
+  private wireInput(showCredits: boolean): void {
+    this.clearKeyListeners();
+    this.registerShutdownGuard();
+    if (!this.input?.keyboard) return;
+    if (showCredits) this.wireCreditsInput();
+    else this.wireDialogueInput();
+  }
+
+  private wireCreditsInput(): void {
+    this.syncHeldKeys();
+    this.onKey('keydown-UP', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(-1);
+    });
+    this.onKey('keydown-W', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(-1);
+    });
+    this.onKey('keydown-DOWN', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(1);
+    });
+    this.onKey('keydown-S', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(1);
+    });
+    this.onKey('keydown-ENTER', (event) => this.handleAdvance('ENTER', event));
+    this.onKey('keydown-SPACE', (event) => this.handleAdvance('SPACE', event));
+    this.onKey('keydown-E', (event) => this.handleAdvance('E', event));
+    this.onKey('keyup-E', () => this.releaseHeldKey('E'));
+    this.onKey('keyup-SPACE', () => this.releaseHeldKey('SPACE'));
+    this.onKey('keyup-ENTER', () => this.releaseHeldKey('ENTER'));
+    this.onKey('keyup-UP', () => this.releaseHeldKey('UP'));
+    this.onKey('keyup-W', () => this.releaseHeldKey('W'));
+    this.onKey('keyup-DOWN', () => this.releaseHeldKey('DOWN'));
+    this.onKey('keyup-S', () => this.releaseHeldKey('S'));
+  }
+
+  private wireDialogueInput(): void {
+    const pages = [
+      'Nhinh tắt đèn. Những tia sáng cũ rút khỏi Cây Mẹ; vòng ngày đêm lại chuyển động.\n\nNhinh: “Lumo?”\n\nMột tiếng dế vang lên. Nước chảy qua suối, lá khẽ lay.\n\nLumo: “Tôi đây.”  Nhinh: “Tôi vẫn thấy cậu.”',
+      'Bình minh đi qua khu vườn, dòng suối và những ô cửa trên tháp.\n\nThe Shadow nhìn về chân trời.\n\nThe Shadow: “Trời sáng rồi.”\n\nLumo: “Lần này, chúng ta đã để đêm đi hết con đường của nó.”',
+      'Lumo đậu lên quai chiếc đèn đã tắt. Một chiếc lá non mắc trên quai.\n\nNhinh: “Trước hết, mình đi xem khu rừng vào ban ngày.”\n\nLumo: “Tôi đi cùng được không?”\n\nNhinh: “Đó là lối đi cho hai người mà.”',
+    ];
+    let page = 0;
+    this.bodyText?.setText(pages[page]);
+    this.quoteText?.setText('BÌNH MINH TỰ TÌM ĐƯỢC ĐƯỜNG VỀ');
+    const advance = (event?: KeyboardEvent) => {
+      if (event?.repeat) return;
+      page += 1;
+      if (page < pages.length) this.bodyText?.setText(pages[page]);
+      else this.scene.restart({ showCredits: true, campaign: this.campaignEnding });
+    };
+    this.onKey('keydown-E', advance);
+  }
+
+  private handleAdvance(name: string, event?: KeyboardEvent): void {
+    if (event?.repeat) return;
+    if (this.heldKeys.has(name)) return;
+    this.triggerSelected();
+  }
+
+  /** Records every key still down as the credits appear, so their press cannot act. */
+  private syncHeldKeys(): void {
+    this.heldKeys.clear();
+    if (!this.input?.keyboard) return;
+    for (const name of ['E', 'SPACE', 'ENTER']) {
+      const key = this.input.keyboard.addKey(name);
+      if (key && key.isDown) this.heldKeys.add(name);
+    }
+  }
+
+  private releaseHeldKey(name: string): void {
+    this.heldKeys.delete(name);
+  }
+
+  private onKey(event: string, handler: (event: KeyboardEvent) => void): void {
+    if (!this.input?.keyboard) return;
+    this.input.keyboard.on(event, handler);
+    this.keyListeners.push({ event, handler });
+  }
+
+  private clearKeyListeners(): void {
+    if (this.input?.keyboard) {
+      for (const listener of this.keyListeners) this.input.keyboard.off(listener.event, listener.handler);
+    }
+    this.keyListeners = [];
+  }
+
+  private registerShutdownGuard(): void {
+    if (!this.events) return;
+    this.events.off('shutdown');
+    this.events.once('shutdown', () => this.teardownInput());
+  }
+
+  private teardownInput(): void {
+    this.clearKeyListeners();
+    this.heldKeys.clear();
+    this.events?.off('shutdown');
   }
 
   public playAgain(): void {
