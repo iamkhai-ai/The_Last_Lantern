@@ -21,8 +21,14 @@ export class EndingScene extends Phaser.Scene {
   private campaignEnding = false;
   private menuMode: EndingMenuMode = 'credits';
   private restartConfirmed = false;
-  /** Keys that were already down when the credits appeared; ignored until released. */
-  private heldKeys = new Set<string>();
+  /**
+   * This scene's own `shutdown` hook, kept so it can be removed by identity.
+   * `this.events` is `scene.sys.events`, where every core scene plugin registers
+   * its own teardown at scene START (before `create()` runs), so the hook must
+   * always be removed by naming this function and this scene — never by clearing
+   * the event, which would strip Phaser's teardown with it.
+   */
+  private shutdownHandler?: () => void;
   private keyListeners: Array<{ event: string; handler: (event: KeyboardEvent) => void }> = [];
   private bodyText?: Phaser.GameObjects.Text;
   private quoteText?: Phaser.GameObjects.Text;
@@ -41,7 +47,6 @@ export class EndingScene extends Phaser.Scene {
     this.menuMode = 'credits';
     this.restartConfirmed = false;
     this.buttons = [];
-    this.heldKeys.clear();
 
     // Build Dawn Heart Tree backdrop matching 05_final_dawn.png
     WorldFactory.buildZone(this, 'hub', 3, true);
@@ -226,7 +231,6 @@ export class EndingScene extends Phaser.Scene {
   }
 
   private wireCreditsInput(): void {
-    this.syncHeldKeys();
     this.onKey('keydown-UP', (event) => {
       if (event?.repeat) return;
       this.moveSelection(-1);
@@ -243,16 +247,9 @@ export class EndingScene extends Phaser.Scene {
       if (event?.repeat) return;
       this.moveSelection(1);
     });
-    this.onKey('keydown-ENTER', (event) => this.handleAdvance('ENTER', event));
-    this.onKey('keydown-SPACE', (event) => this.handleAdvance('SPACE', event));
-    this.onKey('keydown-E', (event) => this.handleAdvance('E', event));
-    this.onKey('keyup-E', () => this.releaseHeldKey('E'));
-    this.onKey('keyup-SPACE', () => this.releaseHeldKey('SPACE'));
-    this.onKey('keyup-ENTER', () => this.releaseHeldKey('ENTER'));
-    this.onKey('keyup-UP', () => this.releaseHeldKey('UP'));
-    this.onKey('keyup-W', () => this.releaseHeldKey('W'));
-    this.onKey('keyup-DOWN', () => this.releaseHeldKey('DOWN'));
-    this.onKey('keyup-S', () => this.releaseHeldKey('S'));
+    this.onKey('keydown-ENTER', (event) => this.handleAdvance(event));
+    this.onKey('keydown-SPACE', (event) => this.handleAdvance(event));
+    this.onKey('keydown-E', (event) => this.handleAdvance(event));
   }
 
   private wireDialogueInput(): void {
@@ -273,24 +270,18 @@ export class EndingScene extends Phaser.Scene {
     this.onKey('keydown-E', advance);
   }
 
-  private handleAdvance(name: string, event?: KeyboardEvent): void {
+  /**
+   * A key that is still held cannot act on the menu. The shipped runtime already
+   * delivers that, without any bookkeeping of ours: while a key stays down the
+   * browser keeps sending auto-repeat keydowns, and every one of them carries
+   * `event.repeat`, which is ignored here; and once a `Key` object exists for the
+   * code, Phaser's plugin drops those repeats before a handler sees them at all
+   * (`emitOnRepeat` is false by default). So the only press that can act is a
+   * fresh one — a keydown that follows a real release.
+   */
+  private handleAdvance(event?: KeyboardEvent): void {
     if (event?.repeat) return;
-    if (this.heldKeys.has(name)) return;
     this.triggerSelected();
-  }
-
-  /** Records every key still down as the credits appear, so their press cannot act. */
-  private syncHeldKeys(): void {
-    this.heldKeys.clear();
-    if (!this.input?.keyboard) return;
-    for (const name of ['E', 'SPACE', 'ENTER']) {
-      const key = this.input.keyboard.addKey(name);
-      if (key && key.isDown) this.heldKeys.add(name);
-    }
-  }
-
-  private releaseHeldKey(name: string): void {
-    this.heldKeys.delete(name);
   }
 
   private onKey(event: string, handler: (event: KeyboardEvent) => void): void {
@@ -308,14 +299,27 @@ export class EndingScene extends Phaser.Scene {
 
   private registerShutdownGuard(): void {
     if (!this.events) return;
-    this.events.off('shutdown');
-    this.events.once('shutdown', () => this.teardownInput());
+    this.clearShutdownGuard();
+    this.shutdownHandler = () => this.teardownInput();
+    this.events.once('shutdown', this.shutdownHandler, this);
+  }
+
+  /**
+   * Removes this scene's hook and nothing else. `this.events` is
+   * `scene.sys.events` and the emitter's `off(event)` with no handler clears
+   * *every* listener for that event, which would take the teardown that each
+   * core scene plugin registered at scene START with it (InputPlugin,
+   * CameraManager, DisplayList, UpdateList, TweenManager, Clock, ...).
+   */
+  private clearShutdownGuard(): void {
+    if (!this.shutdownHandler) return;
+    this.events?.off('shutdown', this.shutdownHandler, this);
+    this.shutdownHandler = undefined;
   }
 
   private teardownInput(): void {
     this.clearKeyListeners();
-    this.heldKeys.clear();
-    this.events?.off('shutdown');
+    this.clearShutdownGuard();
   }
 
   public playAgain(): void {

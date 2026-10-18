@@ -14,7 +14,14 @@
  *  - the menu methods (triggerSelected, requestPlayAgain, confirmPlayAgain,
  *    cancelPlayAgain, refreshHighlight, handleAdvance, wireCreditsInput ...) are
  *    the scene's own method bodies, extracted the same way, so the confirmation
- *    state, the release guard and the teardown are the shipped logic;
+ *    state, the key-repeat filter and the shutdown teardown are the shipped logic;
+ *  - the two emitters are modelled on the ones Phaser ships, not on assumptions:
+ *    `input.keyboard` replays the events KeyboardPlugin actually delivers (the
+ *    browser's auto-repeats included, carrying the DOM `repeat` flag), and the
+ *    scene's `events` has eventemitter3's removal semantics — `off(event)` with
+ *    no handler clears *every* listener for that event, which is what the core
+ *    scene plugins' own shutdown hooks would be caught by, since they register at
+ *    scene START, before create() runs;
  *  - the initial selection is the expression create() assigns to selectedIndex,
  *    read out of the source, so the case proves the shipped default instead of a
  *    hand-copied one.
@@ -156,8 +163,8 @@ const ARROWS = registeredArrows();
 const METHOD_NAMES = [
   'playAgain', 'goToMainMenu', 'inputOptions', 'activateIndex', 'triggerSelected',
   'requestPlayAgain', 'cancelPlayAgain', 'confirmPlayAgain', 'moveSelection', 'refreshHighlight',
-  'wireInput', 'wireCreditsInput', 'wireDialogueInput', 'handleAdvance', 'syncHeldKeys',
-  'releaseHeldKey', 'onKey', 'clearKeyListeners', 'registerShutdownGuard', 'teardownInput',
+  'wireInput', 'wireCreditsInput', 'wireDialogueInput', 'handleAdvance',
+  'onKey', 'clearKeyListeners', 'registerShutdownGuard', 'clearShutdownGuard', 'teardownInput',
 ];
 
 function makeText(record) {
@@ -172,8 +179,25 @@ function makeText(record) {
   };
 }
 
-function makeKeyboard(downKeys) {
+/**
+ * A recording stand-in for `input.keyboard`, plus the DOM side of it. The scene
+ * only subscribes to events — it never creates a `Key` — so what reaches a
+ * handler is the browser's KeyboardEvent itself, `repeat` and all:
+ * KeyboardManager queues every DOM keydown unfiltered (KeyboardManager.js:186)
+ * and KeyboardPlugin forwards it unless a `Key` for the code exists and was
+ * already down, whose repeats are dropped because `emitOnRepeat` is false by
+ * default (KeyboardPlugin.js:787-808, addKey:494). `domKeydown`/`domKeyup`
+ * deliver exactly those events, so a case can hold a key down for as long as the
+ * runtime would.
+ */
+function makeKeyboard() {
   const registry = new Map();
+  const physicallyDown = new Set();
+  const delivered = [];
+  const emit = (event, payload) => {
+    delivered.push({ event, repeat: payload?.repeat === true });
+    for (const handler of [...(registry.get(event) ?? [])]) handler(payload);
+  };
   return {
     on(event, handler) {
       const list = registry.get(event) ?? [];
@@ -186,35 +210,77 @@ function makeKeyboard(downKeys) {
       const index = list.indexOf(handler);
       if (index >= 0) list.splice(index, 1);
     },
-    addKey(name) { return { isDown: downKeys.includes(name) }; },
     count(event) { return (registry.get(event) ?? []).length; },
     total() { let n = 0; for (const list of registry.values()) n += list.length; return n; },
     events() { return [...registry.keys()]; },
+    /** The key coming down. A key that is already down produces the browser's auto-repeat. */
+    domKeydown(name) {
+      const repeat = physicallyDown.has(name);
+      physicallyDown.add(name);
+      emit(`keydown-${name}`, { repeat });
+    },
+    /**
+     * A key that was already down before this scene wired its handlers — the
+     * closing-text E — so no keydown is delivered here: the DOM state survives
+     * the restart, the scene's listeners do not.
+     */
+    domHoldDown(name) { physicallyDown.add(name); },
+    /** The key going back up: the only thing that re-arms it. */
+    domKeyup(name) {
+      physicallyDown.delete(name);
+      emit(`keyup-${name}`, { repeat: false });
+    },
+    /** Every event delivered so far, with the repeat flag the handler saw. */
+    delivered() { return delivered.map((entry) => ({ ...entry })); },
   };
 }
 
-function makeScene({ campaign = true, downKeys = [] } = {}) {
+/**
+ * `scene.sys.events`, with eventemitter3's removal semantics: `off(event)` with
+ * no handler clears *every* listener for the event (eventemitter3 index.js:254),
+ * while `off(event, handler, context)` removes only the matching listener.
+ * Phaser's scene plugins register their shutdown on this emitter, so the two are
+ * not interchangeable.
+ */
+function makeEvents() {
+  const registry = new Map();
+  const list = (event) => {
+    if (!registry.has(event)) registry.set(event, []);
+    return registry.get(event);
+  };
+  const api = {
+    on(event, handler, context) { list(event).push({ handler, context, once: false }); },
+    once(event, handler, context) { list(event).push({ handler, context, once: true }); },
+    off(event, handler, context) {
+      if (!registry.has(event)) return;
+      if (handler === undefined) { registry.delete(event); return; }
+      registry.set(event, list(event).filter((entry) => entry.handler !== handler
+        || (context !== undefined && entry.context !== context)));
+    },
+    emit(event, ...args) {
+      const snapshot = [...list(event)];
+      for (const entry of snapshot) if (entry.once) api.off(event, entry.handler, entry.context);
+      for (const entry of snapshot) entry.handler(...args);
+    },
+    count(event) { return list(event).length; },
+  };
+  return api;
+}
+
+function makeScene({ campaign = true } = {}) {
   const calls = {
     started: [], restarted: [], campaignCleared: 0, legacyCleared: 0, legacySaved: [],
     soundMirror: 0, soundLantern: 0, confirmTexts: [], buttonTexts: [],
   };
-  const keyboard = makeKeyboard(downKeys);
-  const events = {
-    handlers: new Map(),
-    on() {},
-    once(event, handler) { this.handlers.set(event, handler); },
-    off(event, handler) {
-      if (handler === undefined) { this.handlers.delete(event); return; }
-      if (this.handlers.get(event) === handler) this.handlers.delete(event);
-    },
-  };
+  const keyboard = makeKeyboard();
+  const events = makeEvents();
   const confirmText = makeText(calls.confirmTexts);
   const scene = {
     campaignEnding: campaign,
     selectedIndex: 0,
     menuMode: 'credits',
     restartConfirmed: false,
-    heldKeys: new Set(),
+    shutdownHandler: undefined,
     keyListeners: [],
     buttons: [makeText(calls.buttonTexts), makeText(calls.buttonTexts)],
     bodyText: makeText([]),
@@ -281,28 +347,33 @@ const CASES = [
     },
   },
   {
-    name: 'held_advance_key_from_the_closing_text_cannot_act_on_the_credits',
+    name: 'a_key_held_across_the_credits_restart_cannot_act_without_a_release',
     run: () => {
-      const scene = makeScene({ campaign: true, downKeys: ['E'] });
+      const scene = makeScene({ campaign: true });
       scene.selectedIndex = selectedIndexFor(true);
       scene.wireInput(true);
-      invokeHandler(scene, 'keydown-E');
-      assert.equal(scene.calls.campaignCleared, 0, 'a held advance key never clears the save');
-      assert.equal(scene.calls.started.length, 0, 'a held advance key never leaves the menu');
-    },
-  },
-  {
-    name: 'after_release_the_advance_key_reaches_main_menu',
-    run: () => {
-      const scene = makeScene({ campaign: true, downKeys: ['E'] });
-      scene.selectedIndex = selectedIndexFor(true);
-      scene.wireInput(true);
-      invokeHandler(scene, 'keydown-E');
-      assert.equal(scene.calls.started.length, 0, 'the held press is ignored');
-      invokeHandler(scene, 'keyup-E');
-      invokeHandler(scene, 'keydown-E');
+      // E paged the closing text, the scene restarted, and E is still physically
+      // down: the restarted scene has no Key for it (this scene never calls
+      // addKey), so the browser's auto-repeats are delivered, each one carrying
+      // the DOM repeat flag.
+      scene.input.keyboard.domHoldDown('E');
+      scene.input.keyboard.domKeydown('E');
+      scene.input.keyboard.domKeydown('E');
+      assert.deepEqual(scene.input.keyboard.delivered(), [
+        { event: 'keydown-E', repeat: true },
+        { event: 'keydown-E', repeat: true },
+      ], 'while the key stays down the delivered keydowns are auto-repeats');
+      assert.equal(scene.calls.campaignCleared, 0, 'a held key never clears the save');
+      assert.equal(scene.calls.started.length, 0, 'a held key never leaves the menu');
+      assert.equal(scene.menuMode, 'credits', 'a held key never opens the confirmation');
+
+      // The physical release, then a genuine press: the first event with repeat === false.
+      scene.input.keyboard.domKeyup('E');
+      scene.input.keyboard.domKeydown('E');
+      const delivered = scene.input.keyboard.delivered();
+      assert.equal(delivered[delivered.length - 1].repeat, false, 'the press after the release is a fresh keydown');
       assert.equal(scene.calls.campaignCleared, 0, 'the released press still keeps the save');
-      assert.equal(scene.calls.started.length, 1, 'the released press acts once');
+      assert.equal(scene.calls.started.length, 1, 'the released press acts exactly once');
       assert.equal(scene.calls.started[0].key, 'MenuScene', 'the released press reaches Main Menu');
     },
   },
@@ -315,6 +386,9 @@ const CASES = [
       invokeHandler(scene, 'keydown-E', { repeat: true });
       assert.equal(scene.calls.campaignCleared, 0, 'an auto-repeated key never acts');
       assert.equal(scene.calls.started.length, 0, 'an auto-repeated key never leaves the menu');
+      assert.equal(scene.menuMode, 'credits', 'an auto-repeated key never opens the confirmation');
+      invokeHandler(scene, 'keydown-DOWN', { repeat: true });
+      assert.equal(scene.selectedIndex, 0, 'an auto-repeated arrow never moves the selection');
     },
   },
   {
@@ -406,10 +480,31 @@ const CASES = [
       for (const event of scene.input.keyboard.events()) {
         assert.equal(scene.input.keyboard.count(event), 1, `${event} must have exactly one live listener`);
       }
+      assert.equal(scene.events.count('shutdown'), 1, 'a re-entry leaves exactly one shutdown hook');
       // The real restart shuts the scene down first; the teardown must leave nothing behind either.
-      scene.events.handlers.get('shutdown')?.();
+      scene.events.emit('shutdown');
       scene.wireInput(true);
       assert.equal(scene.input.keyboard.total(), before, 'a shutdown followed by re-entry leaves one set of listeners');
+    },
+  },
+  {
+    name: 'the_shutdown_hook_leaves_phasers_own_shutdown_listeners_alone',
+    run: () => {
+      const scene = makeScene({ campaign: true });
+      // Every core scene plugin registers its teardown on scene.sys.events at
+      // scene START, i.e. before create() runs (InputPlugin, CameraManager,
+      // DisplayList, UpdateList, TweenManager, Clock, ...). wireInput() runs the
+      // guard on every create(), so it must remove its own hook by identity only.
+      let corePluginTearDowns = 0;
+      scene.events.on('shutdown', () => { corePluginTearDowns += 1; });
+      scene.registerShutdownGuard();
+      scene.registerShutdownGuard();
+      assert.equal(scene.events.count('shutdown'), 2,
+        'the credits wiring must not remove the shutdown listeners Phaser registered');
+      scene.events.emit('shutdown');
+      assert.equal(corePluginTearDowns, 1, 'the core plugin teardown still runs when the scene shuts down');
+      assert.equal(scene.events.count('shutdown'), 1, 'and only that hook is left on the emitter');
+      assert.equal(scene.shutdownHandler, undefined, 'the scene removed its own hook by identity');
     },
   },
   {
@@ -417,12 +512,12 @@ const CASES = [
     run: () => {
       const scene = makeScene({ campaign: true });
       scene.wireInput(true);
-      const shutdown = scene.events.handlers.get('shutdown');
-      assert.ok(shutdown, 'the scene registers a shutdown teardown');
-      shutdown();
+      assert.equal(scene.events.count('shutdown'), 1, 'the scene registers exactly one shutdown teardown');
+      scene.events.emit('shutdown');
       assert.equal(scene.input.keyboard.total(), 0, 'shutdown removes every key listener the scene registered');
       assert.equal(scene.keyListeners.length, 0, 'shutdown drops the listener ledger');
-      assert.equal(scene.events.handlers.has('shutdown'), false, 'shutdown removes its own teardown hook');
+      assert.equal(scene.events.count('shutdown'), 0, 'shutdown removes its own teardown hook');
+      assert.equal(scene.shutdownHandler, undefined, 'the scene forgets the hook it removed');
     },
   },
   {
