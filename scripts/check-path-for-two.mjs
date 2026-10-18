@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { buildPathSchematic, choosePathCallAction, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathDoorPassage, getPathElementArtRect, getPathElementSolid, getPathExitBlock, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, pathPolylineLength, pathRouteCableSegments, pathRouteCorners, PATH_BACK_ARRIVAL_OFFSET, PATH_BODY, PATH_CHECKPOINTS, PATH_CONTROL_STANDS, PATH_DOORS, PATH_ELEMENT_RADIUS, PATH_FLOOR_BOUNDS, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_ORDER, PATH_SCHEMATIC_SIZE, PATH_PIPE_ENDPOINTS, PATH_TUBE_MOUTHS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
+import { buildPathSchematic, choosePathCallAction, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathDoorPassage, getPathElementArtRect, getPathElementSolid, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, pathPolylineLength, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, PATH_BACK_ARRIVAL_OFFSET, PATH_BODY, PATH_CHECKPOINTS, PATH_CONTROL_STANDS, PATH_DOORS, PATH_ELEMENT_RADIUS, PATH_FLOOR_BOUNDS, PATH_INK_CORRIDOR, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_ORDER, PATH_SCHEMATIC_SIZE, PATH_PIPE_ENDPOINTS, PATH_TUBE_MOUTHS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
 
 const allOpen = { a: true, b: true, c: true, practice: true };
 const actor = (room, point, open = allOpen) => isPathPositionSafe(room, point, { latches: open });
@@ -300,9 +300,8 @@ const saidText = (scene) => scene.said.flat().map((line) => line.text).join(' | 
  */
 function bindTravelPipeline(scene) {
   const plateRooms = controllerConstant('PLATE_ROOMS');
-  const platePoints = controllerConstant('PLATE_POINTS');
   scene.persistRoute = compile('persistRoute', [], {});
-  scene.localRoute = compile('localRoute', ['mark'], { PLATE_ROOMS: plateRooms, PLATE_POINTS: platePoints });
+  scene.localRoute = compile('localRoute', ['mark'], { PLATE_ROOMS: plateRooms, getPathLocalLeg });
   scene.pipeRoute = compile('pipeRoute', ['from', 'to'], { getPathPipePoint });
   scene.buildAssignmentRoute = compile('buildAssignmentRoute', ['mark', 'playerPoint'], { PLATE_ROOMS: plateRooms });
   scene.send = compile('send', ['mark'], {});
@@ -348,6 +347,26 @@ function fourSides(element) {
     west: { x: element.x - element.width / 2 - 6, y: element.y - element.height / 2 - 16 },
   };
 }
+
+/**
+ * Every rect the shipped controller draws with `tileSprite`, read out of the source and evaluated
+ * against the layout symbol: a hand-written literal is measured exactly like a derived one, so the ink
+ * case never restates the numbers it is checking.
+ */
+function tileSpriteRects(source) {
+  const calls = [...source.matchAll(/add\.tileSprite\(([\s\S]*?)\)/g)];
+  assert.ok(calls.length > 0, 'the controller still draws its native tiles with tileSprite');
+  return calls.map((call) => {
+    const args = call[1].split(',').map((part) => part.trim());
+    assert.equal(args.length, 5, `the tile is drawn from a centre, a size and a key (got ${args.length} arguments)`);
+    const [cx, cy, width, height] = args.slice(0, 4).map((arg) => new Function('PATH_INK_CORRIDOR', `return (${arg});`)(PATH_INK_CORRIDOR));
+    return { x: cx - width / 2, y: cy - height / 2, width, height };
+  });
+}
+const rectCovers = (rect, band) => rect.x <= band.x && rect.y <= band.y
+  && rect.x + rect.width >= band.x + band.width && rect.y + rect.height >= band.y + band.height;
+const rectInside = (rect, bounds) => rect.x >= bounds.x && rect.y >= bounds.y
+  && rect.x + rect.width <= bounds.x + bounds.width && rect.y + rect.height <= bounds.y + bounds.height;
 
 /* ------------------------------------------------------------------ *
  * Cases: the controller behaviour this task owns
@@ -651,7 +670,7 @@ controllerCase('route_cables_reach_both_ends_and_bend_at_real_corners', () => {
   for (const [room, mark, chord, corners] of expected) {
     const line = getPathRouteLine(room, mark);
     assert.ok(line, `${room}/${mark} route is authored in the layout data`);
-    const points = line.points;
+    const points = pathRoutePoints(line);
     const length = pathPolylineLength(points);
     assert.ok(Math.abs(Math.hypot(points[points.length - 1].x - points[0].x, points[points.length - 1].y - points[0].y) - chord) < 1,
       `${room}/${mark} chord is the published ${chord}px run`);
@@ -668,12 +687,103 @@ controllerCase('route_cables_reach_both_ends_and_bend_at_real_corners', () => {
   }
 });
 
+controllerCase('the_controller_route_legs_run_along_the_authored_lines', () => {
+  // The plate leg of Lumo's walk *is* the layout's own route tail (`PATH_ROUTE_LINES[].plate`), but
+  // `pipeRoute()` still authors its between-room turn points in the controller — the shape of failure
+  // this level's art history is made of, and nothing caught a drift. This case binds the shipped
+  // `pipeRoute()` and `localRoute()` and proves every point either one emits is a waypoint of the
+  // authored line of its own room, taken in route order along that line.
+  const linePointsOf = (room) => PATH_ROUTE_LINES.filter((line) => line.room === room).map((line) => pathRoutePoints(line));
+  /**
+   * A leg walks along one authored line at a time: a strictly monotone run of one line (forwards or
+   * backwards along it), then — when two rooms away, where the route chains two of that room's lines —
+   * a run of another line of the same room.
+   */
+  const runLength = (points, leg, from, direction) => {
+    let index = points.findIndex((authored) => authored.x === leg[from].x && authored.y === leg[from].y);
+    if (index < 0) return 0;
+    let taken = 1;
+    while (from + taken < leg.length) {
+      const next = leg[from + taken];
+      const at = points.findIndex((authored) => authored.x === next.x && authored.y === next.y);
+      if (at < 0 || (direction === 1 ? at <= index : at >= index)) break;
+      index = at;
+      taken += 1;
+    }
+    return taken;
+  };
+  const runsAlong = (lineSets, leg) => {
+    if (leg.length === 0) return true;
+    for (const points of lineSets) {
+      for (const direction of [1, -1]) {
+        const taken = runLength(points, leg, 0, direction);
+        if (taken > 0 && runsAlong(lineSets, leg.slice(taken))) return true;
+      }
+    }
+    return false;
+  };
+  const roomLegs = (route) => route.reduce((legs, point) => {
+    const last = legs[legs.length - 1];
+    if (last && last.room === point.room) last.points.push(point);
+    else legs.push({ room: point.room, points: [point] });
+    return legs;
+  }, []);
+  const scene = bindTravelPipeline(makePathScene('entry', {}));
+  const rooms = ['entry', 'relay', 'ink'];
+  for (const from of rooms) {
+    for (const to of rooms) {
+      if (from === to) continue;
+      const route = scene.pipeRoute(from, to);
+      assert.ok(route.length > 0, `${from} -> ${to} authors a pipe route`);
+      for (const leg of roomLegs(route)) {
+        assert.ok(runsAlong(linePointsOf(leg.room), leg.points),
+          `${from} -> ${to}: the ${leg.room} pipe leg ${JSON.stringify(leg.points.map((point) => ({ x: point.x, y: point.y })))} is a run of that room's authored route line`);
+      }
+    }
+  }
+
+  // And the walk itself has to end on the plate's own floor seal — the very point `hasDoorPower()`
+  // measures with Lumo standing there — in the plate's own room.
+  const plateRooms = controllerConstant('PLATE_ROOMS');
+  for (const mark of ['practice', 'a', 'b', 'c']) {
+    const room = plateRooms[mark];
+    const seal = PATH_ROOMS[room].elements.find((element) => element.id === (mark === 'practice' ? 'practice-plate' : `plate-${mark}`));
+    assert.ok(seal && isPathSeal(seal), `${room} authors the floor seal the ${mark} route ends on`);
+    const art = getPathElementArtRect(seal);
+    const plate = { x: art.x + art.width / 2, y: art.y + art.height / 2 };
+    const leg = scene.localRoute(mark);
+    assert.ok(leg.length > 1, `${mark}: the walk authors its own leg inside ${room}`);
+    assert.ok(leg.every((point) => point.room === room), `${mark}: every walked waypoint carries the plate's own room`);
+    assert.ok(runsAlong(linePointsOf(room), leg),
+      `${mark}: the walk ${JSON.stringify(leg.map((point) => ({ x: point.x, y: point.y })))} is the authored line's own plate leg`);
+    const end = leg[leg.length - 1];
+    assert.deepEqual({ x: end.x, y: end.y }, plate, `${mark}: the walk ends on its own seal (${plate.x},${plate.y})`);
+    assert.equal(hasDoorPower(mark, { assignment: mark, lumoRoom: room, lumoX: plate.x, lumoY: plate.y }), true,
+      `${mark}: that seal is the target the door power measures`);
+  }
+});
+
 controllerCase('the_ink_mark_is_one_continuous_run_and_the_mouths_leave_the_passages', () => {
-  // One 348×48 tile over the corridor instead of two 240×48 stamps 132px out of phase.
-  const corridor = { x: 184, y: 218, width: 348, height: 48 };
-  assert.equal(corridor.width, 348, 'the corridor mark is one 348px run');
+  // One 348×48 tile over the corridor instead of two 240×48 stamps 132px out of phase. The tile is
+  // measured against the layout's own corridor rect rather than against a literal the case restates, so
+  // a mark that no longer covers the walkable band — or masonry that no longer frames it — fails here.
   assert.equal(CONTROLLER_SOURCE.includes("for(const x of [304,412])"), false, 'the two out-of-phase ink stamps are gone');
-  assert.ok(CONTROLLER_SOURCE.includes('add.tileSprite(358,242,348,48'), 'the mark is one native tile over the corridor');
+  // The mark is the one floor-sized tile that covers the whole band. A stamp drawn smaller than the
+  // corridor — the 240×48 pair this replaced — leaves nothing here and fails on the count; the room's
+  // own background tile is not floor-sized, so it cannot stand in for the mark.
+  const drawn = tileSpriteRects(CONTROLLER_SOURCE)
+    .filter((rect) => rectCovers(rect, PATH_INK_CORRIDOR) && rectInside(rect, PATH_FLOOR_BOUNDS));
+  assert.equal(drawn.length, 1, `exactly one floor-sized tile covers the whole ink corridor band (got ${drawn.length})`);
+  assert.ok(rectCovers(drawn[0], PATH_INK_CORRIDOR),
+    `the drawn ink mark ${JSON.stringify(drawn[0])} covers the layout corridor band ${JSON.stringify(PATH_INK_CORRIDOR)}`);
+  const slabs = PATH_ROOMS.ink.walls.filter((wall) => wall.x === PATH_INK_CORRIDOR.x && wall.width === PATH_INK_CORRIDOR.width);
+  assert.equal(slabs.length, 2, 'the corridor band is flanked by exactly its two authored 348px masonry slabs');
+  assert.ok(slabs.some((wall) => wall.y + wall.height === PATH_INK_CORRIDOR.y), 'the north slab ends on the corridor band');
+  assert.ok(slabs.some((wall) => wall.y === PATH_INK_CORRIDOR.y + PATH_INK_CORRIDOR.height), 'the south slab starts on it');
+  const middle = { x: PATH_INK_CORRIDOR.x + PATH_INK_CORRIDOR.width / 2, y: PATH_INK_CORRIDOR.y + PATH_INK_CORRIDOR.height / 2 };
+  assert.equal(actor('ink', middle), true, `the middle of the band (${middle.x},${middle.y}) is walkable for the real foot body`);
+  assert.equal(actor('ink', { x: middle.x, y: PATH_INK_CORRIDOR.y - 20 }), false,
+    'and the slab above it is still masonry the body cannot enter');
   assert.ok(!CONTROLLER_SOURCE.includes("path-id','ink-route'"), 'no second ink stamp object survives');
 
   for (const mouth of PATH_TUBE_MOUTHS) {
@@ -701,7 +811,7 @@ controllerCase('the_ink_mark_is_one_continuous_run_and_the_mouths_leave_the_pass
   const inkC = PATH_TUBE_MOUTHS.find((mouth) => mouth.room === 'ink' && mouth.tube === 'c');
   assert.equal(inkC.x, 536, 'the C mouth sits where the C run leaves the corridor masonry');
   const cLine = getPathRouteLine('ink', 'c');
-  const descent = cLine.points.slice(-2);
+  const descent = pathRoutePoints(cLine).slice(-2);
   const expectedAngle = Math.atan2(descent[1].y - descent[0].y, descent[1].x - descent[0].x);
   assert.ok(Math.abs(inkC.rotation - expectedAngle) < 0.02, 'the C mouth rotation is the descent angle itself');
   const crossing = descent[0].x + (218 - descent[0].y) / (descent[1].y - descent[0].y) * (descent[1].x - descent[0].x);

@@ -7,7 +7,7 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
-import { choosePathCallAction, buildPathSchematic, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathElementArtRect, getPathExitBlock, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, pathRouteCableSegments, pathRouteCorners, PATH_BODY, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_TUBE_MOUTHS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathElement, type PathMark, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
+import { choosePathCallAction, buildPathSchematic, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathElementArtRect, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, PATH_BODY, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_INK_CORRIDOR, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_TUBE_MOUTHS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathElement, type PathMark, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
 
 export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
@@ -24,7 +24,6 @@ const MEMORY: DialogueLine[] = [
   {speaker:'Nhinh',text:'Cậu có muốn nghỉ một chút không?'},{speaker:'Lumo',text:'Nếu đứng yên, tôi sợ sẽ quên mất.'},{speaker:'Nhinh',text:'Vậy mình ghi lại. Cậu không cần giữ tất cả một mình.'},{speaker:'Lumo',text:'Ghi cả vết xoắn này nhé.'},
 ];
 const PLATE_ROOMS: Record<'practice'|'a'|'b'|'c',PathRoomId> = {practice:'entry',a:'entry',b:'relay',c:'ink'};
-const PLATE_POINTS: Record<'practice'|'a'|'b'|'c',PathPoint> = {practice:{x:212,y:114},a:{x:546,y:114},b:{x:546,y:114},c:{x:558,y:244}};
 
 export class PathForTwoLevel {
   private scene: Phaser.Scene; private progress: CampaignProgress; private player: Player; private lumo: Lumo;
@@ -201,11 +200,13 @@ export class PathForTwoLevel {
     this.routeGraphics=this.scene.add.graphics().setDepth(5);this.track(this.routeGraphics);this.drawTubeRoutes();
     this.drawStationSchematic();
     if(this.room==='ink'){
-      // One continuous 348×48 mark over the whole corridor: the two native 240×48 stamps used to be
-      // 132px out of phase, so the middle third showed two offset dash patterns. The native texture is
-      // tiled at its own size (no scaling), so aspect and dash spacing stay as authored.
+      // One continuous mark over the whole corridor, sized and placed from the layout's own corridor
+      // rect: the two native 240×48 stamps used to be 132px out of phase, so the middle third showed two
+      // offset dash patterns. The native texture is tiled at its own size (no scaling), so aspect and
+      // dash spacing stay as authored.
       const key=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');
-      if(key){this.inkTrail=this.scene.add.tileSprite(358,242,348,48,key).setDepth(4);this.track(this.inkTrail);}
+      if(key){this.inkTrail=this.scene.add.tileSprite(PATH_INK_CORRIDOR.x+PATH_INK_CORRIDOR.width/2,
+        PATH_INK_CORRIDOR.y+PATH_INK_CORRIDOR.height/2,PATH_INK_CORRIDOR.width,PATH_INK_CORRIDOR.height,key).setDepth(4);this.track(this.inkTrail);}
     }
     for(const mouth of PATH_TUBE_MOUTHS){
       if(mouth.room!==this.room)continue;
@@ -225,7 +226,7 @@ export class PathForTwoLevel {
     if(!this.routeGraphics)return;
     const lines=PATH_ROUTE_LINES.filter(line=>line.room===this.room);
     for(const line of lines){
-      const points=line.points;
+      const points=pathRoutePoints(line);
       this.routeGraphics.lineStyle(10,0x403328,0.88);
       this.routeGraphics.beginPath();this.routeGraphics.moveTo(points[0].x,points[0].y);
       for(const p of points.slice(1))this.routeGraphics.lineTo(p.x,p.y);
@@ -478,13 +479,20 @@ export class PathForTwoLevel {
       ...this.localRoute(mark),
     ];
   }
+  /**
+   * The leg Lumo walks inside the plate's own room: the `plate` tail of that mark's authored route line,
+   * taken from the layout rather than re-typed here, so the walked route and the drawn tube/cable art
+   * (`drawTubeRoutes` draws `pathRoutePoints(line)`) are one list of waypoints and cannot drift.
+   */
   private localRoute(mark:'practice'|'a'|'b'|'c'):PathRoutePoint[]{
-    const room=PLATE_ROOMS[mark], plate=PLATE_POINTS[mark];
-    if(mark==='practice')return[{room,x:110,y:220},{room,x:156,y:186},{room,x:156,y:110},{room,...plate}];
-    if(mark==='a')return[{room,x:440,y:232},{room,x:480,y:190},{room,x:520,y:150},{room,...plate}];
-    if(mark==='b')return[{room,x:420,y:232},{room,x:480,y:190},{room,x:520,y:150},{room,...plate}];
-    return[{room,x:180,y:200},{room,x:360,y:200},{room,x:520,y:200},{room,...plate}];
+    return getPathLocalLeg(PLATE_ROOMS[mark],mark);
   }
+  /**
+   * The turn points between two rooms. These are the only route coordinates the controller still authors
+   * itself, and every one of them has to be a waypoint of the authored route lines of its own room —
+   * `scripts/check-path-for-two.mjs` proves that for all six room pairs, so a drifted pipe point fails
+   * there instead of quietly disagreeing with the drawn pipe.
+   */
   private pipeRoute(from:PathRoomId,to:PathRoomId):PathRoutePoint[]{
     const route:PathRoutePoint[]=[];let current=from;
     while(current!==to){
@@ -691,8 +699,8 @@ export class PathForTwoLevel {
     }
   }
   private updateInkProgress():void{
-    const corridor={x:184,y:218,width:348,height:48};
-    const atCorridor=rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),corridor);
+    // The layout's own corridor rect: the band the 348×48 mark is drawn over and the masonry leaves open.
+    const atCorridor=rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),PATH_INK_CORRIDOR);
     if(this.room==='ink'&&!this.lanternOn&&!this.progress.flags['l4-ink-revealed']&&atCorridor){
       this.progress.flags['l4-ink-revealed']=true;
       this.save();

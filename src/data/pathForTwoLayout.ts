@@ -13,6 +13,13 @@ export interface PathRoom { id: PathRoomId; title: string; spawn: PathPoint; ent
 export const PATH_BODY = { feetY: 19, x: -7, y: 16, width: 14, height: 6 } as const;
 /** The main floor every room shares: x=24..616, y=80..310 (the reverse pockets reach y=318). */
 export const PATH_FLOOR_BOUNDS = { x: 24, y: 80, width: 592, height: 230 } as const;
+/**
+ * The ink corridor's own walkable band: the gap between the two 348px masonry slabs that flank it in
+ * `PATH_ROOMS.ink.walls`, which are derived from this rect. One definition, so the drawn 348×48 mark,
+ * the corridor overlap test that reveals the ink and the masonry that frames the corridor cannot drift
+ * apart; `scripts/check-path-for-two.mjs` measures the tile against it.
+ */
+export const PATH_INK_CORRIDOR: PathRect = { x: 184, y: 218, width: 348, height: 48 };
 export const PATH_DOORS = {
   practice: { room: 'entry' as const, x: 156, base: 210, target: 'entry' as const },
   a: { room: 'entry' as const, x: 480, base: 210, target: 'relay' as const },
@@ -152,6 +159,8 @@ const reversePortalWalls = (x:number):PathRect[]=>[
   {x:x+22,y:310,width:640-(x+22),height:8},
   {x:0,y:318,width:640,height:42},
 ];
+/** One of the two masonry slabs that leave `PATH_INK_CORRIDOR` open: same x/width, authored height. */
+const inkCorridorSlab = (y: number, height: number): PathRect => ({ x: PATH_INK_CORRIDOR.x, y, width: PATH_INK_CORRIDOR.width, height });
 const element = (id: string, art: string, x: number, y: number, width: number, height: number, sx: number, sy: number): PathElement => ({ id, art, x, y, width, height, stand: { x: sx, y: sy } });
 const standingSolid = (elementId:string,x:number,anchorY:number,width:number,height:number):PathSolid=>({elementId,x:x-width/2,y:anchorY-height,width,height});
 
@@ -185,7 +194,10 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
     id: 'ink', title: 'Hành Lang Mực', spawn: { x: 82, y: 251 }, entrySpawn: { x: 82, y: 251 },
     walls: [
       {x:0,y:0,width:640,height:80},{x:0,y:80,width:24,height:230},{x:616,y:80,width:24,height:230},
-      ...reversePortalWalls(82),{x:184,y:80,width:348,height:138},{x:184,y:266,width:348,height:44},
+      ...reversePortalWalls(82),
+      inkCorridorSlab(PATH_FLOOR_BOUNDS.y, PATH_INK_CORRIDOR.y - PATH_FLOOR_BOUNDS.y),
+      inkCorridorSlab(PATH_INK_CORRIDOR.y + PATH_INK_CORRIDOR.height,
+        PATH_FLOOR_BOUNDS.y + PATH_FLOOR_BOUNDS.height - (PATH_INK_CORRIDOR.y + PATH_INK_CORRIDOR.height)),
       {x:24,y:150,width:10,height:30},{x:130,y:150,width:54,height:30}, {x:532,y:150,width:10,height:30},{x:606,y:150,width:10,height:30},
       ...doorWalls(82,318), ...doorWalls(574,180),
     ],
@@ -270,19 +282,37 @@ export const PATH_CHECKPOINTS: Record<PathRoomId, PathCheckpoint> = {
 };
 
 /**
- * The visible route each tube and root cable follows, authored once so the renderer, the Lumo route
- * and the checks all read the same waypoints. `mark` is the control that owns the line.
+ * The visible route each tube and root cable follows. `lead` runs from the line's own anchor — the
+ * owning call marker, or the door/pipe the room is entered by — up to where Lumo's own walk joins it;
+ * `plate` is that same line continued to the floor seal, and it is the leg Lumo really walks from the
+ * player's position (`getPathLocalLeg`). `mark` is the control that owns the line.
+ *
+ * The renderer draws `pathRoutePoints(line)` — lead then plate — while the walk takes the `plate` tail
+ * itself, so the plate leg of the route can never be a second copy of the art's coordinates. The pipe
+ * legs between rooms still author their own turn points in `PathForTwoLevel.pipeRoute()`, and
+ * `scripts/check-path-for-two.mjs` asserts every one of those points is a run of these lines, so a
+ * drifted pipe waypoint fails a check instead of quietly disagreeing with the drawn route.
  */
-export interface PathRouteLine { mark: PathMark; room: PathRoomId; points: readonly PathPoint[]; }
+export interface PathRouteLine { mark: PathMark; room: PathRoomId; lead: readonly PathPoint[]; plate: readonly PathPoint[]; }
+/** The whole visible line: what the tube modules, the cable stamps and the corners are drawn along. */
+export function pathRoutePoints(line: PathRouteLine): readonly PathPoint[] { return [...line.lead, ...line.plate]; }
 export const PATH_ROUTE_LINES: readonly PathRouteLine[] = [
-  { mark: 'practice', room: 'entry', points: [{x:76,y:268},{x:110,y:220},{x:156,y:186},{x:156,y:110},{x:212,y:114}] },
-  { mark: 'a', room: 'entry', points: [{x:384,y:256},{x:440,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}] },
-  { mark: 'b', room: 'relay', points: [{x:360,y:256},{x:420,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}] },
-  { mark: 'a', room: 'relay', points: [{x:110,y:280},{x:140,y:280},{x:220,y:280},{x:320,y:250},{x:420,y:220},{x:480,y:190}] },
-  { mark: 'c', room: 'ink', points: [{x:82,y:280},{x:122,y:242},{x:122,y:210},{x:180,y:200},{x:360,y:200},{x:520,y:200},{x:558,y:244}] },
+  { mark: 'practice', room: 'entry', lead: [{x:76,y:268}], plate: [{x:110,y:220},{x:156,y:186},{x:156,y:110},{x:212,y:114}] },
+  { mark: 'a', room: 'entry', lead: [{x:384,y:256}], plate: [{x:440,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}] },
+  { mark: 'b', room: 'relay', lead: [{x:360,y:256}], plate: [{x:420,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}] },
+  { mark: 'a', room: 'relay', lead: [{x:110,y:280}], plate: [{x:140,y:280},{x:220,y:280},{x:320,y:250},{x:420,y:220},{x:480,y:190}] },
+  { mark: 'c', room: 'ink', lead: [{x:82,y:280},{x:122,y:242},{x:122,y:210}], plate: [{x:180,y:200},{x:360,y:200},{x:520,y:200},{x:558,y:244}] },
 ];
 export function getPathRouteLine(room: PathRoomId, mark: PathMark): PathRouteLine | undefined {
   return PATH_ROUTE_LINES.find((line) => line.room === room && line.mark === mark);
+}
+/**
+ * The leg Lumo walks inside the plate's own room, read straight out of the authored line, so the walk
+ * and the drawn tube/cable are the same waypoints rather than two lists kept equal by hand.
+ */
+export function getPathLocalLeg(room: PathRoomId, mark: PathMark): PathRoutePoint[] {
+  const line = getPathRouteLine(room, mark);
+  return line ? line.plate.map((point) => ({ room, x: point.x, y: point.y })) : [];
 }
 export function pathPolylineLength(points: readonly PathPoint[]): number {
   let total = 0;

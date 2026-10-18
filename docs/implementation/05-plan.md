@@ -73,7 +73,7 @@ flow narrative in `level-05-flow-plan.md`.
 - A small geometry-only schematic from the same room/seal/pipe data is drawn beside each call marker; no lettering and no baked staging, and the "pillars" claim is dropped because there are no pillars in this level's wall data.
 - Standing props and door controls now share one layout approach predicate across prompt, `isEnabled`, `ownsPosition` and the action (`isPathApproachAllowed` / `isPathDoorApproachAllowed`), which is what `check-interaction-targets.mjs` §bullet-3 expects of L05.
 - `pendingClose` and `l4-lumo-arrived` were confirmed write-only (no reader anywhere at `ee34eba`) and deleted.
-- `scripts/check-path-for-two.mjs` now counts its geometry/state invariants as a case as well (19 cases) and exits non-zero whenever any case fails, naming it on the summary line.
+- `scripts/check-path-for-two.mjs` now counts its geometry/state invariants as a case as well (20 cases) and exits non-zero whenever any case fails, naming it on the summary line. The fix pass added `the_controller_route_legs_run_along_the_authored_lines`, which fails when a `pipeRoute()` turn point stops being a waypoint of the authored route lines, and `localRoute()` now reads its plate leg from the layout (`getPathLocalLeg`) instead of re-typing those coordinates.
 
 ## Decisions and risks
 
