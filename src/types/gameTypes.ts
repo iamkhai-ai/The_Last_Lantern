@@ -46,9 +46,20 @@ export interface InteractableConfig {
   /**
    * Optional. True while the player's feet stand inside this control's own domain (a floor cell, a
    * socket). Among the candidates that already pass enabled/prompt/range, `InteractionSystem`
-   * prefers such a control over a nearer neighbouring prop, and re-checks it when E is pressed.
-   * Absent means the control is an ordinary candidate: nearest wins, ties go to the first
-   * registered. This is not a global priority: only the controls that opt in are affected.
+   * prefers such a control over a nearer neighbouring prop (`update()`), and re-checks it when E is
+   * pressed (`tryInteract()`). Absent means the control is an ordinary candidate: nearest wins, ties
+   * go to the first registered. This is not a global priority: only the controls that opt in are
+   * affected.
+   *
+   * Precondition for opting in — ownership only *ranks* and *re-checks*; it never suppresses. A
+   * control is a candidate as soon as `isEnabled()` passes and its prompt is non-null, whatever
+   * `ownsPosition` says: with ownership false it is simply outranked by a rival, or selected when it
+   * is the only candidate. So an opted-in control **must** return a falsy prompt and be disabled
+   * (`isEnabled() === false`) outside its own domain — otherwise it advertises itself outside its
+   * domain, and the E press, which re-validates ownership, refuses the very prompt it just showed
+   * (prompt hidden on press, shown again next frame: the "prompt shows but E does nothing" failure).
+   * Prompt, enabled and the press must agree: outside the domain, nothing is shown and nothing is
+   * accepted.
    */
   ownsPosition?: (playerX: number, playerY: number) => boolean;
 }

@@ -33,20 +33,29 @@ import {
   observatoryElementSolid, observatoryPrompt, observatorySolidRects, OBSERVATORY_ROOT_BED,
 } from '../src/data/observatoryLayout.ts';
 import {
-  canReachHeartElement, getHeartElement, HEART_CONTROL_ORDER, heartActorBody, isHeartPositionSafe,
-  isInsideHeartGate,
+  canReachHeartElement, getHeartElement, HEART_CONFIRM_ID, HEART_CONTROL_ORDER, HEART_G0_ID, heartActorBody,
+  HEART_MAT_ID, HEART_SEAL_ID, isHeartPositionSafe, isInsideHeartGate,
 } from '../src/data/heartOfElariaLayout.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const INTERACTION_FILE = join(rootDir, 'src/systems/InteractionSystem.ts');
 const PATH_FILE = join(rootDir, 'src/levels/PathForTwoLevel.ts');
 const SCENE_FILE = join(rootDir, 'src/scenes/CampaignScene.ts');
+const HEART_FILE = join(rootDir, 'src/levels/HeartOfElariaLevel.ts');
+const TOWER_FILE = join(rootDir, 'src/levels/SleeplessTowerLevel.ts');
+const GARDEN_FILE = join(rootDir, 'src/levels/SleepingGardenLevel.ts');
+const RUINS_FILE = join(rootDir, 'src/levels/RuinsOfTwoHalvesLevel.ts');
 const observatoryLayoutSource = readFileSync(join(rootDir, 'src/data/observatoryLayout.ts'), 'utf8');
 
-const parse = (file) => ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
+const parsed = new Map();
+const parse = (file) => {
+  if (!parsed.has(file)) parsed.set(file, ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true));
+  return parsed.get(file);
+};
 const INTERACTION_SOURCE = parse(INTERACTION_FILE);
 const PATH_SOURCE = parse(PATH_FILE);
 const SCENE_SOURCE = parse(SCENE_FILE);
+const HEART_SOURCE = parse(HEART_FILE);
 
 /** The north probe used by the L05 barrier case: above latch C's own block, inside the room band. */
 const L05_NORTH_PROBE = { x: 550, y: 150 };
@@ -113,6 +122,32 @@ function compile(file, methodName, owner, params, symbols) {
 const runUpdate = compile(INTERACTION_SOURCE, 'update', 'InteractionSystem',
   ['playerX', 'playerY', 'canInteract', 'playerBounds', 'protectedBounds'], { layoutInteractionPrompt });
 const runTryInteract = compile(INTERACTION_SOURCE, 'tryInteract', 'InteractionSystem', ['now'], {});
+
+/**
+ * The shipped Level 10 prompt predicate (`getPrompt: () => this.promptFor(element)`), extracted the
+ * same way, plus the gate it consults. Using the real `promptFor()` — not a re-typed copy of the
+ * gate — is what makes the case below an assertion about the layout, not about the check.
+ */
+const heartCanReach = compile(HEART_SOURCE, 'canReach', 'HeartOfElariaLevel', ['element'], { canReachHeartElement });
+const heartPromptFor = compile(HEART_SOURCE, 'promptFor', 'HeartOfElariaLevel', ['element'], {
+  MAT_MODELS: localConstant(HEART_SOURCE, 'MAT_MODELS'),
+  HEART_MAT_ID, HEART_SEAL_ID, HEART_CONFIRM_ID, HEART_G0_ID,
+});
+
+/** A stand-in for the parts of HeartOfElariaLevel the shipped prompt predicate reads. */
+function makeHeartLevelProbe() {
+  const level = {
+    player: PROBE,
+    progress: { flags: {}, counters: {} },
+    lantern: { lanternInHand: true, lanternPlaced: false, lanternOn: false },
+    lumoMode: 'follow',
+    value: () => 0,
+    state: () => ({ latched: false, ready: false, g0Split: false }),
+  };
+  level.canReach = (element) => heartCanReach.call(level, element);
+  level.promptFor = (element) => heartPromptFor.call(level, element);
+  return level;
+}
 
 /** PLATE_ROOMS is module-local in PathForTwoLevel.ts; read it from the source, never hand-copied. */
 function localConstant(file, name) {
@@ -334,6 +369,29 @@ function statueControl() {
     onInteract: () => { hits.value += 1; },
     px: 0,
     py: 0,
+    hits,
+  };
+}
+
+/**
+ * The shipped Level 10 wiring of the Moon cell (`getPrompt: () => this.promptFor(element)`,
+ * `isEnabled: () => this.canReach(element)`) plus the ownership opt-in T11 adds. The prompt is the
+ * real layout predicate, so this is the control T11 will register — not a fixture prompt. The
+ * `imageVisible(element.id)` half of the shipped `isEnabled` is the art being on screen, which the
+ * probe always satisfies.
+ */
+function heartMoonControl(level) {
+  const element = L10_MOON;
+  const hits = { value: 0 };
+  return {
+    id: element.id,
+    x: element.stand.x,
+    y: element.stand.y,
+    radius: element.radius,
+    getPrompt: () => level.promptFor(element),
+    isEnabled: () => level.canReach(element),
+    ownsPosition: (x, y) => isInsideHeartGate(element.id, { x, y }),
+    onInteract: () => { hits.value += 1; },
     hits,
   };
 }
@@ -637,7 +695,158 @@ const CASES = [
         'the 14x6 foot body the gate test uses really sits inside the authored cell');
     },
   },
+  {
+    name: 'opted_in_cell_is_silent_outside_its_own_domain',
+    run: () => {
+      const level = makeHeartLevelProbe();
+      const gate = L10_MOON.gate;
+      const stand = L10_MOON.stand;
+
+      // Inside its gate the shipped prompt predicate advertises the cell: the one domain where
+      // ownership, prompt, enabled and the press must agree.
+      PROBE.x = stand.x;
+      PROBE.y = stand.y;
+      assert.equal(isInsideHeartGate('heart-moon', PROBE), true, 'the authored Moon stand is inside the cell gate');
+      assert.equal(level.canReach(L10_MOON), true, 'the shipped gate accepts the authored stand');
+      assert.equal(level.promptFor(L10_MOON), 'E · Kiểm tra lõi Nguyệt',
+        'the shipped prompt predicate advertises the cell inside its gate');
+
+      const inside = makeSystem([heartMoonControl(level)]);
+      assert.equal(selectWith(inside, stand.x, stand.y), 'heart-moon', 'inside its gate the owned cell is selected');
+      assert.equal(inside.promptContainer.visible, true, 'and its prompt is shown');
+      assert.equal(inside.tryInteract(0), true, 'and the very same prompt is accepted on E');
+      assert.equal(inside.interactables[0].hits.value, 1, 'the cell received the E action');
+
+      // The ownsPosition precondition: outside its own domain an opted-in control must already be
+      // silent and disabled, so the prompt the selector shows is always the prompt E will accept.
+      const outside = [
+        { x: stand.x, y: gate.y - 1, side: 'north' },
+        { x: stand.x, y: gate.y + gate.height + 1, side: 'south' },
+        { x: gate.x - 1, y: stand.y, side: 'west' },
+        { x: gate.x + gate.width + 1, y: stand.y, side: 'east' },
+      ];
+      for (const point of outside) {
+        PROBE.x = point.x;
+        PROBE.y = point.y;
+        assert.equal(isInsideHeartGate('heart-moon', PROBE), false, `${point.side} of the gate is outside the cell`);
+        assert.ok(Math.hypot(point.x - stand.x, point.y - stand.y) <= L10_MOON.radius,
+          `${point.side} of the gate still sits inside the cell radius, so only the domain test can drop it`);
+        assert.equal(level.promptFor(L10_MOON), null,
+          `the real Level 10 prompt predicate is already null ${point.side} of the gate`);
+
+        const system = makeSystem([heartMoonControl(level)]);
+        assert.equal(selectWith(system, point.x, point.y), null,
+          `an opted-in cell is not selected ${point.side} of its own gate`);
+        assert.equal(system.promptContainer.visible, false,
+          `no prompt is shown ${point.side} of the gate, so E can never contradict one`);
+        assert.equal(system.tryInteract(1000), false, `a press ${point.side} of the gate is refused`);
+        assert.equal(system.interactables[0].hits.value, 0, 'and the refused press runs no action');
+      }
+
+      console.log('      ownsPosition precondition: the real Moon cell is silent on all four sides of its'
+        + ' gate, so prompt, enabled and the press agree');
+
+      // And the same over the whole interaction disc: no position in range may show a prompt that E
+      // would then refuse — the failure mode a constant prompt on an opted-in control produces.
+      const advertised = [];
+      for (let x = stand.x - L10_MOON.radius; x <= stand.x + L10_MOON.radius; x += 1) {
+        for (let y = stand.y - L10_MOON.radius; y <= stand.y + L10_MOON.radius; y += 1) {
+          if (Math.hypot(x - stand.x, y - stand.y) > L10_MOON.radius) continue;
+          PROBE.x = x;
+          PROBE.y = y;
+          if (!level.promptFor(L10_MOON)) continue;
+          advertised.push({ x, y });
+          assert.equal(isInsideHeartGate('heart-moon', { x, y }), true,
+            `the cell advertises itself at (${x}, ${y}) only because that is inside its gate`);
+          const system = makeSystem([heartMoonControl(level)]);
+          assert.equal(selectWith(system, x, y), 'heart-moon', `the prompt shown at (${x}, ${y}) belongs to the cell`);
+          assert.equal(system.tryInteract(2000), true, `the prompt shown at (${x}, ${y}) is accepted on E`);
+        }
+      }
+      assert.ok(advertised.length > 0, `the cell still advertises itself inside its gate (${advertised.length} position(s))`);
+      console.log(`      ownsPosition precondition: ${advertised.length} in-range position(s) advertise the cell,`
+        + ' every one of them inside its gate and pressable');
+    },
+  },
+  {
+    name: 'bullet_3_audit_of_every_level_registration',
+    run: () => {
+      for (const row of bullet3Audit()) console.log(`      ${row.verdict}`);
+    },
+  },
 ];
+
+/* ------------------------------------------------------------------ *
+ * 6b. Bullet 3 — does each level's shipped registration share a layout predicate?
+ * ------------------------------------------------------------------ */
+
+const LAYOUT_MODULE = /^\.\.\/data\/\w+Layout$/;
+
+/** The names a file imports from layout data modules — read from the source, never hand-listed. */
+function layoutImports(file) {
+  const source = parse(file);
+  const names = [];
+  for (const statement of source.statements) {
+    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+    if (!LAYOUT_MODULE.test(statement.moduleSpecifier.text)) continue;
+    const bindings = statement.importClause?.namedBindings;
+    if (bindings && ts.isNamedImports(bindings)) for (const element of bindings.elements) names.push(nodeText(element.name));
+  }
+  return names;
+}
+
+/** A registration body plus the bodies of the `this.<helper>()` methods it consults one level down. */
+function registrationText(file, methodName) {
+  const source = parse(file);
+  const body = methodSource(source, methodName, `the ${methodName}() registration`);
+  let text = body;
+  const call = /this\.(\w+)\s*\(/g;
+  let match = call.exec(body);
+  while (match) {
+    const helper = findNode(source, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === match[1]);
+    if (helper?.body) text += `\n${nodeText(helper.body)}`;
+    match = call.exec(body);
+  }
+  return text;
+}
+
+/**
+ * One row per campaign level that owns a dedicated controller or scene block. `required: true` marks
+ * the levels whose bullet-3 row claims the shared predicate already exists, so that claim cannot
+ * silently rot; the gaps owned by other tasks print a NOTE instead of failing T05.
+ */
+const BULLET_3_ROWS = [
+  { level: 'L05', index: 4, label: 'Path for two', owner: 'T06', file: PATH_FILE, method: 'registerRoomInteractions' },
+  { level: 'L06', index: 5, label: 'Sleepless tower', owner: 'T07', file: TOWER_FILE, method: 'registerActions', required: true },
+  { level: 'L07', index: 6, label: 'Sleeping garden', owner: 'T08', file: GARDEN_FILE, method: 'registerInteractions' },
+  { level: 'L08', index: 7, label: 'Ruins of two halves', owner: 'T09', file: RUINS_FILE, method: 'registerInteractions' },
+  { level: 'L09', index: 8, label: 'Observatory (scene block)', owner: 'T10', file: SCENE_FILE, method: 'registerObservatoryInteractable' },
+  { level: 'L10', index: 9, label: 'Heart of Elaria', owner: 'T11', file: HEART_FILE, method: 'registerInteractions', required: true },
+];
+
+/** A predicate-like layout symbol: an approach/face test, not a walkability or state helper. */
+const APPROACH_PREDICATE = /(approach|canreach)/i;
+
+function bullet3Audit() {
+  return BULLET_3_ROWS.map((row) => {
+    const predicates = layoutImports(row.file).filter((name) => APPROACH_PREDICATE.test(name));
+    const text = registrationText(row.file, row.method);
+    const shared = predicates.filter((name) => new RegExp(`\\b${name}\\b`).test(text));
+    if (row.required) {
+      assert.ok(shared.length > 0,
+        `${row.level} (${row.label}) still routes its standing props through the layout predicate ${predicates.join('/')}`);
+    }
+    const where = `${row.level} (index ${row.index}, ${row.label}, ${row.owner})`;
+    return {
+      ...row,
+      shared,
+      verdict: shared.length
+        ? `OK   ${where}: the shipped registration reuses the layout predicate ${shared.join(', ')}`
+        : `NOTE ${where}: no layout-owned approach predicate in the standing-prop registration`
+          + ` (prompt/enabled agree on state only) — owned by ${row.owner}`,
+    };
+  });
+}
 
 /* ------------------------------------------------------------------ *
  * 7. Runner
