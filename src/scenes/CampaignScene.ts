@@ -368,7 +368,6 @@ export class CampaignScene extends Phaser.Scene {
     this.libraryLevel?.update();
     if (this.progress.level === 6) this.gardenLevel?.update(dt);
     this.pathForTwoLevel?.update(dt);
-    this.sleeplessTower?.update(dt);
     this.ruinsLevel?.update(dt);
     this.heartLevel?.update(dt);
     if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 6 && this.progress.level !== 7 && this.progress.level !== 9) {

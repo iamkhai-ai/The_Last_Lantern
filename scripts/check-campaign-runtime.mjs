@@ -16,7 +16,10 @@
  *    scene's Phaser ports (say / save / flag writes / display list);
  *  - the observatory state, the observatory world state, the completion
  *    predicate and the return-loop strip refresh are the scene's own methods,
- *    extracted the same way and run against that stand-in.
+ *    extracted the same way and run against that stand-in;
+ *  - the campaign frame is the scene's own update() body, extracted the same
+ *    way, stepped once per level index against a recording stand-in whose
+ *    controller fields mirror the ones buildLevel() really builds.
  *
  * Grepping the scene for `flags['l8-return-loop-open'] = true` cannot pass these
  * cases: only behaviour can. A later task adds one entry to CASES.
@@ -36,6 +39,7 @@ import {
   observatoryReturnLoopLane,
   observatorySolidRects,
 } from '../src/data/observatoryLayout.ts';
+import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -302,6 +306,144 @@ const loopThresholds = OBSERVATORY_ALCOVES.filter((alcove) => alcove.doorId === 
 const sameRect = (a, b) => a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 
 /* ------------------------------------------------------------------ *
+ * 3b. The campaign frame: the shipped update() body, one step per index
+ * ------------------------------------------------------------------ */
+
+/**
+ * The two Phaser helpers the frame body calls. Phaser needs a canvas, so this
+ * stands in for those two ports only; the dispatch under test is the scene's own
+ * update() body, extracted above.
+ */
+const PHASER_PORTS = {
+  Math: { Clamp: (value, min, max) => Math.min(Math.max(value, min), max) },
+  Input: { Keyboard: { JustDown: () => false } },
+};
+
+/**
+ * The dedicated controller CampaignScene builds for each campaign index
+ * (buildLevel(): 2 -> libraryLevel, 3 -> shatteredCreek, 4 -> pathForTwoLevel,
+ * 5 -> sleeplessTower, 6 -> gardenLevel, 7 -> ruinsLevel, 9 -> heartLevel).
+ * clearActiveRoom() drops every controller before a level is rebuilt, so a frame
+ * at index N has exactly the controller of N alive — which is why the frame
+ * stand-in materialises that one and leaves the other six undefined.
+ */
+const LEVEL_CONTROLLERS = [
+  { level: 2, field: 'libraryLevel' },
+  { level: 3, field: 'shatteredCreek' },
+  { level: 4, field: 'pathForTwoLevel' },
+  { level: 5, field: 'sleeplessTower' },
+  { level: 6, field: 'gardenLevel' },
+  { level: 7, field: 'ruinsLevel' },
+  { level: 9, field: 'heartLevel' },
+];
+const LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+/** The generic per-frame pass a dedicated controller replaces. */
+const LEGACY_PASS = ['updatePuzzle', 'updateCampaignBarriers', 'refreshCampaignPuzzleVisuals'];
+/** Lumo is driven by update() at these indices; 8 routes him itself, 4/5/9 own him. */
+const LUMO_LEVELS = [0, 1, 2, 3, 6, 7];
+
+let frameStep = null;
+/**
+ * One authored frame step: the scene's own update() body, called with the
+ * authored 16ms delta. `delta` is a closed-over parameter because the extracted
+ * snippet is the method *body*; the body never reads the `time` argument.
+ */
+function stepFrame(scene, delta = 16) {
+  if (!frameStep || frameStep.delta !== delta) {
+    frameStep = { delta, run: bind(methodSource('update'), { Phaser: PHASER_PORTS, isRuinsPositionSafe, delta }, 'update()') };
+  }
+  frameStep.run(scene);
+}
+
+/**
+ * A recording stand-in for the ports one CampaignScene frame touches. Everything
+ * the frame calls outside the dispatch is recorded rather than re-implemented:
+ * the dispatch itself, including the guard around each controller, is the
+ * shipped update() body.
+ */
+function makeFrameScene(level, { controllers = [] } = {}) {
+  const calls = {
+    player: 0, lumo: [], lantern: 0, interactions: 0, dialogue: 0, hud: 0, observatoryLumo: 0,
+    observatoryRefresh: 0, forestEdgeProgress: 0, woodsFirefly: 0, legacy: [], controller: [],
+  };
+  const bounds = { x: 0, y: 0, width: 36, height: 42 };
+  const scene = {
+    progress: { level, flags: {}, counters: {} },
+    heartEnd: false,
+    activeObservatoryRoom: level === 8 ? 'observatory' : null,
+    lumoTarget: { x: 320, y: 272 },
+    lastLumoSave: 0,
+    lastPlayerSave: 0,
+    time: { now: 100000 },
+    dialogue: { isInputLocked: () => false, isActive: () => false, update: () => { calls.dialogue += 1; } },
+    pauseMenu: { isOpen: () => false, open: () => undefined },
+    player: { x: 320, y: 290, update: () => { calls.player += 1; }, sprite: { visible: true, getBounds: () => bounds } },
+    lumo: {
+      update: (_dt, x, y) => calls.lumo.push({ x, y }),
+      sprite: { x: 300, y: 270, visible: true, getBounds: () => bounds },
+    },
+    lantern: { lanternInHand: true, lanternOn: true, update: () => { calls.lantern += 1; } },
+    interactions: { update: () => { calls.interactions += 1; } },
+    keys: { esc: {} },
+    calls,
+    /** Saving is not what this harness measures; the frame stand-in just absorbs it. */
+    save: () => undefined,
+    refreshHud: () => { calls.hud += 1; },
+    updateWoodsFirefly: () => { calls.woodsFirefly += 1; },
+    updateForestEdgeProgress: () => { calls.forestEdgeProgress += 1; },
+    updateObservatoryLumo: () => { calls.observatoryLumo += 1; },
+    resolveSafeObservatoryCheckpoint: () => undefined,
+    updateObservatoryCrossingState: () => { calls.observatoryRefresh += 1; },
+    refreshObservatoryDoors: () => { calls.observatoryRefresh += 1; },
+    refreshObservatoryPuzzle: () => { calls.observatoryRefresh += 1; },
+  };
+  for (const name of LEGACY_PASS) scene[name] = () => calls.legacy.push(name);
+  for (const field of controllers) {
+    scene[field] = {
+      update: (dt) => calls.controller.push({ field, level, dt }),
+      getProtectedPromptBounds: () => [],
+    };
+  }
+  return scene;
+}
+
+/** The deltas the tower controller receives, one entry per campaign index. */
+function towerStepPerLevel() {
+  const perLevel = [];
+  for (const level of LEVELS) {
+    const scene = makeFrameScene(level, { controllers: ['sleeplessTower'] });
+    stepFrame(scene);
+    perLevel[level] = scene.calls.controller.map((call) => call.dt);
+  }
+  return perLevel;
+}
+
+/**
+ * The level indices update()'s own guard skips for the generic pass — the
+ * `this.progress.level !== N` literals on the condition that wraps
+ * updatePuzzle(). Read out of the shipped condition rather than copied by hand,
+ * so letting the generic pass back into a controller-owned frame fails here
+ * instead of silently drifting.
+ */
+function legacyPassExcludedLevels() {
+  const update = findNode(sourceFile, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === 'update');
+  assert.ok(update?.body, 'CampaignScene still declares update()');
+  const legacyCall = findNode(update.body, (node) => ts.isCallExpression(node) && nodeText(node.expression) === 'this.updatePuzzle');
+  assert.ok(legacyCall, 'update() still runs the generic puzzle refresh');
+  let guard = legacyCall.parent;
+  while (guard && !(ts.isIfStatement(guard) && findNode(guard.thenStatement, (node) => node === legacyCall))) guard = guard.parent;
+  assert.ok(guard, 'the generic puzzle refresh still sits inside a level guard');
+  const excluded = [];
+  walk(guard.expression, (node) => {
+    if (!ts.isBinaryExpression(node) || node.operatorToken.kind !== ts.SyntaxKind.ExclamationEqualsEqualsToken) return;
+    if (nodeText(node.left) !== 'this.progress.level' || !ts.isNumericLiteral(node.right)) return;
+    excluded.push(Number(node.right.text));
+  });
+  assert.ok(excluded.length, 'the guard on the generic pass still names the levels it skips');
+  return excluded.sort((a, b) => a - b);
+}
+
+/* ------------------------------------------------------------------ *
  * 4. Cases
  * ------------------------------------------------------------------ */
 
@@ -478,6 +620,89 @@ const CASES = [
       runRegistered('final-door-control', scene);
       assert.equal(scene.calls.nextLevel.length, 1, 'the far-bank control hands over to the next level');
       assert.equal(scene.calls.nextLevel[0].length, 2, 'the handover plays its two authored lines');
+    },
+  },
+  {
+    name: 'tower_controller_updates_once_per_frame',
+    run: () => {
+      const perLevel = towerStepPerLevel();
+      assert.equal(perLevel[5].length, 1,
+        `one frame at index 5 must drive the tower controller exactly once, but the spy recorded ${perLevel[5].length} calls (dt = ${perLevel[5].join(', ')})`);
+      assert.equal(perLevel[5][0], 16, 'the tower controller receives the authored 16ms step once');
+    },
+  },
+  {
+    name: 'tower_controller_never_runs_at_other_levels',
+    run: () => {
+      const perLevel = towerStepPerLevel();
+      for (const level of LEVELS) {
+        if (level === 5) continue;
+        assert.equal(perLevel[level].length, 0,
+          `the tower spy must record nothing at index ${level}, but it recorded ${perLevel[level].length} call(s)`);
+      }
+    },
+  },
+  {
+    name: 'every_controller_has_a_single_update_owner',
+    run: () => {
+      for (const level of LEVELS) {
+        const owner = LEVEL_CONTROLLERS.find((entry) => entry.level === level);
+        const scene = makeFrameScene(level, owner ? { controllers: [owner.field] } : {});
+        stepFrame(scene);
+        assert.equal(scene.calls.player, 1, `index ${level}: Nhinh steps exactly once per frame`);
+        assert.equal(scene.calls.lantern, 1, `index ${level}: the lantern system ticks exactly once per frame`);
+        assert.equal(scene.calls.lumo.length, LUMO_LEVELS.includes(level) ? 1 : 0,
+          `index ${level}: Lumo ticks exactly once per frame where update() drives him`);
+        assert.equal(scene.calls.observatoryLumo, level === 8 ? 1 : 0,
+          `index ${level}: the observatory Lumo route runs exactly once, and only at index 8`);
+        assert.equal(scene.calls.observatoryRefresh, level === 8 ? 3 : 0,
+          `index ${level}: the observatory crossing/doors/puzzle refresh runs only at index 8`);
+        assert.equal(scene.calls.forestEdgeProgress, 1,
+          `index ${level}: the forest-edge tick is still called once per frame (it gates itself by index)`);
+        assert.equal(scene.calls.woodsFirefly, level === 1 ? 1 : 0,
+          `index ${level}: the firefly route ticks only at index 1`);
+        assert.equal(scene.calls.controller.length, owner ? 1 : 0, owner
+          ? `index ${level}: ${owner.field} must be updated exactly once per frame`
+          : `index ${level}: no dedicated controller is alive, so none may be updated`);
+        assert.equal(scene.calls.interactions, 1, `index ${level}: the prompt system still updates exactly once per frame`);
+        assert.equal(scene.calls.hud, 1, `index ${level}: the HUD refresh still runs once per frame`);
+        assert.equal(scene.calls.dialogue, 1, `index ${level}: the dialogue system still ticks once per frame`);
+      }
+    },
+  },
+  {
+    name: 'legacy_campaign_pass_skipped_for_controller_levels',
+    run: () => {
+      const excluded = legacyPassExcludedLevels();
+      for (const level of LEVELS) {
+        const owner = LEVEL_CONTROLLERS.find((entry) => entry.level === level);
+        const scene = makeFrameScene(level, owner ? { controllers: [owner.field] } : {});
+        stepFrame(scene);
+        if (excluded.includes(level)) {
+          assert.ok(owner, `index ${level} skips the generic pass, so one of the dedicated controllers must own it`);
+          assert.deepEqual(scene.calls.legacy, [],
+            `index ${level}: ${owner.field} owns the frame, so the generic puzzle/barrier/art pass must be skipped`);
+          assert.equal(scene.calls.controller.length, 1, `index ${level}: ${owner.field} receives exactly one update`);
+          // shatteredCreek.update() and libraryLevel.update() take no delta at
+          // all; every call site that does pass one passes the authored step.
+          const [call] = scene.calls.controller;
+          if (call.dt !== undefined) assert.equal(call.dt, 16, `index ${level}: ${owner.field} receives the authored 16ms step`);
+        } else {
+          assert.deepEqual(scene.calls.legacy, LEGACY_PASS,
+            `index ${level} has no controller owning the generic pass, so the scene's own refresh still runs there`);
+        }
+      }
+      // Index 2 is the one controller level the guard keeps on the generic pass,
+      // and deliberately so: LibraryLevel complements the scene's own memory-ring
+      // puzzle (inspectStone/placeStone/checkMemory are still scene methods, and
+      // neither updatePuzzle() nor updateCampaignBarriers() branches on level 2),
+      // so the pass there only repaints campaign art. Every other controller
+      // level must be guarded off it.
+      for (const { level, field } of LEVEL_CONTROLLERS) {
+        if (level === 2) continue;
+        assert.ok(excluded.includes(level),
+          `index ${level}: ${field} owns the frame, so the generic pass must not run there`);
+      }
     },
   },
 ];

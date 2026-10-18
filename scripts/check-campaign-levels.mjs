@@ -65,6 +65,26 @@ for (const level of LEVELS) {
     `campaign index ${level.index} (${level.title}) is wired to its implementation via ${level.marker}`);
 }
 
+/* ------------------------------------------- one per-frame update owner per controller */
+
+// update() is the only place a level controller is driven every frame. The tower
+// controller used to be driven there twice — once from its own index guard, once
+// from the list that reconciles the other controllers — which double-stepped the
+// whole level. scripts/check-campaign-runtime.mjs proves the count at runtime;
+// this keeps the dispatch itself single-sourced for every controller.
+const updateBody = scene.slice(scene.indexOf('public update('), scene.indexOf('private updateForestEdgeProgress('));
+assert.ok(updateBody.includes('this.progress.level === 5') && updateBody.includes('this.sleeplessTower?.update('),
+  'update() still drives the tower controller from its index-5 guard');
+for (const driver of [
+  'this.player.update(', 'this.lumo.update(', 'this.lantern.update(',
+  'this.libraryLevel?.update(', 'this.shatteredCreek?.update(', 'this.pathForTwoLevel?.update(',
+  'this.sleeplessTower?.update(', 'this.gardenLevel?.update(', 'this.ruinsLevel?.update(', 'this.heartLevel?.update(',
+]) {
+  const callSites = updateBody.split(driver).length - 1;
+  assert.equal(callSites, 1,
+    `update() must drive ${driver.slice(5, -1)} exactly once per frame, found ${callSites} call sites`);
+}
+
 /* ------------------------------------------- every level still has its authored scenario on disk */
 
 for (const level of LEVELS) {
@@ -106,4 +126,5 @@ console.log(`  scenario docs : ${LEVELS.length}/${LEVELS.length} present`);
 console.log(`  pure checks   : ${covered.length}/${LEVELS.length} dedicated (index ${covered.join(', ')})`);
 console.log(`  shared cover  : index ${sharedOnly.join(', ')} rely on the shared interaction-prompt check and the build`);
 console.log('  gating        : no coming-soon diversion left; nextLevel() stops at index 9');
+console.log('  frame owners  : each controller, Lumo and the lantern system has one update() call site');
 console.log('  ending        : EndingScene reachable, completed campaigns resume at the ending');
