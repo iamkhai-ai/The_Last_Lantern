@@ -20,6 +20,7 @@ import { DialogueLine } from '../types/gameTypes';
 import { PauseMenu } from '../ui/PauseMenu';
 import { ShatteredCreekController } from './ShatteredCreekController';
 import { SleeplessTowerLevel } from '../levels/SleeplessTowerLevel';
+import { SleepingGardenLevel } from '../levels/SleepingGardenLevel';
 
 type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: Phaser.Input.Keyboard.Key; j: Phaser.Input.Keyboard.Key; space: Phaser.Input.Keyboard.Key; esc: Phaser.Input.Keyboard.Key };
 
@@ -51,10 +52,6 @@ export class CampaignScene extends Phaser.Scene {
   private roomColliders: Phaser.Physics.Arcade.Collider[] = [];
   private campaignColliders: Phaser.Physics.Arcade.Collider[] = [];
   private campaignBodies = new Map<string, Phaser.Physics.Arcade.StaticBody>();
-  private lastCampaignPlayerPosition = { x: 0, y: 0 };
-  private gardenBridgePendingRemoval = false;
-  private gardenBridgeWasReady = false;
-  private gardenTraversalSide: 'north' | 'south' | null = null;
   private activeObservatoryRoom: ObservatoryRoomId | null = null;
   private roomDoors = new Map<string, { image: Phaser.GameObjects.Image; body: Phaser.Physics.Arcade.StaticBody; exit: ObservatoryExit }>();
   private observatoryPuzzleVisuals = new Map<string, Phaser.GameObjects.GameObject>();
@@ -91,6 +88,7 @@ export class CampaignScene extends Phaser.Scene {
   private woodsCueStage?: WoodsTutorialStage;
   private libraryLevel?: LibraryLevel;
   private shatteredCreek?: ShatteredCreekController;
+  private gardenLevel?: SleepingGardenLevel;
   private pathForTwoLevel?: PathForTwoLevel;
   private sleeplessTower?: SleeplessTowerLevel;
 
@@ -171,11 +169,12 @@ export class CampaignScene extends Phaser.Scene {
         }
       }
     });
-    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.showHint(); });
+    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.progress.level === 6 ? this.gardenLevel?.showHint() : this.showHint(); });
     keyboard.on('keydown-J', () => {
       if (this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
       else if (this.progress.level === 5) this.sleeplessTower?.showJournal();
+      else if (this.progress.level === 6) this.gardenLevel?.showJournal();
       else if (this.progress.level === 8) this.showObservatoryJournal();
       else if (this.progress.level === 2) this.libraryLevel?.showJournal();
       else if (this.progress.level === 4) this.pathForTwoLevel?.showJournal();
@@ -221,7 +220,7 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshHud();
     });
     this.buildLevel();
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.shatteredCreek?.destroy(); this.sleeplessTower?.destroy(); });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.shatteredCreek?.destroy(); this.sleeplessTower?.destroy(); this.gardenLevel?.destroy(); });
   }
 
   public update(_time: number, delta: number): void {
@@ -239,6 +238,7 @@ export class CampaignScene extends Phaser.Scene {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) };
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
+    if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 330) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
     else if (this.progress.level !== 4 && this.progress.level !== 5) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.progress.level !== 4 && this.time.now - this.lastLumoSave >= 600) {
@@ -288,16 +288,17 @@ export class CampaignScene extends Phaser.Scene {
       [
         ...(this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : []),
         ...(this.libraryLevel?.getProtectedPromptBounds() ?? []),
+        ...(this.gardenLevel?.getProtectedPromptBounds() ?? []),
         ...(this.pathForTwoLevel?.getProtectedPromptBounds() ?? []),
         ...(this.sleeplessTower?.getProtectedPromptBounds() ?? []),
       ],
     );
     this.libraryLevel?.update();
+    if (this.progress.level === 6) this.gardenLevel?.update(dt);
     this.pathForTwoLevel?.update(dt);
     this.sleeplessTower?.update(dt);
-    if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 5) {
+    if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 6) {
       this.updatePuzzle(dt);
-      this.updateCampaignCrossingState();
       this.updateCampaignBarriers();
       this.refreshCampaignPuzzleVisuals();
     }
@@ -366,6 +367,8 @@ export class CampaignScene extends Phaser.Scene {
     this.libraryLevel = undefined;
     this.shatteredCreek?.destroy();
     this.shatteredCreek = undefined;
+    this.gardenLevel?.destroy();
+    this.gardenLevel = undefined;
     this.pathForTwoLevel?.destroy();
     this.pathForTwoLevel = undefined;
     this.sleeplessTower?.destroy();
@@ -401,7 +404,6 @@ export class CampaignScene extends Phaser.Scene {
       const saved = this.progress.counters['player-level'] === level && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
         ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] } : undefined;
       this.shatteredCreek.build(saved);
-      this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
       this.refreshHud();
       return;
     }
@@ -414,7 +416,6 @@ export class CampaignScene extends Phaser.Scene {
       const saved = this.progress.counters['player-level'] === level && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
         ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] } : undefined;
       this.sleeplessTower.build(saved);
-      this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
       this.refreshHud();
       return;
     }
@@ -445,15 +446,14 @@ export class CampaignScene extends Phaser.Scene {
         this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true,
       );
       this.player.setPosition(spawn.x, spawn.y);
-    } else if (level !== 4) {
+    } else if (level !== 4 && level !== 6) {
       this.player.setFootPlacement(0, 27);
       this.player.setPosition(
         overloadCheckpoint ? 130 : typeof savedPlayerX === 'number' ? Phaser.Math.Clamp(savedPlayerX, 24, 616) : defaultPlayerX,
-        overloadCheckpoint ? 205 : typeof savedPlayerY === 'number' ? Phaser.Math.Clamp(savedPlayerY, 58, 305) : level === 6 ? 160 : 290,
+        overloadCheckpoint ? 205 : typeof savedPlayerY === 'number' ? Phaser.Math.Clamp(savedPlayerY, 58, 305) : 290,
       );
     }
     (this.player.sprite.body as Phaser.Physics.Arcade.Body | null)?.updateFromGameObject();
-    this.lastCampaignPlayerPosition = { x: this.player.x, y: this.player.y };
     this.lumoTarget = level === 2
       ? { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) }
       : overloadCheckpoint ? { x: 165, y: 205 } : this.getSavedLumoTarget();
@@ -487,6 +487,14 @@ export class CampaignScene extends Phaser.Scene {
         interactions: this.interactions, lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
         nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen() });
       this.pathForTwoLevel.build();
+    } else if (level === 6) {
+      this.gardenLevel = new SleepingGardenLevel({
+        scene: this, progress: this.progress, player: this.player, lumo: this.lumo,
+        interactions: this.interactions, lantern: this.lantern, save: () => this.save(),
+        say: (lines, done) => this.say(lines, done), nextLevel: (lines) => this.nextLevel(lines),
+        canStartStory: () => !this.dialogue.isActive(),
+      });
+      this.gardenLevel.build();
     } else {
       this.addNarrativeProps(level);
       this.registerLevel(level);
@@ -499,6 +507,7 @@ export class CampaignScene extends Phaser.Scene {
       this.save();
       if (level === 2) this.libraryLevel?.startOpeningDialogue();
       else if (level === 4) this.pathForTwoLevel?.startOpeningDialogue();
+      else if (level === 6) this.gardenLevel?.startOpeningDialogue();
       else {
         const woodsStage = level === 1 ? this.getWoodsTutorialStage() : undefined;
         const woodsDirection = woodsStage === 'exit' ? 'Cổng đã mở. Đi theo lối phía đông tới bậc thang.'
@@ -1319,7 +1328,6 @@ export class CampaignScene extends Phaser.Scene {
       : level === 2 ? [['mural_tablet', 320, 72], ['pedestal_empty', 320, 190], ['receiver_off', 530, 194]]
       : level === 4 ? [['receiver_off', 320, 85], ['lock_moon_off', 220, 130], ['lock_moon_off', 420, 130], ['lock_sun_off', 320, 218]]
       : level === 5 ? [['pedestal_lit', 120, 205], ['mirror_0', 160, 170], ['mirror_1', 250, 170], ['mirror_2', 350, 170], ['receiver_off', 470, 145], ['receiver_off', 470, 205], ['lock_sun_off', 320, 80], ['mural_tablet', 535, 86]]
-      : level === 6 ? [['ruins_flower', 220, 160], ['ruins_flower', 420, 160], ['receiver_off', 320, 100]]
       : level === 7 ? [['guardian_statue', 320, 170], ['lock_sun_off', 200, 126], ['lock_sun_off', 440, 126], ['lock_moon_off', 320, 222], ['ruins_altar', 320, 82], ['pedestal_empty', 120, 205], ['mirror_1', 220, 175], ['mirror_1', 420, 175], ['receiver_off', 200, 126], ['receiver_off', 440, 126], ...(this.progress.flags['l7-solved'] ? [['shadow_npc', 320, 98] as [string, number, number]] : [])]
       : level === 8 ? [['mirror_0', 220, 175], ['mirror_2', 420, 175], ['shadow_npc', 320, 114], ['crystal_balance', 320, 68]]
       : [['heart_tree_0', 320, 157], ['crystal_memory', 190, 260], ['crystal_hope', 320, 260], ['crystal_balance', 450, 260], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
@@ -1356,9 +1364,6 @@ export class CampaignScene extends Phaser.Scene {
       this.addLevelArt('call-idle', 320, 85, 26, 26, 8);
     } else if (level === 5) {
       this.addLevelArt('tower-lamp-dim', 541, 108, 48, 48, 8);
-    } else if (level === 6) {
-      this.addLevelArt(this.progress.flags['l6-canopy-shut'] ? 'reservoir-shutter-closed-overlay' : 'reservoir-open', 320, 236, 80, 72, 5);
-      this.addLevelArt(this.progress.flags['l6-water-flowing'] ? 'nursery-water-delivered' : 'nursery-drain-closed', 480, 178, 88, 20, 8);
     } else if (level === 9) {
       for (const [name, x] of [['memory', 190], ['hope', 320], ['balance', 450]] as const) {
         const state = this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty';
@@ -1482,15 +1487,6 @@ export class CampaignScene extends Phaser.Scene {
       action('tower-recall-lumo', 'E · Gọi Lumo trở lại', 320, 80, () => { this.progress.flags['l5-return-called'] = true; this.lumoTarget = { x: this.player.x - 18, y: this.player.y - 20 }; this.save(); this.say([{ speaker: 'Nhinh', text: 'Cậu về được rồi, Lumo.' }, { speaker: 'Lumo', text: 'Tôi nghe thấy nước. Tôi tới ngay.' }]); }, () => this.progress.flags['l5-power'] === true && !this.progress.flags['l5-reunited'], 'shadow_npc');
       action('tower-record', 'E · Nghe bản ghi bên cửa sổ', 535, 86, () => { this.progress.flags['l5-record-read'] = true; this.save(); this.say([{ speaker: 'Ký Ức', text: 'Đội tìm kiếm đã trở về. Con bé vẫn chưa có mặt. Cha sẽ giữ ngọn tháp sáng thêm một đêm. Nếu con nhìn thấy, cứ đi về phía ánh đèn. Cha ở đây.' }, { speaker: 'Nhinh', text: 'Ông ấy đang đợi con gái.' }, { speaker: 'Lumo', text: 'Tôi nhớ chiếc khăn này. Nó từng đỏ.' }, { speaker: 'Nhinh', text: 'Mình đã trả nước cho rừng. Chuyện ở Cây Mẹ vẫn cần được biết.' }]); }, () => this.progress.flags['l5-crystal'] === true && !this.progress.flags['l5-record-read'], 'mural_tablet');
       action('tower-exit', 'E · Ra khu vườn', 560, 300, () => this.nextLevel([{ speaker: 'Lumo', text: 'Nước đã trở lại. Sao những cây nhỏ vẫn cúi đầu?' }, { speaker: 'Nhinh', text: 'Mình xuống gần xem.' }]), () => this.progress.flags['l5-record-read'] === true && this.progress.flags['l5-reunited'] === true, 'woods_arch_open');
-    } else if (level === 6) {
-      action('sun-shutter', 'E · Kéo màn che bể tích quang', 320, 75, () => { this.progress.flags['l6-canopy-shut'] = true; this.save(); this.say([{ speaker: 'Lumo', text: 'Tối đi thật.' }, { speaker: 'Nhinh', text: 'Nghe kìa.' }]); }, () => !this.progress.flags['l6-canopy-shut'], 'lock_sun_off');
-      action('sun-gate', 'E · Đánh thức cây nắng', 220, 160, () => this.setFlag('l6-sun-open'), () => this.progress.flags['l6-canopy-shut'] && this.lantern.lanternOn && !this.progress.flags['l6-sun-open'], 'ruins_flower');
-      action('moon-gate', 'E · Đánh thức rễ trăng', 420, 160, () => this.setFlag('l6-moon-open'), () => this.progress.flags['l6-canopy-shut'] && !this.lantern.lanternOn && !this.progress.flags['l6-moon-open'], 'ruins_flower');
-      action('sun-latch', 'E · Gài chốt thanh chắn', 310, 185, () => { this.progress.flags['l6-sun-latched'] = true; this.save(); this.say([{ speaker: 'Lumo', text: 'Cửa vẫn mở. Cậu giữ được thanh chắn rồi.' }]); }, () => this.progress.flags['l6-sun-open'] && !this.progress.flags['l6-sun-latched'], 'receiver_off');
-      action('garden-water', 'E · Mở cống tới vườn ươm', 320, 300, () => { this.progress.flags['l6-water-flowing'] = true; this.save(); this.say([{ speaker: 'Nhinh', text: 'Nước đã chảy tới vườn ươm.' }, { speaker: 'Lumo', text: 'Một chiếc lá vừa mở ra.' }]); }, () => this.progress.flags['l6-bridge-crossed'] && !this.progress.flags['l6-water-flowing'], 'receiver_off');
-      action('return-latch', 'E · Gài chốt lối đá phụ', 480, 300, () => { this.progress.flags['l6-return-latched'] = true; this.save(); this.say([{ speaker: 'Lumo', text: 'Cầu rễ rút lại được rồi. Lối đá phụ vẫn thông.' }, { speaker: 'Nhinh', text: 'Cây non có nước và có lúc nghỉ.' }]); }, () => this.progress.flags['l6-water-flowing'] && !this.progress.flags['l6-return-latched'], 'receiver_on');
-      action('garden-reflection', 'E · Nói với Lumo bên mầm cây', 450, 155, () => { this.progress.flags['l6-lumo-realized'] = true; this.save(); this.say([{ speaker: 'Lumo', text: 'Tôi cứ nghĩ nếu làm mọi nơi sáng hơn…' }, { speaker: 'Nhinh', text: 'Cậu muốn giúp rừng tỉnh dậy.' }, { speaker: 'Lumo', text: 'Nhưng có những thứ cần được ngủ.' }, { speaker: 'Nhinh', text: 'Mình biết thêm được một điều rồi.' }, { speaker: 'Lumo', text: 'Cứ ngủ đi. Chúng tôi sẽ giữ đường nước mở.' }]); }, () => this.progress.flags['l6-return-latched'] && !this.progress.flags['l6-lumo-realized'], 'ruins_flower');
-      action('garden-exit', 'E · Qua cổng vườn', 560, 300, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Đường vào điện thờ đã mở.' }, { speaker: 'Lumo', text: 'Mình cùng xem điều gì đang chờ ở đó.' }]), () => this.progress.flags['l6-lumo-realized'] === true, 'woods_arch_open');
     } else if (level === 7) {
       this.registerMirror('ruins-left', 'Gương trái', 220, 175, 2);
       this.registerMirror('ruins-right', 'Gương phải', 420, 175, 1);
@@ -1857,9 +1853,6 @@ export class CampaignScene extends Phaser.Scene {
     for (const collider of this.campaignColliders) collider.destroy();
     this.campaignColliders = [];
     this.campaignBodies.clear();
-    this.gardenBridgePendingRemoval = false;
-    this.gardenBridgeWasReady = false;
-    this.gardenTraversalSide = null;
   }
 
   private addCampaignBarrier(id: string, x: number, y: number, width: number, height: number, enabled = true): void {
@@ -1895,38 +1888,7 @@ export class CampaignScene extends Phaser.Scene {
       for (const [id,r] of [['woods-gate-left',WHISPERING_WOODS.gate.leftPost],['woods-gate-right',WHISPERING_WOODS.gate.rightPost],['woods-gate-backing',WHISPERING_WOODS.gate.backing],['woods-gate-threshold',WHISPERING_WOODS.gate.threshold]] as const) {
         this.addCampaignBarrier(id,r.x+r.width/2,r.y+r.height/2,r.width,r.height,id==='woods-gate-threshold'?!this.progress.flags['l1-open']:true);
       }
-    } else if (level === 6) {
-      // The retractable root bridge and latched stone return path are the only canal crossings.
-      this.addCampaignBarrier('garden-west-water', 135, 260, 270, 30);
-      // The return latch opens a separate stone crossing, independent of the retractable root bridge.
-      this.addCampaignBarrier('garden-east-water-near', 415, 260, 90, 30);
-      this.addCampaignBarrier('garden-east-water-far', 580, 260, 120, 30);
-      this.addCampaignBarrier('garden-return-path-gate', 490, 260, 75, 30, !this.progress.flags['l6-return-latched']);
-      const bridgeReady = this.isGardenBridgeReady();
-      this.gardenBridgeWasReady = bridgeReady;
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-      const playerOnRootBridge = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
-        new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height),
-        new Phaser.Geom.Rectangle(270, 245, 100, 30),
-      ));
-      const savedCrossingSide = this.progress.flags['l6-crossing-side'];
-      this.gardenTraversalSide = playerOnRootBridge && (savedCrossingSide === 'north' || savedCrossingSide === 'south')
-        ? savedCrossingSide
-        : null;
-      this.gardenBridgePendingRemoval = !bridgeReady && playerOnRootBridge && this.gardenTraversalSide !== null;
-      if (!playerOnRootBridge && savedCrossingSide) {
-        delete this.progress.flags['l6-crossing-side'];
-        this.gardenTraversalSide = null;
-        this.save();
-      }
-      this.addCampaignBarrier('garden-root-bridge-gate', 320, 260, 100, 30, !bridgeReady && !this.gardenBridgePendingRemoval);
     }
-  }
-
-  private isGardenBridgeReady(): boolean {
-    return this.progress.flags['l6-sun-latched'] === true
-      && this.progress.flags['l6-moon-open'] === true
-      && !this.lantern.lanternOn;
   }
 
   private updateCampaignBarriers(): void {
@@ -1941,56 +1903,6 @@ export class CampaignScene extends Phaser.Scene {
       else setEnabled('woods-gate-threshold',true);
       setEnabled('woods-gate-backing',true);
       setEnabled('woods-gate-left',true); setEnabled('woods-gate-right',true);
-    } else if (this.progress.level === 6) {
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-      const playerOnBridge = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
-        new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height),
-        new Phaser.Geom.Rectangle(270, 245, 100, 30),
-      ));
-      if (!this.isGardenBridgeReady() && playerOnBridge && this.gardenTraversalSide !== null) this.gardenBridgePendingRemoval = true;
-      if (this.isGardenBridgeReady()) this.gardenBridgePendingRemoval = false;
-      if (this.gardenBridgePendingRemoval && !playerOnBridge) this.gardenBridgePendingRemoval = false;
-      setEnabled('garden-root-bridge-gate', !this.isGardenBridgeReady() && !this.gardenBridgePendingRemoval);
-      setEnabled('garden-return-path-gate', !this.progress.flags['l6-return-latched']);
-    }
-  }
-
-  private updateCampaignCrossingState(): void {
-    if (this.progress.level === 6) {
-      const previous = this.lastCampaignPlayerPosition;
-      const x = this.player.x;
-      const y = this.player.y;
-      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
-      const bodyOffsetY = body ? body.y - y : 0;
-      const bodyHeight = body?.height ?? 0;
-      const playerOnBridge = Boolean(body && Phaser.Geom.Rectangle.Overlaps(
-        new Phaser.Geom.Rectangle(body.x, body.y, body.width, body.height),
-        new Phaser.Geom.Rectangle(270, 245, 100, 30),
-      ));
-      if (playerOnBridge && (this.isGardenBridgeReady() || this.gardenBridgeWasReady) && this.gardenTraversalSide === null) {
-        const previousBodyTop = previous.y + bodyOffsetY;
-        const previousBodyBottom = previousBodyTop + bodyHeight;
-        this.gardenTraversalSide = previousBodyBottom <= 245 ? 'north'
-          : previousBodyTop >= 275 ? 'south'
-            : y > previous.y ? 'north' : 'south';
-        this.progress.flags['l6-crossing-side'] = this.gardenTraversalSide;
-        this.savePlayerCheckpoint();
-      }
-      const crossedToOtherBank = !playerOnBridge && (
-        this.gardenTraversalSide === 'north' && this.player.y > 243
-        || this.gardenTraversalSide === 'south' && this.player.y < 208
-      );
-      if (crossedToOtherBank && !this.progress.flags['l6-bridge-crossed']) {
-        this.progress.flags['l6-bridge-crossed'] = true;
-        this.save();
-      }
-      if (!playerOnBridge && (this.player.y < 208 || this.player.y > 243) && this.gardenTraversalSide !== null) {
-        this.gardenTraversalSide = null;
-        delete this.progress.flags['l6-crossing-side'];
-        this.save();
-      }
-      this.lastCampaignPlayerPosition = { x, y };
-      this.gardenBridgeWasReady = this.isGardenBridgeReady();
     }
   }
 
@@ -2144,9 +2056,6 @@ export class CampaignScene extends Phaser.Scene {
       this.setForestEdgeArt('sun-eye', this.progress.flags['l0-gate-open'] ? 'sun-eye-full' : this.forestEdgeChargeMs > 0 ? 'sun-eye-receiving' : 'sun-eye-dormant');
     } else if (level === 2) {
       this.setLevelArtAt(548, 194, this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed');
-    } else if (level === 6) {
-      this.setLevelArtAt(320, 236, this.progress.flags['l6-canopy-shut'] ? 'reservoir-shutter-closed-overlay' : 'reservoir-open');
-      this.setLevelArtAt(480, 178, this.progress.flags['l6-water-flowing'] ? 'nursery-water-delivered' : 'nursery-drain-closed');
     } else if (level === 7) {
       this.setLevelArtAt(320, 170, `statue-notch-${this.value('statue') % 4}`);
     } else if (level === 9) {
@@ -2202,7 +2111,7 @@ export class CampaignScene extends Phaser.Scene {
   private refreshCampaignPuzzleVisuals(): void {
     const level = this.progress.level;
     this.refreshCampaignArtVisuals(level);
-    if (![0, 3, 4, 5, 6, 7, 9].includes(level)) return;
+    if (![0, 3, 4, 5, 7, 9].includes(level)) return;
     if (!this.campaignBeamGraphics || !this.campaignBeamGraphics.active) {
       this.campaignBeamGraphics = this.add.graphics().setDepth(6);
       this.track(this.campaignBeamGraphics);
@@ -2256,29 +2165,6 @@ export class CampaignScene extends Phaser.Scene {
       graphics.fillStyle(c ? 0xffdf83 : 0x52636a, c ? 0.9 : 0.32); graphics.fillCircle(320, 80, 9);
       if (this.progress.flags['l5-water-returned']) {
         graphics.lineStyle(3, 0x57cbe0, 0.85); graphics.beginPath(); graphics.moveTo(575, 100); graphics.lineTo(575, 280); graphics.strokePath();
-      }
-    } else if (level === 6) {
-      graphics.fillStyle(this.progress.flags['l6-canopy-shut'] ? 0x243645 : 0xffefad, this.progress.flags['l6-canopy-shut'] ? 0.8 : 0.35); graphics.fillRoundedRect(295, 62, 50, 16, 5);
-      graphics.fillStyle(this.progress.flags['l6-sun-open'] ? 0xffdf83 : 0x52636a, this.progress.flags['l6-sun-open'] ? 0.9 : 0.32); graphics.fillCircle(220, 160, 18);
-      const gardenBridge = this.isGardenBridgeReady() || this.gardenBridgePendingRemoval;
-      graphics.fillStyle(gardenBridge ? 0x99c8ed : 0x52636a, gardenBridge ? 0.88 : 0.5); graphics.fillRect(270, 253, 100, 14);
-      const returnPathOpen = this.progress.flags['l6-return-latched'] === true;
-      graphics.fillStyle(returnPathOpen ? 0x83d6a2 : 0x52636a, returnPathOpen ? 0.9 : 0.42);
-      graphics.fillRect(460, 253, 60, 14);
-      if (returnPathOpen) {
-        graphics.lineStyle(2, 0xc8e8ce, 0.9);
-        graphics.lineBetween(468, 256, 468, 264);
-        graphics.lineBetween(484, 256, 484, 264);
-        graphics.lineBetween(500, 256, 500, 264);
-        graphics.lineBetween(516, 256, 516, 264);
-      }
-      if (this.progress.flags['l6-water-flowing']) { graphics.lineStyle(4, 0x57cbe0, 0.8); graphics.beginPath(); graphics.moveTo(320, 95); graphics.lineTo(320, 275); graphics.strokePath(); }
-      if (returnPathOpen) { graphics.fillStyle(0x83d6a2, 0.8); graphics.fillRoundedRect(465, 192, 30, 8, 3); }
-      if (this.progress.flags['l6-water-flowing']) {
-        graphics.lineStyle(3, 0x83d6a2, 0.95); graphics.beginPath(); graphics.moveTo(450, 175); graphics.lineTo(450, 145); graphics.strokePath();
-        graphics.fillStyle(0xa3e29e, 0.95); graphics.fillEllipse(440, 151, 16, 8); graphics.fillEllipse(460, 158, 16, 8);
-      } else {
-        graphics.fillStyle(0x6e855c, 0.7); graphics.fillEllipse(450, 175, 16, 7);
       }
     } else if (level === 7) {
       const left = this.isRuinsOuterBeamReady('left');
@@ -2541,6 +2427,10 @@ export class CampaignScene extends Phaser.Scene {
       this.objectiveText?.setText(this.libraryLevel.getObjectiveText());
       this.statusText?.setText(this.libraryLevel.getStatusText());
     }
+    if (this.progress.level === 6 && this.gardenLevel) {
+      this.objectiveText?.setText(this.gardenLevel.getObjectiveText());
+      this.statusText?.setText(this.gardenLevel.getStatusText());
+    }
     if (this.titleText) this.titleText.setText(this.progress.level === 8 && this.activeObservatoryRoom
       ? `09  ${OBSERVATORY_ROOMS[this.activeObservatoryRoom].title}   ·   ${level.chapter}`
       : `${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
@@ -2552,7 +2442,7 @@ export class CampaignScene extends Phaser.Scene {
         : levelIndex === 3 ? `Cầu: ${Number(Boolean(this.progress.flags['l3-latch-a'])) + Number(Boolean(this.progress.flags['l3-latch-b']))}/2 · G1 ${this.value('g1')} / G2 ${this.value('g2')} / G3 ${this.value('g3')}`
         : levelIndex === 4 ? `Cửa: ${Number(Boolean(this.progress.flags['l4-latch-a'])) + Number(Boolean(this.progress.flags['l4-latch-b'])) + Number(Boolean(this.progress.flags['l4-latch-c']))}/3 · Lumo: ${this.progress.flags['l4-reunited'] ? 'đã trở lại' : 'theo mốc'}`
         : levelIndex === 5 ? `Nhánh A/B: ${this.value('tower-g1') === 1 && this.value('tower-g0') === 2 && this.lantern.lanternOn ? 'A sáng' : 'A tắt'} / ${this.value('tower-g2') === 3 && this.value('tower-g0') === 2 && this.lantern.lanternOn ? 'B sáng' : 'B tắt'} · Nước: ${this.progress.flags['l5-water-returned'] ? 'đã trả' : 'đang bị hút'}`
-        : levelIndex === 6 ? `Màn che: ${this.progress.flags['l6-canopy-shut'] ? 'đóng' : 'mở'} · Cầu rễ: ${this.progress.flags['l6-bridge-crossed'] ? 'đã qua' : 'chưa qua'} · Nước: ${this.progress.flags['l6-water-flowing'] ? 'đã chảy' : 'chưa chảy'}`
+        : levelIndex === 6 && this.gardenLevel ? this.gardenLevel.getStatusText()
         : levelIndex === 7 ? `Mắt: ${Number(this.isRuinsOuterBeamReady('left')) + Number(this.isRuinsOuterBeamReady('right'))}/2 · Bóng giữa: ${this.value('statue') === 2 ? 'đúng' : 'chưa đúng'} · Điện thờ: ${this.progress.flags['l7-solved'] ? 'mở' : 'khóa'}`
         : levelIndex === 9 ? `Tinh thể: ${['memory', 'hope', 'balance'].filter((s) => this.progress.flags[`l9-${s}`]).length}/3 · Nhánh: ${Number(this.value('heart-memory') === 1) + Number(this.value('heart-balance') === 2)}/2 · Lumo: ${this.progress.flags['l9-at-heart'] ? 'đang tới ấn' : 'chưa gọi'}`
         : `Đèn: ${this.lantern.lanternOn ? 'BẬT' : 'TẮT'} · Lumo: đang đi cùng`;
@@ -2560,6 +2450,7 @@ export class CampaignScene extends Phaser.Scene {
     }
     if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.level === 4
       ? (this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về')
-      : this.progress.level >= 5 && this.progress.level !== 8 ? 'LUMO · E gọi tới ấn' : 'NHINH + LUMO');
+      : this.progress.level === 6 ? 'LUMO · đi cùng Nhinh'
+        : this.progress.level >= 5 && this.progress.level !== 8 ? 'LUMO · E gọi tới ấn' : 'NHINH + LUMO');
   }
 }
