@@ -146,3 +146,63 @@ Rules used for every merge in this log:
 - Indices 7, 8 and 9 still run their pre-rebuild implementations until the Level 08, 09 and 10
   merges land. This is transitional.
 - Level 07 records `NOT_RUN` for browser and human playthrough.
+
+## Merge 3 — `codex/level-08-spatial-rebuild` (Level 08, campaign index 7)
+
+- Branch merged: `codex/level-08-spatial-rebuild`, tip `7f9b697`.
+- Its real change set adds `src/data/ruinsOfTwoHalvesLayout.ts`,
+  `src/levels/RuinsOfTwoHalvesLevel.ts`, `scripts/check-ruins-of-two-halves.mjs`,
+  `docs/implementation/08-plan.md`, `docs/implementation/08-layout.md`, and a small number of
+  `CampaignScene.ts` hooks. Its merge base predates this `test-develop` line, so it also carries the
+  Level 05 files that are already merged here; those produced no conflicts.
+- Level 08 previously had only the thin index-7 placeholder, so this is the level's real rebuild.
+
+### Conflicts and resolutions
+
+**`src/art/CampaignArt.ts`** — one hunk. The branch listed every Level 05 sprite by name plus a
+two-file Level 06 list plus a five-file Level 07 list, and used a glob for Level 08. `test-develop`
+had globs for 05, 06 and 07 and a five-file Level 08 list. Resolution: four globs, one per level
+(05, 06, 07, 08). Reason: the Level 08 controller references the whole Level 08 sprite set
+(`statue-notch-*`, `shadow-notch-*`, `test-column-notch-*`, `lock-moon-*`, `confirmation-*`,
+`seedling-curtain-*`, `sanctuary-door-*`, `fixed-three-route-splitter-*`), so the five-file list was
+too small, and the Level 07 glob is required as well.
+
+**`src/scenes/CampaignScene.ts`** — ten hunks, all resolved by keeping both levels.
+
+1. Controller field: kept `sleeplessTower` and added `ruinsLevel`.
+2. Playtest gate: the branch added `level >= 4 && level !== 7`. Resolution: dropped it, because the
+   gate had already been removed. Every campaign index stays reachable.
+3. `H` handler: now chains level 3 → level 5 → level 6 → level 7 → generic. The `J` handler already
+   contained the level 7 branch after auto-merge.
+4. Level-6 and level-7 `lumoTarget` rows are both kept.
+5. Protected prompt bounds: both `sleeplessTower` and `ruinsLevel` contribute.
+6. End of `update()`: both controllers are updated in order, and the generic puzzle pass is skipped
+   for levels 3, 4, 5, 6 and 7.
+7. `buildLevel()` teardown: both controllers destroyed and cleared.
+8. `drawRoom()` and the shared HUD text creation: `drawRoom()` is skipped for levels 2, 3, 4, 5 and 7,
+   while the shared `titleText`/`objectiveText`/`statusText`/`hintText` are still created for levels
+   6 and 7. Reason: unlike levels 4 and 5, the garden and ruins controllers do not draw a floor of
+   their own, and they write their objective and status into the scene's rows.
+9. Build branches: the `level === 6` garden branch and the `level === 7` ruins branch are both kept.
+10. Opening-dialogue dispatch: both the level 6 and level 7 cases are kept.
+
+The branch's deliberate edits elsewhere auto-merged correctly: level 7 is excluded from the generic
+spawn placement, and level 7 uses its own collision-aware checkpoint
+(`if (this.progress.level === 7) { if (isRuinsPositionSafe({ x, y })) { ... } }`) so a reload cannot
+store a centre whose foot body sits inside a solid.
+
+### Verification on the merged revision
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `npm run build` | PASS | `tsc --noEmit` clean, Vite build 587 modules. |
+| All nine `scripts/check-*.mjs` | PASS | start-intent, forest-edge, interaction-prompt-layout, path-for-two, ruins-of-two-halves, shattered-creek, sleeping-garden, sleepless-tower, whispering-woods. |
+| `node scripts/check-ruins-of-two-halves.mjs` | PASS | Level 08 geometry/state checks passed. |
+| Conflict-marker scan | PASS | No `<<<<<<<` or `>>>>>>>` left in the two shared files. |
+| Browser playthrough | NOT_RUN | No browser automation available in this environment. |
+
+### Known limits after this merge
+
+- Index 8 and index 9 still run their pre-rebuild implementations until the Level 09 and Level 10
+  merges land. This is transitional.
+- Level 08 records `NOT_RUN` for browser and human playthrough.

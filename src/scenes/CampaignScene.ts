@@ -7,6 +7,8 @@ import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutor
 import { LIBRARY_LAYOUT, resolveLibrarySpawn } from '../data/libraryLayout';
 import { LibraryLevel } from '../levels/LibraryLevel';
 import { PathForTwoLevel } from '../levels/PathForTwoLevel';
+import { RuinsOfTwoHalvesLevel } from '../levels/RuinsOfTwoHalvesLevel';
+import { isRuinsPositionSafe } from '../data/ruinsOfTwoHalvesLayout';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -91,6 +93,7 @@ export class CampaignScene extends Phaser.Scene {
   private gardenLevel?: SleepingGardenLevel;
   private pathForTwoLevel?: PathForTwoLevel;
   private sleeplessTower?: SleeplessTowerLevel;
+  private ruinsLevel?: RuinsOfTwoHalvesLevel;
 
   constructor() { super({ key: 'CampaignScene' }); }
 
@@ -169,7 +172,7 @@ export class CampaignScene extends Phaser.Scene {
         }
       }
     });
-    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.progress.level === 6 ? this.gardenLevel?.showHint() : this.showHint(); });
+    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.progress.level === 6 ? this.gardenLevel?.showHint() : this.progress.level === 7 ? this.ruinsLevel?.showHint() : this.showHint(); });
     keyboard.on('keydown-J', () => {
       if (this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
@@ -178,6 +181,7 @@ export class CampaignScene extends Phaser.Scene {
       else if (this.progress.level === 8) this.showObservatoryJournal();
       else if (this.progress.level === 2) this.libraryLevel?.showJournal();
       else if (this.progress.level === 4) this.pathForTwoLevel?.showJournal();
+      else if (this.progress.level === 7) this.ruinsLevel?.showJournal();
       else if (this.progress.level === 1) this.showRuneJournal();
       else if (this.progress.level === 0) this.showOpeningJournal();
     });
@@ -239,6 +243,7 @@ export class CampaignScene extends Phaser.Scene {
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
     if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 330) };
+    if (this.progress.level === 7) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 30, 610), y: Phaser.Math.Clamp(this.player.y - 22, 84, 302) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
     else if (this.progress.level !== 4 && this.progress.level !== 5) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.progress.level !== 4 && this.time.now - this.lastLumoSave >= 600) {
@@ -264,7 +269,16 @@ export class CampaignScene extends Phaser.Scene {
           this.progress.roomSpawn = checkpoint;
         }
       }
-      if (this.progress.counters['player-level'] !== this.progress.level || Math.abs((this.progress.counters['player-x'] ?? x) - x) > 3 || Math.abs((this.progress.counters['player-y'] ?? y) - y) > 3) {
+      // Level 08 keeps its own collision-aware checkpoint: never store a centre whose foot body
+      // sits inside a solid, so a reload cannot restore the player out of bounds.
+      if (this.progress.level === 7) {
+        if (isRuinsPositionSafe({ x, y })) {
+          this.progress.counters['player-level'] = this.progress.level;
+          this.progress.counters['player-x'] = x;
+          this.progress.counters['player-y'] = y;
+          this.save();
+        }
+      } else if (this.progress.counters['player-level'] !== this.progress.level || Math.abs((this.progress.counters['player-x'] ?? x) - x) > 3 || Math.abs((this.progress.counters['player-y'] ?? y) - y) > 3) {
         this.progress.counters['player-level'] = this.progress.level;
         this.progress.counters['player-x'] = x;
         this.progress.counters['player-y'] = y;
@@ -291,13 +305,15 @@ export class CampaignScene extends Phaser.Scene {
         ...(this.gardenLevel?.getProtectedPromptBounds() ?? []),
         ...(this.pathForTwoLevel?.getProtectedPromptBounds() ?? []),
         ...(this.sleeplessTower?.getProtectedPromptBounds() ?? []),
+        ...(this.ruinsLevel?.getProtectedPromptBounds() ?? []),
       ],
     );
     this.libraryLevel?.update();
     if (this.progress.level === 6) this.gardenLevel?.update(dt);
     this.pathForTwoLevel?.update(dt);
     this.sleeplessTower?.update(dt);
-    if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 6) {
+    this.ruinsLevel?.update(dt);
+    if (this.progress.level !== 3 && this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 6 && this.progress.level !== 7) {
       this.updatePuzzle(dt);
       this.updateCampaignBarriers();
       this.refreshCampaignPuzzleVisuals();
@@ -373,6 +389,8 @@ export class CampaignScene extends Phaser.Scene {
     this.pathForTwoLevel = undefined;
     this.sleeplessTower?.destroy();
     this.sleeplessTower = undefined;
+    this.ruinsLevel?.destroy();
+    this.ruinsLevel = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.memoryLayerLabels.clear();
@@ -381,7 +399,7 @@ export class CampaignScene extends Phaser.Scene {
     const level = this.progress.level;
     const definition = CAMPAIGN_LEVELS[level];
     this.selectedStone = -1;
-    if (level !== 2 && level !== 3 && level !== 4 && level !== 5) this.drawRoom(definition.biome);
+    if (level !== 2 && level !== 3 && level !== 4 && level !== 5 && level !== 7) this.drawRoom(definition.biome);
     if (level !== 4 && level !== 5) {
       this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
       this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
@@ -466,7 +484,6 @@ export class CampaignScene extends Phaser.Scene {
     this.lantern.isDawnMode = false;
     this.lantern.isOverloadMode = false;
     if (level === 9 && this.progress.flags['l9-overload']) this.lantern.isOverloadMode = true;
-    if (level === 7 && this.progress.flags['l7-lantern-placed']) this.lantern.placeLanternAt(120, 205);
     if (level === 5 && this.progress.flags['l5-lantern-placed'] && !this.progress.flags['l5-lantern-retrieved']) this.lantern.placeLanternAt(120, 205);
     const heartLanternShouldBePlaced = this.progress.flags['l9-lantern-placed'] === true
       || (this.progress.flags['l9-lantern-placed'] === undefined && this.progress.flags['l9-roots'] === true && !this.progress.flags['l9-lantern-retrieved']);
@@ -495,6 +512,11 @@ export class CampaignScene extends Phaser.Scene {
         canStartStory: () => !this.dialogue.isActive(),
       });
       this.gardenLevel.build();
+    } else if (level === 7) {
+      this.ruinsLevel = new RuinsOfTwoHalvesLevel({ scene: this, progress: this.progress, player: this.player, lumo: this.lumo,
+        interactions: this.interactions, lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
+        nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen() });
+      this.ruinsLevel.build();
     } else {
       this.addNarrativeProps(level);
       this.registerLevel(level);
@@ -508,6 +530,7 @@ export class CampaignScene extends Phaser.Scene {
       if (level === 2) this.libraryLevel?.startOpeningDialogue();
       else if (level === 4) this.pathForTwoLevel?.startOpeningDialogue();
       else if (level === 6) this.gardenLevel?.startOpeningDialogue();
+      else if (level === 7) this.ruinsLevel?.startOpeningDialogue();
       else {
         const woodsStage = level === 1 ? this.getWoodsTutorialStage() : undefined;
         const woodsDirection = woodsStage === 'exit' ? 'Cổng đã mở. Đi theo lối phía đông tới bậc thang.'
@@ -1488,6 +1511,8 @@ export class CampaignScene extends Phaser.Scene {
       action('tower-record', 'E · Nghe bản ghi bên cửa sổ', 535, 86, () => { this.progress.flags['l5-record-read'] = true; this.save(); this.say([{ speaker: 'Ký Ức', text: 'Đội tìm kiếm đã trở về. Con bé vẫn chưa có mặt. Cha sẽ giữ ngọn tháp sáng thêm một đêm. Nếu con nhìn thấy, cứ đi về phía ánh đèn. Cha ở đây.' }, { speaker: 'Nhinh', text: 'Ông ấy đang đợi con gái.' }, { speaker: 'Lumo', text: 'Tôi nhớ chiếc khăn này. Nó từng đỏ.' }, { speaker: 'Nhinh', text: 'Mình đã trả nước cho rừng. Chuyện ở Cây Mẹ vẫn cần được biết.' }]); }, () => this.progress.flags['l5-crystal'] === true && !this.progress.flags['l5-record-read'], 'mural_tablet');
       action('tower-exit', 'E · Ra khu vườn', 560, 300, () => this.nextLevel([{ speaker: 'Lumo', text: 'Nước đã trở lại. Sao những cây nhỏ vẫn cúi đầu?' }, { speaker: 'Nhinh', text: 'Mình xuống gần xem.' }]), () => this.progress.flags['l5-record-read'] === true && this.progress.flags['l5-reunited'] === true, 'woods_arch_open');
     } else if (level === 7) {
+      // Superseded by RuinsOfTwoHalvesLevel (registered in buildLevel). Kept only so the legacy
+      // `l7-*` flag names stay visible in history; this branch is unreachable for index 7.
       this.registerMirror('ruins-left', 'Gương trái', 220, 175, 2);
       this.registerMirror('ruins-right', 'Gương phải', 420, 175, 1);
       action('place-ruins-lantern', 'E · Đặt đèn lên bệ', 120, 205, () => { this.lantern.placeLanternAt(120, 205); this.progress.lanternOn = true; this.progress.flags['l7-lantern-placed'] = true; this.save(); }, () => this.lantern.lanternInHand && !this.lantern.lanternPlaced, 'pedestal_empty');
@@ -2392,6 +2417,14 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private refreshHud(): void {
+    let objectiveTextChanged = false;
+    if (this.progress.level === 7 && this.ruinsLevel) {
+      this.objectiveText?.setText(this.ruinsLevel.getObjectiveText());
+      this.statusText?.setText(this.ruinsLevel.getStatusText());
+      if (this.lumoStatusText) this.lumoStatusText.setText('NHINH + LUMO');
+      objectiveTextChanged = true;
+    }
+    if (objectiveTextChanged) return;
     if (this.progress.level === 3) { this.shatteredCreek?.refreshHud(); return; }
     if (this.progress.level === 5) { this.sleeplessTower?.refreshHud(); return; }
     const level = CAMPAIGN_LEVELS[this.progress.level];
