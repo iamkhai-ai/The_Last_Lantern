@@ -286,11 +286,11 @@ const mirror = (index: number): ObsArtRef => ({ kind: 'texture', key: `mirror_${
 export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   // --- entrance / lobby: source pedestal, G0, and the safe practice miniature.
   {
-    id: 'lantern-pedestal', roomId: 'entrance', art: pedestal, nativeWidth: 36, nativeHeight: 46, scale: 1,
+    id: 'lantern-pedestal', roomId: 'entrance', art: pedestal, nativeWidth: 36, nativeHeight: 39, scale: 1,
     anchor: { x: 188, y: 232 }, stand: { x: 188, y: 250 }, radius: 22, approach: 'south',
   },
   {
-    id: 'g0', roomId: 'entrance', art: mirror(0), nativeWidth: 40, nativeHeight: 50, scale: 0.9,
+    id: 'g0', roomId: 'entrance', art: mirror(0), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
     anchor: { x: 432, y: 236 }, stand: { x: 432, y: 254 }, radius: 22, approach: 'south', rotatesWith: 'g0',
   },
   {
@@ -300,7 +300,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   },
   // --- corridor / star-map room.
   {
-    id: 'g1', roomId: 'corridor', art: mirror(1), nativeWidth: 40, nativeHeight: 50, scale: 0.9,
+    id: 'g1', roomId: 'corridor', art: mirror(1), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
     anchor: { x: 240, y: 216 }, stand: { x: 240, y: 234 }, radius: 22, approach: 'south', rotatesWith: 'g1',
   },
   {
@@ -318,7 +318,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 56, y: 204 }, stand: { x: 56, y: 222 }, radius: 22, approach: 'south',
   },
   {
-    id: 'sun-door-control', roomId: 'corridor', art: lockSun, nativeWidth: 36, nativeHeight: 44, scale: 1,
+    id: 'sun-door-control', roomId: 'corridor', art: lockSun, nativeWidth: 32, nativeHeight: 40, scale: 1,
     anchor: { x: 500, y: 260 }, stand: { x: 500, y: 278 }, radius: 22, approach: 'south',
   },
   {
@@ -327,7 +327,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   },
   // --- observatory: the combined puzzle room.
   {
-    id: 'g2', roomId: 'observatory', art: mirror(2), nativeWidth: 40, nativeHeight: 50, scale: 0.9,
+    id: 'g2', roomId: 'observatory', art: mirror(2), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
     anchor: { x: 168, y: 258 }, stand: { x: 168, y: 276 }, radius: 22, approach: 'south', rotatesWith: 'g2',
   },
   {
@@ -339,7 +339,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 296, y: 252 }, stand: { x: 296, y: 270 }, radius: 22, approach: 'south', rotatesWith: 'statue',
   },
   {
-    id: 'sun-lock', roomId: 'observatory', art: lockSun, nativeWidth: 36, nativeHeight: 44, scale: 0.85,
+    id: 'sun-lock', roomId: 'observatory', art: lockSun, nativeWidth: 32, nativeHeight: 40, scale: 0.85,
     anchor: { x: 176, y: 152 }, stand: { x: 176, y: 170 }, radius: 22, approach: 'south',
   },
   {
@@ -364,7 +364,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 500, y: 152 }, stand: { x: 500, y: 152 }, radius: 0, approach: 'gate', mount: 'ground',
   },
   {
-    id: 'stone-return-loop', roomId: 'observatory', art: receiver, nativeWidth: 40, nativeHeight: 48, scale: 0.7,
+    id: 'stone-return-loop', roomId: 'observatory', art: receiver, nativeWidth: 40, nativeHeight: 37, scale: 0.7,
     anchor: { x: 466, y: 252 }, stand: { x: 466, y: 270 }, radius: 22, approach: 'south',
   },
   {
@@ -372,7 +372,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 418, y: 256 }, stand: { x: 418, y: 274 }, radius: 22, approach: 'south',
   },
   {
-    id: 'balance-crystal', roomId: 'observatory', art: crystal, nativeWidth: 42, nativeHeight: 50, scale: 0.6,
+    id: 'balance-crystal', roomId: 'observatory', art: crystal, nativeWidth: 42, nativeHeight: 78, scale: 0.5,
     anchor: { x: 568, y: 252 }, stand: { x: 568, y: 270 }, radius: 22, approach: 'south',
   },
 ];

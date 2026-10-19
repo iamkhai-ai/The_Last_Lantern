@@ -1922,7 +1922,8 @@ export class CampaignScene extends Phaser.Scene {
     const controls = this.progress.level === 0
       ? `WASD Move    E Interact${this.progress.lanternPickedUp ? '    F Lantern' : ''}${this.progress.flags['l0-tablet-read'] ? '    SPACE Pulse' : ''}    J Journal    H Hint    ESC Pause`
       : 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause';
-    this.controlsText = this.track(this.add.text(320, this.progress.level === 0 || this.progress.level === 1 ? 358 : 344, controls, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
+    // bottom row y=358 for every level: the status row above it (y320..) never shares a line with the controls
+    this.controlsText = this.track(this.add.text(320, 358, controls, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
     const stage = this.progress.level;
     const landscape = this.add.graphics().setDepth(1.5);
     if (!hasCampaignBackground && stage === 3) {

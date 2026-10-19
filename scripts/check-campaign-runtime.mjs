@@ -54,7 +54,7 @@ import { observatoryPlacedLightVisible } from '../src/data/observatoryLayout.ts'
 import { CAMPAIGN_LEVELS } from '../src/data/campaignLevels.ts';
 import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import {
-  getHeartPrerequisiteFeedback, HEART_CONFIRM_ID, HEART_MAT_ID, HEART_SEAL_ID, HEART_SEAL_RADIUS, resolveHeartLumoMode,
+  getHeartElement, getHeartPrerequisiteFeedback, HEART_CONFIRM_ID, HEART_CORE, HEART_MAT_ID, HEART_SEAL_ID, HEART_SEAL_RADIUS, resolveHeartLumoMode,
 } from '../src/data/heartOfElariaLayout.ts';
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
 import {
@@ -72,6 +72,9 @@ const sourceFile = ts.createSourceFile(SCENE_FILE, readFileSync(SCENE_FILE, 'utf
  */
 const HEART_FILE = join(rootDir, 'src/levels/HeartOfElariaLevel.ts');
 const heartSourceFile = ts.createSourceFile(HEART_FILE, readFileSync(HEART_FILE, 'utf8'), ts.ScriptTarget.Latest, true);
+
+const LANTERN_FILE = join(rootDir, 'src/systems/LanternSystem.ts');
+const lanternSourceFile = ts.createSourceFile(LANTERN_FILE, readFileSync(LANTERN_FILE, 'utf8'), ts.ScriptTarget.Latest, true);
 
 const OPEN_LOOP_LINE = 'Lối đá đã khớp vào vòng. Đường về bệ đèn thông suốt ngay cả khi ánh sáng tắt.';
 
@@ -710,7 +713,60 @@ function legacyPassExcludedLevels() {
  * 4. Cases
  * ------------------------------------------------------------------ */
 
+/** A recording stand-in for a Phaser Graphics object: it keeps every line and rounded rect drawn since the last clear. */
+function makeRecorder() {
+  const recorder = { lines: [], rects: [], styles: [], cleared: 0,
+    clear() { recorder.lines = []; recorder.rects = []; recorder.styles = []; recorder.cleared += 1; },
+    lineStyle(width, colour, alpha) { recorder.styles.push({ width, colour, alpha }); },
+    fillStyle() {},
+    lineBetween(x1, y1, x2, y2) { recorder.lines.push({ x1, y1, x2, y2 }); },
+    fillRoundedRect(x, y, width, height) { recorder.rects.push({ x, y, width, height, kind: 'fill' }); },
+    strokeRoundedRect(x, y, width, height) { recorder.rects.push({ x, y, width, height, kind: 'stroke' }); },
+  };
+  return recorder;
+}
+
 const CASES = [
+  {
+    name: 'heart_overload_beam_follows_the_carried_lamp_every_frame',
+    run: () => {
+      const lampOf = bind(methodSource('getCarriedLightPosition', lanternSourceFile, 'LanternSystem'), { playerX: 0, playerY: 0 }, 'getCarriedLightPosition()');
+      const carried = (x, y) => bind(methodSource('getCarriedLightPosition', lanternSourceFile, 'LanternSystem'), { playerX: x, playerY: y }, 'getCarriedLightPosition()')({});
+      assert.ok(lampOf, 'the helper compiles');
+      const refresh = (scene, active) => bind(methodSource('refreshCarriedBeam', heartSourceFile, 'HeartOfElariaLevel'), { HEART_CORE, active }, 'HeartOfElariaLevel.refreshCarriedBeam()')(scene);
+      const scene = { carriedBeamGraphics: makeRecorder(), player: { x: 120, y: 240 }, lantern: { getCarriedLightPosition: (x, y) => carried(x, y) } };
+      refresh(scene, true);
+      assert.deepEqual(scene.carriedBeamGraphics.lines[0], { x1: HEART_CORE.x, y1: HEART_CORE.y, x2: 126, y2: 242 }, 'the beam runs from the core to the carried lamp');
+      scene.player.x = 400; scene.player.y = 260;
+      refresh(scene, true);
+      assert.equal(scene.carriedBeamGraphics.lines.length, 2, 'it is redrawn each frame (one glow, one core stroke), not accumulated');
+      assert.deepEqual(scene.carriedBeamGraphics.lines.at(-1), { x1: HEART_CORE.x, y1: HEART_CORE.y, x2: 406, y2: 262 }, 'and it follows Nhinh when he walks');
+      refresh(scene, false);
+      assert.equal(scene.carriedBeamGraphics.lines.length, 0, 'switching the lamp off, or putting it down, removes the beam at once');
+      const lanternSource = readFileSync(LANTERN_FILE, 'utf8');
+      assert.ok(lanternSource.includes('this.getCarriedLightPosition(playerX, playerY)'), 'the halo uses the same helper, so there is one carried-light offset');
+      const heartSource = readFileSync(HEART_FILE, 'utf8');
+      assert.equal(/lantern\.placedX|lanternSpot/.test(methodSource('refreshCarriedBeam', heartSourceFile, 'HeartOfElariaLevel')), false, 'no beam is drawn from the pedestal while the lamp is carried');
+      assert.ok(heartSource.includes('this.beamGraphics = this.track(this.scene.add.graphics().setDepth(6.8))'), 'puzzle beams sit at depth 6.8, under the floor cells and locks at 7');
+    },
+  },
+  {
+    name: 'heart_pocket_border_is_drawn_on_the_moon_cell',
+    run: () => {
+      const draw = (scene, visible) => bind(methodSource('refreshPocket', heartSourceFile, 'HeartOfElariaLevel'), { getHeartElement, visible }, 'HeartOfElariaLevel.refreshPocket()')(scene);
+      const scene = { pocketGraphics: makeRecorder() };
+      draw(scene, true);
+      const moon = getHeartElement('heart-moon');
+      const [fill, stroke] = scene.pocketGraphics.rects;
+      assert.ok(fill && stroke, 'a filled pocket and its border are drawn');
+      for (const rect of [fill, stroke]) {
+        assert.ok(rect.x < moon.x - moon.width / 2 + 12 && rect.x + rect.width > moon.x + moon.width / 2 - 12, 'the border surrounds the Moon cell horizontally');
+        assert.ok(rect.y < moon.y && rect.y + rect.height > moon.y, 'and vertically');
+      }
+      draw(scene, false);
+      assert.equal(scene.pocketGraphics.rects.length, 0, 'a pocket that is not engaged draws nothing');
+    },
+  },
   {
     name: 'observatory_opening_plays_in_two_beats_once',
     run: () => {

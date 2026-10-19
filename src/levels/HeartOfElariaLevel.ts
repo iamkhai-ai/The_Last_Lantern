@@ -154,6 +154,10 @@ export class HeartOfElariaLevel {
   private images = new Map<string, Phaser.GameObjects.Image>();
   private overlays = new Map<string, Phaser.GameObjects.Image>();
   private beamGraphics?: Phaser.GameObjects.Graphics;
+  /** The overload beam from the core to the lamp Nhinh is carrying; redrawn every frame from the live position. */
+  private carriedBeamGraphics?: Phaser.GameObjects.Graphics;
+  /** Purple border of the Moon pocket, drawn on the Moon cell's own geometry. */
+  private pocketGraphics?: Phaser.GameObjects.Graphics;
   private ringGraphics?: Phaser.GameObjects.Graphics;
   private shadowGraphics?: Phaser.GameObjects.Graphics;
   private dawnOverlay?: Phaser.GameObjects.Image;
@@ -639,19 +643,19 @@ export class HeartOfElariaLevel {
       layer?.setOrigin(0, 0);
       if (layer) this.overlays.set(`root-${branch}`, layer);
     }
-    const darkPocket = this.levelArt('fixed-dark-pocket-purple-border', 0, 0, 640, 360, 4.4);
-    darkPocket?.setOrigin(0, 0);
-    if (darkPocket) this.overlays.set('dark-pocket', darkPocket);
+    // The packaged pocket border is a full-canvas image whose visible box sits to the right of the Moon cell, so
+    // it is not used: the border is drawn on the Moon cell geometry (see refreshPocket).
+    this.pocketGraphics = this.track(this.scene.add.graphics().setDepth(4.4));
     const bloom = this.levelArt('temporary-core-bloom-after-retrieval', 0, 0, 640, 360, 4.6);
     bloom?.setOrigin(0, 0).setVisible(false);
     if (bloom) this.overlays.set('bloom', bloom);
-    const carried = this.levelArt('redundant-carried-lantern-line', 0, 0, 640, 360, 4.8);
-    carried?.setOrigin(0, 0).setVisible(false);
-    if (carried) this.overlays.set('carried-line', carried);
+    // The overload beam follows the lamp Nhinh carries (LanternSystem.getCarriedLightPosition); the packaged line is a
+    // fixed stroke from the core to one point and cannot follow him, so it is not used.
+    this.carriedBeamGraphics = this.track(this.scene.add.graphics().setDepth(6.8));
 
     // The return ring that closes the loop between the three sockets and the central node.
     this.ringGraphics = this.track(this.scene.add.graphics().setDepth(4));
-    const core = this.levelArt('core-night', HEART_CORE.x, HEART_CORE.y, HEART_CORE.width, HEART_CORE.height, 6.2);
+    const core = this.levelArt(this.coreArtName(this.state()), HEART_CORE.x, HEART_CORE.y, HEART_CORE.width, HEART_CORE.height, 6.2);
     if (core) this.images.set('core', core);
     const wheel = this.levelArt('day-night-wheel-resuming', HEART_CORE.x, HEART_CORE.y + 4, 96, 80, 6.5);
     wheel?.setAlpha(0).setVisible(false);
@@ -679,7 +683,8 @@ export class HeartOfElariaLevel {
       this.protected.push(prism);
     }
     this.shadowGraphics = this.track(this.scene.add.graphics().setDepth(6.6));
-    this.beamGraphics = this.track(this.scene.add.graphics().setDepth(7));
+    // Beams sit just under the floor cells and locks (depth 7), so the cells are never raised over the actor to fix it.
+    this.beamGraphics = this.track(this.scene.add.graphics().setDepth(6.8));
     const dawn = this.levelArt('ending-dawn-lighting-overlay', 0, 0, 640, 360, 67.5);
     if (dawn) this.dawnOverlay = dawn.setOrigin(0, 0).setVisible(false);
 
@@ -967,6 +972,18 @@ export class HeartOfElariaLevel {
     // Objective/status text lives on the campaign HUD; CampaignScene pulls it through getObjectiveText.
   }
 
+  /**
+   * The core's art for a state, from the live state (also used for the first frame, so a restored save never flashes
+   * another state). `core-dawn` is byte-identical to `core-night`, so the dawn is read from the dawn lighting overlay
+   * (shown from the dawn transition on), not from a second picture.
+   */
+  private coreArtName(state: HeartPuzzleState): string {
+    return this.completed || this.progress.flags['l9-complete'] === true ? 'core-dawn'
+      : state.latched ? 'core-latched'
+        : state.ready ? 'core-ready'
+          : state.light ? 'core-waiting' : 'core-night';
+  }
+
   private refreshBranchArt(state: HeartPuzzleState): void {
     for (const branch of ['memory', 'hope', 'balance'] as HeartBranchId[]) {
       const overlay = this.overlays.get(`root-${branch}`);
@@ -985,11 +1002,7 @@ export class HeartOfElariaLevel {
       const element = getHeartElement(id);
       if (element) this.swapArt(id, name, element);
     }
-    const coreName = this.completed || this.progress.flags['l9-complete'] === true ? 'core-dawn'
-      : state.latched ? 'core-latched'
-        : state.ready ? 'core-ready'
-          : state.light ? 'core-waiting' : 'core-night';
-    const coreKey = getLevelArtKey(9, coreName);
+    const coreKey = getLevelArtKey(9, this.coreArtName(state));
     const core = this.images.get('core');
     if (core && coreKey && this.scene.textures.exists(coreKey) && core.texture.key !== coreKey) core.setTexture(coreKey);
 
@@ -1042,13 +1055,11 @@ export class HeartOfElariaLevel {
     if (channels && channelKey && this.scene.textures.exists(channelKey) && channels.texture.key !== channelKey) channels.setTexture(channelKey);
 
     const bloom = this.overlays.get('bloom');
-    const carried = this.overlays.get('carried-line');
     const overloading = this.progress.flags['l9-overload'] === true && this.lantern.lanternOn && this.lantern.lanternInHand;
     bloom?.setVisible(overloading && !this.completed);
-    carried?.setVisible(overloading && !this.completed);
-    const darkPocket = this.overlays.get('dark-pocket');
-    darkPocket?.setVisible(state.balanceRoute || state.balance || this.progress.flags['l9-roots'] === true);
-    if (this.dawnOverlay) this.dawnOverlay.setVisible(this.dawn);
+    this.refreshCarriedBeam(overloading && !this.completed);
+    this.refreshPocket(state.balanceRoute || state.balance || this.progress.flags['l9-roots'] === true);
+    if (this.dawnOverlay) this.dawnOverlay.setVisible(this.dawn || this.completed || this.progress.flags['l9-complete'] === true);
 
     if (this.shadowGraphics) {
       this.shadowGraphics.clear();
@@ -1057,6 +1068,31 @@ export class HeartOfElariaLevel {
       this.shadowGraphics.fillStyle(0x1b2436, covered ? 0.55 : 0.22);
       this.shadowGraphics.fillEllipse(HEART_MOON_SHADOW.x, HEART_MOON_SHADOW.y + (covered ? 0 : -26), HEART_MOON_SHADOW.radiusX * 2, HEART_MOON_SHADOW.radiusY * 2);
     }
+  }
+
+  /** Core -> the lamp in Nhinh's hand, from the live position every frame; it vanishes the moment the lamp goes out or is put down. */
+  private refreshCarriedBeam(active: boolean): void {
+    const graphics = this.carriedBeamGraphics;
+    if (!graphics) return;
+    graphics.clear();
+    if (!active) return;
+    const lamp = this.lantern.getCarriedLightPosition(this.player.x, this.player.y);
+    graphics.lineStyle(8, 0xfff0b8, 0.2);
+    graphics.lineBetween(HEART_CORE.x, HEART_CORE.y, lamp.x, lamp.y);
+    graphics.lineStyle(3, 0xfff6d0, 0.9);
+    graphics.lineBetween(HEART_CORE.x, HEART_CORE.y, lamp.x, lamp.y);
+  }
+
+  private refreshPocket(visible: boolean): void {
+    const graphics = this.pocketGraphics;
+    if (!graphics) return;
+    graphics.clear();
+    const moon = getHeartElement('heart-moon');
+    if (!visible || !moon) return;
+    graphics.fillStyle(0x1b1230, 0.28);
+    graphics.fillRoundedRect(moon.x - 28, moon.y - 24, 56, 44, 8);
+    graphics.lineStyle(2, 0xb98cf0, 0.85);
+    graphics.strokeRoundedRect(moon.x - 28, moon.y - 24, 56, 44, 8);
   }
 
   private refreshBeams(state: HeartPuzzleState): void {

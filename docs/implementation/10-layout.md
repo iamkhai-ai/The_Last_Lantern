@@ -202,3 +202,13 @@ ending gate match the scenario.
 
 Not covered by the script (needs a browser playthrough): rendered layering/occlusion looks, dialogue
 timing, and the full human puzzle solve.
+
+## Repair T11 — light and overlays follow live geometry
+
+- Overload beam: a Graphics line from the core (320,115) to `LanternSystem.getCarriedLightPosition(player)` is redrawn every frame at depth 6.8, so it follows Nhinh and disappears the moment the lamp goes out or is put down. The packaged `redundant-carried-lantern-line` (a fixed stroke from the core to one point) and the pedestal are not used while the lamp is carried. The halo shares the same helper, so there is one carried-light offset (+6,+2).
+- Moon pocket: the packaged `fixed-dark-pocket-purple-border` is a full-canvas image whose visible box starts right of the Moon cell (x 488+ against a cell ending at x 436), so it is not used. The border is a rounded rectangle centred on the Moon cell (`heart-moon`, 416,282), shown with the same condition as before.
+- Depth: puzzle beams moved from 7 to 6.8, under the floor cells and locks (7), instead of raising the cells over the actor.
+- Floor-cell gates now equal the alpha box of their own art (measured from the PNG, ±2px): seal plate (300..340 x 233..255), floor eyes and Moon lock. They previously reached 3–5px past what the player sees.
+- `core-dawn` is byte-identical to `core-night`; the dawn reads from the existing `ending-dawn-lighting-overlay`, now shown from the dawn transition on and when the level is complete. The first frame takes its core art from the live state (`coreArtName`), never from a fixed `core-night`.
+- Measured art facts live in `scripts/check-campaign-art.mjs` (IHDR size and decoded alpha of the real files): runtime textures against `assetManifest.json` and the layout, Level 10 package art, floor-cell gates, and the Level 09 elements. It found stale declared sizes: the manifest listed the pedestal and the four locks wrongly (corrected), and the Level 09 layout scaled the mirrors, sun locks, loop receiver and the balance crystal from wrong native sizes, stretching them (the crystal was drawn at 42x30 from a 42x78 file). The native sizes are corrected; their footprints changed with them and every observatory stand check still passes.
+- Moon ownership (T05) is unchanged. NOT_RUN: WebGL look of the overload beam and the pocket border (checked once in the Canvas renderer: the beam follows Nhinh, the border sits on the Moon cell).
