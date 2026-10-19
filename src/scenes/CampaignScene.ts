@@ -543,7 +543,6 @@ export class CampaignScene extends Phaser.Scene {
     this.lantern.lanternPlaced = false;
     this.lantern.isDawnMode = false;
     this.lantern.isOverloadMode = false;
-    if (level === 7 && this.progress.flags['l7-lantern-placed']) this.lantern.placeLanternAt(120, 205);
     if (level === 2) {
       this.libraryLevel = new LibraryLevel({
         scene: this, progress: this.progress, player: this.player, interactions: this.interactions,

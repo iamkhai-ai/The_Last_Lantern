@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getLevelArtKey } from '../art/CampaignArt';
+import { getLevelArtKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -13,7 +13,8 @@ import {
   getRuinsStage, isRuinsExitReady, isRuinsMainPuzzleEngaged, resolveRuinsSpawn, RUINS_BEAMS, RUINS_CONDUIT,
   RUINS_DEPTH, RUINS_FOOT_PLACEMENT,
   RUINS_MIRROR_STATES, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
-  RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
+  RUINS_SHADOW, RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
+  ruinsNextStep, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSpotFor,
   RUINS_WALLS, ruinsDepthAt, ruinsNormalizeCounters,
   ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsStage,
 } from '../data/ruinsOfTwoHalvesLayout';
@@ -32,7 +33,7 @@ export interface RuinsOfTwoHalvesLevelOptions {
 }
 
 /** Textures that live in `src/assets` (or are procedural) instead of the level-08 art directory. */
-const BASE_TEXTURES = new Set(['ruins_altar', 'shadow_npc', 'beacon_stone', 'lantern_hang_2']);
+const BASE_TEXTURES = new Set(['ruins_altar', 'beacon_stone', 'lantern_hang_2']);
 
 /** Which progress counter drives each rotating prop's `{n}` art placeholder. */
 const PROP_COUNTER: Record<string, string> = {
@@ -112,7 +113,7 @@ const HINT_LADDER: Record<RuinsStage, [string, string, string]> = {
   ],
   shadow: [
     'Màn đá đã trượt che luống mầm. The Shadow đã thôi giơ tay chắn sáng.',
-    'Ông đang đợi ở phía đông bắc sân.',
+    'Ông đang đứng cạnh luống mầm, ở phía tây bắc sân.',
     'Tới gần The Shadow và nhấn E để nói chuyện.',
   ],
   exit: [
@@ -149,6 +150,10 @@ export class RuinsOfTwoHalvesLevel {
   private hintStage = '';
   private destroyed = false;
   private lastLanternOn = false;
+  private shadowImage?: Phaser.GameObjects.Image;
+  private shadowSolid?: Phaser.GameObjects.Rectangle;
+  private shadowTalk?: InteractableConfig;
+  private shadowWalk: { index: number } | null = null;
 
   constructor(options: RuinsOfTwoHalvesLevelOptions) {
     this.scene = options.scene;
@@ -201,9 +206,10 @@ export class RuinsOfTwoHalvesLevel {
     this.interactions.clear();
   }
 
-  public update(_dt: number): void {
+  public update(dt: number): void {
     if (this.destroyed) return;
     this.updateStoryBeats();
+    this.advanceShadowWalk(dt);
     this.refreshArt();
     this.flushPendingBeats();
   }
@@ -350,6 +356,7 @@ export class RuinsOfTwoHalvesLevel {
       RUINS_SHADOW_OVERLAY.center.x, RUINS_SHADOW_OVERLAY.center.y, RUINS_SHADOW_OVERLAY.depth);
 
     this.drawProps();
+    this.drawShadow();
     this.drawWallFixtures();
     this.drawLockLabels();
     this.addColliders();
@@ -530,6 +537,10 @@ export class RuinsOfTwoHalvesLevel {
       const solid = getRuinsSolid(prop.id);
       if (solid) this.addBlocker(solid.x, solid.y, solid.width, solid.height);
     }
+    // The Shadow's footprint follows the spot he occupies (see syncShadow); it is disabled while he walks.
+    const spot = ruinsShadowSpotFor(this.shadowPhase());
+    this.addBlocker(spot.footprint.x, spot.footprint.y, spot.footprint.width, spot.footprint.height);
+    this.shadowSolid = this.objects[this.objects.length - 1] as Phaser.GameObjects.Rectangle;
   }
 
   private addBlocker(x: number, y: number, width: number, height: number): void {
@@ -596,14 +607,17 @@ export class RuinsOfTwoHalvesLevel {
       onInteract: () => this.inspectBed(),
     });
 
-    register({
+    // x/y/radius are live: syncShadow moves the stand with him, InteractionSystem reads them every frame.
+    const talkSpot = ruinsShadowSpotFor(this.shadowPhase());
+    this.shadowTalk = {
       id: 'l7-shadow-npc',
-      x: prop('shadow-npc').stand.x, y: prop('shadow-npc').stand.y, radius: prop('shadow-npc').stand.radius,
-      getPrompt: () => 'E · Nói chuyện với The Shadow',
+      x: talkSpot.stand.x, y: talkSpot.stand.y, radius: talkSpot.stand.radius,
+      getPrompt: () => (this.shadowWalk ? null : 'E · Nói chuyện với The Shadow'),
       getPromptBounds: () => this.artById.get('shadow-npc')?.getBounds() ?? null,
-      isEnabled: () => true,
+      isEnabled: () => !this.shadowWalk,
       onInteract: () => this.talkToShadow(),
-    });
+    };
+    register(this.shadowTalk);
 
     const fixture = (id: string, prompt: () => string, handler: () => void): void => {
       const entry = RUINS_WALL_FIXTURES.find((item) => item.id === id);
@@ -783,6 +797,7 @@ export class RuinsOfTwoHalvesLevel {
       this.progress.flags['l7-shadow-spiral'] = true;
       this.save();
       this.refresh();
+      this.startShadowWalk();
     });
   }
 
@@ -796,15 +811,20 @@ export class RuinsOfTwoHalvesLevel {
   private useExit(): void {
     const block = getRuinsExitBlock(this.getExitInput());
     if (block === 'latch') {
-      this.say([{ speaker: 'Nhinh', text: 'Điện thờ còn khóa. Hai khóa Nhật phải sáng cùng lúc, và khóa Nguyệt phải nằm trong bóng.' }]);
+      const next = ruinsNextStep(this.getPuzzleState());
+      const text = next === 'place' ? 'Cửa Bắc còn khóa. Bệ chính đang trống: đứng ở mép nam bệ và nhấn E để đặt đèn lên.'
+        : next === 'suns' ? 'Cửa Bắc còn khóa. Hai khóa Nhật chưa cùng sáng: xoay các gương (E ở mép nam từng gương).'
+          : next === 'moon' ? 'Cửa Bắc còn khóa. Khóa Nguyệt chưa nằm trong bóng: xoay tượng giữa sân (E ở mép nam tượng).'
+            : 'Mọi khóa đã đúng. Nhấn E ở mép nam bệ chính để gài điện thờ.';
+      this.say([{ speaker: 'Nhinh', text }]);
       return;
     }
     if (block === 'lamp') {
-      this.say([{ speaker: 'Nhinh', text: 'Mình cần thu hồi đèn ở bệ chính trước khi lên cầu thang.' }]);
+      this.say([{ speaker: 'Nhinh', text: 'Đèn vẫn nằm trên bệ chính. Đứng ở mép nam bệ và nhấn E để thu hồi trước khi lên cầu thang.' }]);
       return;
     }
     if (block === 'shadow') {
-      this.say([{ speaker: 'Lumo', text: 'The Shadow vẫn đang đợi ở phía đông bắc. Mình nói chuyện với ông trước.' }]);
+      this.say([{ speaker: 'Lumo', text: 'The Shadow đang đứng cạnh luống mầm, phía tây bắc sân. Mình nhấn E để nói chuyện với ông trước.' }]);
       return;
     }
     this.progress.counters['lumo-x'] = Math.round(this.lumo.sprite.x);
@@ -851,6 +871,96 @@ export class RuinsOfTwoHalvesLevel {
     }
   }
 
+  /* ---------------------------------------------------------------------- */
+  /* The Shadow                                                             */
+  /* ---------------------------------------------------------------------- */
+
+  private shadowPhase() {
+    return ruinsShadowPhase({
+      latched: this.progress.flags['l7-route-latched'] === true,
+      metShadow: this.progress.flags['l7-met-shadow'] === true,
+    });
+  }
+
+  private shadowKey(pose: ReturnType<typeof ruinsShadowPoseFor>): string | undefined {
+    return getShadowArtKey(pose) ?? undefined;
+  }
+
+  private drawShadow(): void {
+    const phase = this.shadowPhase();
+    const spot = ruinsShadowSpotFor(phase);
+    const key = this.shadowKey(ruinsShadowPoseFor(phase));
+    if (!key) return;
+    const image = this.scene.add.image(spot.ground.x, spot.ground.y, key).setOrigin(0.5, 1).setDepth(ruinsDepthAt(spot.ground.y));
+    image.setData('ruins-id', 'shadow-npc');
+    this.artById.set('shadow-npc', image);
+    this.shadowImage = image;
+    this.track(image);
+    this.protectedArt.push(image);
+  }
+
+  /** Puts the sprite, solid and stand where the story says he is, unless he is mid-walk. */
+  private syncShadow(): void {
+    const image = this.shadowImage;
+    if (!image || !image.active || this.shadowWalk) return;
+    const phase = this.shadowPhase();
+    const spot = ruinsShadowSpotFor(phase);
+    const key = this.shadowKey(ruinsShadowPoseFor(phase));
+    if (key && image.texture.key !== key) image.setTexture(key);
+    image.setFlipX(false);
+    if (image.x !== spot.ground.x || image.y !== spot.ground.y) {
+      image.setPosition(spot.ground.x, spot.ground.y).setDepth(ruinsDepthAt(spot.ground.y));
+    }
+    const solid = this.shadowSolid;
+    if (solid && solid.active) {
+      const footprint = spot.footprint;
+      solid.setPosition(footprint.x + footprint.width / 2, footprint.y + footprint.height / 2);
+      const body = solid.body as Phaser.Physics.Arcade.StaticBody | null;
+      if (body) { body.enable = true; body.updateFromGameObject(); }
+    }
+    if (this.shadowTalk) {
+      this.shadowTalk.x = spot.stand.x; this.shadowTalk.y = spot.stand.y; this.shadowTalk.radius = spot.stand.radius;
+    }
+  }
+
+  /** After the conversation he walks to the north stair; he pauses whenever the player falls behind (scenario §7). */
+  private startShadowWalk(): void {
+    if (!this.shadowImage || !this.shadowImage.active) return;
+    this.shadowWalk = { index: 0 };
+    const body = this.shadowSolid?.body as Phaser.Physics.Arcade.StaticBody | null | undefined;
+    if (body) body.enable = false;
+  }
+
+  private advanceShadowWalk(dt: number): void {
+    const walk = this.shadowWalk;
+    const image = this.shadowImage;
+    if (!walk || !image || !image.active) return;
+    const path = RUINS_SHADOW.path;
+    if (walk.index >= path.length) { this.shadowWalk = null; this.syncShadow(); return; }
+    const near = Math.hypot(this.player.x - image.x, this.player.y - (image.y - 20)) <= RUINS_SHADOW.followRange;
+    const walking = this.shadowKey('walk-right');
+    const waiting = this.shadowKey('stillness');
+    if (!near) {
+      const key = waiting ?? walking;
+      if (key && image.texture.key !== key) image.setTexture(key);
+      return;
+    }
+    const target = path[walk.index];
+    const dx = target.x - image.x;
+    const dy = target.y - image.y;
+    const distance = Math.hypot(dx, dy);
+    const step = (RUINS_SHADOW.speed * Math.min(dt, 50)) / 1000;
+    if (walking && image.texture.key !== walking) image.setTexture(walking);
+    if (Math.abs(dx) > 0.5) image.setFlipX(dx < 0);
+    if (distance <= step) {
+      image.setPosition(target.x, target.y);
+      walk.index += 1;
+    } else {
+      image.setPosition(image.x + (dx / distance) * step, image.y + (dy / distance) * step);
+    }
+    image.setDepth(ruinsDepthAt(image.y));
+  }
+
   private queueBeat(lines: DialogueLine[], onComplete?: () => void): void {
     this.pendingBeats.push({ lines, onComplete });
     this.flushPendingBeats();
@@ -891,6 +1001,7 @@ export class RuinsOfTwoHalvesLevel {
     this.setArt('north-door', `sanctuary-door-${latched ? 'open' : 'closed'}`);
     this.setArt('shadow', `shadow-notch-${state.statue}`);
     this.artById.get('placed-lamp')?.setVisible(this.lantern.lanternPlaced);
+    this.syncShadow();
 
     this.lockLabels.get('left')?.setText(`NHẬT TRÁI · ${state.leftLit ? 'SÁNG' : 'TẮT'}`);
     this.lockLabels.get('right')?.setText(`NHẬT PHẢI · ${state.rightLit ? 'SÁNG' : 'TẮT'}`);
@@ -925,6 +1036,10 @@ export class RuinsOfTwoHalvesLevel {
     this.artById.clear();
     this.protectedArt = [];
     this.lockLabels.clear();
+    this.shadowImage = undefined;
+    this.shadowSolid = undefined;
+    this.shadowTalk = undefined;
+    this.shadowWalk = null;
   }
 
   /* ---------------------------------------------------------------------- */

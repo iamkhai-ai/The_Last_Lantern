@@ -100,13 +100,63 @@ export const RUINS_PROPS: Record<string, RuinsStandingProp> = {
     footprint: { x: 136, y: 104, width: 88, height: 48 },
     stand: { id: 'seedling-bed', x: 180, y: 176, radius: 22 },
   },
-  'shadow-npc': {
-    id: 'shadow-npc', art: 'shadow_npc', artWidth: 44, artHeight: 56,
-    artCenter: { x: 522, y: 140 }, groundAnchor: { x: 522, y: 160 },
-    footprint: { x: 508, y: 124, width: 28, height: 36 },
-    stand: { id: 'shadow-npc', x: 522, y: 184, radius: 22 },
-  },
 };
+
+/* -------------------------------------------------------------------------- */
+/* The Shadow: where he stands and how he moves with the story                  */
+/* -------------------------------------------------------------------------- */
+
+export type RuinsShadowPhase = 'guard' | 'relaxed' | 'wait';
+export type RuinsShadowPoseId = 'shielding' | 'turn' | 'waiting' | 'walk-right' | 'stillness';
+
+export interface RuinsShadowSpot {
+  id: 'guard' | 'wait';
+  /** ground anchor (bottom-centre of the 48x64 registered pose) */
+  ground: RuinsPoint;
+  /** solid while he stands here, `x/y` top-left */
+  footprint: RuinsRect;
+  stand: RuinsStand;
+}
+
+/**
+ * The Shadow owns two spots and one walk between them (scenario §2, §5, §7). Before the latch he stands
+ * beside the seedling bed holding a hand up against the light (pose `shielding`); once the curtain slides
+ * he lowers it (`turn`); after the conversation he walks to the north stair and waits (`waiting`). He never
+ * disappears. Poses are only the ones registered in `CampaignArt` (48x64, native size).
+ */
+export const RUINS_SHADOW = {
+  art: { width: 48, height: 64 },
+  spots: {
+    guard: {
+      id: 'guard', ground: { x: 238, y: 164 },
+      footprint: { x: 224, y: 128, width: 28, height: 36 },
+      stand: { id: 'shadow-guard', x: 246, y: 190, radius: 22 },
+    },
+    wait: {
+      id: 'wait', ground: { x: 470, y: 110 },
+      footprint: { x: 456, y: 74, width: 28, height: 36 },
+      stand: { id: 'shadow-wait', x: 470, y: 134, radius: 18 },
+    },
+  } as Record<'guard' | 'wait', RuinsShadowSpot>,
+  /** waypoints after `guard`, ending on the `wait` ground anchor; the walk crosses open floor above the statue */
+  path: [{ x: 270, y: 142 }, { x: 450, y: 142 }, { x: 470, y: 110 }] as readonly RuinsPoint[],
+  speed: 70,
+  /** he pauses while the player is further than this from him (scenario §7: he stops for them) */
+  followRange: 150,
+} as const;
+
+export function ruinsShadowPhase(state: { latched: boolean; metShadow: boolean }): RuinsShadowPhase {
+  if (state.metShadow) return 'wait';
+  return state.latched ? 'relaxed' : 'guard';
+}
+
+export function ruinsShadowSpotFor(phase: RuinsShadowPhase): RuinsShadowSpot {
+  return phase === 'wait' ? RUINS_SHADOW.spots.wait : RUINS_SHADOW.spots.guard;
+}
+
+export function ruinsShadowPoseFor(phase: RuinsShadowPhase): RuinsShadowPoseId {
+  return phase === 'guard' ? 'shielding' : phase === 'relaxed' ? 'turn' : 'waiting';
+}
 
 /** Wall-mounted fixtures with interaction stand points but no extra collider. */
 export const RUINS_WALL_FIXTURES: readonly {
@@ -129,7 +179,7 @@ export function getRuinsSolid(id: string): RuinsSolid | undefined {
 }
 
 /** Every solid that blocks the player: walls, architecture and standing props. */
-export const RUINS_BLOCKERS: readonly RuinsSolid[] = [
+export const RUINS_BLOCKERS: readonly RuinsSolid[] = [ // The Shadow's own footprint is added at runtime for the spot he currently occupies
   ...RUINS_WALLS,
   ...Object.values(RUINS_PROPS).map((prop): RuinsSolid => ({ id: prop.id, prop: true, ...prop.footprint })),
 ];
@@ -458,6 +508,19 @@ export function getRuinsExitBlock(state: { latched: boolean; lanternRetrieved: b
   return undefined;
 }
 
+/**
+ * The next missing step toward the latch, in scenario order. Exit refusal and hints name this step and the
+ * control to use, instead of replaying the whole solution.
+ */
+export type RuinsNextStep = 'place' | 'suns' | 'moon' | 'confirm';
+
+export function ruinsNextStep(puzzle: RuinsPuzzleState): RuinsNextStep {
+  if (!puzzle.lightActive) return 'place';
+  if (puzzle.sunsLit < 2) return 'suns';
+  if (!puzzle.moonCovered) return 'moon';
+  return 'confirm';
+}
+
 export function isRuinsExitReady(state: { latched: boolean; lanternRetrieved: boolean; metShadow: boolean }): boolean {
   return getRuinsExitBlock(state) === undefined;
 }
@@ -533,6 +596,8 @@ export function resolveRuinsSpawn(
 /** Stand points that must stay reachable and distinct. */
 export const RUINS_STANDS: readonly RuinsStand[] = [
   ...Object.values(RUINS_PROPS).map((prop) => prop.stand),
+  RUINS_SHADOW.spots.guard.stand,
+  RUINS_SHADOW.spots.wait.stand,
   ...RUINS_WALL_FIXTURES.map((fixture) => fixture.stand),
 ];
 
