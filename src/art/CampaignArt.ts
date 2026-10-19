@@ -103,11 +103,32 @@ const sharedMechanismModules = import.meta.glob([
 const shadowCharacterModules = import.meta.glob([
   '../../assets/levels/shared/characters/the-shadow/sprites/waiting.png',
   '../../assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/shielding.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/stillness.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/turn.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/walk-right.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png',
 ], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+
+/** Shadow poses that are actually loaded (48x64 RGBA, bottom-centre pivot). Other files in the pack stay unregistered. */
+export type ShadowPose =
+  | 'waiting' | 'memory-overlay' | 'shielding' | 'stillness' | 'turn' | 'walk-right'
+  | 'dawn-afterimage' | 'dawn-dissolve-1' | 'dawn-dissolve-2' | 'dawn-empty';
 
 const SHADOW_ART_KEYS: Record<string, string> = {
   'waiting.png': 'shadow_waiting',
   'memory-overlay.png': 'shadow_memory_overlay',
+  'shielding.png': 'shadow_shielding',
+  'stillness.png': 'shadow_stillness',
+  'turn.png': 'shadow_turn',
+  'walk-right.png': 'shadow_walk_right',
+  'dawn-afterimage.png': 'shadow_dawn_afterimage',
+  'dawn-dissolve-1.png': 'shadow_dawn_dissolve_1',
+  'dawn-dissolve-2.png': 'shadow_dawn_dissolve_2',
+  'dawn-empty.png': 'shadow_dawn_empty',
 };
 
 function normalize(value: string): string {
@@ -148,8 +169,8 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
     .map(([path, url]) => ({ key: SHADOW_ART_KEYS[path.slice(path.lastIndexOf('/') + 1)], url })),
 ];
 
-/** The Shadow's Level 09 frames, or null when the pack is absent. */
-export function getShadowArtKey(frame: 'waiting' | 'memory-overlay'): string | null {
+/** A registered Shadow pose, or null when the pack is absent. */
+export function getShadowArtKey(frame: ShadowPose): string | null {
   const key = SHADOW_ART_KEYS[`${frame}.png`];
   return CAMPAIGN_ART_FILES.some((asset) => asset.key === key) ? key : null;
 }

@@ -74,6 +74,41 @@ export function sidePathOpen(state: GardenState): boolean {
 }
 
 export const GARDEN_BAR_BEAM: GardenRect = { x: 107, y: 136, width: 87, height: 26 };
+/**
+ * The gate-bar sprite (112x72 at top-left 94,104) holds two posts and a beam. Raised or held, only
+ * the beam (rows 0..29) is overhead (depth 70); the posts (rows 30..71) sort with the world by their
+ * feet at y=176 so the actor is never painted over a post it stands in front of.
+ */
+export const GARDEN_BAR_SPRITE: GardenRect = { x: 94, y: 104, width: 112, height: 72 };
+export const GARDEN_BAR_BEAM_ROWS = 30;
+export const GARDEN_BAR_POSTS: Array<{ id: 'w' | 'e'; crop: GardenRect }> = [
+  { id: 'w', crop: { x: 0, y: GARDEN_BAR_BEAM_ROWS, width: 16, height: 72 - GARDEN_BAR_BEAM_ROWS } },
+  { id: 'e', crop: { x: 96, y: GARDEN_BAR_BEAM_ROWS, width: 16, height: 72 - GARDEN_BAR_BEAM_ROWS } },
+];
+
+/** Where the two practice pots are close enough to read (the south lawn, zone z1-lawn). */
+export const GARDEN_OBSERVATION_ZONE: GardenRect = { x: 28, y: 266, width: 276, height: 82 };
+export function inGardenObservationZone(center: GardenPoint): boolean { return pointInRect(center, GARDEN_OBSERVATION_ZONE); }
+
+/** Any light change (on->off or off->on) after the canopy is shut arms the practice lesson once. */
+export function practiceLessonArmed(canopyShut: boolean, observed: boolean): boolean { return canopyShut && !observed; }
+
+/** The armed lesson plays only while the player stands where both pots can be read; otherwise it keeps waiting. */
+export function practiceLessonDue(pending: boolean, canopyShut: boolean, observed: boolean, center: GardenPoint): boolean {
+  return pending && practiceLessonArmed(canopyShut, observed) && inGardenObservationZone(center);
+}
+
+/**
+ * Scenario §7 beat: a silhouette crosses the light by the shrine gate, stops beside the seedlings
+ * and slips out of sight by the gate pillar. Points are ground anchors (bottom-centre).
+ */
+export const GARDEN_SHADOW_PATH = {
+  appear: { x: 574, y: 84 } as GardenPoint,
+  toSeedlings: [{ x: 574, y: 262 }, { x: 548, y: 272 }, { x: 524, y: 274 }] as GardenPoint[],
+  back: [{ x: 548, y: 272 }, { x: 574, y: 258 }, { x: 574, y: 124 }, { x: 556, y: 102 }] as GardenPoint[],
+  speed: 110,
+  stopMs: 1100,
+} as const;
 export const GARDEN_BRIDGE: GardenRect = { x: 304, y: 228, width: 92, height: 20 };
 // The visible plank PNG (side-stone-path-closed/open) is 80x32 native; the solid the
 // closed plank draws with matches that art exactly so no invisible blocker is left at

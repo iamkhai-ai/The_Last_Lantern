@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
+import { getLevelArtKey, getSharedMechanismKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -8,11 +8,11 @@ import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
-  GARDEN_ACTOR, GARDEN_BAR_BEAM, GARDEN_BRIDGE, GARDEN_ICONS, GARDEN_MODULES, GARDEN_SIDE_PATH, GARDEN_SPANS,
+  GARDEN_ACTOR, GARDEN_BAR_BEAM, GARDEN_BAR_BEAM_ROWS, GARDEN_BAR_POSTS, GARDEN_BAR_SPRITE, GARDEN_BRIDGE, GARDEN_SHADOW_PATH, GARDEN_ICONS, GARDEN_MODULES, GARDEN_SIDE_PATH, GARDEN_SPANS,
   GARDEN_SPAWN, GARDEN_STANDS, GARDEN_STATIC_SOLIDS, GARDEN_WATER, NO_HELD_SPANS, barRaised, bridgeWalkable,
   crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody, gardenCompletionBlock, gardenDrainEnabled,
   gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled, gardenPropDepth, inGateCorridor,
-  isGardenPositionSafe, nearestSafeGardenSpawn, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed,
+  isGardenPositionSafe, nearestSafeGardenSpawn, practiceLessonArmed, practiceLessonDue, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed,
   sanitizeGardenState, sidePathOpen, sunOpen, updateHeldSpans,
   type GardenArtVariant, type GardenHeldSpans, type GardenModuleSpec, type GardenPoint, type GardenSpanId, type GardenState,
 } from '../data/sleepingGardenLayout';
@@ -75,12 +75,12 @@ const SPROUT_AFTER: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Lá mới đã mở hẳn.' },
   { speaker: 'Lumo', text: 'Cứ để nó ngủ thêm. Mình giữ nước cho nó.' },
 ];
+// Scenario §7 verbatim. The silhouette is only seen, never named: it does not reveal who the Shadow is.
 const ENDING: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Cổng điện thờ sáng lên rồi.' },
-  { speaker: 'Lumo', text: 'Bóng của tôi… dài hơn trước.' },
-  { speaker: 'Nhinh', text: 'Cậu thấy gì phía sau cánh cổng?' },
-  { speaker: 'Lumo', text: 'Một nửa khác của chính tôi. Nó vẫn đang ngủ.' },
-  { speaker: 'Nhinh', text: 'Vậy mình qua đó đánh thức nó — lần này là để thức đúng lúc.' },
+  { speaker: 'Lumo', text: 'Có ai ở đó.' },
+  { speaker: 'Nhinh', text: 'Người ấy vừa che ánh sáng khỏi luống cây.' },
+  { speaker: 'Lumo', text: 'Giống việc mình vừa làm?' },
+  { speaker: 'Nhinh', text: 'Mình tới hỏi xem.' },
 ];
 
 export class SleepingGardenLevel {
@@ -113,6 +113,8 @@ export class SleepingGardenLevel {
   private pendingBeats: Array<{ lines: DialogueLine[]; onComplete?: () => void }> = [];
   private hintStage = '';
   private hintIndex = 0;
+  private lessonPending = false;
+  private shadowBeatPlaying = false;
 
   constructor(o: SleepingGardenLevelOptions) {
     this.scene = o.scene; this.progress = o.progress; this.player = o.player; this.lumo = o.lumo;
@@ -167,6 +169,7 @@ export class SleepingGardenLevel {
     this.readState();
     this.flushPendingBeats();
     this.updateLightState();
+    this.tryPracticeLesson();
     this.updateHeldAndTraversal();
     this.ejectFromBarBeam();
     this.rememberSafePosition();
@@ -183,6 +186,7 @@ export class SleepingGardenLevel {
     const state = this.state;
     if (!state.canopyShut) return 'Tới tay màn che trong khe tường phía tây bắc và nhấn E để đóng màn che bể tích quang.';
     if (!state.sunLatched) {
+      if (this.progress.flags['l6-practice-observed'] !== true) return 'Hai chậu thử ở bãi cỏ phía nam cho thấy cây phản ứng thế nào với đèn. Bật hoặc tắt đèn (F) khi đứng gần chúng.';
       return this.lanternOn
         ? 'Thanh chắn đang nâng. Vào khe tường phía tây và nhấn E ở tay chốt để giữ nó.'
         : 'Bật đèn (F) cho Hoa Nhật mở, nâng thanh chắn, rồi gài chốt trong khe tường.';
@@ -194,7 +198,7 @@ export class SleepingGardenLevel {
         : 'Bóng tối đang giữ. Qua cầu rễ giữa vườn tới vườn ươm và mở cống.';
     }
     if (!state.returnLatched) return 'Gài chốt lối đá phụ cạnh cống để mở lối về không cần ánh sáng.';
-    if (!state.lumoRealized) return 'Nói với Lumo bên mầm cây trong vườn ươm.';
+    if (!state.lumoRealized) return 'Nói chuyện với Lumo bên mầm cây trong vườn ươm (nhấn E ở mầm cây).';
     return 'Tới cổng điện thờ ở góc đông bắc và nhấn E.';
   }
 
@@ -210,8 +214,10 @@ export class SleepingGardenLevel {
       : !state.sunLatched ? (this.lanternOn ? 'latch' : 'sun')
         : !state.waterFlowing ? (this.lanternOn ? 'dark' : 'cross')
           : !state.returnLatched ? 'side'
-            : 'exit';
+            : !state.lumoRealized ? 'story'
+              : 'exit';
     if (stage !== this.hintStage) { this.hintStage = stage; this.hintIndex = 0; }
+    // Scenario §6: level 1 observation, level 2 relation, level 3 next action. Nothing hands over both plants at level 1.
     const hints: Record<string, string[]> = {
       canopy: [
         'Cả khu vườn đang được bể tích quang nuôi sáng.',
@@ -219,18 +225,18 @@ export class SleepingGardenLevel {
         'Đi vòng lên phía bắc, vào khe tường và nhấn E ở tay màn che.',
       ],
       sun: [
-        'Vườn đã tối đi. Hai chậu thử cho thấy cây cần hai điều kiện khác nhau.',
-        'Hoa Nhật chỉ mở khi có ánh sáng.',
-        'Bật đèn bằng F rồi tới khe tường phía tây.',
+        'Hai chậu thử phản ứng trái ngược khi đèn đổi. Sau thanh chắn có một tay chốt.',
+        'Hoa Nhật nâng thanh chắn khi có sáng. Chốt đá giữ thanh đó lại để nó không còn phụ thuộc đèn.',
+        'Bật đèn bằng F, vào khe tường phía tây và nhấn E ở tay chốt.',
       ],
       latch: [
         'Thanh chắn đang được Hoa Nhật nâng lên.',
-        'Đi qua khe tường khi thanh chắn còn nâng.',
-        'Vào trong khe tường và nhấn E ở tay chốt để giữ thanh chắn.',
+        'Chốt đá sau thanh chắn giữ nó được cả khi tắt đèn. Cần làm điều đó khi thanh còn nâng.',
+        'Vào khe tường phía tây và nhấn E ở tay chốt.',
       ],
       dark: [
-        'Thanh chắn đã được giữ. Giờ chỉ bóng tối mới đánh thức được Rễ Nguyệt.',
-        'Rễ Nguyệt vươn ra khi đèn tắt.',
+        'Thanh chắn đã được giữ. Còn một loại cây chưa được đánh thức.',
+        'Rễ Nguyệt vươn ra khi đèn tắt. Một phần đường phải tự giữ trước khi phần kia xuất hiện.',
         'Tắt đèn bằng F rồi qua cầu rễ bắc ngang mương ở giữa vườn.',
       ],
       cross: [
@@ -242,6 +248,11 @@ export class SleepingGardenLevel {
         'Nước đã chảy tới vườn ươm.',
         'Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm.',
         'Nhấn E ở chốt để mở lối về không cần ánh sáng.',
+      ],
+      story: [
+        'Lối về đã được giữ. Lumo có điều muốn nói.',
+        'Lumo đang ở gần mầm cây trong vườn ươm.',
+        'Nhấn E ở mầm cây để nghe Lumo.',
       ],
       exit: [
         'Cả vườn đã được chăm lại. Cổng điện thờ nằm ở góc đông bắc.',
@@ -295,11 +306,9 @@ export class SleepingGardenLevel {
     if (lanternOn !== this.lastLanternOn) {
       this.lastLanternOn = lanternOn;
       this.pulsePlants();
-      if (lanternOn && this.state.canopyShut && this.progress.flags['l6-practice-observed'] !== true) {
-        this.progress.flags['l6-practice-observed'] = true;
-        this.save();
-        this.queueBeat(PRACTICE_OBSERVED);
-      }
+      // The practice lesson answers the first light change in EITHER direction once the canopy is shut. If
+      // the pots are not readable from where the player stands, it waits until they walk back to the lawn.
+      if (practiceLessonArmed(this.state.canopyShut, this.progress.flags['l6-practice-observed'] === true)) this.lessonPending = true;
       if (lanternOn && !this.state.waterFlowing && this.progress.flags['l6-retract-cue'] !== true) {
         const center = { x: this.player.x, y: this.player.y };
         if (rectsOverlap(gardenActorBody(center), GARDEN_BRIDGE)) {
@@ -316,6 +325,17 @@ export class SleepingGardenLevel {
         this.queueBeat(HELD_REJOINED);
       }
     }
+  }
+
+  private tryPracticeLesson(): void {
+    if (!this.lessonPending) return;
+    const observed = this.progress.flags['l6-practice-observed'] === true;
+    if (!practiceLessonArmed(this.state.canopyShut, observed)) { this.lessonPending = false; return; }
+    if (!practiceLessonDue(this.lessonPending, this.state.canopyShut, observed, { x: this.player.x, y: this.player.y })) return;
+    this.lessonPending = false;
+    this.progress.flags['l6-practice-observed'] = true;
+    this.save();
+    this.queueBeat(PRACTICE_OBSERVED);
   }
 
   private updateHeldAndTraversal(): void {
@@ -426,6 +446,29 @@ export class SleepingGardenLevel {
       this.objects.push(image);
       this.images.set(`bridge-${span}`, image);
     }
+    // Retracted spans keep their curled roots and also show the bank edges (shared root-bridge-missing), so the
+    // 92px gap reads as a gap rather than as an invisible wall.
+    const missingKey = getSharedMechanismKey('root-bridge-missing');
+    for (const span of ['s1', 's2'] as const) {
+      if (!missingKey) break;
+      const place = this.placeFor(bridgeSpec, GARDEN_SPANS[span]);
+      const image = this.scene.add.image(place.x, place.y, missingKey).setOrigin(place.origin[0], place.origin[1]).setDepth(3.9);
+      image.setData('garden-id', `bridge-missing-${span}`);
+      this.objects.push(image);
+      this.images.set(`bridge-missing-${span}`, image);
+    }
+    // Gate-bar posts sort with the world by their feet; only the beam is overhead while raised.
+    const barSpec = this.module('gate-bar');
+    const barKey = this.artKey(barSpec.variants.raised);
+    for (const post of GARDEN_BAR_POSTS) {
+      if (!barKey) break;
+      const image = this.scene.add.image(GARDEN_BAR_SPRITE.x, GARDEN_BAR_SPRITE.y, barKey).setOrigin(0, 0)
+        .setCrop(post.crop.x, post.crop.y, post.crop.width, post.crop.height)
+        .setDepth(gardenPropDepth(GARDEN_BAR_SPRITE.y + GARDEN_BAR_SPRITE.height)).setVisible(false);
+      image.setData('garden-id', `gate-post-${post.id}`);
+      this.objects.push(image);
+      this.images.set(`gate-post-${post.id}`, image);
+    }
     for (const id of ['handle', 'latch-west', 'latch-east', 'drain', 'sprout', 'gate-bar']) {
       const image = this.images.get(id);
       if (image) this.protected.push(image);
@@ -481,9 +524,9 @@ export class SleepingGardenLevel {
     reg({
       id: 'l6-latch-west', x: GARDEN_STANDS.latchWest.x, y: GARDEN_STANDS.latchWest.y, radius: GARDEN_STANDS.latchWest.radius,
       getPromptBounds: () => this.images.get('latch-west')?.getBounds() ?? null,
-      getPrompt: () => this.canLatchWest() ? 'E · Gài chốt thanh chắn' : null,
-      isEnabled: () => this.canLatchWest(),
-      onInteract: () => this.latchWest(),
+      getPrompt: () => this.canLatchWest() ? 'E · Gài chốt thanh chắn' : this.canInspectLatchWest() ? 'E · Xem chốt đá (chưa gài được)' : null,
+      isEnabled: () => this.canLatchWest() || this.canInspectLatchWest(),
+      onInteract: () => { if (this.canLatchWest()) this.latchWest(); else this.say([{ speaker: 'Nhinh', text: 'Thanh chắn đang hạ nên chốt chưa khớp. Bật đèn (F) cho Hoa Nhật nâng nó lên, rồi gài chốt.' }]); },
     });
     reg({
       id: 'l6-drain', x: GARDEN_STANDS.drain.x, y: GARDEN_STANDS.drain.y, radius: GARDEN_STANDS.drain.radius,
@@ -495,9 +538,9 @@ export class SleepingGardenLevel {
     reg({
       id: 'l6-latch-east', x: GARDEN_STANDS.latchEast.x, y: GARDEN_STANDS.latchEast.y, radius: GARDEN_STANDS.latchEast.radius,
       getPromptBounds: () => this.images.get('latch-east')?.getBounds() ?? null,
-      getPrompt: () => this.canLatchEast() ? 'E · Gài chốt lối đá phụ' : null,
-      isEnabled: () => this.canLatchEast(),
-      onInteract: () => this.latchEast(),
+      getPrompt: () => this.canLatchEast() ? 'E · Gài chốt lối đá phụ' : this.canInspectLatchEast() ? 'E · Xem chốt lối đá phụ (chưa gài được)' : null,
+      isEnabled: () => this.canLatchEast() || this.canInspectLatchEast(),
+      onInteract: () => { if (this.canLatchEast()) this.latchEast(); else this.say([{ speaker: 'Nhinh', text: 'Chốt này chỉ khớp khi nước đã chảy tới vườn ươm. Mở cống trước đã.' }]); },
     });
     reg({
       id: 'l6-sprout', x: GARDEN_STANDS.sprout.x, y: GARDEN_STANDS.sprout.y, radius: GARDEN_STANDS.sprout.radius,
@@ -526,6 +569,15 @@ export class SleepingGardenLevel {
       && inGateCorridor({ x: this.player.x, y: this.player.y });
   }
 
+  private canInspectLatchWest(): boolean {
+    return this.state.canopyShut && !this.state.sunLatched && !gardenLatchWestEnabled(this.state, this.lanternOn)
+      && inGateCorridor({ x: this.player.x, y: this.player.y });
+  }
+
+  private canInspectLatchEast(): boolean {
+    return !this.state.waterFlowing;
+  }
+
   private canOpenDrain(): boolean {
     return gardenDrainEnabled(this.state);
   }
@@ -539,7 +591,7 @@ export class SleepingGardenLevel {
   }
 
   private tryExit(): void {
-    if (this.exitReady()) { this.nextLevel(ENDING); return; }
+    if (this.exitReady()) { this.playShadowBeat(); return; }
     const block = gardenCompletionBlock(this.state);
     const text = block === 'canopy' ? 'Cổng còn khép. Mình phải che bể tích quang trước đã.'
       : block === 'bar' ? 'Thanh chắn chưa được giữ. Cần gài chốt trước khi cổng mở.'
@@ -547,6 +599,47 @@ export class SleepingGardenLevel {
           : block === 'side' ? 'Chưa gài chốt lối đá phụ. Lối về cần được giữ.'
             : 'Lumo vẫn đang đợi bên mầm cây.';
     this.say([{ speaker: 'Nhinh', text }]);
+  }
+
+  /** Scenario §7: a silhouette crosses the light, stops by the seedlings and slips out of sight; then the four lines. */
+  private playShadowBeat(): void {
+    if (this.shadowBeatPlaying) return;
+    this.shadowBeatPlaying = true;
+    const walk = getShadowArtKey('walk-right');
+    const shield = getShadowArtKey('shielding');
+    if (!walk || !shield) { this.nextLevel(ENDING); return; }
+    const path = GARDEN_SHADOW_PATH;
+    const sprite = this.scene.add.image(path.appear.x, path.appear.y, walk).setOrigin(0.5, 1).setAlpha(0).setDepth(gardenPropDepth(path.appear.y));
+    this.objects.push(sprite);
+    const finish = (): void => {
+      if (sprite.active) sprite.destroy();
+      if (!this.destroyed) this.nextLevel(ENDING);
+    };
+    const follow = (points: GardenPoint[], index: number, done: () => void): void => {
+      if (this.destroyed || !sprite.active) return;
+      if (index >= points.length) { done(); return; }
+      const to = points[index];
+      const distance = Math.hypot(to.x - sprite.x, to.y - sprite.y);
+      if (Math.abs(to.x - sprite.x) > 1) sprite.setFlipX(to.x < sprite.x);
+      this.scene.tweens.add({
+        targets: sprite, x: to.x, y: to.y, duration: Math.max(80, (distance / path.speed) * 1000),
+        onUpdate: () => sprite.setDepth(gardenPropDepth(sprite.y)),
+        onComplete: () => follow(points, index + 1, done),
+      });
+    };
+    this.scene.tweens.add({
+      targets: sprite, alpha: 1, duration: 400,
+      onComplete: () => follow([...path.toSeedlings], 0, () => {
+        sprite.setTexture(shield).setFlipX(true);
+        this.scene.time.delayedCall(path.stopMs, () => {
+          if (this.destroyed || !sprite.active) return;
+          sprite.setTexture(walk);
+          follow([...path.back], 0, () => {
+            this.scene.tweens.add({ targets: sprite, alpha: 0, duration: 500, onComplete: finish });
+          });
+        });
+      }),
+    });
   }
 
   private distanceTo(x: number, y: number): number {
@@ -625,6 +718,14 @@ export class SleepingGardenLevel {
       const key = this.artKey(spec.variants[variant]);
       if (key && barImage.texture.key !== key) barImage.setTexture(key);
       barImage.setDepth(variant === 'lowered' ? gardenPropDepth(spec.rect.y + spec.rect.height) : 70);
+      if (variant === 'lowered') barImage.setCrop(); else barImage.setCrop(0, 0, GARDEN_BAR_SPRITE.width, GARDEN_BAR_BEAM_ROWS);
+      for (const post of GARDEN_BAR_POSTS) {
+        const postImage = this.images.get(`gate-post-${post.id}`);
+        if (!postImage) continue;
+        postImage.setVisible(variant !== 'lowered');
+        if (key && postImage.texture.key !== key) postImage.setTexture(key);
+        postImage.setCrop(post.crop.x, post.crop.y, post.crop.width, post.crop.height);
+      }
     }
     const water = this.images.get('water');
     if (water) water.setVisible(state.waterFlowing);
@@ -655,6 +756,7 @@ export class SleepingGardenLevel {
       const variant = deployed ? 'on' : this.held[span] ? 'held' : 'off';
       const key = this.artKey(spec.variants[variant]);
       if (key && image.texture.key !== key) image.setTexture(key);
+      this.images.get(`bridge-missing-${span}`)?.setVisible(variant === 'off');
     }
   }
 

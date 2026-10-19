@@ -14,7 +14,8 @@ import {
   gardenDrainEnabled, gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled,
   gardenPropDepth, gardenReachableRegion, gardenRegionReaches, inGateCorridor, isGardenPositionSafe,
   nearestSafeGardenSpawn, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed, sanitizeGardenState,
-  sidePathOpen, sunOpen, updateHeldSpans,
+  sidePathOpen, sunOpen, updateHeldSpans, GARDEN_BAR_BEAM_ROWS, GARDEN_BAR_POSTS, GARDEN_BAR_SPRITE, GARDEN_OBSERVATION_ZONE,
+  GARDEN_SHADOW_PATH, inGardenObservationZone, practiceLessonArmed, practiceLessonDue,
 } from '../src/data/sleepingGardenLayout.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -427,3 +428,44 @@ assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 546, y: 20 })
 assert.equal(barRaised(latched, true) && rootsDeployed(latched, true), false, 'bar up and roots out never coexist while the lantern is on');
 
 console.log(`Sleeping Garden checks passed (${restoreCases} restore cases, ${artChecks} art boxes, ${blockDirections} 4-way block cells, ${GARDEN_REACH_STEP}px reach grid from ${GARDEN_REACH_ORIGIN.x},${GARDEN_REACH_ORIGIN.y})`);
+
+// ---------------------------------------------------------------- repair T08
+const pngDims = (file) => { const b = fs.readFileSync(path.join(ROOT, file)); return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) }; };
+// practice lesson: any light change after the canopy shuts arms it; it plays only where the pots can be read; once.
+assert.equal(practiceLessonArmed(true, false), true, 'armed by either direction once the canopy is shut');
+assert.equal(practiceLessonArmed(false, false), false, 'an open canopy never arms it');
+assert.equal(practiceLessonArmed(true, true), false, 'a committed lesson never repeats');
+const farFromPots = { x: 140, y: 120 }; const atPots = { x: 120, y: 306 };
+assert.equal(inGardenObservationZone(farFromPots), false); assert.equal(inGardenObservationZone(atPots), true);
+assert.equal(practiceLessonDue(true, true, false, farFromPots), false, 'toggling at the gate queues the lesson instead of talking about distant plants');
+assert.equal(practiceLessonDue(true, true, false, atPots), true, 'returning to the lawn plays the queued lesson');
+assert.equal(practiceLessonDue(false, true, false, atPots), false, 'nothing queued, nothing plays');
+assert.equal(practiceLessonDue(true, true, true, atPots), false, 'reload after the beat does not repeat it');
+assert.equal(inGardenObservationZone(GARDEN_SPAWN), true, 'the entry stands inside the observation zone');
+const solvedShut = stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true, bridgeCrossed: true });
+const lawnRegion = gardenReachableRegion(stateOf({ canopyShut: true }), false, NO_HELD_SPANS, GARDEN_SPAWN);
+assert.equal(gardenRegionReaches(lawnRegion, { x: 120, y: 306 }, 8), true, 'pots are reachable from the entry in the shut-canopy state');
+// guided route both directions: leaving the lawn to the gate and coming back crosses the observation zone (sluice -> lawn -> forecourt).
+const gateRegion = gardenReachableRegion(stateOf({ canopyShut: true }), true, NO_HELD_SPANS, GARDEN_SPAWN);
+assert.equal(gardenRegionReaches(gateRegion, { x: 132, y: 132 }, 6), true, 'gate corridor reachable from the entry');
+assert.ok(GARDEN_OBSERVATION_ZONE.y + GARDEN_OBSERVATION_ZONE.height <= HUD_BOTTOM + 28 && GARDEN_OBSERVATION_ZONE.y > HUD_TOP, 'zone sits between the HUD rows');
+// gate bar: posts sort by their feet, only the beam is overhead while raised.
+const postSolids = ['bar-post-west', 'bar-post-east'].map((id) => GARDEN_STATIC_SOLIDS.find((s) => s.id === id).rect);
+assert.equal(GARDEN_BAR_POSTS.length, 2);
+for (const [i, post] of GARDEN_BAR_POSTS.entries()) {
+  const solid = postSolids[i];
+  assert.ok(solid.x - GARDEN_BAR_SPRITE.x >= post.crop.x && solid.x + solid.width - GARDEN_BAR_SPRITE.x <= post.crop.x + post.crop.width, `post crop ${post.id} covers its solid column`);
+  assert.equal(solid.y + solid.height, GARDEN_BAR_SPRITE.y + GARDEN_BAR_SPRITE.height, 'post solid bottom = sprite bottom = depth anchor');
+  assert.equal(post.crop.y, GARDEN_BAR_BEAM_ROWS, 'post crop starts under the beam rows');
+}
+assert.deepEqual(pngDims('assets/levels/07-the-sleeping-garden/sprites/gate-bar-raised.png'), { width: GARDEN_BAR_SPRITE.width, height: GARDEN_BAR_SPRITE.height }, 'gate bar sprite matches its authored rect');
+// retracted gap art and Shadow poses exist at their native sizes (no stretching).
+assert.deepEqual(pngDims('assets/levels/shared/garden-mechanisms/root-bridge-missing.png'), { width: 48, height: 32 });
+for (const pose of ['walk-right', 'shielding']) assert.deepEqual(pngDims(`assets/levels/shared/characters/the-shadow/sprites/${pose}.png`), { width: 48, height: 64 }, `${pose} native size`);
+// scenario §7 silhouette: every waypoint is open floor in the solved state, ends near the seedlings, and fades by the gate pillar.
+const shadowPoints = [GARDEN_SHADOW_PATH.appear, ...GARDEN_SHADOW_PATH.toSeedlings, ...GARDEN_SHADOW_PATH.back];
+for (const point of shadowPoints) assert.equal(isGardenPositionSafe(solvedShut, true, NO_HELD_SPANS, point), true, `shadow waypoint ${JSON.stringify(point)} is open floor`);
+const stop = GARDEN_SHADOW_PATH.toSeedlings.at(-1);
+assert.ok(Math.hypot(stop.x - 500, stop.y - 264) <= 36, 'the silhouette stops beside the seedlings');
+assert.ok(Math.hypot(GARDEN_SHADOW_PATH.appear.x - GARDEN_STANDS.exit.x, GARDEN_SHADOW_PATH.appear.y - GARDEN_STANDS.exit.y) <= 40, 'it appears at the shrine gate');
+console.log('Sleeping Garden T08 checks passed (lesson timing, bar posts, gap art, silhouette path)');
