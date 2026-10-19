@@ -1,0 +1,640 @@
+{
+  "schemaVersion": 1,
+  "sourceDirectory": "redesign-v2",
+  "runtimeDirectory": "sprites",
+  "assetCount": 19,
+  "tool": "scripts/export-level05-art.py",
+  "permission": "User authorized scripted technical normalization on 2026-10-19.",
+  "paletteColors": 96,
+  "runtimeIntegrated": true,
+  "assets": [
+    {
+      "file": "call-idle.png",
+      "sourceSha256": "2ba0fd8a649ef8d53f486981e9c73797d9e74074ddcededad6781e3646ea5017",
+      "nativeSha256": "bb4b216a1c43b55f99b50328b31838b310a2a588db22a86242bdda970e437cc6",
+      "size": [
+        40,
+        48
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          100,
+          0,
+          1045,
+          1374
+        ],
+        "resized": [
+          38,
+          47
+        ],
+        "canvas": [
+          40,
+          48
+        ],
+        "position": [
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "file": "call-sent.png",
+      "sourceSha256": "4a85ebc4d5d6f0f9294475d0e288fb8601586f4010282f391118e5337d481724",
+      "nativeSha256": "0115746994f088a0cef095517a79d75d70cba9471553f274ccd662c36e3a4f95",
+      "size": [
+        40,
+        48
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          100,
+          0,
+          1045,
+          1374
+        ],
+        "resized": [
+          38,
+          47
+        ],
+        "canvas": [
+          40,
+          48
+        ],
+        "position": [
+          1,
+          0
+        ],
+        "stateCue": "upper wings cyan; lower wings retain idle gold"
+      }
+    },
+    {
+      "file": "call-arrived.png",
+      "sourceSha256": "96791376ae2c9907ac32d755fc0ab01b7350f84579c75fd456cf22ad45eef0a3",
+      "nativeSha256": "9c228d2609f3719fe480b223afcf8a488a4fb00404126b0d57ef53968568e7c4",
+      "size": [
+        40,
+        48
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          100,
+          0,
+          1045,
+          1374
+        ],
+        "resized": [
+          38,
+          47
+        ],
+        "canvas": [
+          40,
+          48
+        ],
+        "position": [
+          1,
+          0
+        ],
+        "stateCue": "all four wings cyan on real arrival"
+      }
+    },
+    {
+      "file": "pressure-empty.png",
+      "sourceSha256": "a07caeb3ea174e675662ed36533dd6fc5e58d551435fa91c523b0c8b80127b86",
+      "nativeSha256": "a867013f68d4826547fe1e8cc8df4e6315369968c75acc45920541d16276bdec",
+      "size": [
+        44,
+        28
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          50,
+          62,
+          1520,
+          960
+        ],
+        "resized": [
+          44,
+          28
+        ],
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "file": "pressure-occupied.png",
+      "sourceSha256": "f4f2cf43d9473fe90e302d6db9878105a356008f86b06ace1270c61f19a79640",
+      "nativeSha256": "8ec58d464ba9b2139be431580808096df09580723ccb5aa3866017fd66c99d13",
+      "size": [
+        44,
+        28
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          50,
+          62,
+          1520,
+          960
+        ],
+        "resized": [
+          44,
+          28
+        ],
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "file": "latch-unlatched.png",
+      "sourceSha256": "d3fb3517995a2e9fd8db27a50b7ef8e076fa416b823a3d9d89ff4c01164011a7",
+      "nativeSha256": "c00e1a37e9539fc112d92606e9a79ac4b48c5a32d74af4c76a73ec73f34144d5",
+      "size": [
+        28,
+        32
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          137,
+          114,
+          1113,
+          1270
+        ],
+        "resized": [
+          27,
+          32
+        ],
+        "canvas": [
+          28,
+          32
+        ],
+        "position": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "file": "latch-latched.png",
+      "sourceSha256": "5bd25686c3c894dba943481ddcec50fcc83cf321bf2c80454f0cb94dd040fa4a",
+      "nativeSha256": "cf50acd2cec719f0ad4ba2af44adaa55c393b49ddd1be610b0360ace21f28c6e",
+      "size": [
+        28,
+        32
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          137,
+          114,
+          1113,
+          1270
+        ],
+        "resized": [
+          27,
+          32
+        ],
+        "canvas": [
+          28,
+          32
+        ],
+        "position": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "file": "door-open.png",
+      "sourceSha256": "a2c4c227c5f1db137d692f20c06d4723b1da938f168150c875d0bf4cc56018b8",
+      "nativeSha256": "b88298e31aef37658d4e1c1dfbcac50b1c60c10c30c90bdedd23fd82bbbf8160",
+      "size": [
+        64,
+        88
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "canvas": [
+          64,
+          88
+        ],
+        "sourceX": [
+          0,
+          267,
+          803,
+          1070
+        ],
+        "nativeX": [
+          0,
+          10,
+          54,
+          64
+        ],
+        "baseY": 88
+      }
+    },
+    {
+      "file": "door-closed.png",
+      "sourceSha256": "e3400da407808b54d1360342643bfa279f9104d30770ed4e60a83ba5bd7e731a",
+      "nativeSha256": "20e0039a155f542f3e41a334e4fd0f3a12dde25b2ac58af27142884a1d825f34",
+      "size": [
+        64,
+        88
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "canvas": [
+          64,
+          88
+        ],
+        "sourceX": [
+          0,
+          267,
+          803,
+          1070
+        ],
+        "nativeX": [
+          0,
+          10,
+          54,
+          64
+        ],
+        "baseY": 88
+      }
+    },
+    {
+      "file": "door-held-overlay.png",
+      "sourceSha256": "13b4e13f296b8fcd2a8cbbf35edb940b32b52b4398c34cb53d76880396e494c8",
+      "nativeSha256": "edb917299d603ada150f767648d06ccfbe55166b9560192678938a510ccf77c1",
+      "size": [
+        64,
+        88
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "canvas": [
+          64,
+          88
+        ],
+        "sourceX": [
+          0,
+          267,
+          803,
+          1070
+        ],
+        "nativeX": [
+          0,
+          10,
+          54,
+          64
+        ],
+        "baseY": 88
+      }
+    },
+    {
+      "file": "tube-straight.png",
+      "sourceSha256": "a6440fcfc2e5a540c0c25235e1547715c1df4a5d6c34c3e894c1195b9f89ab6a",
+      "nativeSha256": "2112a50ac4dc721bddb5c12662e262cb6386982a1168387f8126e73008f64ecf",
+      "size": [
+        64,
+        32
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          0,
+          350,
+          1774,
+          540
+        ],
+        "resized": [
+          64,
+          8
+        ],
+        "canvas": [
+          64,
+          32
+        ],
+        "position": [
+          0,
+          12
+        ]
+      }
+    },
+    {
+      "file": "tube-mouth.png",
+      "sourceSha256": "c31f4a5ed92e4cfe2baddb4250a46d925f3d0d713ff740d2c1f46b62bb13f8e0",
+      "nativeSha256": "88987b299ab9862f6afce4d3ffe3687cc96c03dc0f53bb0507fcefdc4c002110",
+      "size": [
+        64,
+        32
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          170,
+          88,
+          1604,
+          798
+        ],
+        "resized": [
+          28,
+          14
+        ],
+        "canvas": [
+          64,
+          32
+        ],
+        "position": [
+          18,
+          9
+        ]
+      }
+    },
+    {
+      "file": "root-cable-rest.png",
+      "sourceSha256": "b41e44fda6b5ceb5ea641b08d7c13cd56713a86842fbbb9d3f5ee6470778d74c",
+      "nativeSha256": "b5f70a1af065e9cd2697ba90151392709122c73d4fca07a69c8468a891de4b64",
+      "size": [
+        160,
+        40
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          0,
+          350,
+          1983,
+          440
+        ],
+        "resized": [
+          160,
+          6
+        ],
+        "canvas": [
+          160,
+          40
+        ],
+        "position": [
+          0,
+          17
+        ]
+      }
+    },
+    {
+      "file": "root-cable-flow.png",
+      "sourceSha256": "5bb0ff4c12c271845e9a28cd30f722ecf4ff2feb30f54c44eedabf027c4c1be0",
+      "nativeSha256": "f2df8a64582843e7922daefc12ec6ce9d5f85a5ad1f00431dfcd632541670c66",
+      "size": [
+        160,
+        40
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          0,
+          350,
+          1983,
+          440
+        ],
+        "resized": [
+          160,
+          6
+        ],
+        "canvas": [
+          160,
+          40
+        ],
+        "position": [
+          0,
+          17
+        ]
+      }
+    },
+    {
+      "file": "root-cable-arrived.png",
+      "sourceSha256": "26cd6e18314ee4943f4e9914ee223d429fe63716d24902d5d080c0186a466518",
+      "nativeSha256": "d31785616bdaf0effde1368e5b5eb84fe91ece6bc5d613ec0554949577bd3e2f",
+      "size": [
+        160,
+        40
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          0,
+          350,
+          1983,
+          440
+        ],
+        "resized": [
+          160,
+          6
+        ],
+        "canvas": [
+          160,
+          40
+        ],
+        "position": [
+          0,
+          17
+        ]
+      }
+    },
+    {
+      "file": "tube-elbow.png",
+      "sourceSha256": "c5b5d9b0a74d155389c09bedf3021983da5acb2fb232069fdf1a3f8313ba0297",
+      "nativeSha256": "256eccfd055ea387981f9a35c0aeb9c83891b72c460de41d24fae3df04e95291",
+      "size": [
+        64,
+        32
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          530,
+          260,
+          850,
+          580
+        ],
+        "resized": [
+          10,
+          10
+        ],
+        "canvas": [
+          64,
+          32
+        ],
+        "position": [
+          27,
+          11
+        ],
+        "note": "10px compact junction cap; center (32,16), no fixed-angle arms"
+      }
+    },
+    {
+      "file": "ink-route-dark.png",
+      "sourceSha256": "8e4bbd973401c5d6548884df9ee7faa10e3c3a5b9b4d58e3b498fb9aab47c0eb",
+      "nativeSha256": "e452d889ca70cb0866ae0313f251aff2e251438ee1af4a9749b1125d2e399a8c",
+      "size": [
+        240,
+        48
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          13,
+          312,
+          2160,
+          442
+        ],
+        "resized": [
+          240,
+          14
+        ],
+        "canvas": [
+          240,
+          48
+        ],
+        "position": [
+          0,
+          17
+        ]
+      }
+    },
+    {
+      "file": "ink-route-bright.png",
+      "sourceSha256": "b8e68e671c15f8d562895250987c275874fcfe96ba40a3999465a9af9f14069f",
+      "nativeSha256": "5c8a79e3ad5f29a71eebd3765259a22f209a60a3faf30f6d3d2a1f2e9193c131",
+      "size": [
+        240,
+        48
+      ],
+      "alphaExtrema": [
+        0,
+        28
+      ],
+      "recipe": {
+        "sourceBox": [
+          13,
+          312,
+          2160,
+          442
+        ],
+        "resized": [
+          240,
+          14
+        ],
+        "canvas": [
+          240,
+          48
+        ],
+        "position": [
+          0,
+          17
+        ],
+        "alpha": "28/255 on the shared dark-route silhouette"
+      }
+    },
+    {
+      "file": "swirl-memory-scratch.png",
+      "sourceSha256": "8f5413622ca63a6bb9d5308cce4ba79236006bfb2fb97c9016ad935b6f035faf",
+      "nativeSha256": "695f1cfffdb82021f2ff7b8aae8687ae3f46c345ccd4683ec691365a3d4e88a0",
+      "size": [
+        40,
+        40
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "recipe": {
+        "sourceBox": [
+          200,
+          176,
+          1054,
+          1090
+        ],
+        "resized": [
+          34,
+          36
+        ],
+        "canvas": [
+          40,
+          40
+        ],
+        "position": [
+          3,
+          2
+        ]
+      }
+    }
+  ]
+}

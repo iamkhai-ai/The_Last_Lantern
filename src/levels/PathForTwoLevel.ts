@@ -217,7 +217,7 @@ export class PathForTwoLevel {
       const art=getPathElementArtRect(e);
       const image=this.scene.add.image(art.x+art.width/2,art.y+art.height/2,key).setDisplaySize(e.width,e.height).setDepth(e.art.startsWith('call')||e.art.startsWith('latch')?this.depthAt(e.y):5);
       this.track(image);
-      if(e.id.startsWith('call')||e.id.startsWith('latch')||e.id==='spiral')this.protected.push(image);
+      if(e.art.startsWith('call')||e.art.startsWith('latch')||e.id==='spiral')this.protected.push(image);
       image.setData('path-id',e.id);
     }
     this.addDoors();this.drawRoomHud();this.registerRoomInteractions();this.refreshArt();
@@ -260,7 +260,7 @@ export class PathForTwoLevel {
   /**
    * The root cable follows the same waypoints as the tube, one stateful native crop per ≤160px run,
    * so it really reaches the call at one end and the plate at the other. Genuine corners get the
-   * elbow module (unused before) instead of a straight piece across the bend.
+   * compact elbow coupling instead of fixed 90-degree arms across an arbitrary bend.
    */
   private addCable(mark:PathMark,points:readonly PathPoint[]):void{
     const cableKey=getLevelArtKey(4,'root-cable-rest');
@@ -331,9 +331,11 @@ export class PathForTwoLevel {
     const source=this.scene.textures.get(artKey).getSourceImage() as HTMLImageElement;
     const texture=this.scene.textures.createCanvas(textureKey,64,88);
     if(!texture)throw new Error(`Could not create Level 05 door frame layer: ${layer}`);
-    const region=layer==='header'?[0,0,64,24]:layer==='left-post'?[0,0,14,88]:[50,0,14,88];
+    // The v2 arch reaches y44; the lower posts match the existing 10px collision columns.
+    const region=layer==='header'?[0,0,64,44]:layer==='left-post'?[0,0,10,88]:[54,0,10,88];
     const context=texture.getContext();
     context.save();
+    context.imageSmoothingEnabled=false;
     context.beginPath();
     context.rect(region[0],region[1],region[2],region[3]);
     context.clip();
@@ -755,7 +757,7 @@ export class PathForTwoLevel {
         texture=getLevelArtKey(4,this.progress.flags[`l4-latch-${latch}`]===true?'latch-latched':'latch-unlatched');
       }else if(id==='spiral'&&this.progress.flags['l4-memo']){
         object.setAlpha(0.62);
-      }else if(id.startsWith('call')||id==='inner-call'){
+      }else if(id.startsWith('call')||id==='inner-call'||id==='practice-call'){
         const mark=id.includes('practice')||id==='inner-call'?'practice':id.includes('-a')?'a':id.includes('-b')?'b':'c';
         const state=this.hasPower(mark as 'practice'|'a'|'b'|'c')?'arrived':this.assignment===mark?'sent':'idle';
         texture=getLevelArtKey(4,`call-${state}`);

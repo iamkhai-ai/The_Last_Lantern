@@ -1,0 +1,583 @@
+{
+  "schemaVersion": 1,
+  "status": "source-pack-complete; native-exports-integrated",
+  "createdDate": "2026-10-19",
+  "generationTool": "image_gen.imagegen",
+  "model": "Not exposed by built-in tool. User accepted this limitation on 2026-10-19.",
+  "assetCount": 19,
+  "runtimeIntegrated": false,
+  "baseRevision": "8e265694186d82649ba190f42c89d27eb130d880",
+  "verification": {
+    "sourceFileInspection": "PASS: 19 PNG files decoded; all RGBA, all contain transparent pixels. Dimensions and hashes recorded per file.",
+    "nativeDimensions": "PASS: approved sources exported by scripts/export-level05-art.py to the existing native sprite sizes. See native export manifest for hashes.",
+    "runtimeVisualReview": "Actual CampaignScene captures recorded in docs/implementation/level-05-art-v2-integration.md; not a full gameplay playthrough.",
+    "gameplayTests": "NOT_RUN: no gameplay code changed."
+  },
+  "notes": [
+    "Raw high-resolution files stay outside the runtime import glob; normalized exports are active in ../sprites/.",
+    "State variants use reference-image edits; exact pixel registration is not certified.",
+    "Pressure plate pair differs by one source pixel in height.",
+    "Tube elbow visible endpoints do not yet meet the authored tile-edge anchors; prepare/crop/re-anchor before integration.",
+    "Thin alpha specks exist outside dominant silhouettes; inspect and remove before native export.",
+    "Ink bright state alpha maximum is 98, above the prompt target; tune opacity in native export/runtime and check hidden-route readability.",
+    "The built-in tool did not honor requested source aspect ratios for some long strips; use intendedLogicalSize only as a target, not an export already performed.",
+    "Source limitations above describe original generated files; the native export recipe handles sizing, alpha, family registration and junction placement. See README.md."
+  ],
+  "assets": [
+    {
+      "file": "door-closed.png",
+      "intendedLogicalSize": [
+        64,
+        88
+      ],
+      "generatedPixelSize": [
+        1070,
+        1470
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1070,
+        1470
+      ],
+      "alphaNonzeroFraction": 0.7627681352914998,
+      "sha256": "e3400da407808b54d1360342643bfa279f9104d30770ed4e60a83ba5bd7e731a",
+      "reference": null,
+      "promptRecord": "summary; original expanded prompt not retained in this record",
+      "prompt": "Closed ancient slate/brass/root sluice gate, firefly crest, native logical64x88, transparent, elevated top-down pixel art; exact geometry for state variants.",
+      "generatedSourceFile": "exec-08a58622-a5e4-4a6b-8369-8b8d77b8992b.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "door-open.png",
+      "intendedLogicalSize": [
+        64,
+        88
+      ],
+      "generatedPixelSize": [
+        1070,
+        1470
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1070,
+        1470
+      ],
+      "alphaNonzeroFraction": 0.5110146862483311,
+      "sha256": "a2c4c227c5f1db137d692f20c06d4723b1da938f168150c875d0bf4cc56018b8",
+      "reference": "door-closed",
+      "promptRecord": "submitted prompt",
+      "prompt": "Edit target: the referenced closed gateway. Change ONLY the gate's state to OPEN: remove/retract the slatted portcullis completely out of the passage. Preserve the exact canvas, position, outer silhouette, moss, roots, two side posts, crown/firefly crest, scale, perspective and lighting of the original. The whole central passage must be ACTUAL TRANSPARENT ALPHA so the game floor and character can show through; do not paint black or a wall in the opening. No stairs, no extra object, no background. Clean pixel edges. Final transparent sprite, matching the same logical64x88 frame.",
+      "generatedSourceFile": "exec-6d2e6186-4c99-4695-b4d7-2d4205f2cac1.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "call-idle.png",
+      "intendedLogicalSize": [
+        40,
+        48
+      ],
+      "generatedPixelSize": [
+        1145,
+        1374
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1135,
+        1362
+      ],
+      "alphaNonzeroFraction": 0.5056921111344177,
+      "sha256": "2ba0fd8a649ef8d53f486981e9c73797d9e74074ddcededad6781e3646ea5017",
+      "reference": "door-closed (style)",
+      "promptRecord": "submitted prompt",
+      "prompt": "Single isolated production game sprite for The Last Lantern's abandoned forest waterworks. Match the reference's polished hand-placed pixel-art material language: weathered slate, aged brass, small moss and root inlays, firefly motifs, restrained warm amber and cyan magic. Fixed elevated top-down 2D game camera, south-facing front. Crisp square pixel clusters; not photorealistic, not smooth 3D. Actual transparent alpha; no floor, external shadow, labels, text, border, UI, other objects or contact sheet. Fill the specified content aspect tightly and preserve a horizontal ground baseline. Use the gateway ONLY as a style reference; create a different object: ONE sculpted Lumo call pedestal, logical40x48 portrait sprite. A compact rounded slate stone plinth with a stepped broad stable foot, inset aged brass hoop around a large clear engraved firefly sigil, a small empty glass/amber light niche, root-carved shoulders and two simple copper signal coils. Ancient waterworks craftsmanship, memorable silhouette readable at game scale, not a plain rectangular sign/tablet. IDLE state: sigil lightly etched but not powered, small warm brass highlights, no magical bloom. The foot occupies the lower quarter, top sculptural part is elegant and not too wide. Keep the principal firefly symbol large and simple. Return only the new call pedestal on transparency.",
+      "generatedSourceFile": "exec-2f415044-6894-4e0e-9d86-bc8f4427ac17.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "pressure-empty.png",
+      "intendedLogicalSize": [
+        44,
+        28
+      ],
+      "generatedPixelSize": [
+        1570,
+        1001
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1557,
+        1001
+      ],
+      "alphaNonzeroFraction": 0.6388305961554369,
+      "sha256": "a07caeb3ea174e675662ed36533dd6fc5e58d551435fa91c523b0c8b80127b86",
+      "reference": "door-closed (style)",
+      "promptRecord": "submitted prompt",
+      "prompt": "Single isolated production game sprite for The Last Lantern's abandoned forest waterworks. Match the reference's polished hand-placed pixel-art material language: weathered slate, aged brass, small moss and root inlays, firefly motifs, restrained warm amber and cyan magic. Fixed elevated top-down 2D game camera, south-facing front. Crisp square pixel clusters; not photorealistic, not smooth 3D. Actual transparent alpha; no floor, external shadow, labels, text, border, UI, other objects or contact sheet. Fill the specified content aspect tightly and preserve a horizontal ground baseline. Use reference ONLY for palette/material style; create ONE LOW floor seal/pressure plate for tiny firefly companion Lumo. Logical44x28 landscape footprint, low elliptical carved stone disk seen in the same elevated top-down camera, raised worn brass rim with root clasps, large firefly-wing sigil etched into central slate inlay. EMPTY/unpowered state: inset dark turquoise glass, no light beam, no standing pillar, no occupant. Intentionally flat and walkable-looking, crisp visible rim, readable broad shapes, tightly cropped object against transparency. No monster/face, no gem on a tall pedestal. This is the resting floor seal that a later variant will illuminate without changing geometry.",
+      "generatedSourceFile": "exec-59be5c4c-5f68-49e4-8625-1490faa5b5a4.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "call-sent.png",
+      "intendedLogicalSize": [
+        40,
+        48
+      ],
+      "generatedPixelSize": [
+        1145,
+        1374
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1121,
+        1374
+      ],
+      "alphaNonzeroFraction": 0.510810243893137,
+      "sha256": "4a85ebc4d5d6f0f9294475d0e288fb8601586f4010282f391118e5337d481724",
+      "reference": "call-idle",
+      "promptRecord": "submitted prompt",
+      "prompt": "Edit this exact Lumo call pedestal into its SENT / TRAVELLING state. Preserve the entire geometry, canvas size, silhouette, firefly engraving, masonry, moss, roots, brass and perspective pixel-for-pixel as closely as possible. Change ONLY light/state details: the lower lantern glass contains a small soft amber light; a restrained turquoise pulse illuminates the firefly's outline and just two of its four wings, suggesting a message travelling to a destination. No extra pedestal, no particles outside the silhouette, no new objects/text. Maintain crisp pixel-art shading. Actual transparent PNG, same framing/logical40x48, no background or floor.",
+      "generatedSourceFile": "exec-bd53fbde-9b56-4d27-b30b-6bae601baeb9.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "call-arrived.png",
+      "intendedLogicalSize": [
+        40,
+        48
+      ],
+      "generatedPixelSize": [
+        1145,
+        1374
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1125,
+        1364
+      ],
+      "alphaNonzeroFraction": 0.5067053132726937,
+      "sha256": "96791376ae2c9907ac32d755fc0ab01b7350f84579c75fd456cf22ad45eef0a3",
+      "reference": "call-idle",
+      "promptRecord": "submitted prompt",
+      "prompt": "Edit this exact Lumo call pedestal into its ARRIVED / CONFIRMED state. Preserve the exact geometry, canvas size, silhouette, position, masonry, moss, roots, brass and camera. Change ONLY light/state details: all four wings of the large firefly sigil glow a clear warm cyan-turquoise, with a brighter warm golden center; the lower small glass window holds a steady golden light. More visibly powered than idle/sent but not washed out, no bloom outside the object. No extra symbols/objects/text. Same crisp pixel-art, true transparent PNG, unchanged framing/logical40x48.",
+      "generatedSourceFile": "exec-12bdec8b-3ce4-44b7-9ffa-30224247d605.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "pressure-occupied.png",
+      "intendedLogicalSize": [
+        44,
+        28
+      ],
+      "generatedPixelSize": [
+        1570,
+        1002
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        21,
+        1544,
+        957
+      ],
+      "alphaNonzeroFraction": 0.6347680435307729,
+      "sha256": "f4f2cf43d9473fe90e302d6db9878105a356008f86b06ace1270c61f19a79640",
+      "reference": "pressure-empty",
+      "promptRecord": "submitted prompt",
+      "prompt": "Edit this exact floor firefly seal to its OCCUPIED / POWERED state. Preserve the exact canvas, framing, ellipse geometry, outline, bronze rim, moss and roots. Only the inset central firefly-wing sigil and the narrow inset channels are now illuminated with gentle pale turquoise, a small warm golden core and a clear localized light. Keep the stone/bronze readable. The seal is low on the floor, no occupant/character/creature and no light beam. No glow beyond the silhouette. Actual transparent PNG. Same logical44x28 landscape footprint, same crisp pixel style and elevated top-down perspective.",
+      "generatedSourceFile": "exec-00d3455b-f74d-4b49-88ae-7ff171ee8dd4.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "door-held-overlay.png",
+      "intendedLogicalSize": [
+        64,
+        88
+      ],
+      "generatedPixelSize": [
+        1070,
+        1470
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1054,
+        1420
+      ],
+      "alphaNonzeroFraction": 0.042220102994468815,
+      "sha256": "13b4e13f296b8fcd2a8cbbf35edb940b32b52b4398c34cb53d76880396e494c8",
+      "reference": "door-open",
+      "promptRecord": "submitted prompt",
+      "prompt": "Produce a matching TRANSPARENT OVERLAY for the reference OPEN gateway, using its exact canvas/frame/positions. Do NOT redraw the gateway. Output only an engaged mechanical aged-brass latch/brace: two small riveted golden clamps on the lower outer side posts and a root-bound locking pin at the right side, with a tiny steady amber indicator. The center passage must stay completely empty/transparent; no crossbar across the walkable opening, no stone/moss/root duplication elsewhere. Logical64x88 canvas same as reference, all unused pixels transparent. Crisp pixel art with shaded brass; no text, check marks, UI/background. This layer is placed OVER that gate when its mechanism has latched permanently.",
+      "generatedSourceFile": "exec-74b9b055-af7a-42d6-aeec-a8f5afeb23cd.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "latch-unlatched.png",
+      "intendedLogicalSize": [
+        28,
+        32
+      ],
+      "generatedPixelSize": [
+        1173,
+        1341
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        9,
+        1139,
+        1341
+      ],
+      "alphaNonzeroFraction": 0.3355628410298075,
+      "sha256": "d3fb3517995a2e9fd8db27a50b7ef8e076fa416b823a3d9d89ff4c01164011a7",
+      "reference": "door-closed",
+      "promptRecord": "submitted prompt",
+      "prompt": "Style reference only. Create ONE small UNLATCHED mechanical gate latch/hand lever for an ancient forest waterworks. Logical28x32 portrait sprite on transparent alpha. Same gorgeous crisp pixel-art as reference: a compact rounded dark slate wall/base mounting, aged brass rotating cam and a big readable ivory-bronze handgrip tilted up to the left in an unengaged position, thick root clasp and a little moss at the bottom, subtle firefly mark. Strong simple silhouette appropriate to a tiny gameplay item; a warm amber notch indicates where it will engage, no magical glow yet. Fixed elevated top-down view with south-facing accessible handle, base at bottom, tight frame. Not a giant gearwheel, not a UI icon or flat sign. No background, floor, cast shadow, border, labels/text or other objects.",
+      "generatedSourceFile": "exec-2c4b8e4a-3b27-4dd6-94b3-9fe1c9b60bd5.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "latch-latched.png",
+      "intendedLogicalSize": [
+        28,
+        32
+      ],
+      "generatedPixelSize": [
+        1173,
+        1341
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        33,
+        37,
+        1129,
+        1341
+      ],
+      "alphaNonzeroFraction": 0.3054775196075253,
+      "sha256": "5bd25686c3c894dba943481ddcec50fcc83cf321bf2c80454f0cb94dd040fa4a",
+      "reference": "latch-unlatched",
+      "promptRecord": "submitted prompt",
+      "prompt": "Edit this EXACT gate latch into its LATCHED / ENGAGED state. Keep identical canvas, mounting stone, base, cam pivot, dimensions, moss, root binding, brass finish, pixel style and camera. Rotate only the ivory-brass lever handle down into the matching receiving notch, pointing down-right, visibly mechanically engaged, and make the tiny status window a steady gentle turquoise-green instead of idle amber. Keep all parts inside the same frame. Do not redraw a different lever or add background/UI/text. True transparent alpha. Same logical28x32 sprite framing.",
+      "generatedSourceFile": "exec-69e42a62-4fa1-4228-a477-1c6f93a31e99.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "tube-straight.png",
+      "intendedLogicalSize": [
+        64,
+        32
+      ],
+      "generatedPixelSize": [
+        1774,
+        887
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        0,
+        1774,
+        887
+      ],
+      "alphaNonzeroFraction": 0.23613411306241094,
+      "sha256": "a6440fcfc2e5a540c0c25235e1547715c1df4a5d6c34c3e894c1195b9f89ab6a",
+      "reference": "door-closed",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use the reference only for the established material/style: finely shaded but readable pixel-art for an elevated top-down 2D forest waterworks game, dark slate, worn aged brass, subtle moss/root inlays, restrained firefly turquoise highlights. No text, labels, UI, floor, cast shadow, background, vignette, checkerboard, or additional objects. Actual transparent PNG, crisp square pixel clusters, not photorealistic. Create ONE seamless STRAIGHT horizontal narrow waterworks conduit module. Logical64x32 transparent frame: tube runs exactly from left edge to right edge, central axis exactly horizontal through y=16, its tube body only8 logical pixels thick with transparent space above/below. Simple dark slate ceramic tube inside thin aged-brass reinforcing rails, two restrained small metal collar rings, tiny root binding; a narrow inset dark turquoise glass channel suggests where Lumo travels, NOT a bright beam. Both cut end cross-sections must match perfectly in position/width/color for tiling. Never bend, curve, kink or taper the centerline; no side branches, huge connectors or pedestal. Keep most detail simple and strong at small game scale. This will tile/crop end-to-end along arbitrary route segments. Single isolated production texture module.",
+      "generatedSourceFile": "exec-2137e12f-0728-4128-b32b-8b20d2025b16.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "tube-elbow.png",
+      "intendedLogicalSize": [
+        64,
+        32
+      ],
+      "generatedPixelSize": [
+        1774,
+        887
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        21,
+        1706,
+        887
+      ],
+      "alphaNonzeroFraction": 0.18948446113153924,
+      "sha256": "c5b5d9b0a74d155389c09bedf3021983da5acb2fb232069fdf1a3f8313ba0297",
+      "reference": "door-closed",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use the reference only for the established material/style: finely shaded but readable pixel-art for an elevated top-down 2D forest waterworks game, dark slate, worn aged brass, subtle moss/root inlays, restrained firefly turquoise highlights. No text, labels, UI, floor, cast shadow, background, vignette, checkerboard, or additional objects. Actual transparent PNG, crisp square pixel clusters, not photorealistic. Create ONE 90-degree CORNER coupling for the same narrow ancient conduit. Logical64x32 transparent canvas. An elegant rounded aged-brass elbow over slate ceramic, a small moss/root binding only at the bend. The inlet tube enters from the LEFT edge at center y=16, runs toward x32 and bends down, the outlet exits the BOTTOM edge at x32. Both tube apertures are8 logical pixels across. No extra inlet on the right, no extra branches, no broad slab. Preserve a clean empty transparent upper-right region. Tiny turquoise inlay follows the bend, dim/unpowered. Standalone modular pixel-art game asset, matching the straight conduit's thickness and materials. Show only this L-shaped narrow coupling.",
+      "generatedSourceFile": "exec-20256b77-abc4-465a-8e0f-90534377b45f.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "tube-mouth.png",
+      "intendedLogicalSize": [
+        64,
+        32
+      ],
+      "generatedPixelSize": [
+        1774,
+        887
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        47,
+        32,
+        1752,
+        887
+      ],
+      "alphaNonzeroFraction": 0.4403427181294637,
+      "sha256": "c31f4a5ed92e4cfe2baddb4250a46d925f3d0d713ff740d2c1f46b62bb13f8e0",
+      "reference": "door-closed",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use the reference only for the established material/style: finely shaded but readable pixel-art for an elevated top-down 2D forest waterworks game, dark slate, worn aged brass, subtle moss/root inlays, restrained firefly turquoise highlights. No text, labels, UI, floor, cast shadow, background, vignette, checkerboard, or additional objects. Actual transparent PNG, crisp square pixel clusters, not photorealistic. Create ONE SMALL WALL TUBE MOUTH for tiny firefly Lumo, logical64x32 landscape transparent sprite. A low oval/circular recessed opening in a compact worn slate block frame, aged-brass collar around a dark clearly readable opening, two root clasps and a tiny firefly wing crest over the top. Same elevated top-down camera as the gateway, south-facing opening; slightly heavier frame than the narrow conduit but NOT a second large door. Aperture is a dark recess, stone/brass fills only the compact object, no wall or floor around it. Give it a memorable simple outline and leave a clear throat where the modular pipe attaches. No bars, no closed lid, no creature or light beam.",
+      "generatedSourceFile": "exec-044386e8-410d-484a-8e4e-df8f1050d8ec.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "root-cable-rest.png",
+      "intendedLogicalSize": [
+        160,
+        40
+      ],
+      "generatedPixelSize": [
+        1983,
+        793
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        145,
+        1983,
+        769
+      ],
+      "alphaNonzeroFraction": 0.10083693742333161,
+      "sha256": "b41e44fda6b5ceb5ea641b08d7c13cd56713a86842fbbb9d3f5ee6470778d74c",
+      "reference": "door-closed",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use the reference only for the established material/style: finely shaded but readable pixel-art for an elevated top-down 2D forest waterworks game, dark slate, worn aged brass, subtle moss/root inlays, restrained firefly turquoise highlights. No text, labels, UI, floor, cast shadow, background, vignette, checkerboard, or additional objects. Actual transparent PNG, crisp square pixel clusters, not photorealistic. Create ONE LONG STRAIGHT HORIZONTAL thin magical ROOT CABLE texture strip, logical160x40 transparent canvas. Cable axis is perfectly horizontal at y=20 from left edge to right edge, with UNIFORM thin body4 logical pixels tall and at most6-pixel binding collars. The rest of the canvas is empty transparent padding. Two intertwined dark roots bound by occasional tiny brass wraps, with one recessed dim turquoise filament running along the middle. REST / UNPOWERED state. Absolutely no large central ornaments, no waves, no zigzags, no diagonal offsets, no curving route, no arrowheads at the ends, no wall/floor. Both ends must match for seamless repetition. Design a clean reusable signal conductor that can be clipped to any short length and rotated without a baked bend. One single production strip.",
+      "generatedSourceFile": "exec-2169b069-0372-4446-95c2-dced7dace1fe.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "root-cable-flow.png",
+      "intendedLogicalSize": [
+        160,
+        40
+      ],
+      "generatedPixelSize": [
+        1983,
+        793
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        27,
+        1983,
+        635
+      ],
+      "alphaNonzeroFraction": 0.10625563188743666,
+      "sha256": "5bb0ff4c12c271845e9a28cd30f722ecf4ff2feb30f54c44eedabf027c4c1be0",
+      "reference": "root-cable-rest",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use case: precise-object-edit. Edit target: reference image 1, the root cable. Produce its FLOW state for The Last Lantern Level 05. Preserve the exact canvas size, straight horizontal centerline, silhouette, brass collars, roots, moss, pixel grid, transparent padding and endpoints from reference. Change only the narrow central cyan filament: a readable warm-gold pulse travels left to right along it, with a few cyan-white points and gold chevrons contained INSIDE the cable. Keep dark root casing unchanged, no external glow clouds. Elevated top-down handcrafted pixel-art. Logical canvas 160x40, axis at y20, cable about 4 logical pixels tall and collars no more than 6. Transparent alpha background. No text, labels, characters, scene or border.",
+      "generatedSourceFile": "exec-98349700-c60b-4f54-9928-c562864cd9b7.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "root-cable-arrived.png",
+      "intendedLogicalSize": [
+        160,
+        40
+      ],
+      "generatedPixelSize": [
+        1983,
+        793
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        167,
+        1983,
+        701
+      ],
+      "alphaNonzeroFraction": 0.1023447093485039,
+      "sha256": "26cd6e18314ee4943f4e9914ee223d429fe63716d24902d5d080c0186a466518",
+      "reference": "root-cable-rest",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use case: precise-object-edit. Edit target reference image 1 is the root cable. Create its ARRIVED powered state for The Last Lantern Level 05. Preserve exactly the canvas, silhouette, straight horizontal centerline, roots, moss, brass collar positions, pixel grid, endpoints and transparent margins. Change only the filament to a steady brighter turquoise channel with small steady warm amber collar lights, all illumination contained inside the cable. Do not draw moving arrows, extra branches or decorative swirls. Dark slate/brown root casing and aged brass. Logical canvas 160x40, axis y20, body about 4 logical pixels tall, collars <=6. Real transparent alpha outside. No floor, shadow, labels, text, character, frame or UI.",
+      "generatedSourceFile": "exec-f8a59b7a-9fc6-4875-8a91-821ddb81c1d9.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "ink-route-dark.png",
+      "intendedLogicalSize": [
+        240,
+        48
+      ],
+      "generatedPixelSize": [
+        2172,
+        724
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        13,
+        27,
+        2160,
+        603
+      ],
+      "alphaNonzeroFraction": 0.0863755685113397,
+      "sha256": "8e4bbd973401c5d6548884df9ee7faa10e3c3a5b9b4d58e3b498fb9aab47c0eb",
+      "reference": "ink-route-dark (first generated draft)",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use case: precise-object-edit. Edit target: reference image 1, the horizontal route strip. Keep its canvas dimensions, placement of the seven repeated firefly glyphs and horizontal centerline. Change the entire strip from metallic physical objects into FLAT HAND-PAINTED MEMORY INK MARKS. Remove ALL brass metal, rivets, 3D bevels, stone chunks, connecting rods, cast shadows and thick structural material. Each firefly becomes only four small turquoise PAINT BRUSH STROKES for wings and a short vertical ink dash for its body, like ancient glowing graffiti painted flat on the floor, no outline or solid fill around it. Between the seven glyphs leave a few broken turquoise dotted ink traces, not a continuous rod. Keep some slight worn gaps in the strokes; a few tiny amber paint dots are okay. Real transparent alpha everywhere except actual paint strokes, with wide transparent top and bottom margins. This is the DARK-LANTERN state of a hidden floor trail: clearly visible cyan/teal paint in darkness. Hard crisp chunky pixel-art. Logical canvas 240x48. No scene, floor plate, props, characters, letters, text, border or UI. Critical: it must look like flat disembodied painted strokes, never jewelry or machinery.",
+      "firstDraftPrompt": "Use case: stylized-concept. Reference image 1 is STYLE ONLY: match the ancient slate, brass, amber/turquoise handcrafted pixel-art of The Last Lantern, but do not include a gate. Asset type: one horizontal transparent floor-marking strip for Level 05's hidden memory ink route, DARK-LANTERN state. Composition: very wide 5:1 canvas intended logical size 240x48. Sparse elegant chain of 7 small engraved-looking firefly wing/spiral glyphs and short double-dot traces along the horizontal centerline y24. The first and last short turquoise strokes meet matching positions on left/right boundaries for repeatable horizontal tiling; keep 12px logical transparent padding above/below. Glyphs glow pale turquoise and restrained warm amber, with a few dark slate flecks suggesting old ink. Make the route immediately readable in a dark game room, with strong simple silhouettes when reduced to 240x48. No opaque floor or panel; alpha only outside the actual marks. No wall, stones, props, plants, characters, labels, letters, numbers, watermark, text or UI. Crisp chunky pixels, no smooth neon aura.",
+      "discardedDraftFile": "exec-70af2ad4-f12e-4524-ab29-9211f43a25f4.png",
+      "generatedSourceFile": "exec-76d802a6-0eca-459b-8b2d-0bd4752d9621.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "swirl-memory-scratch.png",
+      "intendedLogicalSize": [
+        40,
+        40
+      ],
+      "generatedPixelSize": [
+        1254,
+        1254
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "alphaBounds": [
+        0,
+        20,
+        1236,
+        1206
+      ],
+      "alphaNonzeroFraction": 0.35282121135810385,
+      "sha256": "8f5413622ca63a6bb9d5308cce4ba79236006bfb2fb97c9016ad935b6f035faf",
+      "reference": "door-closed",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use case: stylized-concept. Reference image 1 is material and pixel-art STYLE ONLY; do not include the gate. Create one isolated memory scratch emblem for The Last Lantern Level 05: a compact spiral carved into a broken dark-slate medallion fragment, root-like engraving ending in a tiny firefly shape. Warm antique brass inlay around a simple cyan center, restrained moss in just two cracks, chunky chipped edges and readable depth. Elevated top-down game prop, logical canvas 40x40 with generous transparent margin and centered silhouette, all decoration inside a roughly 28x28 logical footprint. Match weathered slate/brass ancient waterworks style. Pixel-art with deliberate hard stepped edges and few large readable highlights. Real transparent alpha background, no ground plane, external shadow, text, labels, UI, characters or extra props.",
+      "generatedSourceFile": "exec-b79d3753-43b6-4d33-91b3-0ed7e66e3214.png",
+      "runtimeIntegrated": false
+    },
+    {
+      "file": "ink-route-bright.png",
+      "intendedLogicalSize": [
+        240,
+        48
+      ],
+      "generatedPixelSize": [
+        2172,
+        724
+      ],
+      "colorMode": "RGBA",
+      "alphaExtrema": [
+        0,
+        98
+      ],
+      "alphaBounds": [
+        13,
+        168,
+        2162,
+        650
+      ],
+      "alphaNonzeroFraction": 0.08207294242137501,
+      "sha256": "b8e68e671c15f8d562895250987c275874fcfe96ba40a3999465a9af9f14069f",
+      "reference": "ink-route-dark",
+      "promptRecord": "submitted prompt",
+      "prompt": "Use case: precise-object-edit. Reference image 1 is the EDIT TARGET, a flat horizontal painted memory-ink route. Create the corresponding BRIGHT-LANTERN state. Preserve EXACTLY its canvas size, seven firefly-shaped paint glyph positions, every stroke shape, gaps and horizontal centerline. Change ONLY pigment visibility: remove white/cyan emissive highlights and all glow; turn the paint into very faint desaturated dark teal stains with low opacity (roughly 10-18% alpha, maximum about 45/255), and barely visible muted ochre dots. This hidden route should nearly disappear against a lit floor while retaining a faint trace, much less visible than the source. Keep the floor itself fully transparent; do not add a background. Preserve real alpha outside and within gaps. It is flat worn paint, not a physical object. No metal, stone, bevel, external shadow, new glyphs, characters, text, border or UI. Logical intended display 240x48; keep source canvas unchanged.",
+      "generatedSourceFile": "exec-b250f1bb-cc90-4501-b750-cb3c89673bd2.png",
+      "runtimeIntegrated": false
+    }
+  ],
+  "nativeExportsIntegrated": true,
+  "nativeExportManifest": "../native-v2-manifest.json"
+}
