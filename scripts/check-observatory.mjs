@@ -23,6 +23,10 @@
  *    build registers those controls in a loop over the room's own data — a method
  *    that exists but is never called cannot hide behind either check. The
  *    registration itself is executed by scripts/check-campaign-runtime.mjs.
+ *  - every alcove's threshold, jambs, arch and transit circle sit between the HUD
+ *    bands (y 58..320), and the south sill pocket's transit circle is tested on the
+ *    foot-body centre grid: no legal centre inside it while the loop is shut (with
+ *    a margin), and legal centres spanning several px inside it once the loop opens.
  */
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -343,6 +347,45 @@ assert.ok(reachable('observatory', farBankSpawn, STAGES.finished, pocketTarget, 
 assert.equal(reachable('observatory', entry('observatory'), STAGES.finished, pocketTarget, 12), false,
   'with the lantern back in hand the root bridge is gone, so the near bank cannot reach the far side');
 
+// South sill pocket: the transit circle is tested on the foot-body centre grid with the runtime's own
+// predicate (not only by flood fill). Shut: no legal centre is inside the circle and the nearest one keeps a
+// margin. Open: legal centres inside the circle span several px in x and y, so the trigger is not pixel-perfect.
+{
+  const pocket = loopAlcove;
+  const radius = pocket.triggerRadius;
+  const nearestAndInside = (stage) => {
+    let nearest = Infinity;
+    const inside = [];
+    for (let x = pocket.trigger.x - radius - 12; x <= pocket.trigger.x + radius + 12; x += 1) {
+      for (let y = pocket.trigger.y - radius - 12; y <= pocket.trigger.y + radius + 12; y += 1) {
+        if (!isObservatoryPositionSafe('observatory', { x, y }, stage)) continue;
+        const distance = Math.hypot(x - pocket.trigger.x, y - pocket.trigger.y);
+        nearest = Math.min(nearest, distance);
+        if (distance <= radius) inside.push({ x, y });
+      }
+    }
+    return { nearest, inside };
+  };
+  for (const [name, stage] of Object.entries(STAGES).filter(([, candidate]) => !candidate.returnLoopOpen)) {
+    const { nearest, inside } = nearestAndInside(stage);
+    assert.equal(inside.length, 0, `${name}: with the loop shut no legal centre lies inside the pocket transit circle`);
+    assert.ok(nearest - radius >= 8, `${name}: the nearest legal centre with the loop shut clears the circle by 8px (${nearest.toFixed(1)} vs ${radius})`);
+  }
+  for (const [name, stage] of Object.entries(STAGES).filter(([, candidate]) => candidate.returnLoopOpen)) {
+    const { inside } = nearestAndInside(stage);
+    assert.ok(inside.length > 0, `${name}: with the loop open a legal centre lies inside the pocket transit circle`);
+    const xs = inside.map((point) => point.x);
+    const ys = inside.map((point) => point.y);
+    assert.ok(Math.max(...xs) - Math.min(...xs) >= 6, `${name}: the open pocket trigger spans at least 6px in x`);
+    assert.ok(Math.max(...ys) - Math.min(...ys) >= 6, `${name}: the open pocket trigger spans at least 6px in y`);
+  }
+  // The south masonry under the sill closes the pocket from below (the HUD band hides it, it is never walkable).
+  assert.ok(observatorySolidRects('observatory', STAGES.finished).some((solid) => solid.x <= pocket.threshold.x
+    && solid.x + solid.width >= pocket.threshold.x + pocket.threshold.width
+    && solid.y <= pocket.threshold.y + pocket.threshold.height && solid.y + solid.height >= 360),
+  'masonry under the sill closes the pocket from the south');
+}
+
 // The opened loop's floor strip is data-owned: it stays inside the room's own
 // walkable band, between the side walls, and clear of the HUD (y<58) and the
 // bottom status band (y>=320).
@@ -514,13 +557,34 @@ for (const alcove of OBSERVATORY_ALCOVES) {
   const passage = horizontalWall ? alcove.threshold.width : alcove.threshold.height;
   assert.ok(passage >= 48, `${alcove.id} keeps an opening of at least 48px (got ${passage})`);
   const depth = horizontalWall ? alcove.threshold.height : alcove.threshold.width;
-  assert.ok(depth >= 34, `${alcove.id} keeps a real sill depth (got ${depth})`);
+  if (alcove.id === 'return-loop-observatory') {
+    // Exact geometry, not the generic >=34 sill depth: this south pocket must end above the
+    // status band (y=320), so its 20px depth is the space between the floor edge (y=300) and that band.
+    assert.deepEqual(alcove.threshold, { x: 496, y: 300, width: 48, height: 20 },
+      `${alcove.id} sill pocket is exactly the 20px between the floor edge (y=300) and the status band (y=320)`);
+  } else {
+    assert.ok(depth >= 34, `${alcove.id} keeps a real sill depth (got ${depth})`);
+  }
   assert.equal(alcove.jambs.length, 2, `${alcove.id} has two permanent jambs`);
   for (const jamb of alcove.jambs) {
     assert.equal(observatorySolidRects(alcove.roomId, STAGES.finished).some((solid) => solid.x === jamb.x
       && solid.y === jamb.y && solid.width === jamb.width && solid.height === jamb.height), true,
     `${alcove.id} jamb is registered as permanent masonry`);
   }
+}
+
+// Every alcove stays between the top HUD band (y<58) and the bottom status band (y>=320): its threshold,
+// jambs, arch and transit circle. The south pocket is the one that sits exactly on the status band edge.
+for (const alcove of OBSERVATORY_ALCOVES) {
+  const parts = [['threshold', alcove.threshold], ['arch', alcove.arch], ...alcove.jambs.map((jamb, index) => [`jamb ${index}`, jamb])];
+  for (const [name, part] of parts) {
+    assert.ok(part.y >= 58 && part.y + part.height <= 320,
+      `${alcove.id} ${name} stays between the HUD bands (${part.y}..${part.y + part.height})`);
+  }
+  const circleTop = alcove.trigger.y - alcove.triggerRadius;
+  const circleBottom = alcove.trigger.y + alcove.triggerRadius;
+  assert.ok(circleTop >= 58 && circleBottom <= 320,
+    `${alcove.id} transit circle stays between the HUD bands (${circleTop}..${circleBottom})`);
 }
 
 /* * ------------------------------------------------------------------ *

@@ -176,7 +176,7 @@ export const OBSERVATORY_WALLS: Record<ObservatoryRoomKey, readonly ObsRect[]> =
     { x: 616, y: 152, width: 24, height: 148 },
     { x: 0, y: 300, width: 488, height: 60 },
     { x: 548, y: 300, width: 92, height: 60 },
-    { x: 496, y: 334, width: 48, height: 26 },
+    { x: 488, y: 320, width: 64, height: 40 },
   ],
 };
 
@@ -185,11 +185,13 @@ export const OBSERVATORY_WALLS: Record<ObservatoryRoomKey, readonly ObsRect[]> =
  * ------------------------------------------------------------------ */
 
 /**
- * Jambs are thicker (24px) than the opening is tall, so the nearest standing
- * point outside a locked alcove is always further away than the trigger radius.
- * That is what makes "unreachable while locked" a geometric fact instead of a
- * convention: with a 28px trigger and 24px jambs the closest outside foot body
- * is at least 32px from the trigger.
+ * Side alcoves: jambs are thicker (24px) than the opening is tall, so the nearest
+ * standing point outside a locked alcove is always further away than the trigger
+ * radius. That makes "unreachable while locked" a geometric fact instead of a
+ * convention: with a 28px trigger and 24px jambs the closest outside foot body is
+ * at least 32px from the trigger. The south return-loop pocket (8px jambs, 16px
+ * trigger) does not follow this rule; its exact geometry is checked by the "South
+ * sill pocket" block in scripts/check-observatory.mjs instead.
  */
 export const OBSERVATORY_JAMB_THICKNESS = 24;
 
@@ -240,14 +242,19 @@ export const OBSERVATORY_ALCOVES: readonly ObsAlcove[] = [
     label: 'Lối đá vòng',
   },
   {
-    // A south sill pocket: the foot body only reaches the trigger once the loop
-    // opens, because the main floor band stops at y=300.
+    // A 20px south sill pocket (y 300..320), the only alcove shallower than 48px:
+    // it must end above the bottom status band (y>=320). The floor band stops at
+    // y=300, so with the loop shut the lowest legal foot-body centre is (520,278),
+    // 26px from the trigger (radius 16, outside). With the loop open the body can
+    // stand inside the pocket with its bottom at y=320: centre (520,298), 6px from
+    // the trigger (inside). The south masonry under the sill (OBSERVATORY_WALLS,
+    // y 320..360) closes the pocket from below.
     id: 'return-loop-observatory', roomId: 'observatory', doorId: 'return-loop',
-    threshold: { x: 496, y: 300, width: 48, height: 34 },
-    jambs: [{ x: 488, y: 300, width: 8, height: 60 }, { x: 548, y: 300, width: 8, height: 60 }],
+    threshold: { x: 496, y: 300, width: 48, height: 20 },
+    jambs: [{ x: 488, y: 300, width: 8, height: 20 }, { x: 544, y: 300, width: 8, height: 20 }],
     inspect: { x: 520, y: 262 }, inspectRadius: 22,
-    trigger: { x: 520, y: 318 }, triggerRadius: 28,
-    arch: { x: 496, y: 300, width: 48, height: 34 },
+    trigger: { x: 520, y: 304 }, triggerRadius: 16,
+    arch: { x: 496, y: 284, width: 48, height: 36 },
     label: 'Lối đá vòng',
   },
 ];

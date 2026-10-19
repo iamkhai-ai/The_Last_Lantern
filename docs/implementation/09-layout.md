@@ -26,10 +26,12 @@
 - Depth: floor art 0..7, door arches 3, ground-mounted art 3, bridge deck 6, standing props
   `10 + groundAnchorY/10`, memory overlay 94, prompt container 82, HUD 86. Darkness uses the shared
   `LanternSystem` overlay stack (68..71) instead of a level-local overlay.
-- HUD text occupies y=0..58 and y=320..360. No collider, stand or prompt sits in those bands, and every
-  world sprite sorts below prompt/HUD depth so nothing can draw over the HUD.
+- HUD text occupies y=0..58 and y=320..360. No stand, transit circle, inspect control, door threshold, arch or
+  walkable floor sits in those bands (checked for every alcove by `scripts/check-observatory.mjs`). Outer masonry
+  may run under the status band as solid wall that is never walkable. Every world sprite sorts below the
+  prompt/HUD depth so nothing can draw over the HUD.
 - A door is a recessed alcove: a 48px opening, permanent jambs
-  24px thick, and a threshold that is solid only while the door is shut. The transit
+  (24px thick on the side alcoves, 8px on the south sill pocket), and a threshold that is solid only while the door is shut. The transit
   trigger sits deep inside the alcove, so it is geometrically unreachable while locked, and a
   room-facing inspect control at the alcove mouth always names the missing prerequisite in Vietnamese.
 
@@ -75,7 +77,7 @@
 | 616,152,24,148 |
 | 0,300,488,60 |
 | 548,300,92,60 |
-| 496,334,48,26 |
+| 488,320,64,40 |
 
 ### Door alcoves
 
@@ -86,7 +88,7 @@
 | `sun-door-corridor` | corridor | sun-door | 536,196,104,48 | 536,172,104,24 · 536,244,104,24 | 512,220 (22) | 604,220 (28) | 576,192,48,48 |
 | `sun-door-observatory` | observatory | sun-door | 24,190,80,48 | 24,166,80,24 · 24,238,80,24 | 118,214 (22) | 36,214 (28) | 56,186,48,48 |
 | `return-loop-entrance` | entrance | return-loop | 24,196,104,48 | 24,172,104,24 · 24,244,104,24 | 140,220 (22) | 36,220 (28) | 72,192,48,48 |
-| `return-loop-observatory` | observatory | return-loop | 496,300,48,34 | 488,300,8,60 · 548,300,8,60 | 520,262 (22) | 520,318 (28) | 496,300,48,34 |
+| `return-loop-observatory` | observatory | return-loop | 496,300,48,20 | 488,300,8,20 · 544,300,8,20 | 520,262 (22) | 520,304 (16) | 496,284,48,36 |
 
 ## Modules (art + stand + behaviour)
 
@@ -139,7 +141,7 @@ Rooms, spawns, exits and beam waypoints:
   - waypoints: `g1` (corridor 240,190) · `lumo-tube-entry` (corridor 105,78) · `lumo-seal` (corridor 320,80)
 - **phòng thiên văn (`observatory-clean-base`)**
   - spawns: `observatory-from-corridor` 128,200 · `observatory-near-bridge` 280,276 · `observatory-far-bank` 452,276
-  - exits: `observatory-to-corridor` (sun-door; trigger 36,214; inspect 118,214 → corridor / corridor-from-observatory) · `observatory-return-loop-to-entrance` (return-loop; trigger 520,318; inspect 520,262 → entrance / entrance-from-return-loop)
+  - exits: `observatory-to-corridor` (sun-door; trigger 36,214; inspect 118,214 → corridor / corridor-from-observatory) · `observatory-return-loop-to-entrance` (return-loop; trigger 520,304; inspect 520,262 → entrance / entrance-from-return-loop)
   - waypoints: `g2` (observatory 168,226) · `sun-lock` (observatory 176,133) · `splitter` (observatory 240,220) · `root-branch` (observatory 362,226)
 
 ## Dynamic structures
@@ -154,7 +156,7 @@ Rooms, spawns, exits and beam waypoints:
 | `sun-door-corridor` threshold | 536,196,104,48 | solid until the sun-door opens or latches |
 | `sun-door-observatory` threshold | 24,190,80,48 | solid until the sun-door opens or latches |
 | `return-loop-entrance` threshold | 24,196,104,48 | solid until the return-loop opens or latches |
-| `return-loop-observatory` threshold | 496,300,48,34 | solid until the return-loop opens or latches |
+| `return-loop-observatory` threshold | 496,300,48,20 | solid until the return-loop opens or latches |
 
 Ground stamps (painted floor decor, below the feet, never solid):
 
@@ -222,7 +224,9 @@ load and after every change; they are never persisted.
 | `balance-crystal` | E · Nhận Tinh thể Cân Bằng |
 
 - Every trigger centre sits at or below its object's south edge, or on the documented side/gate
-  exception; standing north, east or west of a prop shows nothing, and radii stay 22..24 (exits 28..30).
+  exception; standing north, east or west of a prop shows nothing, and control radii stay 22..24.
+- Transit circles are 28px, except the south sill pocket (16px): its centre (520,304) sits 26px from the nearest
+  foot-body centre while the loop is shut, so the 16px circle keeps a 10px margin and still ends above y=320.
 - Every locked door and disabled control states the unmet prerequisite in Vietnamese via
   `observatoryDoorBlockReason`, `observatoryBridgeBlockReason`, `observatoryRecordBlockReason` and
   `observatoryFinalDoorBlockReason`.

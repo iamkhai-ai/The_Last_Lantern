@@ -12,7 +12,7 @@ import {
   OBSERVATORY_ALCOVES, OBSERVATORY_BODY, OBSERVATORY_BRIDGE_LANE, OBSERVATORY_ELEMENTS,
   OBSERVATORY_FINAL_DOOR_HEAD, OBSERVATORY_FLOORS, OBSERVATORY_JAMB_THICKNESS,
   OBSERVATORY_NON_SOLID_IDS, OBSERVATORY_PLACED_LIGHT_ROOM, OBSERVATORY_ROOT_BED, OBSERVATORY_SHADOW, OBSERVATORY_STAMPS, OBSERVATORY_WALLS,
-  observatoryArtRect, observatoryPrompt,
+  observatoryArtRect, observatoryBody, observatoryPrompt,
 } from '../src/data/observatoryLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
 
@@ -25,6 +25,27 @@ const ROOM_TITLE = {
   corridor: 'hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used)',
   observatory: 'phòng thiên văn (`observatory-clean-base`)',
 };
+
+// Numbers quoted in the south-pocket sentences come from the data. The guards make the
+// generator fail instead of writing a sentence that no longer matches the geometry.
+const pocket = OBSERVATORY_ALCOVES.find((alcove) => alcove.id === 'return-loop-observatory');
+if (!pocket) throw new Error('return-loop-observatory alcove is missing');
+const sideAlcoves = OBSERVATORY_ALCOVES.filter((alcove) => alcove !== pocket);
+const sideRadius = sideAlcoves[0].triggerRadius;
+if (sideAlcoves.some((alcove) => alcove.triggerRadius !== sideRadius)) {
+  throw new Error('side alcoves do not share one trigger radius; reword the transit-circle sentence');
+}
+const observatoryFloor = OBSERVATORY_FLOORS.observatory;
+if (pocket.threshold.y !== observatoryFloor.y + observatoryFloor.height) {
+  throw new Error('the south pocket must open exactly at the observatory floor edge');
+}
+// Lowest centre with the loop shut: the foot body's bottom edge stays on the floor band.
+// observatoryBody() at the origin gives the body's offset from the centre (y 16, height 6).
+const bodyAtOrigin = observatoryBody({ x: 0, y: 0 });
+const lowestCentreY = observatoryFloor.y + observatoryFloor.height - bodyAtOrigin.y - bodyAtOrigin.height;
+const pocketGap = pocket.trigger.y - lowestCentreY;
+const pocketMargin = pocketGap - pocket.triggerRadius;
+if (pocketMargin <= 0) throw new Error('south pocket transit circle reaches a legal centre while the loop is shut');
 
 const artLabel = (element) => (element.art.kind === 'texture'
   ? `texture \`${element.art.key}\``
@@ -63,10 +84,12 @@ p(`  is **${OBSERVATORY_BODY.width}×${OBSERVATORY_BODY.height}** at \`center + 
 p('- Depth: floor art 0..7, door arches 3, ground-mounted art 3, bridge deck 6, standing props');
 p('  `10 + groundAnchorY/10`, memory overlay 94, prompt container 82, HUD 86. Darkness uses the shared');
 p('  `LanternSystem` overlay stack (68..71) instead of a level-local overlay.');
-p('- HUD text occupies y=0..58 and y=320..360. No collider, stand or prompt sits in those bands, and every');
-p('  world sprite sorts below prompt/HUD depth so nothing can draw over the HUD.');
+p('- HUD text occupies y=0..58 and y=320..360. No stand, transit circle, inspect control, door threshold, arch or');
+p('  walkable floor sits in those bands (checked for every alcove by `scripts/check-observatory.mjs`). Outer masonry');
+p('  may run under the status band as solid wall that is never walkable. Every world sprite sorts below the');
+p('  prompt/HUD depth so nothing can draw over the HUD.');
 p('- A door is a recessed alcove: a 48px opening, permanent jambs');
-p(`  ${OBSERVATORY_JAMB_THICKNESS}px thick, and a threshold that is solid only while the door is shut. The transit`);
+p(`  (${OBSERVATORY_JAMB_THICKNESS}px thick on the side alcoves, ${pocket.jambs[0].width}px on the south sill pocket), and a threshold that is solid only while the door is shut. The transit`);
 p('  trigger sits deep inside the alcove, so it is geometrically unreachable while locked, and a');
 p('  room-facing inspect control at the alcove mouth always names the missing prerequisite in Vietnamese.');
 p();
@@ -196,7 +219,9 @@ for (const element of OBSERVATORY_ELEMENTS) {
 }
 p();
 p('- Every trigger centre sits at or below its object\'s south edge, or on the documented side/gate');
-p('  exception; standing north, east or west of a prop shows nothing, and radii stay 22..24 (exits 28..30).');
+p('  exception; standing north, east or west of a prop shows nothing, and control radii stay 22..24.');
+p(`- Transit circles are ${sideRadius}px, except the south sill pocket (${pocket.triggerRadius}px): its centre (${point(pocket.trigger)}) sits ${pocketGap}px from the nearest`);
+p(`  foot-body centre while the loop is shut, so the ${pocket.triggerRadius}px circle keeps a ${pocketMargin}px margin and still ends above y=320.`);
 p('- Every locked door and disabled control states the unmet prerequisite in Vietnamese via');
 p('  `observatoryDoorBlockReason`, `observatoryBridgeBlockReason`, `observatoryRecordBlockReason` and');
 p('  `observatoryFinalDoorBlockReason`.');
