@@ -63,12 +63,18 @@ console.log(`Artifacts: ${out}`);
     throw new Error(`Move timeout: ${axis} ${target}`);
   };
   const move = async (x,y,first='x') => { if(first==='x') { await moveAxis('x',x); await moveAxis('y',y); } else { await moveAxis('y',y); await moveAxis('x',x); } await page.waitForTimeout(90); };
+  // New Game and the pause-menu Restart both play the opening prologue first; Esc skips it into CampaignScene.
+  const skipPrologue = async () => {
+    await page.waitForFunction(() => window.__LAST_LANTERN_GAME__?.scene.isActive('PrologueScene'));
+    await tap('Escape');
+    await page.waitForFunction(() => window.__LAST_LANTERN_GAME__?.scene.isActive('CampaignScene'));
+  };
   try {
     await page.goto(baseUrl);
     await page.waitForLoadState('networkidle');
     await page.waitForFunction(() => window.__LAST_LANTERN_GAME__?.scene.isActive('MenuScene'));
     await tap('Enter');
-    await page.waitForFunction(() => window.__LAST_LANTERN_GAME__?.scene.isActive('CampaignScene'));
+    await skipPrologue();
     await shot('opening');
     await dismiss();
     let s=await state(); assert.equal(s.level,0); assert.equal(s.picked,false);
@@ -111,10 +117,11 @@ console.log(`Artifacts: ${out}`);
     assert.equal((await state()).level,1,'Continue in same runtime must keep Level02'); await mark('same-runtime Continue preserves progress');
     await tap('Escape'); await clickWorld(320,241);
     await page.waitForFunction(()=>window.__LAST_LANTERN_GAME__.scene.isActive('MenuScene'));
-    await tap('s'); await tap('Enter');await page.waitForFunction(()=>window.__LAST_LANTERN_GAME__.scene.isActive('CampaignScene'));await dismiss();
+    // With a save present "Hành trình mới" asks for confirmation first: open it, pick "Bắt đầu lại", confirm.
+    await tap('s'); await tap('Enter'); await tap('ArrowRight'); await tap('Enter'); await skipPrologue(); await dismiss();
     assert.equal((await state()).level,0);assert.equal((await state()).picked,false);assert.ok(!(await state()).flags['l0-gate-open']);await mark('explicit second NewGame resets progress');
     await move(224,251);await dismiss();await tap('e');await dismiss();assert.equal((await state()).picked,true);
-    await tap('Escape');await clickWorld(320,177);await clickWorld(320,177);await page.waitForTimeout(300);await dismiss();
+    await tap('Escape');await clickWorld(320,177);await clickWorld(320,177);await skipPrologue();await dismiss();
     assert.equal((await state()).level,0);assert.equal((await state()).picked,false);await mark('confirmed pause Restart resets progress');
     assert.deepEqual(errors,[]);
     results.push({ name:'browser console',status:'PASS',errors });

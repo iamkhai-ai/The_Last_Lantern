@@ -326,7 +326,7 @@ export class EndingScene extends Phaser.Scene {
     if (this.campaignEnding) {
       CampaignSaveSystem.clear();
       SoundSystem.playLanternToggle(true);
-      this.scene.start('CampaignScene', { newGame: true });
+      this.scene.start('PrologueScene');
       return;
     }
     SaveSystem.clear();

@@ -4,6 +4,7 @@ import { CampaignScene } from '../scenes/CampaignScene';
 import { ComingSoonScene } from '../scenes/ComingSoonScene';
 import { EndingScene } from '../scenes/EndingScene';
 import { MenuScene } from '../scenes/MenuScene';
+import { PrologueScene } from '../scenes/PrologueScene';
 import { WorldScene } from '../scenes/WorldScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -24,5 +25,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [BootScene, MenuScene, CampaignScene, ComingSoonScene, WorldScene, EndingScene],
+  scene: [BootScene, MenuScene, PrologueScene, CampaignScene, ComingSoonScene, WorldScene, EndingScene],
 };

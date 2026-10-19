@@ -17,6 +17,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CAMPAIGN_LEVELS } from '../src/data/campaignLevels.ts';
+import { DEMO_LEVEL_COUNT, FULL_LEVEL_COUNT, RELEASE_POLICY } from '../src/config/releaseConfig.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (relative) => readFileSync(path.join(ROOT, relative), 'utf8');
@@ -51,10 +52,20 @@ for (const level of LEVELS) {
     `campaign index ${level.index} is "${level.title}"`);
 }
 
-/* --------------------------------------------- no level is diverted to the "coming soon" screen */
+/* --------------------------- the only "coming soon" route is the demo boundary */
 
-assert.equal(scene.includes('ComingSoonScene'), false,
-  'CampaignScene must not route any index to ComingSoonScene any more');
+// The default build has no VITE_BUILD_FLAVOR, so it must still be the full
+// campaign. The demo boundary is behavioral, not source-only:
+// scripts/check-demo-release.mjs runs nextLevel() in both injected modes and
+// proves demo index 3 stops while full index 3 advances to 4 and saves.
+assert.equal(RELEASE_POLICY.isDemo, false,
+  'the default build (no VITE_BUILD_FLAVOR) is the full ten-level campaign');
+assert.equal(RELEASE_POLICY.lastPlayableLevelIndex, 9,
+  'full mode keeps all ten levels playable');
+assert.equal(FULL_LEVEL_COUNT, 10, 'the full campaign defines ten levels');
+assert.equal(DEMO_LEVEL_COUNT, 4, 'the demo slice defines four levels');
+assert.equal((scene.match(/ComingSoonScene/g) ?? []).length, 2,
+  'CampaignScene references ComingSoonScene only for the demo resume guard and the demo slice boundary');
 
 /* --------------------------------------------------- every index reaches a real implementation */
 
@@ -109,9 +120,14 @@ assert.ok(covered.length >= 9, 'at least nine of the ten indices ship a dedicate
 
 /* ------------------------------------------- the campaign can advance 0..9 and stops at index 9 */
 
-const nextLevelBody = scene.slice(scene.indexOf('private nextLevel('), scene.indexOf('private nextLevel(') + 400);
+const nextLevelStart = scene.indexOf('private nextLevel(');
+const nextLevelEnd = scene.indexOf('private finishHeartCampaign(');
+assert.ok(nextLevelStart >= 0 && nextLevelEnd > nextLevelStart, 'nextLevel() is still declared before the ending helpers');
+const nextLevelBody = scene.slice(nextLevelStart, nextLevelEnd);
 assert.ok(nextLevelBody.includes('this.progress.level >= 9'), 'nextLevel() stops advancing past index 9');
 assert.ok(nextLevelBody.includes('this.progress.level += 1'), 'nextLevel() advances one index at a time');
+assert.ok(nextLevelBody.includes('RELEASE_POLICY.isDemo'),
+  'the only early next-level stop is the demo build boundary');
 
 /* --------------------------------------------------------- the ending is still reachable and wired */
 
@@ -125,6 +141,6 @@ console.log(`  levels        : ${LEVELS.length} authored indices, all dispatched
 console.log(`  scenario docs : ${LEVELS.length}/${LEVELS.length} present`);
 console.log(`  pure checks   : ${covered.length}/${LEVELS.length} dedicated (index ${covered.join(', ')})`);
 console.log(`  shared cover  : index ${sharedOnly.join(', ')} rely on the shared interaction-prompt check and the build`);
-console.log('  gating        : no coming-soon diversion left; nextLevel() stops at index 9');
+console.log('  gating        : full build keeps all ten levels; the only coming-soon route is the demo slice boundary');
 console.log('  frame owners  : each controller, Lumo and the lantern system has one update() call site');
 console.log('  ending        : EndingScene reachable, completed campaigns resume at the ending');

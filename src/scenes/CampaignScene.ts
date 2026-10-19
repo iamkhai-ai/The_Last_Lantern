@@ -55,6 +55,7 @@ import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem, LIBRARY_LIGHTING } from '../systems/LanternSystem';
 import { CampaignProgress, CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { consumeCampaignNewGameIntent } from '../systems/CampaignStartIntent';
+import { RELEASE_POLICY } from '../config/releaseConfig';
 import { deriveObservatoryState } from '../systems/ObservatoryPuzzle';
 import { SoundSystem } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
@@ -151,6 +152,8 @@ export class CampaignScene extends Phaser.Scene {
   private hintIndex = 0;
   private heartEnd = false;
   private hud!: CampaignHud;
+  /** Guards the demo boundary so a re-fired exit callback cannot stack screens. */
+  private demoCompleteShown = false;
   private lastGateCheck = 0;
   private lastLumoSave = 0;
   private lastPlayerSave = 0;
@@ -185,12 +188,20 @@ export class CampaignScene extends Phaser.Scene {
     } else {
       this.progress = CampaignSaveSystem.load();
     }
+    // A demo build must not build the world, dispatch the full ending, or write
+    // anything for a saved run outside its four-level slice. Checking here also
+    // covers a direct scene start that bypasses the menu.
+    if (this.isBlockedDemoResume(newGameRequested)) {
+      this.scene.start('ComingSoonScene', { mode: 'demo-save-blocked' });
+      return;
+    }
     if (!newGameRequested && this.progress.flags['l9-complete'] === true) {
       this.scene.start('EndingScene', { campaign: true });
       return;
     }
     this.hintIndex = 0;
     this.heartEnd = false;
+    this.demoCompleteShown = false;
     this.lastPlayerSave = 0;
     this.runeRevealExpiresAt = 0;
     this.activeRevealedRunes.clear();
@@ -206,7 +217,7 @@ export class CampaignScene extends Phaser.Scene {
     this.dialogue = new DialogueSystem(this);
     this.pauseMenu = new PauseMenu(this, {
       onResume: () => undefined,
-      onRestart: () => { CampaignSaveSystem.clear(); this.scene.restart({ newGame: true }); },
+      onRestart: () => { CampaignSaveSystem.clear(); this.scene.start('PrologueScene'); },
       onMainMenu: () => this.scene.start('MenuScene'),
     });
     this.hud = new CampaignHud(this);
@@ -2539,9 +2550,27 @@ export class CampaignScene extends Phaser.Scene {
 
   private say(lines: DialogueLine[], onComplete?: () => void): void { this.dialogue.startDialogue(lines, onComplete); }
 
+  /**
+   * True when a loaded (not explicitly new) campaign save belongs outside this
+   * build's playable slice. In demo that is index 4+ or a completed campaign;
+   * in full mode no save is ever blocked.
+   */
+  private isBlockedDemoResume(newGameRequested: boolean): boolean {
+    if (newGameRequested) return false;
+    return RELEASE_POLICY.isOutOfRange(this.progress.level, this.progress.flags['l9-complete'] === true);
+  }
+
   private nextLevel(lines: DialogueLine[]): void {
     if (this.progress.level >= 9) return;
     this.say(lines, () => {
+      // Demo slice: the authored Shattered Creek exit still plays in full, then
+      // the run stops on index 3. No increment, no lantern grant, no save as 4.
+      if (RELEASE_POLICY.isDemo && this.progress.level >= RELEASE_POLICY.lastPlayableLevelIndex) {
+        if (this.demoCompleteShown) return;
+        this.demoCompleteShown = true;
+        this.scene.start('ComingSoonScene', { mode: 'demo-complete' });
+        return;
+      }
       this.progress.level += 1;
       this.progress.lanternPickedUp = true;
       this.progress.lanternOn = true;
