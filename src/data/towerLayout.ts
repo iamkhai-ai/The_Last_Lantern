@@ -22,13 +22,13 @@ export const TOWER = {
     g0: { ground: p(212, 242), optical: p(212, 215), stand: p(212, 262), base: rect(201, 232, 22, 10) },
     prism: { center: p(292, 209), input: p(292, 215), left: p(275, 215), right: p(309, 215), base: rect(281, 221, 22, 8) },
     g1: { ground: p(275, 187), optical: p(275, 162), stand: p(275, 218), base: rect(264, 177, 22, 10) },
-    g2: { ground: p(309, 300), optical: p(309, 275), stand: p(309, 288), base: rect(298, 290, 22, 10) },
+    g2: { ground: p(309, 280), optical: p(309, 255), stand: p(309, 272), base: rect(298, 270, 22, 10) },
     eyeA: { ground: p(460, 174), optical: p(460, 162), base: rect(452, 166, 16, 8) },
-    eyeB: { ground: p(460, 287), optical: p(460, 275), base: rect(452, 279, 16, 8) },
+    eyeB: { ground: p(460, 267), optical: p(460, 255), base: rect(452, 259, 16, 8) },
     call: { ground: p(350, 252), stand: p(350, 272), base: rect(339, 242, 22, 10) },
     lever: { ground: p(540, 232), stand: p(540, 254), base: rect(529, 222, 22, 10) },
     chamber: { stand: p(600, 288), solid: rect(560, 180, 80, 104), crystal: p(600, 232) },
-    record: { stand: p(530, 182) },
+    record: { stand: p(549, 192) },
   },
   lumo: {
     route: [p(400, 246), p(382, 262), p(366, 276), p(350, 290)] as const,
@@ -85,6 +85,14 @@ export function towerCanApproach(center: Point, target: Point, obstacles: readon
   return towerCenterWalkable(center, obstacles) && Math.hypot(center.x - target.x, center.y - target.y) <= TOWER.interactionRange;
 }
 
+/**
+ * Standing props are used from their south face only (RULE_GAMES §1): the body must sit at or below
+ * the prop's footprint bottom edge (1px tolerance for sub-pixel collision), inside the stand range.
+ */
+export function towerCanApproachFront(center: Point, stand: Point, front: Rect, obstacles: readonly Rect[] = TOWER_SOLIDS): boolean {
+  return towerCanApproach(center, stand, obstacles) && towerBodyRect(center).y + 1 >= front.y + front.height;
+}
+
 export function isLumoAtSeal(assignment: LumoAssign, lumo: Point | undefined): boolean {
   return assignment === 'at-c' && lumo !== undefined && Math.hypot(lumo.x - TOWER.lumo.seal.x, lumo.y - TOWER.lumo.seal.y) <= TOWER.lumo.sealTolerance;
 }
@@ -111,7 +119,7 @@ export function deriveTowerLive(state: TowerState, lumo?: Point): TowerLiveState
         beams.push({ from: o.g2.optical, to: o.eyeB.optical, live: opticsLive, kind: 'main' });
         liveB = opticsLive;
       } else if (state.g2 === 2) {
-        beams.push({ from: o.g2.optical, to: p(287, 275), live: false, kind: 'main' });
+        beams.push({ from: o.g2.optical, to: p(287, 255), live: false, kind: 'main' });
       }
     } else if (state.g0 === 1) {
       beams.push({ from: o.g0.optical, to: p(247, 180), live: opticsLive, kind: 'main' });
@@ -122,8 +130,8 @@ export function deriveTowerLive(state: TowerState, lumo?: Point): TowerLiveState
     } else {
       beams.push({ from: o.g0.optical, to: p(240, 243), live: opticsLive, kind: 'main' });
       beams.push({ from: p(240, 243), to: p(440, 243), live: opticsLive, kind: 'main' });
-      beams.push({ from: p(440, 243), to: p(440, 275), live: opticsLive, kind: 'main' });
-      beams.push({ from: p(440, 275), to: o.eyeB.optical, live: opticsLive, kind: 'main' });
+      beams.push({ from: p(440, 243), to: p(440, 255), live: opticsLive, kind: 'main' });
+      beams.push({ from: p(440, 255), to: o.eyeB.optical, live: opticsLive, kind: 'main' });
       liveB = opticsLive;
     }
   }

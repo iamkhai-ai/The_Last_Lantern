@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
-import { TOWER, TOWER_SOLIDS, canCompleteTower, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, type G0Pose, type MirrorPose, type Point, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
+import { TOWER, TOWER_SOLIDS, canCompleteTower, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanApproachFront, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
+import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -51,18 +52,21 @@ const THREE_CIRCUITS: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Tôi sẽ chuyển cần. Cậu giữ nguyên một chút.' },
 ];
 
-const SWITCH_NARRATION: DialogueLine[] = [
-  { speaker: 'Hệ thống', text: 'Bánh răng khóa ở chế độ Trả dòng. Đèn tháp dịu xuống, nước đổi hướng chảy xuống rừng. Cửa buồng tinh thể mở.' },
-];
+const SWITCH_CAPTION = 'Bánh răng khóa ở chế độ Trả dòng. Đèn tháp dịu xuống, nước chảy xuống rừng. Cửa buồng mở.';
+const RECORD_OPEN_CAPTION = 'Ngăn bản ghi mở. Tiếng mưa, rồi giọng một người đàn ông.';
+const RECORD_FADE_CAPTION = 'Tiếng máy trong bản ghi tăng lên, rồi tắt. Nhinh nhìn chiếc khăn trên bậu cửa.';
 
 const SWITCHED: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Xong rồi. Máy tự giữ chế độ mới. Cậu về được rồi, Lumo.' },
   { speaker: 'Lumo', text: 'Tôi nghe tiếng suối!' },
 ];
 
-const RECORD: DialogueLine[] = [
+const RECORD_VOICE: DialogueLine[] = [
   { speaker: 'Người Bảo Vệ', text: 'Đội tìm kiếm đã trở về. Con bé vẫn chưa có mặt.' },
   { speaker: 'Người Bảo Vệ', text: 'Tôi sẽ giữ ngọn tháp sáng thêm một đêm. Nếu con nhìn thấy, cứ đi về phía ánh đèn. Cha ở đây.' },
+];
+
+const RECORD: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Ông ấy đang đợi con gái.' },
   { speaker: 'Lumo', text: 'Tôi nhớ chiếc khăn này. Nó từng đỏ.' },
   { speaker: 'Nhinh', text: 'Cậu có nhớ cô bé trở về không?' },
@@ -81,24 +85,29 @@ const ENDING: DialogueLine[] = [
 
 const HINTS: Record<TowerStep, DialogueLine[]> = {
   practice: [
-    { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
-    { speaker: 'Lumo', text: 'Đặt đèn vào bệ bàn thử rồi xoay gương đầu vào cho tia đi qua lăng kính.' },
+    { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử ở góc trên bên trái cho thấy cách tách tia.' },
+    { speaker: 'Lumo', text: 'Bàn thử chỉ để học, không bắt buộc. Muốn thử: đặt đèn vào bệ bàn thử rồi xoay gương đầu vào cho tia đi qua lăng kính.' },
+    { speaker: 'Lumo', text: 'Muốn vào thẳng máy chính: đặt đèn lên bệ giữa phòng và bật bằng F.' },
   ],
   place: [
     { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
-    { speaker: 'Lumo', text: 'Nhấc đèn khỏi bàn thử rồi đặt lên bệ chính giữa phòng.' },
+    { speaker: 'Lumo', text: 'Máy chính chỉ nhận ánh sáng từ bệ giữa phòng.' },
+    { speaker: 'Lumo', text: 'Nhấc đèn khỏi bàn thử (nếu còn ở đó) rồi đặt lên bệ chính giữa phòng và bật bằng F.' },
   ],
   main: [
+    { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
     { speaker: 'Lumo', text: 'Gương chung phải cấp cho lăng kính để hai nhánh cùng sáng. Tôi giữ điều kiện thứ ba.' },
     { speaker: 'Lumo', text: 'Hướng G0 vào lăng kính, G1 vào A, G2 vào B. Gọi tôi tới C rồi dùng cần Trả dòng khi cả ba sáng.' },
   ],
   call: [
-    { speaker: 'Lumo', text: 'Gương chung phải cấp cho lăng kính để hai nhánh cùng sáng. Tôi giữ điều kiện thứ ba.' },
-    { speaker: 'Lumo', text: 'Nhấn E ở mốc gọi bên phải để đưa tôi lên ấn C.' },
+    { speaker: 'Lumo', text: 'Hai mắt đá đã sáng. Vòng thứ ba nằm ở ấn C, và ấn đó chỉ sáng khi có tôi đứng trên.' },
+    { speaker: 'Lumo', text: 'Tôi chỉ giữ được ấn C khi bay tới đó và đứng yên. Mốc gọi nằm giữa phòng, ngay trên ấn.' },
+    { speaker: 'Lumo', text: 'Nhấn E ở mốc gọi để đưa tôi lên ấn C.' },
   ],
   switch: [
-    { speaker: 'Lumo', text: 'Hướng G0 vào lăng kính, G1 vào A, G2 vào B. Gọi tôi tới C rồi dùng cần Trả dòng khi cả ba sáng.' },
-    { speaker: 'Lumo', text: 'Cả ba vòng đang sáng. Dùng E với cần Trả dòng ở cửa buồng.' },
+    { speaker: 'Lumo', text: 'Cả ba vòng trên tường đang cùng quay.' },
+    { speaker: 'Lumo', text: 'Cần Trả dòng chỉ chuyển được khi cả ba cùng sáng. Đừng đổi gương hay gọi tôi đi lúc này.' },
+    { speaker: 'Lumo', text: 'Dùng E với cần Trả dòng ở cửa buồng bên phải.' },
   ],
   retrieve: [
     { speaker: 'Nhinh', text: 'Máy đã tự giữ chế độ mới. Thu hồi đèn khỏi bệ bằng E.' },
@@ -107,7 +116,7 @@ const HINTS: Record<TowerStep, DialogueLine[]> = {
     { speaker: 'Nhinh', text: 'Buồng đã mở. Nhấn E trước buồng để nhận Tinh thể Hy Vọng.' },
   ],
   record: [
-    { speaker: 'Nhinh', text: 'Ngăn bản ghi dưới cửa sổ đã mở. Chạm vào để nghe.' },
+    { speaker: 'Nhinh', text: 'Ngăn bản ghi dưới cửa sổ đã mở. Đứng phía trước ngăn, nhấn E để nghe.' },
   ],
   recall: [
     { speaker: 'Nhinh', text: 'Nhấn E ở mốc gọi để gọi Lumo trở về.' },
@@ -117,16 +126,20 @@ const HINTS: Record<TowerStep, DialogueLine[]> = {
   ],
 };
 
+const RECALL_FOLLOWING: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Lumo đang bay về. Đứng gần cậu ấy rồi xuống bậc thang góc dưới bên trái.' },
+];
+
 const OBJECTIVE: Record<TowerStep, string> = {
-  practice: 'Góc trên bên trái có bàn thử: đặt đèn và xoay gương đầu vào cho tia qua lăng kính.',
-  place: 'Đặt đèn lên bệ chính giữa phòng bằng E.',
+  practice: 'Bàn thử góc trên bên trái là phần học tùy chọn. Hoặc đặt đèn lên bệ chính giữa phòng.',
+  place: 'Đặt đèn lên bệ chính giữa phòng bằng E, bật bằng F.',
   main: 'Điều hướng G0, G1, G2 để nhánh A và B cùng sáng.',
-  call: 'A và B đã sáng. Gọi Lumo tới ấn C.',
+  call: 'A và B đã sáng. Gọi Lumo tới ấn C bằng mốc gọi.',
   switch: 'Cả ba mạch đang sáng. Gạt cần Trả dòng ở cửa buồng.',
   retrieve: 'Máy đã giữ chế độ mới. Thu hồi đèn khỏi bệ bằng E.',
   crystal: 'Tới buồng bên phải, nhận Tinh thể Hy Vọng.',
   record: 'Nghe bản ghi dưới cửa sổ.',
-  recall: 'Gọi Lumo trở về bằng E ở mốc gọi.',
+  recall: 'Gọi Lumo trở về bằng E ở mốc gọi, rồi đứng gần cậu ấy.',
   exit: 'Xuống khu vườn bằng bậc thang góc dưới bên trái.',
 };
 
@@ -135,7 +148,7 @@ const EXIT_REFUSAL: Record<'power' | 'lamp' | 'crystal' | 'record' | 'companion'
   lamp: 'Đèn còn nằm trên bệ. Mình cần thu hồi đèn đã.',
   crystal: 'Buồng đã mở rồi. Mình cần nhận Tinh thể Hy Vọng.',
   record: 'Còn bản ghi dưới cửa sổ chưa nghe.',
-  companion: 'Gọi Lumo trở về cùng rồi hãy xuống.',
+  companion: 'Gọi Lumo về ở mốc gọi, rồi đứng gần cậu ấy mới xuống được.',
 };
 
 export class SleeplessTowerLevel {
@@ -325,29 +338,31 @@ export class SleeplessTowerLevel {
 
   private registerActions(): void {
     const { interactions } = this.ctx;
-    const add = (id: string, stand: Point, prompt: () => string, onInteract: () => void, artId: string, enabled: () => boolean = () => true) => {
+    // RULE_GAMES §1: standing props answer E from their south face only. Props without a front rect (record, stairs) are wall or door controls.
+    const add = (id: string, stand: Point, prompt: () => string, onInteract: () => void, artId: string, enabled: () => boolean = () => true, front?: Rect) => {
+      const reach = (): boolean => (front ? towerCanApproachFront(this.point(), stand, front) : towerCanApproach(this.point(), stand));
       const config: InteractableConfig = {
         id: `tower-${id}`,
         x: stand.x,
         y: stand.y,
         radius: TOWER.interactionRange,
-        getPrompt: () => (towerCanApproach(this.point(), stand) ? prompt() : null),
+        getPrompt: () => (reach() ? prompt() : null),
         getPromptBounds: () => this.visuals.get(artId)?.getBounds() ?? null,
-        isEnabled: () => towerCanApproach(this.point(), stand) && enabled(),
-        onInteract: () => { if (towerCanApproach(this.point(), stand)) onInteract(); },
+        isEnabled: () => reach() && enabled(),
+        onInteract: () => { if (reach()) onInteract(); },
       };
       interactions.register(config);
     };
     const o = TOWER.objects;
-    add('bench-source', o.benchSource.stand, () => this.sourcePrompt('practice'), () => this.useSource('practice'), 'bench-source');
-    add('bench-mirror', o.benchMirror.stand, () => 'E · Xoay gương đầu vào', () => this.rotateBench(), 'bench-mirror');
-    add('source', o.source.stand, () => this.sourcePrompt('main'), () => this.useSource('main'), 'source');
-    add('g0', o.g0.stand, () => 'E · Xoay gương chung G0', () => this.rotateG0(), 'g0');
-    add('g1', o.g1.stand, () => 'E · Xoay gương nhánh G1', () => this.rotateBranch('g1'), 'g1');
-    add('g2', o.g2.stand, () => 'E · Xoay gương nhánh G2', () => this.rotateBranch('g2'), 'g2');
-    add('call', o.call.stand, () => (this.state.lumoAssign === 'follow' ? 'E · Gọi Lumo tới ấn C' : 'E · Gọi Lumo về'), () => this.useCall(), 'call');
-    add('lever', o.lever.stand, () => (this.state.waterReturned ? 'E · Cần đang giữ chế độ Trả dòng' : 'E · Gạt cần Trả dòng'), () => this.useLever(), 'lever');
-    add('chamber', o.chamber.stand, () => (!this.state.waterReturned ? 'E · Buồng tinh thể còn khóa' : !this.state.crystal ? 'E · Nhận Tinh thể Hy Vọng' : 'E · Ngăn chứa đã trống'), () => this.useChamber(), 'chamber');
+    add('bench-source', o.benchSource.stand, () => this.sourcePrompt('practice'), () => this.useSource('practice'), 'bench-source', undefined, o.benchSource.base);
+    add('bench-mirror', o.benchMirror.stand, () => 'E · Xoay gương đầu vào', () => this.rotateBench(), 'bench-mirror', undefined, o.benchMirror.base);
+    add('source', o.source.stand, () => this.sourcePrompt('main'), () => this.useSource('main'), 'source', undefined, o.source.base);
+    add('g0', o.g0.stand, () => 'E · Xoay gương chung G0', () => this.rotateG0(), 'g0', undefined, o.g0.base);
+    add('g1', o.g1.stand, () => 'E · Xoay gương nhánh G1', () => this.rotateBranch('g1'), 'g1', undefined, o.g1.base);
+    add('g2', o.g2.stand, () => 'E · Xoay gương nhánh G2', () => this.rotateBranch('g2'), 'g2', undefined, o.g2.base);
+    add('call', o.call.stand, () => (this.state.lumoAssign === 'follow' ? 'E · Gọi Lumo tới ấn C' : 'E · Gọi Lumo về'), () => this.useCall(), 'call', undefined, o.call.base);
+    add('lever', o.lever.stand, () => (this.state.waterReturned ? 'E · Cần đang giữ chế độ Trả dòng' : 'E · Gạt cần Trả dòng'), () => this.useLever(), 'lever', undefined, o.lever.base);
+    add('chamber', o.chamber.stand, () => (!this.state.waterReturned ? 'E · Buồng tinh thể còn khóa' : !this.state.crystal ? 'E · Nhận Tinh thể Hy Vọng' : 'E · Ngăn chứa đã trống'), () => this.useChamber(), 'chamber', undefined, o.chamber.solid);
     add('record', o.record.stand, () => (this.state.recordRead ? 'E · Nghe lại bản ghi' : 'E · Nghe bản ghi bên cửa sổ'), () => this.useRecord(), 'record', () => this.state.crystal);
     add('exit', TOWER.stairsStand, () => (canCompleteTower(this.state) ? 'E · Xuống khu vườn' : 'E · Kiểm tra lối xuống'), () => this.useExit(), 'exit');
   }
@@ -440,7 +455,9 @@ export class SleeplessTowerLevel {
     }
     this.state.waterReturned = true;
     this.saveState();
-    this.ctx.say([...SWITCH_NARRATION, ...SWITCHED]);
+    this.caption(SWITCH_CAPTION);
+    this.ctx.scene.cameras.main.shake(260, 0.0015);
+    this.ctx.say(SWITCHED);
   }
 
   private useChamber(): void {
@@ -467,7 +484,11 @@ export class SleeplessTowerLevel {
     }
     this.state.recordRead = true;
     this.saveState();
-    this.ctx.say(RECORD, () => this.hidePanel());
+    this.caption(RECORD_OPEN_CAPTION);
+    this.ctx.say(RECORD_VOICE, () => {
+      this.caption(RECORD_FADE_CAPTION);
+      this.ctx.say(RECORD, () => this.hidePanel());
+    });
   }
 
   private useExit(): void {
@@ -476,7 +497,7 @@ export class SleeplessTowerLevel {
       this.prepareLevelExit();
       return;
     }
-    this.ctx.say([{ speaker: 'Nhinh', text: EXIT_REFUSAL[block] }]);
+    this.ctx.say(block === 'companion' && this.state.lumoAssign === 'follow' ? RECALL_FOLLOWING : [{ speaker: 'Nhinh', text: EXIT_REFUSAL[block] }]);
   }
 
   private prepareLevelExit(): void {
@@ -493,12 +514,14 @@ export class SleeplessTowerLevel {
     if (this.state.source !== null && !this.state.lanternOn && ['practice', 'place', 'main', 'call', 'switch'].includes(live.step)) {
       return [{ speaker: 'Nhinh', text: 'Đèn trên bệ đang tắt. Nhấn F để bật tia sáng.' }];
     }
+    if (live.step === 'recall' && this.state.lumoAssign === 'follow') return RECALL_FOLLOWING;
     return HINTS[live.step];
   }
 
   private objectiveFor(live: TowerLiveState): string {
     const placedPower = this.state.source !== null && ['practice', 'place', 'main', 'call', 'switch'].includes(live.step);
     if (placedPower && !this.state.lanternOn) return 'Đèn trên bệ đang tắt. Nhấn F để bật lại.';
+    if (live.step === 'recall' && this.state.lumoAssign === 'follow') return 'Lumo đang bay về. Đứng gần cậu ấy rồi xuống bậc thang.';
     return OBJECTIVE[live.step];
   }
 
@@ -566,9 +589,9 @@ export class SleeplessTowerLevel {
     this.addLabel('label-bench', 'Bàn thử', 140, 86);
     this.addLabel('label-g0', 'G0', 212, 190);
     this.addLabel('label-g1', 'G1', 251, 145);
-    this.addLabel('label-g2', 'G2', 287, 258);
+    this.addLabel('label-g2', 'G2', 287, 238);
     this.addLabel('label-a', 'A', 477, 152);
-    this.addLabel('label-b', 'B', 477, 261);
+    this.addLabel('label-b', 'B', 477, 241);
     this.beams = this.keep(this.ctx.scene.add.graphics().setDepth(7));
   }
 
@@ -645,7 +668,7 @@ export class SleeplessTowerLevel {
 
   private drawHud(): void {
     const { scene } = this.ctx;
-    this.hud.push(this.keep(scene.add.text(16, 13, '06  Ngọn Tháp Không Ngủ · Hy vọng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86)));
+    this.hud.push(this.keep(scene.add.text(16, 13, `06  ${CAMPAIGN_LEVELS[5].title} · Hy vọng`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86)));
     this.hud.push(this.keep(scene.add.text(16, 42, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86)));
     this.hud.push(this.keep(scene.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86)));
     this.hud.push(this.keep(scene.add.text(624, 320, 'E Tương tác · F Đèn · H Gợi ý · J Ghi chép · ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 5, y: 3 } }).setOrigin(1, 0).setDepth(86)));
@@ -685,6 +708,12 @@ export class SleeplessTowerLevel {
     const label = this.ctx.scene.add.text(x, y, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#f2ddb0', backgroundColor: '#07151c88', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(15 + y / 10);
     label.setData('towerLabel', id);
     this.keep(label);
+  }
+
+  private caption(text: string): void {
+    const { scene } = this.ctx;
+    const label = this.keep(scene.add.text(320, 66, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', fontStyle: 'italic', color: '#f2e6c4', backgroundColor: '#07151ccc', padding: { x: 8, y: 4 }, align: 'center', wordWrap: { width: 480 } }).setOrigin(0.5, 0).setDepth(84));
+    scene.tweens.add({ targets: label, alpha: 0, delay: 3200, duration: 600, onComplete: () => { if (label.active) label.destroy(); } });
   }
 
   private depthAt(y: number): number { return 10 + y / 10; }
