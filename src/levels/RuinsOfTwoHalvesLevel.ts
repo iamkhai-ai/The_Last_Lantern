@@ -81,6 +81,13 @@ const ENDING: DialogueLine[] = [
 
 const INSCRIPTION = 'Mặt trời giữ đường đi. Mặt trăng giữ giờ nghỉ. Đừng đặt một bên vào chỗ của cả hai.';
 
+/** Scenario 08 §6, Mức 1-3 verbatim: the two-sun and moon puzzle is one ladder (suns and moon share it). */
+const MAIN_LADDER: [string, string, string] = [
+  'Cột ở tiền sảnh tạo bóng. Bức tượng giữa sân có đế xoay giống vậy.',
+  'Hai khóa Nhật cần sáng cùng lúc. Khóa Nguyệt cần bóng của tượng, trong khi đèn vẫn bật.',
+  'Đặt đèn, hướng hai gương vào hai Nhật. Xoay mặt rộng của tượng chắn luồng giữa tới Nguyệt, rồi xác nhận ở bệ.',
+];
+
 const HINT_LADDER: Record<RuinsStage, [string, string, string]> = {
   practice: [
     'Cột ở tiền sảnh tạo bóng. Bức tượng giữa sân có đế xoay giống vậy.',
@@ -92,16 +99,8 @@ const HINT_LADDER: Record<RuinsStage, [string, string, string]> = {
     'Bộ chia tia trên bệ chỉ chạy khi đèn nằm ngay trên bệ.',
     'Đứng ở mép nam bệ chính và nhấn E để đặt đèn.',
   ],
-  suns: [
-    'Hai khóa Nhật cần sáng cùng lúc.',
-    'Bộ chia tia trên bệ đã tách sẵn ba nhánh. Hai nhánh bên đi qua hai gương.',
-    'Xoay gương trái cho tia bật lên khóa Nhật trái, rồi gương phải cho tia bật lên khóa Nhật phải.',
-  ],
-  moon: [
-    'Khóa Nguyệt cần bóng của tượng, trong khi đèn vẫn bật.',
-    'Đế tượng có bốn nấc. Chỉ một nấc cho bóng phủ trọn khóa Nguyệt.',
-    'Đứng ở mép nam tượng và nhấn E. Mặt rộng của tượng phải chắn luồng giữa tới Nguyệt.',
-  ],
+  suns: MAIN_LADDER,
+  moon: MAIN_LADDER,
   confirm: [
     'Hai Nhật sáng và Nguyệt đã tối cùng lúc.',
     'Vòng trên bệ chính đang sáng đều.',
@@ -1160,8 +1159,10 @@ export class RuinsOfTwoHalvesLevel {
 
   public showHint(): void {
     const stage = this.getStage();
-    if (stage !== this.hintStage) {
-      this.hintStage = stage;
+    // suns and moon are one Mức 1-3 ladder, so the move from the suns to the moon step does not restart it.
+    const ladderStage = stage === 'moon' ? 'suns' : stage;
+    if (ladderStage !== this.hintStage) {
+      this.hintStage = ladderStage;
       this.hintIndex = 0;
     }
     const ladder = HINT_LADDER[stage];

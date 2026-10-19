@@ -59,6 +59,7 @@ import {
   observatoryElementSolids,
   observatoryElements,
   observatoryGuidance,
+  observatoryHints,
   observatoryPrompt,
   observatoryReturnLoopLane,
   observatorySolidRects,
@@ -1000,3 +1001,19 @@ console.log('  save         : v1 observatory validations intact');
   for (const line of story.OBSERVATORY_MEMORY_SPOKEN_LINES) assert.equal(/cô bé (còn sống|đã mất)|đã mất/.test(line.text), false, 'no line settles the girl\'s fate');
   console.log('  guidance     : room-aware objectives, shared door predicate, final-door prompts, Shadow spot, placed light, scenario lines');
 }
+
+// ---------------------------------------------------------------- H ladder is the scenario text (scenario 09 §7)
+// Every network-solve state (lamp placed, bridge not yet crossed) shows the scenario Mức 1-3 verbatim, in order.
+{
+  const hits = [...readFileSync(join(rootDir, 'docs/scenario/09-dark-moon-observatory.md'), 'utf8')
+    .matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], 'scenario 09 lists Mức 1, 2, 3 in order');
+  const MUC = hits.map((m) => m[2].normalize('NFC'));
+  for (const roomId of ROOMS) {
+    for (const stage of [STAGES.lampPlaced, STAGES.doorALatched, STAGES.beamToObservatory, STAGES.splitWithShadow]) {
+      assert.deepEqual([...observatoryHints(roomId, stage)], MUC, `${roomId}: the network solve shows Mức 1, 2, 3 verbatim`);
+    }
+  }
+}
+
+console.log('Observatory H ladder checks passed (network solve is the scenario Mức 1-3 verbatim, in order).');

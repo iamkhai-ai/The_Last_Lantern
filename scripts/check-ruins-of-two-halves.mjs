@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
+import ts from 'typescript';
 import {
   canLatchRuinsSanctuary, deriveRuinsPracticeState, deriveRuinsPuzzleState, getRuinsExitBlock, getRuinsSolid,
   getRuinsStage, isRuinsExitReady, isRuinsMainPuzzleEngaged, isRuinsPositionSafe, resolveRuinsSpawn, RUINS_BEAMS,
@@ -828,3 +829,51 @@ for (const ground of walkRoute) {
 }
 
 console.log('Level 08 Shadow state, spots, walk and exit-guidance checks passed.');
+
+// ---------------------------------------------------------------- H ladder is the scenario text (scenario 08 §6)
+// suns and moon are one ladder: the scenario Mức 1-3, verbatim and in order. Shown by the shipped showHint().
+{
+  const md = readFileSync(new URL('../docs/scenario/08-ruins-of-two-halves.md', import.meta.url), 'utf8');
+  const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], 'scenario 08 lists Mức 1, 2, 3 in order');
+  const MUC = hits.map((m) => m[2].normalize('NFC'));
+
+  const levelText = readFileSync(new URL('../src/levels/RuinsOfTwoHalvesLevel.ts', import.meta.url), 'utf8');
+  const sourceFile = ts.createSourceFile('RuinsOfTwoHalvesLevel.ts', levelText, ts.ScriptTarget.Latest, true);
+  const COMPILER = { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } };
+  const find = (predicate) => {
+    let found;
+    const visit = (node) => { if (found) return; if (predicate(node)) { found = node; return; } ts.forEachChild(node, visit); };
+    visit(sourceFile);
+    return found;
+  };
+  const ladderSource = ['MAIN_LADDER', 'HINT_LADDER'].map((name) => {
+    const declaration = find((node) => ts.isVariableDeclaration(node) && node.name.getText(sourceFile) === name);
+    assert.ok(declaration?.initializer, `the Ruins level still authors ${name}`);
+    return ts.transpileModule(`const ${name} = ${declaration.initializer.getText(sourceFile)};`, COMPILER).outputText;
+  }).join('\n');
+  const { HINT_LADDER } = new Function(`"use strict";\n${ladderSource}\nreturn { HINT_LADDER };`)();
+  const method = find((node) => ts.isMethodDeclaration(node) && node.name.getText(sourceFile) === 'showHint');
+  assert.ok(method?.body, 'the Ruins level still authors showHint()');
+  const showHintJs = ts.transpileModule(`const __unit = function () ${method.body.getText(sourceFile)};`, COMPILER).outputText;
+  const showHint = new Function('HINT_LADDER', `"use strict";\n${showHintJs}\nreturn __unit;`)(HINT_LADDER);
+
+  const ALL_MET = { lightActive: true, leftAimed: true, rightAimed: true, moonCovered: true };
+  const presses = (stages, puzzle = ALL_MET) => {
+    const level = {
+      stage: '', puzzle, hintStage: '', hintIndex: 0, spoken: [],
+      getStage() { return this.stage; }, getPuzzleState() { return this.puzzle; },
+      say(lines) { this.spoken.push(lines[0].text); },
+    };
+    for (const stage of stages) { level.stage = stage; showHint.call(level); }
+    return level.spoken;
+  };
+  assert.deepEqual(presses(['suns', 'suns', 'moon', 'moon']), [MUC[0], MUC[1], MUC[2], MUC[2]], 'suns then moon: Mức 1, 2, 3 verbatim, then holds Mức 3');
+  assert.deepEqual(presses(['suns', 'moon', 'moon']), [MUC[0], MUC[1], MUC[2]], 'the moon step continues the suns ladder');
+  const missingLeft = { ...ALL_MET, leftAimed: false };
+  const named = presses(['suns', 'suns'], missingLeft);
+  assert.equal(named[0], MUC[0], 'the first press is verbatim Mức 1');
+  assert.ok(named[1].startsWith(`${MUC[1]} Còn thiếu:`), 'a later press keeps Mức 2 and names the missing condition');
+}
+
+console.log('Level 08 H ladder checks passed (suns and moon share the scenario Mức 1-3, verbatim and in order).');

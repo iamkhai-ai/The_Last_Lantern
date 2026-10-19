@@ -831,3 +831,33 @@ function makeBeatHarness({ gateOpen = true, paused = false, art = true } = {}) {
 }
 
 console.log('Sleeping Garden shadow beat checks passed (gate-deferred ending, pause hold and resume, destroy safety, art fallback, scene wiring)');
+
+// ---------------------------------------------------------------- H ladder is the scenario text (scenario 07 §6)
+// The main puzzle (sun, latch, dark, cross) is one stage with one ladder: the scenario's Mức 1-3, verbatim and in
+// order. Lantern toggles inside it do not restart the ladder. Canopy and post-drain stages keep their own lines.
+{
+  const scenarioLadderOf = (file) => {
+    const md = fs.readFileSync(path.join(ROOT, 'docs/scenario', file), 'utf8');
+    const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+    assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
+    return hits.map((m) => m[2].normalize('NFC'));
+  };
+  const MUC = scenarioLadderOf('07-the-sleeping-garden.md');
+  const showHintMethod = compileLevelMethod('showHint');
+  // Presses on a fake level; `lanterns` is the lantern state before each press.
+  const presses = (fields, lanterns) => {
+    const level = { state: stateOf(fields), lanternOn: true, hintStage: '', hintIndex: 0, spoken: [], say(lines) { this.spoken.push(lines[0].text); } };
+    for (const lanternOn of lanterns) { level.lanternOn = lanternOn; showHintMethod.call(level); }
+    return level.spoken;
+  };
+  const mainPuzzle = [{ canopyShut: true }, { canopyShut: true, sunLatched: true }];
+  for (const fields of mainPuzzle) {
+    assert.deepEqual(presses(fields, [true, false, true, true]), [MUC[0], MUC[1], MUC[2], MUC[2]],
+      `main puzzle ${JSON.stringify(fields)}: three presses give Mức 1, 2, 3 verbatim and then hold Mức 3, even when the lantern toggles`);
+    assert.deepEqual(presses(fields, [false, false, false]), [MUC[0], MUC[1], MUC[2]], `main puzzle ${JSON.stringify(fields)}: lantern off from the start`);
+  }
+  assert.equal(MUC.includes(presses({}, [true])[0]), false, 'the canopy stage is stage-specific and does not reuse the main ladder');
+  assert.equal(MUC.includes(presses({ canopyShut: true, sunLatched: true, waterFlowing: true }, [true])[0]), false, 'post-drain guidance is stage-specific');
+}
+
+console.log('Sleeping Garden H ladder checks passed (main puzzle is the scenario Mức 1-3 verbatim, in order).');

@@ -840,6 +840,17 @@ export function observatoryStatus(roomId: ObservatoryRoomKey, state: ObsWorldSta
     + ` · Cửa A ${doorA} · Cửa Mặt Trời ${sun} · ${bed} · Lối vòng ${state.returnLoopOpen ? 'đã mở' : 'chưa mở'}`;
 }
 
+/**
+ * Scenario 09 §7, Mức 1-3 verbatim: one H ladder for the whole network solve (lamp placed, bridge not yet
+ * crossed). Stage-specific lines stay only where §7 allows them: the lamp placement step before the network
+ * starts, the bridge/final-door step, and the post-solve record and crystal states.
+ */
+const OBSERVATORY_NETWORK_LADDER: readonly string[] = [
+  'Xem các đường nối trên tường. G0 dùng cho cả cửa vào lẫn đường tia tới phòng sao.',
+  'Giữ cửa vào bằng chốt rồi đổi nguồn sang phòng sao. Cửa cuối cần sáng, nhưng rễ cần bóng của tượng.',
+  'Gài cửa A, gọi tôi tới ấn, hướng G0 qua G1 tới G2. Chọn đường G2 qua khung tượng, che luống rễ rồi qua cầu và mở lối vòng.',
+];
+
 export function observatoryHints(roomId: ObservatoryRoomKey, state: ObsWorldState): readonly string[] {
   if (state.crystalTaken) {
     return ['Tinh thể đã nằm trong tay.', 'Chốt cửa cuối ở phòng thiên văn sẽ đưa Nhinh về Cây Mẹ.',
@@ -868,29 +879,7 @@ export function observatoryHints(roomId: ObservatoryRoomKey, state: ObsWorldStat
       'Đèn phải nằm trên bệ đá ở tiền sảnh thì mạng sáng mới hoạt động.',
       'Đứng trước bệ đá ở tiền sảnh và nhấn E để đặt đèn.'];
   }
-  if (!state.doorALatched) {
-    return ['Xem các đường nối trên tường. G0 dùng cho cả cửa vào lẫn đường tia tới phòng sao.',
-      'Cửa A chỉ mở khi tia sáng chiếu vào mắt cửa; chốt phía trong sẽ giữ cửa mở lâu dài.',
-      'Vào hành lang phòng sao qua cửa A rồi gài chốt phía trong bằng E.'];
-  }
-  if (!state.lumoAtSeal) {
-    return ['Giữ cửa vào bằng chốt rồi đổi nguồn sáng sang phòng sao.',
-      'Đường ống trên tường hành lang có một ấn dành cho Lumo; chỉ khi Lumo giữ ấn thì tia mới đi tiếp.',
-      'Đứng trước ống dẫn ở hành lang phòng sao và nhấn E để gọi Lumo tới ấn.'];
-  }
-  if (!state.sunDoorUnlocked) {
-    return ['Gài cửa A, gọi Lumo tới ấn, hướng G0 qua G1 tới G2.',
-      'G0 nằm ở tiền sảnh; G1 nằm ở hành lang phòng sao; G2 nằm ở phòng thiên văn.',
-      'Xoay G0 sang nấc 1 và G1 sang nấc 2 rồi đi tới cửa Mặt Trời ở tường phía đông hành lang.'];
-  }
-  if (!state.rootBedShadowed) {
-    return ['Cửa cuối cần sáng, nhưng rễ cần bóng của tượng.',
-      'Khung chia tia gửi một nhánh lên khóa Nhật và một nhánh qua vị trí tượng tới luống rễ.',
-      'Xoay G2 vào khung chia tia (nấc 1) rồi xoay tượng cho mặt rộng che luống rễ.'];
-  }
-  return ['Khóa Nhật đã sáng, rễ đã nằm trong bóng và Lumo vẫn giữ ấn.',
-    'Cầu rễ mọc qua luống rễ ở giữa phòng thiên văn.',
-    'Đi theo cầu rễ sang bờ bên kia rồi gài chốt cửa cuối bằng E.'];
+  return OBSERVATORY_NETWORK_LADDER;
 }
 
 /** Prompt labels for every authored control; disabled gates always explain themselves. */

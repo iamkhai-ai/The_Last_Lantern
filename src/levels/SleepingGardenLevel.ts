@@ -224,41 +224,26 @@ export class SleepingGardenLevel {
   public showHint(): void {
     const state = this.state;
     const stage = !state.canopyShut ? 'canopy'
-      : !state.sunLatched ? (this.lanternOn ? 'latch' : 'sun')
-        : !state.waterFlowing ? (this.lanternOn ? 'dark' : 'cross')
-          : !state.returnLatched ? 'side'
-            : !state.lumoRealized ? 'story'
-              : 'exit';
+      : !state.sunLatched || !state.waterFlowing ? 'main'
+        : !state.returnLatched ? 'side'
+          : !state.lumoRealized ? 'story'
+            : 'exit';
     if (stage !== this.hintStage) { this.hintStage = stage; this.hintIndex = 0; }
-    // Scenario §6: level 1 observation, level 2 relation, level 3 next action. Nothing hands over both plants at level 1.
+    // Scenario 07 §6: the main puzzle (sun, latch, dark, cross) is one stage with one verbatim Mức 1-3 ladder,
+    // so lantern toggles do not restart it. Canopy and post-drain stages keep stage-specific guidance.
     const hints: Record<string, string[]> = {
       canopy: [
         'Cả khu vườn đang được bể tích quang nuôi sáng.',
         'Có một tay màn che ở khe tường phía tây bắc, cạnh bể.',
         'Đi vòng lên phía bắc, vào khe tường và nhấn E ở tay màn che.',
       ],
-      sun: [
-        'Hai chậu thử phản ứng trái ngược khi đèn đổi. Sau thanh chắn có một tay chốt.',
-        'Hoa Nhật nâng thanh chắn khi có sáng. Chốt đá giữ thanh đó lại để nó không còn phụ thuộc đèn.',
-        'Bật đèn bằng F, vào khe tường phía tây và nhấn E ở tay chốt.',
-      ],
-      latch: [
-        'Thanh chắn đang được Hoa Nhật nâng lên.',
-        'Chốt đá sau thanh chắn giữ nó được cả khi tắt đèn. Cần làm điều đó khi thanh còn nâng.',
-        'Vào khe tường phía tây và nhấn E ở tay chốt.',
-      ],
-      dark: [
-        'Thanh chắn đã được giữ. Còn một loại cây chưa được đánh thức.',
-        'Rễ Nguyệt vươn ra khi đèn tắt. Một phần đường phải tự giữ trước khi phần kia xuất hiện.',
-        'Tắt đèn bằng F rồi qua cầu rễ bắc ngang mương ở giữa vườn.',
-      ],
-      cross: [
-        'Cầu rễ chỉ bắc khi đèn tắt.',
-        'Vườn ươm nằm bên kia mương, phía đông.',
-        'Qua cầu rễ tới vườn ươm và nhấn E ở cống để mở đường nước.',
+      main: [
+        'Hai chậu thử phản ứng trái ngược. Sau thanh chắn có một tay chốt.',
+        'Giữ thanh chắn bằng chốt, rồi tắt đèn để rễ làm cầu. Một phần đường phải tự giữ trước khi phần kia xuất hiện.',
+        'Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi gài lối đá phụ.',
       ],
       side: [
-        'Nước đã chảy tới vườn ươm.',
+        'Nước đã chảy tới vườn ươm. Cổng điện thờ nằm ở góc đông bắc.',
         'Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm.',
         'Nhấn E ở chốt để mở lối về không cần ánh sáng.',
       ],
