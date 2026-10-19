@@ -11,7 +11,7 @@ Date: 2026-10-19 (Asia/Saigon). User requested a separate branch and native Luna
 ## Changes and decisions
 
 1. Shared interaction selection and E-press validation use the same radial range: the registered interaction radius plus 8 world pixels. The game has no authoritative meter-to-pixel scale; this is a modest cushion (24 becomes 32 px, 22 becomes 30 px), not a claim of a literal one-meter measurement. Authored approach anchors, enabled predicates, and control ownership remain the basis for safe interaction.
-2. Level 01 draws a high-contrast ring at the player's feet with an arrow toward the lantern, then the tablet. The standing-ring target appears after Pulse discovers the footprints. The cue retires after the gate opens and is hidden during dialogue/pause. Geometry is computed in world coordinates; depth 72 places it above darkness and the actor.
+2. Level 01 draws a high-contrast direction arrow toward the lantern, then the tablet. Per the user's later correction, the decorative player-feet ring has been removed; the arrow starts outside the sprite frame. The standing-ring target appears after Pulse discovers the footprints. The cue retires after the gate opens and is hidden during dialogue/pause. Geometry is computed in world coordinates; depth 72 keeps the arrow visible above darkness.
 3. Both restored and newly discovered footprint stamps rotate from their north-facing source art toward the next trail point or the standing ring.
 4. Level 03's book teaches F/E layer observation, selecting at racks or occupied sockets, placing/swapping/returning pieces, the north horizon start and clockwise route, and explicit E confirmation. Prompts distinguish selecting from placing. H escalates to a concise north/east/south/west mapping only at tier 3. Objective and book do not automatically reveal the full mapping. J retains observed clues and gains time labels after solving. Actual observation flags drive guidance instead of trusting stale readiness flags; observations remain optional for solving.
 
@@ -61,3 +61,11 @@ Screenshots, outside the repository:
 - `C:/Users/Admin/.codex/visualizations/2026/10/19/01a1536f-384d-7091-9324-13b87e5c0bc9/level03-hint-final.png`
 
 The temporary fixture and preview server were removed/stopped after inspection. The primary checkout's in-progress character edits were preserved. Generated tracked `dist/index.html` from the initial build was restored; the final build went outside the repository. No push, merge, or deployment was performed.
+
+## Follow-up: arrow only
+
+The user first reported that the decorative feet ring overprinted Nhinh's frame, then requested removing that ring entirely. Commit `7e3ecb33d2a5d73b823bdcac3bad7d47885e2a37` (tree `2489d83570d359722137455d3f73f19982788b47`) implements the final request: no player ring, only an arrow whose ray starts 3 pixels beyond the current sprite bounds. The authored stone standing ring and puzzle progression are preserved.
+
+Root results on this source: **PASS** production build (626 modules, output outside repo at `arrow-only-build`), `check-forest-edge.mjs`, `check-campaign-runtime.mjs` (15/15), and diff check. Browser inspection of the opening lantern objective: **PASS**, no player ring and arrow outside the sprite. Screenshot: `C:/Users/Admin/.codex/visualizations/2026/10/19/01a1536f-384d-7091-9324-13b87e5c0bc9/level01-arrow-only.png`. Full campaign replay: **NOT_RUN**.
+
+Two fresh independent static reviewers, `/root/arrow_review_a` and `/root/arrow_review_b`, requested as `gpt-6-luna` / `high`, found no actionable issues on this exact commit. Their resolved model metadata was not exposed. The first resumed worker attempt failed with `Fatal error: application network permission was revoked`; after the user said to continue, the same Luna High worker completed successfully. No fallback model was used. The local preview on port 5197 is left running with the arrow-only tab for user inspection; the earlier cleanup statement applies to the original verification run.
