@@ -139,8 +139,6 @@ export class CampaignScene extends Phaser.Scene {
   private forestEdgeEyeGlow?: Phaser.GameObjects.Image;
   private forestEdgeTabletGlow?: Phaser.GameObjects.Image;
   private forestEdgeRingGlow?: Phaser.GameObjects.Image;
-  private memoryLayerLabels = new Map<string, Phaser.GameObjects.Text>();
-  private memorySocketLabels = new Map<number, Phaser.GameObjects.Text>();
   private campaignBeamGraphics?: Phaser.GameObjects.Graphics;
   private observatoryBridgePendingRemoval = false;
   private observatoryBridgeTraversalSide: 'near' | 'far' | null = null;
@@ -148,7 +146,6 @@ export class CampaignScene extends Phaser.Scene {
   /** Objective row that the current hint ladder belongs to. */
   private observatoryHintKey = '';
   private hintIndex = 0;
-  private selectedStone = -1;
   private heartEnd = false;
   private titleText!: Phaser.GameObjects.Text;
   private objectiveText!: Phaser.GameObjects.Text;
@@ -195,7 +192,6 @@ export class CampaignScene extends Phaser.Scene {
       return;
     }
     this.hintIndex = 0;
-    this.selectedStone = -1;
     this.heartEnd = false;
     this.lastPlayerSave = 0;
     this.runeRevealExpiresAt = 0;
@@ -544,12 +540,9 @@ export class CampaignScene extends Phaser.Scene {
     this.forestEdgeEyeGlow = undefined;
     this.forestEdgeTabletGlow = undefined;
     this.forestEdgeRingGlow = undefined;
-    this.memoryLayerLabels.clear();
-    this.memorySocketLabels.clear();
     this.interactions.clear();
     const level = this.progress.level;
     const definition = CAMPAIGN_LEVELS[level];
-    this.selectedStone = -1;
     if (level !== 2 && level !== 3 && level !== 4 && level !== 5 && level !== 7) this.drawRoom(definition.biome);
     if (level !== 4 && level !== 5) {
       this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
@@ -559,8 +552,9 @@ export class CampaignScene extends Phaser.Scene {
     }
     this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
     if (level === 2) {
-      this.controlsText = this.track(this.add.text(320, 344,
-        'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause',
+      // Bottom edge of the screen, below statusText (y 320) and hintText, so the legend never overlaps them.
+      this.controlsText = this.track(this.add.text(320, 358,
+        'WASD / ←↑→↓ Di chuyển    Shift Chạy    E Tương tác    F Đèn    J Sổ tay    H Gợi ý    ESC Tạm dừng',
         { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } })
         .setOrigin(0.5, 1).setDepth(87));
     }
@@ -681,7 +675,6 @@ export class CampaignScene extends Phaser.Scene {
     if (level === 1) this.updateRuneRevealVisuals();
     if (!this.progress.flags[`intro-${level}`]) {
       this.progress.flags[`intro-${level}`] = true;
-      if (level === 2) this.progress.flags['l2-inscription-read'] = true;
       this.save();
       if (level === 2) this.libraryLevel?.startOpeningDialogue();
       else if (level === 4) this.pathForTwoLevel?.startOpeningDialogue();
@@ -1780,9 +1773,6 @@ export class CampaignScene extends Phaser.Scene {
       this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(groundTint).setDepth(0));
       if (forestDecor) {
         this.drawForestFloor(forestDecor, this.progress.level === 0 ? FOREST_EDGE_PATH_DEPTH : WOODS_PATH_DEPTH);
-      } else if (this.progress.level === 2) {
-        this.track(this.add.tileSprite(96, 64, 448, 244, 'ground_stone').setOrigin(0).setTint(0xd8c69c).setAlpha(0.42).setDepth(0.4));
-        this.track(this.add.tileSprite(276, 76, 88, 232, 'ground_stone').setOrigin(0).setTint(0xefe0ba).setAlpha(0.35).setDepth(0.5));
       }
     }
     const decor = this.add.graphics().setDepth(1);
@@ -1891,7 +1881,6 @@ export class CampaignScene extends Phaser.Scene {
   private addNarrativeProps(level: number): void {
     const props: Array<[string, number, number]> = level === 0 ? [['beacon_stone', 300, 230], ['woods_arch_locked', 486, 166], ['pedestal_empty', 410, 225]]
       : level === 1 ? []
-      : level === 2 ? [['mural_tablet', 320, 72], ['pedestal_empty', 320, 190], ['receiver_off', 530, 194]]
       : level === 4 ? [['receiver_off', 320, 85], ['lock_moon_off', 220, 130], ['lock_moon_off', 420, 130], ['lock_sun_off', 320, 218]]
       : level === 5 ? [['pedestal_lit', 120, 205], ['mirror_0', 160, 170], ['mirror_1', 250, 170], ['mirror_2', 350, 170], ['receiver_off', 470, 145], ['receiver_off', 470, 205], ['lock_sun_off', 320, 80], ['mural_tablet', 535, 86]]
       : level === 7 ? [['guardian_statue', 320, 170], ['lock_sun_off', 200, 126], ['lock_sun_off', 440, 126], ['lock_moon_off', 320, 222], ['ruins_altar', 320, 82], ['pedestal_empty', 120, 205], ['mirror_1', 220, 175], ['mirror_1', 420, 175], ['receiver_off', 200, 126], ['receiver_off', 440, 126], ...(this.progress.flags['l7-solved'] ? [['shadow_npc', 320, 98] as [string, number, number]] : [])]
@@ -1921,14 +1910,6 @@ export class CampaignScene extends Phaser.Scene {
       this.addWoodsGlows();
       this.createWoodsTutorialCue();
       this.updateRuneRevealVisuals();
-    } else if (level === 2) {
-      this.addLevelArt('room-bookshelf', 74, 143, undefined, undefined, 4);
-      this.addLevelArt('room-bookshelf', 566, 143, undefined, undefined, 4);
-      this.addLevelArt('room-test-desk', 208, 134, 96, 68, 4);
-      // Keep the portrait artwork proportional within its existing vertical slots.
-      this.addLevelArt('room-mural-fifth', 432, 92, 62 * 96 / 136, 62, 4);
-      this.addLevelArt(this.progress.flags['l2-secret'] ? 'room-panel-open' : 'room-panel-closed', 432, 152, 58 * 116 / 148, 58, 4);
-      this.addLevelArt(this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed', 548, 194, 112, 112, 4);
     } else if (level === 4) {
       this.addLevelArt('call-idle', 320, 85, 26, 26, 8);
     } else if (level === 5) {
@@ -1942,8 +1923,6 @@ export class CampaignScene extends Phaser.Scene {
       this.addLevelArt(core, 320, 115, 46, 46, 8);
     }
     if (level === 1) this.drawFireflyRoute();
-    if (level === 2 && this.progress.flags['l2-memory'] === true) this.addProp('crystal_memory', 320, 190, 0.9);
-    if (level === 2 && this.progress.flags['l2-crystal'] === true) this.drawFifthMural();
     if (level === 5 && this.progress.flags['l5-power'] === true && !this.progress.flags['l5-crystal']) this.addProp('crystal_hope', 445, 168, 0.9);
   }
 
@@ -1992,20 +1971,6 @@ export class CampaignScene extends Phaser.Scene {
         if (!this.progress.flags['l1-open']) { this.say([{speaker:'Nhinh',text:'Rễ cây vẫn quấn kín lối xuống.'},{speaker:'Lumo',text:'Cổng đang chờ điều gì đó được nhớ lại.'}]); return; }
         this.nextLevel([{speaker:'Nhinh',text:'Có một căn phòng dưới gốc cây.'},{speaker:'Lumo',text:'Thư viện. Tôi nhớ từ đó.'},{speaker:'Nhinh',text:'Vậy xuống xem rừng đã ghi lại những gì.'}]);
       }, undefined, 'woods_arch_open');
-    } else if (level === 2) {
-      const stones = ['bird', 'leaf', 'boat', 'seed'];
-      const xs = [170, 270, 370, 470];
-      stones.forEach((stone, i) => action(`picture-${stone}`, `E · Xem phiến ${this.stoneLabel(stone)}`, xs[i], 115, () => this.inspectStone(stone), () => !this.progress.flags['l2-memory'], i === 0 ? 'runestone_leaf_rev' : i === 1 ? 'ruins_flower' : i === 2 ? 'stepping_stone' : 'runestone_moon_rev'));
-      const socketXs = [190, 280, 360, 450];
-      socketXs.forEach((x, i) => action(`socket-${i}`, `E · Đặt phiến vào hốc ${i + 1}`, x, 255, () => this.placeStone(i), () => !this.progress.flags['l2-memory'], 'pedestal_empty'));
-      action('check-memory', 'E · Kiểm tra vòng ngày đêm', 320, 190, () => this.checkMemory(), () => !this.progress.flags['l2-memory'], 'receiver_off');
-      action('memory-crystal', 'E · Nhận Tinh thể Ký Ức', 320, 190, () => this.finishMemory(), () => this.progress.flags['l2-memory'] === true && !this.progress.flags['l2-crystal'], 'crystal_memory');
-      action('fifth-mural', 'E · Xem bức tranh sau vách rễ', 432, 92, () => {
-        this.progress.flags['l2-fifth-viewed'] = true;
-        this.save();
-        this.say([{ speaker: 'Nhinh', text: 'Người này đang giữ bánh xe lại.' }, { speaker: 'Lumo', text: 'Tôi nghe thấy mưa. Và ai đó bảo đừng để đèn tắt.' }, { speaker: 'Nhinh', text: 'Giống dòng chữ trên chiếc đèn. Mình mang ký ức này theo, chưa cần đoán phần còn thiếu.' }]);
-      }, () => this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] !== true, 'shadow_npc');
-      action('library-exit', 'E · Qua lối rễ cây', 530, 194, () => this.nextLevel([{ speaker: 'Lumo', text: 'Đường nước tới Cây Mẹ nằm phía đó. Tinh thể tiếp theo chắc ở ngọn tháp cuối dòng.' }, { speaker: 'Nhinh', text: 'Vậy trước hết mình phải tìm đường qua suối.' }]), () => this.progress.flags['l2-fifth-viewed'] === true, 'receiver_on');
     } else if (level === 4) {
       action('call-a', 'E · Gọi Lumo tới mốc A', 220, 130, () => this.callLumo('a', 220, 130), () => !this.progress.flags['l4-latch-a'], 'lock_moon_on');
       action('call-b', 'E · Gọi Lumo tới mốc B', 420, 130, () => this.callLumo('b', 420, 130), () => this.progress.flags['l4-latch-a'] === true && !this.progress.flags['l4-latch-b'], 'lock_moon_on');
@@ -2238,109 +2203,6 @@ export class CampaignScene extends Phaser.Scene {
     fly.setPosition(x,y); glow.setPosition(x,y);
   }
 
-  private inspectStone(stone: string): void {
-    if (this.progress.flags[`l2-${stone}-lit`] && this.progress.flags[`l2-${stone}-dark`]) {
-      this.selectedStone = ['bird', 'leaf', 'boat', 'seed'].indexOf(stone);
-      this.say([{ speaker: 'Hệ thống', text: `Đã chọn phiến ${this.stoneLabel(stone)}. Hãy đặt vào một trong bốn hốc.` }]);
-      return;
-    }
-    const layer = this.lantern.lanternOn ? 'lit' : 'dark';
-    this.progress.flags[`l2-${stone}-${layer}`] = true;
-    const other = layer === 'lit' ? 'dark' : 'lit';
-    const layerClues: Record<string, { lit: string; dark: string }> = {
-      bird: { lit: 'Mặt trời sát chân trời trên mặt nước.', dark: 'Một vạch đi từ dưới lên qua chân trời.' },
-      leaf: { lit: 'Mặt trời ở cao. Đường cung quanh nó bị khuyết.', dark: 'Đường cung lên tới đỉnh; thiên thể không còn hiện.' },
-      boat: { lit: 'Mặt trời sát chân trời trên mặt nước.', dark: 'Một vạch đi từ trên xuống qua chân trời.' },
-      seed: { lit: 'Mặt trăng ở cao. Đường cung quanh nó bị khuyết.', dark: 'Đường cung lên tới đỉnh; thiên thể không còn hiện.' },
-    };
-    const lines: DialogueLine[] = [{ speaker: 'Nhinh', text: `${this.stoneLabel(stone)}: ${layerClues[stone][layer]}` }];
-    if (this.progress.flags[`l2-${stone}-${other}`]) lines.push({ speaker: 'Lumo', text: 'Hai lớp ghép lại mới cho biết thời điểm trong ngày.' });
-    this.save();
-    this.drawMemoryProgress();
-    const allSeen = ['bird', 'leaf', 'boat', 'seed'].every((name) => this.progress.flags[`l2-${name}-lit`] && this.progress.flags[`l2-${name}-dark`]);
-    if (allSeen) { this.progress.flags['l2-clues-ready'] = true; this.save(); lines.push({ speaker: 'Nhinh', text: 'Bây giờ mình có đủ manh mối để đặt lại cả vòng.' }); }
-    else lines.push({ speaker: 'Hệ thống', text: 'Đã ghi lớp mực này. Đổi trạng thái đèn bằng F để xem lớp còn lại.' });
-    this.say(lines);
-  }
-
-  private placeStone(socket: number): void {
-    if (this.selectedStone < 0) { this.say([{ speaker: 'Hệ thống', text: 'Hãy chọn một phiến tranh trước.' }]); return; }
-    const slots = this.readMemorySlots();
-    const oldSlot = slots.indexOf(this.selectedStone);
-    if (oldSlot >= 0) slots[oldSlot] = slots[socket];
-    slots[socket] = this.selectedStone;
-    this.progress.flags['memory-slots-json'] = JSON.stringify(slots) as unknown as boolean;
-    this.progress.counters['memory-slots'] = slots.filter((x) => x >= 0).length;
-    this.selectedStone = -1; this.save();
-    this.drawMemoryProgress();
-    this.say([{ speaker: 'Nhinh', text: `Đã đặt phiến vào hốc ${socket + 1}.` }]);
-  }
-
-  private checkMemory(): void {
-    const slots = this.readMemorySlots();
-    if (slots.join(',') === '0,1,2,3') {
-      this.progress.flags['l2-memory'] = true;
-      if (!this.objects.some((object) => object instanceof Phaser.GameObjects.Image && object.texture.key === 'crystal_memory')) this.addProp('crystal_memory', 320, 190, 0.9);
-      this.say([{ speaker: 'Nhinh', text: 'Bình minh, ngày, chiều… rồi đêm.' }, { speaker: 'Lumo', text: 'Tôi đã quên khu rừng từng đổi màu đẹp thế nào.' }]); this.save();
-    } else this.say([{ speaker: 'Nhinh', text: 'Vòng này chưa liền mạch.' }, { speaker: 'Lumo', text: 'Mình xem lại đường đi của mặt trời trên từng tranh nhé.' }]);
-    this.drawMemoryProgress();
-  }
-
-  private finishMemory(): void {
-    this.progress.flags['l2-crystal'] = true; this.save();
-    this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && object.texture.key === 'crystal_memory')?.destroy();
-    this.drawFifthMural();
-    this.say([{ speaker: 'Lumo', text: 'Ký Ức. Tôi nhớ rồi… đây là một trong ba mảnh trái tim Cây Mẹ.' }, { speaker: 'Nhinh', text: 'Vậy còn hai mảnh nữa?' }, { speaker: 'Lumo', text: 'Hy Vọng và Cân Bằng. Những cái tên ấy được khắc trên rễ cây.' }, { speaker: 'Nhinh', text: 'Mình giữ mảnh này cẩn thận. Rồi tìm đường tới hai mảnh còn lại.' }]);
-  }
-
-  private drawMemoryProgress(): void {
-    for (const [stone, x] of [['bird', 170], ['leaf', 270], ['boat', 370], ['seed', 470]] as Array<[string, number]>) {
-      let label = this.memoryLayerLabels.get(stone);
-      if (!label || !label.scene) {
-        label = this.add.text(x, 145, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#fff1b0', backgroundColor: '#07151ccc', padding: { x: 3, y: 2 }, align: 'center' }).setOrigin(0.5).setDepth(22);
-        this.memoryLayerLabels.set(stone, label);
-        this.track(label);
-      }
-      const lit = this.progress.flags[`l2-${stone}-lit`] === true;
-      const dark = this.progress.flags[`l2-${stone}-dark`] === true;
-      label.setText(`${lit ? '☀' : '·'} ${dark ? '☾' : '·'}`);
-    }
-    const slots = this.readMemorySlots();
-    for (let index = 0; index < slots.length; index += 1) {
-      let label = this.memorySocketLabels.get(index);
-      if (!label || !label.scene) {
-        label = this.add.text([190, 280, 360, 450][index], 278, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#f5efe0', backgroundColor: '#07151ccc', padding: { x: 3, y: 2 }, align: 'center' }).setOrigin(0.5).setDepth(22);
-        this.memorySocketLabels.set(index, label);
-        this.track(label);
-      }
-      label.setText(slots[index] < 0 ? `Hốc ${index + 1}` : this.stoneLabel(['bird', 'leaf', 'boat', 'seed'][slots[index]]));
-    }
-  }
-
-  private drawFifthMural(): void {
-    if (this.objects.some((object) => object instanceof Phaser.GameObjects.Graphics && object.getData('campaign-fifth-mural') === true)) return;
-    const muralArt = getLevelArtKey(2, 'room-mural-fifth');
-    const hasMuralCaption = this.objects.some((object) =>
-      object instanceof Phaser.GameObjects.Text && object.getData('campaign-fifth-mural-caption') === true,
-    );
-    if (!hasMuralCaption) {
-      const caption = this.add.text(432, 53, 'BẢO VỆ · BÁNH XE MẶT TRỜI', { fontFamily: 'Segoe UI, sans-serif', fontSize: '7px', color: '#ffe7a4', backgroundColor: '#07151ccc', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(22);
-      caption.setData('campaign-fifth-mural-caption', true);
-      this.track(caption);
-    }
-    if (muralArt && this.textures.exists(muralArt)) return;
-    const muralWidth = 62 * 96 / 136;
-    const mural = this.add.graphics().setDepth(17).setPosition(432, 92);
-    mural.setData('campaign-fifth-mural', true);
-    mural.fillStyle(0x283342, 0.95); mural.fillRoundedRect(-muralWidth / 2, -31, muralWidth, 62, 4);
-    mural.lineStyle(2, 0xe4c477, 0.8); mural.strokeRoundedRect(-muralWidth / 2 + 1, -30, muralWidth - 2, 60, 3);
-    mural.lineStyle(1, 0x9fb1bd, 0.45);
-    for (const [x, y] of [[-14, -23], [8, -24], [16, -13], [-15, 18], [15, 23]] as Array<[number, number]>) mural.strokeCircle(x, y, 1);
-    mural.fillStyle(0x1a1c25, 0.95); mural.fillEllipse(0, 13, 12, 24); mural.fillCircle(0, -10, 5);
-    mural.lineStyle(2, 0xf4d574, 0.85); mural.strokeCircle(0, -6, 14);
-    this.track(mural);
-  }
-
   private registerMirror(id: string, label: string, x: number, y: number, goal: number): void {
     this.addAction(`mirror-${id}`, `E · Xoay ${label} (${this.value(id)})`, x, y, () => {
       this.progress.counters[id] = (this.value(id) + 1) % 4; this.save();
@@ -2570,7 +2432,6 @@ export class CampaignScene extends Phaser.Scene {
       if (key === 'mural_tablet') return getLevelArtKey(level, 'poem_fragment');
       if ((key === 'woods_arch_locked' || key === 'woods_arch_open') && this.progress.flags['l1-open']) return getLevelArtKey(level, 'woods_arch_open_passage');
     }
-    if (level === 2 && key === 'mural_tablet') return getLevelArtKey(level, 'tablet-body');
     if (level === 7 && key === 'guardian_statue') return getLevelArtKey(level, `statue-notch-${this.value('statue') % 4}`);
     return null;
   }
@@ -2631,8 +2492,6 @@ export class CampaignScene extends Phaser.Scene {
       if (tablet instanceof Phaser.GameObjects.Image && tabletKey && this.textures.exists(tabletKey) && tablet.texture.key !== tabletKey) tablet.setTexture(tabletKey);
       this.syncForestEdgeTabletGlow();
       this.setForestEdgeArt('sun-eye', this.progress.flags['l0-gate-open'] ? 'sun-eye-full' : this.forestEdgeChargeMs > 0 ? 'sun-eye-receiving' : 'sun-eye-dormant');
-    } else if (level === 2) {
-      this.setLevelArtAt(548, 194, this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed');
     } else if (level === 7) {
       this.setLevelArtAt(320, 170, `statue-notch-${this.value('statue') % 4}`);
     } else if (level === 9) {
@@ -2822,16 +2681,7 @@ export class CampaignScene extends Phaser.Scene {
     this.progress.counters['player-y'] = this.player.y;
     this.save();
   }
-  private readMemorySlots(): number[] {
-    const raw = this.progress.flags['memory-slots-json'];
-    try {
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : null;
-      if (Array.isArray(parsed) && parsed.length === 4 && parsed.every((x) => Number.isInteger(x) && x >= -1 && x < 4)) return parsed as number[];
-    } catch { /* Invalid save falls back to empty sockets. */ }
-    return [-1, -1, -1, -1];
-  }
   private save(): void { CampaignSaveSystem.save(this.progress); }
-  private stoneLabel(stone: string): string { return ({ bird: 'Chim', leaf: 'Lá', boat: 'Thuyền', seed: 'Hạt' } as Record<string, string>)[stone] ?? stone; }
   private getRunePositions(): Record<string, { x: number; y: number }> { return { moon: { x: 180, y: 204 }, leaf: { x: 320, y: 125 }, star: { x: 460, y: 204 } }; }
 
   private updateRuneRevealVisuals(): void {
@@ -3116,6 +2966,7 @@ export class CampaignScene extends Phaser.Scene {
       const choices=hints[step],message=choices[Math.min(this.hintIndex,choices.length-1)];this.hintIndex=Math.min(this.hintIndex+1,choices.length-1);this.say([{speaker:'Hệ thống',text:message}]);return;
     }
     const hints = CAMPAIGN_LEVELS[this.progress.level].hint;
+    if (!hints) return;
     const message = hints[Math.min(this.hintIndex, hints.length - 1)];
     this.hintIndex = Math.min(this.hintIndex + 1, hints.length - 1);
     this.say([{ speaker: 'Hệ thống', text: message }]);
@@ -3189,11 +3040,11 @@ export class CampaignScene extends Phaser.Scene {
     if (this.titleText) this.titleText.setText(this.progress.level === 8 && this.activeObservatoryRoom
       ? `09  ${OBSERVATORY_ROOMS[this.activeObservatoryRoom].title}   ·   ${level.chapter}`
       : `${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
-    if (this.statusText) {
+    // Level 03 writes its own status line above (LibraryLevel.getStatusText), so this generic line skips it.
+    if (this.statusText && this.progress.level !== 2) {
       const levelIndex = this.progress.level;
       const state = levelIndex === 0 ? `Bia: ${this.progress.flags['l0-tablet-read'] ? 'đã đọc' : 'chưa đọc'} · Dấu chân: ${this.progress.flags['l0-footprints-found'] ? 'đã thấy' : 'chưa thấy'} · Cổng: ${this.progress.flags['l0-gate-open'] ? 'mở' : 'đóng'}`
         : levelIndex === 1 ? `Cổ tự: ${this.value('rune-sequence')}/3 · Bài thơ: ${this.progress.flags['l1-poem-read'] ? 'đã đọc' : 'chưa đọc'} · Cổng: ${this.progress.flags['l1-open']?'mở':'đóng'} · J sổ tay`
-        : levelIndex === 2 ? `Phiến: ${this.value('memory-slots') ?? 0}/4 · Hai lớp: ${['bird', 'leaf', 'boat', 'seed'].filter((s) => this.progress.flags[`l2-${s}-lit`] && this.progress.flags[`l2-${s}-dark`]).length}/4 · Tranh sau vách: ${this.progress.flags['l2-fifth-viewed'] ? 'đã xem' : 'chưa xem'}`
         : levelIndex === 3 ? `Cầu: ${Number(Boolean(this.progress.flags['l3-latch-a'])) + Number(Boolean(this.progress.flags['l3-latch-b']))}/2 · G1 ${this.value('g1')} / G2 ${this.value('g2')} / G3 ${this.value('g3')}`
         : levelIndex === 4 ? `Cửa: ${Number(Boolean(this.progress.flags['l4-latch-a'])) + Number(Boolean(this.progress.flags['l4-latch-b'])) + Number(Boolean(this.progress.flags['l4-latch-c']))}/3 · Lumo: ${this.progress.flags['l4-reunited'] ? 'đã trở lại' : 'theo mốc'}`
         : levelIndex === 5 ? `Nhánh A/B: ${this.value('tower-g1') === 1 && this.value('tower-g0') === 2 && this.lantern.lanternOn ? 'A sáng' : 'A tắt'} / ${this.value('tower-g2') === 3 && this.value('tower-g0') === 2 && this.lantern.lanternOn ? 'B sáng' : 'B tắt'} · Nước: ${this.progress.flags['l5-water-returned'] ? 'đã trả' : 'đang bị hút'}`
@@ -3201,7 +3052,7 @@ export class CampaignScene extends Phaser.Scene {
         : levelIndex === 7 ? `Mắt: ${Number(this.isRuinsOuterBeamReady('left')) + Number(this.isRuinsOuterBeamReady('right'))}/2 · Bóng giữa: ${this.value('statue') === 2 ? 'đúng' : 'chưa đúng'} · Điện thờ: ${this.progress.flags['l7-solved'] ? 'mở' : 'khóa'}`
         : levelIndex === 9 ? `Tinh thể: ${['memory', 'hope', 'balance'].filter((s) => this.progress.flags[`l9-${s}`]).length}/3 · Nhánh: ${Number(this.value('heart-memory') === 1) + Number(this.value('heart-balance') === 2)}/2 · Lumo: ${this.progress.flags['l9-at-heart'] ? 'đang tới ấn' : 'chưa gọi'}`
         : `Đèn: ${this.lantern.lanternOn ? 'BẬT' : 'TẮT'} · Lumo: đang đi cùng`;
-      this.statusText.setText(levelIndex === 2 && this.libraryLevel ? this.libraryLevel.getStatusText() : state);
+      this.statusText.setText(state);
     }
     if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.level === 4
       ? (this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về')

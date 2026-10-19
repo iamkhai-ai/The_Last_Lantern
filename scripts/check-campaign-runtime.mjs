@@ -1027,11 +1027,10 @@ const CASES = [
         }
       }
       // Index 2 is the one controller level the guard keeps on the generic pass,
-      // and deliberately so: LibraryLevel complements the scene's own memory-ring
-      // puzzle (inspectStone/placeStone/checkMemory are still scene methods, and
-      // neither updatePuzzle() nor updateCampaignBarriers() branches on level 2),
-      // so the pass there only repaints campaign art. Every other controller
-      // level must be guarded off it.
+      // and deliberately so: LibraryLevel owns the whole memory-ring puzzle (the
+      // scene holds no level-2 puzzle methods any more), and neither updatePuzzle()
+      // nor updateCampaignBarriers() branches on level 2, so the pass there does no
+      // level-2 work. Every other controller level must be guarded off it.
       for (const { level, field } of LEVEL_CONTROLLERS) {
         if (level === 2) continue;
         assert.ok(excluded.includes(level),

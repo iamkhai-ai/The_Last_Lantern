@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { getLevelArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
-import { LIBRARY_EXIT_THRESHOLD, LIBRARY_LAYOUT, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
+import { LIBRARY_DAIS, LIBRARY_EXIT_THRESHOLD, LIBRARY_LAYOUT, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
+import { SoundSystem } from '../systems/SoundSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import { createForestRandom } from '../data/forestDecor';
@@ -13,22 +14,29 @@ import { inkOverlayFade } from './libraryInkFade';
 const STONES = ['bird', 'leaf', 'boat', 'seed'] as const;
 type Stone = typeof STONES[number];
 const LABELS: Record<Stone, string> = { bird: 'Chim', leaf: 'Lá', boat: 'Thuyền', seed: 'Hạt' };
-const ANSWER_HINT = 'Bắc (trên): Chim; Đông (phải): Lá; Nam (dưới): Thuyền; Tây (trái): Hạt. E chọn ở giá/hốc; E đặt ở hốc; E kiểm tra ở bệ giữa.';
+const ANSWER_HINT = 'Bắc: Chim (bình minh, mũi tên lên) · Đông: Lá (ban ngày) · Nam: Thuyền (hoàng hôn, mũi tên xuống) · Tây: Hạt (ban đêm). E chọn ở giá đá; E đặt ở hốc; E kiểm tra ở bệ giữa.';
+/** Names the time order without naming any tablet; shown before the answer is unlocked. */
+const RULE_HINT = 'Bắt đầu ở hốc có dấu mặt trời, rồi đi theo chiều kim đồng hồ: bình minh, ban ngày, hoàng hôn, ban đêm.';
+const INSCRIPTION = '“Một ngày khởi đầu khi mặt trời nhô khỏi chân trời và khép lại khi trăng lên cao. Hãy đặt nó trở lại vòng của mình.”';
 const RACK_ORDER: Stone[] = ['boat', 'bird', 'seed', 'leaf'];
 const CLUES: Record<Stone, { lit: string; dark: string }> = {
-  bird: { lit: 'Mặt trời sát chân trời trên mặt nước.', dark: 'Một vạch đi từ dưới lên qua chân trời.' },
+  bird: { lit: 'Mặt trời sát chân trời trên mặt nước.', dark: 'Mũi tên chỉ lên: mặt trời đang nhô khỏi chân trời.' },
   leaf: { lit: 'Mặt trời ở cao. Đường cung quanh nó bị khuyết.', dark: 'Đường cung lên tới đỉnh; thiên thể không còn hiện.' },
-  boat: { lit: 'Mặt trời sát chân trời trên mặt nước.', dark: 'Một vạch đi từ trên xuống qua chân trời.' },
+  boat: { lit: 'Mặt trời sát chân trời trên mặt nước.', dark: 'Mũi tên chỉ xuống: mặt trời đang lặn.' },
   seed: { lit: 'Mặt trăng ở cao. Đường cung quanh nó bị khuyết.', dark: 'Đường cung lên tới đỉnh; thiên thể không còn hiện.' },
 };
 const BOOK_GUIDANCE: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Nhấn F để đổi đèn. Nhấn E trên trang hoặc từng phiến để ghi lớp đang hiện vào sổ.' },
   { speaker: 'Lumo', text: 'Đèn bật cho biết thiên thể và vị trí; đèn tắt mới hiện đường chuyển động. Đèn chỉ đổi manh mối, không ảnh hưởng việc xếp phiến.' },
-  { speaker: 'Nhinh', text: 'E ở giá đá chọn phiến; nếu chưa chọn, E trên hốc có phiến cũng chọn phiến tại đó. E ở hốc đích đặt phiến đang chọn.' },
-  { speaker: 'Lumo', text: 'Nếu hốc đích đã có phiến, phiến chọn từ hốc khác đổi chỗ với nó; phiến bị thay khi chọn từ giá trở về giá.' },
-  { speaker: 'Nhinh', text: 'Bắt đầu ở hốc có biểu tượng chân trời sáng phía Bắc, theo mũi tên chiều kim đồng hồ. Chỉ E ở bệ giữa mới chủ động kiểm tra vòng.' },
+  { speaker: 'Nhinh', text: 'E ở giá đá để chọn phiến; nếu chưa chọn, E ở hốc có phiến cũng chọn phiến đó. E ở hốc trống để đặt phiến đang chọn.' },
+  { speaker: 'Lumo', text: 'Nếu hốc đã có phiến, phiến đó đổi chỗ với phiến đang chọn nếu nó đang ở hốc; nếu không, nó trở về giá đá.' },
+  { speaker: 'Nhinh', text: 'Bắt đầu ở hốc có dấu mặt trời phía Bắc, rồi đi theo chiều kim đồng hồ. Chỉ E ở bệ giữa mới chủ động kiểm tra vòng.' },
+  { speaker: 'Lumo', text: 'Bốn phiến là bốn thời khắc của một ngày. Vòng bắt đầu ở hốc có dấu mặt trời, lúc mặt trời vừa nhô lên.' },
 ];
 const TIME_LABELS: Record<Stone, string> = { bird: 'Bình minh', leaf: 'Ban ngày', boat: 'Hoàng hôn', seed: 'Ban đêm' };
+/** Seat names follow the seat order: North, East, South, West. */
+const SEAT_NAMES = ['Bắc', 'Đông', 'Nam', 'Tây'];
+const TOAST_MS = 1800;
 const LIBRARY_CELL_HALF = 26;
 // Room decor (rendering only; colliders and interactions live in libraryLayout.ts and registerInteractions).
 // Glows sit above the lantern darkness (depth 68); dark-ink copies sit above it too, at 69.3.
@@ -40,8 +48,13 @@ const LIBRARY_INK_DEPTH = 69.3;
 const INK_OVERLAY_ALPHA = 0.92;
 const LIBRARY_CYAN = 0x7df2d4;
 const LIBRARY_WARM = 0xffe680;
+/** Gap between the warm seat flashes of a correct arrangement, clockwise from the North seat. */
+const SEAT_FLASH_STEP_MS = 120;
 // Placed below the HUD objective panel (which covers roughly y <= 65).
 const LIBRARY_PLAQUE = { x: 110, y: 78 };
+// The plaque is a warmer stone than the tablets and carries gold engraving, so it never reads as a fifth blank tablet.
+const LIBRARY_PLAQUE_STONE = 0xe6c995;
+const LIBRARY_PLAQUE_GOLD = 0xd8b869;
 const LIBRARY_PLAQUE_AREA = { min: 84, max: 140 };
 const LIBRARY_HANG_XS = [230, 306, 382, 458, 534];
 const LIBRARY_EXIT_GLOW = { x: 566, y: 262 };
@@ -50,9 +63,10 @@ const BORDER_NAMES: Record<Stone, string> = { bird: 'border-chim', leaf: 'border
 const INTRO: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Sách mọc giữa rễ cây.' },
   { speaker: 'Lumo', text: 'Người Elaria gửi ký ức vào đây. Tôi nhớ mùi giấy này.' },
-  { speaker: 'Nhinh', text: 'Bốn chỗ trống, bốn bức tranh. Ai đã lấy chúng xuống?' },
+  { speaker: 'Nhinh', text: 'Bốn hốc trống, bốn phiến. Ai đã lấy chúng xuống?' },
   { speaker: 'Lumo', text: 'Có thể cơn chấn động đêm ấy… Tôi không biết.' },
-  { speaker: 'Nhinh', text: 'Đặt một ngày trở lại đúng vòng của nó. Đừng bỏ quên giờ nghỉ của những chiếc lá.' },
+  { speaker: 'Nhinh', text: `Dòng khắc trên bệ đá: ${INSCRIPTION}` },
+  { speaker: 'Lumo', text: 'Cuốn sách trên bàn bên trái có hai lớp mực. Thử đọc nó, rồi nhấn F đổi đèn và đọc lại.' },
 ];
 
 export interface LibraryLevelOptions {
@@ -91,8 +105,18 @@ export class LibraryLevel {
   private crystalGlowTween?: Phaser.Tweens.Tween;
   /** Soft warm glow on the open mural's painted sun; visible only while the mural is open. */
   private muralSunGlow?: Phaser.GameObjects.Image;
+  /** Gentle warm pulse on the reading desk; visible only until the book has been practised. */
+  private bookGlow?: Phaser.GameObjects.Image;
+  /** Exit glow: dim and cool while the stone gate is shut, bright once it opens. */
+  private exitGlow?: Phaser.GameObjects.Image;
+  /** Brighter core pulse shown while all four seats are filled and before the arrangement is checked. */
+  private corePulseTween?: Phaser.Tweens.Tween;
   private readonly glowTweens: Phaser.Tweens.Tween[] = [];
   private selectedStone: number | null = null;
+  /** `${stone}-${state}` of the last layer read; a second E on the same rack tablet in the same light deselects it. */
+  private lastInspected = '';
+  private toast?: Phaser.GameObjects.Text;
+  private toastTimer?: Phaser.Time.TimerEvent;
   private stageKey = '';
   private hintIndex = 0;
   private exitThresholdBody?: Phaser.Physics.Arcade.StaticBody;
@@ -103,6 +127,9 @@ export class LibraryLevel {
   private destroyed = false;
   private readonly artImages: Phaser.GameObjects.Image[] = [];
   private readonly protectedImages = new Set<Phaser.GameObjects.Image>();
+  /** Parsed memory slots; per-frame reads reuse them. slotsSource is the saved JSON string they were parsed from. */
+  private slots: readonly number[] = [-1, -1, -1, -1];
+  private slotsSource: unknown = undefined;
 
   public constructor(options: LibraryLevelOptions) {
     this.scene = options.scene;
@@ -136,6 +163,9 @@ export class LibraryLevel {
     this.destroyed = true;
     this.glowTweens.forEach((tween) => tween.stop());
     this.glowTweens.length = 0;
+    this.toastTimer?.remove(false);
+    if (this.toast?.active) this.toast.destroy();
+    this.toast = undefined;
     this.colliders.forEach((collider) => { if (collider.active) collider.destroy(); });
     this.bodies.forEach((body) => { if (body.gameObject?.active) body.gameObject.destroy(); });
     this.objects.forEach((object) => { if (object.active) object.destroy(); });
@@ -159,12 +189,13 @@ export class LibraryLevel {
   }
 
   public getObjectiveText(): string {
-    if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'Đứng ở mép nam bệ giữa và nhận Tinh thể Ký Ức bằng E.';
-    if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'Đọc bức tranh sau vách rễ bằng E.';
-    if (this.isExitOpen()) return 'Tới lối phía Đông và nhấn E.';
-    if (!this.progress.flags['l2-memory'] && this.allTabletLayersSeen()) return 'Đã đọc đủ lớp. Theo dấu chân trời sáng và mũi tên; E ở bệ giữa để kiểm tra.';
-    if (!this.progress.flags['l2-book-practice']) return 'E ở bàn đọc lớp mực; F đổi đèn để xem lớp kia.';
-    if (!this.progress.flags['l2-memory']) return 'E xem hai lớp mỗi phiến (F đổi đèn); E ở giá/hốc chọn, E ở hốc đặt hoặc đổi chỗ, E giữa kiểm tra.';
+    if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'Nhấn E ở mép nam bệ giữa để nhận Tinh thể Ký Ức.';
+    if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'Nhấn E trước vách rễ để đọc bức tranh thứ năm.';
+    if (this.isExitOpen()) return 'Tới cổng đá phía Đông Nam và nhấn E.';
+    if (!this.progress.flags['l2-memory'] && this.allSeatsFilled()) return 'Đủ bốn phiến. Nhấn E ở bệ giữa để kiểm tra.';
+    if (this.isBookStage()) return 'Đọc cuốn sách trên bàn, nhấn F đổi đèn rồi đọc lại.';
+    if (!this.progress.flags['l2-memory'] && !this.allTabletLayersSeen() && !this.anyTabletPlaced()) return 'Đọc cả hai lớp (đèn bật/tắt) của bốn phiến trên giá.';
+    if (!this.progress.flags['l2-memory']) return 'Đặt bốn phiến vào bốn hốc theo vòng một ngày.';
     return 'Khám phá thư viện.';
   }
 
@@ -174,41 +205,43 @@ export class LibraryLevel {
     const observed = STONES.reduce((count, stone) => count
       + Number(this.progress.flags[`l2-${stone}-lit`] === true)
       + Number(this.progress.flags[`l2-${stone}-dark`] === true), 0);
-    if (this.progress.flags['l2-memory']) return `Vòng: đã phục hồi · Tinh thể: ${this.progress.flags['l2-crystal'] ? 'đã nhận' : 'chưa nhận'} · Tranh: ${this.progress.flags['l2-fifth-viewed'] ? 'đã đọc' : 'chưa đọc'}`;
+    if (this.progress.flags['l2-memory']) return `Vòng: đã phục hồi · Tinh thể: ${this.progress.flags['l2-crystal'] ? 'đã nhận' : 'chưa nhận'} · Bức tranh thứ năm: ${this.progress.flags['l2-fifth-viewed'] ? 'đã đọc' : 'chưa đọc'}`;
     const selected = this.selectedStone === null ? '' : ` · Đang chọn: ${LABELS[STONES[this.selectedStone]]}`;
-    return `Phiến ở giếng ${placed}/4 · Lớp đã đọc ${observed}/8${selected}`;
+    return `Phiến trong hốc ${placed}/4 · Lớp đã đọc ${observed}/8${selected}`;
   }
 
   public showHint(): void {
     const stage = this.hintStage();
     if (stage !== this.stageKey) { this.stageKey = stage; this.hintIndex = 0; }
     const observedLayers = this.tabletLayerCount();
+    // The final tier names the answer only after every layer is read or a check has failed.
+    const finalHint = this.isAnswerUnlocked() ? ANSWER_HINT : RULE_HINT;
     const clueHints = observedLayers === 0
       ? [
         'Đi tới từng giá đá và nhấn E để xem phiến dưới lớp đèn hiện tại; nhấn F rồi E lần nữa để so sánh lớp kia.',
-        'Đèn bật cho biết thiên thể và vị trí. Tắt đèn để thấy đường chuyển động; ghép hai lớp của cùng một phiến.',
-        ANSWER_HINT,
+        'Bật đèn để thấy thiên thể và vị trí; tắt đèn để thấy đường chuyển động. Ghép hai lớp của cùng một phiến.',
+        finalHint,
       ]
       : [
-        `Cậu đã đọc ${observedLayers}/8 lớp. Dùng F đổi đèn, rồi E đọc các phiến còn thiếu ở giá đá; vẫn có thể thử xếp bất cứ lúc nào.`,
+        `Đã đọc ${observedLayers}/8 lớp. Nhấn F đổi đèn, rồi E đọc các phiến còn thiếu ở giá đá; vẫn có thể thử xếp bất cứ lúc nào.`,
         this.getObservedPairHint(),
-        ANSWER_HINT,
+        finalHint,
       ];
     const hints: Record<string, string[]> = {
       book: [
         'Đứng cạnh bàn rồi nhấn E để đọc trang dưới lớp đèn đang hiện. Nhấn F đổi đèn, sau đó E đọc lại.',
-        'Đèn bật cho biết thiên thể và vị trí; đèn tắt cho thấy đường chuyển động. E trên trang và phiến ghi lớp đang thấy.',
-        'Dấu chân trời sáng ở Bắc là điểm bắt đầu; theo mũi tên chiều kim đồng hồ. E chọn phiến ở giá/hốc, E ở hốc đặt hoặc đổi chỗ; E giữa kiểm tra.',
+        'Bật đèn để thấy thiên thể và vị trí; tắt đèn để thấy đường chuyển động. Nhấn E trên trang hoặc phiến để ghi lớp đang thấy.',
+        'Bắt đầu ở hốc có dấu mặt trời phía Bắc. Nhấn E ở giá đá để chọn phiến, E ở hốc để đặt; E ở bệ giữa để kiểm tra.',
       ],
       clues: clueHints,
       arrange: [
-        'Bắt đầu tại biểu tượng chân trời sáng ở hốc phía Bắc; lần theo các mũi tên theo chiều kim đồng hồ.',
-        'Bốn hốc theo chiều kim đồng hồ từ dấu bắt đầu là Bắc, Đông, Nam, Tây. So từng phiến với các lớp đã đọc.',
-        ANSWER_HINT,
+        'Bắt đầu ở hốc có dấu mặt trời phía Bắc, rồi đi theo chiều kim đồng hồ.',
+        'So từng phiến với lớp đã đọc. Hốc theo chiều kim đồng hồ là Bắc, Đông, Nam, Tây.',
+        finalHint,
       ],
-      crystal: ['Giếng đã mở ở giữa vòng.', 'Đứng ở mép phía nam của bệ giữa để tới tinh thể.', 'Nhấn E tại bệ giữa để nhận Tinh thể Ký Ức.'],
-      mural: ['Ánh sáng đã mở vách sau rễ cây.', 'Tới trước tấm vách ở phía đông bắc.', 'Đứng trước vách và nhấn E để đọc bức tranh thứ năm.'],
-      exit: ['Đường rễ cây dẫn ra phía đông.', 'Lối đi nằm dưới bức tranh thứ năm.', 'Tới cổng ở góc đông nam và nhấn E để đi tiếp.'],
+      crystal: ['Đứng ở mép nam của bệ giữa để tới tinh thể.', 'Nhấn E ở bệ giữa để nhận Tinh thể Ký Ức.'],
+      mural: ['Tới vách rễ ở phía đông bắc của phòng.', 'Đứng trước vách rễ và nhấn E để đọc bức tranh thứ năm.'],
+      exit: ['Đi sang phía đông, qua dưới vòm cổng đá.', 'Tới cổng đá phía Đông Nam và nhấn E để đi tiếp.'],
     };
     const choices = hints[stage];
     const message = choices[Math.min(this.hintIndex, choices.length - 1)];
@@ -218,7 +251,7 @@ export class LibraryLevel {
 
   public showJournal(): void {
     const entries: DialogueLine[] = [];
-    if (this.progress.flags['l2-inscription-read']) entries.push({ speaker: 'Nhinh', text: 'Dòng khắc: “Đặt một ngày trở lại đúng vòng của nó. Đừng bỏ quên giờ nghỉ của những chiếc lá.”' });
+    if (this.progress.flags['l2-inscription-read']) entries.push({ speaker: 'Nhinh', text: `Dòng khắc: ${INSCRIPTION}` });
     if (this.progress.flags['l2-book-lit']) entries.push({ speaker: 'Nhinh', text: 'Trang sách · Đèn bật: cánh hoa khép màu vàng.' });
     if (this.progress.flags['l2-book-dark']) entries.push({ speaker: 'Nhinh', text: 'Trang sách · Đèn tắt: hiện nét mực xanh hình trăng lưỡi liềm.' });
     for (const stone of STONES) {
@@ -231,7 +264,7 @@ export class LibraryLevel {
     if (this.progress.flags['l2-memory']) entries.push({ speaker: 'Nhinh', text: 'Vòng ngày đêm: Chim — bình minh; Lá — ban ngày; Thuyền — hoàng hôn; Hạt — ban đêm.' });
     if (this.progress.flags['l2-plan-recorded']) entries.push({ speaker: 'Lumo', text: 'Tìm đủ ba tinh thể để thắp sáng trái tim Cây Mẹ. Rừng sẽ hồi sinh.' });
     if (this.progress.flags['l2-fifth-viewed']) entries.push({ speaker: 'Nhinh', text: 'Vết nứt bắt đầu từ lúc vòng ngày đêm dừng lại.' });
-    const lines = entries.length ? entries : [{ speaker: 'Nhinh' as const, text: 'Sổ tay chưa ghi trang sách hay phiến tranh nào.' }];
+    const lines = entries.length ? entries : [{ speaker: 'Nhinh' as const, text: 'Sổ tay chưa ghi trang sách hay phiến nào.' }];
     this.say([{ speaker: 'Nhinh', text: 'Sổ tay thư viện. Mỗi trang giữ một manh mối đã quan sát.' }, ...lines]);
   }
 
@@ -321,6 +354,7 @@ export class LibraryLevel {
     this.bookLayers[1].setVisible(false);
     this.bookLayers[2].setVisible(false);
     this.bookInkOverlay = this.createBookInkOverlay();
+    this.createBookGlow();
     const mural = this.addImage(this.isMuralOpen() ? 'room-panel-open' : 'room-panel-closed',
       LIBRARY_LAYOUT.mural.x, LIBRARY_LAYOUT.mural.y, LIBRARY_LAYOUT.art.panelWidth,
       LIBRARY_LAYOUT.art.panelHeight, this.depthAt(200), true);
@@ -361,11 +395,29 @@ export class LibraryLevel {
     });
   }
 
-  /** Carved plaque where the inscription is read; the interaction and its prompt bounds are registered elsewhere. */
+  /**
+   * Carved inscription plaque: a warm stone with a sun glyph and three engraved lines on top.
+   * The interaction and its prompt bounds are registered in registerInteractions().
+   */
   private drawInscriptionPlaque(): void {
-    this.track(this.scene.add.image(LIBRARY_PLAQUE.x, LIBRARY_PLAQUE.y, this.textureKey('tablet-body'))
-      .setDisplaySize(26, 30).setDepth(this.depthAt(78)));
-    this.track(this.scene.add.image(LIBRARY_PLAQUE.x, LIBRARY_PLAQUE.y, 'light_radial')
+    const { x, y } = LIBRARY_PLAQUE;
+    const depth = this.depthAt(78);
+    this.track(this.scene.add.image(x, y, this.textureKey('tablet-body'))
+      .setDisplaySize(26, 30).setTint(LIBRARY_PLAQUE_STONE).setDepth(depth));
+    const engraving = this.scene.add.graphics().setDepth(depth + 0.05);
+    engraving.lineStyle(1, LIBRARY_PLAQUE_GOLD, 0.8);
+    // Sun glyph: a half-disc on a short horizon line in the upper part of the plaque.
+    const horizonY = y - 7;
+    engraving.beginPath();
+    engraving.arc(x, horizonY, 4, Math.PI, Math.PI * 2, false);
+    engraving.strokePath();
+    engraving.lineBetween(x - 8, horizonY, x + 8, horizonY);
+    // Three engraved lines of text below the sun, each a little shorter than the last.
+    engraving.lineBetween(x - 7, y + 3, x + 7, y + 3);
+    engraving.lineBetween(x - 6, y + 7, x + 6, y + 7);
+    engraving.lineBetween(x - 7, y + 11, x + 5, y + 11);
+    this.track(engraving);
+    this.track(this.scene.add.image(x, y, 'light_radial')
       .setBlendMode(Phaser.BlendModes.ADD).setScale(0.26).setAlpha(0.5).setDepth(LIBRARY_GLOW_DEPTH));
   }
 
@@ -379,6 +431,18 @@ export class LibraryLevel {
     this.setInkFade(overlay, this.player.x, this.player.y);
     this.track(overlay);
     return overlay;
+  }
+
+  /** Gentle warm pulse that marks the reading desk; updateVisualState hides it once the book is practised. */
+  private createBookGlow(): void {
+    const glow = this.scene.add.image(LIBRARY_LAYOUT.book.x, LIBRARY_LAYOUT.book.y, 'light_radial')
+      .setTint(LIBRARY_WARM).setBlendMode(Phaser.BlendModes.ADD).setScale(0.3).setAlpha(0.4).setDepth(LIBRARY_GLOW_DEPTH);
+    this.track(glow);
+    this.bookGlow = glow;
+    this.glowTweens.push(this.scene.tweens.add({
+      targets: glow, alpha: { from: 0.3, to: 0.6 }, duration: 1600,
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+    }));
   }
 
   private drawTabletsAndSockets(): void {
@@ -401,7 +465,7 @@ export class LibraryLevel {
       this.rackEmptyStands.push(stand);
     }
     if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) {
-      const crystal = this.addImage('room-memory-crystal', LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y, 28, 36, 35);
+      const crystal = this.addImage('room-memory-crystal', LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y, 28, 36, 35, true);
       crystal.setData('library-crystal', true);
     }
     this.redrawTabletStacks();
@@ -409,7 +473,17 @@ export class LibraryLevel {
 
   private drawCycleMarks(): void {
     const start = LIBRARY_LAYOUT.seats[0];
-    this.addImage('bright-horizon-sun', start.x, start.y + 36, 34, 34, LIBRARY_LAYOUT.groundDepth - 0.4).setAlpha(1);
+    const markY = start.y + 36;
+    // Dark backing disc above the well art keeps the start sun readable on the carved lid.
+    const backing = this.scene.add.graphics().setDepth(LIBRARY_LAYOUT.groundDepth - 0.45);
+    backing.fillStyle(0x0d1414, 0.75);
+    backing.fillCircle(start.x, markY, 13);
+    this.track(backing);
+    this.addImage('bright-horizon-sun', start.x, markY, 30, 30, LIBRARY_LAYOUT.groundDepth - 0.4).setTint(LIBRARY_WARM);
+    // Soft warm glow above the darkness so the start marker stays visible with the lantern off.
+    const glow = this.scene.add.image(start.x, markY, 'light_radial')
+      .setTint(LIBRARY_WARM).setBlendMode(Phaser.BlendModes.ADD).setScale(0.18).setAlpha(0.45).setDepth(LIBRARY_GLOW_DEPTH);
+    this.track(glow);
     const graphics = this.scene.add.graphics().setDepth(LIBRARY_LAYOUT.groundDepth - 0.4);
     graphics.fillStyle(0xd8b869, 0.55);
     graphics.lineStyle(3, 0xd8b869, 0.55);
@@ -432,7 +506,7 @@ export class LibraryLevel {
       onInteract: () => {
         this.progress.flags['l2-inscription-read'] = true;
         this.save();
-        this.say([{ speaker: 'Nhinh', text: '“Đặt một ngày trở lại đúng vòng của nó. Đừng bỏ quên giờ nghỉ của những chiếc lá.”' }]);
+        this.say([{ speaker: 'Nhinh', text: INSCRIPTION }]);
       } });
     this.register({ id: 'library-book', x: LIBRARY_LAYOUT.book.x, y: 278, radius: 22,
       getPrompt: () => 'E · Xem lớp mực (F đổi đèn)', getPromptBounds: () => this.bookLayers[0]?.getBounds() ?? null,
@@ -441,42 +515,37 @@ export class LibraryLevel {
       id: `library-rack-${rackIndex}`, x: point.x, y: point.y + LIBRARY_LAYOUT.rackStandOffset, radius: 22,
       getPrompt: () => {
         const stone = this.rackStone(rackIndex);
-        return stone ? `E · Chọn phiến ${LABELS[stone]}` : 'Giá đá trống';
+        return stone ? `E · Xem và chọn phiến ${LABELS[stone]}` : '';
       },
       getPromptBounds: () => this.tabletStacks.get(this.rackKey(rackIndex))?.getBounds()
         ?? this.rackEmptyStands[rackIndex]?.getBounds() ?? null,
-      onInteract: () => { const stone = this.rackStone(rackIndex); if (stone) this.inspectAndSelect(stone); },
-      isEnabled: () => true,
+      onInteract: () => this.pressRack(rackIndex),
+      // An empty rack has no tablet to read, so it offers no prompt at all.
+      isEnabled: () => this.rackStone(rackIndex) !== null,
     }));
     LIBRARY_LAYOUT.seatApproaches.forEach((point, seatIndex) => this.register({
       id: `library-seat-${seatIndex}`, x: point.x, y: point.y, radius: 40,
-      getPrompt: () => {
-        if (!this.isPlayerInCell(LIBRARY_LAYOUT.seats[seatIndex], LIBRARY_CELL_HALF)) return '';
-        const stone = this.readSlots()[seatIndex];
-        if (this.progress.flags['l2-memory']) return stone >= 0 ? `E · Đọc phiến ${LABELS[STONES[stone]]}` : 'Hốc trống';
-        if (stone >= 0) return this.selectedStone === null ? `E · Chọn phiến ${LABELS[STONES[stone]]}` : 'E · Đặt hoặc đổi phiến';
-        return seatIndex === 0 ? 'E · Đặt phiến (hốc khắc mặt trời)' : 'E · Đặt phiến đã chọn';
-      },
+      getPrompt: () => (this.isPlayerInCell(LIBRARY_LAYOUT.seats[seatIndex], LIBRARY_CELL_HALF) ? this.seatPrompt(seatIndex) : ''),
       getPromptBounds: () => this.tabletStacks.get(this.seatKey(seatIndex))?.getBounds() ?? this.socketImages[seatIndex].getBounds(),
       onInteract: () => this.interactWithSeat(seatIndex),
       isEnabled: () => true,
     }));
-    this.register({ id: 'library-confirm', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: 22,
-      getPrompt: () => this.progress.flags['l2-memory'] ? 'Vòng ngày đêm đã phục hồi' : 'E · Kiểm tra vòng ngày đêm',
-      getPromptBounds: () => ({ x: 314, y: 182, width: 12, height: 12 }),
+    this.register({ id: 'library-confirm', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: LIBRARY_LAYOUT.confirm.radius,
+      getPrompt: () => this.progress.flags['l2-memory'] ? 'Vòng ngày đêm đã phục hồi' : 'E · Kiểm tra vòng ở bệ giữa',
+      getPromptBounds: () => ({ ...LIBRARY_DAIS }),
       onInteract: () => this.checkMemory(), isEnabled: () => this.progress.flags['l2-memory'] !== true });
-    this.register({ id: 'library-crystal', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: 22,
+    this.register({ id: 'library-crystal', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: LIBRARY_LAYOUT.confirm.radius,
       getPrompt: () => 'E · Nhận Tinh thể Ký Ức',
       getPromptBounds: () => this.objects.find((object) => object.getData('library-crystal') === true) instanceof Phaser.GameObjects.Image
         ? (this.objects.find((object) => object.getData('library-crystal') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.collectCrystal(), isEnabled: () => this.progress.flags['l2-memory'] === true && this.progress.flags['l2-crystal'] !== true });
     this.register({ id: 'library-mural', x: LIBRARY_LAYOUT.muralStand.x, y: LIBRARY_LAYOUT.muralStand.y, radius: 22,
-      getPrompt: () => this.progress.flags['l2-fifth-viewed'] ? 'E · Đọc lại bức tranh' : 'E · Đọc bức tranh sau vách',
+      getPrompt: () => this.progress.flags['l2-fifth-viewed'] ? 'E · Đọc lại bức tranh thứ năm' : 'E · Đọc bức tranh thứ năm sau vách rễ',
       getPromptBounds: () => this.objects.find((object) => object.getData('library-mural') === true) instanceof Phaser.GameObjects.Image
         ? (this.objects.find((object) => object.getData('library-mural') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.readMural(), isEnabled: () => this.progress.flags['l2-crystal'] === true });
     this.register({ id: 'library-exit', x: LIBRARY_LAYOUT.exit.x, y: LIBRARY_LAYOUT.exit.y, radius: 22,
-      getPrompt: () => this.isExitOpen() ? 'E · Qua lối rễ cây' : 'E · Kiểm tra cổng phía Đông',
+      getPrompt: () => this.isExitOpen() ? 'E · Qua cổng đá' : 'E · Kiểm tra cổng đá phía Đông Nam',
       getPromptBounds: () => this.exitImages[0]?.getBounds() ?? null,
       onInteract: () => this.useExit(), isEnabled: () => true });
   }
@@ -499,6 +568,7 @@ export class LibraryLevel {
     if (!this.progress.flags['l2-book-practice']) {
       this.progress.flags['l2-book-practice'] = true;
       this.save();
+      this.updateVisualState(true);
       this.say([
         { speaker: 'Nhinh', text: 'Bật đèn thì thấy cánh hoa. Tắt đi mới thấy mặt trăng.' },
         { speaker: 'Lumo', text: 'Có cả hai lớp trên cùng một trang.' },
@@ -507,56 +577,90 @@ export class LibraryLevel {
       ]);
       return;
     }
-    this.say([...observation, ...this.bookGuidance()]);
+    // Re-reading after practice repeats only the observation, not the full guidance.
+    this.say(observation);
   }
 
+  /** The full book guidance is spoken once, on the first safe practice exchange. */
   private bookGuidance(): DialogueLine[] {
     return [...BOOK_GUIDANCE];
   }
 
-  private inspectAndSelect(stone: Stone): void {
+  /** E on a rack: read and select the tablet; a second E on it in the same light deselects it. */
+  private pressRack(rackIndex: number): void {
+    const stone = this.rackStone(rackIndex);
+    if (!stone) return;
     const state = this.lantern.lanternOn ? 'lit' : 'dark';
-    const other = state === 'lit' ? 'dark' : 'lit';
-    const otherLayerWasSeen = this.progress.flags[`l2-${stone}-${other}`] === true;
-    this.progress.flags[`l2-${stone}-${state}`] = true;
+    if (this.selectedStone === STONES.indexOf(stone) && this.lastInspected === `${stone}-${state}`) {
+      this.selectedStone = null;
+      this.redrawTabletStacks();
+      this.showToast(`Bỏ chọn phiến ${LABELS[stone]}`);
+      return;
+    }
+    this.inspectAndSelect(stone);
+  }
+
+  private inspectAndSelect(stone: Stone): void {
     this.selectedStone = STONES.indexOf(stone);
-    const lines: DialogueLine[] = [{ speaker: 'Nhinh', text: `${LABELS[stone]}: ${CLUES[stone][state]}` }];
-    if (stone === 'seed' && state === 'lit') {
-      lines[0] = { speaker: 'Nhinh', text: 'Một mặt trăng trên cao. Đường quanh nó bị mất một đoạn.' };
-    }
-    const leafBothLayersSeen = this.progress.flags['l2-leaf-lit'] === true && this.progress.flags['l2-leaf-dark'] === true;
-    if (stone === 'seed' && state === 'dark' && otherLayerWasSeen && leafBothLayersSeen) {
-      lines[0] = { speaker: 'Nhinh', text: 'Đường cung hiện rồi. Giống phiến Lá, nhưng ở đó là mặt trời.' };
-      lines.push({ speaker: 'Lumo', text: 'Lớp này cho thấy đường đi. Mình phải nhớ cả thiên thể ở lớp kia nữa.' });
-    } else if (otherLayerWasSeen) lines.push({ speaker: 'Lumo', text: 'Hai lớp ghép lại mới cho biết thời điểm trong ngày.' });
-    const pair = (a: Stone, b: Stone) => ['lit', 'dark'].every((layer) => this.progress.flags[`l2-${a}-${layer}`] && this.progress.flags[`l2-${b}-${layer}`]);
-    if (!this.progress.flags['l2-horizon-pair-read'] && pair('bird', 'boat')) {
-      this.progress.flags['l2-horizon-pair-read'] = true;
-      lines.push({ speaker: 'Nhinh', text: 'Cùng một mặt trời sát chân trời. Một bức đang lên, một bức đang lặn.' },
-        { speaker: 'Lumo', text: 'Nếu chỉ để đèn sáng, chúng giống hệt nhau.' });
-    }
-    this.save();
+    const lines = this.readTablet(stone);
     this.redrawTabletStacks();
-    const allSeen = this.allTabletLayersSeen();
-    if (allSeen && !this.progress.flags['l2-clues-ready']) {
-      this.progress.flags['l2-clues-ready'] = true;
-      lines.push({ speaker: 'Nhinh', text: 'Bây giờ mình có đủ manh mối để đặt lại cả vòng.' });
-    }
-    this.save();
     this.say(lines);
   }
 
+  /**
+   * Records the layer currently shown and returns its reading. Only the first look at a layer adds
+   * commentary; a re-read gives the single clue line.
+   */
+  private readTablet(stone: Stone): DialogueLine[] {
+    const state = this.lantern.lanternOn ? 'lit' : 'dark';
+    const other = state === 'lit' ? 'dark' : 'lit';
+    const firstLook = this.progress.flags[`l2-${stone}-${state}`] !== true;
+    const otherLayerWasSeen = this.progress.flags[`l2-${stone}-${other}`] === true;
+    this.progress.flags[`l2-${stone}-${state}`] = true;
+    this.lastInspected = `${stone}-${state}`;
+    const lines: DialogueLine[] = [{ speaker: 'Nhinh', text: `${LABELS[stone]}: ${CLUES[stone][state]}` }];
+    if (firstLook) {
+      const leafBothLayersSeen = this.progress.flags['l2-leaf-lit'] === true && this.progress.flags['l2-leaf-dark'] === true;
+      if (stone === 'seed' && state === 'dark' && otherLayerWasSeen && leafBothLayersSeen) {
+        lines[0] = { speaker: 'Nhinh', text: 'Đường cung hiện rồi. Giống phiến Lá, nhưng ở đó là mặt trời.' };
+        lines.push({ speaker: 'Lumo', text: 'Lớp này cho thấy đường đi. Mình phải nhớ cả thiên thể ở lớp kia nữa.' });
+      } else if (otherLayerWasSeen && this.progress.flags['l2-two-layer-tip'] !== true) {
+        this.progress.flags['l2-two-layer-tip'] = true;
+        lines.push({ speaker: 'Lumo', text: 'Hai lớp ghép lại mới cho biết thời điểm trong ngày.' });
+      }
+      const pair = (a: Stone, b: Stone) => ['lit', 'dark'].every((layer) => this.progress.flags[`l2-${a}-${layer}`] && this.progress.flags[`l2-${b}-${layer}`]);
+      if (!this.progress.flags['l2-horizon-pair-read'] && pair('bird', 'boat')) {
+        this.progress.flags['l2-horizon-pair-read'] = true;
+        lines.push({ speaker: 'Nhinh', text: 'Cùng một mặt trời sát chân trời. Một phiến đang lên, một phiến đang lặn.' },
+          { speaker: 'Lumo', text: 'Nếu chỉ để đèn sáng, chúng giống hệt nhau.' });
+      }
+      if (this.allTabletLayersSeen() && !this.progress.flags['l2-clues-ready']) {
+        this.progress.flags['l2-clues-ready'] = true;
+        lines.push({ speaker: 'Nhinh', text: 'Bây giờ mình có đủ manh mối để đặt lại cả vòng.' });
+      }
+    }
+    this.save();
+    return lines;
+  }
+
+  /** E on a seat: read the tablet there, select it when nothing is selected, or place the selected one. */
   private interactWithSeat(seatIndex: number): void {
-    const slots = this.readSlots();
+    const slots = [...this.readSlots()];
     const occupying = slots[seatIndex];
+    // After the check the ring is fixed: a seat only reads its tablet and never selects one.
     if (this.progress.flags['l2-memory']) {
-      if (occupying >= 0) this.inspectAndSelect(STONES[occupying]);
-      else this.say([{ speaker: 'Hệ thống', text: 'Hốc này đang trống.' }]);
+      if (occupying >= 0) this.say(this.readTablet(STONES[occupying]));
+      else this.showToast('Hốc này đang trống.');
       return;
     }
     if (this.selectedStone === null) {
       if (occupying >= 0) this.inspectAndSelect(STONES[occupying]);
-      else this.say([{ speaker: 'Hệ thống', text: 'Hãy chọn một phiến ở giá đá trước.' }]);
+      else this.showToast('Hãy chọn một phiến ở giá đá trước.');
+      return;
+    }
+    // The selected tablet already sits in this seat: reading it is all E does here.
+    if (occupying === this.selectedStone) {
+      this.say(this.readTablet(STONES[occupying]));
       return;
     }
     const oldSeat = slots.indexOf(this.selectedStone);
@@ -564,7 +668,30 @@ export class LibraryLevel {
     slots[seatIndex] = this.selectedStone;
     this.selectedStone = null;
     this.writeSlots(slots);
-    this.say([{ speaker: 'Nhinh', text: `Đã đặt phiến vào hốc ${seatIndex + 1}.` }]);
+    SoundSystem.playRuneActivate(seatIndex + 1);
+    this.showToast(`Đã đặt phiến vào hốc ${SEAT_NAMES[seatIndex]}`);
+  }
+
+  private seatPrompt(seatIndex: number): string {
+    const occupant = this.readSlots()[seatIndex];
+    if (this.progress.flags['l2-memory']) return occupant >= 0 ? `E · Đọc phiến ${LABELS[STONES[occupant]]}` : 'Hốc trống';
+    if (occupant >= 0 && occupant === this.selectedStone) return `E · Đọc phiến ${LABELS[STONES[occupant]]}`;
+    if (occupant >= 0) return this.selectedStone === null ? `E · Chọn phiến ${LABELS[STONES[occupant]]}` : 'E · Đặt hoặc đổi phiến';
+    if (this.selectedStone === null) return 'Hốc trống · Chọn phiến ở giá đá trước';
+    return seatIndex === 0 ? 'E · Đặt phiến ở hốc có dấu mặt trời' : 'E · Đặt phiến đã chọn';
+  }
+
+  /** Short non-blocking confirmation near the top centre; a new toast replaces the one on screen. */
+  private showToast(message: string): void {
+    this.toastTimer?.remove(false);
+    if (this.toast?.active) this.toast.destroy();
+    this.toast = this.scene.add.text(320, 80, message, {
+      fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#f7dfaa', backgroundColor: '#07151cdd', padding: { x: 9, y: 5 },
+    }).setOrigin(0.5, 0.5).setDepth(88);
+    this.toastTimer = this.scene.time.delayedCall(TOAST_MS, () => {
+      if (this.toast?.active) this.toast.destroy();
+      this.toast = undefined;
+    });
   }
 
   private checkMemory(): void {
@@ -573,25 +700,48 @@ export class LibraryLevel {
     if (slots.join(',') !== '0,1,2,3') {
       if (slots.includes(-1)) {
         const missing = slots.filter((slot) => slot < 0).length;
-        this.say([{ speaker: 'Nhinh', text: `Quanh giếng còn ${missing} hốc trống. Đặt đủ bốn phiến rồi hãy kiểm tra.` }]);
+        this.showToast(`Còn ${missing} hốc trống. Đặt đủ bốn phiến rồi hãy kiểm tra.`);
         return;
       }
+      this.progress.flags['l2-check-failed'] = true;
+      this.save();
+      SoundSystem.playPuzzleError();
       const isRotationOf = (base: readonly number[]) => base.some((_, shift) => base.every((value, index) => slots[(index + shift) % base.length] === value));
       if (isRotationOf([0, 1, 2, 3])) {
-        this.say([{ speaker: 'Nhinh', text: 'Đúng thứ tự rồi, nhưng vòng phải bắt đầu từ hốc khắc mặt trời ở phía trên giếng.' }]);
+        this.say([{ speaker: 'Nhinh', text: 'Đúng thứ tự rồi, nhưng vòng phải bắt đầu ở hốc có dấu mặt trời, với phiến mặt trời đang nhô lên.' }]);
         return;
       }
       if (isRotationOf([0, 3, 2, 1])) {
         this.say([{ speaker: 'Nhinh', text: 'Vòng này chạy ngược chiều kim đồng hồ. Đi theo các mũi tên quanh giếng xem.' }]);
         return;
       }
-      this.say([{ speaker: 'Nhinh', text: 'Vòng này chưa liền mạch.' }, { speaker: 'Lumo', text: 'Mình xem lại đường đi của mặt trời trên từng tranh nhé.' }]);
+      this.say([{ speaker: 'Nhinh', text: 'Vòng này chưa liền mạch.' }, { speaker: 'Lumo', text: 'Mình xem lại đường đi của mặt trời trên từng phiến nhé.' }]);
       return;
     }
     this.progress.flags['l2-memory'] = true;
+    // The ring is fixed now, so no tablet stays selected.
+    this.selectedStone = null;
     this.save();
+    SoundSystem.playPuzzleSolved();
+    this.celebrateSolve();
     this.updateVisualState(true);
-    this.say([{ speaker: 'Nhinh', text: 'Bình minh, ngày, chiều… rồi đêm.' }, { speaker: 'Lumo', text: 'Tôi đã quên khu rừng từng đổi màu đẹp thế nào.' }]);
+    this.say([{ speaker: 'Nhinh', text: 'Bình minh, ngày, hoàng hôn… rồi đêm.' }, { speaker: 'Lumo', text: 'Tôi đã quên khu rừng từng đổi màu đẹp thế nào.' }]);
+  }
+
+  /** Correct arrangement: warm glows run clockwise through the four seats (N, E, S, W) as the well opens. */
+  private celebrateSolve(): void {
+    LIBRARY_LAYOUT.seats.forEach((seat, index) => this.flashGlow(seat.x, seat.y, index * SEAT_FLASH_STEP_MS, 0.3, 0.9));
+  }
+
+  /** A brief warm ADD glow that swells and fades; tracked so destroy() stops its tween and removes it. */
+  private flashGlow(x: number, y: number, delay: number, scale: number, peakAlpha: number): void {
+    const glow = this.scene.add.image(x, y, 'light_radial')
+      .setTint(LIBRARY_WARM).setBlendMode(Phaser.BlendModes.ADD).setScale(scale).setAlpha(0).setDepth(LIBRARY_GLOW_DEPTH);
+    this.track(glow);
+    this.glowTweens.push(this.scene.tweens.add({
+      targets: glow, alpha: { from: 0, to: peakAlpha }, duration: 120, delay, hold: 60, yoyo: true,
+      ease: 'Sine.easeOut', onComplete: () => { if (glow.active) glow.destroy(); },
+    }));
   }
 
   private collectCrystal(): void {
@@ -599,8 +749,11 @@ export class LibraryLevel {
     this.progress.flags['l2-crystal'] = true;
     this.progress.flags['l2-plan-recorded'] = true;
     this.save();
-    this.objects.find((object) => object.getData('library-crystal') === true)?.destroy();
+    SoundSystem.playCrystalPickup();
+    this.removeCrystalImage();
     this.updateVisualState(true);
+    // The mural's sun brightens once as the crystal opens the wall.
+    this.flashGlow(LIBRARY_MURAL_SUN.x, LIBRARY_MURAL_SUN.y, 0, 0.5, 0.9);
     this.say([
       { speaker: 'Nhinh', text: 'Nhận Tinh thể Ký Ức.' },
       { speaker: 'Lumo', text: 'Ký Ức. Tôi nhớ rồi… đây là một trong ba mảnh trái tim Cây Mẹ.' },
@@ -629,13 +782,13 @@ export class LibraryLevel {
       this.progress.flags['l2-fifth-viewed'] = true;
       this.save();
       this.updateVisualState(true);
+      this.showToast('Lối ra đã mở');
     });
   }
 
   private useExit(): void {
     if (!this.isExitOpen()) {
-      const missing = !this.progress.flags['l2-crystal'] ? 'Nhận Tinh thể Ký Ức trước.' : 'Đọc bức tranh sau vách rễ trước.';
-      this.say([{ speaker: 'Nhinh', text: missing }]);
+      this.say([{ speaker: 'Nhinh', text: this.exitBlockedMessage() }]);
       return;
     }
     this.nextLevel([
@@ -653,7 +806,10 @@ export class LibraryLevel {
     this.bookLayers[1]?.setVisible(lit);
     this.bookLayers[2]?.setVisible(!lit);
     this.bookInkOverlay?.setVisible(!lit);
+    this.bookGlow?.setVisible(this.progress.flags['l2-book-practice'] !== true);
+    this.exitGlow?.setTint(exitOpen ? 0xffffff : LIBRARY_CYAN).setAlpha(exitOpen ? 0.4 : 0.15);
     this.coreGlow?.setTint(lit ? LIBRARY_WARM : LIBRARY_CYAN);
+    this.syncCorePulse();
     for (const [key, stack] of this.tabletStacks) {
       const identity = stack.getData('library-identity') as number | undefined;
       if (identity === undefined) continue;
@@ -684,6 +840,24 @@ export class LibraryLevel {
     this.syncCrystal();
     if (this.exitThresholdBody) this.exitThresholdBody.enable = !exitOpen;
     this.updateExitTextures(exitOpen);
+  }
+
+  /** Brightens the well core while all four seats are filled, until the arrangement is checked. */
+  private syncCorePulse(): void {
+    const ready = this.progress.flags['l2-memory'] !== true && this.allSeatsFilled();
+    if (ready && !this.corePulseTween && this.coreGlow) {
+      this.corePulseTween = this.scene.tweens.add({
+        targets: this.coreGlow, alpha: { from: 0.3, to: 0.6 }, duration: 900,
+        yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+      this.glowTweens.push(this.corePulseTween);
+    } else if (!ready && this.corePulseTween) {
+      this.corePulseTween.stop();
+      const index = this.glowTweens.indexOf(this.corePulseTween);
+      if (index >= 0) this.glowTweens.splice(index, 1);
+      this.corePulseTween = undefined;
+      this.coreGlow?.setAlpha(0.3);
+    }
   }
 
   private redrawTabletStacks(): void {
@@ -792,17 +966,20 @@ export class LibraryLevel {
     const layers = ['header', 'left-post', 'right-post'];
     this.exitImages = layers.map((layer) => {
       const key = this.createArchLayerTexture('woods_arch_locked', layer);
+      // Header and posts share the arch base depth: north of the base the player is drawn behind them.
       const image = this.scene.add.image(LIBRARY_LAYOUT.exit.x, LIBRARY_LAYOUT.exit.anchorY, key)
         .setOrigin(0.5, 1).setDisplaySize(LIBRARY_LAYOUT.exit.width, height)
-        .setDepth(layer === 'header' ? this.depthAt(LIBRARY_LAYOUT.exit.anchorY - 54) : this.depthAt(LIBRARY_LAYOUT.exit.anchorY))
+        .setDepth(this.depthAt(LIBRARY_LAYOUT.exit.anchorY))
         .setData('library-exit', true);
       this.objects.push(image);
       this.artImages.push(image);
       if (layer !== 'header') this.protectedImages.add(image);
       return image;
     });
-    this.track(this.scene.add.image(LIBRARY_EXIT_GLOW.x, LIBRARY_EXIT_GLOW.y, 'light_radial')
-      .setBlendMode(Phaser.BlendModes.ADD).setScale(0.5).setAlpha(0.4).setDepth(LIBRARY_GLOW_DEPTH));
+    this.exitGlow = this.scene.add.image(LIBRARY_EXIT_GLOW.x, LIBRARY_EXIT_GLOW.y, 'light_radial')
+      .setBlendMode(Phaser.BlendModes.ADD).setScale(0.5).setAlpha(0.15).setTint(LIBRARY_CYAN)
+      .setDepth(LIBRARY_GLOW_DEPTH);
+    this.track(this.exitGlow);
   }
 
   private createArchLayerTexture(textureKey: string, layer: string): string {
@@ -842,21 +1019,25 @@ export class LibraryLevel {
   }
 
   private syncCrystal(): void {
-    const existing = this.objects.find((object) => object.getData('library-crystal') === true);
     if (this.progress.flags['l2-memory'] === true && this.progress.flags['l2-crystal'] !== true) {
-      if (!existing) {
+      if (!this.objects.some((object) => object.getData('library-crystal') === true)) {
         const crystal = this.addImage('room-memory-crystal', LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y, 28, 36, 35, true);
         crystal.setData('library-crystal', true);
       }
       if (!this.crystalGlow) this.createCrystalGlow();
     } else {
-      if (existing) {
-        existing.destroy();
-        this.objects = this.objects.filter((object) => object !== existing);
-        if (existing instanceof Phaser.GameObjects.Image) this.protectedImages.delete(existing);
-      }
+      this.removeCrystalImage();
       this.destroyCrystalGlow();
     }
+  }
+
+  /** Destroys the crystal image and drops it from objects and the protected prompt bounds; used by collection and sync alike. */
+  private removeCrystalImage(): void {
+    const crystal = this.objects.find((object) => object.getData('library-crystal') === true);
+    if (!crystal) return;
+    crystal.destroy();
+    this.objects = this.objects.filter((object) => object !== crystal);
+    this.protectedImages.delete(crystal as Phaser.GameObjects.Image);
   }
 
   /** Warm golden pulse marking the memory crystal on the well; created and removed only by syncCrystal(). */
@@ -931,15 +1112,36 @@ export class LibraryLevel {
     return lit ? 'bright-high-moon' : 'dark-apex-arc';
   }
   private isMuralOpen(): boolean { return this.progress.flags['l2-crystal'] === true; }
+  private allSeatsFilled(): boolean { return this.readSlots().every((slot) => slot >= 0); }
+  /** The locked-exit line names the next missing step for the player's current stage. */
+  private exitBlockedMessage(): string {
+    if (!this.progress.flags['l2-memory']) return 'Cổng đá vẫn đóng. Có lẽ phải khôi phục vòng ngày đêm ở giữa phòng trước.';
+    if (!this.progress.flags['l2-crystal']) return 'Cổng vẫn đóng. Tinh thể trong giếng đang chờ.';
+    return 'Cổng vẫn đóng. Hãy đọc bức tranh thứ năm sau vách rễ.';
+  }
   private isExitOpen(): boolean { return this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true; }
 
   private hintStage(): string {
     if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'crystal';
     if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'mural';
     if (this.isExitOpen()) return 'exit';
-    if (!this.progress.flags['l2-book-practice']) return 'book';
-    if (!this.progress.flags['l2-memory'] && !this.allTabletLayersSeen()) return 'clues';
+    if (this.isBookStage()) return 'book';
+    if (!this.allTabletLayersSeen() && !this.anyTabletPlaced()) return 'clues';
     return 'arrange';
+  }
+
+  /** The book stage ends once every layer is read or any tablet is seated; getObjectiveText and hintStage share it. */
+  private isBookStage(): boolean {
+    return !this.progress.flags['l2-book-practice'] && !this.allTabletLayersSeen() && !this.anyTabletPlaced();
+  }
+
+  private anyTabletPlaced(): boolean {
+    return this.readSlots().some((slot) => slot >= 0);
+  }
+
+  /** The answer is spoken only after all eight layers are read or a check has failed. */
+  private isAnswerUnlocked(): boolean {
+    return this.allTabletLayersSeen() || this.progress.flags['l2-check-failed'] === true;
   }
 
   private tabletLayerCount(): number {
@@ -957,15 +1159,15 @@ export class LibraryLevel {
     const birdBoatBrightSeen = this.progress.flags['l2-bird-lit'] === true && this.progress.flags['l2-boat-lit'] === true;
     const leafSeedDarkSeen = this.progress.flags['l2-leaf-dark'] === true && this.progress.flags['l2-seed-dark'] === true;
     if (birdBoatBrightSeen && leafSeedDarkSeen) {
-      return 'Cậu đã thấy Chim và Thuyền giống nhau khi đèn bật, còn Lá và Hạt giống nhau khi tắt. So sánh lớp kia để phân biệt từng cặp.';
+      return 'Xem lớp tối của Chim và Thuyền, rồi lớp sáng của Lá và Hạt để phân biệt từng cặp.';
     }
     if (birdBoatBrightSeen) {
-      return 'Cậu đã thấy Chim và Thuyền cùng có mặt trời sát chân trời khi đèn bật. So sánh vạch chuyển động khi tắt đèn; hãy xem cả hai lớp của Lá và Hạt nữa.';
+      return 'Xem mũi tên của Chim và Thuyền khi tắt đèn. Xem cả hai lớp của Lá và Hạt.';
     }
     if (leafSeedDarkSeen) {
-      return 'Cậu đã thấy Lá và Hạt cùng có đường cung cao khi đèn tắt. Bật đèn để nhận ra mặt trời hay mặt trăng; hãy so sánh Chim và Thuyền ở cả hai lớp.';
+      return 'Bật đèn để xem Lá và Hạt là mặt trời hay mặt trăng. Xem cả hai lớp của Chim và Thuyền.';
     }
-    return 'Hãy so sánh Chim với Thuyền dưới cả hai lớp; chúng giống nhau khi đèn bật. Lá và Hạt giống nhau khi tắt đèn, nên cần xem lớp sáng.';
+    return 'So Chim với Thuyền ở cả hai lớp, vì chúng giống nhau khi đèn bật. Với Lá và Hạt, xem lớp sáng: chúng giống nhau khi tắt đèn.';
   }
 
   private sanitizeSavedSlots(): void {
@@ -973,17 +1175,31 @@ export class LibraryLevel {
     const serialized = JSON.stringify(sanitized);
     if (this.progress.flags['memory-slots-json'] !== serialized) {
       this.progress.flags['memory-slots-json'] = serialized;
-      this.progress.counters['memory-slots'] = sanitized.filter((slot) => slot >= 0).length;
       this.save();
     }
+    this.slots = sanitized;
+    this.slotsSource = serialized;
   }
 
-  private readSlots(): number[] { return sanitizeLibrarySlots(this.progress.flags['memory-slots-json']); }
+  /**
+   * The memory slots, parsed once per saved value. Prompts and the HUD call this every frame, so the
+   * saved string is compared first and JSON is parsed only when it has really changed.
+   */
+  private readSlots(): readonly number[] {
+    const raw = this.progress.flags['memory-slots-json'];
+    if (raw !== this.slotsSource) {
+      this.slotsSource = raw;
+      this.slots = sanitizeLibrarySlots(raw);
+    }
+    return this.slots;
+  }
 
-  private writeSlots(slots: number[]): void {
+  private writeSlots(slots: readonly number[]): void {
     const sanitized = sanitizeLibrarySlots(slots);
-    this.progress.flags['memory-slots-json'] = JSON.stringify(sanitized);
-    this.progress.counters['memory-slots'] = sanitized.filter((slot) => slot >= 0).length;
+    const serialized = JSON.stringify(sanitized);
+    this.progress.flags['memory-slots-json'] = serialized;
+    this.slots = sanitized;
+    this.slotsSource = serialized;
     this.save();
     this.redrawTabletStacks();
   }

@@ -4,6 +4,7 @@ import ts from 'typescript';
 import * as libraryLayout from '../src/data/libraryLayout.ts';
 import * as forestDecor from '../src/data/forestDecor.ts';
 import * as libraryInkFade from '../src/levels/libraryInkFade.ts';
+import * as soundSystem from '../src/systems/SoundSystem.ts';
 
 const root = new URL('../', import.meta.url);
 const source = readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8');
@@ -20,13 +21,16 @@ assert.equal(errors.length, 0, 'LibraryLevel.ts transpiles without syntax errors
 
 const moduleRecord = { exports: {} };
 const requireStub = (specifier) => {
-  if (specifier === 'phaser') return {};
+  // Only the classes that updateVisualState tests with instanceof; no scene objects are created here.
+  if (specifier === 'phaser') return { GameObjects: { Image: class Image {}, Text: class Text {} }, BlendModes: { ADD: 'ADD' } };
   if (specifier === '../art/CampaignArt') return { getLevelArtKey: (_level, filename) => filename };
   if (specifier === '../data/libraryLayout') return libraryLayout;
   // Pure seeded PRNG helper (no imports of its own) used for the floor mottling.
   if (specifier === '../data/forestDecor') return forestDecor;
   // Pure distance-fade helper for the dark-ink overlays (no imports of its own).
   if (specifier === './libraryInkFade') return libraryInkFade;
+  // Static WebAudio helpers; without a window they resolve to no-ops.
+  if (specifier === '../systems/SoundSystem') return soundSystem;
   throw new Error(`unexpected runtime import in LibraryLevel.ts: ${specifier}`);
 };
 new Function('exports', 'require', 'module', output.outputText)(moduleRecord.exports, requireStub, moduleRecord);
@@ -35,6 +39,7 @@ const { LibraryLevel } = moduleRecord.exports;
 function createLevel(initialFlags = {}, lanternOn = true) {
   const registered = [];
   const dialogue = [];
+  const toasts = [];
   const progress = { flags: { ...initialFlags }, counters: {} };
   const interactions = { register: (config) => registered.push(config), clear() {} };
   const level = new LibraryLevel({
@@ -50,8 +55,29 @@ function createLevel(initialFlags = {}, lanternOn = true) {
   // These visual effects are outside this guidance/state regression's scope.
   level.redrawTabletStacks = () => {};
   level.updateVisualState = () => {};
+  level.flashGlow = () => {};
+  level.showToast = (message) => toasts.push(message);
   level.registerInteractions();
-  return { level, progress, registered, dialogue };
+  return { level, progress, registered, dialogue, toasts };
+}
+
+/** Records only the properties the visual-state tests read; setters return the object for chaining. */
+function fakeVisual() {
+  const visual = {
+    visible: false,
+    alpha: 1,
+    tint: 0xffffff,
+    setVisible(value) { this.visible = value; return this; },
+    setAlpha(value) { this.alpha = value; return this; },
+    setTint(value) { this.tint = value; return this; },
+  };
+  return visual;
+}
+
+/** Runs the real updateVisualState (createLevel stubs the instance copy) without the texture-driven exit art. */
+function refreshVisuals(level) {
+  level.updateExitTextures = () => {};
+  Object.getPrototypeOf(level).updateVisualState.call(level, true);
 }
 
 const textOf = (dialogueLines) => dialogueLines.map((line) => line.text).join('\n');
@@ -70,11 +96,15 @@ const findControl = (registered, id) => {
   level.lantern.lanternOn = false;
   level.readBook();
   const guidance = textOf(dialogue.at(-1));
-  for (const phrase of ['Đèn bật', 'đèn tắt', 'E ở giá đá', 'đổi chỗ', 'chân trời sáng phía Bắc', 'chiều kim đồng hồ', 'bệ giữa', 'chủ động kiểm tra']) {
+  for (const phrase of ['Đèn bật', 'đèn tắt', 'E ở giá đá', 'đổi chỗ', 'dấu mặt trời phía Bắc', 'chiều kim đồng hồ', 'bệ giữa', 'chủ động kiểm tra', 'Bốn phiến là bốn thời khắc']) {
     assert.ok(guidance.includes(phrase), `book guidance explains ${phrase}`);
   }
   assert.equal(progress.flags['l2-book-practice'], true, 'safe-practice exchange triggers after both book layers');
   assert.equal(progress.flags['l2-bird-lit'], undefined, 'book demonstration does not consume a main puzzle tablet');
+  // Re-reading the book after practice repeats only the observation, never the full guidance.
+  level.readBook();
+  assert.equal(dialogue.at(-1).length, 1, 'a re-read of the book speaks one observation line');
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /E ở giá đá/, 'a re-read does not repeat the guidance');
 }
 
 // H remains state-aware: stale readiness flags do not skip observations; only H tier 3 gives the map.
@@ -85,8 +115,10 @@ const findControl = (registered, id) => {
     'stale l2-clues-ready does not skip the observation stage');
   level.showHint();
   assert.doesNotMatch(textOf(dialogue.at(-1)), /Bắc.*Chim.*Đông.*Lá.*Nam.*Thuyền.*Tây.*Hạt/);
+  // Before every layer is read or a check fails, the third tier states the rule without naming tablets.
   level.showHint();
-  assert.match(textOf(dialogue.at(-1)), /Bắc \(trên\): Chim; Đông \(phải\): Lá; Nam \(dưới\): Thuyền; Tây \(trái\): Hạt/);
+  assert.match(textOf(dialogue.at(-1)), /bình minh.*ban ngày.*hoàng hôn.*ban đêm/, 'third tier states the time order');
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Chim|Lá|Thuyền|Hạt/, 'the rule tier names no tablet');
 
   for (const stone of ['bird', 'leaf', 'boat', 'seed']) {
     progress.flags[`l2-${stone}-lit`] = true;
@@ -100,7 +132,8 @@ const findControl = (registered, id) => {
   level.showHint();
   assert.doesNotMatch(textOf(dialogue.at(-1)), /Bắc.*Chim.*Đông.*Lá.*Nam.*Thuyền.*Tây.*Hạt/);
   level.showHint();
-  assert.match(textOf(dialogue.at(-1)), /Bắc \(trên\): Chim; Đông \(phải\): Lá; Nam \(dưới\): Thuyền; Tây \(trái\): Hạt/);
+  assert.match(textOf(dialogue.at(-1)), /Bắc: Chim \(bình minh, mũi tên lên\) · Đông: Lá \(ban ngày\) · Nam: Thuyền \(hoàng hôn, mũi tên xuống\) · Tây: Hạt \(ban đêm\)/,
+    'all layers read: the final tier explains each seat');
 
   level.showJournal();
   assert.doesNotMatch(textOf(dialogue.at(-1)), /Bình minh|Ban ngày|Hoàng hôn|Ban đêm/,
@@ -177,6 +210,381 @@ const findControl = (registered, id) => {
   level.bookInkOverlay.visible = true;
   level.update();
   assert.equal(level.bookInkOverlay.alpha, 0, 'book ink fades to 0 beside the player');
+}
+
+// Sound cues are recorded through the real SoundSystem statics, replaced here so no audio runs.
+const sounds = [];
+for (const name of ['playRuneActivate', 'playPuzzleError', 'playPuzzleSolved', 'playCrystalPickup']) {
+  soundSystem.SoundSystem[name] = (...args) => sounds.push([name, ...args]);
+}
+const pickRack = (registered, label) => registered.find((item) => item.id.startsWith('library-rack-') && item.getPrompt().includes(label));
+
+// The third hint tier states the time order until a check fails; only then does it name the answer.
+{
+  const { level, progress, registered, dialogue } = createLevel({ 'memory-slots-json': '[1,0,2,3]' });
+  sounds.length = 0;
+  level.showHint();
+  level.showHint();
+  level.showHint();
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Bắc: Chim/, 'the rule tier does not name the answer before a failed check');
+  findControl(registered, 'library-confirm').onInteract();
+  assert.equal(progress.flags['l2-check-failed'], true, 'a wrong arrangement records a failed check');
+  assert.deepEqual(sounds, [['playPuzzleError']], 'a failed check plays the error tone');
+  level.showHint();
+  assert.match(textOf(dialogue.at(-1)), /Bắc: Chim \(bình minh, mũi tên lên\)/, 'after a failed check the final tier gives the answer');
+}
+
+// Placing tablets, the correct check, and the crystal pickup each trigger their sound and glow.
+{
+  const { level, progress, registered } = createLevel({ 'memory-slots-json': '[-1,-1,-1,-1]' });
+  const flashes = [];
+  level.flashGlow = (x, y, delay, scale, peakAlpha) => flashes.push({ x, y, delay, scale, peakAlpha });
+  sounds.length = 0;
+  for (const [seat, label] of ['Chim', 'Lá', 'Thuyền', 'Hạt'].entries()) {
+    pickRack(registered, label).onInteract();
+    findControl(registered, `library-seat-${seat}`).onInteract();
+    assert.deepEqual(sounds.at(-1), ['playRuneActivate', seat + 1], `placing ${label} plays the seat tone`);
+  }
+  sounds.length = 0;
+  findControl(registered, 'library-confirm').onInteract();
+  assert.equal(progress.flags['l2-memory'], true, 'correct arrangement solves');
+  assert.deepEqual(sounds, [['playPuzzleSolved']], 'a correct check plays the solved chime');
+  assert.deepEqual(flashes.map((flash) => [flash.x, flash.y]), [[320, 112], [396, 188], [320, 264], [244, 188]],
+    'seat glows run clockwise from the North seat');
+  assert.deepEqual(flashes.map((flash) => flash.delay), [0, 120, 240, 360], 'seat glows are 120ms apart');
+
+  sounds.length = 0;
+  flashes.length = 0;
+  findControl(registered, 'library-crystal').onInteract();
+  assert.equal(progress.flags['l2-crystal'], true, 'the crystal is collected');
+  assert.deepEqual(sounds, [['playCrystalPickup']], 'collecting the crystal plays the pickup chime');
+  assert.deepEqual(flashes.map((flash) => [flash.x, flash.y]), [[487, 118]], 'the mural sun pulses once');
+}
+
+// Bird and boat dark layers state the arrow direction; the rotation message points at the sun marker.
+{
+  const { registered, dialogue } = createLevel({}, false);
+  pickRack(registered, 'Chim').onInteract();
+  assert.match(textOf(dialogue.at(-1)), /Mũi tên chỉ lên: mặt trời đang nhô khỏi chân trời\./);
+  pickRack(registered, 'Thuyền').onInteract();
+  assert.match(textOf(dialogue.at(-1)), /Mũi tên chỉ xuống: mặt trời đang lặn\./);
+}
+
+// The inscription is the same wording on the plaque, in the journal and in the opening dialogue.
+{
+  const inscription = '“Một ngày khởi đầu khi mặt trời nhô khỏi chân trời và khép lại khi trăng lên cao. Hãy đặt nó trở lại vòng của mình.”';
+  const { level, progress, registered, dialogue } = createLevel();
+  level.startOpeningDialogue();
+  const introReading = dialogue.at(-1).find((line) => line.text.startsWith('Dòng khắc trên bệ đá: '));
+  assert.ok(introReading, 'the opening dialogue includes the inscription reading');
+  assert.equal(introReading.speaker, 'Nhinh', 'Nhinh reads the inscription aloud');
+  const introPointer = dialogue.at(-1).at(-1);
+  assert.equal(introPointer.speaker, 'Lumo', 'the intro ends with Lumo pointing at the book desk');
+  assert.match(introPointer.text, /Cuốn sách trên bàn bên trái.*nhấn F đổi đèn/, 'the closing intro line names the book and the F key');
+  assert.ok(introReading.text.startsWith('Dòng khắc trên bệ đá: '), 'the opening line introduces the reading');
+  assert.ok(introReading.text.endsWith(inscription), 'opening dialogue quotes the inscription');
+  findControl(registered, 'library-inscription').onInteract();
+  assert.equal(textOf(dialogue.at(-1)), inscription, 'plaque reads the new inscription');
+  level.showJournal();
+  assert.ok(textOf(dialogue.at(-1)).includes(`Dòng khắc: ${inscription}`), 'journal records the new inscription');
+  assert.equal(progress.flags['l2-inscription-read'], true);
+  assert.doesNotMatch(readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8'), /Đừng bỏ quên/, 'old inscription wording is gone');
+}
+
+// Racks name the tablet they offer; an empty rack (its tablet already seated) offers no prompt at all.
+{
+  // Slot values index STONES: bird = 0 sits in the North seat, so the bird rack (index 1) is empty.
+  const { registered } = createLevel({ 'memory-slots-json': '[0,-1,-1,-1]' });
+  assert.equal(registered.find((item) => item.id === 'library-rack-0').getPrompt(), 'E · Xem và chọn phiến Thuyền',
+    'a rack prompt reads "Xem và chọn phiến"');
+  const emptyRack = registered.find((item) => item.id === 'library-rack-1');
+  assert.equal(emptyRack.isEnabled(), false, 'the rack of a seated tablet is disabled');
+  assert.equal(emptyRack.getPrompt(), '', 'the rack of a seated tablet shows no prompt');
+}
+
+// Spawn: no rack prompt is in reach at the entry point; the stand of each rack stays usable.
+{
+  const { registered } = createLevel({}, true);
+  const spawn = libraryLayout.LIBRARY_LAYOUT.entry;
+  const INTERACTION_PADDING = 8; // mirrors src/systems/InteractionSystem.ts
+  for (const item of registered.filter((entry) => entry.id.startsWith('library-rack-'))) {
+    const reach = item.radius + INTERACTION_PADDING;
+    assert.ok(Math.hypot(spawn.x - item.x, spawn.y - item.y) > reach, `${item.id} is out of reach at the spawn point`);
+  }
+}
+
+// Short confirmations are toasts; story lines stay in dialogue. Seats name their direction.
+{
+  const { level, progress, registered, dialogue, toasts } = createLevel({ 'memory-slots-json': '[-1,-1,-1,-1]' });
+  findControl(registered, 'library-seat-1').onInteract();
+  assert.equal(toasts.at(-1), 'Hãy chọn một phiến ở giá đá trước.', 'an empty seat with nothing selected gives a toast');
+  findControl(registered, 'library-confirm').onInteract();
+  assert.equal(toasts.at(-1), 'Còn 4 hốc trống. Đặt đủ bốn phiến rồi hãy kiểm tra.', 'the check reports the missing seats as a toast');
+  assert.equal(progress.flags['l2-check-failed'], undefined, 'a check with missing seats is not a failed arrangement');
+  pickRack(registered, 'Lá').onInteract();
+  findControl(registered, 'library-seat-1').onInteract();
+  assert.equal(toasts.at(-1), 'Đã đặt phiến vào hốc Đông', 'placing a tablet names the seat by its direction');
+  assert.equal(dialogue.some((lines) => textOf(lines).includes('Đã đặt')), false, 'placement is not shown as dialogue');
+  findControl(registered, 'library-confirm').onInteract();
+  assert.equal(toasts.at(-1), 'Còn 3 hốc trống. Đặt đủ bốn phiến rồi hãy kiểm tra.', 'the missing count follows the seats');
+}
+{
+  const { level, registered, toasts } = createLevel({ 'l2-memory': true, 'memory-slots-json': '[0,1,2,-1]' });
+  findControl(registered, 'library-seat-3').onInteract();
+  assert.equal(toasts.at(-1), 'Hốc này đang trống.', 'an empty seat after the solve gives a toast');
+  findControl(registered, 'library-seat-1').onInteract();
+  assert.equal(level.selectedStone, null, 'reading a seat after the solve never selects its tablet');
+}
+{
+  const { level, progress, registered, toasts } = createLevel({ 'memory-slots-json': '[0,1,2,3]' });
+  findControl(registered, 'library-seat-0').onInteract();
+  assert.equal(level.selectedStone, 0, 'a seated tablet is selected by E when nothing is selected');
+  findControl(registered, 'library-confirm').onInteract();
+  assert.equal(progress.flags['l2-memory'], true, 'the arrangement solves');
+  assert.equal(level.selectedStone, null, 'a solved check clears the selected tablet');
+  assert.equal(toasts.length, 0, 'a correct check shows no toast');
+}
+{
+  const { level, progress, dialogue, toasts } = createLevel({ 'l2-crystal': true });
+  level.say = (lines, done) => { dialogue.push(lines); done?.(); };
+  level.readMural();
+  assert.equal(progress.flags['l2-fifth-viewed'], true, 'the mural is read');
+  assert.equal(toasts.at(-1), 'Lối ra đã mở', 'the exit opening is confirmed by a toast once the mural dialogue completes');
+}
+
+// Seat E while the selected tablet already sits there only reads it: no re-placing, no false message.
+{
+  const { level, progress, registered, toasts } = createLevel({ 'memory-slots-json': '[0,-1,-1,-1]' }, true);
+  sounds.length = 0;
+  const seat0 = findControl(registered, 'library-seat-0');
+  seat0.onInteract();
+  assert.equal(level.selectedStone, 0, 'E on a seated tablet selects it while nothing is selected');
+  assert.equal(level.seatPrompt(0), 'E · Đọc phiến Chim', 'the selected tablet\'s seat offers a read');
+  seat0.onInteract();
+  assert.deepEqual(JSON.parse(progress.flags['memory-slots-json']), [0, -1, -1, -1], 'reading the selected tablet does not re-place it');
+  assert.equal(toasts.some((message) => message.includes('Đã đặt')), false, 'no false placement message');
+  assert.equal(level.selectedStone, 0, 'the selection is kept after a read');
+  assert.deepEqual(sounds, [], 'a read plays no rune sound');
+}
+
+// E on a rack: a second press on the same tablet in the same light deselects it.
+{
+  const { level, registered, toasts } = createLevel({}, true);
+  const rack = (id) => registered.find((item) => item.id === id);
+  rack('library-rack-3').onInteract();
+  assert.equal(level.selectedStone, 1, 'the first E on the leaf rack selects the leaf tablet');
+  rack('library-rack-3').onInteract();
+  assert.equal(level.selectedStone, null, 'the second E on the same tablet in the same light deselects it');
+  assert.equal(toasts.at(-1), 'Bỏ chọn phiến Lá', 'deselecting confirms with a toast');
+}
+
+// Lumo's two-layer tip plays once; a re-read of a seen layer gives one short line.
+{
+  const { level, progress, registered, dialogue, toasts } = createLevel({}, true);
+  const rack = (id) => registered.find((item) => item.id === id);
+  rack('library-rack-1').onInteract();
+  level.lantern.lanternOn = false;
+  rack('library-rack-1').onInteract();
+  assert.match(textOf(dialogue.at(-1)), /Hai lớp ghép lại/, 'the first two-layer comparison speaks the tip');
+  assert.equal(progress.flags['l2-two-layer-tip'], true, 'the tip is recorded');
+  level.lantern.lanternOn = true;
+  rack('library-rack-3').onInteract();
+  level.lantern.lanternOn = false;
+  rack('library-rack-3').onInteract();
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Hai lớp ghép lại/, 'the tip does not repeat');
+  rack('library-rack-3').onInteract();
+  assert.equal(toasts.at(-1), 'Bỏ chọn phiến Lá');
+  rack('library-rack-1').onInteract();
+  assert.equal(dialogue.at(-1).length, 1, 're-reading a seen layer gives a single line');
+  assert.match(textOf(dialogue.at(-1)), /^Chim: Mũi tên chỉ lên/, 'the single line is the clue itself');
+}
+
+// The Hạt lit reading is the same in the observation and the journal.
+{
+  const { level, registered, dialogue } = createLevel({}, true);
+  registered.find((item) => item.id === 'library-rack-2').onInteract();
+  const described = 'Mặt trăng ở cao. Đường cung quanh nó bị khuyết.';
+  assert.equal(textOf(dialogue.at(-1)), `Hạt: ${described}`, 'the observed Hạt lit layer uses the shared description');
+  level.showJournal();
+  assert.ok(textOf(dialogue.at(-1)).includes(`Hạt · Đèn bật: ${described}`), 'the journal repeats the same Hạt description');
+}
+
+// Objectives: one action per stage, plain words, under 70 characters.
+{
+  const solvedFlags = { 'memory-slots-json': '[0,1,2,3]' };
+  const stages = [
+    [{}, 'Đọc cuốn sách trên bàn, nhấn F đổi đèn rồi đọc lại.'],
+    [{ 'l2-book-practice': true }, 'Đọc cả hai lớp (đèn bật/tắt) của bốn phiến trên giá.'],
+    [{ 'l2-book-practice': true, 'memory-slots-json': '[0,-1,-1,-1]' }, 'Đặt bốn phiến vào bốn hốc theo vòng một ngày.'],
+    [{ 'l2-book-practice': true, ...solvedFlags }, 'Đủ bốn phiến. Nhấn E ở bệ giữa để kiểm tra.'],
+    [{ 'l2-memory': true, ...solvedFlags }, 'Nhấn E ở mép nam bệ giữa để nhận Tinh thể Ký Ức.'],
+    [{ 'l2-memory': true, 'l2-crystal': true, ...solvedFlags }, 'Nhấn E trước vách rễ để đọc bức tranh thứ năm.'],
+    [{ 'l2-memory': true, 'l2-crystal': true, 'l2-fifth-viewed': true, ...solvedFlags }, 'Tới cổng đá phía Đông Nam và nhấn E.'],
+  ];
+  for (const [flags, text] of stages) {
+    const { level } = createLevel(flags);
+    assert.equal(level.getObjectiveText(), text, `objective for ${JSON.stringify(flags)}`);
+    assert.ok(text.length < 70, `objective "${text}" stays under 70 characters`);
+  }
+}
+
+// Hints are imperative and speak to the player without calling her Cậu; the source keeps the new vocabulary.
+{
+  const stateSets = [
+    {},
+    { 'l2-book-practice': true },
+    { 'l2-book-practice': true, 'l2-bird-lit': true, 'l2-boat-lit': true, 'l2-leaf-dark': true, 'l2-seed-dark': true },
+    { 'l2-book-practice': true, 'memory-slots-json': '[0,1,2,3]' },
+  ];
+  for (const flags of stateSets) {
+    const { level, dialogue } = createLevel(flags);
+    for (let press = 0; press < 4; press += 1) level.showHint();
+    for (const lines of dialogue) {
+      for (const line of lines) {
+        assert.equal(line.speaker, 'Hệ thống', 'hints speak as the system');
+        assert.doesNotMatch(line.text, /Cậu/, `hint "${line.text}" does not address the player as Cậu`);
+      }
+    }
+  }
+  const source = readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8');
+  for (const banned of ['vạch', 'chân trời sáng', 'hốc đích', 'lối rễ', 'Qua lối', 'Giá đá trống', 'ngày, chiều', 'Cậu đã', 'Đọc bức tranh sau vách', 'Giếng đã mở']) {
+    assert.equal(source.includes(banned), false, `LibraryLevel.ts no longer says "${banned}"`);
+  }
+}
+
+// Exit feedback: the locked-exit line names the stage that is still missing.
+{
+  const { level, progress, dialogue } = createLevel();
+  level.useExit();
+  assert.equal(textOf(dialogue.at(-1)), 'Cổng đá vẫn đóng. Có lẽ phải khôi phục vòng ngày đêm ở giữa phòng trước.');
+  progress.flags['l2-memory'] = true;
+  level.useExit();
+  assert.equal(textOf(dialogue.at(-1)), 'Cổng vẫn đóng. Tinh thể trong giếng đang chờ.');
+  progress.flags['l2-crystal'] = true;
+  level.useExit();
+  assert.equal(textOf(dialogue.at(-1)), 'Cổng vẫn đóng. Hãy đọc bức tranh thứ năm sau vách rễ.');
+}
+
+// Visual cues: the exit glow is dim and cool while shut, the book glow pulses until practice,
+// and the core pulses only while all four seats are filled and unchecked.
+{
+  const { level, progress } = createLevel({}, true);
+  level.exitGlow = fakeVisual();
+  level.bookGlow = fakeVisual();
+  refreshVisuals(level);
+  assert.equal(level.exitGlow.alpha, 0.15, 'the exit glow is dim while the gate is shut');
+  assert.equal(level.exitGlow.tint, 0x7df2d4, 'the shut exit glow is cool cyan');
+  assert.equal(level.bookGlow.visible, true, 'the book glow shows until the book is practised');
+  progress.flags['l2-crystal'] = true;
+  progress.flags['l2-fifth-viewed'] = true;
+  refreshVisuals(level);
+  assert.equal(level.exitGlow.alpha, 0.4, 'the open exit glows bright');
+  assert.equal(level.exitGlow.tint, 0xffffff, 'the open exit has no cyan tint');
+  progress.flags['l2-book-practice'] = true;
+  refreshVisuals(level);
+  assert.equal(level.bookGlow.visible, false, 'the book glow ends once the book is practised');
+}
+{
+  const { level, progress } = createLevel({ 'memory-slots-json': '[0,1,2,-1]' }, true);
+  const tweens = [];
+  let stops = 0;
+  level.scene = { tweens: { add: (config) => { tweens.push(config); return { stop() { stops += 1; } }; } } };
+  level.coreGlow = fakeVisual();
+  refreshVisuals(level);
+  assert.equal(tweens.length, 0, 'the core stays steady while a seat is empty');
+  progress.flags['memory-slots-json'] = '[0,1,2,3]';
+  refreshVisuals(level);
+  assert.equal(tweens.length, 1, 'filling all four seats starts the core pulse');
+  assert.equal(tweens[0].targets, level.coreGlow, 'the pulse targets the core glow');
+  refreshVisuals(level);
+  assert.equal(tweens.length, 1, 'refreshing does not start a second pulse');
+  progress.flags['l2-memory'] = true;
+  progress.flags['l2-crystal'] = true;
+  refreshVisuals(level);
+  assert.equal(stops, 1, 'the solved check stops the core pulse');
+  assert.equal(level.coreGlow.alpha, 0.3, 'the core returns to its steady glow');
+}
+
+// Toasts are non-blocking: centred near the top, depth 88, hidden after 1800ms, replaced by the next one.
+{
+  const texts = [];
+  const timers = [];
+  const scene = {
+    add: {
+      text: (x, y, text) => {
+        const object = {
+          x, y, text, active: true, depth: 0,
+          setOrigin() { return this; },
+          setDepth(depth) { this.depth = depth; return this; },
+          destroy() { this.active = false; },
+        };
+        texts.push(object);
+        return object;
+      },
+    },
+    time: {
+      delayedCall: (delay, callback) => {
+        const timer = { delay, callback, removed: false, remove() { this.removed = true; } };
+        timers.push(timer);
+        return timer;
+      },
+    },
+  };
+  const level = new LibraryLevel({
+    scene,
+    progress: { flags: {}, counters: {} },
+    player: { x: 0, y: 0 },
+    interactions: { register() {}, clear() {} },
+    lantern: { lanternOn: true },
+    save() {},
+    say() {},
+    nextLevel() {},
+  });
+  level.showToast('Đã đặt phiến vào hốc Bắc');
+  assert.equal(texts[0].text, 'Đã đặt phiến vào hốc Bắc');
+  assert.deepEqual([texts[0].x, texts[0].y, texts[0].depth], [320, 80, 88], 'the toast sits top-centre at depth 88');
+  assert.equal(timers[0].delay, 1800, 'the toast hides after 1800ms');
+  level.showToast('Hốc này đang trống.');
+  assert.equal(texts[0].active, false, 'a new toast replaces the old one');
+  assert.equal(timers[0].removed, true, 'replacing a toast cancels its hide timer');
+  assert.equal(texts[1].text, 'Hốc này đang trống.');
+  level.destroy();
+  assert.equal(texts[1].active, false, 'destroying the level removes the toast');
+  assert.equal(timers[1].removed, true, 'destroying the level cancels the hide timer');
+}
+
+// A collected crystal leaves no trace in the level's object list or its protected prompt bounds.
+{
+  const { level, progress, registered } = createLevel({ 'l2-memory': true, 'memory-slots-json': '[0,1,2,3]' });
+  const crystal = { active: true, getData: (key) => key === 'library-crystal', destroy() { this.active = false; } };
+  level.objects = [crystal];
+  level.protectedImages.add(crystal);
+  findControl(registered, 'library-crystal').onInteract();
+  assert.equal(progress.flags['l2-crystal'], true, 'the crystal is collected');
+  assert.equal(crystal.active, false, 'the crystal image is destroyed');
+  assert.equal(level.objects.includes(crystal), false, 'the crystal leaves the object list');
+  assert.equal(level.protectedImages.has(crystal), false, 'the crystal leaves the protected prompt bounds');
+}
+
+// Per-frame prompts and HUD text reuse the parsed slots: no JSON.parse while the saved string is unchanged.
+{
+  const { level, registered } = createLevel({ 'memory-slots-json': '[0,1,-1,-1]' });
+  const rack = registered.find((item) => item.id === 'library-rack-0');
+  level.getStatusText();
+  const originalParse = JSON.parse;
+  let parses = 0;
+  JSON.parse = (...args) => { parses += 1; return originalParse(...args); };
+  try {
+    for (let frame = 0; frame < 100; frame += 1) {
+      level.getStatusText();
+      level.getObjectiveText();
+      level.seatPrompt(0);
+      rack.getPrompt();
+    }
+  } finally {
+    JSON.parse = originalParse;
+  }
+  assert.equal(parses, 0, 'per-frame reads of the memory slots do not parse JSON');
 }
 
 console.log('Level 03 guidance/state checks passed.');

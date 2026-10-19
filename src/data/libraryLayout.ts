@@ -3,7 +3,8 @@ export interface LibraryRect extends LibraryPoint { width: number; height: numbe
 
 export const LIBRARY_LAYOUT = {
   floor: { left: 24, right: 616, top: 80, bottom: 310 },
-  entry: { x: 180, y: 288 },
+  // Nudged east so the spawn sits outside the rack prompt radius of the leaf rack at (180,282).
+  entry: { x: 214, y: 288 },
   desk: { x: 66, y: 246, width: 80, height: 54 },
   book: { x: 66, y: 235, width: 56, height: 40 },
   racks: [
@@ -21,19 +22,23 @@ export const LIBRARY_LAYOUT = {
     { x: 320, y: 112 }, { x: 420, y: 184 },
     { x: 320, y: 282 }, { x: 220, y: 184 },
   ] as LibraryPoint[],
-  confirm: { x: 320, y: 224 },
+  // Just south of the dais edge; the small radius keeps the South seat (320,282) targeted.
+  confirm: { x: 320, y: 216, radius: 9 },
   shelves: [{ x: 50, y: 150 }, { x: 598, y: 120 }] as LibraryPoint[],
   mural: { x: 500, y: 144, scale: 0.75 },
   muralStand: { x: 500, y: 226 },
   exit: { x: 566, y: 286, anchorY: 312, width: 110 },
   checkpoints: [
-    { x: 180, y: 288 }, { x: 66, y: 278 }, { x: 320, y: 282 },
+    { x: 214, y: 288 }, { x: 66, y: 278 }, { x: 320, y: 282 },
     { x: 500, y: 226 }, { x: 566, y: 286 },
   ] as LibraryPoint[],
   actor: { bodyX: 11, bodyY: 37, bodyWidth: 14, bodyHeight: 6, feetY: 19 },
   art: { rack: 48, shelf: 80, panelWidth: 87, panelHeight: 111 },
   core: { x: 320, y: 188, radius: 46 },
 } as const;
+
+/** Footprint of the central well dais (approximates the core radius of 46). */
+export const LIBRARY_DAIS: LibraryRect = { x: 284, y: 158, width: 72, height: 60 };
 
 export const LIBRARY_SOLID_RECTS: LibraryRect[] = [
   // Solid footprints fill the visible prop faces, so their sides and backs block too.
@@ -45,9 +50,11 @@ export const LIBRARY_SOLID_RECTS: LibraryRect[] = [
   { x: 108, y: 212, width: 48, height: 48 },
   { x: 156, y: 212, width: 48, height: 48 },
   { x: 458, y: 90, width: 84, height: 110 },
-  // Full visible side-post strips from the 152x156 split frame at 110px wide.
-  { x: 511, y: 199, width: 37, height: 113 },
-  { x: 585, y: 199, width: 37, height: 113 },
+  LIBRARY_DAIS,
+  // Exit posts block only their base footprint (bottom 24px of the 110px-wide arch at anchorY 312);
+  // the upper post is drawn behind the player when the player stands north of the base.
+  { x: 511, y: 288, width: 37, height: 24 },
+  { x: 585, y: 288, width: 37, height: 24 },
 ];
 
 export const LIBRARY_EXIT_THRESHOLD: LibraryRect = { x: 548, y: 309, width: 36, height: 7 };

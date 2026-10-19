@@ -21,7 +21,7 @@ Màu thư viện ấm hơn rừng bên ngoài, nhưng một phần giấy đã b
 
 *Nhinh đọc dòng khắc quanh giếng.*
 
-**Dòng khắc:** “Đặt một ngày trở lại đúng vòng của nó. Đừng bỏ quên giờ nghỉ của những chiếc lá.”
+**Dòng khắc:** “Một ngày khởi đầu khi mặt trời nhô khỏi chân trời và khép lại khi trăng lên cao. Hãy đặt nó trở lại vòng của mình.”
 
 ## 3. Khu thử an toàn — hai lớp mực
 
@@ -39,9 +39,9 @@ Mỗi phiến có hai lớp thông tin:
 
 | Phiến | Khi bật đèn | Khi tắt đèn | Ý nghĩa |
 | --- | --- | --- | --- |
-| Chim | Mặt trời sát chân trời trên mặt nước; không thấy hướng chuyển động | Vạch chuyển động đi từ dưới lên qua chân trời; không thấy thiên thể | Bình minh: mặt trời đang lên |
+| Chim | Mặt trời sát chân trời trên mặt nước; không thấy hướng chuyển động | Mũi tên chỉ lên qua chân trời; không thấy thiên thể | Bình minh: mặt trời đang lên |
 | Lá | Mặt trời trên cao; đường cung quanh nó bị khuyết | Đường cung đạt đỉnh; không thấy thiên thể, giống lớp tối của phiến Hạt | Ban ngày: mặt trời trên cao |
-| Thuyền | Mặt trời sát chân trời trên mặt nước, giống lớp sáng của phiến Chim | Vạch chuyển động đi từ trên xuống qua chân trời; không thấy thiên thể | Hoàng hôn: mặt trời đang lặn |
+| Thuyền | Mặt trời sát chân trời trên mặt nước, giống lớp sáng của phiến Chim | Mũi tên chỉ xuống qua chân trời; không thấy thiên thể | Hoàng hôn: mặt trời đang lặn |
 | Hạt | Mặt trăng trên cao; đường cung quanh nó bị khuyết | Đường cung đạt đỉnh; không thấy thiên thể, giống lớp tối của phiến Lá | Ban đêm: mặt trăng trên cao |
 
 Chỉ xem lớp sáng chưa phân biệt được Chim với Thuyền: cùng một mặt trời thấp có thể đang mọc hoặc đang lặn. Chỉ xem lớp tối chưa phân biệt được Lá với Hạt: cùng một đường cung trên cao không cho biết đó là mặt trời hay mặt trăng. Ghép hai lớp của từng phiến mới đủ thông tin để xác định cả bốn thời điểm.
@@ -50,7 +50,7 @@ Tên Chim, Lá, Thuyền và Hạt chỉ là dấu nhận diện ở viền phi�
 
 Người chơi xem tranh bằng E. Tại giá đá, E chọn một phiến; E tại hốc đặt phiến đó. Nếu hốc có phiến, hai phiến đổi chỗ. Bệ kiểm tra ở giữa chỉ xác nhận khi người chơi chủ động dùng E.
 
-Lời giải từ hốc có biểu tượng chân trời sáng, theo chiều các vạch nối: **Chim, Lá, Thuyền, Hạt**. Chuỗi tạo một vòng và không loại phiến Ban đêm.
+Lời giải từ hốc có dấu mặt trời, theo chiều các mũi tên quanh giếng: **Chim, Lá, Thuyền, Hạt**. Chuỗi tạo một vòng và không loại phiến Ban đêm.
 
 *Khi xem phiến Hạt với đèn bật:*
 
@@ -73,7 +73,7 @@ Lời giải từ hốc có biểu tượng chân trời sáng, theo chiều cá
 
 *Kiểm tra đúng: ánh sáng chạy quanh cả bốn phiến, giếng mở.*
 
-**Nhinh:** “Bình minh, ngày, chiều… rồi đêm.”\
+**Nhinh:** “Bình minh, ngày, hoàng hôn… rồi đêm.”\
 **Lumo:** “Tôi đã quên khu rừng từng đổi màu đẹp thế nào.”
 
 ## 5. Tinh thể Ký Ức và bức tranh thứ năm
@@ -101,8 +101,8 @@ Không giải thích động cơ Người Bảo Vệ hoặc vai trò Lumo ở đ
 ## 6. Gợi ý H và lời thoại bổ sung
 
 - **Mức 1 — quan sát:** “Trang sách ở bàn cho thấy mực thay đổi khi cậu tắt đèn. Những phiến tranh có thể cũng vậy.”
-- **Mức 2 — quan hệ:** “Bật đèn để nhận ra thiên thể và vị trí của nó. Tắt đèn để xem đường chuyển động. Mặt trời sát chân trời có thể đang mọc hoặc đang lặn.”
-- **Mức 3 — bước tiếp:** “Từ hốc chân trời sáng, đặt Chim, Lá, Thuyền rồi Hạt; dùng bệ giữa để kiểm tra.”
+- **Mức 2 — quan hệ:** “Bật đèn để nhận ra thiên thể và vị trí của nó. Tắt đèn để xem mũi tên chỉ hướng chuyển động. Mặt trời sát chân trời có thể đang mọc hoặc đang lặn.”
+- **Mức 3 — bước tiếp:** “Từ hốc có dấu mặt trời, đặt Chim, Lá, Thuyền rồi Hạt theo chiều kim đồng hồ; dùng bệ giữa để kiểm tra.”
 
 Sau khi đã giải, H hướng về giếng nhận tinh thể hoặc vách tranh thứ năm. Đọc lại tranh thứ năm: **Nhinh:** “Vết nứt bắt đầu từ lúc vòng ngày đêm dừng lại.”
 
