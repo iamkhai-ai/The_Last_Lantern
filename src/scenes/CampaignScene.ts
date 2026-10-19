@@ -570,7 +570,8 @@ export class CampaignScene extends Phaser.Scene {
         scene: this, progress: this.progress, player: this.player, lumo: this.lumo,
         interactions: this.interactions, lantern: this.lantern, save: () => this.save(),
         say: (lines, done) => this.say(lines, done), nextLevel: (lines) => this.nextLevel(lines),
-        canStartStory: () => !this.dialogue.isActive(),
+        canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen(),
+        isPaused: () => this.pauseMenu.isOpen(),
       });
       this.gardenLevel.build();
     } else if (level === 7) {

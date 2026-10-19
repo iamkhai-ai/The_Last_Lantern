@@ -28,6 +28,8 @@ export interface SleepingGardenLevelOptions {
   say: (lines: DialogueLine[], onComplete?: () => void) => void;
   nextLevel: (lines: DialogueLine[]) => void;
   canStartStory: () => boolean;
+  /** True while the pause menu is open: the silhouette freezes, the ending hand-off waits. */
+  isPaused: () => boolean;
 }
 
 // Scenario §2 (source of truth): the opening poses the mystery and points at the shutter,
@@ -92,6 +94,7 @@ export class SleepingGardenLevel {
   private say: SleepingGardenLevelOptions['say'];
   private nextLevel: SleepingGardenLevelOptions['nextLevel'];
   private canStartStory: SleepingGardenLevelOptions['canStartStory'];
+  private isPaused: SleepingGardenLevelOptions['isPaused'];
   private destroyed = false;
   private lastSafe: GardenPoint = { ...GARDEN_SPAWN };
 
@@ -113,11 +116,15 @@ export class SleepingGardenLevel {
   private hintIndex = 0;
   private lessonPending = false;
   private shadowBeatPlaying = false;
+  private shadowBeatTween?: Phaser.Tweens.Tween;
+  private shadowBeatTimer?: Phaser.Time.TimerEvent;
+  private shadowBeatFrozen = false;
+  private shadowEndingPending = false;
 
   constructor(o: SleepingGardenLevelOptions) {
     this.scene = o.scene; this.progress = o.progress; this.player = o.player; this.lumo = o.lumo;
     this.interactions = o.interactions; this.lantern = o.lantern; this.save = o.save;
-    this.say = o.say; this.nextLevel = o.nextLevel; this.canStartStory = o.canStartStory;
+    this.say = o.say; this.nextLevel = o.nextLevel; this.canStartStory = o.canStartStory; this.isPaused = o.isPaused;
     this.lastLanternOn = this.lantern.lanternOn;
   }
 
@@ -152,6 +159,12 @@ export class SleepingGardenLevel {
   public destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.shadowEndingPending = false;
+    // Stop the silhouette chain so no stale tween or timer callback runs after the level is gone.
+    this.shadowBeatTween?.stop();
+    this.shadowBeatTween = undefined;
+    this.shadowBeatTimer?.remove(false);
+    this.shadowBeatTimer = undefined;
     this.lantern.isDawnMode = false;
     for (const collider of this.colliders) if (collider.active) collider.destroy();
     for (const object of this.objects) if (object.active) object.destroy();
@@ -166,6 +179,8 @@ export class SleepingGardenLevel {
     if (this.destroyed) return;
     this.readState();
     this.flushPendingBeats();
+    this.holdShadowBeat(this.isPaused());
+    this.flushShadowEnding();
     this.updateLightState();
     this.tryPracticeLesson();
     this.updateHeldAndTraversal();
@@ -291,6 +306,26 @@ export class SleepingGardenLevel {
     if (!this.pendingBeats.length || !this.canStartStory()) return;
     const next = this.pendingBeats.shift();
     if (next) this.say(next.lines, next.onComplete);
+  }
+
+  /** The ending hand-off uses the same gate as every story beat, so it never overwrites a dialogue or plays under the pause menu. */
+  private flushShadowEnding(): void {
+    if (!this.shadowEndingPending || this.destroyed || !this.canStartStory()) return;
+    this.shadowEndingPending = false;
+    this.nextLevel(ENDING);
+  }
+
+  /** Freezes the running silhouette tween or timer while paused. Idempotent per frame. */
+  private holdShadowBeat(frozen: boolean): void {
+    if (frozen === this.shadowBeatFrozen) return;
+    this.shadowBeatFrozen = frozen;
+    if (frozen) {
+      this.shadowBeatTween?.pause();
+      if (this.shadowBeatTimer) this.shadowBeatTimer.paused = true;
+    } else {
+      this.shadowBeatTween?.resume();
+      if (this.shadowBeatTimer) this.shadowBeatTimer.paused = false;
+    }
   }
 
   private queueBeat(lines: DialogueLine[], onComplete?: () => void): void {
@@ -605,13 +640,30 @@ export class SleepingGardenLevel {
     this.shadowBeatPlaying = true;
     const walk = getShadowArtKey('walk-right');
     const shield = getShadowArtKey('shielding');
-    if (!walk || !shield) { this.nextLevel(ENDING); return; }
+    if (!walk || !shield) { this.shadowEndingPending = true; return; }
     const path = GARDEN_SHADOW_PATH;
     const sprite = this.scene.add.image(path.appear.x, path.appear.y, walk).setOrigin(0.5, 1).setAlpha(0).setDepth(gardenPropDepth(path.appear.y));
     this.objects.push(sprite);
+    // Every tween and timer of the chain is created through these helpers, so a pause that is already
+    // in force also holds the new one, and holdShadowBeat() can reach whichever one is running.
+    const tween = (config: Phaser.Types.Tweens.TweenBuilderConfig): void => {
+      const running = this.scene.tweens.add(config);
+      this.shadowBeatTween = running;
+      // Defensive: a frozen tween cannot normally spawn the next one, so this only covers a pause landing mid-callback.
+      if (this.shadowBeatFrozen) running.pause();
+    };
+    const wait = (delay: number, callback: () => void): void => {
+      const timer = this.scene.time.delayedCall(delay, callback);
+      this.shadowBeatTimer = timer;
+      // Defensive: a frozen timer cannot normally spawn the next one, so this only covers a pause landing mid-callback.
+      if (this.shadowBeatFrozen) timer.paused = true;
+    };
+    // The hand-off itself runs from update() (flushShadowEnding) once the story gate is open.
     const finish = (): void => {
+      if (this.destroyed) return;
       if (sprite.active) sprite.destroy();
-      if (!this.destroyed) this.nextLevel(ENDING);
+      this.shadowBeatTween = undefined;
+      this.shadowEndingPending = true;
     };
     const follow = (points: GardenPoint[], index: number, done: () => void): void => {
       if (this.destroyed || !sprite.active) return;
@@ -619,21 +671,21 @@ export class SleepingGardenLevel {
       const to = points[index];
       const distance = Math.hypot(to.x - sprite.x, to.y - sprite.y);
       if (Math.abs(to.x - sprite.x) > 1) sprite.setFlipX(to.x < sprite.x);
-      this.scene.tweens.add({
+      tween({
         targets: sprite, x: to.x, y: to.y, duration: Math.max(80, (distance / path.speed) * 1000),
         onUpdate: () => sprite.setDepth(gardenPropDepth(sprite.y)),
         onComplete: () => follow(points, index + 1, done),
       });
     };
-    this.scene.tweens.add({
+    tween({
       targets: sprite, alpha: 1, duration: 400,
       onComplete: () => follow([...path.toSeedlings], 0, () => {
         sprite.setTexture(shield).setFlipX(true);
-        this.scene.time.delayedCall(path.stopMs, () => {
+        wait(path.stopMs, () => {
           if (this.destroyed || !sprite.active) return;
           sprite.setTexture(walk);
           follow([...path.back], 0, () => {
-            this.scene.tweens.add({ targets: sprite, alpha: 0, duration: 500, onComplete: finish });
+            tween({ targets: sprite, alpha: 0, duration: 500, onComplete: finish });
           });
         });
       }),

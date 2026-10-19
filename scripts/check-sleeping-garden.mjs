@@ -6,6 +6,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import ts from 'typescript';
 import {
   GARDEN_BAR_BEAM, GARDEN_BOUNDS, GARDEN_BRIDGE, GARDEN_ICONS, GARDEN_MODULES, GARDEN_REACH_ORIGIN, GARDEN_REACH_STEP,
   GARDEN_SIDE_PATH, GARDEN_SIDE_STRIP, GARDEN_SPANS, GARDEN_SPAWN, GARDEN_STAGE_ANCHORS, GARDEN_STANDS,
@@ -548,3 +549,285 @@ const stop = GARDEN_SHADOW_PATH.toSeedlings.at(-1);
 assert.ok(Math.hypot(stop.x - 500, stop.y - 264) <= 36, 'the silhouette stops beside the seedlings');
 assert.ok(Math.hypot(GARDEN_SHADOW_PATH.appear.x - GARDEN_STANDS.exit.x, GARDEN_SHADOW_PATH.appear.y - GARDEN_STANDS.exit.y) <= 40, 'it appears at the shrine gate');
 console.log('Sleeping Garden T08 checks passed (lesson timing, bar posts, gap art, silhouette path)');
+
+// ---------------------------------------------------------------- shadow beat hand-off (runtime)
+// The shipped SleepingGardenLevel bodies are extracted from the TypeScript source and bound to a fake
+// scene with a fake tween/timer queue. The level file imports Phaser, so it cannot be loaded here.
+const COMPILER = { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } };
+const parseTs = (file) => ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
+const LEVEL_FILE = path.join(ROOT, 'src/levels/SleepingGardenLevel.ts');
+const SCENE_FILE = path.join(ROOT, 'src/scenes/CampaignScene.ts');
+const levelAst = parseTs(LEVEL_FILE);
+const findNode = (root, predicate) => {
+  let found;
+  const visit = (node) => { if (found) return; if (predicate(node)) { found = node; return; } ts.forEachChild(node, visit); };
+  visit(root);
+  return found;
+};
+const levelMethod = (name) => {
+  const method = findNode(levelAst, (node) => ts.isMethodDeclaration(node) && node.name.getText(levelAst) === name);
+  assert.ok(method?.body, `SleepingGardenLevel.${name}() is still authored`);
+  return method;
+};
+/** Compile one shipped method body into a function; `this` is the fake level it is called on. */
+function compileLevelMethod(name, symbols = {}) {
+  const method = levelMethod(name);
+  const params = method.parameters.map((p) => p.name.getText(levelAst));
+  const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
+  const names = Object.keys(symbols);
+  return new Function(...names, `"use strict";\n${js}\nreturn __unit;`)(...names.map((key) => symbols[key]));
+}
+/** The shipped value of a top-level const, e.g. the ENDING lines. */
+function levelConstant(name) {
+  const declaration = findNode(levelAst, (node) => ts.isVariableDeclaration(node) && node.name.getText(levelAst) === name);
+  assert.ok(declaration?.initializer, `SleepingGardenLevel still authors ${name}`);
+  const js = ts.transpileModule(`const __value = (${declaration.initializer.getText(levelAst)});`, COMPILER).outputText;
+  return new Function(`"use strict";\n${js}\nreturn __value;`)();
+}
+const ENDING_LINES = levelConstant('ENDING');
+const SHADOW_KEYS = { 'walk-right': 'shadow-walk', shielding: 'shadow-shield' };
+
+/**
+ * A fake level with the shipped beat methods bound on it. Tweens and timers queue in creation order and
+ * only run when the harness steps them, so a pause can be applied between any two steps.
+ */
+function makeBeatHarness({ gateOpen = true, paused = false, art = true } = {}) {
+  const queue = [];
+  const gate = { open: gateOpen };
+  const pause = { on: paused };
+  const log = { nextLevel: [] };
+  const sprites = [];
+  const scene = {
+    add: {
+      image(x, y, key) {
+        const sprite = {
+          x, y, key, alpha: 1, flip: false, depth: 0, active: true,
+          setOrigin() { return this; },
+          setAlpha(value) { this.alpha = value; return this; },
+          setDepth(value) { this.depth = value; return this; },
+          setFlipX(value) { this.flip = value; return this; },
+          setTexture(value) { this.key = value; return this; },
+          destroy() { this.active = false; },
+        };
+        sprites.push(sprite);
+        return sprite;
+      },
+    },
+    tweens: {
+      add(config) {
+        // stop() mirrors Phaser BaseTween.stop: no further onComplete, and the tween is removed from the queue.
+        const item = {
+          kind: 'tween', config, paused: false, done: false, stopped: false,
+          pause() { this.paused = true; return this; }, resume() { this.paused = false; return this; },
+          stop() { this.stopped = true; this.done = true; return this; },
+        };
+        queue.push(item);
+        return item;
+      },
+    },
+    time: {
+      delayedCall(delay, callback) {
+        // remove(false) mirrors Phaser TimerEvent.remove: the callback never fires and the event leaves the queue.
+        const item = { kind: 'timer', delay, callback, paused: false, done: false, removed: false, remove() { this.removed = true; this.done = true; } };
+        queue.push(item);
+        return item;
+      },
+    },
+  };
+  const level = {
+    scene, objects: [], destroyed: false, shadowBeatPlaying: false, shadowBeatTween: undefined, shadowBeatTimer: undefined,
+    shadowBeatFrozen: false, shadowEndingPending: false,
+    canStartStory: () => gate.open, isPaused: () => pause.on, nextLevel: (lines) => log.nextLevel.push(lines),
+    lantern: { isDawnMode: true }, colliders: [], protected: [], spanBodies: new Map(), images: new Map(), icons: new Map(),
+    interactions: { clear() {} },
+    // update() calls these; they are outside the shadow beat and stubbed here.
+    readState() {}, flushPendingBeats() {}, tryPracticeLesson() {}, updateLightState() {}, updateHeldAndTraversal() {},
+    ejectFromBarBeam() {}, rememberSafePosition() {}, refresh() {},
+  };
+  level.playShadowBeat = compileLevelMethod('playShadowBeat', {
+    getShadowArtKey: (pose) => (art ? SHADOW_KEYS[pose] : null), GARDEN_SHADOW_PATH, gardenPropDepth,
+  });
+  level.holdShadowBeat = compileLevelMethod('holdShadowBeat');
+  level.flushShadowEnding = compileLevelMethod('flushShadowEnding', { ENDING: ENDING_LINES });
+  level.update = compileLevelMethod('update');
+  level.destroy = compileLevelMethod('destroy');
+  const live = () => queue.find((item) => !item.done && !item.paused);
+  const step = () => {
+    const next = live();
+    if (!next) return false;
+    next.done = true;
+    if (next.kind === 'tween') {
+      for (const key of ['x', 'y', 'alpha']) if (key in next.config) next.config.targets[key] = next.config[key];
+      next.config.onComplete?.();
+    } else {
+      next.callback();
+    }
+    return true;
+  };
+  const drain = (limit = 100) => { let count = 0; while (count < limit && step()) count += 1; return count; };
+  const stepUntil = (predicate, limit = 100) => { for (let i = 0; i < limit && !predicate(); i += 1) if (!step()) break; return predicate(); };
+  return { level, gate, pause, log, sprites, scene, step, drain, stepUntil, sprite: () => sprites[0] };
+}
+
+// (a) finish while the gate is closed waits; once it opens, update() hands off exactly once with ENDING.
+{
+  const h = makeBeatHarness({ gateOpen: false });
+  h.level.playShadowBeat();
+  assert.ok(h.drain() > 4, 'the beat plays through its tween chain');
+  assert.equal(h.sprite().active, false, 'the silhouette fades out and is removed');
+  assert.equal(h.log.nextLevel.length, 0, 'finish does not call nextLevel while the gate is closed');
+  assert.equal(h.level.shadowEndingPending, true, 'the hand-off is held as pending');
+  h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 0, 'still closed: update keeps waiting');
+  h.gate.open = true;
+  h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 1, 'once the gate opens, update() hands off');
+  assert.equal(h.log.nextLevel[0], ENDING_LINES, 'the hand-off carries the shipped ENDING lines');
+  h.level.update(16); h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 1, 'the hand-off runs exactly once');
+  assert.equal(h.level.shadowEndingPending, false);
+}
+
+// (b) pause freezes the running segment and the stop timer; unpause resumes them and the beat completes.
+{
+  const h = makeBeatHarness();
+  h.level.playShadowBeat();
+  // the fade-in is current; one step completes it and starts the first walk segment (the only tween with x/y)
+  assert.equal(h.stepUntil(() => 'x' in (h.level.shadowBeatTween?.config ?? {})), true);
+  h.pause.on = true;
+  h.level.update(16);
+  assert.equal(h.level.shadowBeatTween.paused, true, 'the running walk segment is paused while the menu is open');
+  assert.equal(h.step(), false, 'nothing advances while paused');
+  h.pause.on = false;
+  h.level.update(16);
+  assert.equal(h.level.shadowBeatTween.paused, false, 'the segment resumes when the menu closes');
+  assert.equal(h.stepUntil(() => h.level.shadowBeatTimer && !h.level.shadowBeatTimer.done), true, 'the chain reaches the shielding stop timer');
+  assert.equal(h.sprite().key, 'shadow-shield', 'shielding pose is shown at the stop');
+  h.pause.on = true;
+  h.level.update(16);
+  assert.equal(h.level.shadowBeatTimer.paused, true, 'the stop timer is held while paused');
+  assert.equal(h.step(), false, 'the stop does not end while paused');
+  assert.equal(h.sprite().key, 'shadow-shield', 'still shielding while paused');
+  h.pause.on = false;
+  h.level.update(16);
+  h.drain();
+  assert.equal(h.sprite().key, 'shadow-walk', 'the silhouette walks back after the stop');
+  assert.equal(h.sprite().active, false, 'the silhouette fades out');
+  assert.equal(h.log.nextLevel.length, 0, 'finish only marks the hand-off; it does not call nextLevel itself');
+  h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 1, 'the ending runs on the next update once the menu is closed and the gate is open');
+  assert.equal(h.log.nextLevel[0], ENDING_LINES);
+}
+
+// (b2) a segment that starts in the frame the menu opens comes up held, not running.
+{
+  const h = makeBeatHarness();
+  h.level.playShadowBeat();
+  h.stepUntil(() => 'x' in (h.level.shadowBeatTween?.config ?? {}));
+  h.step(); // the first walk segment completes and the next one is created while unpaused
+  const next = h.level.shadowBeatTween;
+  h.pause.on = true;
+  h.level.update(16);
+  assert.equal(next.paused, true, 'the segment created just before the pause is held by the same frame');
+}
+
+// (b3) an open dialogue does not freeze the silhouette: only the hand-off waits for the gate.
+{
+  const h = makeBeatHarness({ gateOpen: false, paused: false });
+  h.level.playShadowBeat();
+  h.drain();
+  assert.equal(h.sprite().active, false, 'the beat still completes behind an open dialogue');
+  assert.equal(h.log.nextLevel.length, 0);
+}
+
+// (c) destroyed during the stop: destroy stops the chain's timer, so nothing runs after it and no hand-off happens.
+{
+  const h = makeBeatHarness();
+  h.level.playShadowBeat();
+  h.stepUntil(() => h.level.shadowBeatTimer && !h.level.shadowBeatTimer.done);
+  const timer = h.level.shadowBeatTimer;
+  h.level.destroy();
+  assert.equal(timer.removed, true, 'destroy removes the pending stop timer');
+  assert.equal(h.level.shadowBeatTimer, undefined, 'destroy clears the timer reference');
+  assert.equal(h.drain(), 0, 'nothing is left to run after destroy');
+  h.gate.open = true;
+  h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 0, 'a level destroyed mid-beat never hands off');
+  assert.equal(h.level.shadowEndingPending, false, 'destroy leaves no hand-off pending');
+  assert.equal(h.sprite().active, false, 'the silhouette is removed with the level');
+}
+
+// (c3) destroyed during a walk segment: destroy stops the running tween, so its onComplete never fires.
+{
+  const h = makeBeatHarness();
+  h.level.playShadowBeat();
+  h.stepUntil(() => 'x' in (h.level.shadowBeatTween?.config ?? {}) && !h.level.shadowBeatTween.done);
+  const segment = h.level.shadowBeatTween;
+  h.level.destroy();
+  assert.equal(segment.stopped, true, 'destroy stops the running walk segment');
+  assert.equal(h.level.shadowBeatTween, undefined, 'destroy clears the tween reference');
+  assert.equal(h.drain(), 0, 'the stopped segment never advances the chain');
+  assert.equal(h.level.shadowEndingPending, false);
+  assert.equal(h.log.nextLevel.length, 0);
+}
+
+// (c4) a stale fade-out callback that still runs after destroy cannot re-arm the hand-off.
+{
+  const h = makeBeatHarness();
+  h.level.playShadowBeat();
+  h.stepUntil(() => h.level.shadowBeatTween?.config?.alpha === 0);
+  const fade = h.level.shadowBeatTween;
+  h.level.destroy();
+  fade.config.onComplete();
+  assert.equal(h.level.shadowEndingPending, false, 'finish() after destroy does not re-arm the hand-off');
+  h.gate.open = true;
+  h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 0, 'a stale callback after destroy never hands off');
+}
+
+// (c2) destroyed while the hand-off is already pending: the pending hand-off is dropped.
+{
+  const h = makeBeatHarness({ gateOpen: false });
+  h.level.playShadowBeat();
+  h.drain();
+  assert.equal(h.level.shadowEndingPending, true);
+  h.level.destroy();
+  h.gate.open = true;
+  h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 0, 'a destroyed level never calls nextLevel from a pending hand-off');
+}
+
+// (d) missing silhouette art still hands off through the same gate, once.
+{
+  const h = makeBeatHarness({ art: false, gateOpen: false });
+  h.level.playShadowBeat();
+  assert.equal(h.log.nextLevel.length, 0, 'the fallback also waits for the gate');
+  h.gate.open = true;
+  h.level.update(16);
+  assert.equal(h.log.nextLevel.length, 1);
+  assert.equal(h.log.nextLevel[0], ENDING_LINES);
+}
+
+// (e) CampaignScene wiring: the garden gate covers dialogue and the pause menu, and pause reaches the level.
+{
+  const sceneAst = parseTs(SCENE_FILE);
+  const gardenCall = findNode(sceneAst, (node) => ts.isNewExpression(node) && node.expression.getText(sceneAst) === 'SleepingGardenLevel');
+  assert.ok(gardenCall, 'CampaignScene constructs SleepingGardenLevel');
+  const option = (name) => {
+    const property = gardenCall.arguments[0].properties.find((prop) => prop.name?.getText(sceneAst) === name);
+    assert.ok(property?.initializer, `SleepingGardenLevel is constructed with ${name}`);
+    return property.initializer.getText(sceneAst);
+  };
+  const evaluate = (text, context) => {
+    const js = ts.transpileModule(`const __unit = function () { return (${text}); };`, COMPILER).outputText;
+    return new Function(`"use strict";\n${js}\nreturn __unit;`)().call(context)();
+  };
+  const sceneContext = (dialogueActive, pauseOpen) => ({ dialogue: { isActive: () => dialogueActive }, pauseMenu: { isOpen: () => pauseOpen } });
+  assert.equal(evaluate(option('canStartStory'), sceneContext(false, false)), true, 'the garden starts a beat when idle');
+  assert.equal(evaluate(option('canStartStory'), sceneContext(true, false)), false, 'an active dialogue closes the garden gate');
+  assert.equal(evaluate(option('canStartStory'), sceneContext(false, true)), false, 'an open pause menu closes the garden gate');
+  assert.equal(evaluate(option('isPaused'), sceneContext(false, true)), true, 'isPaused reports the pause menu');
+  assert.equal(evaluate(option('isPaused'), sceneContext(false, false)), false);
+}
+
+console.log('Sleeping Garden shadow beat checks passed (gate-deferred ending, pause hold and resume, destroy safety, art fallback, scene wiring)');
