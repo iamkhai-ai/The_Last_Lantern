@@ -7,6 +7,8 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
+import { createForestRandom } from '../data/forestDecor';
+import { inkOverlayFade } from './libraryInkFade';
 
 const STONES = ['bird', 'leaf', 'boat', 'seed'] as const;
 type Stone = typeof STONES[number];
@@ -28,6 +30,22 @@ const BOOK_GUIDANCE: DialogueLine[] = [
 ];
 const TIME_LABELS: Record<Stone, string> = { bird: 'Bình minh', leaf: 'Ban ngày', boat: 'Hoàng hôn', seed: 'Ban đêm' };
 const LIBRARY_CELL_HALF = 26;
+// Room decor (rendering only; colliders and interactions live in libraryLayout.ts and registerInteractions).
+// Glows sit above the lantern darkness (depth 68); dark-ink copies sit above it too, at 69.3.
+// Ink copies fade out near the player (see inkOverlayFade) so they never cover the actor.
+const LIBRARY_FLOOR_SEED = 0x2b7f;
+const LIBRARY_WALL_DEPTH = 0.2;
+const LIBRARY_GLOW_DEPTH = 69.2;
+const LIBRARY_INK_DEPTH = 69.3;
+const INK_OVERLAY_ALPHA = 0.92;
+const LIBRARY_CYAN = 0x7df2d4;
+const LIBRARY_WARM = 0xffe680;
+// Placed below the HUD objective panel (which covers roughly y <= 65).
+const LIBRARY_PLAQUE = { x: 110, y: 78 };
+const LIBRARY_PLAQUE_AREA = { min: 84, max: 140 };
+const LIBRARY_HANG_XS = [230, 306, 382, 458, 534];
+const LIBRARY_EXIT_GLOW = { x: 566, y: 262 };
+const BORDER_NAMES: Record<Stone, string> = { bird: 'border-chim', leaf: 'border-la', boat: 'border-thuyen', seed: 'border-hat' };
 const INTRO: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Sách mọc giữa rễ cây.' },
   { speaker: 'Lumo', text: 'Người Elaria gửi ký ức vào đây. Tôi nhớ mùi giấy này.' },
@@ -63,6 +81,11 @@ export class LibraryLevel {
   private socketImages: Phaser.GameObjects.Image[] = [];
   private rackEmptyStands: Phaser.GameObjects.Image[] = [];
   private bookLayers: Phaser.GameObjects.Image[] = [];
+  /** Dark-ink copy of the book page, shown above the darkness only while the lantern is off. */
+  private bookInkOverlay?: Phaser.GameObjects.Container;
+  /** Well core glow; warm when the lantern is on, cyan when it is off. */
+  private coreGlow?: Phaser.GameObjects.Image;
+  private readonly glowTweens: Phaser.Tweens.Tween[] = [];
   private selectedStone: number | null = null;
   private stageKey = '';
   private hintIndex = 0;
@@ -105,6 +128,8 @@ export class LibraryLevel {
   public destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.glowTweens.forEach((tween) => tween.stop());
+    this.glowTweens.length = 0;
     this.colliders.forEach((collider) => { if (collider.active) collider.destroy(); });
     this.bodies.forEach((body) => { if (body.gameObject?.active) body.gameObject.destroy(); });
     this.objects.forEach((object) => { if (object.active) object.destroy(); });
@@ -118,6 +143,7 @@ export class LibraryLevel {
 
   public update(): void {
     this.updateVisualState(false);
+    this.updateInkFade();
   }
 
   public getProtectedPromptBounds(): PromptRect[] {
@@ -204,17 +230,60 @@ export class LibraryLevel {
   }
 
   private drawFloorAndRoom(): void {
-    const floor = this.scene.add.tileSprite(0, 0, 640, 360, 'ground_stone').setOrigin(0).setTint(0xb6a887).setDepth(0);
-    this.track(floor);
-    const light = this.scene.add.graphics().setDepth(0.5);
-    light.fillStyle(0x9d835c, 0.12);
-    light.fillRoundedRect(32, 70, 576, 240, 20);
-    light.lineStyle(2, 0xb88b4c, 0.18);
-    light.strokeRoundedRect(34, 72, 572, 236, 18);
-    light.lineStyle(1, 0x5a4330, 0.25);
-    light.lineBetween(32, 74, 32, 306);
-    light.lineBetween(608, 74, 608, 306);
-    this.track(light);
+    const { left, right, top, bottom } = LIBRARY_LAYOUT.floor;
+    // Masonry outside the walkable floor: a top band, side columns and a bottom band.
+    this.track(this.scene.add.tileSprite(0, 0, 640, top, 'ground_stone').setOrigin(0).setTint(0x4a4236).setDepth(LIBRARY_WALL_DEPTH));
+    this.track(this.scene.add.tileSprite(0, top, left, bottom - top, 'ground_stone').setOrigin(0).setTint(0x3d362c).setDepth(LIBRARY_WALL_DEPTH));
+    this.track(this.scene.add.tileSprite(right, top, 640 - right, bottom - top, 'ground_stone').setOrigin(0).setTint(0x3d362c).setDepth(LIBRARY_WALL_DEPTH));
+    this.track(this.scene.add.tileSprite(0, bottom, 640, 360 - bottom, 'ground_stone').setOrigin(0).setTint(0x332d25).setDepth(LIBRARY_WALL_DEPTH));
+    this.track(this.scene.add.tileSprite(left, top, right - left, bottom - top, 'ground_stone').setOrigin(0).setTint(0x8a7c62).setDepth(0));
+    const ledges = this.scene.add.graphics().setDepth(0.25);
+    ledges.fillStyle(0x2b251e, 1);
+    ledges.fillRect(0, top - 8, 640, 8);
+    ledges.fillStyle(0x1c1812, 0.9);
+    ledges.fillRect(0, bottom, 640, 2);
+    this.track(ledges);
+    this.drawFloorInnerShadow();
+    this.drawFloorMottling();
+    const lip = this.scene.add.graphics().setDepth(0.5);
+    lip.fillStyle(0x7a6a50, 0.6);
+    lip.fillRect(left, top, right - left, 1);
+    this.track(lip);
+    // Worn ring and contact shadow under the well; the well art itself is drawn at depth 5.
+    const well = LIBRARY_LAYOUT.well;
+    this.track(this.scene.add.ellipse(well.x, well.y, 250, 120, 0x6b5a40, 0.18).setDepth(4.7));
+    this.track(this.scene.add.ellipse(well.x, well.y + 20, 230, 90, 0x000000, 0.25).setDepth(4.9));
+  }
+
+  /** Soft shadow along the four walls: five stacked strips, each 4px shorter, so the tint fades inward from the wall. */
+  private drawFloorInnerShadow(): void {
+    const { left, right, top, bottom } = LIBRARY_LAYOUT.floor;
+    const shadow = this.scene.add.graphics().setDepth(0.35);
+    shadow.fillStyle(0x0b0906, 0.08);
+    for (let step = 0; step < 5; step += 1) {
+      const reach = 20 - step * 4;
+      shadow.fillRect(left, top, right - left, reach);
+      shadow.fillRect(left, bottom - reach, right - left, reach);
+      shadow.fillRect(left, top, reach, bottom - top);
+      shadow.fillRect(right - reach, top, reach, bottom - top);
+    }
+    this.track(shadow);
+  }
+
+  /** Sixteen soft dark blotches on the floor, placed by a fixed seed so every load looks the same. */
+  private drawFloorMottling(): void {
+    const { left, right, top, bottom } = LIBRARY_LAYOUT.floor;
+    const rand = createForestRandom(LIBRARY_FLOOR_SEED);
+    const mottle = this.scene.add.graphics().setDepth(0.4);
+    for (let index = 0; index < 16; index += 1) {
+      const width = 36 + rand() * 60;
+      const height = width * (0.3 + rand() * 0.2);
+      const x = left + 6 + width / 2 + rand() * (right - left - width - 12);
+      const y = top + 6 + height / 2 + rand() * (bottom - top - height - 12);
+      mottle.fillStyle(0x120e0a, 0.12 + rand() * 0.08);
+      mottle.fillEllipse(x, y, width, height);
+    }
+    this.track(mottle);
   }
 
   private createObstacles(): void {
@@ -233,13 +302,11 @@ export class LibraryLevel {
     const [leftShelf, rightShelf] = LIBRARY_LAYOUT.shelves;
     this.addImage('room-bookshelf', leftShelf.x, leftShelf.y, 80, 80, this.depthAt(leftShelf.y + 40), true);
     this.addImage('room-bookshelf', rightShelf.x, rightShelf.y, 80, 80, this.depthAt(rightShelf.y + 40), true);
+    this.drawTopWallShelves();
+    this.drawHangingLanterns();
+    this.drawInscriptionPlaque();
     this.addImage('room-test-desk', LIBRARY_LAYOUT.desk.x, LIBRARY_LAYOUT.desk.y,
       LIBRARY_LAYOUT.desk.width, LIBRARY_LAYOUT.desk.height, this.depthAt(LIBRARY_LAYOUT.desk.y + 27), true);
-    const inscription = this.scene.add.text(110, 82, 'DÒNG KHẮC', {
-      fontFamily: 'Segoe UI, sans-serif', fontSize: '8px', color: '#9db3a0',
-      backgroundColor: '#142018aa', padding: { x: 3, y: 2 },
-    }).setOrigin(0.5, 0).setDepth(10);
-    this.objects.push(inscription);
     this.bookLayers = [
       this.addImage('test-book-body', LIBRARY_LAYOUT.book.x, LIBRARY_LAYOUT.book.y, 56, 40, this.depthAt(273), true),
       this.addImage('test-book-bright-layer', LIBRARY_LAYOUT.book.x, LIBRARY_LAYOUT.book.y, 56, 40, this.depthAt(273) + 0.1, true),
@@ -247,6 +314,7 @@ export class LibraryLevel {
     ];
     this.bookLayers[1].setVisible(false);
     this.bookLayers[2].setVisible(false);
+    this.bookInkOverlay = this.createBookInkOverlay();
     const mural = this.addImage(this.isMuralOpen() ? 'room-panel-open' : 'room-panel-closed',
       LIBRARY_LAYOUT.mural.x, LIBRARY_LAYOUT.mural.y, LIBRARY_LAYOUT.art.panelWidth,
       LIBRARY_LAYOUT.art.panelHeight, this.depthAt(200), true);
@@ -254,10 +322,57 @@ export class LibraryLevel {
     this.addExitArt();
   }
 
+  /** A row of bookshelves along the top wall; the plaque area stays clear and the two big shelves are drawn separately. */
+  private drawTopWallShelves(): void {
+    for (let x = 40; x <= 600; x += 76) {
+      if (x >= LIBRARY_PLAQUE_AREA.min && x <= LIBRARY_PLAQUE_AREA.max) continue;
+      this.track(this.scene.add.image(x, 80, this.textureKey('room-bookshelf'))
+        .setOrigin(0.5, 1).setDisplaySize(64, 64).setTint(0x9a8f80).setDepth(this.depthAt(78)));
+    }
+  }
+
+  /** Lanterns hang on the top wall between the shelves, each with a slowly breathing warm glow. */
+  private drawHangingLanterns(): void {
+    const keys = ['lantern_hang_1', 'lantern_hang_2', 'lantern_hang_3'].filter((key) => this.scene.textures.exists(key));
+    LIBRARY_HANG_XS.forEach((x, index) => {
+      if (keys.length > 0) this.track(this.scene.add.image(x, 62, keys[index % keys.length]).setDisplaySize(16, 33).setDepth(this.depthAt(78)));
+      const glow = this.scene.add.image(x, 62, 'light_radial')
+        .setBlendMode(Phaser.BlendModes.ADD).setScale(0.32).setAlpha(0.5).setDepth(LIBRARY_GLOW_DEPTH);
+      this.track(glow);
+      this.glowTweens.push(this.scene.tweens.add({
+        targets: glow, alpha: { from: 0.4, to: 0.55 }, duration: 1800 + index * 150,
+        yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: index * 260,
+      }));
+    });
+  }
+
+  /** Carved plaque where the inscription is read; the interaction and its prompt bounds are registered elsewhere. */
+  private drawInscriptionPlaque(): void {
+    this.track(this.scene.add.image(LIBRARY_PLAQUE.x, LIBRARY_PLAQUE.y, this.textureKey('tablet-body'))
+      .setDisplaySize(26, 30).setDepth(this.depthAt(78)));
+    this.track(this.scene.add.image(LIBRARY_PLAQUE.x, LIBRARY_PLAQUE.y, 'light_radial')
+      .setBlendMode(Phaser.BlendModes.ADD).setScale(0.26).setAlpha(0.5).setDepth(LIBRARY_GLOW_DEPTH));
+  }
+
+  /** Dark-ink copy of the book page with a small cyan glow; visible only while the lantern is off. */
+  private createBookInkOverlay(): Phaser.GameObjects.Container {
+    const glow = this.scene.add.image(0, 0, 'light_radial').setTint(LIBRARY_CYAN)
+      .setBlendMode(Phaser.BlendModes.ADD).setScale(0.2).setAlpha(0.45);
+    const layer = this.scene.add.image(0, 0, this.textureKey('test-book-dark-layer')).setDisplaySize(56, 40);
+    const overlay = this.scene.add.container(LIBRARY_LAYOUT.book.x, LIBRARY_LAYOUT.book.y, [glow, layer])
+      .setDepth(LIBRARY_INK_DEPTH).setVisible(false);
+    this.setInkFade(overlay, this.player.x, this.player.y);
+    this.track(overlay);
+    return overlay;
+  }
+
   private drawTabletsAndSockets(): void {
     const well = this.addImage('room-well-closed', LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y,
       LIBRARY_LAYOUT.well.width, LIBRARY_LAYOUT.well.height, 5);
     well.setData('library-well', true);
+    this.coreGlow = this.scene.add.image(LIBRARY_LAYOUT.core.x, LIBRARY_LAYOUT.core.y, 'light_radial')
+      .setBlendMode(Phaser.BlendModes.ADD).setScale(0.45).setAlpha(0.3).setDepth(LIBRARY_GLOW_DEPTH);
+    this.track(this.coreGlow);
     for (let i = 0; i < LIBRARY_LAYOUT.seats.length; i += 1) {
       const point = LIBRARY_LAYOUT.seats[i];
       const socket = this.addImage('socket-empty', point.x, point.y, 48, 48, LIBRARY_LAYOUT.groundDepth);
@@ -522,6 +637,8 @@ export class LibraryLevel {
     this.lastExitOpen = exitOpen;
     this.bookLayers[1]?.setVisible(lit);
     this.bookLayers[2]?.setVisible(!lit);
+    this.bookInkOverlay?.setVisible(!lit);
+    this.coreGlow?.setTint(lit ? LIBRARY_WARM : LIBRARY_CYAN);
     for (const [key, stack] of this.tabletStacks) {
       const identity = stack.getData('library-identity') as number | undefined;
       if (identity === undefined) continue;
@@ -535,6 +652,8 @@ export class LibraryLevel {
       const selected = identity === this.selectedStone;
       const marker = stack.list.find((child) => child instanceof Phaser.GameObjects.Image && child.getData('library-selection') === true);
       if (marker instanceof Phaser.GameObjects.Image) marker.setVisible(selected);
+      const ink = stack.getData('library-ink') as Phaser.GameObjects.Container | undefined;
+      if (ink) this.syncInkOverlay(ink, STONES[identity], lit, selected);
     }
     const mural = this.objects.find((object) => object.getData('library-mural') === true);
     if (mural instanceof Phaser.GameObjects.Image) {
@@ -552,10 +671,7 @@ export class LibraryLevel {
   }
 
   private redrawTabletStacks(): void {
-    for (const stack of this.tabletStacks.values()) {
-      stack.destroy();
-      this.objects = this.objects.filter((object) => object !== stack);
-    }
+    for (const stack of this.tabletStacks.values()) this.destroyTabletStack(stack);
     this.tabletStacks.clear();
     const slots = this.readSlots();
     const occupied = new Set(slots.filter((id) => id >= 0));
@@ -575,17 +691,78 @@ export class LibraryLevel {
     this.updateVisualState(true);
   }
 
+  private destroyTabletStack(stack: Phaser.GameObjects.Container): void {
+    const ink = stack.getData('library-ink') as Phaser.GameObjects.Container | undefined;
+    if (ink) {
+      ink.destroy();
+      this.objects = this.objects.filter((object) => object !== ink);
+    }
+    stack.destroy();
+    this.objects = this.objects.filter((object) => object !== stack);
+  }
+
   private createTabletStack(identity: number, x: number, y: number, depth: number, selected: boolean): Phaser.GameObjects.Container {
     const stone = STONES[identity];
     const body = this.scene.add.image(0, 0, this.textureKey('tablet-body'));
-    const borderName: Record<Stone, string> = { bird: 'border-chim', leaf: 'border-la', boat: 'border-thuyen', seed: 'border-hat' };
-    const border = this.scene.add.image(0, 0, this.textureKey(borderName[stone]));
+    const border = this.scene.add.image(0, 0, this.textureKey(BORDER_NAMES[stone]));
     const clue = this.scene.add.image(0, 0, this.textureKey(this.clueFilename(stone, this.lantern.lanternOn))).setData('library-clue', true);
     const selection = this.scene.add.image(0, 0, this.textureKey('socket-selected')).setVisible(selected).setData('library-selection', true);
     const stack = this.scene.add.container(x, y, [body, clue, border, selection]).setDepth(depth);
     stack.setData('library-identity', identity);
     this.objects.push(stack);
+    const ink = this.createInkOverlay(stone, x, y, selected);
+    stack.setData('library-ink', ink);
+    this.objects.push(ink);
     return stack;
+  }
+
+  /**
+   * Dark-ink copy of a tablet's border, clue and selection marker, drawn above the darkness with a cyan glow.
+   * It mirrors the stack at the same position; syncInkOverlay() keeps it visible only while the lantern is off.
+   */
+  private createInkOverlay(stone: Stone, x: number, y: number, selected: boolean): Phaser.GameObjects.Container {
+    const glow = this.scene.add.image(0, 0, 'light_radial').setTint(LIBRARY_CYAN)
+      .setBlendMode(Phaser.BlendModes.ADD).setScale(0.22).setAlpha(0.45);
+    const border = this.scene.add.image(0, 0, this.textureKey(BORDER_NAMES[stone]));
+    const clue = this.scene.add.image(0, 0, this.textureKey(this.clueFilename(stone, this.lantern.lanternOn))).setData('library-ink-clue', true);
+    const selection = this.scene.add.image(0, 0, this.textureKey('socket-selected'))
+      .setVisible(selected).setData('library-ink-selection', true);
+    const ink = this.scene.add.container(x, y, [glow, clue, border, selection])
+      .setDepth(LIBRARY_INK_DEPTH).setVisible(false);
+    // Start at the faded alpha for the current player position: a stack redrawn beside the player
+    // (e.g. just seated) must not flash over her for one frame before update() runs.
+    this.setInkFade(ink, this.player.x, this.player.y);
+    return ink;
+  }
+
+  /**
+   * Every frame, fades each visible dark-ink overlay by its distance from the player: hidden within
+   * INK_FADE_NEAR so the copy never covers the actor, fully shown beyond INK_FADE_FAR.
+   */
+  private updateInkFade(): void {
+    const px = this.player.x;
+    const py = this.player.y;
+    if (this.bookInkOverlay?.visible) this.setInkFade(this.bookInkOverlay, px, py);
+    for (const stack of this.tabletStacks.values()) {
+      const ink = stack.getData('library-ink') as Phaser.GameObjects.Container | undefined;
+      if (ink?.visible) this.setInkFade(ink, px, py);
+    }
+  }
+
+  private setInkFade(ink: Phaser.GameObjects.Container, px: number, py: number): void {
+    const fade = inkOverlayFade(Math.hypot(ink.x - px, ink.y - py));
+    ink.setAlpha(INK_OVERLAY_ALPHA * fade);
+  }
+
+  private syncInkOverlay(ink: Phaser.GameObjects.Container, stone: Stone, lit: boolean, selected: boolean): void {
+    ink.setVisible(!lit);
+    const inkClue = ink.list.find((child) => child instanceof Phaser.GameObjects.Image && child.getData('library-ink-clue') === true);
+    if (inkClue instanceof Phaser.GameObjects.Image) {
+      const texture = this.textureKey(this.clueFilename(stone, lit));
+      if (inkClue.texture.key !== texture) inkClue.setTexture(texture);
+    }
+    const inkSelection = ink.list.find((child) => child instanceof Phaser.GameObjects.Image && child.getData('library-ink-selection') === true);
+    if (inkSelection instanceof Phaser.GameObjects.Image) inkSelection.setVisible(selected);
   }
 
   private addExitArt(): void {
@@ -608,6 +785,8 @@ export class LibraryLevel {
       if (layer !== 'header') this.protectedImages.add(image);
       return image;
     });
+    this.track(this.scene.add.image(LIBRARY_EXIT_GLOW.x, LIBRARY_EXIT_GLOW.y, 'light_radial')
+      .setBlendMode(Phaser.BlendModes.ADD).setScale(0.5).setAlpha(0.4).setDepth(LIBRARY_GLOW_DEPTH));
   }
 
   private createArchLayerTexture(textureKey: string, layer: string): string {

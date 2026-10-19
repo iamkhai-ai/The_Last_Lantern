@@ -3,16 +3,31 @@ import { SoundSystem } from './SoundSystem';
 
 export type PulseCallback = (x: number, y: number, maxRadius: number) => void;
 
+/** Numbers for the falloff-shaded lantern box: a lit box and a dark (lantern off) box, each with its darkness and halo. */
+export type LanternLightingProfile = {
+  litShadeSize: number;
+  litDarkness: number;
+  litHaloScale: number;
+  litHaloAlpha: number;
+  darkShadeSize: number;
+  darkDarkness: number;
+  darkHaloScale: number;
+  darkHaloAlpha: number;
+};
+
 // Forest night lighting, shared by Level 01 (Forgotten Forest Edge) and Level 02 (Whispering Woods):
 // a falloff-shaded lantern box inside a dark forest.
-const WOODS_SHADE_SIZE_LIT = 300;
-const WOODS_DARKNESS_LIT = 0.80;
-const WOODS_HALO_SCALE_LIT = 0.80;
-const WOODS_HALO_ALPHA_LIT = 0.48;
-const WOODS_SHADE_SIZE_DARK = 120;
-const WOODS_DARKNESS_DARK = 0.88;
-const WOODS_HALO_SCALE_DARK = 0.30;
-const WOODS_HALO_ALPHA_DARK = 0.14;
+export const FOREST_LIGHTING: LanternLightingProfile = {
+  litShadeSize: 300, litDarkness: 0.80, litHaloScale: 0.80, litHaloAlpha: 0.48,
+  darkShadeSize: 120, darkDarkness: 0.88, darkHaloScale: 0.30, darkHaloAlpha: 0.14,
+};
+
+// Level 03 (Library Beneath the Roots): a wider warm box when lit keeps the tablets readable across the room;
+// with the lantern off, the box is tighter and the room darker, and the glowing dark ink carries the clues.
+export const LIBRARY_LIGHTING: LanternLightingProfile = {
+  litShadeSize: 380, litDarkness: 0.62, litHaloScale: 0.75, litHaloAlpha: 0.42,
+  darkShadeSize: 170, darkDarkness: 0.74, darkHaloScale: 0.30, darkHaloAlpha: 0.12,
+};
 
 export class LanternSystem {
   private scene: Phaser.Scene;
@@ -21,8 +36,8 @@ export class LanternSystem {
   private pulseGraphics: Phaser.GameObjects.Graphics;
   private vignetteImage: Phaser.GameObjects.Image;
   private forestEdgeShade?: Phaser.GameObjects.Image;
-  private readonly forestEdgeLighting: boolean;
-  private readonly woodsLighting: boolean;
+  /** Set when the shaded box recipe is active (forest levels or an explicit profile); null for generic lighting. */
+  private readonly shadedLighting: LanternLightingProfile | null;
 
   public lanternOn = true;
   public lanternInHand = true;
@@ -44,10 +59,9 @@ export class LanternSystem {
   public static readonly PULSE_DURATION_MS = 1000;
   public static readonly PULSE_MAX_RADIUS = 195;
 
-  constructor(scene: Phaser.Scene, forestEdgeLighting = false, woodsLighting = false) {
+  constructor(scene: Phaser.Scene, forestEdgeLighting = false, woodsLighting = false, profile?: LanternLightingProfile) {
     this.scene = scene;
-    this.forestEdgeLighting = forestEdgeLighting;
-    this.woodsLighting = woodsLighting;
+    this.shadedLighting = profile ?? (forestEdgeLighting || woodsLighting ? FOREST_LIGHTING : null);
 
     this.darknessOverlay = scene.add.graphics();
     this.darknessOverlay.setDepth(68);
@@ -61,10 +75,11 @@ export class LanternSystem {
     this.vignetteImage = scene.add.image(320, 180, 'vignette');
     this.vignetteImage.setDepth(71);
     this.vignetteImage.setScrollFactor(0);
-    if (forestEdgeLighting || woodsLighting) {
+    if (this.shadedLighting) {
       this.vignetteImage.setVisible(false);
       if (!scene.textures.exists('level01_darkness_falloff')) {
-        throw new Error(forestEdgeLighting ? 'Missing Level 01 darkness falloff texture' : 'Missing darkness falloff texture for Level 02');
+        throw new Error(profile ? 'Missing darkness falloff texture for Level 03'
+          : forestEdgeLighting ? 'Missing Level 01 darkness falloff texture' : 'Missing darkness falloff texture for Level 02');
       }
       this.forestEdgeShade = scene.add.image(0, 0, 'level01_darkness_falloff').setDepth(68.5);
     }
@@ -152,15 +167,17 @@ export class LanternSystem {
       const pulseAlpha = 0.36 + Math.sin(this.flickerTime * 4) * 0.12;
       this.darknessOverlay.fillStyle(0xfff5cc, pulseAlpha);
       this.darknessOverlay.fillRect(0, 0, 640, 360);
-    } else if (this.forestEdgeLighting || this.woodsLighting) {
-      // Level 01 and Level 02 share one forest recipe (the Level 01 flag only changes the missing-texture message).
+    } else if (this.shadedLighting) {
+      // Forest levels (01 and 02) share the forest profile; Level 03 passes its own. The flags only pick the profile
+      // and the missing-texture message, so the box and halo code below is shared.
+      const profile = this.shadedLighting;
       const activeLantern = this.lanternOn && (this.lanternInHand || this.lanternPlaced);
       this.haloSprite.setVisible(true);
       this.haloSprite.setPosition(lightX, lightY);
-      this.haloSprite.setScale((activeLantern ? WOODS_HALO_SCALE_LIT : WOODS_HALO_SCALE_DARK) * flicker);
-      this.haloSprite.setAlpha(activeLantern ? WOODS_HALO_ALPHA_LIT : WOODS_HALO_ALPHA_DARK);
-      const darknessAlpha = activeLantern ? WOODS_DARKNESS_LIT : WOODS_DARKNESS_DARK;
-      const size = activeLantern ? WOODS_SHADE_SIZE_LIT : WOODS_SHADE_SIZE_DARK;
+      this.haloSprite.setScale((activeLantern ? profile.litHaloScale : profile.darkHaloScale) * flicker);
+      this.haloSprite.setAlpha(activeLantern ? profile.litHaloAlpha : profile.darkHaloAlpha);
+      const darknessAlpha = activeLantern ? profile.litDarkness : profile.darkDarkness;
+      const size = activeLantern ? profile.litShadeSize : profile.darkShadeSize;
       const shadeX = Math.round(lightX);
       const shadeY = Math.round(lightY);
       this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);

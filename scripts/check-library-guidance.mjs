@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import * as libraryLayout from '../src/data/libraryLayout.ts';
+import * as forestDecor from '../src/data/forestDecor.ts';
+import * as libraryInkFade from '../src/levels/libraryInkFade.ts';
 
 const root = new URL('../', import.meta.url);
 const source = readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8');
@@ -21,6 +23,10 @@ const requireStub = (specifier) => {
   if (specifier === 'phaser') return {};
   if (specifier === '../art/CampaignArt') return { getLevelArtKey: (_level, filename) => filename };
   if (specifier === '../data/libraryLayout') return libraryLayout;
+  // Pure seeded PRNG helper (no imports of its own) used for the floor mottling.
+  if (specifier === '../data/forestDecor') return forestDecor;
+  // Pure distance-fade helper for the dark-ink overlays (no imports of its own).
+  if (specifier === './libraryInkFade') return libraryInkFade;
   throw new Error(`unexpected runtime import in LibraryLevel.ts: ${specifier}`);
 };
 new Function('exports', 'require', 'module', output.outputText)(moduleRecord.exports, requireStub, moduleRecord);
@@ -131,6 +137,46 @@ const findControl = (registered, id) => {
   assert.deepEqual(JSON.parse(progress.flags['memory-slots-json']), [0, 1, 2, 3]);
   findControl(registered, 'library-confirm').onInteract();
   assert.equal(progress.flags['l2-memory'], true, 'explicit E confirmation solves with only one observed layer per tile');
+}
+
+// Dark-ink distance fade: hidden within 50px of the player, fully shown from 80px, smooth between.
+{
+  const { inkOverlayFade, INK_FADE_NEAR, INK_FADE_FAR } = libraryInkFade;
+  assert.equal(INK_FADE_NEAR, 50);
+  assert.equal(INK_FADE_FAR, 80);
+  assert.equal(inkOverlayFade(0), 0, 'fade(0) = 0');
+  assert.equal(inkOverlayFade(50), 0, 'fade(50) = 0');
+  assert.equal(inkOverlayFade(65), 0.5, 'fade(65) = 0.5');
+  assert.equal(inkOverlayFade(80), 1, 'fade(80) = 1');
+  assert.equal(inkOverlayFade(200), 1, 'fade(200) = 1');
+  let previous = -Infinity;
+  for (let d = 0; d <= 120; d += 0.5) {
+    const value = inkOverlayFade(d);
+    assert.ok(value >= previous, `fade is monotonic non-decreasing at d=${d}`);
+    assert.ok(value >= 0 && value <= 1, `fade stays within 0..1 at d=${d}`);
+    previous = value;
+  }
+}
+
+// Per-frame wiring: visible ink overlays take INK_OVERLAY_ALPHA (0.92) * fade of their distance to the player.
+{
+  const { level } = createLevel({}, false);
+  const makeInk = (x, y, visible) => ({ x, y, visible, alpha: -1, setAlpha(value) { this.alpha = value; } });
+  const near = makeInk(244, 188, true);   // 22px from player: fully hidden
+  const far = makeInk(400, 188, true);    // 178px from player: full alpha
+  const hidden = makeInk(400, 188, false); // lantern on: untouched
+  const stack = (ink) => ({ getData: (key) => (key === 'library-ink' ? ink : undefined) });
+  level.player = { x: 222, y: 185 };
+  level.tabletStacks = new Map([['a', stack(near)], ['b', stack(far)], ['c', stack(hidden)]]);
+  level.bookInkOverlay = makeInk(222, 185, false);
+  level.update();
+  assert.equal(near.alpha, 0, 'tablet ink is hidden beside the player');
+  assert.equal(far.alpha, 0.92, 'distant tablet ink uses the full 0.92 alpha');
+  assert.equal(hidden.alpha, -1, 'ink overlays are left alone while the lantern is on');
+  assert.equal(level.bookInkOverlay.alpha, -1, 'book ink is left alone while the lantern is on');
+  level.bookInkOverlay.visible = true;
+  level.update();
+  assert.equal(level.bookInkOverlay.alpha, 0, 'book ink fades to 0 beside the player');
 }
 
 console.log('Level 03 guidance/state checks passed.');
