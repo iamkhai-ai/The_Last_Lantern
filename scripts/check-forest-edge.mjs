@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   canChargeForestEdgeReceiver,
   canUseForestEdgePulse,
@@ -9,6 +10,11 @@ import {
   worldDepth,
 } from '../src/data/forestEdgeLayout.ts';
 import { forestEdgeFootprintRotation, forestEdgeGuideTarget } from '../src/data/forestEdgeGuidance.ts';
+
+const campaignScene = readFileSync(new URL('../src/scenes/CampaignScene.ts', import.meta.url), 'utf8');
+const guideMethodStart = campaignScene.indexOf('private updateForestEdgeGuide(');
+const guideMethodEnd = campaignScene.indexOf('\n  private buildLevel(', guideMethodStart);
+const guideMethod = campaignScene.slice(guideMethodStart, guideMethodEnd);
 
 const close = (a, b) => Math.abs(a - b) < 1e-9;
 assert.deepEqual(feetAt({ x: 410, y: 191 }), { x: 410, y: 210 });
@@ -22,6 +28,12 @@ assert.equal(forestEdgeGuideTarget('tablet'), 'tablet', 'tablet objective stays 
 assert.equal(forestEdgeGuideTarget('pulse'), null, 'the ring stays untargeted until Pulse discovers it');
 assert.equal(forestEdgeGuideTarget('ring'), 'ring', 'the discovered standing objective points toward its ring');
 assert.equal(forestEdgeGuideTarget('exit'), null, 'the spatial guide retires when the objective is complete');
+assert.ok(guideMethodStart >= 0 && guideMethodEnd > guideMethodStart, 'Level 01 guide update method is present');
+assert.doesNotMatch(guideMethod, /strokeEllipse|strokeCircle/, 'the spatial guide draws no ring around the player');
+assert.match(guideMethod, /guide\.clear\(\)\.setPosition\(0, 0\)\.setDepth\(72\)/,
+  'the direction pointer stays above Level 01 darkness layers');
+assert.match(guideMethod, /const bounds = this\.player\.sprite\.getBounds\(\);[\s\S]*const startDistance = actorExit \+ 3;/,
+  'the visible pointer starts outside the character frame');
 for (const [index, point] of FOREST_EDGE.objects.trail.entries()) {
   const next = FOREST_EDGE.objects.trail[index + 1] ?? FOREST_EDGE.objects.ring.ground;
   assert.ok(close(forestEdgeFootprintRotation(index, FOREST_EDGE.objects.trail, FOREST_EDGE.objects.ring.ground), Math.atan2(next.y - point.y, next.x - point.x) + Math.PI / 2),

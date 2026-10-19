@@ -455,23 +455,22 @@ export class CampaignScene extends Phaser.Scene {
     const dy = targetPoint.y - feet.y;
     const distance = Math.hypot(dx, dy);
     guide.clear().setPosition(0, 0).setDepth(72);
-
-    // Depth 72 stays above the darkness falloff, vignette and player sprite.
-    guide.lineStyle(4, 0x07151c, 0.95);
-    guide.strokeEllipse(feet.x, feet.y, 26, 12);
-    guide.lineStyle(2, 0xffe680, 1);
-    guide.strokeEllipse(feet.x, feet.y, 26, 12);
-
     if (distance > 0.01) {
       const ux = dx / distance;
       const uy = dy / distance;
-      const ellipseRadius = 1 / Math.sqrt((ux * ux) / (13 * 13) + (uy * uy) / (6 * 6));
-      const startX = feet.x + ux * (ellipseRadius + 1);
-      const startY = feet.y + uy * (ellipseRadius + 1);
-      const tipX = feet.x + ux * (ellipseRadius + 15);
-      const tipY = feet.y + uy * (ellipseRadius + 15);
-      const backX = tipX - ux * 5;
-      const backY = tipY - uy * 5;
+      const bounds = this.player.sprite.getBounds();
+      const xExit = Math.abs(ux) > 0.001
+        ? ((ux > 0 ? bounds.right : bounds.left) - feet.x) / ux : Number.POSITIVE_INFINITY;
+      const yExit = Math.abs(uy) > 0.001
+        ? ((uy > 0 ? bounds.bottom : bounds.top) - feet.y) / uy : Number.POSITIVE_INFINITY;
+      const actorExit = Math.max(0, Math.min(xExit > 0 ? xExit : Number.POSITIVE_INFINITY, yExit > 0 ? yExit : Number.POSITIVE_INFINITY));
+      const startDistance = actorExit + 3;
+      const startX = feet.x + ux * startDistance;
+      const startY = feet.y + uy * startDistance;
+      const tipX = feet.x + ux * (startDistance + 13);
+      const tipY = feet.y + uy * (startDistance + 13);
+      const backX = tipX - ux * 4;
+      const backY = tipY - uy * 4;
       const left = { x: backX - uy * 4, y: backY + ux * 4 };
       const right = { x: backX + uy * 4, y: backY - ux * 4 };
       guide.lineStyle(4, 0x07151c, 0.95);
