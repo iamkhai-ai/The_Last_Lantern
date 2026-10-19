@@ -32,7 +32,7 @@ const TOP_X = 12;
 const TOP_Y = 8;
 const TOP_MIN_WIDTH = 240;
 const TOP_MAX_WIDTH = 460;
-const TOP_MAX_HEIGHT = 100;
+const TOP_MAX_HEIGHT = 60;
 const TOP_PAD_X = 8;
 const TOP_PAD_Y = 6;
 const TOP_LINE_GAP = 2;
@@ -153,6 +153,7 @@ export class CampaignHud {
   private pulseFlash = 0;
   private pulseShake = 0;
   private pulseVisible = false;
+  private pulseSignature = '';
   private pulseX = 0;
   private pulseWidth = 0;
   private topPanelBottom = TOP_Y;
@@ -168,8 +169,10 @@ export class CampaignHud {
     this.objectiveText = this.makeText(TOP_X + TOP_PAD_X, TOP_Y + TOP_PAD_Y, '', 10.5, BODY);
     this.statusText = this.makeText(STATUS_X + STATUS_PAD_X, STATUS_BOTTOM, '', 10, STATUS);
     this.lumoText = this.makeText(LUMO_X - LUMO_PAD_X, LUMO_Y + LUMO_PAD_Y, '', 10, MINT);
-    this.titleText.setWordWrapWidth(TOP_MAX_WIDTH - TOP_PAD_X * 2, true).setMaxLines(2);
-    this.objectiveText.setWordWrapWidth(TOP_MAX_WIDTH - TOP_PAD_X * 2, true).setMaxLines(4);
+    // One title line and at most two objective lines: with the paddings that is a 57px panel, which keeps
+    // the authored "top HUD band" (y < ~66) instead of letting a long string grow over the playfield.
+    this.titleText.setWordWrapWidth(TOP_MAX_WIDTH - TOP_PAD_X * 2, true).setMaxLines(1);
+    this.objectiveText.setWordWrapWidth(TOP_MAX_WIDTH - TOP_PAD_X * 2, true).setMaxLines(2);
     this.statusText.setWordWrapWidth(STATUS_MAX_WIDTH - STATUS_PAD_X * 2, true).setMaxLines(2);
     this.lumoText.setOrigin(1, 0);
     this.panelLayer.add([this.panelGraphics, this.titleText, this.objectiveText, this.statusText, this.lumoText]);
@@ -456,19 +459,37 @@ export class CampaignHud {
     this.pulseLabel.setColor(cooling ? PULSE_COOLING_CSS : PULSE_READY_CSS);
   }
 
+  /**
+   * Redraws only when something visible changed: the arc is quantised to 1/60 of a turn and the ready
+   * flash to 50ms steps, so an idle (ready) chip costs nothing per frame instead of a Graphics rebuild.
+   */
   private drawPulseChip(): void {
     if (!this.pulseVisible) return;
+    const signature = `${Math.round(this.pulseCooldown * 60)}|${this.pulseFlash > 0 ? Math.ceil(this.pulseFlash / 50) : 0}`;
+    if (signature === this.pulseSignature) return;
+    this.pulseSignature = signature;
     const graphics = this.pulseGraphics;
     graphics.clear();
     graphics.fillStyle(KEY_FACE, 1);
     graphics.fillCircle(PULSE_BADGE_X, 0, PULSE_BADGE_RADIUS);
     graphics.lineStyle(1, PANEL_STROKE, STROKE_ALPHA);
     graphics.strokeCircle(PULSE_BADGE_X, 0, PULSE_BADGE_RADIUS);
-    graphics.lineStyle(2, 0xd8e3da, 1);
-    graphics.lineBetween(PULSE_BADGE_X - 5, 0, PULSE_BADGE_X + 5, 0);
+    // Spacebar glyph (a flat open bracket). A bare dash here read as a "minus / blocked" sign.
+    graphics.lineStyle(1.5, 0xd8e3da, 1);
+    graphics.beginPath();
+    graphics.moveTo(PULSE_BADGE_X - 4.5, -2);
+    graphics.lineTo(PULSE_BADGE_X - 4.5, 2);
+    graphics.lineTo(PULSE_BADGE_X + 4.5, 2);
+    graphics.lineTo(PULSE_BADGE_X + 4.5, -2);
+    graphics.strokePath();
     const cooling = this.pulseCooldown > 0;
     const sweep = (1 - this.pulseCooldown) * Math.PI * 2;
     const flash = this.pulseFlash > 0;
+    // A faint full track under the arc so the remaining time reads as "part of a ring", not a stray tick.
+    if (cooling) {
+      graphics.lineStyle(PULSE_ARC_STROKE, PULSE_COOLING, 0.22);
+      graphics.strokeCircle(PULSE_BADGE_X, 0, PULSE_ARC_RADIUS);
+    }
     graphics.lineStyle(PULSE_ARC_STROKE, cooling ? PULSE_COOLING : PULSE_READY, flash ? 1 : 0.9);
     if (sweep >= Math.PI * 2 - 0.001) {
       graphics.strokeCircle(PULSE_BADGE_X, 0, PULSE_ARC_RADIUS);
