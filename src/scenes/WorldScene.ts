@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { DIALOGUE_DATA } from '../data/dialogue';
-import { getLumoHint, ZONE_SUBTITLES_VI } from '../data/quests';
+import { getLumoHint, getObjectiveText, ZONE_SUBTITLES_VI, ZONE_TITLES } from '../data/quests';
 import { CreekMirrorPuzzle } from '../puzzles/CreekMirrorPuzzle';
 import { RuinsBalancePuzzle } from '../puzzles/RuinsBalancePuzzle';
 import { WoodsRunePuzzle } from '../puzzles/WoodsRunePuzzle';
@@ -14,7 +14,7 @@ import { QuestSystem } from '../systems/QuestSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { GameProgress, ZoneId } from '../types/gameTypes';
-import { HUD } from '../ui/HUD';
+import { CampaignHud } from '../ui/CampaignHud';
 import { PauseMenu } from '../ui/PauseMenu';
 import { WorldFactory } from '../world/WorldFactory';
 import { ZONE_DEFINITIONS } from '../world/zoneDefinitions';
@@ -27,7 +27,7 @@ export class WorldScene extends Phaser.Scene {
   public interactionSystem!: InteractionSystem;
   public dialogueSystem!: DialogueSystem;
   public effectsSystem!: EffectsSystem;
-  public hud!: HUD;
+  public hud!: CampaignHud;
   public pauseMenu!: PauseMenu;
 
   public woodsPuzzle?: WoodsRunePuzzle;
@@ -105,7 +105,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.interactionSystem = new InteractionSystem(this);
     this.dialogueSystem = new DialogueSystem(this);
-    this.hud = new HUD(this);
+    this.hud = new CampaignHud(this);
 
     this.pauseMenu = new PauseMenu(this, {
       onResume: () => {},
@@ -576,7 +576,7 @@ export class WorldScene extends Phaser.Scene {
     if (this.pauseMenu.isOpen()) return;
 
     this.dialogueSystem.update(delta);
-    this.hud.setControlsVisible(!this.dialogueSystem.isActive());
+    this.hud.setHidden(this.dialogueSystem.isActive() || this.pauseMenu.isOpen());
 
     const canMove =
       !this.dialogueSystem.isActive() &&
@@ -619,12 +619,27 @@ export class WorldScene extends Phaser.Scene {
       this.lumo.sprite.visible ? [this.lumo.sprite.getBounds()] : [],
     );
 
-    this.hud.update(
-      delta,
-      this.questSystem.progress,
-      this.lanternSystem.lanternPlaced,
-      this.lanternSystem.getCooldownRatio()
-    );
+    this.refreshHud(delta);
+  }
+
+  /** Pushes this frame's quest state into the shared campaign HUD. */
+  private refreshHud(delta: number): void {
+    const progress = this.questSystem.progress;
+    this.hud.setTitle(progress.stage === 'victory' ? 'THE LAST DAWN' : ZONE_TITLES[progress.currentZone]);
+    this.hud.setObjective(getObjectiveText(progress, this.lanternSystem.lanternPlaced));
+    this.hud.setCrystals(progress.crystals);
+    this.hud.setKeys({
+      move: true,
+      run: true,
+      interact: true,
+      lantern: this.lanternSystem.lanternInHand && !this.lanternSystem.lanternPlaced,
+      pulse: this.lanternSystem.lanternInHand && !this.lanternSystem.lanternPlaced && this.lanternSystem.lanternOn,
+      journal: false,
+      hint: true,
+      pause: true,
+    });
+    this.hud.update(delta, this.lanternSystem.getCooldownRatio());
+    this.hud.setHidden(this.dialogueSystem.isActive() || this.pauseMenu.isOpen());
   }
 
   private static readonly WATER_FRAMES = [

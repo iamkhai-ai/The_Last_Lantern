@@ -6,7 +6,7 @@ import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem } from '../systems/LanternSystem';
 import { QuestSystem } from '../systems/QuestSystem';
 import { SoundSystem } from '../systems/SoundSystem';
-import { HUD } from '../ui/HUD';
+import type { ToastSink } from '../ui/CampaignHud';
 
 type RuneId = 'moon' | 'leaf' | 'star';
 
@@ -27,7 +27,7 @@ export class WoodsRunePuzzle {
   private lanternSystem: LanternSystem;
   private dialogueSystem: DialogueSystem;
   private effectsSystem: EffectsSystem;
-  private hud: HUD;
+  private hud: ToastSink;
 
   public archSprite!: Phaser.GameObjects.Sprite;
   private beamGraphics!: Phaser.GameObjects.Graphics;
@@ -45,7 +45,7 @@ export class WoodsRunePuzzle {
     lanternSystem: LanternSystem,
     dialogueSystem: DialogueSystem,
     effectsSystem: EffectsSystem,
-    hud: HUD
+    hud: ToastSink
   ) {
     this.scene = scene;
     this.questSystem = questSystem;

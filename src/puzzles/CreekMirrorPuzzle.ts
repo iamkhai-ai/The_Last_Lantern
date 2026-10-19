@@ -6,7 +6,7 @@ import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem } from '../systems/LanternSystem';
 import { QuestSystem } from '../systems/QuestSystem';
 import { SoundSystem } from '../systems/SoundSystem';
-import { HUD } from '../ui/HUD';
+import type { ToastSink } from '../ui/CampaignHud';
 
 export class CreekMirrorPuzzle {
   private scene: Phaser.Scene;
@@ -15,7 +15,7 @@ export class CreekMirrorPuzzle {
   private lanternSystem: LanternSystem;
   private dialogueSystem: DialogueSystem;
   private effectsSystem: EffectsSystem;
-  private hud: HUD;
+  private hud: ToastSink;
   private onBridgeActivated: () => void;
 
   private pedestalSprite!: Phaser.GameObjects.Sprite;
@@ -43,7 +43,7 @@ export class CreekMirrorPuzzle {
     lanternSystem: LanternSystem,
     dialogueSystem: DialogueSystem,
     effectsSystem: EffectsSystem,
-    hud: HUD,
+    hud: ToastSink,
     onBridgeActivated: () => void
   ) {
     this.scene = scene;

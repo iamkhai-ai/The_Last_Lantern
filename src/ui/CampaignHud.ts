@@ -2,6 +2,11 @@ import type Phaser from 'phaser';
 
 export type HudKeyId = 'move' | 'run' | 'interact' | 'lantern' | 'pulse' | 'journal' | 'hint' | 'pause';
 
+/** Anything that can surface a transient line of text; puzzles depend on this, not on the whole HUD. */
+export interface ToastSink {
+  showToast(message: string, durationMs?: number): void;
+}
+
 /** Campaign levels where SPACE really fires a lantern pulse. */
 export const PULSE_LEVELS: readonly number[] = [0, 1, 8, 9];
 
@@ -26,7 +31,7 @@ const PANEL_RADIUS = 5;
 const TOP_X = 12;
 const TOP_Y = 8;
 const TOP_MIN_WIDTH = 240;
-const TOP_MAX_WIDTH = 420;
+const TOP_MAX_WIDTH = 460;
 const TOP_MAX_HEIGHT = 100;
 const TOP_PAD_X = 8;
 const TOP_PAD_Y = 6;
@@ -69,6 +74,11 @@ const TOAST_PAD_X = 10;
 const TOAST_PAD_Y = 4;
 const TOAST_DEFAULT_MS = 2600;
 const TOAST_MAX_WIDTH = 520;
+// Three faceted crystal pips, drawn inside the top panel's right edge (WorldScene only).
+const CRYSTAL_GUTTER = 54;
+const CRYSTAL_INSET = 12;
+const CRYSTAL_SPACING = 16;
+const CRYSTAL_RADIUS = 7;
 
 /**
  * Fixed HUD geometry, exported so the source-only checks can prove the pulse
@@ -137,6 +147,7 @@ export class CampaignHud {
   private hidden = false;
   private destroyed = false;
   private toastTimer = 0;
+  private crystals: { memory: boolean; hope: boolean; balance: boolean } | null = null;
   private pulseCooldown = 0;
   private pulseWasCooling = false;
   private pulseFlash = 0;
@@ -219,12 +230,23 @@ export class CampaignHud {
     this.redrawPanels();
   }
 
+  /** Three crystal pips in the top panel; pass null to hide them (most campaign levels do). */
+  public setCrystals(crystals: { memory: boolean; hope: boolean; balance: boolean } | null): void {
+    const same = this.crystals === null && crystals === null
+      || (this.crystals !== null && crystals !== null
+        && this.crystals.memory === crystals.memory && this.crystals.hope === crystals.hope
+        && this.crystals.balance === crystals.balance);
+    if (same) return;
+    this.crystals = crystals === null ? null : { ...crystals };
+    this.redrawPanels();
+  }
+
   public setHidden(hidden: boolean): void {
     if (this.hidden === hidden) return;
     this.hidden = hidden;
     this.panelLayer.setVisible(!hidden);
     this.chipLayer.setVisible(!hidden);
-    this.toastLayer.setVisible(!hidden);
+    // Toasts stay up: they carry zone subtitles and rewards that land while a line is being read.
   }
 
   public update(dt: number, pulseCooldown: number): void {
@@ -309,11 +331,41 @@ export class CampaignHud {
     const objectiveY = TOP_Y + TOP_PAD_Y + Math.ceil(this.titleText.height) + TOP_LINE_GAP;
     this.objectiveText.setVisible(true).setPosition(TOP_X + TOP_PAD_X, objectiveY);
     const inner = Math.ceil(Math.max(this.titleText.width, this.objectiveText.width));
-    const width = Math.min(TOP_MAX_WIDTH, Math.max(TOP_MIN_WIDTH, inner + TOP_PAD_X * 2));
+    const gutter = this.crystals ? CRYSTAL_GUTTER : 0;
+    const width = Math.min(TOP_MAX_WIDTH, Math.max(TOP_MIN_WIDTH, inner + TOP_PAD_X * 2 + gutter));
     const height = Math.min(TOP_MAX_HEIGHT, objectiveY + Math.ceil(this.objectiveText.height) + TOP_PAD_Y - TOP_Y);
     this.topPanelBottom = TOP_Y + height;
     this.drawPanel(graphics, TOP_X, TOP_Y, width, height);
+    if (this.crystals) this.drawCrystals(graphics, TOP_X + width - CRYSTAL_INSET, TOP_Y + 12);
     if (this.toastText.visible) this.redrawToast();
+  }
+
+  private drawCrystals(graphics: Phaser.GameObjects.Graphics, rightX: number, centerY: number): void {
+    const pips = [
+      { on: this.crystals?.memory === true, color: 0xe6b842, hi: 0xfff1a8 },
+      { on: this.crystals?.hope === true, color: 0x4daee6, hi: 0xb8edff },
+      { on: this.crystals?.balance === true, color: 0xb96ce6, hi: 0xeabfff },
+    ];
+    pips.forEach((pip, index) => {
+      const x = rightX - (pips.length - 1 - index) * CRYSTAL_SPACING;
+      graphics.fillStyle(pip.on ? pip.color : 0x3e5259, 1);
+      graphics.beginPath();
+      graphics.moveTo(x, centerY - CRYSTAL_RADIUS);
+      graphics.lineTo(x + CRYSTAL_RADIUS * 0.62, centerY);
+      graphics.lineTo(x, centerY + CRYSTAL_RADIUS);
+      graphics.lineTo(x - CRYSTAL_RADIUS * 0.62, centerY);
+      graphics.closePath();
+      graphics.fillPath();
+      if (!pip.on) return;
+      graphics.fillStyle(pip.hi, 0.9);
+      graphics.beginPath();
+      graphics.moveTo(x, centerY - CRYSTAL_RADIUS * 0.55);
+      graphics.lineTo(x + CRYSTAL_RADIUS * 0.3, centerY);
+      graphics.lineTo(x, centerY + CRYSTAL_RADIUS * 0.55);
+      graphics.lineTo(x - CRYSTAL_RADIUS * 0.3, centerY);
+      graphics.closePath();
+      graphics.fillPath();
+    });
   }
 
   /** Anchored to its bottom edge so a two-line status grows upward, away from the key row. */
