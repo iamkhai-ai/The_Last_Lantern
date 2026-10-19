@@ -105,6 +105,14 @@ const shadowCharacterModules = import.meta.glob([
   '../../assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png',
 ], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 
+/**
+ * Forest-expansion sprites (ancient trees, roadside grass) used by src/data/forestDecor.ts. The decor table names
+ * these keys literally, so a missing file falls back at render time instead of breaking the level.
+ */
+const forestExpansionModules = import.meta.glob([
+  '../../assets/environment/forest-expansion/sprites-v2/*.png',
+], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+
 const SHADOW_ART_KEYS: Record<string, string> = {
   'waiting.png': 'shadow_waiting',
   'memory-overlay.png': 'shadow_memory_overlay',
@@ -146,6 +154,10 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
   ...Object.entries(shadowCharacterModules)
     .filter(([path]) => Boolean(SHADOW_ART_KEYS[path.slice(path.lastIndexOf('/') + 1)]))
     .map(([path, url]) => ({ key: SHADOW_ART_KEYS[path.slice(path.lastIndexOf('/') + 1)], url })),
+  ...Object.entries(forestExpansionModules).map(([path, url]) => ({
+    key: `forest_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
+    url,
+  })),
 ];
 
 /** The Shadow's Level 09 frames, or null when the pack is absent. */

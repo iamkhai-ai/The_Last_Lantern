@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { buildForestEdgeDecor, FOREST_EDGE_DECOR_SEED } from '../src/data/forestEdgeDecor.ts';
+import { existsSync, readFileSync } from 'node:fs';
+import { buildForestEdgeDecor, FOREST_EDGE_DECOR_SEED, forestEdgeDecorSite } from '../src/data/forestEdgeDecor.ts';
 import { chaikinClosed, FOREST_DECOR_TEXTURES, pointInPolygon } from '../src/data/forestDecor.ts';
 import { FOREST_EDGE, FOREST_EDGE_GROUND_PATH, FOREST_EDGE_SOLIDS } from '../src/data/forestEdgeLayout.ts';
 
@@ -20,37 +20,100 @@ assert.equal(decor.paths.length, 1, 'one smoothed ground path');
 assert.equal(decor.paths[0].length, 27 * 8, 'three closed Chaikin passes on the 27-point path');
 assert.deepEqual(decor.paths[0], chaikinClosed(FOREST_EDGE_GROUND_PATH, 3), 'decor path is the Chaikin-smoothed layout path');
 
-// Counts match the Level 02 density.
+// Counts: ancient trees lead the near row and the side bands, grass is 32 on the ground and doubled on the path edge.
+const ANCIENT = new Set(FOREST_DECOR_TEXTURES.ancientTrees);
+const GRASS = new Set(FOREST_DECOR_TEXTURES.roadsideGrass);
+const { gateSpan } = forestEdgeDecorSite();
+const farTrees = decor.backTrees.filter((t) => t.baseY < 70);
+const nearTrees = decor.backTrees.filter((t) => t.baseY >= 70);
+const nearAncient = nearTrees.filter((t) => ANCIENT.has(t.texture));
+const nearSmall = nearTrees.filter((t) => !ANCIENT.has(t.texture));
 assert.ok(decor.backTrees.length >= 30 && decor.backTrees.length <= 50, `back canopy count ${decor.backTrees.length}`);
-assert.ok(decor.sideTrees.length >= 8 && decor.sideTrees.length <= 14, `side tree count ${decor.sideTrees.length}`);
+assert.ok(nearAncient.length >= 3 && nearAncient.length <= 6, `near-row ancient tree count ${nearAncient.length}`);
+assert.equal(decor.sideTrees.length, 6, 'side bands hold 3 ancient trees per edge');
+assert.equal(decor.sideTrees.filter((t) => t.x < 0).length, 3, 'left band ancient tree count');
+assert.equal(decor.sideTrees.filter((t) => t.x > 640).length, 3, 'right band ancient tree count');
 assert.ok(decor.frontBushes.length >= 24 && decor.frontBushes.length <= 34, `front bush count ${decor.frontBushes.length}`);
-assert.equal(decor.groundCover.tufts.length, 24, 'ground tuft count is exactly 24');
+assert.equal(decor.groundCover.tufts.length, 32, 'ground grass count is exactly 32');
 assert.ok(decor.groundCover.mushrooms.length >= 8 && decor.groundCover.mushrooms.length <= 12, `mushroom count ${decor.groundCover.mushrooms.length}`);
 assert.equal(decor.mottling.shadows.length, 28, 'soft dark mottling count');
 assert.equal(decor.mottling.moss.length, 10, 'moss patch count');
-assert.ok(decor.pathEdge.tufts.length > 0 && decor.pathEdge.shadows.length > 0, 'path edge has both tufts and shadow blobs');
-assert.ok(decor.pathEdge.shadows.length > decor.pathEdge.tufts.length, 'path edge shadows outnumber halved tufts');
+assert.ok(decor.pathEdge.tufts.length >= 12 && decor.pathEdge.tufts.length <= 18, `path edge grass count ${decor.pathEdge.tufts.length} (about double the old 9)`);
+assert.ok(decor.pathEdge.shadows.length > 0, 'path edge has shadow blobs');
+assert.ok(Math.abs(decor.pathEdge.tufts.length - decor.pathEdge.shadows.length) <= 5, 'every second edge slot is grass, so grass and shadows stay in step');
 
-// Textures come only from the shared table.
-const allowedTextures = new Set(Object.values(FOREST_DECOR_TEXTURES));
+// Textures come only from the shared table (the art keys are arrays, so flatten the table).
+const allowedTextures = new Set(Object.values(FOREST_DECOR_TEXTURES).flat());
+assert.ok(!allowedTextures.has('tuft_grass'), 'the decor table no longer names tuft_grass');
 for (const item of [...decor.backTrees, ...decor.sideTrees, ...decor.frontBushes, ...decor.groundCover.tufts, ...decor.groundCover.mushrooms, ...decor.pathEdge.tufts, ...decor.pathEdge.shadows]) {
   assert.ok(allowedTextures.has(item.texture ?? FOREST_DECOR_TEXTURES.bush), `texture ${item.texture} comes from FOREST_DECOR_TEXTURES`);
+  assert.notEqual(item.texture, 'tuft_grass', 'no decor item uses tuft_grass');
 }
+for (const item of [...decor.groundCover.tufts, ...decor.pathEdge.tufts]) assert.ok(GRASS.has(item.texture), `grass texture ${item.texture} is a roadside-grass variant`);
 
-// Back canopy: two rows in the top band, never below y 92, and the near row leaves the gate span open.
+// Back canopy: far row of small trees (y 40-56), near row led by ancient trees (y 70-92), never below y 92.
 for (const tree of decor.backTrees) {
   assert.ok(tree.baseY <= 92, `back tree base ${tree.baseY} stays in the top band`);
-  assert.ok(tree.x >= -16 - 3 && tree.x <= 656 + 3, `back tree x ${tree.x} spans the screen width`);
-  assert.ok([FOREST_DECOR_TEXTURES.treeA, FOREST_DECOR_TEXTURES.treeB].includes(tree.texture), 'back tree texture');
+  assert.ok(tree.x >= -16 - 6 && tree.x <= 656 + 6, `back tree x ${tree.x} spans the screen width`);
+  assert.ok([...FOREST_DECOR_TEXTURES.ancientTrees, FOREST_DECOR_TEXTURES.treeA, FOREST_DECOR_TEXTURES.treeB].includes(tree.texture), `back tree texture ${tree.texture}`);
 }
-for (const tree of decor.backTrees.filter((t) => t.tint === 0xa9b8ad)) {
-  assert.ok(tree.x < 400 || tree.x > 572, `near canopy row leaves the gate span clear (x ${tree.x})`);
+for (const tree of farTrees) {
+  assert.ok([FOREST_DECOR_TEXTURES.treeA, FOREST_DECOR_TEXTURES.treeB].includes(tree.texture), 'far canopy stays small trees');
+  assert.equal(tree.tint, 0x7f948a, 'far canopy tint');
+}
+for (const tree of nearAncient) {
+  assert.ok(tree.baseY >= 70 && tree.baseY <= 92, `near ancient base ${tree.baseY} stays in the near row`);
+  assert.ok(tree.x <= gateSpan.min - 40 || tree.x >= gateSpan.max + 40, `near ancient trunk x ${tree.x} keeps 40 px clear of the gate span`);
+  assert.ok(tree.scale >= 0.72 && tree.scale <= 0.86, `near ancient scale ${tree.scale}`);
+  assert.equal(tree.tint, 0xb3c0b5, 'near ancient tint');
+}
+const nearXs = nearAncient.map((t) => t.x).sort((a, b) => a - b);
+for (let i = 1; i < nearXs.length; i += 1) {
+  const gap = nearXs[i] - nearXs[i - 1];
+  const crossesGate = nearXs[i - 1] <= gateSpan.min - 40 && nearXs[i] >= gateSpan.max + 40;
+  assert.ok(crossesGate || (gap >= 85 && gap <= 135), `near ancient spacing ${gap} at x ${nearXs[i - 1]}..${nearXs[i]} is about 100-120 px`);
+}
+for (const tree of nearSmall) {
+  assert.ok(tree.x < gateSpan.min || tree.x > gateSpan.max, `near canopy small tree leaves the gate span clear (x ${tree.x})`);
+  assert.equal(tree.tint, 0xa9b8ad, 'near small tree tint');
+  for (const ancient of nearAncient) assert.ok(Math.abs(tree.x - ancient.x) >= 40, `near small tree ${tree.x} is not within 40 px of ancient ${ancient.x}`);
 }
 
-// Side trees sit off-screen; the bottom band (y >= 330) stays bush-only.
+// Side bands: ancient trees just off the edges, stacked from y 150 down to 292.
 for (const tree of decor.sideTrees) {
-  assert.ok(tree.x <= -8 || tree.x >= 648, `side tree x ${tree.x} is horizontally off-screen`);
-  assert.ok(tree.baseY <= 292, `side tree base ${tree.baseY} stays above y 292`);
+  assert.ok(ANCIENT.has(tree.texture), `side tree ${tree.texture} is an ancient tree`);
+  assert.ok(tree.x <= -28 || tree.x >= 668, `side ancient x ${tree.x} is outside the play field`);
+  assert.ok(tree.baseY >= 140 && tree.baseY <= 292, `side ancient base ${tree.baseY} stays above y 292`);
+  assert.ok(tree.scale >= 0.78 && tree.scale <= 0.9, `side ancient scale ${tree.scale}`);
+  assert.equal(tree.tint, 0x9faea2, 'side ancient tint');
+}
+
+// Art: ground and path-edge grass use the roadside-grass tints; every ancient and grass key maps to a sprites-v2 file
+// of the README canvas size (ancient 160x192, roadside grass 48x32).
+for (const tuft of decor.groundCover.tufts) {
+  assert.equal(tuft.tint, 0xaab6a4, 'ground grass tint');
+  assert.equal(tuft.alpha, 1, 'ground grass alpha');
+  assert.equal(tuft.scale, 1, 'ground grass scale');
+}
+for (const stamp of decor.pathEdge.tufts) {
+  assert.equal(stamp.tint, 0xc9d3c1, 'path edge grass tint');
+  assert.equal(stamp.alpha, 1, 'path edge grass alpha');
+  assert.equal(stamp.scale, 1, 'path edge grass scale');
+}
+const artDir = new URL('../assets/environment/forest-expansion/sprites-v2/', import.meta.url);
+const campaignArt = readFileSync(new URL('../src/art/CampaignArt.ts', import.meta.url), 'utf8');
+assert.ok(campaignArt.includes("'../../assets/environment/forest-expansion/sprites-v2/*.png'"), 'CampaignArt globs the sprites-v2 folder');
+const pngSize = (file) => {
+  const bytes = readFileSync(file);
+  assert.equal(bytes.toString('ascii', 1, 4), 'PNG', `${file} is a PNG`);
+  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+};
+for (const [keys, size] of [[FOREST_DECOR_TEXTURES.ancientTrees, { width: 160, height: 192 }], [FOREST_DECOR_TEXTURES.roadsideGrass, { width: 48, height: 32 }]]) {
+  for (const key of keys) {
+    const file = new URL(`${key.replace(/^forest_/, '').replace(/_/g, '-')}.png`, artDir);
+    assert.ok(existsSync(file), `${key} has a sprites-v2 file`);
+    assert.deepEqual(pngSize(file), size, `${key} canvas size`);
+  }
 }
 
 // Front bushes: low, in the bottom band, with a rendered top clear of the walkable band.

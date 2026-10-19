@@ -41,7 +41,9 @@ export type ForestDecor = Readonly<{
   /** Chaikin-smoothed walkable path polygons, used for the dirt mask and edge breakup. */
   paths: readonly (readonly ForestPoint[])[];
   mottling: Readonly<{ shadows: readonly ForestDecorMark[]; moss: readonly ForestDecorMark[] }>;
+  /** Top band: far small canopy, then the near row (ancient trees with small trees in the gaps). */
   backTrees: readonly ForestDecorTree[];
+  /** Side bands: ancient trees just off the left and right edges. */
   sideTrees: readonly ForestDecorTree[];
   frontBushes: readonly ForestDecorBush[];
   groundCover: Readonly<{ tufts: readonly ForestDecorProp[]; mushrooms: readonly ForestDecorProp[] }>;
@@ -50,17 +52,30 @@ export type ForestDecor = Readonly<{
 
 /**
  * The only place decor names its art. Swap a value here and every forest level picks up the new texture.
- * treeA/treeB alternate along each canopy row; edgeShadow is the dark blob along the path edge.
+ * treeA/treeB alternate along the small canopy rows; ancientTrees cycle through the near row and side bands;
+ * roadsideGrass is picked at random for path-edge and ground-cover grass; edgeShadow is the dark blob along the path edge.
+ * The forest-expansion keys are registered in src/art/CampaignArt.ts from assets/environment/forest-expansion/sprites-v2.
  */
 export const FOREST_DECOR_TEXTURES = {
   treeA: 'tree_woods',
   treeB: 'tree_alt',
+  ancientTrees: ['forest_ancient_tree_01', 'forest_ancient_tree_02', 'forest_ancient_tree_03'],
+  roadsideGrass: [
+    'forest_roadside_grass_01', 'forest_roadside_grass_02', 'forest_roadside_grass_03', 'forest_roadside_grass_04',
+    'forest_roadside_grass_05', 'forest_roadside_grass_06', 'forest_roadside_grass_07', 'forest_roadside_grass_08',
+  ],
   bush: 'bush_woods',
-  tuft: 'tuft_grass',
   mushroomCyan: 'mushroom_cyan',
   mushroomWarm: 'mushroom_warm',
   edgeShadow: 'shadow_blob',
 } as const;
+
+/**
+ * Where the generated forest sprites sit on their decor point. The y is the content bottom (roots or grass base),
+ * not the canvas bottom: ancient trees have 4 px of padding under the roots (content ends at row 187 of 192),
+ * roadside grass has 4 px of padding below the blades (content ends at row 27 of 32).
+ */
+export const FOREST_ART_ORIGIN = { ancientTreeY: 188 / 192, roadsideGrassY: 28 / 32 } as const;
 
 /** Native pixel height of the 'bush' texture (72x77). Front bush bases must clear the walkable band with it. */
 export const FOREST_BUSH_TEXTURE_HEIGHT = 77;
@@ -158,33 +173,44 @@ const round1 = (v: number) => Math.round(v * 10) / 10;
 const round2 = (v: number) => Math.round(v * 100) / 100;
 const round3 = (v: number) => Math.round(v * 1000) / 1000;
 
-// Top band: two staggered rows of canopy. Row 1 is the far, darker row; row 2 sits closer and skips the gate span.
-// Base y never exceeds 92, so no tall tree can reach the walkable field (feet y >= 96).
+// Top band: two staggered rows of canopy. Row 1 is the far, darker row of small trees; row 2 is the near row,
+// led by ancient trees. Base y never exceeds 92, so no tall tree can reach the walkable field (feet y >= 96).
 const TOP_ROWS = [
   { minY: 40, maxY: 56, tint: 0x7f948a, skipGateSpan: false, start: -16 },
   { minY: 70, maxY: 92, tint: 0xa9b8ad, skipGateSpan: true, start: -1 },
 ] as const;
-// Side bands are horizontally off-screen; base y stops before the y >= 330 bottom band.
-const SIDE_BANDS = [{ min: -30, max: -8 }, { min: 648, max: 670 }] as const;
-const SIDE_Y_START = 120;
-const SIDE_Y_STEP = 42;
-const SIDE_Y_LIMIT = 326;
-const SIDE_TINT = 0x95a69b;
+const NEAR_ANCIENT_TINT = 0xb3c0b5;
+const NEAR_ANCIENT_SPACING: readonly [number, number] = [100, 120];
+const ANCIENT_SCALE_NEAR: readonly [number, number] = [0.72, 0.86];
+/** Ancient trunks stay this far outside the gate span (x <= gate.min - 40 or x >= gate.max + 40). */
+const ANCIENT_GATE_CLEARANCE = 40;
+/** A small near-row tree is dropped when an ancient tree stands within this many px of it. */
+const SMALL_TREE_ANCIENT_CLEARANCE = 40;
+// Side bands: ancient trees just outside the left and right edges, stacked down the screen. Base y stops at 292.
+const SIDE_BANDS = [{ min: -48, max: -28 }, { min: 668, max: 688 }] as const;
+const SIDE_Y_START = 150;
+const SIDE_Y_STEP = 68;
+const SIDE_Y_LIMIT = 292;
+const SIDE_SCALE: readonly [number, number] = [0.78, 0.9];
+const SIDE_TINT = 0x9faea2;
 // Bottom band: only low bushes, spaced ~20 px so the band reads as continuous.
 // Bushes are drawn at 0.45 scale (~32 px wide).
 const BUSH_STEP = 20;
 const BUSH_SCALE = 0.45;
 const BUSH_TINT = 0x8fa79a;
 const BUSH_ALPHA = 0.95;
-// Ground cover: sparse, darker and more transparent than the raw grass texture.
-const TUFT_COUNT = 24;
-const TUFT_TINT = 0x5f7d58;
-const TUFT_ALPHA = 0.55;
-// Path edge: tufts on every second tuft slot only, alternating slots keep their dark blobs.
-const EDGE_TUFT_TINT = 0x56724f;
-const EDGE_TUFT_ALPHA = 0.6;
-const EDGE_TUFT_MODULO = 4;
+// Ground cover: sparse roadside grass on open ground, full alpha, tinted to sit in the scene.
+const GROUND_GRASS_COUNT = 32;
+const GROUND_GRASS_TINT = 0xaab6a4;
+const GROUND_GRASS_ALPHA = 1;
+// Path edge: roadside grass on every second edge slot, alternating slots keep their dark blobs.
+const EDGE_GRASS_TINT = 0xc9d3c1;
+const EDGE_GRASS_ALPHA = 1;
+const EDGE_GRASS_DEPTH = 0.62;
+const EDGE_TUFT_MODULO = 2;
 const MUSHROOM_COUNT = 10;
+// Half scale: the 32x26 mushroom PNGs read as mossy boulders at native size and look like obstacles in the walkable field.
+const MUSHROOM_SCALE = 0.5;
 const CYAN_MUSHROOM_CHANCE = 0.4;
 const MOTTLE_SHADOW_COUNT = 28;
 const MOSS_COUNT = 10;
@@ -199,33 +225,68 @@ export function buildForestDecor(site: ForestDecorSite): ForestDecor {
 
   const spots = site.keepClear.points;
   const paths = site.groundPaths.map((polygon) => chaikinClosed(polygon, 3));
+  const grassTexture = () => FOREST_DECOR_TEXTURES.roadsideGrass[Math.floor(rand() * FOREST_DECOR_TEXTURES.roadsideGrass.length)];
+  let ancientIndex = 0;
+  const nextAncientTexture = () => {
+    const texture = FOREST_DECOR_TEXTURES.ancientTrees[ancientIndex % FOREST_DECOR_TEXTURES.ancientTrees.length];
+    ancientIndex += 1;
+    return texture;
+  };
 
+  const [farRow, nearRow] = TOP_ROWS;
   const backTrees: ForestDecorTree[] = [];
-  for (const row of TOP_ROWS) {
-    let cursor = row.start;
-    let index = 0;
-    while (cursor <= 656) {
-      const x = Math.round(cursor + between(-3, 3));
-      const baseY = Math.round(between(row.minY, row.maxY));
-      const flipX = rand() < 0.5;
-      const scale = round2(between(0.85, 1.12));
-      cursor += between(30, 36);
-      if (row.skipGateSpan && x >= site.gateSpan.min && x <= site.gateSpan.max) continue;
-      backTrees.push({ texture: index % 2 === 0 ? FOREST_DECOR_TEXTURES.treeA : FOREST_DECOR_TEXTURES.treeB, x, baseY, flipX, scale, tint: row.tint });
-      index += 1;
-    }
+
+  // Far row: small canopy that reads as distant trees. Unchanged by the forest-expansion art.
+  let farCursor = farRow.start;
+  let farIndex = 0;
+  while (farCursor <= 656) {
+    const x = Math.round(farCursor + between(-3, 3));
+    const baseY = Math.round(between(farRow.minY, farRow.maxY));
+    const flipX = rand() < 0.5;
+    const scale = round2(between(0.85, 1.12));
+    farCursor += between(30, 36);
+    backTrees.push({ texture: farIndex % 2 === 0 ? FOREST_DECOR_TEXTURES.treeA : FOREST_DECOR_TEXTURES.treeB, x, baseY, flipX, scale, tint: farRow.tint });
+    farIndex += 1;
   }
 
+  // Near row, ancient trees first: the dominant canopy, one every 100-120 px, never closer to the gate span than 40 px.
+  const nearAncientX: number[] = [];
+  let ancientCursor = nearRow.start;
+  while (ancientCursor <= 656) {
+    const x = Math.round(ancientCursor + between(-6, 6));
+    const baseY = Math.round(between(nearRow.minY, nearRow.maxY));
+    const flipX = rand() < 0.5;
+    const scale = round2(between(ANCIENT_SCALE_NEAR[0], ANCIENT_SCALE_NEAR[1]));
+    ancientCursor += between(NEAR_ANCIENT_SPACING[0], NEAR_ANCIENT_SPACING[1]);
+    if (x > site.gateSpan.min - ANCIENT_GATE_CLEARANCE && x < site.gateSpan.max + ANCIENT_GATE_CLEARANCE) continue;
+    backTrees.push({ texture: nextAncientTexture(), x, baseY, flipX, scale, tint: NEAR_ANCIENT_TINT });
+    nearAncientX.push(x);
+  }
+
+  // Near row, small trees: only in the gaps between ancient trees, and never in the gate span.
+  let nearCursor = nearRow.start;
+  let nearIndex = 0;
+  while (nearCursor <= 656) {
+    const x = Math.round(nearCursor + between(-3, 3));
+    const baseY = Math.round(between(nearRow.minY, nearRow.maxY));
+    const flipX = rand() < 0.5;
+    const scale = round2(between(0.85, 1.12));
+    nearCursor += between(30, 36);
+    if (nearRow.skipGateSpan && x >= site.gateSpan.min && x <= site.gateSpan.max) continue;
+    if (nearAncientX.some((ax) => Math.abs(ax - x) < SMALL_TREE_ANCIENT_CLEARANCE)) continue;
+    backTrees.push({ texture: nearIndex % 2 === 0 ? FOREST_DECOR_TEXTURES.treeA : FOREST_DECOR_TEXTURES.treeB, x, baseY, flipX, scale, tint: nearRow.tint });
+    nearIndex += 1;
+  }
+
+  // Side bands: ancient trees stacked every 68 px from y 150 down to 292, alternating in variant.
   const sideTrees: ForestDecorTree[] = [];
-  let sideIndex = 0;
   for (const band of SIDE_BANDS) {
     for (let y = SIDE_Y_START; y <= SIDE_Y_LIMIT; y += SIDE_Y_STEP) {
       const x = Math.round(between(band.min, band.max));
-      const baseY = Math.round(y + between(-4, 4));
+      const baseY = Math.min(SIDE_Y_LIMIT, Math.round(y + between(-3, 3)));
       const flipX = rand() < 0.5;
-      const scale = round2(between(0.85, 1.12));
-      sideTrees.push({ texture: sideIndex % 2 === 0 ? FOREST_DECOR_TEXTURES.treeA : FOREST_DECOR_TEXTURES.treeB, x, baseY, flipX, scale, tint: SIDE_TINT });
-      sideIndex += 1;
+      const scale = round2(between(SIDE_SCALE[0], SIDE_SCALE[1]));
+      sideTrees.push({ texture: nextAncientTexture(), x, baseY, flipX, scale, tint: SIDE_TINT });
     }
   }
 
@@ -247,12 +308,12 @@ export function buildForestDecor(site: ForestDecorSite): ForestDecor {
     return true;
   };
   const tufts: ForestDecorProp[] = [];
-  for (let attempts = 0; tufts.length < TUFT_COUNT && attempts < 6000; attempts += 1) {
+  for (let attempts = 0; tufts.length < GROUND_GRASS_COUNT && attempts < 6000; attempts += 1) {
     const p: ForestPoint = { x: round1(between(8, 632)), y: round1(between(100, 336)) };
     const flipX = rand() < 0.5;
     const depth = round2(between(1.2, 1.6));
     if (!groundAllowed(p)) continue;
-    tufts.push({ texture: FOREST_DECOR_TEXTURES.tuft, x: p.x, y: p.y, depth, flipX, scale: 1, alpha: TUFT_ALPHA, tint: TUFT_TINT });
+    tufts.push({ texture: grassTexture(), x: p.x, y: p.y, depth, flipX, scale: 1, alpha: GROUND_GRASS_ALPHA, tint: GROUND_GRASS_TINT });
   }
   const mushrooms: ForestDecorProp[] = [];
   for (let attempts = 0; mushrooms.length < MUSHROOM_COUNT && attempts < 6000; attempts += 1) {
@@ -260,7 +321,7 @@ export function buildForestDecor(site: ForestDecorSite): ForestDecor {
     const texture = rand() < CYAN_MUSHROOM_CHANCE ? FOREST_DECOR_TEXTURES.mushroomCyan : FOREST_DECOR_TEXTURES.mushroomWarm;
     const depth = round2(between(1.4, 1.6));
     if (!groundAllowed(p)) continue;
-    mushrooms.push({ texture, x: p.x, y: p.y, depth, flipX: false, scale: 1, alpha: 0.85, tint: 0xffffff });
+    mushrooms.push({ texture, x: p.x, y: p.y, depth, flipX: false, scale: MUSHROOM_SCALE, alpha: 0.85, tint: 0xffffff });
   }
 
   // Mottling: soft dark patches and faint moss, drawn under the path (depth 0.3).
@@ -275,7 +336,7 @@ export function buildForestDecor(site: ForestDecorSite): ForestDecor {
     moss.push({ x: round1(between(0, 640)), y: round1(between(0, 360)), width, height: round1(width * between(0.5, 0.75)), alpha: round3(between(0.06, 0.09)) });
   }
 
-  // Path edge breakup: alternate grass tufts and dark blobs along each smoothed perimeter.
+  // Path edge breakup: alternate grass and dark blobs along each smoothed perimeter.
   const edgeTufts: ForestDecorProp[] = [];
   const edgeShadows: ForestDecorProp[] = [];
   for (const polygon of paths) {
@@ -285,9 +346,9 @@ export function buildForestDecor(site: ForestDecorSite): ForestDecor {
       const flipX = rand() < 0.5;
       const scale = round2(between(1.4, 2.0));
       if (spots.some((s) => Math.hypot(s.x - x, s.y - y) < PATH_EDGE_CLEARANCE)) return;
-      // Slots alternate tuft (even) / shadow (odd); only every second tuft slot emits a tuft.
-      if (step % 2 === 0) {
-        if (step % EDGE_TUFT_MODULO === 0) edgeTufts.push({ texture: FOREST_DECOR_TEXTURES.tuft, x, y, depth: 0.62, flipX, scale: 1, alpha: EDGE_TUFT_ALPHA, tint: EDGE_TUFT_TINT });
+      // Slots alternate grass (even) / shadow (odd); every even slot emits a grass stamp.
+      if (step % EDGE_TUFT_MODULO === 0) {
+        edgeTufts.push({ texture: grassTexture(), x, y, depth: EDGE_GRASS_DEPTH, flipX, scale: 1, alpha: EDGE_GRASS_ALPHA, tint: EDGE_GRASS_TINT });
       } else {
         edgeShadows.push({ texture: FOREST_DECOR_TEXTURES.edgeShadow, x, y, depth: 0.58, flipX: false, scale, alpha: 0.28, tint: 0xffffff });
       }

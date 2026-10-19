@@ -6,7 +6,7 @@ import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { buildWoodsDecor } from '../data/whisperingWoodsDecor';
 import { buildForestEdgeDecor } from '../data/forestEdgeDecor';
-import { FOREST_DECOR_TEXTURES, FOREST_MOSS_COLOR, FOREST_MOTTLE_COLOR, type ForestDecor } from '../data/forestDecor';
+import { FOREST_ART_ORIGIN, FOREST_DECOR_TEXTURES, FOREST_MOSS_COLOR, FOREST_MOTTLE_COLOR, type ForestDecor } from '../data/forestDecor';
 import { LIBRARY_LAYOUT, resolveLibrarySpawn } from '../data/libraryLayout';
 import { LibraryLevel } from '../levels/LibraryLevel';
 import { PathForTwoLevel } from '../levels/PathForTwoLevel';
@@ -2897,15 +2897,28 @@ export class CampaignScene extends Phaser.Scene {
       this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setDepth(Math.max(stamp.depth, pathDepth + 0.01)));
     }
     for (const stamp of decor.pathEdge.tufts) {
-      this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
+      this.track(this.forestArtImage(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
     }
   }
 
-  /** Shared forest decor for Level 01 and Level 02: back canopy rows, side trees, bottom bushes, ground cover. No actor or walkable meaning. */
+  /**
+   * Forest decor art at a decor point. Generated sprites sit on FOREST_ART_ORIGIN (their content bottom). A missing
+   * texture falls back to tree_woods (trees) or tuft_grass (grass), both bottom-anchored, so no missing-texture box shows.
+   */
+  private forestArtImage(x: number, y: number, texture: string): Phaser.GameObjects.Image {
+    const ancient = (FOREST_DECOR_TEXTURES.ancientTrees as readonly string[]).includes(texture);
+    const grass = (FOREST_DECOR_TEXTURES.roadsideGrass as readonly string[]).includes(texture);
+    if (this.textures.exists(texture)) {
+      const originY = ancient ? FOREST_ART_ORIGIN.ancientTreeY : grass ? FOREST_ART_ORIGIN.roadsideGrassY : 1;
+      return this.add.image(x, y, texture).setOrigin(0.5, originY);
+    }
+    return this.add.image(x, y, grass ? 'tuft_grass' : 'tree_woods').setOrigin(0.5, 1);
+  }
+
+  /** Shared forest decor for Level 01 and Level 02: back canopy rows, ancient side trees, bottom bushes, ground cover. No actor or walkable meaning. */
   private drawForestDecor(decor: ForestDecor): void {
-    const tree = (texture: string) => (this.textures.exists(texture) ? texture : FOREST_DECOR_TEXTURES.treeA);
     for (const t of [...decor.backTrees, ...decor.sideTrees]) {
-      this.track(this.add.image(t.x, t.baseY, tree(t.texture)).setOrigin(0.5, 1).setFlipX(t.flipX)
+      this.track(this.forestArtImage(t.x, t.baseY, t.texture).setFlipX(t.flipX)
         .setScale(t.scale).setTint(t.tint).setDepth(woodsDepth(t.baseY)));
     }
     for (const bush of decor.frontBushes) {
@@ -2913,7 +2926,7 @@ export class CampaignScene extends Phaser.Scene {
         .setAlpha(bush.alpha).setDepth(woodsDepth(bush.baseY)));
     }
     for (const tuft of decor.groundCover.tufts) {
-      this.track(this.add.image(tuft.x, tuft.y, tuft.texture).setScale(tuft.scale).setTint(tuft.tint).setAlpha(tuft.alpha)
+      this.track(this.forestArtImage(tuft.x, tuft.y, tuft.texture).setScale(tuft.scale).setTint(tuft.tint).setAlpha(tuft.alpha)
         .setFlipX(tuft.flipX).setDepth(tuft.depth));
     }
     for (const mushroom of decor.groundCover.mushrooms) {
