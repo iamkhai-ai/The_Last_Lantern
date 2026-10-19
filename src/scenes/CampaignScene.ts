@@ -1907,46 +1907,12 @@ export class CampaignScene extends Phaser.Scene {
       : 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause';
     // bottom row y=358 for every level: the status row above it (y320..) never shares a line with the controls
     this.controlsText = this.track(this.add.text(320, 358, controls, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
-    const stage = this.progress.level;
-    const landscape = this.add.graphics().setDepth(1.5);
-    if (!hasCampaignBackground && stage === 3) {
-      landscape.fillStyle(0x123d58, 0.82); landscape.fillRect(245, 145, 175, 195);
-      landscape.fillStyle(0x66bfd0, 0.25); landscape.fillEllipse(330, 195, 140, 22); landscape.fillEllipse(300, 300, 120, 18);
-      landscape.fillStyle(0xa1b79a, 0.72); landscape.fillRect(235, 218, 195, 12);
-      landscape.lineStyle(2, 0x9bd8dd, 0.22); landscape.lineBetween(260, 162, 405, 162); landscape.lineBetween(258, 176, 400, 176);
-    } else if (!hasCampaignBackground && stage === 4) {
-      landscape.lineStyle(7, 0x7c786a, 0.56); landscape.lineBetween(295, 86, 295, 280); landscape.lineBetween(440, 86, 440, 280);
-      landscape.lineStyle(1, 0xb8a87d, 0.42); landscape.lineBetween(300, 100, 435, 100); landscape.lineBetween(300, 270, 435, 270);
-      landscape.lineStyle(3, this.lantern.lanternOn ? 0x8b8d76 : 0x88e4d4, this.lantern.lanternOn ? 0.25 : 0.8);
-      landscape.beginPath(); landscape.moveTo(300, 230); landscape.lineTo(350, 230); landscape.lineTo(385, 245); landscape.lineTo(435, 245); landscape.strokePath();
-    } else if (!hasCampaignBackground && stage === 5) {
-      landscape.lineStyle(2, 0xd1ba83, 0.42); landscape.strokeCircle(320, 175, 128); landscape.strokeCircle(320, 175, 92);
-      landscape.fillStyle(0x1f5567, 0.55); landscape.fillRect(535, 82, 12, 202); landscape.lineStyle(3, 0x6acfe0, 0.6); landscape.lineBetween(541, 278, 541, 98);
-    } else if (!hasCampaignBackground && stage === 6) {
-      landscape.fillStyle(0x245263, 0.78); landscape.fillRect(0, 246, 640, 28);
-      landscape.lineStyle(2, 0x66bfd0, 0.45); landscape.lineBetween(0, 246, 640, 246); landscape.lineBetween(0, 274, 640, 274);
-      landscape.lineStyle(2, 0xb9d08b, 0.5); landscape.lineBetween(70, 185, 570, 185); landscape.lineBetween(70, 292, 570, 292);
-    } else if (!hasCampaignBackground && stage === 7) {
-      landscape.lineStyle(3, 0xa9a18d, 0.32); landscape.strokeCircle(320, 180, 122); landscape.strokeCircle(320, 180, 76);
-      landscape.lineStyle(1, 0xd1bf94, 0.2); landscape.lineBetween(320, 58, 320, 300); landscape.lineBetween(198, 180, 442, 180);
-    } else if (!hasCampaignBackground && stage === 9) {
-      landscape.lineStyle(3, 0xe9d18b, 0.55); landscape.strokeCircle(320, 160, 76); landscape.strokeCircle(320, 160, 110);
-      landscape.lineStyle(2, 0x74bd95, 0.5); landscape.lineBetween(320, 210, 320, 292); landscape.lineBetween(270, 238, 190, 275); landscape.lineBetween(370, 238, 450, 275);
-    }
-    this.track(landscape);
   }
 
   private addNarrativeProps(level: number): void {
     const props: Array<[string, number, number]> = level === 0 ? [['beacon_stone', 300, 230], ['woods_arch_locked', 486, 166], ['pedestal_empty', 410, 225]]
-      : level === 1 ? []
-      : level === 2 ? [['mural_tablet', 320, 72], ['pedestal_empty', 320, 190], ['receiver_off', 530, 194]]
-      : level === 4 ? [['receiver_off', 320, 85], ['lock_moon_off', 220, 130], ['lock_moon_off', 420, 130], ['lock_sun_off', 320, 218]]
-      : level === 5 ? [['pedestal_lit', 120, 205], ['mirror_0', 160, 170], ['mirror_1', 250, 170], ['mirror_2', 350, 170], ['receiver_off', 470, 145], ['receiver_off', 470, 205], ['lock_sun_off', 320, 80], ['mural_tablet', 535, 86]]
-      : level === 7 ? [['guardian_statue', 320, 170], ['lock_sun_off', 200, 126], ['lock_sun_off', 440, 126], ['lock_moon_off', 320, 222], ['ruins_altar', 320, 82], ['pedestal_empty', 120, 205], ['mirror_1', 220, 175], ['mirror_1', 420, 175], ['receiver_off', 200, 126], ['receiver_off', 440, 126], ...(this.progress.flags['l7-solved'] ? [['shadow_npc', 320, 98] as [string, number, number]] : [])]
-      : level === 8 ? [['mirror_0', 220, 175], ['mirror_2', 420, 175], ['shadow_npc', 320, 114], ['crystal_balance', 320, 68]]
-      : [['heart_tree_0', 320, 157], ['crystal_memory', 158, 192], ['crystal_hope', 320, 200], ['crystal_balance', 480, 192], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
+      : [];
     for (const [key, x, y] of props) {
-      if (level === 9 && key === 'heart_tree_0') continue;
       this.addProp(key, x, y, level === 0 || key === 'woods_arch_locked' || key === 'heart_tree_0' ? 1 : 0.9);
     }
     if (level === 0) {
@@ -1966,30 +1932,8 @@ export class CampaignScene extends Phaser.Scene {
       this.addWoodsArt('poem', 'poem_fragment', WHISPERING_WOODS.anchors.poem, WOODS_POEM_ART.width, WOODS_POEM_ART.height);
       this.createWoodsTutorialCue();
       this.updateRuneRevealVisuals();
-    } else if (level === 2) {
-      this.addLevelArt('room-bookshelf', 74, 143, undefined, undefined, 4);
-      this.addLevelArt('room-bookshelf', 566, 143, undefined, undefined, 4);
-      this.addLevelArt('room-test-desk', 208, 134, 96, 68, 4);
-      // Keep the portrait artwork proportional within its existing vertical slots.
-      this.addLevelArt('room-mural-fifth', 432, 92, 62 * 96 / 136, 62, 4);
-      this.addLevelArt(this.progress.flags['l2-secret'] ? 'room-panel-open' : 'room-panel-closed', 432, 152, 58 * 116 / 148, 58, 4);
-      this.addLevelArt(this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed', 548, 194, 112, 112, 4);
-    } else if (level === 4) {
-      this.addLevelArt('call-idle', 320, 85, 26, 26, 8);
-    } else if (level === 5) {
-      this.addLevelArt('tower-lamp-dim', 541, 108, 48, 48, 8);
-    } else if (level === 9) {
-      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
-        const state = this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty';
-        this.addLevelArt(`${name}-alcove-${state}`, x, y, 52, 52, 8);
-      }
-      const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.addLevelArt(core, 320, 115, 46, 46, 8);
     }
     if (level === 1) this.drawFireflyRoute();
-    if (level === 2 && this.progress.flags['l2-memory'] === true) this.addProp('crystal_memory', 320, 190, 0.9);
-    if (level === 2 && this.progress.flags['l2-crystal'] === true) this.drawFifthMural();
-    if (level === 5 && this.progress.flags['l5-power'] === true && !this.progress.flags['l5-crystal']) this.addProp('crystal_hope', 445, 168, 0.9);
   }
 
   private registerLevel(level: number): void {
@@ -2112,30 +2056,6 @@ export class CampaignScene extends Phaser.Scene {
     const progress=Math.min(1,this.woodsFlyPhase/1500), t=this.woodsFlyPhase<1500?progress:1;
     const x=origin.x+(target.x-origin.x)*t, y=origin.y+(target.y-origin.y)*t;
     fly.setPosition(x,y); glow.setPosition(x,y);
-  }
-
-  private drawFifthMural(): void {
-    if (this.objects.some((object) => object instanceof Phaser.GameObjects.Graphics && object.getData('campaign-fifth-mural') === true)) return;
-    const muralArt = getLevelArtKey(2, 'room-mural-fifth');
-    const hasMuralCaption = this.objects.some((object) =>
-      object instanceof Phaser.GameObjects.Text && object.getData('campaign-fifth-mural-caption') === true,
-    );
-    if (!hasMuralCaption) {
-      const caption = this.add.text(432, 53, 'BẢO VỆ · BÁNH XE MẶT TRỜI', { fontFamily: 'Segoe UI, sans-serif', fontSize: '7px', color: '#ffe7a4', backgroundColor: '#07151ccc', padding: { x: 2, y: 1 } }).setOrigin(0.5).setDepth(22);
-      caption.setData('campaign-fifth-mural-caption', true);
-      this.track(caption);
-    }
-    if (muralArt && this.textures.exists(muralArt)) return;
-    const muralWidth = 62 * 96 / 136;
-    const mural = this.add.graphics().setDepth(17).setPosition(432, 92);
-    mural.setData('campaign-fifth-mural', true);
-    mural.fillStyle(0x283342, 0.95); mural.fillRoundedRect(-muralWidth / 2, -31, muralWidth, 62, 4);
-    mural.lineStyle(2, 0xe4c477, 0.8); mural.strokeRoundedRect(-muralWidth / 2 + 1, -30, muralWidth - 2, 60, 3);
-    mural.lineStyle(1, 0x9fb1bd, 0.45);
-    for (const [x, y] of [[-14, -23], [8, -24], [16, -13], [-15, 18], [15, 23]] as Array<[number, number]>) mural.strokeCircle(x, y, 1);
-    mural.fillStyle(0x1a1c25, 0.95); mural.fillEllipse(0, 13, 12, 24); mural.fillCircle(0, -10, 5);
-    mural.lineStyle(2, 0xf4d574, 0.85); mural.strokeCircle(0, -6, 14);
-    this.track(mural);
   }
 
   private getLumoMark(mark: string, x?: number, y?: number): { x: number; y: number } {
@@ -2373,18 +2293,6 @@ export class CampaignScene extends Phaser.Scene {
     return image;
   }
 
-  private setLevelArtAt(x: number, y: number, filename: string): void {
-    const key = getLevelArtKey(this.progress.level, filename);
-    if (!key || !this.textures.exists(key)) return;
-    const image = this.objects.find((object): object is Phaser.GameObjects.Image =>
-      object instanceof Phaser.GameObjects.Image
-      && object.texture.key.startsWith('art_')
-      && Math.abs(object.x - x) < 0.1
-      && Math.abs(object.y - y) < 0.1,
-    );
-    if (image && image.texture.key !== key) image.setTexture(key);
-  }
-
   private refreshCampaignArtVisuals(level: number): void {
     if (level === 0) {
       const gateOpen = this.progress.flags['l0-gate-open'] === true;
@@ -2411,16 +2319,6 @@ export class CampaignScene extends Phaser.Scene {
       const tabletKey = getLevelArtKey(0, this.progress.lanternOn ? 'beacon-stone-illuminated' : 'beacon-stone-hidden');
       if (tablet instanceof Phaser.GameObjects.Image && tabletKey && this.textures.exists(tabletKey) && tablet.texture.key !== tabletKey) tablet.setTexture(tabletKey);
       this.setForestEdgeArt('sun-eye', this.progress.flags['l0-gate-open'] ? 'sun-eye-full' : this.forestEdgeChargeMs > 0 ? 'sun-eye-receiving' : 'sun-eye-dormant');
-    } else if (level === 2) {
-      this.setLevelArtAt(548, 194, this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed');
-    } else if (level === 7) {
-      this.setLevelArtAt(320, 170, `statue-notch-${this.value('statue') % 4}`);
-    } else if (level === 9) {
-      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
-        this.setLevelArtAt(x, y, `${name}-alcove-${this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty'}`);
-      }
-      const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.setLevelArtAt(320, 115, core);
     }
   }
 
@@ -2466,80 +2364,18 @@ export class CampaignScene extends Phaser.Scene {
   private refreshCampaignPuzzleVisuals(): void {
     const level = this.progress.level;
     this.refreshCampaignArtVisuals(level);
-    if (![0, 3, 4, 5, 7, 9].includes(level)) return;
+    if (level !== 0) return; // every later level draws its own beams in its controller
     if (!this.campaignBeamGraphics || !this.campaignBeamGraphics.active) {
       this.campaignBeamGraphics = this.add.graphics().setDepth(6);
       this.track(this.campaignBeamGraphics);
     }
     const graphics = this.campaignBeamGraphics;
     graphics.clear();
-    const line = (points: Array<[number, number]>, active: boolean): void => {
-      graphics.lineStyle(3, active ? 0xffdf83 : 0x52636a, active ? 0.9 : 0.32);
-      graphics.beginPath();
-      graphics.moveTo(points[0][0], points[0][1]);
-      for (const [x, y] of points.slice(1)) graphics.lineTo(x, y);
-      graphics.strokePath();
-    };
-    if (level === 0) {
-      graphics.clear();
-      if (this.forestEdgeChargeMs > 0) {
-        const t = Math.min(1, this.forestEdgeChargeMs / FOREST_EDGE.chargeMs);
-        graphics.lineStyle(2 + t, 0xffe680, 0.35 + t * 0.55);
-        graphics.beginPath(); graphics.moveTo(this.player.x + 6, this.player.y + 2); graphics.lineTo(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8); graphics.strokePath();
-        graphics.fillStyle(0xffe680, 0.25 + t * 0.45); graphics.fillCircle(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8, 3 + t * 4);
-      }
-      return;
-    }
-    const light = this.lantern.lanternPlaced && this.lantern.lanternOn;
-    if (level === 4) {
-      graphics.lineStyle(5, 0x8b8d76, 0.78);
-      graphics.lineBetween(295, 80, 295, 280); graphics.lineBetween(440, 80, 440, 280);
-      graphics.lineStyle(3, this.progress.flags['l4-latch-a'] ? 0x83d6a2 : 0xffdf83, 0.85); graphics.lineBetween(295, 150, 295, 195);
-      graphics.lineStyle(3, this.progress.flags['l4-latch-b'] ? 0x83d6a2 : 0xffdf83, 0.85); graphics.lineBetween(440, 155, 440, 200);
-      graphics.lineStyle(2, this.lantern.lanternOn ? 0x8b8d76 : 0x88e4d4, this.lantern.lanternOn ? 0.22 : 0.85);
-      graphics.beginPath(); graphics.moveTo(300, 230); graphics.lineTo(350, 230); graphics.lineTo(385, 245); graphics.lineTo(435, 245); graphics.strokePath();
-      if (!this.lantern.lanternOn) {
-        graphics.lineStyle(3, 0x88e4d4, 0.9);
-        graphics.beginPath(); graphics.moveTo(350, 230); graphics.lineTo(385, 245); graphics.lineTo(430, 245); graphics.lineTo(475, 265); graphics.strokePath();
-        graphics.fillStyle(0x88e4d4, 0.82);
-        for (const [x, y] of [[350, 230], [385, 245], [430, 245], [475, 265]] as Array<[number, number]>) graphics.fillCircle(x, y, 3);
-      }
-      for (const [mark, x, y] of [['a', 220, 130], ['b', 420, 130], ['c', 320, 218]] as Array<[string, number, number]>) {
-        const arrived = this.progress.flags[`l4-at-${mark}`] === true;
-        graphics.fillStyle(arrived ? 0xffdf83 : 0x52636a, arrived ? 0.9 : 0.35); graphics.fillCircle(x, y, 7);
-      }
-      if (this.progress.flags['l4-latch-c']) { graphics.lineStyle(3, 0x83d6a2, 0.85); graphics.lineBetween(430, 275, 500, 275); }
-    } else if (level === 5) {
-      const common = light && this.value('tower-g0') === 2;
-      const a = common && this.value('tower-g1') === 1;
-      const b = common && this.value('tower-g2') === 3;
-      const c = this.progress.flags['l5-called-high'] === true && Math.hypot(this.lumo.sprite.x - 320, this.lumo.sprite.y - 80) < 36;
-      line([[120, 205], [160, 170]], light);
-      line([[160, 170], [250, 170], [470, 145]], a);
-      line([[160, 170], [250, 170], [350, 170], [470, 205]], b);
-      graphics.fillStyle(c ? 0xffdf83 : 0x52636a, c ? 0.9 : 0.32); graphics.fillCircle(320, 80, 9);
-      if (this.progress.flags['l5-water-returned']) {
-        graphics.lineStyle(3, 0x57cbe0, 0.85); graphics.beginPath(); graphics.moveTo(575, 100); graphics.lineTo(575, 280); graphics.strokePath();
-      }
-    } else if (level === 7) {
-      const left = this.isRuinsOuterBeamReady('left');
-      const right = this.isRuinsOuterBeamReady('right');
-      line([[120, 205], [320, 170], [200, 126]], left);
-      line([[120, 205], [320, 170], [440, 126]], right);
-      graphics.fillStyle(this.value('statue') === 2 ? 0x283743 : 0xffdf83, this.value('statue') === 2 ? 0.88 : 0.2);
-      graphics.fillEllipse(320, 221, 42, 18);
-      graphics.fillStyle(left && right ? 0xffdf83 : 0x52636a, left && right ? 0.95 : 0.4);
-      graphics.fillCircle(200, 126, 8); graphics.fillCircle(440, 126, 8);
-    } else {
-      const memory = light && this.value('heart-memory') === 1;
-      const balance = light && this.value('heart-balance') === 2;
-      const lumo = this.progress.flags['l9-called-heart'] === true && Math.hypot(this.lumo.sprite.x - 320, this.lumo.sprite.y - 125) < 36;
-      line([[100, 205], [320, 200]], light);
-      line([[320, 200], [220, 220], [180, 145]], memory);
-      line([[320, 200], [420, 220], [460, 145]], balance);
-      graphics.fillStyle(this.value('heart-statue') === 2 ? 0x283743 : 0xffdf83, this.value('heart-statue') === 2 ? 0.88 : 0.2); graphics.fillEllipse(320, 125, 42, 18);
-      graphics.fillStyle(lumo ? 0xffdf83 : 0x52636a, lumo ? 0.9 : 0.35); graphics.fillCircle(320, 125, 7);
-      graphics.fillStyle(this.progress.flags['l9-roots'] ? 0x83d6a2 : 0x52636a, this.progress.flags['l9-roots'] ? 0.85 : 0.3); graphics.fillRoundedRect(270, 152, 100, 9, 4);
+    if (this.forestEdgeChargeMs > 0) {
+      const t = Math.min(1, this.forestEdgeChargeMs / FOREST_EDGE.chargeMs);
+      graphics.lineStyle(2 + t, 0xffe680, 0.35 + t * 0.55);
+      graphics.beginPath(); graphics.moveTo(this.player.x + 6, this.player.y + 2); graphics.lineTo(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8); graphics.strokePath();
+      graphics.fillStyle(0xffe680, 0.25 + t * 0.45); graphics.fillCircle(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8, 3 + t * 4);
     }
   }
 
