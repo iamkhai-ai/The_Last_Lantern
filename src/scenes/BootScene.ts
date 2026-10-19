@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { AssetLoader } from '../art/AssetLoader';
 import { ProceduralTextures } from '../art/ProceduralTextures';
+import { loadMenuFont } from '../art/MenuFont';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -27,6 +28,8 @@ export class BootScene extends Phaser.Scene {
       }
     }
 
+    // Canvas text must be measured with the real font, never a cold-load fallback.
+    await loadMenuFont();
     this.scene.start('MenuScene');
   }
 }

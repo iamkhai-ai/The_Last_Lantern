@@ -1,20 +1,33 @@
 import Phaser from 'phaser';
-import { getLevelArtKey, getNhinhTexture } from '../art/CampaignArt';
-import { EffectsSystem } from '../systems/EffectsSystem';
+import menuDawnUrl from '../../Art_References/07_The_Last_Dawn.png?url';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
 import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 
+const MENU_TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
+  fontFamily: 'Bitter, serif', fontStyle: '500',
+  shadow: { offsetX: 0, offsetY: 1, color: '#10180f', blur: 1, stroke: false, fill: true },
+};
+
 export class MenuScene extends Phaser.Scene {
-  private effectsSystem!: EffectsSystem;
   private menuButtons: Phaser.GameObjects.Text[] = [];
+  private selectionDot!: Phaser.GameObjects.Arc;
   private selectedIndex = 0;
   private hasSavedGame = false;
   private actions: Array<() => void> = [];
+  private confirmationOpen = false;
+  private confirmationIndex = 0;
+  private confirmationObjects: Phaser.GameObjects.GameObject[] = [];
+  private confirmationButtons: Phaser.GameObjects.Text[] = [];
+  private leaving = false;
 
   constructor() {
     super({ key: 'MenuScene' });
+  }
+
+  public preload(): void {
+    if (!this.textures.exists('menu_dawn')) this.load.image('menu_dawn', menuDawnUrl);
   }
 
   public create(): void {
@@ -22,232 +35,199 @@ export class MenuScene extends Phaser.Scene {
     this.selectedIndex = 0;
     this.menuButtons = [];
     this.actions = [];
+    this.confirmationOpen = false;
+    this.confirmationObjects = [];
+    this.confirmationButtons = [];
+    this.leaving = false;
+    this.input.setTopOnly(true);
 
-    const backdropKey = getLevelArtKey(9, 'sanctuary-base');
-    if (backdropKey && this.textures.exists(backdropKey)) {
-      const backdrop = this.add.image(320, 180, backdropKey);
-      backdrop.setDepth(0);
-      this.tweens.add({ targets: backdrop, scale: 1.06, duration: 16000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-      const veil = this.add.graphics().setDepth(10);
-      veil.fillStyle(0x04121a, 0.22);
-      veil.fillRect(0, 0, 640, 360);
-      veil.fillStyle(0x04121a, 0.38);
-      veil.fillRect(0, 0, 252, 360);
+    if (this.textures.exists('menu_dawn')) {
+      this.add.image(320, 180, 'menu_dawn').setDisplaySize(640, 360).setDepth(0);
     } else {
       WorldFactory.buildZone(this, 'hub', 0, false);
     }
 
-    const halo = this.add.image(330, 294, 'light_radial');
-    halo.setDepth(19);
-    halo.setScale(0.9);
-    halo.setAlpha(0.8);
-
-    const menuNhinh = getNhinhTexture('idle_lit', 'right', 0);
-    if (!menuNhinh) throw new Error('Missing required Nhinh menu frame: idle_lit/right/0');
-    const linh = this.add.sprite(334, 292, menuNhinh);
-    linh.setDepth(22);
-
-    const lumo = this.add.sprite(382, 264, 'lumo_0');
-    lumo.setDepth(25);
-    this.tweens.add({
-      targets: lumo,
-      y: 258,
-      duration: 1200,
-      yoyo: true,
-      repeat: -1,
-    });
-
-    this.effectsSystem = new EffectsSystem(this);
-    this.effectsSystem.setupZoneEffects('hub', false);
-
-    // Top-left and top-right decorative HUD pills matching 00_cover.png
-    const hudDecor = this.add.graphics();
-    hudDecor.setDepth(75);
-    hudDecor.fillStyle(0x0c1d24, 0.86);
-    hudDecor.lineStyle(1, 0x3b5c63, 0.85);
-    hudDecor.fillRoundedRect(14, 12, 166, 30, 5);
-    hudDecor.strokeRoundedRect(14, 12, 166, 30, 5);
-    hudDecor.fillRoundedRect(462, 12, 164, 30, 5);
-    hudDecor.strokeRoundedRect(462, 12, 164, 30, 5);
-
-    hudDecor.fillStyle(0xd8b869, 1);
-    hudDecor.fillCircle(30, 27, 7.5);
-    for (const cx of [60, 82, 104]) {
-      hudDecor.fillStyle(0x3e5259, 1);
-      hudDecor.beginPath();
-      hudDecor.moveTo(cx, 17);
-      hudDecor.lineTo(cx + 7, 27);
-      hudDecor.lineTo(cx, 37);
-      hudDecor.lineTo(cx - 7, 27);
-      hudDecor.closePath();
-      hudDecor.fillPath();
+    // Preserve the illustration's golden light and its own Nhinh/Lumo composition.
+    // A moss-toned veil gives the left menu contrast without turning dawn into night.
+    const veil = this.add.graphics().setDepth(10);
+    veil.fillStyle(0x182318, 0.10);
+    veil.fillRect(0, 0, 640, 360);
+    for (let x = 0; x < 350; x += 2) {
+      veil.fillStyle(0x101c15, 0.86 * Math.pow(1 - x / 350, 1.05));
+      veil.fillRect(x, 0, 2, 360);
+    }
+    // Ground the small footer against the bright water and flowers.
+    for (let y = 310; y < 360; y += 2) {
+      veil.fillStyle(0x101c15, 0.55 * (y - 310) / 50);
+      veil.fillRect(0, y, 640, 2);
     }
 
-    const topRightTitle = this.add.text(476, 27, 'PLAYTEST · MÀN 01–10', {
-      fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '11px',
-      fontStyle: 'bold',
-      color: '#cddbd8',
-    });
-    topRightTitle.setOrigin(0, 0.5);
-    topRightTitle.setDepth(76);
-
-    // Main Title Card on Left (matching 00_cover.png)
-    const card = this.add.graphics();
-    card.setDepth(80);
-    card.fillStyle(0x07151c, 0.94);
-    card.lineStyle(1.5, 0xc9be82, 0.9);
-    card.fillRoundedRect(28, 38, 330, 148, 8);
-    card.strokeRoundedRect(28, 38, 330, 148, 8);
-
-    const title1 = this.add.text(46, 52, 'THE LAST\nLANTERN', {
-      fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '34px',
-      fontStyle: 'bold',
-      color: '#f7dfaa',
-      lineSpacing: -4,
-    });
-    title1.setDepth(81);
-
-    const subVi = this.add.text(46, 134, 'KHU RỪNG ÁNH SÁNG', {
-      fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '13px',
-      fontStyle: 'bold',
-      color: '#d7e6e1',
-    });
-    subVi.setDepth(81);
-
-    const tagline = this.add.text(
-      46,
-      156,
-      '2D TOP-DOWN  •  COZY MYSTERY  •  LIGHT PUZZLES',
-      {
-        fontFamily: 'Segoe UI, sans-serif',
-        fontSize: '9.5px',
-        color: '#9eb8b2',
-      }
-    );
-    tagline.setDepth(81);
-
-    // Interactive Menu Panel below Title Card
-    const menuPanel = this.add.graphics();
-    menuPanel.setDepth(80);
-    menuPanel.fillStyle(0x07151c, 0.92);
-    menuPanel.lineStyle(1.2, 0x4d7370, 0.85);
-    menuPanel.fillRoundedRect(28, 198, 250, 126, 7);
-    menuPanel.strokeRoundedRect(28, 198, 250, 126, 7);
+    this.add.text(38, 48, 'THE LAST\nLANTERN', {
+      fontFamily: 'Georgia, serif', fontSize: '29px', fontStyle: 'bold',
+      color: '#f4dfad', lineSpacing: -2,
+    }).setDepth(81);
+    this.add.text(40, 124, 'Khu rừng ánh sáng', {
+      ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf',
+    }).setDepth(81);
 
     const items: Array<{ label: string; action: () => void }> = [];
-
-    if (this.hasSavedGame) {
-      items.push({
-        label: 'TIẾP TỤC (CONTINUE)',
-        action: () => this.continueGame(),
-      });
-    }
-
+    if (this.hasSavedGame) items.push({ label: 'Tiếp tục', action: () => this.continueGame() });
+    items.push({ label: 'Hành trình mới', action: () => this.startNewGame() });
     items.push({
-      label: 'TRÒ CHƠI MỚI (NEW GAME)',
-      action: () => this.startNewGame(),
+      label: this.soundLabel(),
+      action: () => { SoundSystem.toggleMute(); this.refreshMenuHighlight(); },
     });
-
-    items.push({
-      label: SoundSystem.isMuted() ? 'ÂM THANH: TẮT' : 'ÂM THANH: BẬT',
-      action: () => {
-        SoundSystem.toggleMute();
-        this.refreshMenuHighlight();
-      },
-    });
-
+    this.selectionDot = this.add.circle(42, 198, 2.5, 0xe8c777).setDepth(82);
     items.forEach((item, idx) => {
-      const btn = this.add.text(48, 218 + idx * 32, item.label, {
-        fontFamily: 'Segoe UI, sans-serif',
-        fontSize: '13px',
-        fontStyle: 'bold',
-        color: '#cddbd8',
-      });
-      btn.setDepth(82);
-      btn.setInteractive({ useHandCursor: true });
+      const btn = this.add.text(56, 198 + idx * 33, item.label, {
+        ...MENU_TEXT_STYLE, fontSize: idx === items.length - 1 ? '12px' : '15px',
+        color: '#efe6cf',
+      }).setOrigin(0, 0.5).setDepth(82).setInteractive({ useHandCursor: true });
       btn.on('pointerover', () => {
+        if (this.confirmationOpen || this.leaving) return;
         this.selectedIndex = idx;
         this.refreshMenuHighlight();
       });
       btn.on('pointerdown', () => {
+        if (this.confirmationOpen || this.leaving) return;
         this.selectedIndex = idx;
-        this.actions[idx]?.();
+        this.triggerSelected();
       });
       this.menuButtons.push(btn);
       this.actions.push(item.action);
     });
-
     this.refreshMenuHighlight();
 
-    const footerBackdrop = this.add.graphics();
-    footerBackdrop.setDepth(81);
-    footerBackdrop.fillStyle(0x07151c, 0.72);
-    footerBackdrop.fillRoundedRect(24, 331, 336, 21, 4);
+    this.add.text(38, 337, '↑↓ Chọn · Enter Xác nhận', {
+      ...MENU_TEXT_STYLE, fontSize: '10px', color: '#efe6cf',
+    }).setDepth(82);
+    this.add.text(620, 347, 'Bản chơi thử · 01–10', {
+      ...MENU_TEXT_STYLE, fontSize: '9px', color: '#d2c4a6',
+    }).setOrigin(1, 1).setDepth(82);
 
-    const footerHint = this.add.text(
-      28,
-      338,
-      'Nhấn [Enter / Space / E] hoặc Click chuột để chọn  •  [W/S] Di chuyển mục',
-      {
-        fontFamily: 'Segoe UI, sans-serif',
-        fontSize: '10px',
-        color: '#a8c4bd',
-      }
-    );
-    footerHint.setDepth(82);
-
-    const buildTag = this.add.text(626, 350, 'PLAYTEST BUILD · MÀN 01–10', {
-      fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '9px',
-      color: '#7f9a94',
-    });
-    buildTag.setOrigin(1, 1);
-    buildTag.setDepth(82);
-
-    if (this.input.keyboard) {
-      this.input.keyboard.on('keydown-UP', () => this.moveSelection(-1));
-      this.input.keyboard.on('keydown-W', () => this.moveSelection(-1));
-      this.input.keyboard.on('keydown-DOWN', () => this.moveSelection(1));
-      this.input.keyboard.on('keydown-S', () => this.moveSelection(1));
-      this.input.keyboard.on('keydown-ENTER', () => this.triggerSelected());
-      this.input.keyboard.on('keydown-SPACE', () => this.triggerSelected());
-      this.input.keyboard.on('keydown-E', () => this.triggerSelected());
+    const keyboard = this.input.keyboard;
+    if (keyboard) {
+      keyboard.on('keydown', this.handleKey, this);
+      this.events.once('shutdown', () => keyboard.off('keydown', this.handleKey, this));
     }
   }
 
+  private soundLabel(): string {
+    return SoundSystem.isMuted() ? 'Âm thanh: Tắt' : 'Âm thanh: Bật';
+  }
+
+  private handleKey(event: KeyboardEvent): void {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyS', 'Enter', 'Space', 'KeyE', 'Escape'].includes(event.code)) {
+      event.preventDefault();
+    }
+    // Holding the key that opens the dialog must never also confirm deletion.
+    if (event.repeat || this.leaving) return;
+    if (event.code === 'Escape') {
+      if (this.confirmationOpen) this.closeConfirmation();
+      return;
+    }
+    const direction = ['ArrowUp', 'KeyW'].includes(event.code) ? -1
+      : ['ArrowDown', 'KeyS'].includes(event.code) ? 1 : 0;
+    if (this.confirmationOpen) {
+      if (direction || event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
+        this.confirmationIndex = 1 - this.confirmationIndex;
+        this.refreshConfirmation();
+      } else if (['Enter', 'Space', 'KeyE'].includes(event.code)) {
+        this.chooseConfirmation();
+      }
+      return;
+    }
+    if (direction) this.moveSelection(direction);
+    else if (['Enter', 'Space', 'KeyE'].includes(event.code)) this.triggerSelected();
+  }
+
   private moveSelection(delta: number): void {
-    this.selectedIndex =
-      (this.selectedIndex + delta + this.menuButtons.length) %
-      this.menuButtons.length;
+    this.selectedIndex = (this.selectedIndex + delta + this.menuButtons.length) % this.menuButtons.length;
     SoundSystem.playMirrorRotate();
     this.refreshMenuHighlight();
   }
 
   private triggerSelected(): void {
+    if (this.confirmationOpen || this.leaving) return;
     this.actions[this.selectedIndex]?.();
   }
 
   private refreshMenuHighlight(): void {
-    const soundIdx = this.menuButtons.length - 1;
     this.menuButtons.forEach((btn, idx) => {
-      let baseText = btn.text.replace(/^▸\s*/, '');
-      if (idx === soundIdx) {
-        baseText = SoundSystem.isMuted() ? 'ÂM THANH: TẮT' : 'ÂM THANH: BẬT';
-      }
-      if (idx === this.selectedIndex) {
-        btn.setText(`▸ ${baseText}`);
-        btn.setColor('#ffe680');
-      } else {
-        btn.setText(baseText);
-        btn.setColor('#cddbd8');
-      }
+      if (idx === this.menuButtons.length - 1) btn.setText(this.soundLabel());
+      btn.setColor(idx === this.selectedIndex ? '#e8c777' : '#efe6cf');
     });
+    const selected = this.menuButtons[this.selectedIndex];
+    if (selected) this.selectionDot.setPosition(42, selected.y);
   }
 
   public startNewGame(): void {
+    if (this.confirmationOpen || this.leaving) return;
+    if (CampaignSaveSystem.hasSave() || SaveSystem.hasSave()) {
+      this.openConfirmation();
+      return;
+    }
+    this.beginNewGame();
+  }
+
+  private openConfirmation(): void {
+    this.confirmationOpen = true;
+    this.confirmationIndex = 0; // Safe action is always the initial selection.
+    this.selectionDot.setVisible(false);
+    const blocker = this.add.rectangle(320, 180, 640, 360, 0x020b10, 0.78)
+      .setDepth(100).setInteractive();
+    const panel = this.add.rectangle(320, 180, 360, 170, 0x0b2027).setDepth(101);
+    const title = this.add.text(168, 112, 'Bắt đầu hành trình mới?', {
+      ...MENU_TEXT_STYLE, fontSize: '17px', color: '#f4dfad',
+    }).setDepth(102);
+    const warning = this.add.text(168, 147, 'Tiến trình đã lưu sẽ bị xóa.\nBạn có muốn bắt đầu lại?', {
+      ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf', lineSpacing: 6,
+    }).setDepth(102);
+    const hint = this.add.text(168, 242, '←→ Chọn · Enter Xác nhận · Esc Quay lại', {
+      ...MENU_TEXT_STYLE, fontSize: '10px', color: '#d2c4a6',
+    }).setDepth(102);
+    this.confirmationObjects = [blocker, panel, title, warning, hint];
+    this.confirmationButtons = ['Quay lại', 'Bắt đầu lại'].map((label, index) => {
+      const button = this.add.text(168 + index * 174, 212, label, {
+        ...MENU_TEXT_STYLE, fontSize: '14px', color: '#efe6cf',
+      }).setOrigin(0, 0.5).setDepth(102).setInteractive({ useHandCursor: true });
+      // A stationary cursor must not turn the safe default into a destructive Enter.
+      // Mouse activation is explicit; keyboard selection changes only with direction keys.
+      button.on('pointerdown', () => {
+        this.confirmationIndex = index;
+        this.chooseConfirmation();
+      });
+      this.confirmationObjects.push(button);
+      return button;
+    });
+    this.refreshConfirmation();
+  }
+
+  private refreshConfirmation(): void {
+    this.confirmationButtons.forEach((button, index) => {
+      button.setColor(index === this.confirmationIndex ? '#e8c777' : '#efe6cf');
+    });
+  }
+
+  private chooseConfirmation(): void {
+    if (!this.confirmationOpen || this.leaving) return;
+    const confirmed = this.confirmationIndex === 1;
+    this.closeConfirmation();
+    if (confirmed) this.beginNewGame();
+  }
+
+  private closeConfirmation(): void {
+    this.confirmationOpen = false;
+    this.confirmationObjects.forEach(object => object.destroy());
+    this.confirmationObjects = [];
+    this.confirmationButtons = [];
+    this.selectionDot.setVisible(true);
+    this.refreshMenuHighlight();
+  }
+
+  private beginNewGame(): void {
+    if (this.leaving) return;
+    this.leaving = true;
     CampaignSaveSystem.clear();
     SaveSystem.clear();
     SoundSystem.playLanternToggle(true);
@@ -255,6 +235,8 @@ export class MenuScene extends Phaser.Scene {
   }
 
   public continueGame(): void {
+    if (this.confirmationOpen || this.leaving) return;
+    this.leaving = true;
     if (CampaignSaveSystem.isCompleted()) {
       this.scene.start('EndingScene', { showCredits: true, campaign: true });
       return;
@@ -273,7 +255,4 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  public update(_time: number, delta: number): void {
-    this.effectsSystem?.update(delta);
-  }
 }
