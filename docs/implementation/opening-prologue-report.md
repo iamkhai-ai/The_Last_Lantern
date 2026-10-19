@@ -1,7 +1,7 @@
 # Tiếng gọi trong sương — báo cáo triển khai và kiểm chứng
 
 Ngày: 2026-10-19 (Asia/Saigon).
-Trạng thái: prologue đã implement, build/checks và browser regression PASS; human art acceptance và bản demo giới hạn 01–04 chưa hoàn tất. Không push/merge/deploy.
+Báo cáo lịch sử của giai đoạn prologue trước khi thêm demo/menu mới. Trạng thái kiểm chứng và bàn giao cập nhật: [demo-menu-integration-report.md](demo-menu-integration-report.md). Các mục bên dưới giữ nguyên bằng chứng tại thời điểm giai đoạn đầu.
 
 ## Revision và vai trò
 

@@ -302,7 +302,7 @@ const MENU_METHODS = [
   'cancelNewGame', 'activateConfirm', 'onConfirmPointer', 'triggerSelected',
   'moveSelection', 'refreshMenuHighlight', 'wireInput', 'armConfirm', 'onKey',
   'clearKeyListeners', 'registerShutdownGuard', 'clearShutdownGuard', 'teardownInput',
-  'continueGame', 'openBlockedSaveMessage', 'setConfirmVisible', 'hasAnySave',
+  'continueGame', 'openBlockedSaveMessage', 'setConfirmVisible', 'hasAnySave', 'soundLabel',
 ];
 
 function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStage, noSave = false } = {}) {
@@ -343,7 +343,9 @@ function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStag
     menuButtons: [makeText(), makeText(), makeText()],
     confirmButtons: [makeText(), makeText()],
     confirmText: makeText(),
-    confirmBackdrop: { visible: false, setVisible(value) { this.visible = value; return this; } },
+    confirmBackdrop: makeText(),
+    confirmDecorations: [],
+    selectionDot: { setVisible() {}, setPosition() {} },
     input: { keyboard },
     events,
     calls,
@@ -355,7 +357,7 @@ function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStag
   const symbols = {
     RELEASE_POLICY: policy,
     NEW_GAME_CONFIRM_TEXT: CONFIRM_SENTENCE,
-    CONFIRM_LABELS: ['HỦY', 'CHƠI MỚI'],
+    CONFIRM_LABELS: ['Quay lại', 'Bắt đầu lại'],
     CampaignSaveSystem: {
       load: (...args) => CampaignSaveSystem.load(...args),
       hasSave: () => CampaignSaveSystem.hasSave(),
@@ -929,11 +931,13 @@ const CASES = [
     },
   },
   {
-    name: 'full_new_game_keeps_its_immediate_clear_and_start',
+    name: 'full_new_game_confirms_existing_saves_then_starts_once',
     run: () => {
       const harness = makeMenuHarness({ policy: policyFor('full'), campaignLevel: 4, legacyStage: 'hub_initial' });
       harness.scene.startNewGame();
-      assert.equal(harness.scene.menuMode, 'menu', 'full mode never opens a demo confirmation');
+      assert.equal(harness.scene.menuMode, 'confirm-new-game', 'redesigned full menu also protects existing saves');
+      assertStorageUntouched(harness.storage, harness.before);
+      harness.scene.onConfirmPointer(1)();
       assert.equal(harness.calls.campaignCleared, 1);
       assert.equal(harness.calls.legacyCleared, 1);
       assert.deepEqual(harness.calls.started, [{ key: 'PrologueScene', data: undefined }]);
@@ -982,13 +986,12 @@ const CASES = [
       const create = findNode(menuSource, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === 'create');
       assert.ok(create?.body, 'MenuScene still declares create()');
       const body = nodeText(create.body);
-      assert.ok(body.includes('RELEASE_POLICY.menuTag'), 'the top-right pill comes from the release policy');
       assert.ok(body.includes('RELEASE_POLICY.buildTag'), 'the build tag comes from the release policy');
       assert.ok(body.includes('this.wireInput()'), 'create() wires input through the ledgered helper');
       assert.ok(body.includes('this.buildNewGameConfirmation()'), 'create() builds the local confirmation UI');
 
       const sourceText = readFileSync(MENU_FILE, 'utf8');
-      assert.ok(sourceText.includes("'HỦY', 'CHƠI MỚI'"), 'the confirmation rows are Cancel first, then confirm');
+      assert.ok(sourceText.includes("'Quay lại', 'Bắt đầu lại'"), 'the confirmation rows are Cancel first, then confirm');
       assert.ok(sourceText.includes(CONFIRM_SENTENCE), 'the approved warning sentence is shipped verbatim');
       assert.equal(/location\.|document\.domain/.test(sourceText), false,
         'the flavor is never inferred from the URL');
