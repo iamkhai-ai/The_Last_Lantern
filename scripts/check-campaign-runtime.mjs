@@ -45,6 +45,7 @@ import {
   observatoryDoorOpen,
   observatoryElement,
   observatoryFinalDoorBlockReason,
+  observatoryGuidance,
   observatoryPrompt,
   observatoryReturnLoopLane,
   observatorySolidRects,
@@ -749,6 +750,50 @@ function makeHeartFinalScene({ inHand, placed, on = true, latched = true, x = 30
 const pressHeartF = (scene) => bind(methodSource('handleLanternKey', heartSourceFile, 'HeartOfElariaLevel'),
   { heartFinalActionSource, getHeartElement, canReachHeartElement }, 'HeartOfElariaLevel.handleLanternKey()')(scene);
 
+/* ------------------------------------------------------------------ *
+ * 4a. Hint ladder, level 7 -> 8 teardown, completed-save redirect, caption, Lumo clamp
+ * ------------------------------------------------------------------ */
+
+let hintShow = null;
+/**
+ * The shipped showHint() body against a fake `this`. The fake sits at index 8 with an observatory room, so only
+ * the observatory branch runs; the other branches are never entered.
+ */
+function runShowHint(scene) {
+  if (!hintShow) hintShow = bind(methodSource('showHint'), { observatoryGuidance }, 'CampaignScene.showHint()');
+  return hintShow(scene);
+}
+
+let buildLevelRun = null;
+/** The shipped buildLevel() body. Level 8 returns through buildObservatoryRoom(), which the stand-in records. */
+function runBuildLevel(scene) {
+  if (!buildLevelRun) buildLevelRun = bind(methodSource('buildLevel'), NO_SYMBOLS, 'CampaignScene.buildLevel()');
+  return buildLevelRun(scene);
+}
+
+/** The shipped showObservatoryCaption() body. Its `text` parameter is part of the signature, so it comes in as a symbol. */
+function runObservatoryCaption(scene, text) {
+  return bind(methodSource('showObservatoryCaption'), { text }, 'CampaignScene.showObservatoryCaption()')(scene);
+}
+
+/** A recording stand-in for the display-list and tween ports the caption touches. */
+function makeCaptionScene() {
+  const calls = { texts: [], tweens: [] };
+  const scene = {
+    roomObjects: [],
+    add: {
+      text(x, y, text, style) {
+        calls.texts.push({ x, y, text, style });
+        const label = { active: true, destroy() { this.active = false; }, setOrigin() { return this; }, setDepth() { return this; } };
+        return label;
+      },
+    },
+    tweens: { add(config) { calls.tweens.push(config); } },
+    calls,
+  };
+  return scene;
+}
+
 const CASES = [
   {
     name: 'a_direct_load_into_the_creek_or_the_tower_can_tear_down_its_hud',
@@ -1370,6 +1415,123 @@ const CASES = [
       assert.equal(refused.progress.flags['l9-roots'], undefined, 'an unready configuration never latches');
       assert.equal(refused.calls.save, 0, 'an unready configuration saves nothing');
       assert.equal(refused.progress.flags['l9-called-heart'], true, 'an unready press leaves the assignment alone');
+    },
+  },
+  {
+    name: 'observatory_hint_index_follows_the_ladder_not_the_objective',
+    run: () => {
+      // Two sub-objectives (door A unlatched, then latched) share the network ladder: the index must carry on, not restart.
+      const scene = makeScene({ lanternPlaced: true, roomId: 'entrance' });
+      const base = scene.getObservatoryWorldState();
+      assert.equal(base.lanternPlaced, true, 'the fixture is inside the network solve');
+      let current = base;
+      scene.getObservatoryWorldState = () => current;
+      scene.hintIndex = 0;
+      scene.observatoryHintLadderKey = '';
+      const lastSaid = () => scene.calls.say.at(-1)[0].text;
+      const unlatched = { ...base, doorALatched: false };
+      const latched = { ...base, doorALatched: true };
+      const ladder = observatoryGuidance('entrance', base).hints;
+      assert.notEqual(observatoryGuidance('entrance', unlatched).objective, observatoryGuidance('entrance', latched).objective,
+        'the two fixtures must show different objective rows');
+      assert.deepEqual(observatoryGuidance('entrance', latched).hints, ladder, 'the two fixtures must share one ladder');
+      current = unlatched;
+      runShowHint(scene);
+      assert.equal(lastSaid(), ladder[0], 'the first press shows Mức 1');
+      current = latched;
+      runShowHint(scene);
+      assert.equal(lastSaid(), ladder[1],
+        `a new sub-objective on the same ladder must continue at Mức 2, but the index restarted (said: ${lastSaid()})`);
+    },
+  },
+  {
+    name: 'observatory_hint_index_resets_when_the_ladder_changes',
+    run: () => {
+      const scene = makeScene({ lanternPlaced: true, roomId: 'entrance' });
+      const base = scene.getObservatoryWorldState();
+      let current = base;
+      scene.getObservatoryWorldState = () => current;
+      scene.hintIndex = 0;
+      scene.observatoryHintLadderKey = '';
+      const lastSaid = () => scene.calls.say.at(-1)[0].text;
+      const ladder = observatoryGuidance('entrance', base).hints;
+      const lampMissing = { ...base, lanternPlaced: false };
+      const lampLadder = observatoryGuidance('entrance', lampMissing).hints;
+      assert.notDeepEqual(lampLadder, ladder, 'the two fixtures must use different ladders');
+      runShowHint(scene);
+      runShowHint(scene);
+      assert.equal(lastSaid(), ladder[1], 'the network ladder has advanced to Mức 2');
+      current = lampMissing;
+      runShowHint(scene);
+      assert.equal(lastSaid(), lampLadder[0], 'a different ladder starts again at its own Mức 1');
+      current = base;
+      runShowHint(scene);
+      assert.equal(lastSaid(), ladder[0], 'returning to the network ladder is a ladder change too, so it restarts at Mức 1');
+    },
+  },
+  {
+    name: 'level_seven_to_eight_releases_the_ruins_controller',
+    run: () => {
+      // The level-8 branch of buildLevel() returns early; the ruins controller must be released before that return.
+      let destroyed = 0;
+      const ruins = {
+        destroy() { destroyed += 1; },
+        update() { throw new Error('the ruins controller ticked after leaving level 7'); },
+      };
+      const observatoryBuilds = [];
+      const scene = {
+        progress: { level: 8, roomId: 'observatory' },
+        ruinsLevel: ruins,
+        buildObservatoryRoom(roomId) { observatoryBuilds.push(roomId); },
+      };
+      runBuildLevel(scene);
+      assert.equal(destroyed, 1, `the level-7 ruins controller must be destroyed once on entering level 8, but destroy() ran ${destroyed} time(s)`);
+      assert.equal(scene.ruinsLevel, undefined, 'the ruins field is nulled so no later frame can tick it');
+      assert.deepEqual(observatoryBuilds, ['observatory'], 'level 8 still builds its observatory room');
+    },
+  },
+  {
+    name: 'completed_save_redirect_skips_the_frame_before_the_scene_is_built',
+    run: () => {
+      // create() returns before player, dialogue and interactions exist when it redirects; update() must stop at the flag.
+      const redirected = { redirecting: true, progress: { level: 0, flags: {}, counters: {} } };
+      stepFrame(redirected);
+      const live = makeFrameScene(0);
+      stepFrame(live);
+      assert.equal(live.calls.player, 1, 'control: a live frame still steps the player');
+    },
+  },
+  {
+    name: 'garden_lumo_target_stays_above_the_status_band',
+    run: () => {
+      // Lumo's target is clamped per level; the sprite sits 12px above it, so every target must stay clear of the band at y 320.
+      for (const level of LUMO_LEVELS) {
+        for (const playerY of [0, 150, 290, 330, 400, 900]) {
+          const scene = makeFrameScene(level);
+          // The level-0 clamp applies only once Lumo has met Nhinh.
+          if (level === 0) scene.progress.flags['l0-lumo-met'] = true;
+          scene.player.y = playerY;
+          stepFrame(scene);
+          const [call] = scene.calls.lumo;
+          const limit = level === 6 ? 300 : 320;
+          assert.ok(call.y <= limit, `level ${level}, player y ${playerY}: Lumo's target y ${call.y} must stay at or above ${limit}`);
+        }
+      }
+    },
+  },
+  {
+    name: 'observatory_caption_sits_below_the_objective_row',
+    run: () => {
+      const source = readFileSync(SCENE_FILE, 'utf8');
+      const objectiveRowY = Number(source.match(/this\.objectiveText = this\.track\(this\.add\.text\(16, (\d+)/)?.[1]);
+      assert.ok(Number.isFinite(objectiveRowY), 'the objective row still sits at a fixed y');
+      // 11px text with 5px padding each side; a 1.5 line height is a generous bound for the panel's bottom edge.
+      const objectivePanelBottom = objectiveRowY + 5 + Math.ceil(11 * 1.5) + 5;
+      const scene = makeCaptionScene();
+      runObservatoryCaption(scene, 'Lumo: caption');
+      const [caption] = scene.calls.texts;
+      assert.ok(caption.y > objectivePanelBottom,
+        `the caption at y ${caption.y} must sit below the objective panel (bottom about y ${objectivePanelBottom})`);
     },
   },
 ];

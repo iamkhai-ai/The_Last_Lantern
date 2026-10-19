@@ -390,7 +390,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
  * solid while locked).
  */
 export const OBSERVATORY_NON_SOLID_IDS = [
-  'lumo-tube', 'lumo-seal', 'learned-marks', 'final-door', 'root-bed',
+  'lumo-tube', 'lumo-seal', 'learned-marks', 'final-door',
   'door-a-control', 'final-door-control',
 ] as const;
 
@@ -405,8 +405,9 @@ export function observatoryElement(id: string): ObsElement | undefined {
 /**
  * Standing props are the level's real obstacles: anything drawn as a standing
  * object is solid, matching its visible art exactly. Wall-mounted art, walkable
- * floor art, the root bed (dynamic) and the two latch plates drawn on a door sill
- * are excluded, and so are ground mounts such as the practice miniature.
+ * floor art and the two latch plates drawn on a door sill are excluded, and so
+ * are ground mounts: the practice miniature, and the root bed, whose solid is the
+ * dynamic bed rectangle in observatorySolidRects.
  */
 export function observatoryElementSolids(roomId: ObservatoryRoomKey): readonly ObsRect[] {
   return observatoryElements(roomId)

@@ -193,13 +193,12 @@ Deliberate exceptions and their reasons (recorded in data):
 
 **Status row** (`getStatusText`): `Nhật {0|1|2}/2 · Nguyệt {sáng|tối} · Bệ {đang chờ|sáng đều|đã gài} · Cửa Bắc {khóa|mở · cần đèn|mở · chờ The Shadow|mở}`. The door leaf is drawn open as soon as the ring latches, so the row names whichever completion step is still outstanding instead of claiming the exit is walkable while it is not.
 
-**Hint ladder (`H`)** — three levels per stage, advancing one level per press, and every level after the first names the *currently missing* condition ("H nêu điều kiện đang thiếu nếu đã có một phần đúng"):
+**Hint ladder (`H`)** — advancing one level per press. Each stage has three levels; the suns and the moon share one ladder, the scenario 08 §6 Mức 1-3 verbatim (`MAIN_LADDER`), and every level after the first names the *currently missing* condition ("H nêu điều kiện đang thiếu nếu đã có một phần đúng"):
 
 | Stage | Level 1 (observe) | Level 2 (relation) | Level 3 (next step) |
 | --- | --- | --- | --- |
 | practice | `Cột ở tiền sảnh tạo bóng. Bức tượng giữa sân có đế xoay giống vậy.` | `Bật đèn bằng F. Mặt rộng của cột chắn ánh sáng, mặt hẹp thì ánh sáng lọt qua.` | `Đứng ở mép nam cột đá thử và nhấn E để xoay. Xem phiến Nguyệt trên nền đổi trạng thái.` |
-| suns | `Hai khóa Nhật cần sáng cùng lúc.` | `Bộ chia tia trên bệ đã tách sẵn ba nhánh. Hai nhánh bên đi qua hai gương.` | `Xoay gương trái cho tia bật lên khóa Nhật trái, rồi gương phải cho tia bật lên khóa Nhật phải.` |
-| moon | `Khóa Nguyệt cần bóng của tượng, trong khi đèn vẫn bật.` | `Đế tượng có bốn nấc. Chỉ một nấc cho bóng phủ trọn khóa Nguyệt.` | `Đứng ở mép nam tượng và nhấn E. Mặt rộng của tượng phải chắn luồng giữa tới Nguyệt.` |
+| suns and moon (one shared ladder, `MAIN_LADDER`) | `Cột ở tiền sảnh tạo bóng. Bức tượng giữa sân có đế xoay giống vậy.` | `Hai khóa Nhật cần sáng cùng lúc. Khóa Nguyệt cần bóng của tượng, trong khi đèn vẫn bật.` | `Đặt đèn, hướng hai gương vào hai Nhật. Xoay mặt rộng của tượng chắn luồng giữa tới Nguyệt, rồi xác nhận ở bệ.` |
 | confirm | `Hai Nhật sáng và Nguyệt đã tối cùng lúc.` | `Vòng trên bệ chính đang sáng đều.` | `Đứng ở mép nam bệ chính và nhấn E để gài điện thờ.` |
 | retrieve | `Điện thờ đã gài. Đèn vẫn nằm trên bệ.` | `Nhinh cần đèn trong tay để đi tiếp.` | `Đứng ở mép nam bệ chính và nhấn E để nhận lại đèn.` |
 | shadow | `Màn đá đã trượt che luống mầm. The Shadow đã thôi giơ tay chắn sáng.` | `Ông đang đợi ở phía đông bắc sân.` | `Tới gần The Shadow và nhấn E để nói chuyện.` |

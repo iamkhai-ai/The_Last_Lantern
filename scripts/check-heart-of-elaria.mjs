@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 import {
   auditHeartGaps, auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartExitBlock, getHeartPrerequisiteFeedback,
   getHeartSolid, getHeartStage, heartArtCandidates, heartArtNativeSize, heartSealPlateArt, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CHECKPOINTS, HEART_CONTROL_ORDER, HEART_ELEMENTS, HEART_FLOOR, HEART_MOON_SHADOW,
@@ -648,3 +649,66 @@ console.log(`Level 10 geometry/state checks passed (${HEART_ELEMENTS.length} con
   console.log('  final action : hand / pedestal sources, old-save recognition, no lamp relight');
 }
 
+
+// ---------------------------------------------------------------- H ladders are the scenario text (scenario 10 §8)
+// The three-branch puzzle (source, seal, route, confirm) shares the primary ladder (§8 first three Mức lines); the
+// overload stage keeps its own set (§8 last three). Both are verbatim and in order; repeated presses hold Mức 3.
+// The level file imports Phaser, so its constants and showHint() are read from the TypeScript source and bound to a fake level.
+{
+  const scenario = readFileSync(path.join(ROOT, 'docs/scenario/10-the-heart-of-elaria.md'), 'utf8');
+  const hits = [...scenario.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)];
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3, 1, 2, 3], '10 §8 lists the primary Mức 1-3 and then the overload Mức 1-3');
+  const PRIMARY = hits.slice(0, 3).map((m) => m[2].normalize('NFC'));
+  const OVERLOAD = hits.slice(3, 6).map((m) => m[2].normalize('NFC'));
+
+  const levelFile = path.join(ROOT, 'src/levels/HeartOfElariaLevel.ts');
+  const levelAst = ts.createSourceFile(levelFile, readFileSync(levelFile, 'utf8'), ts.ScriptTarget.Latest, true);
+  const COMPILER = { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } };
+  const find = (predicate) => {
+    let found;
+    const visit = (node) => { if (found) return; if (predicate(node)) { found = node; return; } ts.forEachChild(node, visit); };
+    visit(levelAst);
+    return found;
+  };
+  const constantOf = (name, symbols = {}) => {
+    const decl = find((node) => ts.isVariableDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(decl?.initializer, `HeartOfElariaLevel still authors ${name}`);
+    const js = ts.transpileModule(`const __value = (${decl.initializer.getText(levelAst)});`, COMPILER).outputText;
+    return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __value;`)(...Object.values(symbols));
+  };
+  const methodOf = (name, symbols = {}) => {
+    const method = find((node) => ts.isMethodDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(method?.body, `HeartOfElariaLevel still authors ${name}()`);
+    const params = method.parameters.map((p) => p.name.getText(levelAst));
+    const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
+    return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(symbols));
+  };
+  const PUZZLE_STAGES = constantOf('PUZZLE_STAGES');
+  const hintLadderOf = constantOf('hintLadderOf', { PUZZLE_STAGES });
+  const PUZZLE_HINTS = constantOf('PUZZLE_HINTS');
+  const HINTS = constantOf('HINTS', { PUZZLE_HINTS });
+  const showHint = methodOf('showHint', { HINTS, hintLadderOf });
+  assert.deepEqual(PUZZLE_HINTS.map((text) => text.normalize('NFC')), PRIMARY, 'PUZZLE_HINTS is the 10 §8 primary Mức 1-3 verbatim');
+  assert.deepEqual(HINTS.overload.map((text) => text.normalize('NFC')), OVERLOAD, 'the overload stage is the 10 §8 overload Mức 1-3 verbatim');
+  // Presses on a fake level, one per stage name in `stages`, as the H key would press them.
+  const presses = (stages) => {
+    const spoken = [];
+    const level = { stage: () => '', hintStage: '', hintIndex: 0, say: (lines) => spoken.push(lines[0].text.normalize('NFC')) };
+    level.showHint = showHint;
+    for (const stage of stages) { level.stage = () => stage; level.showHint(); }
+    return spoken;
+  };
+  for (const stage of ['source', 'seal', 'route', 'confirm']) {
+    assert.deepEqual(presses([stage, stage, stage, stage]), [PRIMARY[0], PRIMARY[1], PRIMARY[2], PRIMARY[2]], `${stage}: presses give the primary Mức 1, 2, 3 verbatim, then hold Mức 3`);
+  }
+  assert.deepEqual(presses(['source', 'seal', 'route', 'confirm']), [PRIMARY[0], PRIMARY[1], PRIMARY[2], PRIMARY[2]], 'the three-branch stages share one ladder, so presses keep their order across them');
+  assert.deepEqual(presses(['overload', 'overload', 'overload', 'overload']), [OVERLOAD[0], OVERLOAD[1], OVERLOAD[2], OVERLOAD[2]], 'overload presses give the overload Mức 1-3 verbatim');
+  assert.deepEqual(presses(['overload', 'route']), [OVERLOAD[0], PRIMARY[0]], 'leaving overload starts the primary ladder at Mức 1');
+  assert.deepEqual(presses(['route', 'overload']), [PRIMARY[0], OVERLOAD[0]], 'entering overload starts its own ladder at Mức 1');
+  for (const stage of ['crystals', 'teach', 'retrieve', 'done']) {
+    const [line] = presses([stage]);
+    assert.equal(PRIMARY.includes(line) || OVERLOAD.includes(line), false, `${stage} keeps its own stage-specific guidance`);
+  }
+}
+
+console.log('  H ladders    : primary (source, seal, route, confirm) and overload are the scenario Mức 1-3 verbatim, in order');

@@ -89,6 +89,17 @@ const LANES_TOAST: DialogueLine[] = [
   { speaker: 'Hệ thống', text: 'Pulse làm các đường nối bị rêu che hiện ra. Thông tin đã được ghi vào sổ.' },
 ];
 
+/** Scenario 10 §8 primary ladder, Mức 1-3 verbatim: the three-branch puzzle (source, seal, route, confirm) shares it. */
+const PUZZLE_HINTS: string[] = [
+  'Xem đường nối từ bệ và dấu sáng trên cả ba nhánh. Nhánh nào chưa giữ được trạng thái?',
+  'Lăng kính phải cấp cả Ký Ức lẫn Cân Bằng. Tôi mở màn Hy Vọng; bóng tượng giữ lõi giữa tối.',
+  'Gọi tôi tới ấn, hướng G0 vào lăng kính, chỉnh nhánh vàng tới tinh thể và nhánh tím qua tượng. Khi hai mắt ngoài sáng, lõi tối và ba rễ nối đều, xác nhận ở giữa.',
+];
+
+const PUZZLE_STAGES: readonly HeartStage[] = ['source', 'seal', 'route', 'confirm'];
+/** The key that resets the H ladder: the puzzle stages share one key, so presses keep their order across them. */
+const hintLadderOf = (stage: HeartStage): string => (PUZZLE_STAGES.includes(stage) ? 'puzzle' : stage);
+
 const HINTS: Record<HeartStage, string[]> = {
   crystals: [
     'Ba hốc nằm quanh thân Cây Mẹ: bên trái, chính giữa và bên phải.',
@@ -100,26 +111,10 @@ const HINTS: Record<HeartStage, string[]> = {
     'Nhấn E trên bàn rễ để xem lại từng mô hình quy tắc. SPACE gần đó sẽ soi các đường nối.',
     'Ba quy tắc: một mạch nhận ánh sáng, một ấn do Lumo giữ, hai mắt Nhật quanh một lõi Nguyệt cần bóng.',
   ],
-  source: [
-    'Ánh sáng phải bắt đầu từ một chỗ cố định.',
-    'Bệ dẫn sáng nằm ở góc tây của khoảng rừng.',
-    'Đứng ở mép nam bệ dẫn sáng và nhấn E để đặt chiếc đèn đang bật.',
-  ],
-  seal: [
-    'Nhánh Hy Vọng cần một người giữ.',
-    'Ấn nằm trên đường rễ xanh, ngay dưới hốc Hy Vọng.',
-    'Đứng trên tấm ấn xanh và nhấn E để gọi Lumo tới giữ, rồi chờ cậu ấy đứng yên.',
-  ],
-  route: [
-    'Xem đường nối từ bệ và dấu sáng trên cả ba nhánh. Nhánh nào chưa giữ được trạng thái?',
-    'Lăng kính phải cấp cả Ký Ức lẫn Cân Bằng. Tôi mở màn Hy Vọng; bóng tượng giữ lõi giữa tối.',
-    'Gọi tôi tới ấn, hướng G0 vào lăng kính, chỉnh nhánh vàng tới tinh thể và nhánh tím qua tượng. Khi hai mắt ngoài sáng, lõi tối và ba rễ nối đều, xác nhận ở giữa.',
-  ],
-  confirm: [
-    'Ba nhánh đang giữ cùng lúc. Nút rễ trung tâm nằm ở giữa khoảng rừng, phía dưới.',
-    'Đứng trên nút rễ trung tâm và nhấn E để khóa cấu hình.',
-    'Nút rễ trung tâm là vòng ba màu ở giữa nền đất, ngay dưới đường rễ xanh.',
-  ],
+  source: PUZZLE_HINTS,
+  seal: PUZZLE_HINTS,
+  route: PUZZLE_HINTS,
+  confirm: PUZZLE_HINTS,
   retrieve: [
     'Cây Mẹ đã tự giữ mạch. Chiếc đèn không cần ở lại nữa.',
     'Bệ dẫn sáng vẫn giữ chiếc đèn ở góc tây.',
@@ -167,7 +162,7 @@ export class HeartOfElariaLevel {
   private protected: Phaser.GameObjects.GameObject[] = [];
   private lumoMode: 'follow' | 'travelling' | 'holding' = 'follow';
   private hintIndex = 0;
-  private hintStage: HeartStage | '' = '';
+  private hintStage = '';
   private lastCheckpoint = 0;
   private lanesRevealUntil = 0;
   private lanternKeyTime = 0;
@@ -398,8 +393,9 @@ export class HeartOfElariaLevel {
 
   public showHint(): void {
     const stage = this.stage();
-    if (stage !== this.hintStage) {
-      this.hintStage = stage;
+    const ladder = hintLadderOf(stage);
+    if (ladder !== this.hintStage) {
+      this.hintStage = ladder;
       this.hintIndex = 0;
     }
     const hints = HINTS[stage];

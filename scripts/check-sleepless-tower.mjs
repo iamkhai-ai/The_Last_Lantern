@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 import { canCompleteTower, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCanApproachFront, towerCenterWalkable, TOWER, TOWER_SOLIDS } from '../src/data/towerLayout.ts';
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const seal = { x: 350, y: 290 };
 const base = { source: 'main', lanternOn: true, g0: 0, g1: 2, g2: 1, practice: 1, practiceDone: true, lanternRetrieved: false, waterReturned: false, crystal: false, recordRead: false, reunited: false, lumoAssign: 'at-c' };
 const atSeal = (state) => deriveTowerLive(state, seal);
@@ -167,3 +172,67 @@ assert.ok(towerBodyRect(record).y > 172, 'record prompt sits in front of the pan
 assert.equal(towerCanApproach({ x: record.x, y: record.y }, record), true);
 assert.equal(sampled([TOWER.objects.chamber.stand, { x: 520, y: 288 }, { x: 518, y: 196 }, record]), true, 'record stand reachable');
 console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn and migration checks passed');
+
+// ---------------------------------------------------------------- H ladder is the scenario text (scenario 06 §6)
+// The placing step and the main puzzle (place, main, call, switch) share one ladder: scenario Mức 1-3, verbatim and in
+// order; repeated presses hold Mức 3. The bench (practice) keeps its own optional-bench ladder. The level file imports
+// Phaser, so its authored constants and methods are read from the TypeScript source and bound to a fake level.
+{
+  const scenario = readFileSync(path.join(ROOT, 'docs/scenario/06-the-sleepless-tower.md'), 'utf8');
+  const hits = [...scenario.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], '06 §6 lists Mức 1, 2, 3 in order');
+  const MUC = hits.map((m) => m[2].normalize('NFC'));
+
+  const levelFile = path.join(ROOT, 'src/levels/SleeplessTowerLevel.ts');
+  const levelAst = ts.createSourceFile(levelFile, readFileSync(levelFile, 'utf8'), ts.ScriptTarget.Latest, true);
+  const COMPILER = { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } };
+  const find = (predicate) => {
+    let found;
+    const visit = (node) => { if (found) return; if (predicate(node)) { found = node; return; } ts.forEachChild(node, visit); };
+    visit(levelAst);
+    return found;
+  };
+  const constantOf = (name, symbols = {}) => {
+    const decl = find((node) => ts.isVariableDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(decl?.initializer, `SleeplessTowerLevel still authors ${name}`);
+    const js = ts.transpileModule(`const __value = (${decl.initializer.getText(levelAst)});`, COMPILER).outputText;
+    return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __value;`)(...Object.values(symbols));
+  };
+  const methodOf = (name, symbols = {}) => {
+    const method = find((node) => ts.isMethodDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(method?.body, `SleeplessTowerLevel still authors ${name}()`);
+    const params = method.parameters.map((p) => p.name.getText(levelAst));
+    const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
+    return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(symbols));
+  };
+  const PUZZLE_HINTS = constantOf('PUZZLE_HINTS');
+  const PUZZLE_STEPS = constantOf('PUZZLE_STEPS');
+  const hintLadderOf = constantOf('hintLadderOf', { PUZZLE_STEPS });
+  const HINTS = constantOf('HINTS', { PUZZLE_HINTS });
+  const RECALL_FOLLOWING = constantOf('RECALL_FOLLOWING');
+  const showHint = methodOf('showHint', { deriveTowerLive: (state) => ({ step: state.step }), hintLadderOf });
+  const hintsFor = methodOf('hintsFor', { HINTS, RECALL_FOLLOWING });
+  assert.deepEqual(PUZZLE_HINTS.map((line) => line.text.normalize('NFC')), MUC, 'PUZZLE_HINTS is the 06 §6 Mức 1-3 verbatim');
+  // Presses on a fake level, one per step name in `steps`, as the H key would press them.
+  const presses = (steps, lumoAssign = 'at-c') => {
+    const spoken = [];
+    const level = {
+      state: { step: '', lumoAssign }, stepKey: '', hintIndex: 0, lumoPoint: () => seal,
+      ctx: { say(lines) { spoken.push(lines[0].text.normalize('NFC')); } },
+    };
+    level.hintsFor = hintsFor;
+    level.showHint = showHint;
+    for (const step of steps) { level.state = { step, lumoAssign }; level.showHint(); }
+    return spoken;
+  };
+  for (const step of ['place', 'main', 'call', 'switch']) {
+    assert.deepEqual(presses([step, step, step, step]), [MUC[0], MUC[1], MUC[2], MUC[2]], `${step}: presses give Mức 1, 2, 3 verbatim, then hold Mức 3`);
+  }
+  assert.deepEqual(presses(['place', 'main', 'call', 'switch']), [MUC[0], MUC[1], MUC[2], MUC[2]], 'the puzzle steps share one ladder, so presses keep their order across them');
+  assert.deepEqual(presses(['practice', 'main']), [HINTS.practice[0].text.normalize('NFC'), MUC[0]], 'leaving the bench starts the puzzle ladder at Mức 1');
+  assert.equal(HINTS.practice.some((line) => MUC.includes(line.text.normalize('NFC'))), false, 'the bench keeps its own optional-bench ladder');
+  assert.deepEqual(presses(['retrieve']), [HINTS.retrieve[0].text.normalize('NFC')], 'after the switch the lines are the stage-specific guidance');
+  assert.deepEqual(presses(['recall'], 'follow'), [RECALL_FOLLOWING[0].text.normalize('NFC')], 'a following Lumo keeps the recall guidance');
+}
+
+console.log('Sleepless Tower H ladder checks passed (place, main, call, switch are the scenario Mức 1-3 verbatim, in order).');

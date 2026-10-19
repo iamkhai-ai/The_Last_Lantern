@@ -164,8 +164,8 @@ for (const roomId of ROOMS) {
   p(`- ${roomId}: ${OBSERVATORY_STAMPS[roomId].map((stamp) => `\`${stamp.id}\` ${rect(stamp)} depth ${stamp.depth}`).join(' · ')}`);
 }
 p();
-p('Non-colliding art — wall-mounted modules, walkable floor art, the dynamic root bed and the two latch');
-p(`plates painted on a door sill: \`${OBSERVATORY_NON_SOLID_IDS.join('`, `')}\`.`);
+p('Non-colliding art — wall-mounted modules, walkable floor art and the two latch plates painted on a door');
+p(`sill: \`${OBSERVATORY_NON_SOLID_IDS.join('`, `')}\`. The root bed is solid and is not listed here (see Dynamic structures).`);
 p();
 
 p('## Beam routing (pure, derived)');

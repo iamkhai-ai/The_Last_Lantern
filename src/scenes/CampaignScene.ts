@@ -83,6 +83,8 @@ export class CampaignScene extends Phaser.Scene {
   private player!: Player;
   private lumo!: Lumo;
   private lumoTarget = { x: 345, y: 265 };
+  /** Set when create() redirects a completed save to the ending: no player, dialogue or interactions exist yet. */
+  private redirecting = false;
   private lantern!: LanternSystem;
   private interactions!: InteractionSystem;
   private dialogue!: DialogueSystem;
@@ -123,8 +125,8 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryLumoHold: { x: number; y: number } | null = null;
   private observatoryBeats: ObservatoryLine[][] = [];
   private observatoryWasThroughSeal = false;
-  /** Objective row that the current hint ladder belongs to. */
-  private observatoryHintKey = '';
+  /** Hint ladder (joined text) the observatory hint index belongs to; the objective row is not part of it. */
+  private observatoryHintLadderKey = '';
   private hintIndex = 0;
   private heartEnd = false;
   private titleText!: Phaser.GameObjects.Text;
@@ -165,7 +167,8 @@ export class CampaignScene extends Phaser.Scene {
     } else {
       this.progress = CampaignSaveSystem.load();
     }
-    if (!newGameRequested && this.progress.flags['l9-complete'] === true) {
+    this.redirecting = !newGameRequested && this.progress.flags['l9-complete'] === true;
+    if (this.redirecting) {
       this.scene.start('EndingScene', { campaign: true });
       return;
     }
@@ -291,6 +294,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   public update(_time: number, delta: number): void {
+    if (this.redirecting) return;
     const dt = Math.min(delta, 50);
     const locked = this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen() || this.heartEnd;
     this.player.update(dt, !locked, this.lantern.lanternInHand, this.lantern.lanternOn);
@@ -305,7 +309,7 @@ export class CampaignScene extends Phaser.Scene {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) };
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
-    if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 330) };
+    if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 300) };
     if (this.progress.level === 7) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 30, 610), y: Phaser.Math.Clamp(this.player.y - 22, 84, 302) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
     else if (this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 9) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
@@ -442,6 +446,9 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private buildLevel(): void {
+    // Level 8 returns before the teardown further down, so the level-7 ruins controller is released first.
+    this.ruinsLevel?.destroy();
+    this.ruinsLevel = undefined;
     if (this.progress.level === 8) {
       this.buildObservatoryRoom(this.progress.roomId ?? 'entrance');
       return;
@@ -457,8 +464,6 @@ export class CampaignScene extends Phaser.Scene {
     this.pathForTwoLevel = undefined;
     this.sleeplessTower?.destroy();
     this.sleeplessTower = undefined;
-    this.ruinsLevel?.destroy();
-    this.ruinsLevel = undefined;
     this.heartLevel?.destroy();
     this.heartLevel = undefined;
     for (const object of this.objects) object.destroy();
@@ -700,7 +705,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private showObservatoryCaption(text: string): void {
-    const label = this.add.text(320, 66, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', fontStyle: 'italic', color: '#f2e6c4', backgroundColor: '#07151ccc', padding: { x: 8, y: 4 }, align: 'center', wordWrap: { width: 480 } })
+    const label = this.add.text(320, 76, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', fontStyle: 'italic', color: '#f2e6c4', backgroundColor: '#07151ccc', padding: { x: 8, y: 4 }, align: 'center', wordWrap: { width: 480 } })
       .setOrigin(0.5, 0).setDepth(85);
     this.roomObjects.push(label);
     this.tweens.add({ targets: label, alpha: 0, delay: 3600, duration: 600, onComplete: () => { if (label.active) label.destroy(); } });
@@ -2533,8 +2538,10 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level === 9) { this.heartLevel?.showHint(); return; }
     if (this.progress.level === 8 && this.activeObservatoryRoom) {
       const guidance = observatoryGuidance(this.activeObservatoryRoom, this.getObservatoryWorldState());
-      if (this.observatoryHintKey !== guidance.objective) {
-        this.observatoryHintKey = guidance.objective;
+      // Keyed on the ladder text, not the objective row: one ladder serves several sub-objectives of the network solve.
+      const ladderKey = guidance.hints.join('\n');
+      if (this.observatoryHintLadderKey !== ladderKey) {
+        this.observatoryHintLadderKey = ladderKey;
         this.hintIndex = 0;
       }
       const index = Math.min(this.hintIndex, guidance.hints.length - 1);

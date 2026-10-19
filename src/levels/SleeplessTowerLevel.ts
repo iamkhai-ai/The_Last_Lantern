@@ -83,32 +83,27 @@ const ENDING: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Mình xuống gần xem.' },
 ];
 
+/** Scenario 06 §6, Mức 1-3 verbatim: the placing step and the main puzzle (main, call, switch) share one ladder. */
+const PUZZLE_HINTS: DialogueLine[] = [
+  { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
+  { speaker: 'Lumo', text: 'Gương chung phải cấp cho lăng kính để hai nhánh cùng sáng. Tôi giữ điều kiện thứ ba.' },
+  { speaker: 'Lumo', text: 'Hướng G0 vào lăng kính, G1 vào A, G2 vào B. Gọi tôi tới C rồi dùng cần Trả dòng khi cả ba sáng.' },
+];
+
+const PUZZLE_STEPS: readonly TowerStep[] = ['place', 'main', 'call', 'switch'];
+/** The key that resets the H ladder: the puzzle steps share one key, so presses keep their order across them. */
+const hintLadderOf = (step: TowerStep): string => (PUZZLE_STEPS.includes(step) ? 'puzzle' : step);
+
 const HINTS: Record<TowerStep, DialogueLine[]> = {
   practice: [
     { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử ở góc trên bên trái cho thấy cách tách tia.' },
     { speaker: 'Lumo', text: 'Bàn thử chỉ để học, không bắt buộc. Muốn thử: đặt đèn vào bệ bàn thử rồi xoay gương đầu vào cho tia đi qua lăng kính.' },
     { speaker: 'Lumo', text: 'Muốn vào thẳng máy chính: đặt đèn lên bệ giữa phòng và bật bằng F.' },
   ],
-  place: [
-    { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
-    { speaker: 'Lumo', text: 'Máy chính chỉ nhận ánh sáng từ bệ giữa phòng.' },
-    { speaker: 'Lumo', text: 'Nhấc đèn khỏi bàn thử (nếu còn ở đó) rồi đặt lên bệ chính giữa phòng và bật bằng F.' },
-  ],
-  main: [
-    { speaker: 'Lumo', text: 'Ba vòng trên máy nối tới hai mắt đá và ấn dành cho tôi. Bàn thử cho thấy cách tách tia.' },
-    { speaker: 'Lumo', text: 'Gương chung phải cấp cho lăng kính để hai nhánh cùng sáng. Tôi giữ điều kiện thứ ba.' },
-    { speaker: 'Lumo', text: 'Hướng G0 vào lăng kính, G1 vào A, G2 vào B. Gọi tôi tới C rồi dùng cần Trả dòng khi cả ba sáng.' },
-  ],
-  call: [
-    { speaker: 'Lumo', text: 'Hai mắt đá đã sáng. Vòng thứ ba nằm ở ấn C, và ấn đó chỉ sáng khi có tôi đứng trên.' },
-    { speaker: 'Lumo', text: 'Tôi chỉ giữ được ấn C khi bay tới đó và đứng yên. Mốc gọi nằm giữa phòng, ngay trên ấn.' },
-    { speaker: 'Lumo', text: 'Nhấn E ở mốc gọi để đưa tôi lên ấn C.' },
-  ],
-  switch: [
-    { speaker: 'Lumo', text: 'Cả ba vòng trên tường đang cùng quay.' },
-    { speaker: 'Lumo', text: 'Cần Trả dòng chỉ chuyển được khi cả ba cùng sáng. Đừng đổi gương hay gọi tôi đi lúc này.' },
-    { speaker: 'Lumo', text: 'Dùng E với cần Trả dòng ở cửa buồng bên phải.' },
-  ],
+  place: PUZZLE_HINTS,
+  main: PUZZLE_HINTS,
+  call: PUZZLE_HINTS,
+  switch: PUZZLE_HINTS,
   retrieve: [
     { speaker: 'Nhinh', text: 'Máy đã tự giữ chế độ mới. Thu hồi đèn khỏi bệ bằng E.' },
   ],
@@ -163,7 +158,7 @@ export class SleeplessTowerLevel {
   private route: Point[] = [];
   private routeIndex = 0;
   private hintIndex = 0;
-  private stepKey: TowerStep | '' = '';
+  private stepKey = '';
   private cleaned = false;
   private pendingStoryBeats: Array<{ lines: DialogueLine[]; onComplete?: () => void }> = [];
 
@@ -244,7 +239,7 @@ export class SleeplessTowerLevel {
 
   public showHint(): void {
     const live = deriveTowerLive(this.state, this.lumoPoint());
-    if (this.stepKey !== live.step) { this.stepKey = live.step; this.hintIndex = 0; }
+    if (this.stepKey !== hintLadderOf(live.step)) { this.stepKey = hintLadderOf(live.step); this.hintIndex = 0; }
     const choices = this.hintsFor(live);
     const line = choices[Math.min(this.hintIndex, choices.length - 1)];
     this.hintIndex = Math.min(this.hintIndex + 1, choices.length - 1);
@@ -511,9 +506,6 @@ export class SleeplessTowerLevel {
   }
 
   private hintsFor(live: TowerLiveState): DialogueLine[] {
-    if (this.state.source !== null && !this.state.lanternOn && ['practice', 'place', 'main', 'call', 'switch'].includes(live.step)) {
-      return [{ speaker: 'Nhinh', text: 'Đèn trên bệ đang tắt. Nhấn F để bật tia sáng.' }];
-    }
     if (live.step === 'recall' && this.state.lumoAssign === 'follow') return RECALL_FOLLOWING;
     return HINTS[live.step];
   }
@@ -663,7 +655,7 @@ export class SleeplessTowerLevel {
     if (!this.hud.length) return;
     this.hud[1].setText(this.objectiveFor(live));
     this.hud[2].setText(this.statusFor(live));
-    if (this.stepKey !== live.step) { this.stepKey = live.step; this.hintIndex = 0; }
+    if (this.stepKey !== hintLadderOf(live.step)) { this.stepKey = hintLadderOf(live.step); this.hintIndex = 0; }
   }
 
   private drawHud(): void {

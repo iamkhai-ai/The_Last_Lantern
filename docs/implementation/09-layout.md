@@ -164,8 +164,8 @@ Ground stamps (painted floor decor, below the feet, never solid):
 - corridor: `pipe-run` 73,74,215,18 depth 2 · `latch-grille` 28,236,56,28 depth 2
 - observatory: `pipe-run` 344,60,264,18 depth 2 · `pipe-drop` 592,76,18,180 depth 2 · `loop-path` 472,266,96,32 depth 2 · `final-door-sill` 468,140,64,14 depth 2
 
-Non-colliding art — wall-mounted modules, walkable floor art, the dynamic root bed and the two latch
-plates painted on a door sill: `lumo-tube`, `lumo-seal`, `learned-marks`, `final-door`, `root-bed`, `door-a-control`, `final-door-control`.
+Non-colliding art — wall-mounted modules, walkable floor art and the two latch plates painted on a door
+sill: `lumo-tube`, `lumo-seal`, `learned-marks`, `final-door`, `door-a-control`, `final-door-control`. The root bed is solid and is not listed here (see Dynamic structures).
 
 ## Beam routing (pure, derived)
 

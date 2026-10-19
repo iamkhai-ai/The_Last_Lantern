@@ -8,7 +8,7 @@ Enter from the southwest and find a book on a low desk. Viewing it with E under 
 
 ## Coordinates and player route
 
-All art positions below are image centers unless stated; stand points are centered Nhinh positions. Native Nhinh is 36×42; feet are center+19px. Use the Level 01 14×6 foot body (offset 11,37), fractional `10 + feetY / 10` depth, and update shadows/depth while dialogue locks movement. Floor foot bounds are x=24..616,y=80..310. Top HUD ends before y=70, status begins y=320.
+All art positions below are image centers unless stated; stand points are centered Nhinh positions. Native Nhinh is 36×42; feet are center+19px. Use the Level 01 14×6 foot body (offset 11,37), fractional `10 + feetY / 10` depth, and update shadows/depth while dialogue locks movement. Floor foot bounds are x=24..616,y=80..310. Top HUD ends before y=58, status begins y=320.
 
 | Element | Art / geometry | E stand and role |
 | --- | --- | --- |

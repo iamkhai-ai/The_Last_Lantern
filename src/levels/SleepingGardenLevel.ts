@@ -144,7 +144,7 @@ export class SleepingGardenLevel {
     const savedLumoY = this.progress.counters['lumo-y'];
     this.lumo.sprite.setPosition(
       Number.isFinite(savedLumoX) ? Phaser.Math.Clamp(savedLumoX as number, 36, 604) : spawn.x - 22,
-      Number.isFinite(savedLumoY) ? Phaser.Math.Clamp(savedLumoY as number, 60, 330) : spawn.y - 18,
+      Number.isFinite(savedLumoY) ? Phaser.Math.Clamp(savedLumoY as number, 60, 288) : spawn.y - 18,
     );
     this.lumo.setVisible(true);
     this.drawStatic();

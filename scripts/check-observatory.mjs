@@ -213,7 +213,8 @@ for (const element of OBSERVATORY_ELEMENTS) {
 // Every collider corresponds to visible art: solids == fitted art rects.
 for (const roomId of ROOMS) {
   for (const element of observatoryElements(roomId)) {
-    if (element.radius === 0 || OBSERVATORY_NON_SOLID_IDS.includes(element.id)) continue;
+    // The root bed is a ground mount: its collider is the dynamic bed rectangle, tested in the bed block below.
+    if (element.radius === 0 || element.id === 'root-bed' || OBSERVATORY_NON_SOLID_IDS.includes(element.id)) continue;
     const rect = observatoryArtRect(element);
     assert.ok(observatoryElementSolids(roomId).some((solid) => Math.abs(solid.x - rect.x) < 0.01
       && Math.abs(solid.y - rect.y) < 0.01 && solid.width === rect.width && solid.height === rect.height),
@@ -254,6 +255,34 @@ for (const roomId of ROOMS) {
       }
     }
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * 3b. The root bed blocks the foot body from all four cardinal sides
+ * ------------------------------------------------------------------ */
+// The bed is a ground mount, so its collider is the dynamic structure in observatorySolidRects (the element solids
+// above skip it). Its whole rectangle is tested from every cardinal contact: while the crossing lane is shut the lane
+// blocks too; once the bridge holds, the lane is the only opening and the bed still blocks from all four sides.
+{
+  const bed = OBSERVATORY_ROOT_BED;
+  const lane = OBSERVATORY_BRIDGE_LANE;
+  const contacts = [
+    { name: 'north', center: { x: bed.x + bed.width / 2, y: bed.y - 20 } },
+    { name: 'south', center: { x: bed.x + bed.width / 2, y: bed.y + bed.height - 20 } },
+    { name: 'west', center: { x: bed.x - 1, y: bed.y + bed.height - 20 } },
+    { name: 'east', center: { x: bed.x + bed.width + 1, y: bed.y + bed.height - 20 } },
+  ];
+  const laneCenter = { x: lane.x + lane.width / 2, y: lane.y + lane.height / 2 };
+  const hasLane = (stage) => observatorySolidRects('observatory', stage).some((solid) => solid.x === lane.x && solid.y === lane.y);
+  assert.equal(hasLane(STAGES.arrival), true, 'the crossing lane is shut before the bridge is eligible');
+  assert.equal(hasLane(STAGES.crossed), false, 'the crossing lane is walkable once the bridge holds');
+  for (const { name, center } of contacts) {
+    assert.ok(rectsOverlap(observatoryBody(center), bed), `root bed ${name} contact overlaps the bed`);
+    assert.equal(isObservatoryPositionSafe('observatory', center, STAGES.arrival), false, `root bed blocks the body from the ${name} while shut`);
+    assert.equal(isObservatoryPositionSafe('observatory', center, STAGES.crossed), false, `root bed blocks the body from the ${name} once the lane opens`);
+  }
+  assert.equal(isObservatoryPositionSafe('observatory', laneCenter, STAGES.arrival), false, 'the shut lane blocks the body');
+  assert.equal(isObservatoryPositionSafe('observatory', laneCenter, STAGES.crossed), true, 'the open lane lets the body cross the bed');
 }
 
 /* ------------------------------------------------------------------ *
