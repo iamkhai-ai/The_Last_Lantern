@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getLevelArtKey, getNhinhTexture } from '../art/CampaignArt';
+import menuDawnUrl from '../../Art_References/07_The_Last_Dawn.png?url';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
@@ -10,6 +10,11 @@ type MenuMode = 'menu' | 'confirm-new-game';
 
 const CONFIRM_LABELS = ['Quay lại', 'Bắt đầu lại'];
 const NEW_GAME_CONFIRM_TEXT = 'Chơi mới sẽ xóa tiến trình đang lưu. Bạn có muốn tiếp tục?';
+
+const MENU_TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
+  fontFamily: 'Bitter, serif', fontStyle: '500',
+  shadow: { offsetX: 0, offsetY: 1, color: '#10180f', blur: 1, stroke: false, fill: true },
+};
 
 export class MenuScene extends Phaser.Scene {
   private selectionDot!: Phaser.GameObjects.Arc;
@@ -43,6 +48,10 @@ export class MenuScene extends Phaser.Scene {
     super({ key: 'MenuScene' });
   }
 
+  public preload(): void {
+    if (!this.textures.exists('menu_dawn')) this.load.image('menu_dawn', menuDawnUrl);
+  }
+
   public create(): void {
     this.hasSavedGame = this.hasAnySave();
     this.selectedIndex = 0;
@@ -61,38 +70,25 @@ export class MenuScene extends Phaser.Scene {
     this.confirmDecorations = [];
     this.input.setTopOnly(true);
 
-    const backdropKey = getLevelArtKey(9, 'sanctuary-base');
-    if (backdropKey && this.textures.exists(backdropKey)) {
-      this.add.image(320, 180, backdropKey).setDisplaySize(640, 360).setDepth(0);
+    if (this.textures.exists('menu_dawn')) {
+      this.add.image(320, 180, 'menu_dawn').setDisplaySize(640, 360).setDepth(0);
     } else {
       WorldFactory.buildZone(this, 'hub', 0, false);
     }
 
-    // A continuous left veil, not a panel: let the forest remain the main image.
+    // Preserve the illustration's golden light and its own Nhinh/Lumo composition.
+    // A moss-toned veil gives the left menu contrast without turning dawn into night.
     const veil = this.add.graphics().setDepth(10);
-    veil.fillStyle(0x04121a, 0.12);
+    veil.fillStyle(0x182318, 0.10);
     veil.fillRect(0, 0, 640, 360);
-    for (let x = 0; x < 380; x += 2) {
-      veil.fillStyle(0x04121a, 0.8 * Math.pow(1 - x / 380, 1.15));
+    for (let x = 0; x < 350; x += 2) {
+      veil.fillStyle(0x101c15, 0.86 * Math.pow(1 - x / 350, 1.05));
       veil.fillRect(x, 0, 2, 360);
     }
-
-    const halo = this.add.image(414, 288, 'light_radial').setDepth(19).setScale(0.8).setAlpha(0.72);
-    const menuNhinh = getNhinhTexture('idle_lit', 'right', 0);
-    if (!menuNhinh) throw new Error('Missing required Nhinh menu frame: idle_lit/right/0');
-    this.add.sprite(418, 288, menuNhinh).setDepth(22);
-    const lumo = this.add.sprite(458, 258, 'lumo_0').setDepth(25);
-    const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reducedMotion) {
-      this.tweens.add({ targets: lumo, y: 254, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-      this.tweens.add({ targets: halo, alpha: 0.61, duration: 2300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    }
-    // Sparse lights on the open path, not the gameplay weather over the menu text.
-    for (const [index, [x, y]] of [[300, 184], [364, 235], [508, 138], [566, 270], [474, 314], [328, 94]].entries()) {
-      const firefly = this.add.image(x, y, 'particle_firefly').setDepth(26).setScale(0.6).setAlpha(0.45);
-      if (!reducedMotion) {
-        this.tweens.add({ targets: firefly, y: y - 5, alpha: 0.75, duration: 2100 + index * 270, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-      }
+    // Ground the small footer against the bright water and flowers.
+    for (let y = 310; y < 360; y += 2) {
+      veil.fillStyle(0x101c15, 0.55 * (y - 310) / 50);
+      veil.fillRect(0, y, 640, 2);
     }
 
     this.add.text(38, 48, 'THE LAST\nLANTERN', {
@@ -100,7 +96,7 @@ export class MenuScene extends Phaser.Scene {
       color: '#f4dfad', lineSpacing: -2,
     }).setDepth(81);
     this.add.text(40, 124, 'Khu rừng ánh sáng', {
-      fontFamily: 'Segoe UI, sans-serif', fontSize: '12px', color: '#b9cec3',
+      ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf',
     }).setDepth(81);
 
     const items: Array<{ label: string; action: () => void }> = [];
@@ -113,8 +109,8 @@ export class MenuScene extends Phaser.Scene {
     this.selectionDot = this.add.circle(42, 198, 2.5, 0xe8c777).setDepth(82);
     items.forEach((item, idx) => {
       const btn = this.add.text(56, 198 + idx * 33, item.label, {
-        fontFamily: 'Segoe UI, sans-serif', fontSize: idx === items.length - 1 ? '12px' : '15px',
-        color: '#c6d5ce',
+        ...MENU_TEXT_STYLE, fontSize: idx === items.length - 1 ? '12px' : '15px',
+        color: '#efe6cf',
       }).setOrigin(0, 0.5).setDepth(82).setInteractive({ useHandCursor: true });
       btn.on('pointerover', () => {
         if (this.menuMode === 'confirm-new-game' || this.starting) return;
@@ -132,10 +128,10 @@ export class MenuScene extends Phaser.Scene {
     this.refreshMenuHighlight();
 
     this.add.text(38, 337, '↑↓ Chọn · Enter Xác nhận', {
-      fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b9cec3',
+      ...MENU_TEXT_STYLE, fontSize: '10px', color: '#efe6cf',
     }).setDepth(82);
     this.add.text(620, 347, RELEASE_POLICY.buildTag, {
-      fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#a8bdb5',
+      ...MENU_TEXT_STYLE, fontSize: '9px', color: '#d2c4a6',
     }).setOrigin(1, 1).setDepth(82);
 
     this.buildNewGameConfirmation();
@@ -145,21 +141,23 @@ export class MenuScene extends Phaser.Scene {
   /** Full-screen local warning keeps the redesigned menu visible behind it. */
   private buildNewGameConfirmation(): void {
     this.confirmBackdrop = this.add.rectangle(320, 180, 640, 360, 0x020b10, 0.78).setDepth(100);
-    const panel = this.add.rectangle(320, 180, 360, 170, 0x0b2027).setDepth(101);
+    // Bitter is wider than the previous face: size the panel so the approved
+    // warning sentence stays on one line instead of splitting "tiếp tục".
+    const panel = this.add.rectangle(320, 180, 376, 170, 0x0b2027).setDepth(101);
     const title = this.add.text(168, 112, 'Bắt đầu hành trình mới?', {
-      fontFamily: 'Segoe UI, sans-serif', fontSize: '17px', color: '#f4dfad',
+      ...MENU_TEXT_STYLE, fontSize: '17px', color: '#f4dfad',
     }).setDepth(102);
     this.confirmText = this.add.text(168, 147, NEW_GAME_CONFIRM_TEXT, {
-      fontFamily: 'Segoe UI, sans-serif', fontSize: '12px', color: '#c6d5ce',
-      wordWrap: { width: 304 }, lineSpacing: 6,
+      ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf',
+      wordWrap: { width: 328 }, lineSpacing: 6,
     }).setDepth(102);
     const hint = this.add.text(168, 242, '←→ Chọn · Enter Xác nhận · Esc Quay lại', {
-      fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#a8bdb5',
+      ...MENU_TEXT_STYLE, fontSize: '10px', color: '#d2c4a6',
     }).setDepth(102);
     this.confirmDecorations = [panel, title, hint];
     CONFIRM_LABELS.forEach((label, idx) => {
       const btn = this.add.text(168 + idx * 174, 212, label, {
-        fontFamily: 'Segoe UI, sans-serif', fontSize: '14px', color: '#c6d5ce',
+        ...MENU_TEXT_STYLE, fontSize: '14px', color: '#efe6cf',
       }).setOrigin(0, 0.5).setDepth(102);
       // Hover must not turn the safe default into a destructive keyboard action.
       btn.on('pointerdown', this.onConfirmPointer(idx));
@@ -240,13 +238,13 @@ export class MenuScene extends Phaser.Scene {
     if (this.menuMode === 'confirm-new-game') {
       this.confirmButtons.forEach((btn, idx) => {
         btn.setText(CONFIRM_LABELS[idx]);
-        btn.setColor(idx === this.confirmSelectedIndex ? '#ffe08b' : '#8fa8a0');
+        btn.setColor(idx === this.confirmSelectedIndex ? '#e8c777' : '#efe6cf');
       });
       return;
     }
     this.menuButtons.forEach((btn, idx) => {
       if (idx === this.menuButtons.length - 1) btn.setText(this.soundLabel());
-      btn.setColor(idx === this.selectedIndex ? '#f4dfad' : '#b9cec3');
+      btn.setColor(idx === this.selectedIndex ? '#e8c777' : '#efe6cf');
     });
     const selected = this.menuButtons[this.selectedIndex];
     if (selected) this.selectionDot.setPosition(42, selected.y);

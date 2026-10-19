@@ -55,7 +55,7 @@ function fixture({ campaign = false, legacy = false, completed = false, victory 
       this.add = {
         image: (x, y, key) => Object.assign(new Display(x, y), { key }),
         sprite: (x, y, key) => Object.assign(new Display(x, y), { key }),
-        text: (x, y, text) => new Display(x, y, text),
+        text: (x, y, text, style) => Object.assign(new Display(x, y, text), { style }),
         graphics: () => new Display(),
         rectangle: (x, y) => new Display(x, y),
         circle: (x, y) => new Display(x, y),
@@ -147,7 +147,16 @@ assert.equal(ui.muted(), true);
 assert.ok(ui.text('Âm thanh: Tắt'));
 assert.deepEqual(ui.scene.menuButtons.map(b => b.x), positions, 'selection never shifts text');
 assert.ok(ui.scene.menuButtons.every(b => !b.text.startsWith('▸')));
-assert.equal(ui.tweens.some(t => t.targets.key === 'backdrop'), false, 'forest remains static');
+assert.ok(ui.objects.some(o => o.key === 'menu_dawn'), 'menu uses the existing golden dawn illustration');
+assert.equal(ui.objects.some(o => ['nhinh', 'lumo_0', 'light_radial', 'particle_firefly'].includes(o.key)), false, 'no detached characters or lights over the illustrated scene');
+assert.equal(ui.tweens.length, 0, 'illustrated menu remains static');
+const logo = ui.objects.find(o => o.text === 'THE LAST\nLANTERN');
+assert.equal(logo.style.fontFamily, 'Georgia, serif', 'logo keeps its display face');
+const subtitle = ui.text('Khu rừng ánh sáng');
+assert.equal(subtitle.style.fontFamily, 'Bitter, serif');
+assert.equal(subtitle.style.fontStyle, '500');
+assert.ok(subtitle.style.shadow, 'menu text stays legible over the bright illustration');
+assert.ok(ui.scene.menuButtons.every(b => b.style.fontFamily === 'Bitter, serif' && b.style.fontStyle === '500'));
 assert.ok(ui.text(createReleasePolicy('full').buildTag), 'full tag comes from release policy');
 const demo = fixture({ flavor: 'demo', campaign: true, level: 5 });
 demo.key('Enter');
