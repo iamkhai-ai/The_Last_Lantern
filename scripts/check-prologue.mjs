@@ -30,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { PROLOGUE_PANELS } from '../src/data/prologue.ts';
 import { consumeCampaignNewGameIntent } from '../src/systems/CampaignStartIntent.ts';
+import { RELEASE_POLICY } from '../src/config/releaseConfig.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SCENE_FILE = join(rootDir, 'src/scenes/PrologueScene.ts');
@@ -1071,18 +1072,27 @@ function makeMenuScene({ completed = false, campaignSave = false, legacy = null 
   scene.campaignSave = campaignSave;
   scene.legacy = legacy;
   const symbols = {
+    // The checks run against the default full build: no VITE_BUILD_FLAVOR is
+    // set, so the demo confirmation/new-game branches stay dormant here and the
+    // bounded demo slice is covered by scripts/check-demo-release.mjs.
+    RELEASE_POLICY,
+    NEW_GAME_CONFIRM_TEXT: 'Chơi mới sẽ xóa tiến trình đang lưu. Bạn có muốn tiếp tục?',
+    CONFIRM_LABELS: ['HỦY', 'CHƠI MỚI'],
     CampaignSaveSystem: {
       clear() { calls.campaignCleared += 1; },
       isCompleted() { return scene.completed === true; },
       hasSave() { return scene.campaignSave === true; },
+      load() { return { version: 1, level: scene.campaignLevel ?? 0, flags: {}, counters: {}, lanternOn: false, lanternPickedUp: false }; },
     },
     SaveSystem: {
       clear() { calls.legacyCleared += 1; },
       load() { return scene.legacy ?? { stage: 'hub_initial' }; },
+      hasSave() { return scene.legacy !== null; },
     },
-    SoundSystem: { playLanternToggle() { calls.lantern += 1; } },
+    SoundSystem: { playLanternToggle() { calls.lantern += 1; }, playMirrorRotate() {}, isMuted() { return false; } },
   };
   scene.startNewGame = bindMethod(methodUnit(menuSource, 'startNewGame', 'MenuScene'), symbols, 'MenuScene.startNewGame()');
+  scene.beginNewGame = bindMethod(methodUnit(menuSource, 'beginNewGame', 'MenuScene'), symbols, 'MenuScene.beginNewGame()');
   scene.continueGame = bindMethod(methodUnit(menuSource, 'continueGame', 'MenuScene'), symbols, 'MenuScene.continueGame()');
   scene.triggerSelected = bindMethod(methodUnit(menuSource, 'triggerSelected', 'MenuScene'), symbols, 'MenuScene.triggerSelected()');
   scene.actions = [() => scene.startNewGame()];
