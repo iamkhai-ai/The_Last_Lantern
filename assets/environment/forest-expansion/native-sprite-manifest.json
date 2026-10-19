@@ -1,0 +1,304 @@
+{
+  "status": "offline-review-not-integrated",
+  "sampling": "nearest-neighbor",
+  "alpha_cleanup": "binary alpha threshold 64; source files retained unchanged",
+  "sprites": [
+    {
+      "file": "ancient-tree-01.png",
+      "canvas": [
+        160,
+        192
+      ],
+      "content_size": [
+        152,
+        179
+      ],
+      "source_box": [
+        0,
+        0,
+        620,
+        794
+      ],
+      "crop_bbox_in_source_box": [
+        35,
+        95,
+        595,
+        755
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "ancient-tree-02.png",
+      "canvas": [
+        160,
+        192
+      ],
+      "content_size": [
+        152,
+        133
+      ],
+      "source_box": [
+        620,
+        0,
+        1415,
+        794
+      ],
+      "crop_bbox_in_source_box": [
+        34,
+        111,
+        772,
+        758
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "ancient-tree-03.png",
+      "canvas": [
+        160,
+        192
+      ],
+      "content_size": [
+        126,
+        184
+      ],
+      "source_box": [
+        1415,
+        0,
+        1981,
+        794
+      ],
+      "crop_bbox_in_source_box": [
+        49,
+        47,
+        534,
+        758
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-01.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        16,
+        12
+      ],
+      "source_box": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "crop_bbox_in_source_box": [
+        109,
+        229,
+        316,
+        388
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-02.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        28,
+        14
+      ],
+      "source_box": [
+        444,
+        0,
+        887,
+        444
+      ],
+      "crop_bbox_in_source_box": [
+        30,
+        205,
+        410,
+        394
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-03.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        25,
+        12
+      ],
+      "source_box": [
+        887,
+        0,
+        1330,
+        444
+      ],
+      "crop_bbox_in_source_box": [
+        41,
+        214,
+        435,
+        402
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-04.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        22,
+        19
+      ],
+      "source_box": [
+        1330,
+        0,
+        1774,
+        444
+      ],
+      "crop_bbox_in_source_box": [
+        97,
+        160,
+        385,
+        409
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-05.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        26,
+        15
+      ],
+      "source_box": [
+        0,
+        444,
+        444,
+        887
+      ],
+      "crop_bbox_in_source_box": [
+        56,
+        153,
+        397,
+        345
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-06.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        33,
+        12
+      ],
+      "source_box": [
+        444,
+        444,
+        887,
+        887
+      ],
+      "crop_bbox_in_source_box": [
+        23,
+        198,
+        427,
+        345
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-07.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        34,
+        19
+      ],
+      "source_box": [
+        887,
+        444,
+        1330,
+        887
+      ],
+      "crop_bbox_in_source_box": [
+        25,
+        115,
+        436,
+        345
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "roadside-grass-08.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "content_size": [
+        25,
+        18
+      ],
+      "source_box": [
+        1330,
+        444,
+        1774,
+        887
+      ],
+      "crop_bbox_in_source_box": [
+        77,
+        137,
+        390,
+        361
+      ],
+      "origin": [
+        0.5,
+        1
+      ]
+    }
+  ]
+}
