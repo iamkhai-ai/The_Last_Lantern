@@ -14,9 +14,10 @@ import {
   RUINS_DEPTH, RUINS_FOOT_PLACEMENT,
   RUINS_MIRROR_STATES, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
   RUINS_SHADOW, RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
-  ruinsNextStep, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSpotFor,
-  RUINS_WALLS, ruinsDepthAt, ruinsNormalizeCounters,
-  ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsStage,
+  ruinsNextStep, ruinsShadowFootprintAt, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSolidEnabled,
+  ruinsShadowSpotFor, ruinsShadowWalkResume, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
+  RUINS_WALLS, ruinsActorBody, ruinsDepthAt, ruinsNormalizeCounters,
+  ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsRect, type RuinsStage,
 } from '../data/ruinsOfTwoHalvesLayout';
 
 export interface RuinsOfTwoHalvesLevelOptions {
@@ -154,6 +155,10 @@ export class RuinsOfTwoHalvesLevel {
   private shadowSolid?: Phaser.GameObjects.Rectangle;
   private shadowTalk?: InteractableConfig;
   private shadowWalk: { index: number } | null = null;
+  /** Ground anchor and footprint the solid body was last placed at; it is re-placed only when the ground moves. */
+  private shadowSolidAt?: { ground: RuinsPoint; footprint: RuinsRect };
+  /** The player's largest step this frame in px (max speed x dt), used by the Shadow's solid. */
+  private playerStepPx = 0;
 
   constructor(options: RuinsOfTwoHalvesLevelOptions) {
     this.scene = options.scene;
@@ -182,7 +187,11 @@ export class RuinsOfTwoHalvesLevel {
       && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
       ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] }
       : undefined;
-    const spawn = resolveRuinsSpawn(saved, { exitReady: isRuinsExitReady(this.getExitInput()) });
+    // The Shadow's footprint is solid on the restored floor too: a saved centre inside it moves to the nearest safe spot.
+    const spawn = resolveRuinsSpawn(saved, {
+      exitReady: isRuinsExitReady(this.getExitInput()),
+      extraBlockers: [ruinsShadowFootprintAt(this.shadowStart().ground)],
+    });
     this.player.setPosition(spawn.x, spawn.y);
     this.restoreLanternPlacement();
     this.placeFollower(spawn);
@@ -209,6 +218,7 @@ export class RuinsOfTwoHalvesLevel {
   public update(dt: number): void {
     if (this.destroyed) return;
     this.updateStoryBeats();
+    this.playerStepPx = (this.player.maxSpeed * dt) / 1000;
     this.advanceShadowWalk(dt);
     this.refreshArt();
     this.flushPendingBeats();
@@ -224,6 +234,10 @@ export class RuinsOfTwoHalvesLevel {
     // re-derives its live state from the solved configuration, so the three receivers still read the
     // way the player left them instead of showing a dark temple behind an already-latched ring.
     ruinsNormalizeCounters(this.progress.flags, this.progress.counters);
+    // A walk record only resumes after the talk and while it names a waypoint the walk still crosses. Anything else is dropped.
+    if (this.progress.flags['l7-met-shadow'] !== true || ruinsShadowWalkResume(this.progress.counters[RUINS_SHADOW_WALK_COUNTER]) === null) {
+      delete this.progress.counters[RUINS_SHADOW_WALK_COUNTER];
+    }
     // A committed latch always keeps `l7-solved` and the slid curtain, whichever of the two flags a save carries.
     if (this.progress.flags['l7-route-latched'] === true) this.progress.flags['l7-solved'] = true;
     if (this.progress.flags['l7-solved'] === true) this.progress.flags['l7-route-latched'] = true;
@@ -537,10 +551,11 @@ export class RuinsOfTwoHalvesLevel {
       const solid = getRuinsSolid(prop.id);
       if (solid) this.addBlocker(solid.x, solid.y, solid.width, solid.height);
     }
-    // The Shadow's footprint follows the spot he occupies (see syncShadow); it is disabled while he walks.
-    const spot = ruinsShadowSpotFor(this.shadowPhase());
-    this.addBlocker(spot.footprint.x, spot.footprint.y, spot.footprint.width, spot.footprint.height);
+    // The Shadow's footprint follows his live ground position, on the spot and during the walk (see placeShadowSolid).
+    const footprint = ruinsShadowFootprintAt(this.shadowGround());
+    this.addBlocker(footprint.x, footprint.y, footprint.width, footprint.height);
     this.shadowSolid = this.objects[this.objects.length - 1] as Phaser.GameObjects.Rectangle;
+    this.placeShadowSolid();
   }
 
   private addBlocker(x: number, y: number, width: number, height: number): void {
@@ -795,9 +810,12 @@ export class RuinsOfTwoHalvesLevel {
       this.progress.flags['l7-met-shadow'] = true;
       this.progress.flags['l7-shadow-talked'] = true;
       this.progress.flags['l7-shadow-spiral'] = true;
+      // The walk is recorded in the same save as the talk, so a reload at any point resumes it instead of snapping him to the wait spot.
+      this.progress.counters[RUINS_SHADOW_WALK_COUNTER] = RUINS_SHADOW_WALK_START;
       this.save();
-      this.refresh();
+      // Start the walk before refreshing: a refresh with no walk running would move him straight to the wait spot.
       this.startShadowWalk();
+      this.refresh();
     });
   }
 
@@ -886,17 +904,65 @@ export class RuinsOfTwoHalvesLevel {
     return getShadowArtKey(pose) ?? undefined;
   }
 
+  /**
+   * Where he is when the level is built: his story spot, or, when a walk was saved mid-way, the waypoint it had
+   * reached, with the walk resuming from the next one.
+   */
+  private shadowStart(): { ground: RuinsPoint; walk: { index: number } | null } {
+    const resume = ruinsShadowWalkResume(this.progress.counters[RUINS_SHADOW_WALK_COUNTER]);
+    if (resume) return { ground: resume.start, walk: { index: resume.next } };
+    return { ground: ruinsShadowSpotFor(this.shadowPhase()).ground, walk: null };
+  }
+
   private drawShadow(): void {
+    const start = this.shadowStart();
     const phase = this.shadowPhase();
-    const spot = ruinsShadowSpotFor(phase);
     const key = this.shadowKey(ruinsShadowPoseFor(phase));
     if (!key) return;
-    const image = this.scene.add.image(spot.ground.x, spot.ground.y, key).setOrigin(0.5, 1).setDepth(ruinsDepthAt(spot.ground.y));
+    const image = this.scene.add.image(start.ground.x, start.ground.y, key).setOrigin(0.5, 1).setDepth(ruinsDepthAt(start.ground.y));
     image.setData('ruins-id', 'shadow-npc');
     this.artById.set('shadow-npc', image);
     this.shadowImage = image;
+    this.shadowWalk = start.walk;
     this.track(image);
     this.protectedArt.push(image);
+  }
+
+  /** Ground anchor of the Shadow as he stands now, or his story spot before any sprite exists. */
+  private shadowGround(): RuinsPoint {
+    const image = this.shadowImage;
+    if (image && image.active) return { x: image.x, y: image.y };
+    return ruinsShadowSpotFor(this.shadowPhase()).ground;
+  }
+
+  /**
+   * Moves the solid to his live footprint and sets whether it is on this frame. `moving` is true on a frame in which he
+   * advanced; then the solid yields to a player who is within one step of it (see ruinsShadowSolidEnabled), so a
+   * walking Shadow never pushes or traps the player. The body is re-placed only when his ground moves; the enable
+   * state is evaluated on every call. Uses the static-body path that `addBlocker` creates: `updateFromGameObject`
+   * re-reads the rect in Phaser 3.90 (node_modules/phaser/src/physics/arcade/StaticBody.js), and `World.separate`
+   * skips bodies with `enable === false`.
+   */
+  private placeShadowSolid(moving = false): void {
+    const solid = this.shadowSolid;
+    if (!solid || !solid.active) return;
+    const body = solid.body as Phaser.Physics.Arcade.StaticBody | null;
+    if (!body) return;
+    const ground = this.shadowGround();
+    let placed = this.shadowSolidAt;
+    if (!placed || placed.ground.x !== ground.x || placed.ground.y !== ground.y) {
+      const footprint = ruinsShadowFootprintAt(ground);
+      solid.setPosition(footprint.x + footprint.width / 2, footprint.y + footprint.height / 2);
+      body.updateFromGameObject();
+      placed = { ground, footprint };
+      this.shadowSolidAt = placed;
+    }
+    body.enable = ruinsShadowSolidEnabled({
+      footprint: placed.footprint,
+      playerBody: ruinsActorBody({ x: this.player.x, y: this.player.y }),
+      moving,
+      stepPx: this.playerStepPx,
+    });
   }
 
   /** Puts the sprite, solid and stand where the story says he is, unless he is mid-walk. */
@@ -911,13 +977,7 @@ export class RuinsOfTwoHalvesLevel {
     if (image.x !== spot.ground.x || image.y !== spot.ground.y) {
       image.setPosition(spot.ground.x, spot.ground.y).setDepth(ruinsDepthAt(spot.ground.y));
     }
-    const solid = this.shadowSolid;
-    if (solid && solid.active) {
-      const footprint = spot.footprint;
-      solid.setPosition(footprint.x + footprint.width / 2, footprint.y + footprint.height / 2);
-      const body = solid.body as Phaser.Physics.Arcade.StaticBody | null;
-      if (body) { body.enable = true; body.updateFromGameObject(); }
-    }
+    this.placeShadowSolid();
     if (this.shadowTalk) {
       this.shadowTalk.x = spot.stand.x; this.shadowTalk.y = spot.stand.y; this.shadowTalk.radius = spot.stand.radius;
     }
@@ -927,8 +987,24 @@ export class RuinsOfTwoHalvesLevel {
   private startShadowWalk(): void {
     if (!this.shadowImage || !this.shadowImage.active) return;
     this.shadowWalk = { index: 0 };
-    const body = this.shadowSolid?.body as Phaser.Physics.Arcade.StaticBody | null | undefined;
-    if (body) body.enable = false;
+    this.placeShadowSolid();
+  }
+
+  /**
+   * Records the walk after each waypoint. The counter holds the last waypoint reached (`-1` before the first). Reaching
+   * the final one ends the walk: the counter is removed and he is on the waiting spot, exactly as a finished walk is.
+   */
+  private persistShadowWalk(): void {
+    const walk = this.shadowWalk;
+    if (!walk) return;
+    if (walk.index < RUINS_SHADOW.path.length) {
+      this.progress.counters[RUINS_SHADOW_WALK_COUNTER] = walk.index - 1;
+    } else {
+      delete this.progress.counters[RUINS_SHADOW_WALK_COUNTER];
+      this.shadowWalk = null;
+      this.syncShadow();
+    }
+    this.save();
   }
 
   private advanceShadowWalk(dt: number): void {
@@ -936,13 +1012,14 @@ export class RuinsOfTwoHalvesLevel {
     const image = this.shadowImage;
     if (!walk || !image || !image.active) return;
     const path = RUINS_SHADOW.path;
-    if (walk.index >= path.length) { this.shadowWalk = null; this.syncShadow(); return; }
+    if (walk.index >= path.length) { this.persistShadowWalk(); return; }
     const near = Math.hypot(this.player.x - image.x, this.player.y - (image.y - 20)) <= RUINS_SHADOW.followRange;
     const walking = this.shadowKey('walk-right');
     const waiting = this.shadowKey('stillness');
     if (!near) {
       const key = waiting ?? walking;
       if (key && image.texture.key !== key) image.setTexture(key);
+      this.placeShadowSolid();
       return;
     }
     const target = path[walk.index];
@@ -955,10 +1032,12 @@ export class RuinsOfTwoHalvesLevel {
     if (distance <= step) {
       image.setPosition(target.x, target.y);
       walk.index += 1;
+      this.persistShadowWalk();
     } else {
       image.setPosition(image.x + (dx / distance) * step, image.y + (dy / distance) * step);
     }
     image.setDepth(ruinsDepthAt(image.y));
+    this.placeShadowSolid(true);
   }
 
   private queueBeat(lines: DialogueLine[], onComplete?: () => void): void {
@@ -1038,6 +1117,7 @@ export class RuinsOfTwoHalvesLevel {
     this.lockLabels.clear();
     this.shadowImage = undefined;
     this.shadowSolid = undefined;
+    this.shadowSolidAt = undefined;
     this.shadowTalk = undefined;
     this.shadowWalk = null;
   }

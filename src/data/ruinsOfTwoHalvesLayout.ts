@@ -138,8 +138,12 @@ export const RUINS_SHADOW = {
       stand: { id: 'shadow-wait', x: 470, y: 134, radius: 18 },
     },
   } as Record<'guard' | 'wait', RuinsShadowSpot>,
-  /** waypoints after `guard`, ending on the `wait` ground anchor; the walk crosses open floor above the statue */
-  path: [{ x: 270, y: 142 }, { x: 450, y: 142 }, { x: 470, y: 110 }] as readonly RuinsPoint[],
+  /**
+   * waypoints after `guard`, ending on the `wait` ground anchor; the walk crosses open floor above the statue. The middle
+   * waypoint keeps his footprint's bottom at or above y 122 while he passes x 409..451, so the inscription stand's foot
+   * body (423..437, 122..128) stays free for the whole walk.
+   */
+  path: [{ x: 270, y: 142 }, { x: 400, y: 122 }, { x: 470, y: 110 }] as readonly RuinsPoint[],
   speed: 70,
   /** he pauses while the player is further than this from him (scenario §7: he stops for them) */
   followRange: 150,
@@ -156,6 +160,64 @@ export function ruinsShadowSpotFor(phase: RuinsShadowPhase): RuinsShadowSpot {
 
 export function ruinsShadowPoseFor(phase: RuinsShadowPhase): RuinsShadowPoseId {
   return phase === 'guard' ? 'shielding' : phase === 'relaxed' ? 'turn' : 'waiting';
+}
+
+/**
+ * Progress counter for the walk: the index of the last waypoint he reached, `RUINS_SHADOW_WALK_START` before the
+ * first one. It is present only while the walk is in progress; reaching the final waypoint removes it.
+ */
+export const RUINS_SHADOW_WALK_COUNTER = 'l7-shadow-walk-step';
+export const RUINS_SHADOW_WALK_START = -1;
+
+/** Offset of the solid footprint from the ground anchor. Read from the guard spot; the wait spot must match it (checked). */
+const SHADOW_FOOTPRINT_OFFSET: RuinsPoint = {
+  x: RUINS_SHADOW.spots.guard.footprint.x - RUINS_SHADOW.spots.guard.ground.x,
+  y: RUINS_SHADOW.spots.guard.footprint.y - RUINS_SHADOW.spots.guard.ground.y,
+};
+
+/** The Shadow's solid footprint when he stands with his ground anchor at `ground`: the same rect as his spots. */
+export function ruinsShadowFootprintAt(ground: RuinsPoint): RuinsRect {
+  const size = RUINS_SHADOW.spots.guard.footprint;
+  return { x: ground.x + SHADOW_FOOTPRINT_OFFSET.x, y: ground.y + SHADOW_FOOTPRINT_OFFSET.y, width: size.width, height: size.height };
+}
+
+/** Inset of the player's foot body for the penetration test: flush contact and float error are not overlap. */
+export const RUINS_SHADOW_SOLID_EPS = 0.5;
+
+/** Strict overlap of `a` with `b` grown by `grow` on every side (a negative `grow` shrinks `b`). Allocates nothing. */
+function ruinsRectOverlapsGrown(a: RuinsRect, b: RuinsRect, grow: number): boolean {
+  return a.x < b.x + b.width + grow && a.x + a.width > b.x - grow
+    && a.y < b.y + b.height + grow && a.y + a.height > b.y - grow;
+}
+
+/**
+ * Whether the Shadow's solid footprint is enabled this frame, against the player's foot body `playerBody`.
+ * - Parked (`moving` false): enabled unless the footprint really penetrates the body, meaning it overlaps the body
+ *   shrunk by `RUINS_SHADOW_SOLID_EPS`. Flush contact stays solid, so a parked Shadow still stops a player who walks up to him.
+ * - Moving: the physics step runs before the scene update, so the footprint has already moved past this frame's
+ *   separation. The player can take one more step of up to `stepPx` before the next check, so the solid is disabled
+ *   while the footprint is within `stepPx + 1` of the body. The same distance re-enables it, so there is no hysteresis
+ *   band: a footprint hovering at that distance may toggle, which is harmless because the player cannot cross the gap in one step.
+ * A parked Shadow never waits for clearance: keeping the solid off there would let the player walk into him.
+ */
+export function ruinsShadowSolidEnabled(state: {
+  footprint: RuinsRect; playerBody: RuinsRect; moving: boolean; stepPx: number;
+}): boolean {
+  if (!state.moving) return !ruinsRectOverlapsGrown(state.footprint, state.playerBody, -RUINS_SHADOW_SOLID_EPS);
+  return !ruinsRectOverlapsGrown(state.footprint, state.playerBody, state.stepPx + 1);
+}
+
+/**
+ * Where a saved walk resumes, or null when there is no walk to resume. `counter` is the last waypoint reached
+ * (`-1`: none yet, so he is still on the guard spot). The final waypoint ends the walk, so `counter` values
+ * at or beyond the penultimate waypoint, and anything that is not an integer in range, resume nothing.
+ */
+export function ruinsShadowWalkResume(counter: number | undefined): { start: RuinsPoint; next: number } | null {
+  if (counter === undefined) return null;
+  const lastResumable = RUINS_SHADOW.path.length - 2;
+  if (!Number.isInteger(counter) || counter < RUINS_SHADOW_WALK_START || counter > lastResumable) return null;
+  const at = counter < 0 ? RUINS_SHADOW.spots.guard.ground : RUINS_SHADOW.path[counter];
+  return { start: { x: at.x, y: at.y }, next: counter + 1 };
 }
 
 /** Wall-mounted fixtures with interaction stand points but no extra collider. */
@@ -416,10 +478,14 @@ export function ruinsSegmentIntersectsQuad(segment: RuinsSegment, quad: RuinsQua
   return false;
 }
 
-/** True when the 14x6 foot body at `center` is walkable: inside the floor and clear of every blocker. */
-export function isRuinsPositionSafe(center: RuinsPoint): boolean {
+/**
+ * True when the 14x6 foot body at `center` is walkable: inside the floor and clear of every blocker.
+ * `extraBlockers` adds solids that exist only at runtime, such as The Shadow's footprint.
+ */
+export function isRuinsPositionSafe(center: RuinsPoint, extraBlockers: readonly RuinsRect[] = []): boolean {
   const body = ruinsActorBody(center);
   if (!ruinsIsInsideFloor(body)) return false;
+  if (extraBlockers.some((blocker) => ruinsRectsOverlap(body, blocker))) return false;
   return !RUINS_BLOCKERS.some((blocker) => ruinsRectsOverlap(body, blocker));
 }
 
@@ -569,17 +635,18 @@ export const RUINS_CHECKPOINTS: readonly RuinsCheckpoint[] = [
  */
 export function resolveRuinsSpawn(
   saved: RuinsPoint | undefined,
-  options: { exitReady: boolean } = { exitReady: false },
+  options: { exitReady: boolean; extraBlockers?: readonly RuinsRect[] } = { exitReady: false },
 ): RuinsPoint {
   const usable = RUINS_CHECKPOINTS.filter((point) => !point.requiresExit || options.exitReady);
+  const blockers = options.extraBlockers ?? [];
   const target = saved && Number.isFinite(saved.x) && Number.isFinite(saved.y) ? saved : RUINS_SPAWN;
   const anchor: RuinsPoint = { ...RUINS_SPAWN };
-  if (isRuinsPositionSafe(target)) {
+  if (isRuinsPositionSafe(target, blockers)) {
     return { x: Math.round(target.x), y: Math.round(target.y) };
   }
   const ordered = [...usable].sort((a, b) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b.x - target.x, b.y - target.y));
   for (const point of ordered) {
-    if (isRuinsPositionSafe(point)) return { x: point.x, y: point.y };
+    if (isRuinsPositionSafe(point, blockers)) return { x: point.x, y: point.y };
   }
   for (let radius = 12; radius <= 120; radius += 12) {
     for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 8) {
@@ -587,7 +654,7 @@ export function resolveRuinsSpawn(
         x: Math.round(anchor.x + Math.cos(angle) * radius),
         y: Math.round(anchor.y + Math.sin(angle) * radius),
       };
-      if (isRuinsPositionSafe(candidate)) return candidate;
+      if (isRuinsPositionSafe(candidate, blockers)) return candidate;
     }
   }
   return { ...RUINS_SPAWN };

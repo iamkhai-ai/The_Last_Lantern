@@ -11,6 +11,8 @@ import {
   ruinsNormalizeCounters, ruinsPointInQuad, ruinsQuadContainsRect,
   ruinsRectsOverlap, ruinsSegmentIntersectsQuad,
   RUINS_SHADOW, ruinsNextStep, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSpotFor,
+  ruinsShadowFootprintAt, ruinsShadowSolidEnabled, ruinsShadowWalkResume,
+  RUINS_SHADOW_SOLID_EPS, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
 } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 
 /* -------------------------------------------------------------------------- */
@@ -700,4 +702,129 @@ assert.equal(ruinsNextStep(puzzle({ lanternPlaced: false })), 'place');
 assert.equal(ruinsNextStep(puzzle({ leftMirror: 3, rightMirror: 2, statue: 1 })), 'suns');
 assert.equal(ruinsNextStep(puzzle({ statue: 1 })), 'moon');
 assert.equal(ruinsNextStep(puzzle({})), 'confirm');
+/* -------------------------------------------------------------------------- */
+/* 16. the Shadow's moving footprint, the persisted walk and the restore guard */
+/* -------------------------------------------------------------------------- */
+
+// Both spots share one footprint offset and size, so the footprint that follows him is the rect he stands on.
+const guardSpotDef = RUINS_SHADOW.spots.guard;
+const waitSpotDef = RUINS_SHADOW.spots.wait;
+const footprintShape = (spot) => ({
+  x: spot.footprint.x - spot.ground.x, y: spot.footprint.y - spot.ground.y,
+  width: spot.footprint.width, height: spot.footprint.height,
+});
+assert.deepEqual(footprintShape(waitSpotDef), footprintShape(guardSpotDef), 'both Shadow spots share one footprint offset and size');
+assert.deepEqual(ruinsShadowFootprintAt(guardSpotDef.ground), guardSpotDef.footprint, 'the footprint helper reproduces the guard spot');
+assert.deepEqual(ruinsShadowFootprintAt(waitSpotDef.ground), waitSpotDef.footprint, 'the footprint helper reproduces the wait spot');
+
+// The walk as the Shadow actually travels it: the guard spot, then every waypoint, sampled every 4px.
+const walkRoute = [guardSpotDef.ground, ...RUINS_SHADOW.path];
+const walkSamples = [];
+for (let index = 1; index < walkRoute.length; index += 1) {
+  const from = walkRoute[index - 1];
+  const to = walkRoute[index];
+  const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 4);
+  for (let step = 0; step < steps; step += 1) {
+    walkSamples.push({ x: from.x + ((to.x - from.x) * step) / steps, y: from.y + ((to.y - from.y) * step) / steps });
+  }
+}
+walkSamples.push(walkRoute.at(-1));
+assert.ok(walkSamples.length > 60, `the walk is sampled along its whole length (${walkSamples.length} samples)`);
+
+// Every open stand and checkpoint, including the north door stand, that the player must keep reaching.
+const openTargets = [...RUINS_STANDS, ...RUINS_CHECKPOINTS.filter((point) => !point.requiresExit)];
+/** Every 4px-grid point the foot body reaches from the spawn with `extra` solids added. */
+const floodFromSpawn = (extra) => {
+  const queue = [{ x: RUINS_SPAWN.x, y: RUINS_SPAWN.y }];
+  const seen = new Set([`${RUINS_SPAWN.x},${RUINS_SPAWN.y}`]);
+  for (let index = 0; index < queue.length; index += 1) {
+    const point = queue[index];
+    for (const [dx, dy] of [[4, 0], [-4, 0], [0, 4], [0, -4]]) {
+      const next = { x: point.x + dx, y: point.y + dy };
+      const key = `${next.x},${next.y}`;
+      if (seen.has(key) || !isRuinsPositionSafe(next, extra)) continue;
+      seen.add(key);
+      queue.push(next);
+    }
+  }
+  return queue;
+};
+for (const ground of walkSamples) {
+  const footprint = ruinsShadowFootprintAt(ground);
+  const where = `${ground.x.toFixed(1)},${ground.y.toFixed(1)}`;
+  // The wait spot stands against the north wall (section 15 makes the same exception), so only that wall is exempt.
+  const hits = RUINS_BLOCKERS.filter((blocker) => blocker.id !== 'north-wall' && ruinsRectsOverlap(footprint, blocker));
+  assert.deepEqual(hits.map((blocker) => blocker.id), [], `the Shadow at ${where} never overlaps a standing prop or a side wall`);
+  const reached = floodFromSpawn([footprint]);
+  for (const target of openTargets) {
+    assert.equal(reached.some((point) => Math.hypot(point.x - target.x, point.y - target.y) <= 22), true,
+      `with the Shadow at ${where}, ${target.id} stays reachable from the spawn`);
+  }
+}
+
+// The footprint is a real solid. Parked, it yields only to real penetration: a foot body that touches the edge keeps it on.
+const yardFootprint = ruinsShadowFootprintAt({ x: 270, y: 142 });
+const parked = (footprint, playerBody) => ruinsShadowSolidEnabled({ footprint, playerBody, moving: false, stepPx: 0 });
+const walking = (footprint, playerBody, stepPx) => ruinsShadowSolidEnabled({ footprint, playerBody, moving: true, stepPx });
+assert.equal(parked(yardFootprint, ruinsActorBody({ x: 270, y: 120 })), false, 'a foot body inside the footprint switches the solid off for that frame');
+assert.equal(parked(yardFootprint, ruinsActorBody({ x: 270, y: 126 })), true, 'a foot body that only touches the footprint edge keeps the solid on');
+assert.equal(parked(yardFootprint, ruinsActorBody({ x: 270, y: 130 })), true, 'a foot body clear below the footprint keeps the solid on');
+for (const ground of walkRoute) {
+  const footprint = ruinsShadowFootprintAt(ground);
+  assert.equal(parked(footprint, ruinsActorBody({ x: ground.x, y: ground.y - 20 })), false,
+    `a player caught under the Shadow at ${ground.x},${ground.y} yields the solid`);
+}
+
+// Flush contact is not overlap. The body is at x 40..54, y 10..16; each footprint touches one edge, or is nudged by `nudge` into it.
+const solidBody = { x: 40, y: 10, width: 14, height: 6 };
+const touching = (side, nudge) => ({
+  left: { x: 12 + nudge, y: -5, width: 28, height: 36 },
+  right: { x: 54 - nudge, y: -5, width: 28, height: 36 },
+  above: { x: 33, y: -26 + nudge, width: 28, height: 36 },
+  below: { x: 33, y: 16 - nudge, width: 28, height: 36 },
+})[side];
+for (const side of ['left', 'right', 'above', 'below']) {
+  assert.equal(parked(touching(side, 0), solidBody), true, `exact flush contact on the ${side} edge keeps the parked solid on`);
+  assert.equal(parked(touching(side, 1e-12), solidBody), true, `1e-12 float penetration on the ${side} edge is not overlap`);
+  assert.equal(parked(touching(side, 1), solidBody), false, `1px real penetration on the ${side} edge switches the parked solid off`);
+}
+// Moving, the solid yields inside the step margin (stepPx + 1), flush contact included, and holds once the footprint is clear of it.
+const gapped = (gap) => ({ x: 40 - gap - 28, y: -5, width: 28, height: 36 });
+assert.equal(walking(gapped(1), solidBody, 2), false, 'moving with the footprint 1px from her body (stepPx 2) switches the solid off');
+assert.equal(walking(gapped(0), solidBody, 2), false, 'moving with flush contact inside the step margin switches the solid off');
+assert.equal(walking(gapped(2.9), solidBody, 2), false, 'moving with the footprint just inside stepPx + 1 switches the solid off');
+assert.equal(walking(gapped(3.5), solidBody, 2), true, 'moving with the footprint more than stepPx + 1 clear keeps the solid on');
+assert.equal(walking(gapped(10), solidBody, 2), true, 'moving with the footprint 10px from her body keeps the solid on');
+// No hysteresis while parked: a solid that was off for a walk comes back on as soon as the footprint is not penetrating.
+assert.equal(parked(gapped(1), solidBody), true, 'parked, the solid is on again while she stands 1px away: she cannot walk into a parked Shadow');
+assert.equal(RUINS_SHADOW_SOLID_EPS, 0.5, 'the penetration inset is half a pixel per side');
+
+// A saved walk resumes from the waypoint it had reached, and only from one the walk still crosses.
+assert.equal(RUINS_SHADOW_WALK_COUNTER, 'l7-shadow-walk-step');
+assert.equal(RUINS_SHADOW_WALK_START, -1);
+assert.equal(ruinsShadowWalkResume(undefined), null, 'no counter: there is no walk to resume');
+assert.deepEqual(ruinsShadowWalkResume(-1), { start: guardSpotDef.ground, next: 0 }, 'no waypoint reached yet: he resumes from the guard spot');
+assert.deepEqual(ruinsShadowWalkResume(0), { start: RUINS_SHADOW.path[0], next: 1 }, 'first waypoint reached: he resumes from it');
+assert.deepEqual(ruinsShadowWalkResume(1), { start: RUINS_SHADOW.path[1], next: 2 }, 'second waypoint reached: he resumes towards the last one');
+assert.equal(ruinsShadowWalkResume(2), null, 'the last waypoint ends the walk, so nothing resumes');
+for (const bad of [-2, 3, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+  assert.equal(ruinsShadowWalkResume(bad), null, `counter ${bad} resumes nothing`);
+}
+for (const counter of [-1, 0, 1]) {
+  const resume = ruinsShadowWalkResume(counter);
+  assert.deepEqual(resume.start, walkRoute[counter + 1], `counter ${counter} starts on the route point it names`);
+  assert.ok(resume.next < RUINS_SHADOW.path.length, `counter ${counter} targets a waypoint that exists`);
+}
+
+// Restore: a saved centre inside the Shadow's footprint is moved out, and a clear centre is kept as saved.
+for (const ground of walkRoute) {
+  const footprint = ruinsShadowFootprintAt(ground);
+  const saved = { x: ground.x, y: ground.y - 20 };
+  assert.equal(isRuinsPositionSafe(saved), true, `a centre inside the Shadow at ${ground.x},${ground.y} is walkable on the static floor`);
+  assert.equal(isRuinsPositionSafe(saved, [footprint]), false, `a centre inside the Shadow at ${ground.x},${ground.y} is not walkable with his footprint`);
+  const restored = resolveRuinsSpawn(saved, { exitReady: false, extraBlockers: [footprint] });
+  assert.equal(isRuinsPositionSafe(restored, [footprint]), true, `restore moves the player out of the Shadow at ${ground.x},${ground.y}`);
+  assert.deepEqual(resolveRuinsSpawn(saved, { exitReady: false }), saved, 'without the footprint the same centre is kept (the footprint is what moves it)');
+}
+
 console.log('Level 08 Shadow state, spots, walk and exit-guidance checks passed.');
