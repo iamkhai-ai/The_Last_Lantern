@@ -19,7 +19,7 @@ Light model (matches asset previews 01/02):
 
 ## Player flow (shipped target)
 
-1. Spawn on the south practice lawn `(238,300)` (above the shared bottom HUD strip, which starts at y320; the original `(238,336)` put the actor behind the status line and the controls bar) walking in from the southern mouth; Lumo follows. Opening dialogue from scenario §2 (4 lines, unchanged scenario text).
+1. Spawn on the south practice lawn `(238,298)` (its 14x6 foot body spans y314..320, so it stays above the status band at y320; the earlier `(238,300)` put the body at 316..322, inside the status row, and the original `(238,336)` put the actor behind the status line and the controls bar) walking in from the entry mouth; Lumo follows. Opening dialogue from scenario §2 (4 lines, unchanged scenario text).
 2. Practice pots (west of spawn, walled lesson corner): while the canopy is still open the pots hold the lit state. Turn west; at the fixed shutter handle `stand (132,132)` press E: the canopy closes over the reservoir, the garden darkens, bar lowers; two-line beat ("Tối đi thật."). First lantern toggle after that plays the four-line practice observation (scenario §3) and every pot shows its state icon.
 3. Main gate: with the lantern ON the Sun Flower opens and the bar raises. Walk north through the bar corridor (posts at x99..106 / x194..201, beam line y150..162), then press E at the west latch `stand (142,132)` to hold the bar. It stays raised when the flower folds.
 4. Turn the lantern OFF. The practice Moon Root and the main one extend; the root bridge spans the vertical canal `(x304..364, y228..248)`. Cross it in the dark to the nursery.

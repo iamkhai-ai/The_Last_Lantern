@@ -3,13 +3,13 @@
 Source: `docs/scenario/07-the-sleeping-garden.md`. Flow plan: `07-plan.md`. Runtime: `src/data/sleepingGardenLayout.ts` + `src/levels/SleepingGardenLevel.ts`.
 Base art: `assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png`. Preview staging (`previews/01..08`) is illustrative; the rectangles below are authoritative and the check script validates them.
 
-Conventions: 640×360, native scale, nearest filtering. Actor center coordinates; body = `center + (-7, +16, 14, 6)`, feet line `center + (0, 19)`. Standing prop anchors = art top-left. Depth: floor art 4–6, standing props `10 + groundAnchorY/10`, raised bar beam 70, actor `10 + (y+19)/10`, prompts 82, dialogue 95, HUD 86+. Darkness uses the shared LanternSystem overlay stack (darkness 68 / halo 69 / pulse 70 / vignette 71) driven by `lantern.isDawnMode = !canopyShut` — no level-local overlay.
+Conventions: 640×360, native scale, nearest filtering. Actor center coordinates; body = `center + (-7, +16, 14, 6)`, feet line `center + (0, 19)`. Standing prop anchors = art top-left. **HUD bands:** the foot body must stay inside `y 58..320` (`GARDEN_HUD_BAND`; top panels end at 58, status row starts at 320), the same foot-body rule as RUINS_FLOOR and HEART_FLOOR. Centre bounds derive from it: `GARDEN_BOUNDS = { minX 14, maxX 626, minY 42, maxY 298 }` (body top 58, body bottom 320), and the bands are physical solids (`band-north-*`, `band-status`) so walking cannot enter them. Depth: floor art 4–6, standing props `10 + groundAnchorY/10`, raised bar beam 70, actor `10 + (y+19)/10`, prompts 82, dialogue 95, HUD 86+. Darkness uses the shared LanternSystem overlay stack (darkness 68 / halo 69 / pulse 70 / vignette 71) driven by `lantern.isDawnMode = !canopyShut` — no level-local overlay.
 
 ## Zones (walkable floors)
 
 | id | rect (x,y,w,h) | contents |
 | --- | --- | --- |
-| Z1 practice lawn | 28,266,276,82 | spawn (238,300), practice pots, teaching waterline, entry mouth (216,348,42,12) |
+| Z1 practice lawn | 28,266,276,32 | spawn (238,298), practice pots, teaching waterline, entry mouth (216,298,42,22); the lawn ends at the lowest in-band centre y=298 |
 | Z2 forecourt | 218,186,86,64 | moon pot at the top of the court, west bridge approach runs under it |
 | Z3 terrace | 208,96,96,90 | sun flower, bar gate corridor zone above |
 | gate corridor | 104,136,92,20 | shutter handle stand, west latch stand (only when bar raised) |
@@ -22,16 +22,18 @@ Conventions: 640×360, native scale, nearest filtering. Actor center coordinates
 | nursery | 364,96,160,196 | drain, sprout, east latch, delivered water |
 | steps | 524,252,12,40 | nursery ↔ walkway |
 | walkway | 536,96,76,196 | route to the shrine gate |
-| gate opening | 552,0,44,96 | exit trigger (574,64) r24 (arch exception, RULE_GAMES §3) |
-| entry mouth | 216,348,42,12 | south entrance |
+| gate opening | 552,58,44,38 | walkable below the top HUD band (y 58..96); exit trigger (574,64) r24 (arch exception, RULE_GAMES §3). The trigger centre is 6px below the band edge; its r24 circle reaches into the band, which is a trigger radius, not body placement |
+| entry mouth | 216,298,42,22 | south entrance: the lowest in-band lawn strip above the status row (was 216,348,42,12, inside the status row) |
 
 ## Static solids (walls, structures, props)
 
 | id | rect | note |
 | --- | --- | --- |
-| band-north-a/b | 0,0,552,56 · 596,0,44,56 | pond, railing, gate roof |
+| band-north-a/b | 0,0,552,58 · 596,0,44,58 | pond, railing, gate roof; the top HUD band (y<58) is solid |
+| band-north-gate | 552,0,44,58 | closes the gate opening over the top HUD band; the arch is walkable from y=58 |
+| band-status | 0,320,640,40 | the bottom HUD status row (y>=320) is solid; no art, the UI draws over it |
 | band-west | 0,56,28,304 | dark woods |
-| band-south | 0,348,216,12 · 258,348,382,12 | entry mouth carved at 216..258 |
+| band-south | 0,348,216,12 · 258,348,382,12 | below band-status; no longer walkable (the entry mouth is at 298..320) |
 | south-east-band | 304,312,336,48 | bushes/water below balustrade |
 | east-band | 612,96,28,264 | east water |
 | pond-railing | 208,56,328,40 | stone/flowers/trees band |
@@ -97,7 +99,7 @@ Depth = `10 + groundAnchorY/10` for standing props and actor feet; ground stamps
 - **Solid (blocks the 14×6 foot body from all four sides):** every rect in `GARDEN_STATIC_SOLIDS` with visible art — bar posts, reservoir, shutter handle, sun flower body, both latches, moon pot body, drain, tower, tree trunk, quiet platform, both practice pots, plus walls/bands/balustrades/canal side-walls. Water rects (`GARDEN_WATER`) are lethal. Checked 4-directionally by `check-sleeping-garden.mjs`.
 - **Dynamic solids:** the lowered bar beam, the retracted bridge spans, and the closed side plank — solid only while their live condition is unmet.
 - **Walkable ground (no collider):** practice lawn/forecourt/terrace/walkway/nursery zones, gate corridor, sluice crossing, entry mouth, teaching waterline, delivered-water chevrons, sprout, icons, gate opening, and the bridge/side strips once their condition is met.
-- **Every solid footprint has matching visible art**; no invisible blocker sits over open floor.
+- **Every solid footprint has matching visible art**, except the two HUD band solids (`band-north-*`, `band-status`): they stand for the UI bands, which have no scenic art, and they are the physical enforcement of the 58..320 foot-body rule. `check-sleeping-garden.mjs` sweeps every 1px centre whose body would enter a band and asserts a solid blocks it.
 
 ## State model (pure, in `sleepingGardenLayout.ts`)
 
@@ -125,9 +127,9 @@ Depth = `10 + groundAnchorY/10` for standing props and actor feet; ground stamps
 ## Restore rules
 
 - Save `player-level/x/y`, `lumo-x/y` on the existing cadence.
-- On load, rebuild state from flags, then place the player: if the saved center is unsafe (inside a solid/dynamic solid, on a canal without walkable crossing, or in a zone unreachable with current crossings/bar), use `nearestSafeGardenSpawn` around the saved point, then the stage anchors (238,300), (200,300), (258,300), (440,282), (576,150), (574,64).
-- **Reachability is part of "safe".** A collision-free point can still be sealed behind an unsolved crossing — a legacy save inside the nursery/walkway/arch while the garden is still lit would strand the player east of the canal with the shutter handle unreachable and the level unwinnable. `nearestSafeGardenSpawn` therefore accepts a candidate only when it is collision-free *and* belongs to `gardenReachableRegion` (the shared 4px collision-aware flood-fill from the entry, `GARDEN_REACH_ORIGIN` 14,12). The entry (238,300) is walkable in every state, so the fallback is always the west lawn; the anchor list is only reached when the saved point is unusable.
-- The spawn itself is (238,300) — not deeper south — because the shared bottom HUD strip starts at y=320 (`statusText` y320, controls bar y344) and a (238,336) spawn put the actor behind two panels.
+- On load, rebuild state from flags, then place the player: if the saved center is unsafe (inside a solid/dynamic solid, on a canal without walkable crossing, or in a zone unreachable with current crossings/bar), use `nearestSafeGardenSpawn` around the saved point, then the stage anchors (238,298), (200,298), (258,298), (440,282), (576,150), (574,64).
+- **Reachability is part of "safe".** A collision-free point can still be sealed behind an unsolved crossing — a legacy save inside the nursery/walkway/arch while the garden is still lit would strand the player east of the canal with the shutter handle unreachable and the level unwinnable. `nearestSafeGardenSpawn` therefore accepts a candidate only when it is collision-free *and* belongs to `gardenReachableRegion` (the shared 4px collision-aware flood-fill from the entry, `GARDEN_REACH_ORIGIN` 14,42, which is `GARDEN_BOUNDS` minX/minY). The entry (238,298) is walkable in every state, so the fallback is always the west lawn; the anchor list is only reached when the saved point is unusable.
+- The spawn itself is (238,298). The foot body is 314..320, the lowest centre that keeps the body above the shared bottom HUD strip (`statusText` y320, controls bar y344). The earlier (238,300) put the body at 316..322, inside the status row, and (238,336) put the actor behind two panels. Walking south from the spawn now stops at y=298 (solid `band-status` below), not y=348.
 - Legacy saves: old `l6-*` flags load as-is; plant visuals re-derive; unknown flags ignored; never write new fields outside the v1 save shape except the listed `l6-*` keys.
 - Integration: `CampaignScene` owns the controller (`gardenLevel`), level index 6 routes here, and the playtest gate still reads `if (this.progress.level >= 4 && this.progress.level !== 6) start('ComingSoonScene')` — index 6 is playable, every other unfinished index keeps the coming-soon screen (reconciled at integration where 05/06 add their own index to the same line).
 

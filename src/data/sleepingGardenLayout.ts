@@ -86,8 +86,8 @@ export const GARDEN_BAR_POSTS: Array<{ id: 'w' | 'e'; crop: GardenRect }> = [
   { id: 'e', crop: { x: 96, y: GARDEN_BAR_BEAM_ROWS, width: 16, height: 72 - GARDEN_BAR_BEAM_ROWS } },
 ];
 
-/** Where the two practice pots are close enough to read (the south lawn, zone z1-lawn). */
-export const GARDEN_OBSERVATION_ZONE: GardenRect = { x: 28, y: 266, width: 276, height: 82 };
+/** Where the two practice pots are close enough to read (the south lawn, zone z1-lawn, clipped at the lowest in-band centre). */
+export const GARDEN_OBSERVATION_ZONE: GardenRect = { x: 28, y: 266, width: 276, height: 32 };
 export function inGardenObservationZone(center: GardenPoint): boolean { return pointInRect(center, GARDEN_OBSERVATION_ZONE); }
 
 /** Any light change (on->off or off->on) after the canopy is shut arms the practice lesson once. */
@@ -139,7 +139,7 @@ export function updateHeldSpans(held: GardenHeldSpans, state: GardenState, lante
 }
 
 export const GARDEN_ZONES: Array<{ id: string; rect: GardenRect }> = [
-  { id: 'z1-lawn', rect: { x: 28, y: 266, width: 276, height: 82 } },
+  { id: 'z1-lawn', rect: { x: 28, y: 266, width: 276, height: 32 } },
   { id: 'z2-forecourt', rect: { x: 218, y: 186, width: 86, height: 64 } },
   { id: 'z3-terrace', rect: { x: 208, y: 96, width: 96, height: 90 } },
   { id: 'gate-corridor', rect: { x: 104, y: 136, width: 92, height: 20 } },
@@ -153,13 +153,18 @@ export const GARDEN_ZONES: Array<{ id: string; rect: GardenRect }> = [
   { id: 'nursery', rect: { x: 364, y: 96, width: 160, height: 196 } },
   { id: 'steps', rect: { x: 524, y: 252, width: 12, height: 40 } },
   { id: 'walkway', rect: { x: 536, y: 96, width: 76, height: 196 } },
-  { id: 'gate-opening', rect: { x: 552, y: 0, width: 44, height: 96 } },
-  { id: 'entry-mouth', rect: { x: 216, y: 348, width: 42, height: 12 } },
+  { id: 'gate-opening', rect: { x: 552, y: 58, width: 44, height: 38 } }, // below the top HUD band (y<58); exit trigger (574,64)
+  { id: 'entry-mouth', rect: { x: 216, y: 298, width: 42, height: 22 } }, // lowest in-band lawn strip above the status row
 ];
 
 export const GARDEN_STATIC_SOLIDS: Array<{ id: string; rect: GardenRect }> = [
-  { id: 'band-north-a', rect: { x: 0, y: 0, width: 552, height: 56 } },
-  { id: 'band-north-b', rect: { x: 596, y: 0, width: 44, height: 56 } },
+  // The HUD bands are physical solids (as RUINS_WALLS does for its north/south bands): the body
+  // cannot enter y<58 or y>320 by walking, not only by the reach grid. band-north-gate closes the
+  // gate opening over the top band; the gate's walkable part starts at y=58.
+  { id: 'band-north-a', rect: { x: 0, y: 0, width: 552, height: 58 } },
+  { id: 'band-north-b', rect: { x: 596, y: 0, width: 44, height: 58 } },
+  { id: 'band-north-gate', rect: { x: 552, y: 0, width: 44, height: 58 } },
+  { id: 'band-status', rect: { x: 0, y: 320, width: 640, height: 40 } },
   { id: 'band-west', rect: { x: 0, y: 56, width: 28, height: 304 } },
   { id: 'band-south-west', rect: { x: 0, y: 348, width: 216, height: 12 } },
   { id: 'band-south-east', rect: { x: 258, y: 348, width: 382, height: 12 } },
@@ -258,15 +263,28 @@ export function gardenLatchEastEnabled(state: GardenState): boolean {
 }
 
 export const GARDEN_STAGE_ANCHORS: GardenPoint[] = [
-  { x: 238, y: 300 },
-  { x: 200, y: 300 },
-  { x: 258, y: 300 },
+  { x: 238, y: 298 },
+  { x: 200, y: 298 },
+  { x: 258, y: 298 },
   { x: 440, y: 282 },
   { x: 576, y: 150 },
   { x: 574, y: 64 },
 ];
 
-export const GARDEN_BOUNDS = { minX: 14, maxX: 626, minY: 12, maxY: 348 };
+/**
+ * Shared HUD bands (CampaignScene): the top title/objective panels end at y=58 and the bottom
+ * status/help row starts at y=320. The walkable unit is the 14x6 foot body (center + (-7,+16)), so
+ * the body must stay inside [58, 320], the same foot-body rule RUINS_FLOOR and HEART_FLOOR use.
+ */
+export const GARDEN_HUD_BAND = { top: 58, bottom: 320 } as const;
+
+/** Player-center bounds derived from the foot-body rule: body top = 58 (minY 42), body bottom = 320 (maxY 298). */
+export const GARDEN_BOUNDS = {
+  minX: 14,
+  maxX: 626,
+  minY: GARDEN_HUD_BAND.top - GARDEN_ACTOR.bodyY,
+  maxY: GARDEN_HUD_BAND.bottom - (GARDEN_ACTOR.bodyY + GARDEN_ACTOR.bodyHeight),
+};
 
 /** Collision-aware walk grid: cells are player centers on a 4px lattice inside GARDEN_BOUNDS. */
 export const GARDEN_REACH_STEP = 4;
@@ -336,7 +354,14 @@ export function gardenPointReachable(state: GardenState, lanternOn: boolean, hel
 
 export function nearestSafeGardenSpawn(state: GardenState, lanternOn: boolean, held: GardenHeldSpans, saved?: GardenPoint): GardenPoint {
   const candidates: GardenPoint[] = [];
-  if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) candidates.push({ x: saved.x, y: saved.y });
+  // A save from before the HUD-band bounds (y<42 or y>298) is clamped into GARDEN_BOUNDS and tried first,
+  // so a legal spot close to it wins over the lawn spawn. A raw point outside the bounds is never safe anyway.
+  if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
+    candidates.push({
+      x: Math.min(GARDEN_BOUNDS.maxX, Math.max(GARDEN_BOUNDS.minX, saved.x)),
+      y: Math.min(GARDEN_BOUNDS.maxY, Math.max(GARDEN_BOUNDS.minY, saved.y)),
+    });
+  }
   candidates.push(...GARDEN_STAGE_ANCHORS);
   const region = gardenReachableRegion(state, lanternOn, held, GARDEN_SPAWN);
   // A saved point that is merely collision-free can still be sealed behind an unsolved
@@ -352,7 +377,9 @@ export function nearestSafeGardenSpawn(state: GardenState, lanternOn: boolean, h
   return { ...GARDEN_STAGE_ANCHORS[0] };
 }
 
-export const GARDEN_SPAWN: GardenPoint = { x: 238, y: 300 }; // south practice lawn, above the shared bottom HUD band (y>=320)
+// South practice lawn. y=298 is the lowest centre whose foot body (314..320) stays above the bottom HUD band (y>=320);
+// the old y=300 put the body at 316..322, inside the status row. 298 is also on the 4px reach lattice from minY 42.
+export const GARDEN_SPAWN: GardenPoint = { x: 238, y: 298 };
 
 export const GARDEN_STANDS = {
   // The handle/latch sit on the north side of the wall gap, so their reachable stand sits

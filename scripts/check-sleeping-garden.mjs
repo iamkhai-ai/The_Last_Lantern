@@ -16,11 +16,13 @@ import {
   nearestSafeGardenSpawn, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed, sanitizeGardenState,
   sidePathOpen, sunOpen, updateHeldSpans, GARDEN_BAR_BEAM_ROWS, GARDEN_BAR_POSTS, GARDEN_BAR_SPRITE, GARDEN_OBSERVATION_ZONE,
   GARDEN_SHADOW_PATH, inGardenObservationZone, practiceLessonArmed, practiceLessonDue,
+  GARDEN_ACTOR, GARDEN_HUD_BAND, gardenActiveSolids,
 } from '../src/data/sleepingGardenLayout.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const HUD_TOP = 58;      // shared top HUD band (CampaignScene: title y13 / objective y42 panels)
 const HUD_BOTTOM = 320;  // shared bottom status/help strip starts here (statusText y320, controls y344)
+assert.deepEqual(GARDEN_HUD_BAND, { top: HUD_TOP, bottom: HUD_BOTTOM }, 'the layout names the same HUD bands the script checks');
 
 const stateOf = (o) => sanitizeGardenState({ canopyShut: false, sunLatched: false, waterFlowing: false, returnLatched: false, lumoRealized: false, bridgeCrossed: false, crossingSide: null, ...o });
 
@@ -245,7 +247,7 @@ function assertSolidBlocks(id, rect, state, lanternOn, held, relaxed = false) {
 // Stand-alone props must be provably the blocker on at least one face. The world bands/walls
 // and controls that are deliberately packed together (handle beside the stone latch, posts in
 // the gate wall, wall hugging the south band) may share their approach cells.
-const WORLD_EDGE_IDS = new Set(['band-north-a', 'band-north-b', 'band-west', 'band-south-west', 'band-south-east', 'south-east-band',
+const WORLD_EDGE_IDS = new Set(['band-north-a', 'band-north-b', 'band-north-gate', 'band-status', 'band-west', 'band-south-west', 'band-south-east', 'south-east-band',
   'east-band', 'pond-railing', 'gate-west-wall', 'gate-east-wall', 'wall-nw', 'wall-nw-east', 'wall-lawn-north-west',
   'wall-lawn-north-east-a', 'wall-lawn-north-east-b', 'wall-canal-north', 'wall-walkway-west', 'balu-south', 'canal-west-wall-a',
   'canal-west-wall-b', 'canal-west-wall-c', 'canal-east-wall-a', 'canal-east-wall-b', 'canal-east-wall-c', 'tree-trunk-sw',
@@ -255,7 +257,8 @@ for (const d of dynamicSolids(shut, false, NO_HELD_SPANS)) if (d.enabled) assert
 for (const d of dynamicSolids(sideClosed, true, NO_HELD_SPANS)) if (d.id === 'side-plank' && d.enabled) assertSolidBlocks('side-plank(closed)', d.rect, sideClosed, true, NO_HELD_SPANS);
 for (const d of dynamicSolids(fresh, true, NO_HELD_SPANS)) if (d.id.startsWith('bridge') && d.enabled) assertSolidBlocks(`${d.id}(retracted)`, d.rect, fresh, true, NO_HELD_SPANS);
 for (const d of dynamicSolids(shut, false, NO_HELD_SPANS)) if (d.id === 'bar-beam' && d.enabled) assertSolidBlocks('bar-beam(lowered)', d.rect, shut, false, NO_HELD_SPANS);
-assert.ok(blockDirections >= 140, `four-direction blocking tested ${blockDirections} approach cells`);
+// The count dropped 168 -> 133 because 35 approach faces fell outside the new GARDEN_BOUNDS (the HUD band edges); those are covered by the 1px HUD sweep below.
+assert.ok(blockDirections >= 133, `four-direction blocking tested ${blockDirections} approach cells`);
 assert.ok(isolatedDirections >= 40, `four-direction blocking proved ${isolatedDirections} isolated (non-vacuous) approach cells`);
 
 // ---------------------------------------------------------------- eject targets
@@ -285,7 +288,7 @@ const savedPoints = [
   { x: 130, y: 134 },   // the wall gap
   { x: 160, y: 112 },   // the nook
   { x: 574, y: 64 },    // the shrine arch
-  { x: 238, y: 300 },   // the entry
+  { x: 238, y: 300 },   // the entry (legacy y=300: now below the bounds, so it exercises the clamp)
   { x: 450, y: 280 },   // nursery floor, east of the canal
   { x: 576, y: 150 },   // the walkway
   { x: 600, y: 300 },   // east band water
@@ -315,8 +318,19 @@ assert.deepEqual(nearestSafeGardenSpawn(fresh, true, NO_HELD_SPANS, { x: 576, y:
 assert.deepEqual(nearestSafeGardenSpawn(fresh, true, NO_HELD_SPANS, { x: 574, y: 64 }), GARDEN_STAGE_ANCHORS[0], 'a save past the closed shrine gate restores to the lawn');
 // …but a save in the nursery with the crossing committed stays where the player was
 assert.deepEqual(nearestSafeGardenSpawn(sideOpen, true, NO_HELD_SPANS, { x: 450, y: 280 }), { x: 450, y: 280 }, 'a reachable nursery save is kept');
-assert.deepEqual(nearestSafeGardenSpawn(restoreMidBridgeState(), true, NO_HELD_SPANS, { x: 327, y: 232 }), { x: 238, y: 300 }, 'mid-bridge stale save returns to the lawn');
+assert.deepEqual(nearestSafeGardenSpawn(restoreMidBridgeState(), true, NO_HELD_SPANS, { x: 327, y: 232 }), GARDEN_SPAWN, 'mid-bridge stale save returns to the lawn');
 function restoreMidBridgeState() { return shut; }
+// saves written above the top band (y<42) or below the lawn (y>298) are clamped into GARDEN_BOUNDS first, so a legal
+// spot next to them wins over the lawn spawn instead of falling back to it
+const solvedRestore = stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true, bridgeCrossed: true });
+const gateRestore = nearestSafeGardenSpawn(solvedRestore, true, NO_HELD_SPANS, { x: 574, y: 20 });
+assert.ok(gateRestore.y >= 42, `a solved save at (574,20) restores inside the top bound (got ${gateRestore.x},${gateRestore.y})`);
+assert.ok(Math.hypot(gateRestore.x - 574, gateRestore.y - 42) <= 8, `a solved save at (574,20) restores within 8px of the gate (574,42) (got ${gateRestore.x},${gateRestore.y})`);
+assert.notDeepEqual(gateRestore, GARDEN_SPAWN, 'a solved save at (574,20) does not fall back to the lawn spawn');
+const southRestore = nearestSafeGardenSpawn(fresh, true, NO_HELD_SPANS, { x: 238, y: 342 });
+assert.deepEqual(southRestore, { x: 238, y: 298 }, 'a save in the status row (238,342) restores to the lawn spot whose foot body is above the status band');
+assert.ok(southRestore.y <= 298, 'the restored lawn point stays at or above the lowest in-band centre');
+assert.equal(region(fresh, true).has(`${gardenCellOf(southRestore).i}:${gardenCellOf(southRestore).j}`), true, 'the (238,342) restore is reachable from the entry');
 
 // ---------------------------------------------------------------- exit gating
 assert.equal(gardenExitReady(fresh), false, 'exit locked before the garden is touched');
@@ -366,7 +380,7 @@ for (const spec of GARDEN_MODULES) {
       assert.equal(box.x + box.width / 2, declared.x + declared.width / 2, `${spec.id}/${variantKey}: extended art stays centred on the pot`);
     }
     if (!spec.floorArt) continue;
-    assert.ok(box.y + box.height <= GARDEN_BOUNDS.maxY + 12, `${spec.id}: floor art stays inside the world`);
+    assert.ok(box.y + box.height <= HUD_BOTTOM, `${spec.id}: floor art stays above the bottom HUD strip`);
   }
 }
 for (const icon of Object.values(GARDEN_ICONS)) assert.deepEqual(pngSize(icon.file), { width: 16, height: 16 }, `${icon.file} is a 16x16 state sticker`);
@@ -408,11 +422,19 @@ for (const host of iconHosts) {
   }
 }
 // the practice demo pair is a side lesson: the test gap stays walkable and the lawn route around it is never blocked
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 126, y: 306 }), true, 'the teaching gap between the practice pots is walkable (14px body fits the 22px gap)');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 126, y: 298 }), true, 'the teaching gap between the practice pots is walkable at the lowest in-band centre (14px body fits the 22px gap)');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 126, y: 306 }), false, 'the teaching gap is no longer walkable at y=306: its foot body would sit in the status row');
 assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 106, y: 268 }), true, 'the lawn north of the practice pots stays open');
 assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 206, y: 268 }), true, 'the lawn route past the pots stays open');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 206, y: 304 }), true, 'the teaching bridge line is walkable');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 196, y: 336 }), false, 'the wall west of the entry mouth stays solid');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 206, y: 298 }), true, 'the teaching bridge line is walkable at the lowest in-band centre');
+// The wall west of the entry mouth (wall-lawn-south-west, x 120..192, y 330..348) is tested with the same solid-overlap
+// helper as the HUD sweep. The probe lies outside GARDEN_BOUNDS, so isGardenPositionSafe would fail on bounds alone and
+// prove nothing about the wall; the overlap test below checks the wall itself is what blocks the foot body.
+const lawnSouthWestWall = GARDEN_STATIC_SOLIDS.find((s) => s.id === 'wall-lawn-south-west').rect;
+const wallPressProbe = { x: 156, y: 318 }; // foot body 149..163 x 334..340, pressed into the wall from the north
+assert.equal(rectsOverlap(gardenActorBody(wallPressProbe), lawnSouthWestWall), true, 'the probe foot body really presses into wall-lawn-south-west');
+assert.equal(gardenActiveSolids(fresh, true, NO_HELD_SPANS).some((rect) => rectsOverlap(gardenActorBody(wallPressProbe), rect)), true,
+  'the wall west of the entry mouth blocks a foot body pressed into it');
 
 // ---------------------------------------------------------------- HUD / floor contract
 for (const anchor of [GARDEN_SPAWN, ...GARDEN_STAGE_ANCHORS]) {
@@ -421,10 +443,67 @@ for (const anchor of [GARDEN_SPAWN, ...GARDEN_STAGE_ANCHORS]) {
 for (const stand of Object.values(GARDEN_STANDS)) {
   assert.ok(stand.y > HUD_TOP && stand.y < HUD_BOTTOM, `stand ${stand.x},${stand.y} sits in the playable band`);
 }
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 238, y: 342 }), true, 'the spawn mouth is walkable');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 238, y: 342 }), false, 'the old spawn mouth (y=342) is no longer walkable: its body sits in the status row');
 assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 640, y: 180 }), false, 'east boundary holds');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 574, y: 20 }), true, 'the gate opening is the way out to the north edge');
-assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 546, y: 20 }), false, 'the bands flanking the gate stay solid');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 574, y: 42 }), true, 'the gate opening is walkable up to the top HUD band edge (body top y=58)');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 574, y: 38 }), false, 'the gate opening does not reach into the top HUD band');
+assert.equal(isGardenPositionSafe(fresh, true, NO_HELD_SPANS, { x: 546, y: 42 }), false, 'the bands flanking the gate stay solid');
+
+// ---------------------------------------------------------------- HUD band rule: the foot body stays in [58, 320]
+// Rule (the foot-body convention of RUINS_FLOOR / HEART_FLOOR): the 14x6 body (center + (-7,+16)) must not overlap
+// the top band (y<58) or the bottom status row (y>320). Enforced two ways: GARDEN_BOUNDS is derived from the rule, and
+// the bands are physical solids so walking itself cannot enter them.
+assert.equal(GARDEN_ACTOR.bodyY, 16, 'the body offset the band math uses');
+assert.equal(GARDEN_BOUNDS.minY + GARDEN_ACTOR.bodyY, HUD_TOP, 'the topmost player centre puts the body exactly at the top band edge');
+assert.equal(GARDEN_BOUNDS.maxY + GARDEN_ACTOR.bodyY + GARDEN_ACTOR.bodyHeight, HUD_BOTTOM, 'the lowest player centre puts the body exactly at the status row edge');
+const bodyInBand = (center) => {
+  const body = gardenActorBody(center);
+  return body.y < HUD_TOP || body.y + body.height > HUD_BOTTOM;
+};
+// (1) physical containment: for every 1px centre whose body would overlap a HUD band, a solid blocks it
+// (checked against the live solid list, not the reach bounds, so walking alone cannot put the body in a band).
+const hudSolved = stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true, bridgeCrossed: true });
+const hudSweepStates = [
+  ['fresh', fresh, true], ['canopy-shut', shut, true], ['roots-deployed', shut, false], ['latched', latched, false],
+  ['solved', hudSolved, true], ['restored', sideOpen, true],
+];
+let hudSweepCells = 0;
+for (const [label, state, lanternOn] of hudSweepStates) {
+  const solids = gardenActiveSolids(state, lanternOn, NO_HELD_SPANS);
+  for (let y = 0; y <= 360; y += 1) for (let x = 0; x <= 640; x += 1) {
+    const center = { x, y };
+    const body = gardenActorBody(center);
+    // the canvas edge (Player setCollideWorldBounds) stops bodies that leave the 640x360 world; only in-world bodies need a solid
+    if (body.x < 0 || body.y < 0 || body.x + body.width > 640 || body.y + body.height > 360) continue;
+    if (!bodyInBand(center)) continue;
+    hudSweepCells += 1;
+    assert.equal(solids.some((rect) => rectsOverlap(gardenActorBody(center), rect)), true,
+      `${label}: body at centre ${x},${y} overlaps a HUD band but no solid blocks it`);
+  }
+}
+assert.ok(hudSweepCells > 10000, `HUD sweep covered ${hudSweepCells} band centres`);
+// (2) reachable cells: every centre the player can stand on from the entry keeps the body clear of both bands.
+const hudRegionStates = [
+  ['start', fresh, true],
+  ['canopy shut', shut, true],
+  ['bridge deployed (roots out, lantern off)', shut, false],
+  ['everything solved', hudSolved, true],
+];
+for (const [label, state, lanternOn] of hudRegionStates) {
+  const reach = region(state, lanternOn);
+  assert.ok(reach.size > 50, `${label}: the entry reaches a real area (${reach.size} cells)`);
+  for (const key of reach) {
+    const [i, j] = key.split(':').map(Number);
+    const center = gardenCellCenter(i, j);
+    assert.equal(bodyInBand(center), false, `${label}: reachable centre ${center.x},${center.y} puts the foot body inside a HUD band`);
+  }
+  // (3) spawn and exit stay reachable in each state (the exit only once the garden is solved)
+  assert.equal(reach.has(`${gardenCellOf(GARDEN_SPAWN).i}:${gardenCellOf(GARDEN_SPAWN).j}`), true, `${label}: the entry is reachable`);
+}
+assert.equal(near(region(hudSolved, true), GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), true, 'everything solved: the exit trigger is reachable under the new bounds');
+assert.equal(near(region(sideOpen, true), GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), true, 'restored garden: the exit trigger is reachable under the new bounds');
+assert.equal(bodyInBand(GARDEN_STANDS.exit), false, 'the exit trigger centre (574,64) sits below the top band, so the arch prompt is driven from a body outside the band');
+assert.equal(bodyInBand(GARDEN_SPAWN), false, 'the spawn body is clear of both bands');
 assert.equal(barRaised(latched, true) && rootsDeployed(latched, true), false, 'bar up and roots out never coexist while the lantern is on');
 
 console.log(`Sleeping Garden checks passed (${restoreCases} restore cases, ${artChecks} art boxes, ${blockDirections} 4-way block cells, ${GARDEN_REACH_STEP}px reach grid from ${GARDEN_REACH_ORIGIN.x},${GARDEN_REACH_ORIGIN.y})`);
@@ -435,7 +514,7 @@ const pngDims = (file) => { const b = fs.readFileSync(path.join(ROOT, file)); re
 assert.equal(practiceLessonArmed(true, false), true, 'armed by either direction once the canopy is shut');
 assert.equal(practiceLessonArmed(false, false), false, 'an open canopy never arms it');
 assert.equal(practiceLessonArmed(true, true), false, 'a committed lesson never repeats');
-const farFromPots = { x: 140, y: 120 }; const atPots = { x: 120, y: 306 };
+const farFromPots = { x: 140, y: 120 }; const atPots = { x: 126, y: 298 };
 assert.equal(inGardenObservationZone(farFromPots), false); assert.equal(inGardenObservationZone(atPots), true);
 assert.equal(practiceLessonDue(true, true, false, farFromPots), false, 'toggling at the gate queues the lesson instead of talking about distant plants');
 assert.equal(practiceLessonDue(true, true, false, atPots), true, 'returning to the lawn plays the queued lesson');
@@ -444,7 +523,7 @@ assert.equal(practiceLessonDue(true, true, true, atPots), false, 'reload after t
 assert.equal(inGardenObservationZone(GARDEN_SPAWN), true, 'the entry stands inside the observation zone');
 const solvedShut = stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true, bridgeCrossed: true });
 const lawnRegion = gardenReachableRegion(stateOf({ canopyShut: true }), false, NO_HELD_SPANS, GARDEN_SPAWN);
-assert.equal(gardenRegionReaches(lawnRegion, { x: 120, y: 306 }, 8), true, 'pots are reachable from the entry in the shut-canopy state');
+assert.equal(gardenRegionReaches(lawnRegion, atPots, 8), true, 'pots are reachable from the entry in the shut-canopy state');
 // guided route both directions: leaving the lawn to the gate and coming back crosses the observation zone (sluice -> lawn -> forecourt).
 const gateRegion = gardenReachableRegion(stateOf({ canopyShut: true }), true, NO_HELD_SPANS, GARDEN_SPAWN);
 assert.equal(gardenRegionReaches(gateRegion, { x: 132, y: 132 }, 6), true, 'gate corridor reachable from the entry');
