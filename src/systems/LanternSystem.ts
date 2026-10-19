@@ -3,6 +3,16 @@ import { SoundSystem } from './SoundSystem';
 
 export type PulseCallback = (x: number, y: number, maxRadius: number) => void;
 
+// Level 02 (Whispering Woods) night lighting: a falloff-shaded lantern box inside a dark forest.
+const WOODS_SHADE_SIZE_LIT = 300;
+const WOODS_DARKNESS_LIT = 0.80;
+const WOODS_HALO_SCALE_LIT = 0.80;
+const WOODS_HALO_ALPHA_LIT = 0.48;
+const WOODS_SHADE_SIZE_DARK = 120;
+const WOODS_DARKNESS_DARK = 0.88;
+const WOODS_HALO_SCALE_DARK = 0.30;
+const WOODS_HALO_ALPHA_DARK = 0.14;
+
 export class LanternSystem {
   private scene: Phaser.Scene;
   private darknessOverlay: Phaser.GameObjects.Graphics;
@@ -11,6 +21,7 @@ export class LanternSystem {
   private vignetteImage: Phaser.GameObjects.Image;
   private forestEdgeShade?: Phaser.GameObjects.Image;
   private readonly forestEdgeLighting: boolean;
+  private readonly woodsLighting: boolean;
 
   public lanternOn = true;
   public lanternInHand = true;
@@ -32,9 +43,10 @@ export class LanternSystem {
   public static readonly PULSE_DURATION_MS = 1000;
   public static readonly PULSE_MAX_RADIUS = 195;
 
-  constructor(scene: Phaser.Scene, forestEdgeLighting = false) {
+  constructor(scene: Phaser.Scene, forestEdgeLighting = false, woodsLighting = false) {
     this.scene = scene;
     this.forestEdgeLighting = forestEdgeLighting;
+    this.woodsLighting = woodsLighting;
 
     this.darknessOverlay = scene.add.graphics();
     this.darknessOverlay.setDepth(68);
@@ -48,9 +60,11 @@ export class LanternSystem {
     this.vignetteImage = scene.add.image(320, 180, 'vignette');
     this.vignetteImage.setDepth(71);
     this.vignetteImage.setScrollFactor(0);
-    if (forestEdgeLighting) {
+    if (forestEdgeLighting || woodsLighting) {
       this.vignetteImage.setVisible(false);
-      if (!scene.textures.exists('level01_darkness_falloff')) throw new Error('Missing Level 01 darkness falloff texture');
+      if (!scene.textures.exists('level01_darkness_falloff')) {
+        throw new Error(forestEdgeLighting ? 'Missing Level 01 darkness falloff texture' : 'Missing darkness falloff texture for Level 02');
+      }
       this.forestEdgeShade = scene.add.image(0, 0, 'level01_darkness_falloff').setDepth(68.5);
     }
   }
@@ -145,6 +159,18 @@ export class LanternSystem {
       this.haloSprite.setAlpha(activeLantern ? 0.42 : 0.12);
       const darknessAlpha = activeLantern ? 0.92 : 0.94;
       const size = activeLantern ? 232 : 76;
+      const shadeX = Math.round(lightX);
+      const shadeY = Math.round(lightY);
+      this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);
+      this.fillForestEdgeDarknessOutside(shadeX, shadeY, size, darknessAlpha);
+    } else if (this.woodsLighting) {
+      const activeLantern = this.lanternOn && (this.lanternInHand || this.lanternPlaced);
+      this.haloSprite.setVisible(true);
+      this.haloSprite.setPosition(lightX, lightY);
+      this.haloSprite.setScale((activeLantern ? WOODS_HALO_SCALE_LIT : WOODS_HALO_SCALE_DARK) * flicker);
+      this.haloSprite.setAlpha(activeLantern ? WOODS_HALO_ALPHA_LIT : WOODS_HALO_ALPHA_DARK);
+      const darknessAlpha = activeLantern ? WOODS_DARKNESS_LIT : WOODS_DARKNESS_DARK;
+      const size = activeLantern ? WOODS_SHADE_SIZE_LIT : WOODS_SHADE_SIZE_DARK;
       const shadeX = Math.round(lightX);
       const shadeY = Math.round(lightY);
       this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);

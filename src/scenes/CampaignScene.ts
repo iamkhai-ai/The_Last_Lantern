@@ -4,6 +4,7 @@ import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
+import { buildWoodsDecor, WOODS_MOSS_COLOR, WOODS_MOTTLE_COLOR, type WoodsDecor } from '../data/whisperingWoodsDecor';
 import { LIBRARY_LAYOUT, resolveLibrarySpawn } from '../data/libraryLayout';
 import { LibraryLevel } from '../levels/LibraryLevel';
 import { PathForTwoLevel } from '../levels/PathForTwoLevel';
@@ -61,6 +62,16 @@ import { SleeplessTowerLevel } from '../levels/SleeplessTowerLevel';
 import { SleepingGardenLevel } from '../levels/SleepingGardenLevel';
 
 type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: Phaser.Input.Keyboard.Key; j: Phaser.Input.Keyboard.Key; space: Phaser.Input.Keyboard.Key; esc: Phaser.Input.Keyboard.Key };
+
+// Level 02 (Whispering Woods) visual constants. Rendering only; layout and collision live in whisperingWoodsLayout.ts.
+const WOODS_GRASS_TINT = 0x5c7663;
+const WOODS_PATH_TINT = 0x8a7558;
+const WOODS_PATH_ALPHA = 0.62;
+const WOODS_GLOW_DEPTH = 69.2;
+const WOODS_GLOW_CYAN = 0x7df2d4;
+const WOODS_GATE_GLOW = { x: 510, y: 150 };
+const WOODS_POEM_GLOW = { x: 136, y: 236 };
+const WOODS_RUNE_GLOW_Y_OFFSET = -30;
 
 const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Trời vẫn chưa sáng sao?' }, { speaker: 'Nhinh', text: 'Mình nhớ con đường vào rừng… Còn đoạn sau thì mờ quá.' }],
@@ -141,6 +152,8 @@ export class CampaignScene extends Phaser.Scene {
   private woodsMemoryOverlay?: Phaser.GameObjects.Graphics;
   private woodsTutorialCue?: Phaser.GameObjects.Graphics;
   private woodsCueStage?: WoodsTutorialStage;
+  /** Level 02 rune accent glows, keyed by rune; state is driven by updateRuneRevealVisuals(). */
+  private readonly woodsRuneGlows = new Map<RuneId, Phaser.GameObjects.Image>();
   private libraryLevel?: LibraryLevel;
   private shatteredCreek?: ShatteredCreekController;
   private gardenLevel?: SleepingGardenLevel;
@@ -174,7 +187,7 @@ export class CampaignScene extends Phaser.Scene {
     this.lumo = new Lumo(this, this.progress.counters['lumo-x'] ?? this.lumoTarget.x, this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
     if (this.progress.level === 0 && !this.progress.lanternPickedUp && !this.progress.flags['l0-gate-open']) this.lumo.setVisible(false);
     if (this.progress.level === 0 && (this.progress.lanternPickedUp || this.progress.flags['l0-gate-open'])) this.progress.flags['l0-lumo-met'] = true;
-    this.lantern = new LanternSystem(this, this.progress.level === 0);
+    this.lantern = new LanternSystem(this, this.progress.level === 0, this.progress.level === 1);
     this.lantern.lanternOn = this.progress.lanternOn;
     this.lantern.lanternInHand = this.progress.lanternPickedUp || this.progress.level > 0;
     this.interactions = new InteractionSystem(this);
@@ -507,6 +520,7 @@ export class CampaignScene extends Phaser.Scene {
     this.heartLevel = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
+    this.woodsRuneGlows.clear();
     this.forestEdgeGuide = undefined;
     this.memoryLayerLabels.clear();
     this.memorySocketLabels.clear();
@@ -1733,18 +1747,38 @@ export class CampaignScene extends Phaser.Scene {
         ? 'ground_dirt'
         : 'ground_grass';
     const tint: Record<string, number> = { woods: 0x728f73, library: 0xb9a882, creek: 0x809dad, tower: 0x9b9078, garden: 0xb2c68e, ruins: 0x82918c, observatory: 0x7182a0, heart: 0xd8b978 };
+    // Level 02 decor is generated once per build and shared by the ground and the decor passes below.
+    const woodsDecor: WoodsDecor | undefined = this.progress.level === 1 ? buildWoodsDecor() : undefined;
     if (hasCampaignBackground) {
       this.track(this.add.image(0, 0, backgroundKey).setOrigin(0).setDisplaySize(640, 360).setDepth(0));
     } else {
-      this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(tint[biome] ?? 0xffffff).setDepth(0));
-      if (this.progress.level === 1) {
+      const groundTint = this.progress.level === 1 ? WOODS_GRASS_TINT : (tint[biome] ?? 0xffffff);
+      this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(groundTint).setDepth(0));
+      if (woodsDecor) {
+        const mottle = this.add.graphics().setDepth(0.3);
+        // Each patch is two nested ellipses so its edge reads soft rather than hard-stroked.
+        for (const patch of woodsDecor.mottling.shadows) {
+          mottle.fillStyle(WOODS_MOTTLE_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width, patch.height);
+          mottle.fillStyle(WOODS_MOTTLE_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width * 0.6, patch.height * 0.6);
+        }
+        for (const patch of woodsDecor.mottling.moss) {
+          mottle.fillStyle(WOODS_MOSS_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width, patch.height);
+          mottle.fillStyle(WOODS_MOSS_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width * 0.6, patch.height * 0.6);
+        }
+        this.track(mottle);
         const paths = this.add.graphics().setDepth(0.55);
         paths.fillStyle(0xffffff,1);
-        for (const polygon of WHISPERING_WOODS.groundPaths) paths.fillPoints(polygon.map(({x,y})=>new Phaser.Geom.Point(x,y)),true);
+        for (const polygon of woodsDecor.paths) paths.fillPoints(polygon.map(({x,y})=>new Phaser.Geom.Point(x,y)),true);
         const mask=paths.createGeometryMask();
-        const pathTexture=this.add.tileSprite(0,0,640,360,'ground_dirt').setOrigin(0).setTint(0xc2ad82).setAlpha(.82).setDepth(.55).setMask(mask);
+        const pathTexture=this.add.tileSprite(0,0,640,360,'ground_dirt').setOrigin(0).setTint(WOODS_PATH_TINT).setAlpha(WOODS_PATH_ALPHA).setDepth(.55).setMask(mask);
         paths.setVisible(false);
         this.track(paths);this.track(pathTexture);
+        for (const stamp of woodsDecor.pathEdge.shadows) {
+          this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setDepth(stamp.depth));
+        }
+        for (const stamp of woodsDecor.pathEdge.tufts) {
+          this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
+        }
       } else if (this.progress.level === 2) {
         this.track(this.add.tileSprite(96, 64, 448, 244, 'ground_stone').setOrigin(0).setTint(0xd8c69c).setAlpha(0.42).setDepth(0.4));
         this.track(this.add.tileSprite(276, 76, 88, 232, 'ground_stone').setOrigin(0).setTint(0xefe0ba).setAlpha(0.35).setDepth(0.5));
@@ -1795,6 +1829,7 @@ export class CampaignScene extends Phaser.Scene {
       for (const rock of WHISPERING_WOODS.rocks) {
         const image = this.add.image(rock.x, rock.y, 'rock_blocker').setOrigin(0.5,1).setDepth(woodsDepth(rock.y)); image.setData('woodsId', rock.id); this.track(image);
       }
+      if (woodsDecor) this.drawWoodsDecor(woodsDecor);
     }
     if (!hasCampaignBackground && this.progress.level === 0) {
       for (const [index, tree] of FOREST_EDGE.objects.trees.entries()) {
@@ -1809,7 +1844,8 @@ export class CampaignScene extends Phaser.Scene {
       for (const [x, y] of [[90, 180], [160, 260], [346, 260], [552, 205], [340, 144], [270, 178], [205, 238], [260, 230], [322, 216], [365, 190], [438, 160], [500, 194]] as Array<[number, number]>) {
         this.track(this.add.image(x, y, 'tuft_grass').setAlpha(0.75).setDepth(3));
       }
-    } else if (!hasCampaignBackground) {
+    } else if (!hasCampaignBackground && this.progress.level !== 1) {
+      // Level 02 replaces this legacy border/bush/grass scatter with drawWoodsDecor().
       const isStoneRoom = biome === 'library' || biome === 'ruins' || biome === 'observatory';
       const tree = isStoneRoom ? 'ruin_pillar' : 'tree_woods';
       const borderSpots: Array<[number, number]> = isStoneRoom
@@ -1899,6 +1935,7 @@ export class CampaignScene extends Phaser.Scene {
       this.addWoodsGate();
       for (const id of RUNE_ORDER) this.addWoodsArt(`rune-${id}`, `runestone_${id}_sleeping`, WHISPERING_WOODS.anchors[id], WOODS_RUNE_ART.width, WOODS_RUNE_ART.height);
       this.addWoodsArt('poem', 'poem_fragment', WHISPERING_WOODS.anchors.poem, WOODS_POEM_ART.width, WOODS_POEM_ART.height);
+      this.addWoodsGlows();
       this.createWoodsTutorialCue();
       this.updateRuneRevealVisuals();
     } else if (level === 2) {
@@ -2782,6 +2819,56 @@ export class CampaignScene extends Phaser.Scene {
       const art = getLevelArtKey(1, `runestone_${id}_${active ? 'active' : revealed ? 'revealed' : 'sleeping'}`);
       const fittedArt = art && this.textures.exists(art) ? this.normalizedWoodsRuneTexture(art) : undefined;
       if (image && fittedArt && image.texture.key!==fittedArt) image.setTexture(fittedArt).setDisplaySize(WOODS_RUNE_ART.width,WOODS_RUNE_ART.height);
+      // The glow follows the same active / revealed / sleeping state as the rune art it sits behind.
+      const glow = this.woodsRuneGlows.get(id);
+      if (glow) {
+        glow.setVisible(revealed);
+        if (active) glow.clearTint().setScale(0.45).setAlpha(0.6);
+        else glow.setTint(WOODS_GLOW_CYAN).setScale(0.42).setAlpha(0.55);
+      }
+    }
+  }
+
+  /** Level 02 accent glows for the gate, the poem, and each rune. Rendering only; no woodsId. */
+  private addWoodsGlows(): void {
+    const gate = this.track(this.add.image(WOODS_GATE_GLOW.x, WOODS_GATE_GLOW.y, 'light_radial')
+      .setScale(0.75).setAlpha(0.55).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH));
+    this.tweens.add({ targets: gate, alpha: { from: 0.45, to: 0.6 }, duration: 1800, yoyo: true, repeat: -1 });
+    this.track(this.add.image(WOODS_POEM_GLOW.x, WOODS_POEM_GLOW.y, 'light_radial')
+      .setTint(0x9fe8d8).setScale(0.32).setAlpha(0.30).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH));
+    this.woodsRuneGlows.clear();
+    for (const id of RUNE_ORDER) {
+      const anchor = WHISPERING_WOODS.anchors[id];
+      const glow = this.track(this.add.image(anchor.x, anchor.y + WOODS_RUNE_GLOW_Y_OFFSET, 'light_radial')
+        .setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH).setVisible(false));
+      this.woodsRuneGlows.set(id, glow);
+    }
+  }
+
+  /** Level 02 forest: back canopy rows, side trees, bottom bushes, ground cover, and path-edge stamps. */
+  private drawWoodsDecor(decor: WoodsDecor): void {
+    const tree = (texture: string) => (this.textures.exists(texture) ? texture : 'tree_woods');
+    for (const t of [...decor.backTrees, ...decor.sideTrees]) {
+      this.track(this.add.image(t.x, t.baseY, tree(t.texture)).setOrigin(0.5, 1).setFlipX(t.flipX)
+        .setScale(t.scale).setTint(t.tint).setDepth(woodsDepth(t.baseY)));
+    }
+    for (const bush of decor.frontBushes) {
+      this.track(this.add.image(bush.x, bush.baseY, 'bush_woods').setOrigin(0.5, 1).setScale(bush.scale).setTint(bush.tint)
+        .setAlpha(bush.alpha).setDepth(woodsDepth(bush.baseY)));
+    }
+    for (const tuft of decor.groundCover.tufts) {
+      this.track(this.add.image(tuft.x, tuft.y, tuft.texture).setScale(tuft.scale).setTint(tuft.tint).setAlpha(tuft.alpha)
+        .setFlipX(tuft.flipX).setDepth(tuft.depth));
+    }
+    for (const mushroom of decor.groundCover.mushrooms) {
+      this.track(this.add.image(mushroom.x, mushroom.y, mushroom.texture).setScale(mushroom.scale).setTint(mushroom.tint)
+        .setAlpha(mushroom.alpha).setDepth(mushroom.depth));
+      if (mushroom.texture === 'mushroom_cyan') {
+        // Small additive glow on the cap (mushroom y - 5). The mushroom sprite stays under actors, but the glow must sit
+        // above the darkness overlay (68-68.5) or it is swallowed; being additive light, it never hides anything.
+        this.track(this.add.image(mushroom.x, mushroom.y - 5, 'light_radial').setScale(0.05).setTint(WOODS_GLOW_CYAN)
+          .setAlpha(0.65).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH));
+      }
     }
   }
 
