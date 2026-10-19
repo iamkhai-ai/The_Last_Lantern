@@ -45,6 +45,7 @@ const LIBRARY_PLAQUE = { x: 110, y: 78 };
 const LIBRARY_PLAQUE_AREA = { min: 84, max: 140 };
 const LIBRARY_HANG_XS = [230, 306, 382, 458, 534];
 const LIBRARY_EXIT_GLOW = { x: 566, y: 262 };
+const LIBRARY_MURAL_SUN = { x: 487, y: 118 };
 const BORDER_NAMES: Record<Stone, string> = { bird: 'border-chim', leaf: 'border-la', boat: 'border-thuyen', seed: 'border-hat' };
 const INTRO: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Sách mọc giữa rễ cây.' },
@@ -85,6 +86,11 @@ export class LibraryLevel {
   private bookInkOverlay?: Phaser.GameObjects.Container;
   /** Well core glow; warm when the lantern is on, cyan when it is off. */
   private coreGlow?: Phaser.GameObjects.Image;
+  /** Golden pulse on the memory crystal; exists only while the crystal rests on the well (owned by syncCrystal). */
+  private crystalGlow?: Phaser.GameObjects.Image;
+  private crystalGlowTween?: Phaser.Tweens.Tween;
+  /** Soft warm glow on the open mural's painted sun; visible only while the mural is open. */
+  private muralSunGlow?: Phaser.GameObjects.Image;
   private readonly glowTweens: Phaser.Tweens.Tween[] = [];
   private selectedStone: number | null = null;
   private stageKey = '';
@@ -319,6 +325,15 @@ export class LibraryLevel {
       LIBRARY_LAYOUT.mural.x, LIBRARY_LAYOUT.mural.y, LIBRARY_LAYOUT.art.panelWidth,
       LIBRARY_LAYOUT.art.panelHeight, this.depthAt(200), true);
     mural.setData('library-mural', true);
+    const sunGlow = this.scene.add.image(LIBRARY_MURAL_SUN.x, LIBRARY_MURAL_SUN.y, 'light_radial')
+      .setTint(LIBRARY_WARM).setBlendMode(Phaser.BlendModes.ADD).setScale(0.36).setAlpha(0.5)
+      .setDepth(LIBRARY_GLOW_DEPTH).setVisible(this.isMuralOpen());
+    this.track(sunGlow);
+    this.muralSunGlow = sunGlow;
+    this.glowTweens.push(this.scene.tweens.add({
+      targets: sunGlow, alpha: { from: 0.5, to: 0.72 }, duration: 2000,
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+    }));
     this.addExitArt();
   }
 
@@ -660,6 +675,7 @@ export class LibraryLevel {
       const key = this.textureKey(this.isMuralOpen() ? 'room-panel-open' : 'room-panel-closed');
       if (mural.texture.key !== key) mural.setTexture(key);
     }
+    this.muralSunGlow?.setVisible(this.isMuralOpen());
     const well = this.objects.find((object) => object.getData('library-well') === true);
     if (well instanceof Phaser.GameObjects.Image) {
       const key = this.textureKey(this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed');
@@ -832,11 +848,43 @@ export class LibraryLevel {
         const crystal = this.addImage('room-memory-crystal', LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y, 28, 36, 35, true);
         crystal.setData('library-crystal', true);
       }
-    } else if (existing) {
-      existing.destroy();
-      this.objects = this.objects.filter((object) => object !== existing);
-      if (existing instanceof Phaser.GameObjects.Image) this.protectedImages.delete(existing);
+      if (!this.crystalGlow) this.createCrystalGlow();
+    } else {
+      if (existing) {
+        existing.destroy();
+        this.objects = this.objects.filter((object) => object !== existing);
+        if (existing instanceof Phaser.GameObjects.Image) this.protectedImages.delete(existing);
+      }
+      this.destroyCrystalGlow();
     }
+  }
+
+  /** Warm golden pulse marking the memory crystal on the well; created and removed only by syncCrystal(). */
+  private createCrystalGlow(): void {
+    const glow = this.scene.add.image(LIBRARY_LAYOUT.well.x, LIBRARY_LAYOUT.well.y, 'light_radial')
+      .setTint(LIBRARY_WARM).setBlendMode(Phaser.BlendModes.ADD).setScale(0.35).setAlpha(0.45).setDepth(LIBRARY_GLOW_DEPTH);
+    this.track(glow);
+    this.crystalGlow = glow;
+    this.crystalGlowTween = this.scene.tweens.add({
+      targets: glow, alpha: { from: 0.45, to: 0.8 }, duration: 1100,
+      yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+    });
+    this.glowTweens.push(this.crystalGlowTween);
+  }
+
+  private destroyCrystalGlow(): void {
+    const glow = this.crystalGlow;
+    const tween = this.crystalGlowTween;
+    if (!glow) return;
+    if (tween) {
+      tween.stop();
+      const index = this.glowTweens.indexOf(tween);
+      if (index >= 0) this.glowTweens.splice(index, 1);
+    }
+    glow.destroy();
+    this.objects = this.objects.filter((object) => object !== glow);
+    this.crystalGlow = undefined;
+    this.crystalGlowTween = undefined;
   }
 
   private addRectCollider(rect: { x: number; y: number; width: number; height: number }): void {
