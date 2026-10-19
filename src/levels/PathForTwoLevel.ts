@@ -246,16 +246,19 @@ export class PathForTwoLevel {
       const start=points[i-1],end=points[i];
       const length=Math.hypot(end.x-start.x,end.y-start.y);
       const pieces=Math.max(1,Math.ceil(length/56));
+      const pieceLength=length/pieces;
       const angle=Math.atan2(end.y-start.y,end.x-start.x);
       for(let piece=0;piece<pieces;piece++){
         const along=Math.min(length,(piece+0.5)*length/pieces);
         const image=this.scene.add.image(start.x+Math.cos(angle)*along,start.y+Math.sin(angle)*along,key).setRotation(angle).setDepth(4.5);
+        // Keep native pixels, clipping symmetrically so the visible ends meet the run boundaries.
+        image.setCrop((image.width-pieceLength)/2,0,pieceLength,image.height);
         this.track(image);
       }
     }
   }
   /**
-   * The root cable follows the same waypoints as the tube, one stateful 160×40 stamp per ≤160px run,
+   * The root cable follows the same waypoints as the tube, one stateful native crop per ≤160px run,
    * so it really reaches the call at one end and the plate at the other. Genuine corners get the
    * elbow module (unused before) instead of a straight piece across the bend.
    */
@@ -265,6 +268,7 @@ export class PathForTwoLevel {
       for(const piece of pathRouteCableSegments(points)){
         const image=this.scene.add.image(piece.x,piece.y,cableKey)
           .setRotation(piece.angle).setDepth(6).setData('path-id','cable').setData('path-cable',mark);
+        image.setCrop((image.width-piece.length)/2,0,piece.length,image.height);
         this.track(image);
       }
     }

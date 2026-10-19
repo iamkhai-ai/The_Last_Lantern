@@ -35,7 +35,17 @@ Backtracking: door A and door B stay open once latched. Returning through A land
 
 ## Verification
 
-- `node scripts/check-path-for-two.mjs` — 20 counted cases: geometry/state invariants, threshold occupancy, backtrack arrivals, door passage in both directions, reachability, the optional-lesson gate, the C-handle inspection feedback, the reunion objective, the objective following main progress, four-side prompt/solid contacts, ink/cable/mouth art anchors, the controller's route legs running along the authored lines, the spiral stand, the schematic, the write-only flag retirement and the save restore cases. The script exits non-zero and names every failing case on its summary line.
+- `node scripts/check-path-for-two.mjs` — 21 counted cases: geometry/state invariants, threshold occupancy, backtrack arrivals, door passage in both directions, reachability, the optional-lesson gate, the C-handle inspection feedback, the reunion objective, the objective following main progress, four-side prompt/solid contacts, ink/cable/mouth art anchors, actual rendered stamp extents and crop survival across cable texture swaps, the controller's route legs running along the authored lines, the spiral stand, the schematic, the write-only flag retirement and the save restore cases. The script exits non-zero and names every failing case on its summary line.
 - `node scripts/check-interaction-targets.mjs` — the shipped selector's L05 domains and the latch C / door C lens measurement ((559,198) → latch C, (567,208) → door C; 92 and 100 reachable positions).
 - `node node_modules/typescript/bin/tsc --noEmit` — typecheck; `npm run build` — production single-file build.
 - Runtime playthrough in a browser: **NOT_RUN**. No browser is available in this environment, so nothing was executed, no artifact exists, and no headless probe is offered as a substitute for a playthrough. The earlier claim of a confirmed Playwright/Chromium run with screenshots on the previous revision of this line was **not** evidence: it contradicts `level-05-report.md` (every round records browser review and human playthrough as `NOT_RUN`) and `integration-log.md` ("Browser playthrough | NOT_RUN | No browser automation available in this environment."). It is corrected here rather than kept as a run that cannot be evidenced. The headless equivalent that does exist is the contract above (four-side prompt/solid contacts, closed/open/occupied door cases, every reachable stand, the save cases across each room, mid-travel and mid-threshold), and the human end-to-end acceptance remains the user's review.
+
+### 2026-10-19 — R01 route-stamp follow-up
+
+The previous browser statement above describes the T06 delivery evidence. A subsequent targeted visual
+inspection now exists: actual `CampaignScene` snapshots of Entry, Relay and Ink on port5198 using a
+temporary fixture with in-memory saves. It does not count as a full gameplay playthrough. The tube and
+cable images are cropped symmetrically to each run's length, with native scale/thickness preserved.
+The added regression executes the shipped renderer with Phaser's real Frame/TextureCrop components and
+PNG dimensions, and checks crop preservation across rest/flow/arrived swaps. See
+`levels-05-10-repair-report.md` for the frozen source hashes and verification results.

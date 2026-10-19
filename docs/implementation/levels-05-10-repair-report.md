@@ -57,3 +57,46 @@ All commands run in the worktree above at revision `b09a19d`.
   recorded as that author's evidence, never restated as a result of this repair.
 - Any check claim must name the assertion or section that implements it.
 - `NOT_RUN` is written plainly, with the reason, instead of being silently upgraded to PASS.
+
+## 2026-10-19 — T06 reopened: R01 native route stamps overran short legs
+
+**Scope:** only the tube/cable renderer and its focused regression. No path, collider, interaction,
+assignment, save rule or PNG was changed. Existing dirty dist and plan progress were preserved.
+
+**Source identity:** base `afbea4949929b072494432704bf2fcbc79e505e6` plus uncommitted patch:
+
+| File | SHA-256 |
+| --- | --- |
+| `src/levels/PathForTwoLevel.ts` | `ACDEE3F9A4EFACA73DD8C952BD95E5B33419937E805A90047E95B5A81B3177B3` |
+| `scripts/check-path-for-two.mjs` | `EE47BD7B807BB303F4761D47780545EAAAECFA3AF0D33662A9CBB75173B54B22` |
+
+The old code put a native160px cable on a32px run. The fix applies a symmetric `setCrop` to the run's
+actual length, keeping image scale1 and native thickness. Texture swaps preserve that crop through
+Phaser's existing TextureCrop component; no generated replacement art or stretch is required.
+
+### Verification
+
+| Evidence | Result |
+| --- | --- |
+| New regression before production fix | FAIL,20/21; actual tube span exceeded its authored run |
+| `node scripts/check-path-for-two.mjs` after fix | PASS,21/21, including real Phaser crop/state-swap case |
+| Entire15-script `scripts/check-*.mjs` battery | PASS, all exit0 |
+| `node node_modules/typescript/bin/tsc --noEmit` | PASS,exit0 |
+| `npm run build -- --outDir <artifact>/build` | PASS,exit0,625 modules; existing dist hash unchanged |
+| Two independent native reviewer tasks | No actionable introduced P1/P2 findings; both checked the same hashes above |
+| Targeted browser render of Entry, Relay, Ink | PASS for bounded tube/cable render; actual CampaignScene, in-memory fixture only |
+| Full puzzle playthrough | NOT_RUN; remains user acceptance |
+
+Reviewer requests: `gpt-6-luna/high` for both; resolved model/effort not returned by the tool, recorded
+as unknown. Read-only is an instruction, not a claimed enforcement boundary. No reviewer findings
+were shared until both completed. Both also ran the focused21-case check successfully.
+
+Artifacts: `C:/Users/Admin/.codex/visualizations/2026/10/15/01a1402c-9306-78e1-a991-c95a32d53f83/repair-crop-fix/`:
+`checks.log`, `build.log`, `entry.jpg`, `relay.jpg`, `ink-rest.jpg`, `ink-arrived.jpg` and the temporary
+`visual-server.mjs` fixture. The initial fixture import error was corrected before accepted snapshots;
+its first Flow-only seed normalized back to follow and is not credited as a visual Flow-state check.
+Automated regression covers all three texture states. The fixture never writes browser saves.
+
+R01's longitudinal overrun is fixed in the reviewed source patch. This does not close T07–T14 or
+claim complete visual/flow acceptance of Level05. At verification time the patch was uncommitted;
+subsequent commit/push status is recorded in Git history and the handoff message. No merge was performed.

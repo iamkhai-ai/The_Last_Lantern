@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { createRequire } from 'node:module';
 import { buildPathSchematic, choosePathCallAction, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathDoorPassage, getPathElementArtRect, getPathElementSolid, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathDoorShouldClose, pathPolylineLength, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, PATH_BACK_ARRIVAL_OFFSET, PATH_BODY, PATH_CHECKPOINTS, PATH_CONTROL_STANDS, PATH_DOORS, PATH_ELEMENT_RADIUS, PATH_FLOOR_BOUNDS, PATH_INK_CORRIDOR, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_ORDER, PATH_SCHEMATIC_SIZE, PATH_PIPE_ENDPOINTS, PATH_TUBE_MOUTHS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
 
 const allOpen = { a: true, b: true, c: true, practice: true };
@@ -684,6 +685,90 @@ controllerCase('route_cables_reach_both_ends_and_bend_at_real_corners', () => {
     assert.ok(Math.hypot(firstStart.x - points[0].x, firstStart.y - points[0].y) < 1e-6, `${room}/${mark} cable starts at the call`);
     assert.ok(Math.hypot(lastEnd.x - points[points.length - 1].x, lastEnd.y - points[points.length - 1].y) < 1e-6, `${room}/${mark} cable ends at the plate`);
     assert.equal(pathRouteCorners(points).length, corners, `${room}/${mark} elbows sit at its genuine corners`);
+  }
+});
+
+controllerCase('rendered_route_stamps_stay_inside_each_run_after_texture_swaps', () => {
+  // Run the shipped renderer with Phaser's real frame/crop components. Layout lengths alone did not
+  // catch a 32px run receiving a full 160px cable image. PNG dimensions come from IHDR, not the layout.
+  const require = createRequire(import.meta.url);
+  const Frame = require('phaser/src/textures/Frame.js');
+  const TextureCrop = require('phaser/src/gameobjects/components/TextureCrop.js');
+  const textures = new Map();
+  const textureFor = (key) => {
+    if (!textures.has(key)) {
+      const png = readFileSync(join(rootDir, 'assets/levels/05-a-path-for-two/sprites', `${key}.png`));
+      const width = png.readUInt32BE(16), height = png.readUInt32BE(20);
+      const texture = { key, source: [{ width, height }] };
+      const frame = new Frame(texture, '__BASE', 0, 0, 0, width, height);
+      texture.get = () => frame;
+      textures.set(key, texture);
+    }
+    return textures.get(key);
+  };
+  class RouteImage {
+    constructor(x, y, key) {
+      Object.assign(this, { x, y, rotation: 0, scaleX: 1, scaleY: 1, flipX: false, flipY: false,
+        _sizeComponent: true, _originComponent: false, renderFlags: 15, data: new Map(),
+        scene: { sys: { textures: { get: textureFor } } } });
+      this._crop = this.resetCropObject();
+      this.setTexture(key);
+    }
+    setSizeToFrame() { this.width = this.frame.realWidth; this.height = this.frame.realHeight; }
+    setRotation(value) { this.rotation = value; return this; }
+    setDepth(value) { this.depth = value; return this; }
+    setData(key, value) { this.data.set(key, value); return this; }
+    getData(key) { return this.data.get(key); }
+  }
+  Object.assign(RouteImage.prototype, TextureCrop);
+  const symbols = { getLevelArtKey: (_level, key) => key, pathRouteCableSegments, pathRouteCorners };
+  const render = {
+    objects: [], scene: { add: { image: (x, y, key) => new RouteImage(x, y, key) } },
+    track(image) { this.objects.push(image); return image; },
+    progress: { flags: {} }, elementFor: () => undefined, hasPower: () => false, assignment: 'follow',
+    addTubeModules: compile('addTubeModules', ['points'], symbols),
+    addCable: compile('addCable', ['mark', 'points'], symbols),
+    refreshArt: compile('refreshArt', [], { ...symbols, isPathSeal, Phaser: { GameObjects: { Image: RouteImage } } }),
+  };
+  const extent = (image, from, angle) => {
+    const crop = image.isCropped ? image._crop : { x: 0, width: image.width };
+    const middle = (image.x - from.x) * Math.cos(angle) + (image.y - from.y) * Math.sin(angle);
+    return { start: middle + crop.x - image.width / 2, end: middle + crop.x + crop.width - image.width / 2 };
+  };
+  for (const line of PATH_ROUTE_LINES) {
+    const points = pathRoutePoints(line);
+    for (let index = 1; index < points.length; index += 1) {
+      const from = points[index - 1], to = points[index];
+      const length = Math.hypot(to.x - from.x, to.y - from.y);
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      render.objects = [];
+      render.addTubeModules([from, to]);
+      render.addCable(line.mark, [from, to]);
+      for (const kind of ['tube-straight', 'root-cable-rest']) {
+        const images = render.objects.filter((image) => image.texture.key === kind);
+        assert.ok(images.length > 0, `${line.room}/${line.mark}: ${kind} is really drawn`);
+        let covered = 0;
+        for (const image of images) {
+          const span = extent(image, from, angle);
+          assert.ok(Math.abs(span.start - covered) < 1e-6 && span.end <= length + 1e-6,
+            `${line.room}/${line.mark}: ${kind} visible span ${span.start}..${span.end} must stay on run 0..${length}`);
+          assert.equal(image.scaleX, 1, 'cropping must not stretch native pixel width');
+          assert.equal(image.scaleY, 1, 'cropping must not stretch native pixel thickness');
+          covered = span.end;
+        }
+        assert.ok(Math.abs(covered - length) < 1e-6, `${kind} covers the run without gaps`);
+      }
+      const cables = render.objects.filter((image) => image.getData('path-id') === 'cable');
+      const before = cables.map((image) => extent(image, from, angle));
+      for (const [state, powered, assignment] of [['flow', false, line.mark], ['arrived', true, line.mark], ['rest', false, 'follow']]) {
+        render.hasPower = () => powered;
+        render.assignment = assignment;
+        render.refreshArt();
+        assert.ok(cables.every((image) => image.texture.key === `root-cable-${state}`));
+        assert.deepEqual(cables.map((image) => extent(image, from, angle)), before,
+          `${state}: Phaser's real setTexture keeps the crop and visible endpoints`);
+      }
+    }
   }
 });
 
