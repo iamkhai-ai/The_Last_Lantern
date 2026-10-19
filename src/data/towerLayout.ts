@@ -87,10 +87,13 @@ export function towerCanApproach(center: Point, target: Point, obstacles: readon
 
 /**
  * Standing props are used from their south face only (RULE_GAMES §1): the body must sit at or below
- * the prop's footprint bottom edge (1px tolerance for sub-pixel collision), inside the stand range.
+ * the prop's footprint bottom edge (1px tolerance for sub-pixel collision), the player's centre must lie
+ * within the footprint's x span (1px tolerance), and the stand must be in range.
  */
 export function towerCanApproachFront(center: Point, stand: Point, front: Rect, obstacles: readonly Rect[] = TOWER_SOLIDS): boolean {
-  return towerCanApproach(center, stand, obstacles) && towerBodyRect(center).y + 1 >= front.y + front.height;
+  const southFace = towerBodyRect(center).y + 1 >= front.y + front.height;
+  const withinSpan = center.x >= front.x - 1 && center.x <= front.x + front.width + 1;
+  return towerCanApproach(center, stand, obstacles) && southFace && withinSpan;
 }
 
 export function isLumoAtSeal(assignment: LumoAssign, lumo: Point | undefined): boolean {

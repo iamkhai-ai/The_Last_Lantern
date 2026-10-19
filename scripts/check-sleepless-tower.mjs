@@ -135,6 +135,22 @@ for (const [id, prop] of standingProps) {
   const n = { x: prop.stand.x, y: prop.base.y - 22 };
   if (towerCenterWalkable(n)) assert.equal(towerCanApproachFront(n, prop.stand, prop.base), false, `${id} north does not answer E`);
 }
+// RULE_GAMES §1 x-span: beside a standing prop (footprint centre +/- (width/2 + 10) at the stand's row) E stays closed.
+// Obstacles are dropped so the front rule decides; where the probe is within E range, it must be walkable and in range first.
+for (const [id, prop] of standingProps) {
+  const reach = prop.base.width / 2 + 10;
+  for (const x of [prop.stand.x - reach, prop.stand.x + reach]) {
+    const probe = { x, y: prop.stand.y };
+    if (reach <= TOWER.interactionRange) assert.equal(towerCanApproach(probe, prop.stand, []), true, `${id} side probe at x=${x} is in range and in bounds`);
+    assert.equal(towerCanApproachFront(probe, prop.stand, prop.base, []), false, `${id} side probe at x=${x} does not answer E`);
+  }
+}
+// lever side spot from the review: (553,240) is 2px past the footprint's east edge (x=551) and stays closed; the 1px edge (552) answers.
+const lever = TOWER.objects.lever;
+assert.equal(towerCanApproach({ x: 553, y: 240 }, lever.stand), true, 'lever side spot is in range and walkable');
+assert.equal(towerCanApproachFront({ x: 553, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the east side at (553,240)');
+assert.equal(towerCanApproachFront({ x: 552, y: 240 }, lever.stand, lever.base), true, 'lever E answers at the 1px east edge');
+assert.equal(towerCanApproachFront({ x: 527, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the west side at (527,240)');
 // usable standing space in front of G2: at least 24px of walkable depth between its front edge and the south bound (layout contract).
 const southBound = TOWER.bounds.y + TOWER.bounds.height;
 assert.ok(southBound - baseBottom >= 24 + towerBodyRect(g2.stand).height, 'G2 keeps 24px of standing space in front of it');
