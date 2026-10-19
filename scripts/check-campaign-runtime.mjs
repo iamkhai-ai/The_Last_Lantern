@@ -54,7 +54,7 @@ import { observatoryPlacedLightVisible } from '../src/data/observatoryLayout.ts'
 import { CAMPAIGN_LEVELS } from '../src/data/campaignLevels.ts';
 import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import {
-  getHeartElement, getHeartPrerequisiteFeedback, HEART_CONFIRM_ID, HEART_CORE, HEART_MAT_ID, HEART_SEAL_ID, HEART_SEAL_RADIUS, resolveHeartLumoMode,
+  canReachHeartElement, getHeartElement, getHeartPrerequisiteFeedback, heartFinalActionSource, HEART_CONFIRM_ID, HEART_CORE, HEART_MAT_ID, HEART_SEAL_ID, HEART_SEAL_RADIUS, resolveHeartLumoMode,
 } from '../src/data/heartOfElariaLayout.ts';
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
 import {
@@ -726,7 +726,67 @@ function makeRecorder() {
   return recorder;
 }
 
+/** A recording stand-in for the ports Level 10's final F touches; commitFinalExtinguish is the shipped body. */
+function makeHeartFinalScene({ inHand, placed, on = true, latched = true, x = 300, y = 280, overload = false } = {}) {
+  const calls = { finish: 0, stopDialogue: 0, save: 0, say: [], refresh: 0 };
+  const scene = {
+    destroyed: false, completed: false, lanternKeyTime: 0,
+    progress: { lanternOn: on, flags: { 'l9-roots': latched, 'l9-overload': overload, 'l9-lantern-placed': placed, 'l9-lantern-retrieved': inHand } },
+    lantern: { lanternInHand: inHand, lanternPlaced: placed, lanternOn: on, isOverloadMode: overload, isDawnMode: false, toggleLantern: () => false },
+    player: { x, y },
+    calls,
+    state: () => ({ latched }),
+    isDialogueLocked: () => overload, isPaused: () => false, playLanternAction() {},
+    say(lines) { calls.say.push(lines); },
+    save() { calls.save += 1; },
+    refresh() { calls.refresh += 1; },
+    stopDialogue() { calls.stopDialogue += 1; },
+    finish() { calls.finish += 1; },
+  };
+  scene.commitFinalExtinguish = (source) => bind(methodSource('commitFinalExtinguish', heartSourceFile, 'HeartOfElariaLevel'), { source }, 'HeartOfElariaLevel.commitFinalExtinguish()')(scene);
+  return scene;
+}
+const pressHeartF = (scene) => bind(methodSource('handleLanternKey', heartSourceFile, 'HeartOfElariaLevel'),
+  { heartFinalActionSource, getHeartElement, canReachHeartElement }, 'HeartOfElariaLevel.handleLanternKey()')(scene);
+
 const CASES = [
+  {
+    name: 'heart_final_f_commits_once_from_hand_even_mid_overload',
+    run: () => {
+      const scene = makeHeartFinalScene({ inHand: true, placed: false, overload: true });
+      pressHeartF(scene);
+      const flags = scene.progress.flags;
+      assert.equal(scene.calls.finish, 1, 'F hands over to the ending exactly once');
+      assert.equal(scene.calls.stopDialogue, 1, 'the running overload dialogue and its queue are dropped');
+      assert.equal(flags['l9-complete'], true); assert.equal(flags['l9-overload'], false);
+      assert.equal(flags['l9-ending-beat'], 'night-call', 'the ending starts at its first beat');
+      assert.equal(flags['l9-lantern-placed'], false); assert.equal(flags['l9-lantern-retrieved'], true, 'the lamp is saved as held');
+      assert.equal(scene.lantern.lanternOn, false); assert.equal(scene.progress.lanternOn, false); assert.equal(scene.lantern.isOverloadMode, false);
+      pressHeartF(scene); scene.commitFinalExtinguish('hand');
+      assert.equal(scene.calls.finish, 1, 'a second F or a stray callback cannot finish twice');
+    },
+  },
+  {
+    name: 'heart_final_f_at_the_pedestal_needs_a_valid_stand',
+    run: () => {
+      const stand = getHeartElement('heart-pedestal').stand;
+      const near = makeHeartFinalScene({ inHand: false, placed: true, x: stand.x, y: stand.y });
+      pressHeartF(near);
+      assert.equal(near.calls.finish, 1, 'F at the pedestal completes at once, with no extra E');
+      assert.equal(near.progress.flags['l9-lantern-placed'], true, 'the lamp stays parked, dark');
+      assert.equal(near.progress.flags['l9-lantern-retrieved'], false);
+      assert.equal(near.progress.lanternOn, false);
+      const far = makeHeartFinalScene({ inHand: false, placed: true, x: 500, y: 280 });
+      pressHeartF(far);
+      assert.equal(far.calls.finish, 0, 'F from across the room cannot finish while the lamp is parked');
+      assert.equal(far.progress.flags['l9-complete'], undefined);
+      assert.equal(far.calls.say.length, 1, 'it says where to stand instead');
+      const early = makeHeartFinalScene({ inHand: true, placed: false, latched: false });
+      pressHeartF(early);
+      assert.equal(early.calls.finish, 0, 'before the roots latch F is not a final action');
+      assert.equal(early.progress.flags['l9-complete'], undefined);
+    },
+  },
   {
     name: 'heart_overload_beam_follows_the_carried_lamp_every_frame',
     run: () => {

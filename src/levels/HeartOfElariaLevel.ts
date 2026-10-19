@@ -8,12 +8,12 @@ import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
-  auditHeartStands, canExtinguishHeartLantern, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
-  getHeartStage, heartArtCandidates, heartArtNativeSize, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
+  auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
+  getHeartStage, heartArtCandidates, heartArtNativeSize, heartFinalActionAlreadyDone, heartFinalActionSource, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
   HEART_G0_ID, HEART_LANE_COLORS, HEART_MAT_ID, HEART_MOON_SHADOW, HEART_OVERLOAD_CHECKPOINT, HEART_PROPS,
   HEART_RING_LANES, HEART_ROOT_LANES, HEART_SEAL_ID, HEART_SEAL_RADIUS, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
   HEART_STATUE_SHADOW, isHeartPositionSafe, nearestSafeHeartSpawn, normalizeHeartProgress,
-  resolveHeartLumoMode, resolveHeartRestoreState, type HeartBranchId, type HeartElement, type HeartPoint, type HeartPuzzleState, type HeartStage,
+  resolveHeartLumoMode, resolveHeartRestoreState, type HeartBranchId, type HeartFinalSource, type HeartElement, type HeartPoint, type HeartPuzzleState, type HeartStage,
 } from '../data/heartOfElariaLayout';
 
 export interface HeartOfElariaLevelOptions {
@@ -27,6 +27,8 @@ export interface HeartOfElariaLevelOptions {
   say: (lines: DialogueLine[], onComplete?: () => void) => void;
   isDialogueLocked: () => boolean;
   isPaused: () => boolean;
+  /** Drops the running dialogue and its queue; the final action uses it so no overload line plays after the ending starts. */
+  stopDialogue: () => void;
   playLanternAction: (on: boolean) => void;
   finish: () => void;
 }
@@ -146,6 +148,7 @@ export class HeartOfElariaLevel {
   private say: HeartOfElariaLevelOptions['say'];
   private isDialogueLocked: () => boolean;
   private isPaused: () => boolean;
+  private readonly stopDialogue: () => void;
   private playLanternAction: (on: boolean) => void;
   private finish: () => void;
 
@@ -170,8 +173,8 @@ export class HeartOfElariaLevel {
   private lanternKeyTime = 0;
   private destroyed = false;
   private completed = false;
-  private dawn = false;
-  private nightElapsed = 0;
+  /** Only EndingScene owns the dawn; this level never starts it, so the flag stays false (kept for the shared art switches). */
+  private readonly dawn = false;
 
   constructor(options: HeartOfElariaLevelOptions) {
     this.scene = options.scene;
@@ -184,6 +187,7 @@ export class HeartOfElariaLevel {
     this.say = options.say;
     this.isDialogueLocked = options.isDialogueLocked;
     this.isPaused = options.isPaused;
+    this.stopDialogue = options.stopDialogue;
     this.playLanternAction = options.playLanternAction;
     this.finish = options.finish;
   }
@@ -251,6 +255,15 @@ export class HeartOfElariaLevel {
     this.registerInteractions();
     this.refresh();
     this.save();
+    // A save from the older F (roots latched, lamp parked and dark) already holds the final action: start the
+    // ending instead of asking for a relight or one more E. Deferred so the scene finishes building first.
+    if (heartFinalActionAlreadyDone({
+      roots: this.progress.flags['l9-roots'] === true,
+      lanternPlaced: this.progress.flags['l9-lantern-placed'] === true,
+      lanternRetrieved: this.progress.flags['l9-lantern-retrieved'] === true,
+      lanternOn: this.progress.lanternOn,
+      complete: this.progress.flags['l9-complete'] === true,
+    })) this.scene.time.delayedCall(0, () => this.commitFinalExtinguish('pedestal'));
   }
 
   public destroy(): void {
@@ -272,7 +285,6 @@ export class HeartOfElariaLevel {
   public update(dt: number): void {
     if (this.destroyed) return;
     this.driveLumo(dt);
-    this.updateFinaleTimeline(dt);
     this.updateBeats();
     if (this.scene.time.now - this.lastCheckpoint >= 600) {
       this.lastCheckpoint = this.scene.time.now;
@@ -432,10 +444,17 @@ export class HeartOfElariaLevel {
     const lamp = { inHand: this.lantern.lanternInHand, placed: this.lantern.lanternPlaced, on: this.lantern.lanternOn };
     const latched = state.latched;
 
-    if (latched && canExtinguishHeartLantern(state, lamp)) {
+    const pedestal = getHeartElement('heart-pedestal');
+    const nearPedestal = Boolean(pedestal && canReachHeartElement(pedestal, { x: this.player.x, y: this.player.y }));
+    const source = heartFinalActionSource(state, lamp, nearPedestal);
+    if (source) {
       this.lanternKeyTime = now;
-      if (this.lantern.lanternPlaced) this.extinguishAtPedestal();
-      else this.finalExtinguish();
+      this.commitFinalExtinguish(source);
+      return;
+    }
+    if (latched && lamp.placed && lamp.on) {
+      this.lanternKeyTime = now;
+      this.say([{ speaker: 'Nhinh', text: 'Đứng ở mép nam bệ đèn rồi nhấn F để tắt đèn.' }]);
       return;
     }
     if (!latched && this.lantern.lanternPlaced) {
@@ -453,52 +472,29 @@ export class HeartOfElariaLevel {
     this.refresh();
   }
 
-  /** Scenario §8: with the loop latched, F at the pedestal is a valid final action (no fake overload). */
-  private extinguishAtPedestal(): void {
-    this.lantern.lanternOn = false;
-    this.progress.lanternOn = false;
-    this.lantern.isOverloadMode = false;
-    // The lantern never left the pedestal here, so no overload stage may linger in the save.
-    this.progress.flags['l9-overload'] = false;
-    this.progress.flags['l9-lantern-placed'] = true;
-    this.progress.flags['l9-lantern-retrieved'] = false;
-    this.save();
-    this.refresh();
-    this.say([{ speaker: 'Nhinh', text: 'Ánh sáng đã rời khỏi bệ. Cây Mẹ đã có đủ.' }]);
-  }
-
-  /** Scenario §5–§6: take the lantern back lit, overload, then F releases the night. */
-  private finalExtinguish(): void {
+  /**
+   * The only place the ending is committed (decision D6/D7): off, complete, overload cleared, the lamp's real place
+   * saved, the ending checkpoint set to its first beat, and `finish()` called exactly once. EndingScene owns every
+   * line and picture that follows, so this level starts no night timer and no dawn of its own.
+   */
+  public commitFinalExtinguish(source: HeartFinalSource): void {
+    if (this.destroyed || this.completed) return;
     this.completed = true;
-    this.progress.flags['l9-complete'] = true;
-    this.progress.flags['l9-overload'] = false;
-    this.progress.lanternOn = false;
+    // An overload line may still be on screen or queued: it must never play after the ending has started.
+    this.stopDialogue();
+    const flags = this.progress.flags;
+    flags['l9-complete'] = true;
+    flags['l9-overload'] = false;
+    flags['l9-ending-beat'] = 'night-call';
+    flags['l9-lantern-placed'] = source === 'pedestal';
+    flags['l9-lantern-retrieved'] = source === 'hand';
     this.lantern.lanternOn = false;
+    this.progress.lanternOn = false;
     this.lantern.isOverloadMode = false;
     this.lantern.isDawnMode = false;
-    this.dawn = false;
-    this.nightElapsed = 0;
     this.save();
     this.refresh();
-    this.say([{ speaker: 'Nhinh', text: 'Lumo?' }], () => this.beginDawnTransition());
-  }
-
-  /** The scenario's quiet moment, then the dawn. */
-  public beginDawnTransition(): void {
-    if (this.destroyed || this.dawn) return;
-    this.dawn = true;
-    this.lantern.isDawnMode = true;
-    this.refresh();
-    this.say([
-      { speaker: 'Lumo', text: 'Tôi đây.' },
-      { speaker: 'Nhinh', text: 'Tôi vẫn thấy cậu.' },
-    ], () => this.finish());
-  }
-
-  private updateFinaleTimeline(dt: number): void {
-    if (!this.completed || this.dawn) return;
-    this.nightElapsed += dt;
-    if (this.nightElapsed >= 1400 && !this.isDialogueLocked()) this.beginDawnTransition();
+    this.finish();
   }
 
   /* ---------------------------------------------------------------- Lumo */
@@ -873,11 +869,8 @@ export class HeartOfElariaLevel {
           this.progress.flags['l9-lantern-retrieved'] = true;
           this.progress.lanternOn = this.lantern.lanternOn;
           if (lampWasOff) {
-            this.progress.flags['l9-overload'] = false;
-            this.lantern.isOverloadMode = false;
-            this.save();
-            this.refresh();
-            this.finishAfterAlreadyOffLantern();
+            // Defensive: a dark lamp on a latched pedestal is already the final action; restore handles saves like this.
+            this.commitFinalExtinguish('hand');
             return;
           }
           this.progress.flags['l9-overload'] = true;
@@ -944,18 +937,6 @@ export class HeartOfElariaLevel {
       }
       default: return;
     }
-  }
-
-  /** Scenario §5–§6 alternate path: the lantern was already dark at the pedestal. */
-  private finishAfterAlreadyOffLantern(): void {
-    this.completed = true;
-    this.progress.flags['l9-complete'] = true;
-    this.progress.flags['l9-overload'] = false;
-    this.progress.lanternOn = false;
-    this.lantern.lanternOn = false;
-    this.save();
-    this.refresh();
-    this.say([{ speaker: 'Nhinh', text: 'Đèn đã tắt từ trên bệ. Cây Mẹ có thể đi hết đêm nay.' }], () => this.beginDawnTransition());
   }
 
   /* ---------------------------------------------------------------- refresh */

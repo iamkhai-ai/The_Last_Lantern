@@ -13,6 +13,19 @@ export interface CampaignProgress {
 
 const STORAGE_KEY = 'last-lantern-campaign-save-v1';
 
+/**
+ * Checkpoints of the campaign ending, stored as the string flag `l9-ending-beat` (save version stays 1). The list
+ * is plain strings so the save layer never imports a Phaser class; `CampaignEndingSequence` uses the same names.
+ */
+export const CAMPAIGN_ENDING_BEATS = ['night-call', 'night-wait', 'reassure', 'montage', 'shadow-dawn', 'tree-return', 'seated', 'trail-title', 'credits'] as const;
+export type CampaignEndingBeat = (typeof CAMPAIGN_ENDING_BEATS)[number];
+
+/** The beat a completed save resumes at: a missing or invalid value means the start of the ending. */
+export function readEndingBeat(flags: Record<string, boolean | string>): CampaignEndingBeat {
+  const value = flags['l9-ending-beat'];
+  return typeof value === 'string' && (CAMPAIGN_ENDING_BEATS as readonly string[]).includes(value) ? value as CampaignEndingBeat : 'night-call';
+}
+
 export class CampaignSaveSystem {
   public static createDefaultProgress(): CampaignProgress {
     return { version: 1, level: 0, flags: {}, counters: {}, lanternOn: false, lanternPickedUp: false };
@@ -125,6 +138,11 @@ export class CampaignSaveSystem {
     }
     const flags = Object.fromEntries(Object.entries(data.flags ?? {}).filter((entry): entry is [string, boolean | string] => typeof entry[1] === 'boolean' || typeof entry[1] === 'string'));
     const counters = Object.fromEntries(Object.entries(data.counters ?? {}).filter((entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isFinite(entry[1])));
+    // An unknown ending beat never invents a chapter: on a completed save it restarts the ending, otherwise it is dropped.
+    if ('l9-ending-beat' in flags && !(CAMPAIGN_ENDING_BEATS as readonly string[]).includes(String(flags['l9-ending-beat']))) {
+      if (flags['l9-complete'] === true) flags['l9-ending-beat'] = 'night-call';
+      else delete flags['l9-ending-beat'];
+    }
     return { version: 1, level: Math.max(0, Math.min(9, Math.floor(data.level!))), flags, counters, lanternOn: Boolean(data.lanternOn), lanternPickedUp: Boolean(data.lanternPickedUp), ...(roomId ? { roomId } : {}), ...(roomSpawn ? { roomSpawn } : {}) };
   }
 }

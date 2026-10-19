@@ -629,3 +629,22 @@ for (const statue of [0, 1, 2, 3]) {
 }
 
 console.log(`Level 10 geometry/state checks passed (${HEART_ELEMENTS.length} controls, ${HEART_PROPS.length} solids, ${HEART_BLOCKERS.length} scenery blockers, ${RUNTIME_ART.length} art states verified on disk).`);
+
+/* ------------------------------------------------------------------ *
+ * Repair T12: one final action, and what an older save already holds
+ * ------------------------------------------------------------------ */
+{
+  const layout = await import('../src/data/heartOfElariaLayout.ts');
+  const latched = { latched: true };
+  assert.equal(layout.heartFinalActionSource(latched, { inHand: true, placed: false, on: true }, false), 'hand', 'a lit carried lamp finishes from anywhere');
+  assert.equal(layout.heartFinalActionSource(latched, { inHand: false, placed: true, on: true }, true), 'pedestal', 'a lit parked lamp finishes at the pedestal');
+  assert.equal(layout.heartFinalActionSource(latched, { inHand: false, placed: true, on: true }, false), null, 'but not from across the room');
+  assert.equal(layout.heartFinalActionSource({ latched: false }, { inHand: true, placed: false, on: true }, true), null, 'never before the roots latch');
+  assert.equal(layout.heartFinalActionSource(latched, { inHand: true, placed: false, on: false }, true), null, 'a dark lamp is not switched off again');
+  assert.equal(layout.heartFinalActionAlreadyDone({ roots: true, lanternPlaced: true, lanternRetrieved: false, lanternOn: false, complete: false }), true, 'an older save that already switched off at the pedestal holds the final action');
+  assert.equal(layout.heartFinalActionAlreadyDone({ roots: true, lanternPlaced: true, lanternRetrieved: false, lanternOn: true, complete: false }), false, 'a lit parked lamp is never switched off for the player');
+  assert.equal(layout.heartFinalActionAlreadyDone({ roots: false, lanternPlaced: true, lanternRetrieved: false, lanternOn: false, complete: false }), false, 'only after the roots latched');
+  assert.equal(layout.heartFinalActionAlreadyDone({ roots: true, lanternPlaced: true, lanternRetrieved: false, lanternOn: false, complete: true }), false, 'a committed ending is not committed again');
+  console.log('  final action : hand / pedestal sources, old-save recognition, no lamp relight');
+}
+

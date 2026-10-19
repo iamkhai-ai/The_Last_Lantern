@@ -592,6 +592,7 @@ export class CampaignScene extends Phaser.Scene {
         scene: this, progress: this.progress, player: this.player, lumo: this.lumo, interactions: this.interactions,
         lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
         isDialogueLocked: () => this.dialogue.isInputLocked(performance.now()),
+        stopDialogue: () => this.dialogue.stop(),
         isPaused: () => this.pauseMenu.isOpen(),
         playLanternAction: (on) => this.player.playLanternAction(on),
         finish: () => this.finishHeartCampaign(),

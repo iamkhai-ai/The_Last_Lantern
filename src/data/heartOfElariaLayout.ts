@@ -687,6 +687,33 @@ export function isHeartFinalActionAvailable(state: HeartPuzzleState, lantern: { 
   return lantern.placed || lantern.inHand;
 }
 
+export type HeartFinalSource = 'hand' | 'pedestal';
+
+/**
+ * The one final action (scenario section 8, decision D6). With the roots latched and the lamp lit, F commits the
+ * ending immediately: from the hand at any place (even mid-overload dialogue), or at the pedestal when the lamp is
+ * parked there and Nhinh stands where the pedestal can be used. Anything else is not a final action.
+ */
+export function heartFinalActionSource(
+  state: Pick<HeartPuzzleState, 'latched'>,
+  lantern: { inHand: boolean; placed: boolean; on: boolean },
+  nearPedestal: boolean,
+): HeartFinalSource | null {
+  if (!state.latched || !lantern.on) return null;
+  if (lantern.inHand && !lantern.placed) return 'hand';
+  if (lantern.placed && nearPedestal) return 'pedestal';
+  return null;
+}
+
+/**
+ * A save written by the older F (roots latched, lamp parked and already dark, ending not committed) holds the final
+ * action already: restoring it completes the ending instead of asking for a relight or one more E. It only applies
+ * after the roots latched, and it never switches a lit lamp off.
+ */
+export function heartFinalActionAlreadyDone(save: { roots: boolean; lanternPlaced: boolean; lanternRetrieved: boolean; lanternOn: boolean; complete: boolean }): boolean {
+  return save.roots && save.lanternPlaced && !save.lanternRetrieved && !save.lanternOn && !save.complete;
+}
+
 /** F is meaningful only while the lantern is still lit and reachable by hand or on the pedestal. */
 export function canExtinguishHeartLantern(state: HeartPuzzleState, lantern: { inHand: boolean; placed: boolean; on: boolean }): boolean {
   return isHeartFinalActionAvailable(state, lantern) && lantern.on;

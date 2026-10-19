@@ -256,7 +256,7 @@ export class MenuScene extends Phaser.Scene {
 
   public continueGame(): void {
     if (CampaignSaveSystem.isCompleted()) {
-      this.scene.start('EndingScene', { showCredits: true, campaign: true });
+      this.scene.start('EndingScene', { campaign: true });
       return;
     }
     if (CampaignSaveSystem.hasSave()) {

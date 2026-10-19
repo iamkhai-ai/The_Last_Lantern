@@ -173,6 +173,16 @@ export class DialogueSystem {
     return true;
   }
 
+  /** Drops the running dialogue and its queued lines without calling the completion callback. */
+  public stop(): void {
+    this.active = false;
+    this.queue = [];
+    this.currentIndex = 0;
+    this.onCompleteCallback = undefined;
+    this.container.setVisible(false);
+    this.dismissedUntil = 0;
+  }
+
   public isActive(): boolean {
     return this.active;
   }
