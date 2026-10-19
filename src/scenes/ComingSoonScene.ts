@@ -3,15 +3,67 @@ import { getLevelArtKey } from '../art/CampaignArt';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 
+/**
+ * Two authored demo modes share the existing composition:
+ *  - `demo-complete`: the demo slice ended after Shattered Creek (index 3);
+ *  - `demo-save-blocked`: the saved run is outside the demo slice (or legacy),
+ *    and nothing on this screen may clear, rewrite or clamp it.
+ *
+ * `unavailable` is the neutral fallback if a caller ever routes here without a
+ * mode. It makes no claim that later levels are undeveloped: all ten levels are
+ * authored in the full build. This screen has no save-system dependency at all.
+ */
+type ComingSoonMode = 'demo-complete' | 'demo-save-blocked' | 'unavailable';
+
+interface ComingSoonCopy {
+  title: string;
+  subtitle: string;
+  body: string;
+  note: string;
+}
+
+const COPY: Record<ComingSoonMode, ComingSoonCopy> = {
+  'demo-complete': {
+    title: 'BẢN CHƠI THỬ ĐẾN ĐÂY LÀ HẾT',
+    subtitle: 'MÀN 01–04 · BẢN CHƠI THỬ',
+    body: 'Cảm ơn bạn đã khám phá 4 màn đầu tiên. Hành trình của Nhinh và Lumo vẫn còn tiếp tục.',
+    note: '',
+  },
+  'demo-save-blocked': {
+    title: 'BẢN LƯU NÀY NGOÀI BẢN CHƠI THỬ',
+    subtitle: 'TIẾN TRÌNH HIỆN TẠI KHÔNG THUỘC 4 MÀN ĐẦU',
+    body: 'Bản lưu hiện tại nằm ngoài phạm vi bản chơi thử hoặc thuộc phiên bản cũ.',
+    note: 'Tiến trình của bạn vẫn được giữ nguyên — chưa có thao tác nào xóa hay ghi đè.',
+  },
+  unavailable: {
+    title: 'MÀN NÀY CHƯA MỞ TRONG BẢN CHƠI NÀY',
+    subtitle: '',
+    body: 'Bản chơi hiện tại không mở màn này.',
+    note: 'Không có dữ liệu lưu nào bị thay đổi.',
+  },
+};
+
+const BUTTON_LABEL = '▸ VỀ MÀN HÌNH CHÍNH';
+
 export class ComingSoonScene extends Phaser.Scene {
   private effectsSystem!: EffectsSystem;
   private button!: Phaser.GameObjects.Text;
+  private leaving = false;
+  /** This scene's own shutdown hook, kept so it can be removed by identity. */
+  private shutdownHandler?: () => void;
+  private keyListeners: Array<{ event: string; handler: (event: KeyboardEvent) => void }> = [];
 
   constructor() {
     super({ key: 'ComingSoonScene' });
   }
 
-  public create(): void {
+  public create(data?: { mode?: ComingSoonMode }): void {
+    const mode: ComingSoonMode = data?.mode === 'demo-complete' || data?.mode === 'demo-save-blocked'
+      ? data.mode
+      : 'unavailable';
+    const copy = COPY[mode];
+    this.leaving = false;
+
     const backdropKey = getLevelArtKey(4, 'station-scene-base');
     if (backdropKey && this.textures.exists(backdropKey)) {
       const backdrop = this.add.image(320, 180, backdropKey);
@@ -41,9 +93,9 @@ export class ComingSoonScene extends Phaser.Scene {
     overline.setOrigin(0.5);
     overline.setDepth(81);
 
-    const title = this.add.text(320, 122, 'MÀN TIẾP THEO ĐANG PHÁT TRIỂN', {
+    const title = this.add.text(320, 122, copy.title, {
       fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '19px',
+      fontSize: mode === 'demo-complete' ? '19px' : '17px',
       fontStyle: 'bold',
       color: '#f7dfaa',
     });
@@ -54,32 +106,37 @@ export class ComingSoonScene extends Phaser.Scene {
     divider.lineStyle(1, 0x3b5c63, 0.9);
     divider.lineBetween(150, 144, 490, 144);
 
-    const nextTitle = this.add.text(320, 160, 'MÀN 05 · A PATH FOR TWO', {
+    const subtitle = this.add.text(320, 160, copy.subtitle, {
       fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '13px',
+      fontSize: '12px',
       fontStyle: 'bold',
       color: '#d7e6e1',
     });
-    nextTitle.setOrigin(0.5);
-    nextTitle.setDepth(81);
+    subtitle.setOrigin(0.5);
+    subtitle.setDepth(81);
 
-    const thanks = this.add.text(320, 186, 'Cảm ơn bạn đã chơi thử 4 màn đầu tiên của The Last Lantern.', {
+    const body = this.add.text(320, 192, copy.body, {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '11px',
       color: '#cddbd8',
+      align: 'center',
+      wordWrap: { width: 400 },
     });
-    thanks.setOrigin(0.5);
-    thanks.setDepth(81);
+    body.setOrigin(0.5);
+    body.setDepth(81);
 
-    const soon = this.add.text(320, 204, 'Hành trình tới Trạm Dẫn Nước đang được hoàn thiện — hẹn gặp lại!', {
+    const note = this.add.text(320, 224, copy.note, {
       fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '11px',
+      fontSize: '10.5px',
       color: '#9eb8b2',
+      align: 'center',
+      wordWrap: { width: 400 },
     });
-    soon.setOrigin(0.5);
-    soon.setDepth(81);
+    note.setOrigin(0.5);
+    note.setDepth(81);
+    note.setVisible(copy.note !== '');
 
-    this.button = this.add.text(320, 250, '▸ VỀ MÀN HÌNH CHÍNH', {
+    this.button = this.add.text(320, 258, BUTTON_LABEL, {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '13px',
       fontStyle: 'bold',
@@ -100,15 +157,58 @@ export class ComingSoonScene extends Phaser.Scene {
     hint.setOrigin(0.5);
     hint.setDepth(82);
 
-    if (this.input.keyboard) {
-      this.input.keyboard.on('keydown-E', () => this.backToMenu());
-      this.input.keyboard.on('keydown-ENTER', () => this.backToMenu());
-      this.input.keyboard.on('keydown-SPACE', () => this.backToMenu());
-      this.input.keyboard.on('keydown-ESC', () => this.backToMenu());
+    this.wireInput();
+  }
+
+  private wireInput(): void {
+    this.clearKeyListeners();
+    this.registerShutdownGuard();
+    if (!this.input?.keyboard) return;
+    this.onKey('keydown-E', () => this.backToMenu());
+    this.onKey('keydown-ENTER', () => this.backToMenu());
+    this.onKey('keydown-SPACE', () => this.backToMenu());
+    this.onKey('keydown-ESC', () => this.backToMenu());
+  }
+
+  private onKey(event: string, handler: (event: KeyboardEvent) => void): void {
+    if (!this.input?.keyboard) return;
+    this.input.keyboard.on(event, handler);
+    this.keyListeners.push({ event, handler });
+  }
+
+  private clearKeyListeners(): void {
+    if (this.input?.keyboard) {
+      for (const listener of this.keyListeners) this.input.keyboard.off(listener.event, listener.handler);
     }
+    this.keyListeners = [];
+  }
+
+  private registerShutdownGuard(): void {
+    if (!this.events) return;
+    this.clearShutdownGuard();
+    this.shutdownHandler = () => this.teardownInput();
+    this.events.once('shutdown', this.shutdownHandler, this);
+  }
+
+  /**
+   * Removes this scene's hook and nothing else. `this.events` is
+   * `scene.sys.events`, where every core scene plugin registers its teardown at
+   * scene START; `off(event)` with no handler would clear those too.
+   */
+  private clearShutdownGuard(): void {
+    if (!this.shutdownHandler) return;
+    this.events?.off('shutdown', this.shutdownHandler, this);
+    this.shutdownHandler = undefined;
+  }
+
+  private teardownInput(): void {
+    this.clearKeyListeners();
+    this.clearShutdownGuard();
   }
 
   private backToMenu(): void {
+    if (this.leaving) return;
+    this.leaving = true;
     SoundSystem.playLanternToggle(true);
     this.scene.start('MenuScene');
   }

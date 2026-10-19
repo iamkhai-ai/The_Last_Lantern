@@ -5,6 +5,12 @@ import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
 import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
+import { RELEASE_POLICY } from '../config/releaseConfig';
+
+type MenuMode = 'menu' | 'confirm-new-game';
+
+const CONFIRM_LABELS = ['HỦY', 'CHƠI MỚI'];
+const NEW_GAME_CONFIRM_TEXT = 'Chơi mới sẽ xóa tiến trình đang lưu. Bạn có muốn tiếp tục?';
 
 export class MenuScene extends Phaser.Scene {
   private effectsSystem!: EffectsSystem;
@@ -14,6 +20,28 @@ export class MenuScene extends Phaser.Scene {
   private actions: Array<() => void> = [];
   /** Guards a held/double-fired New Game activation from clearing or starting twice. */
   private starting = false;
+  /**
+   * Demo builds warn before New Game clears anything. `confirm` swaps the menu
+   * rows for a local two-choice confirmation that defaults to Cancel; full
+   * builds never enter it. It is a mode of this scene, not a second scene or a
+   * general modal framework.
+   */
+  private menuMode: MenuMode = 'menu';
+  private confirmSelectedIndex = 0;
+  private confirmButtons: Phaser.GameObjects.Text[] = [];
+  private confirmText?: Phaser.GameObjects.Text;
+  private confirmBackdrop?: Phaser.GameObjects.Graphics;
+  private selectedIndexBeforeConfirm = 0;
+  /**
+   * Keyboard confirmation needs a real release first: the key that opened the
+   * warning must not also confirm it. Pointer confirmation is a distinct target
+   * and does not depend on this flag.
+   */
+  private confirmArmed = false;
+  private activationViaKey = false;
+  /** This scene's own shutdown hook, kept so it can be removed by identity. */
+  private shutdownHandler?: () => void;
+  private keyListeners: Array<{ event: string; handler: (event: KeyboardEvent) => void }> = [];
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -25,6 +53,14 @@ export class MenuScene extends Phaser.Scene {
     this.starting = false;
     this.menuButtons = [];
     this.actions = [];
+    this.confirmButtons = [];
+    this.menuMode = 'menu';
+    this.confirmSelectedIndex = 0;
+    this.confirmArmed = false;
+    this.activationViaKey = false;
+    this.selectedIndexBeforeConfirm = 0;
+    this.confirmText = undefined;
+    this.confirmBackdrop = undefined;
 
     const backdropKey = getLevelArtKey(9, 'sanctuary-base');
     if (backdropKey && this.textures.exists(backdropKey)) {
@@ -86,7 +122,7 @@ export class MenuScene extends Phaser.Scene {
       hudDecor.fillPath();
     }
 
-    const topRightTitle = this.add.text(476, 27, 'PLAYTEST · MÀN 01–10', {
+    const topRightTitle = this.add.text(476, 27, RELEASE_POLICY.menuTag, {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '11px',
       fontStyle: 'bold',
@@ -202,7 +238,7 @@ export class MenuScene extends Phaser.Scene {
     );
     footerHint.setDepth(82);
 
-    const buildTag = this.add.text(626, 350, 'PLAYTEST BUILD · MÀN 01–10', {
+    const buildTag = this.add.text(626, 350, RELEASE_POLICY.buildTag, {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '9px',
       color: '#7f9a94',
@@ -210,18 +246,70 @@ export class MenuScene extends Phaser.Scene {
     buildTag.setOrigin(1, 1);
     buildTag.setDepth(82);
 
-    if (this.input.keyboard) {
-      this.input.keyboard.on('keydown-UP', () => this.moveSelection(-1));
-      this.input.keyboard.on('keydown-W', () => this.moveSelection(-1));
-      this.input.keyboard.on('keydown-DOWN', () => this.moveSelection(1));
-      this.input.keyboard.on('keydown-S', () => this.moveSelection(1));
-      this.input.keyboard.on('keydown-ENTER', () => this.triggerSelected());
-      this.input.keyboard.on('keydown-SPACE', () => this.triggerSelected());
-      this.input.keyboard.on('keydown-E', () => this.triggerSelected());
+    this.buildNewGameConfirmation();
+    this.wireInput();
+  }
+
+  /** The local demo New Game warning, hidden until a save could be erased. */
+  private buildNewGameConfirmation(): void {
+    const backdrop = this.add.graphics();
+    backdrop.setDepth(90);
+    backdrop.fillStyle(0x07151c, 0.98);
+    backdrop.lineStyle(1.5, 0xc9be82, 0.95);
+    backdrop.fillRoundedRect(28, 198, 250, 126, 7);
+    backdrop.strokeRoundedRect(28, 198, 250, 126, 7);
+    backdrop.setVisible(false);
+    this.confirmBackdrop = backdrop;
+
+    const text = this.add.text(46, 208, NEW_GAME_CONFIRM_TEXT, {
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: '10.5px',
+      fontStyle: 'bold',
+      color: '#ffb4a2',
+      wordWrap: { width: 214 },
+      lineSpacing: 3,
+    });
+    text.setDepth(91);
+    text.setVisible(false);
+    this.confirmText = text;
+
+    CONFIRM_LABELS.forEach((label, idx) => {
+      const btn = this.add.text(48, 284 + idx * 22, label, {
+        fontFamily: 'Segoe UI, sans-serif',
+        fontSize: '13px',
+        fontStyle: 'bold',
+        color: '#cddbd8',
+      });
+      btn.setDepth(92);
+      btn.setVisible(false);
+      btn.on('pointerdown', this.onConfirmPointer(idx));
+      this.confirmButtons.push(btn);
+    });
+  }
+
+  private setConfirmVisible(visible: boolean): void {
+    this.confirmBackdrop?.setVisible(visible);
+    this.confirmText?.setVisible(visible);
+    for (const btn of this.confirmButtons) {
+      btn.setVisible(visible);
+      if (visible) btn.setInteractive({ useHandCursor: true });
+      else btn.disableInteractive();
     }
+    for (const btn of this.menuButtons) {
+      btn.setVisible(!visible);
+      if (visible) btn.disableInteractive();
+      else btn.setInteractive({ useHandCursor: true });
+    }
+    this.refreshMenuHighlight();
   }
 
   private moveSelection(delta: number): void {
+    if (this.menuMode === 'confirm-new-game') {
+      this.confirmSelectedIndex = (this.confirmSelectedIndex + delta + 2) % 2;
+      SoundSystem.playMirrorRotate();
+      this.refreshMenuHighlight();
+      return;
+    }
     this.selectedIndex =
       (this.selectedIndex + delta + this.menuButtons.length) %
       this.menuButtons.length;
@@ -229,11 +317,50 @@ export class MenuScene extends Phaser.Scene {
     this.refreshMenuHighlight();
   }
 
-  private triggerSelected(): void {
-    this.actions[this.selectedIndex]?.();
+  private triggerSelected(event?: KeyboardEvent): void {
+    // Auto-repeats never act. A fresh-looking keydown while the activation key
+    // is still physically down cannot confirm either: `confirmArmed` only flips
+    // on that key's release (or when the warning was opened by pointer).
+    if (event?.repeat) return;
+    if (this.menuMode === 'confirm-new-game') {
+      if (!this.confirmArmed) return;
+      this.activateConfirm(this.confirmSelectedIndex);
+      return;
+    }
+    this.activationViaKey = event !== undefined;
+    try {
+      this.actions[this.selectedIndex]?.();
+    } finally {
+      this.activationViaKey = false;
+    }
+  }
+
+  private activateConfirm(index: number): void {
+    if (this.menuMode !== 'confirm-new-game') return;
+    this.confirmSelectedIndex = index;
+    if (index === 0) this.cancelNewGame();
+    else this.confirmNewGame();
+  }
+
+  /** Confirm rows use a distinct target, so a click acts without the key gate. */
+  private onConfirmPointer(index: number): () => void {
+    return () => this.activateConfirm(index);
   }
 
   private refreshMenuHighlight(): void {
+    if (this.menuMode === 'confirm-new-game') {
+      this.confirmButtons.forEach((btn, idx) => {
+        const baseText = CONFIRM_LABELS[idx];
+        if (idx === this.confirmSelectedIndex) {
+          btn.setText(`▸ ${baseText}`);
+          btn.setColor('#ffe680');
+        } else {
+          btn.setText(baseText);
+          btn.setColor('#cddbd8');
+        }
+      });
+      return;
+    }
     const soundIdx = this.menuButtons.length - 1;
     this.menuButtons.forEach((btn, idx) => {
       let baseText = btn.text.replace(/^▸\s*/, '');
@@ -252,6 +379,17 @@ export class MenuScene extends Phaser.Scene {
 
   public startNewGame(): void {
     if (this.starting) return;
+    if (this.menuMode === 'confirm-new-game') return;
+    if (RELEASE_POLICY.isDemo && this.hasSavedGame) {
+      this.requestNewGameConfirmation();
+      return;
+    }
+    this.beginNewGame();
+  }
+
+  /** The only place New Game clears saves and starts the prologue. */
+  private beginNewGame(): void {
+    if (this.starting) return;
     this.starting = true;
     CampaignSaveSystem.clear();
     SaveSystem.clear();
@@ -259,7 +397,57 @@ export class MenuScene extends Phaser.Scene {
     this.scene.start('PrologueScene');
   }
 
+  private requestNewGameConfirmation(): void {
+    if (this.menuMode === 'confirm-new-game' || this.starting) return;
+    this.selectedIndexBeforeConfirm = this.selectedIndex;
+    this.menuMode = 'confirm-new-game';
+    this.confirmSelectedIndex = 0;
+    // Opened by keyboard: the activating key must be released first. Opened by
+    // a click: the next click is already a distinct target and may confirm.
+    this.confirmArmed = !this.activationViaKey;
+    this.confirmText?.setText(NEW_GAME_CONFIRM_TEXT);
+    this.setConfirmVisible(true);
+    SoundSystem.playMirrorRotate();
+  }
+
+  private cancelNewGame(): void {
+    if (this.menuMode !== 'confirm-new-game') return;
+    this.menuMode = 'menu';
+    this.confirmSelectedIndex = 0;
+    this.confirmArmed = false;
+    this.selectedIndex = this.selectedIndexBeforeConfirm;
+    this.setConfirmVisible(false);
+    SoundSystem.playMirrorRotate();
+  }
+
+  private confirmNewGame(): void {
+    if (this.menuMode !== 'confirm-new-game' || this.starting) return;
+    this.menuMode = 'menu';
+    this.confirmArmed = false;
+    this.setConfirmVisible(false);
+    this.beginNewGame();
+  }
+
   public continueGame(): void {
+    if (RELEASE_POLICY.isDemo) {
+      const campaignSave = CampaignSaveSystem.hasSave();
+      // Out-of-range/completed campaigns are explained before any full-ending
+      // dispatch; a legacy save is a different campaign the demo cannot resume.
+      if (campaignSave
+        && RELEASE_POLICY.isOutOfRange(CampaignSaveSystem.load().level, CampaignSaveSystem.isCompleted())) {
+        this.openBlockedSaveMessage();
+        return;
+      }
+      if (campaignSave) {
+        SoundSystem.playLanternToggle(true);
+        this.scene.start('CampaignScene');
+        return;
+      }
+      if (SaveSystem.hasSave()) {
+        this.openBlockedSaveMessage();
+        return;
+      }
+    }
     if (CampaignSaveSystem.isCompleted()) {
       this.scene.start('EndingScene', { showCredits: true, campaign: true });
       return;
@@ -276,6 +464,75 @@ export class MenuScene extends Phaser.Scene {
     } else {
       this.scene.start('WorldScene', { progress: saved });
     }
+  }
+
+  /** Explains a save outside the demo slice without clearing or rewriting it. */
+  private openBlockedSaveMessage(): void {
+    SoundSystem.playLanternToggle(true);
+    this.scene.start('ComingSoonScene', { mode: 'demo-save-blocked' });
+  }
+
+  private wireInput(): void {
+    this.clearKeyListeners();
+    this.registerShutdownGuard();
+    if (!this.input?.keyboard) return;
+    this.onKey('keydown-UP', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(-1);
+    });
+    this.onKey('keydown-W', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(-1);
+    });
+    this.onKey('keydown-DOWN', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(1);
+    });
+    this.onKey('keydown-S', (event) => {
+      if (event?.repeat) return;
+      this.moveSelection(1);
+    });
+    this.onKey('keydown-ENTER', (event) => this.triggerSelected(event));
+    this.onKey('keydown-SPACE', (event) => this.triggerSelected(event));
+    this.onKey('keydown-E', (event) => this.triggerSelected(event));
+    this.onKey('keyup-ENTER', (event) => this.armConfirm(event));
+    this.onKey('keyup-SPACE', (event) => this.armConfirm(event));
+    this.onKey('keyup-E', (event) => this.armConfirm(event));
+  }
+
+  private armConfirm(_event?: KeyboardEvent): void {
+    if (this.menuMode === 'confirm-new-game') this.confirmArmed = true;
+  }
+
+  private onKey(event: string, handler: (event: KeyboardEvent) => void): void {
+    if (!this.input?.keyboard) return;
+    this.input.keyboard.on(event, handler);
+    this.keyListeners.push({ event, handler });
+  }
+
+  private clearKeyListeners(): void {
+    if (this.input?.keyboard) {
+      for (const listener of this.keyListeners) this.input.keyboard.off(listener.event, listener.handler);
+    }
+    this.keyListeners = [];
+  }
+
+  private registerShutdownGuard(): void {
+    if (!this.events) return;
+    this.clearShutdownGuard();
+    this.shutdownHandler = () => this.teardownInput();
+    this.events.once('shutdown', this.shutdownHandler, this);
+  }
+
+  private clearShutdownGuard(): void {
+    if (!this.shutdownHandler) return;
+    this.events?.off('shutdown', this.shutdownHandler, this);
+    this.shutdownHandler = undefined;
+  }
+
+  private teardownInput(): void {
+    this.clearKeyListeners();
+    this.clearShutdownGuard();
   }
 
   public update(_time: number, delta: number): void {
