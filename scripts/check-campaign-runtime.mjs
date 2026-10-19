@@ -615,7 +615,7 @@ function stepFrame(scene, delta = 16) {
 function makeFrameScene(level, { controllers = [] } = {}) {
   const calls = {
     player: 0, lumo: [], lantern: 0, interactions: 0, dialogue: 0, hud: 0, observatoryLumo: 0,
-    observatoryRefresh: 0, forestEdgeProgress: 0, woodsFirefly: 0, legacy: [], controller: [],
+    observatoryRefresh: 0, forestEdgeProgress: 0, forestEdgeGuide: 0, woodsFirefly: 0, legacy: [], controller: [],
   };
   const bounds = { x: 0, y: 0, width: 36, height: 42 };
   const scene = {
@@ -642,6 +642,7 @@ function makeFrameScene(level, { controllers = [] } = {}) {
     refreshHud: () => { calls.hud += 1; },
     updateWoodsFirefly: () => { calls.woodsFirefly += 1; },
     updateForestEdgeProgress: () => { calls.forestEdgeProgress += 1; },
+    updateForestEdgeGuide: () => { calls.forestEdgeGuide += 1; },
     updateObservatoryLumo: () => { calls.observatoryLumo += 1; },
     resolveSafeObservatoryCheckpoint: () => undefined,
     updateObservatoryCrossingState: () => { calls.observatoryRefresh += 1; },
@@ -990,6 +991,8 @@ const CASES = [
           `index ${level}: the observatory crossing/doors/puzzle refresh runs only at index 8`);
         assert.equal(scene.calls.forestEdgeProgress, 1,
           `index ${level}: the forest-edge tick is still called once per frame (it gates itself by index)`);
+        assert.equal(scene.calls.forestEdgeGuide, 1,
+          `index ${level}: the forest-edge guide tick is still called once per frame (it gates itself by index)`);
         assert.equal(scene.calls.woodsFirefly, level === 1 ? 1 : 0,
           `index ${level}: the firefly route ticks only at index 1`);
         assert.equal(scene.calls.controller.length, owner ? 1 : 0, owner

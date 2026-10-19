@@ -11,6 +11,7 @@ import { RuinsOfTwoHalvesLevel } from '../levels/RuinsOfTwoHalvesLevel';
 import { isRuinsPositionSafe } from '../data/ruinsOfTwoHalvesLayout';
 import { HeartOfElariaLevel } from '../levels/HeartOfElariaLevel';
 import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
+import { forestEdgeFootprintRotation, forestEdgeGuideTarget } from '../data/forestEdgeGuidance';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import {
   OBSERVATORY_ALCOVES,
@@ -108,6 +109,7 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryReturnLoopVisual?: Phaser.GameObjects.TileSprite;
   private observatoryBridgeStones: Phaser.GameObjects.Image[] = [];
   private footprintTrail?: Phaser.GameObjects.Graphics;
+  private forestEdgeGuide?: Phaser.GameObjects.Graphics;
   private memoryLayerLabels = new Map<string, Phaser.GameObjects.Text>();
   private memorySocketLabels = new Map<number, Phaser.GameObjects.Text>();
   private campaignBeamGraphics?: Phaser.GameObjects.Graphics;
@@ -343,6 +345,7 @@ export class CampaignScene extends Phaser.Scene {
     }
     this.lantern.update(dt, this.player.x, this.player.y);
     this.updateForestEdgeProgress(dt);
+    this.updateForestEdgeGuide(locked);
     if (this.progress.level === 8 && this.activeObservatoryRoom) {
       this.updateObservatoryCrossingState();
       this.refreshObservatoryDoors();
@@ -430,6 +433,59 @@ export class CampaignScene extends Phaser.Scene {
     this.forestEdgeWasInRing = inRing;
   }
 
+  private updateForestEdgeGuide(gameplayLocked: boolean): void {
+    const guide = this.forestEdgeGuide;
+    if (!guide) return;
+    if (this.progress.level !== 0 || gameplayLocked || this.dialogue.isInputLocked(performance.now())
+      || this.pauseMenu.isOpen() || this.heartEnd) {
+      guide.clear().setVisible(false);
+      return;
+    }
+
+    const target = forestEdgeGuideTarget(this.getForestEdgeStep());
+    if (!target) {
+      guide.clear().setVisible(false);
+      return;
+    }
+
+    const targetPoint = target === 'lantern' ? FOREST_EDGE.objects.lantern.anchor
+      : target === 'tablet' ? FOREST_EDGE.objects.tablet.anchor : FOREST_EDGE.objects.ring.ground;
+    const feet = feetAt({ x: this.player.x, y: this.player.y });
+    const dx = targetPoint.x - feet.x;
+    const dy = targetPoint.y - feet.y;
+    const distance = Math.hypot(dx, dy);
+    guide.clear().setPosition(0, 0).setDepth(72);
+
+    // Depth 72 stays above the darkness falloff, vignette and player sprite.
+    guide.lineStyle(4, 0x07151c, 0.95);
+    guide.strokeEllipse(feet.x, feet.y, 26, 12);
+    guide.lineStyle(2, 0xffe680, 1);
+    guide.strokeEllipse(feet.x, feet.y, 26, 12);
+
+    if (distance > 0.01) {
+      const ux = dx / distance;
+      const uy = dy / distance;
+      const ellipseRadius = 1 / Math.sqrt((ux * ux) / (13 * 13) + (uy * uy) / (6 * 6));
+      const startX = feet.x + ux * (ellipseRadius + 1);
+      const startY = feet.y + uy * (ellipseRadius + 1);
+      const tipX = feet.x + ux * (ellipseRadius + 15);
+      const tipY = feet.y + uy * (ellipseRadius + 15);
+      const backX = tipX - ux * 5;
+      const backY = tipY - uy * 5;
+      const left = { x: backX - uy * 4, y: backY + ux * 4 };
+      const right = { x: backX + uy * 4, y: backY - ux * 4 };
+      guide.lineStyle(4, 0x07151c, 0.95);
+      guide.lineBetween(startX, startY, tipX, tipY);
+      guide.lineBetween(tipX, tipY, left.x, left.y);
+      guide.lineBetween(tipX, tipY, right.x, right.y);
+      guide.lineStyle(2, 0xffe680, 1);
+      guide.lineBetween(startX, startY, tipX, tipY);
+      guide.lineBetween(tipX, tipY, left.x, left.y);
+      guide.lineBetween(tipX, tipY, right.x, right.y);
+    }
+    guide.setVisible(true);
+  }
+
   private buildLevel(): void {
     if (this.progress.level === 8) {
       this.buildObservatoryRoom(this.progress.roomId ?? 'entrance');
@@ -452,6 +508,7 @@ export class CampaignScene extends Phaser.Scene {
     this.heartLevel = undefined;
     for (const object of this.objects) object.destroy();
     this.objects = [];
+    this.forestEdgeGuide = undefined;
     this.memoryLayerLabels.clear();
     this.memorySocketLabels.clear();
     this.interactions.clear();
@@ -508,6 +565,7 @@ export class CampaignScene extends Phaser.Scene {
       this.player.setPosition(spawn.x, spawn.y);
       this.forestEdgeChargeMs = 0;
       this.forestEdgeWasInRing = false;
+      this.forestEdgeGuide = this.track(this.add.graphics().setDepth(72).setVisible(false));
     } else if (level === 1) {
       this.player.setFootPlacement(WHISPERING_WOODS.player.footOffsetY, WHISPERING_WOODS.player.body.offsetY, WHISPERING_WOODS.player.body.offsetX, WHISPERING_WOODS.player.body.width, WHISPERING_WOODS.player.body.height);
       const state = this.normalizeAndPersistWoodsProgress();
@@ -1835,7 +1893,8 @@ export class CampaignScene extends Phaser.Scene {
       }
       if (this.progress.flags['l0-footprints-found']) for (const { x, y } of FOREST_EDGE.objects.trail) {
         const index = FOREST_EDGE.objects.trail.findIndex((point) => point.x === x && point.y === y);
-        const stamp = this.addLevelArt('footprints-pulse', x, y, 20, 28, 4); stamp?.setAlpha(0.8).setData('forestEdgeId', `footprint-${index}`);
+        const stamp = this.addLevelArt('footprints-pulse', x, y, 20, 28, 4);
+        stamp?.setOrigin(0.5, 0.5).setRotation(forestEdgeFootprintRotation(index, FOREST_EDGE.objects.trail, FOREST_EDGE.objects.ring.ground)).setAlpha(0.8).setData('forestEdgeId', `footprint-${index}`);
       }
     } else if (level === 1) {
       this.addWoodsGate();
@@ -2575,7 +2634,7 @@ export class CampaignScene extends Phaser.Scene {
     FOREST_EDGE.objects.trail.forEach((point, index) => {
       if (this.objects.some((object) => object.getData('forestEdgeId') === `footprint-${index}`)) return;
       const stamp = this.addLevelArt('footprints-pulse', point.x, point.y, 20, 28, 4);
-      stamp?.setAlpha(0.8).setData('forestEdgeId', `footprint-${index}`);
+      stamp?.setOrigin(0.5, 0.5).setRotation(forestEdgeFootprintRotation(index, FOREST_EDGE.objects.trail, FOREST_EDGE.objects.ring.ground)).setAlpha(0.8).setData('forestEdgeId', `footprint-${index}`);
     });
   }
 

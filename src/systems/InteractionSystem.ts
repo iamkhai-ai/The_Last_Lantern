@@ -3,6 +3,13 @@ import { InteractableConfig } from '../types/gameTypes';
 import { layoutInteractionPrompt } from './interactionPromptLayout';
 import type { PromptRect } from './interactionPromptLayout';
 
+/** A small world-space cushion; no meter-to-pixel scale is defined by the game. */
+const INTERACTION_RADIUS_PADDING = 8;
+
+function effectiveRadius(item: InteractableConfig): number {
+  return item.radius + INTERACTION_RADIUS_PADDING;
+}
+
 export class InteractionSystem {
   private scene: Phaser.Scene;
   private interactables: InteractableConfig[] = [];
@@ -59,7 +66,7 @@ export class InteractionSystem {
       if (!label) continue;
 
       const dist = Math.hypot(playerX - item.x, playerY - item.y);
-      if (dist > item.radius) continue;
+      if (dist > effectiveRadius(item)) continue;
 
       // Among the candidates that already pass the gates above, a control that owns the standing
       // position keeps it even when a neighbouring prop is nearer. Controls that do not opt in are
@@ -106,7 +113,7 @@ export class InteractionSystem {
     // that the feet are still inside it. A state change between update() and E can never fire a
     // control the player has already left or that has since gone quiet.
     const disabled = target.isEnabled ? !target.isEnabled() : false;
-    const outOfRange = Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > target.radius;
+    const outOfRange = Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > effectiveRadius(target);
     const lostOwnership = target.ownsPosition
       ? target.ownsPosition(this.lastPlayerPosition.x, this.lastPlayerPosition.y) !== true
       : false;

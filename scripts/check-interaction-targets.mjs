@@ -95,6 +95,14 @@ function transpile(code, label) {
   }
 }
 
+function localFunction(file, name) {
+  const declaration = findNode(file, (node) => ts.isFunctionDeclaration(node) && node.name?.text === name);
+  assert.ok(declaration, `${name} is still authored in its source file`);
+  const js = transpile(nodeText(declaration), name);
+  const radiusPadding = localConstant(file, 'INTERACTION_RADIUS_PADDING');
+  return new Function('INTERACTION_RADIUS_PADDING', `"use strict";\n${js}\nreturn ${name};`)(radiusPadding);
+}
+
 /**
  * Compile one extracted method body into a callable bound to a fake `this`. The method's parameters
  * are part of its signature, not of the extracted body, so they arrive through an env object; every
@@ -120,9 +128,10 @@ function compile(file, methodName, owner, params, symbols) {
   };
 }
 
+const effectiveRadius = localFunction(INTERACTION_SOURCE, 'effectiveRadius');
 const runUpdate = compile(INTERACTION_SOURCE, 'update', 'InteractionSystem',
-  ['playerX', 'playerY', 'canInteract', 'playerBounds', 'protectedBounds'], { layoutInteractionPrompt });
-const runTryInteract = compile(INTERACTION_SOURCE, 'tryInteract', 'InteractionSystem', ['now'], {});
+  ['playerX', 'playerY', 'canInteract', 'playerBounds', 'protectedBounds'], { layoutInteractionPrompt, effectiveRadius });
+const runTryInteract = compile(INTERACTION_SOURCE, 'tryInteract', 'InteractionSystem', ['now'], { effectiveRadius });
 /** The room-change path: `drawRoom()` calls this before a room registers its own controls. */
 const runClear = compile(INTERACTION_SOURCE, 'clear', 'InteractionSystem', [], {});
 
@@ -459,6 +468,30 @@ const CASES = [
     },
   },
   {
+    name: 'shared_interaction_margin_is_radial_and_matches_e_press',
+    run: () => {
+      const hits = { value: 0 };
+      const target = {
+        id: 'item', x: 200, y: 200, radius: 22, getPrompt: () => 'E · Vật phẩm',
+        isEnabled: () => true, onInteract: () => { hits.value += 1; },
+      };
+      const system = makeSystem([target]);
+
+      assert.equal(selectWith(system, 218, 224), 'item',
+        'the radial boundary includes the authored 22 px radius plus the 8 px cushion');
+      assert.equal(system.promptContainer.visible, true, 'the E prompt is shown at the same boundary');
+      assert.equal(system.tryInteract(0), true, 'E accepts the target at that prompt boundary');
+      assert.equal(hits.value, 1, 'the in-range press runs exactly one action');
+
+      const outside = makeSystem([target]);
+      assert.equal(selectWith(outside, 218, 224.01), null,
+        'a position just beyond the radial boundary does not show the prompt');
+      assert.equal(outside.promptContainer.visible, false, 'no E prompt is shown outside the shared range');
+      assert.equal(outside.tryInteract(1000), false, 'E cannot activate a target without a matching prompt');
+      assert.equal(hits.value, 1, 'the out-of-range press runs no action');
+    },
+  },
+  {
     name: 'invalid_candidates_are_never_selected',
     run: () => {
       const owner = (extra) => {
@@ -481,8 +514,8 @@ const CASES = [
         'an owned control that is disabled is not a candidate at all');
 
       const farAway = makeSystem([owner({ radius: 10 }), rival()]);
-      assert.equal(selectWith(farAway, 215, 200), 'prop',
-        'an owned control outside its radius is not a candidate even though it owns the position');
+      assert.equal(selectWith(farAway, 219, 200), 'prop',
+        'an owned control outside its padded radius is not a candidate even though it owns the position');
 
       const promptless = makeSystem([owner({ getPrompt: () => null }), rival()]);
       assert.equal(selectWith(promptless, 201, 200), 'prop',

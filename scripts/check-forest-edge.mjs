@@ -8,12 +8,25 @@ import {
   resolveForestEdgeSpawn,
   worldDepth,
 } from '../src/data/forestEdgeLayout.ts';
+import { forestEdgeFootprintRotation, forestEdgeGuideTarget } from '../src/data/forestEdgeGuidance.ts';
 
 const close = (a, b) => Math.abs(a - b) < 1e-9;
 assert.deepEqual(feetAt({ x: 410, y: 191 }), { x: 410, y: 210 });
 assert.equal(FOREST_EDGE.player.body.height, 6, 'runtime footprint uses the authored six-pixel height');
 assert.equal(canUseForestEdgePulse(false), false, 'SPACE cannot pulse before the tablet teaches it');
 assert.equal(canUseForestEdgePulse(true), true, 'reading the tablet enables Pulse');
+assert.equal(forestEdgeGuideTarget('wake'), 'lantern', 'opening points toward the lantern');
+assert.equal(forestEdgeGuideTarget('pickup'), 'lantern', 'pickup objective keeps pointing toward the lantern');
+assert.equal(forestEdgeGuideTarget('light'), 'tablet', 'after pickup the guide points toward the tablet');
+assert.equal(forestEdgeGuideTarget('tablet'), 'tablet', 'tablet objective stays targeted');
+assert.equal(forestEdgeGuideTarget('pulse'), null, 'the ring stays untargeted until Pulse discovers it');
+assert.equal(forestEdgeGuideTarget('ring'), 'ring', 'the discovered standing objective points toward its ring');
+assert.equal(forestEdgeGuideTarget('exit'), null, 'the spatial guide retires when the objective is complete');
+for (const [index, point] of FOREST_EDGE.objects.trail.entries()) {
+  const next = FOREST_EDGE.objects.trail[index + 1] ?? FOREST_EDGE.objects.ring.ground;
+  assert.ok(close(forestEdgeFootprintRotation(index, FOREST_EDGE.objects.trail, FOREST_EDGE.objects.ring.ground), Math.atan2(next.y - point.y, next.x - point.x) + Math.PI / 2),
+    `footprint ${index} points toward its next mark or the ring`);
+}
 assert.ok(worldDepth(230 - 1) < worldDepth(230));
 assert.ok(worldDepth(230 + 1) > worldDepth(230));
 assert.equal(isForestEdgeCenterWalkable(FOREST_EDGE.player.spawn, false), true);
