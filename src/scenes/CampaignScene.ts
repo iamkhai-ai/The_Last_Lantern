@@ -59,9 +59,12 @@ import { deriveObservatoryState } from '../systems/ObservatoryPuzzle';
 import { SoundSystem } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
 import { PauseMenu } from '../ui/PauseMenu';
+import { CampaignHud, PULSE_LEVELS } from '../ui/CampaignHud';
 import { ShatteredCreekController } from './ShatteredCreekController';
 import { SleeplessTowerLevel } from '../levels/SleeplessTowerLevel';
 import { SleepingGardenLevel } from '../levels/SleepingGardenLevel';
+
+export { PULSE_LEVELS };
 
 type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: Phaser.Input.Keyboard.Key; j: Phaser.Input.Keyboard.Key; space: Phaser.Input.Keyboard.Key; esc: Phaser.Input.Keyboard.Key };
 
@@ -147,12 +150,7 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryHintKey = '';
   private hintIndex = 0;
   private heartEnd = false;
-  private titleText!: Phaser.GameObjects.Text;
-  private objectiveText!: Phaser.GameObjects.Text;
-  private controlsText!: Phaser.GameObjects.Text;
-  private statusText!: Phaser.GameObjects.Text;
-  private hintText!: Phaser.GameObjects.Text;
-  private lumoStatusText!: Phaser.GameObjects.Text;
+  private hud!: CampaignHud;
   private lastGateCheck = 0;
   private lastLumoSave = 0;
   private lastPlayerSave = 0;
@@ -211,6 +209,7 @@ export class CampaignScene extends Phaser.Scene {
       onRestart: () => { CampaignSaveSystem.clear(); this.scene.restart({ newGame: true }); },
       onMainMenu: () => this.scene.start('MenuScene'),
     });
+    this.hud = new CampaignHud(this);
     const keyboard = this.input.keyboard;
     if (!keyboard) return;
     this.keys = {
@@ -226,10 +225,18 @@ export class CampaignScene extends Phaser.Scene {
       else if (!this.pauseMenu.isOpen()) this.interactions.tryInteract(performance.now());
     });
     keyboard.on('keydown-SPACE', () => {
-      if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
-      else if (!this.pauseMenu.isOpen()
-        && (this.progress.level !== 0 || canUseForestEdgePulse(this.progress.flags['l0-tablet-read'] === true))
-        && this.lantern.triggerPulse(this.player.x, this.player.y)) this.player.playPulseAction();
+      if (this.dialogue.isActive()) {
+        this.dialogue.handleAdvanceInput(performance.now());
+        return;
+      }
+      if (this.pauseMenu.isOpen() || !PULSE_LEVELS.includes(this.progress.level)) return;
+      if (this.progress.level === 0 && !canUseForestEdgePulse(this.progress.flags['l0-tablet-read'] === true)) return;
+      if (this.lantern.triggerPulse(this.player.x, this.player.y)) {
+        this.player.playPulseAction();
+        return;
+      }
+      const remaining = this.lantern.getCooldownRatio() * LanternSystem.PULSE_COOLDOWN_MS;
+      if (remaining > 0) this.hud.notePulseBlocked(remaining);
     });
     keyboard.on('keydown-F', () => {
       if (this.progress.level === 3) {
@@ -407,6 +414,8 @@ export class CampaignScene extends Phaser.Scene {
     }
     this.dialogue.update(dt);
     this.refreshHud();
+    this.hud.update(dt, this.lantern.getCooldownRatio());
+    this.hud.setHidden(this.dialogue.isActive() || this.pauseMenu.isOpen());
     if (Phaser.Input.Keyboard.JustDown(this.keys.esc) && !locked && !this.pauseMenu.isOpen()) this.pauseMenu.open();
   }
 
@@ -544,22 +553,7 @@ export class CampaignScene extends Phaser.Scene {
     const level = this.progress.level;
     const definition = CAMPAIGN_LEVELS[level];
     if (level !== 2 && level !== 3 && level !== 4 && level !== 5 && level !== 7) this.drawRoom(definition.biome);
-    if (level !== 4 && level !== 5) {
-      this.titleText = this.track(this.add.text(16, 13, `${String(level + 1).padStart(2, '0')}  ${definition.title}`, { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-      this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-      this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
-      this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
-    }
-    this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
-    if (level === 2) {
-      // Bottom edge of the screen, below statusText (y 320) and hintText, so the legend never overlaps them.
-      this.controlsText = this.track(this.add.text(320, 358,
-        'WASD / ←↑→↓ Di chuyển    Shift Chạy    E Tương tác    F Đèn    J Sổ tay    H Gợi ý    ESC Tạm dừng',
-        { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } })
-        .setOrigin(0.5, 1).setDepth(87));
-    }
     if (level === 3) {
-      this.titleText.destroy(); this.objectiveText.destroy(); this.statusText.destroy(); this.hintText.destroy(); this.lumoStatusText.destroy();
       this.shatteredCreek = new ShatteredCreekController({
         scene: this, player: this.player, lumo: this.lumo, lantern: this.lantern, interactions: this.interactions,
         progress: this.progress, save: () => this.save(), say: (lines, done) => this.say(lines, done), nextLevel: (lines) => this.nextLevel(lines), isDialogueActive: () => this.dialogue.isActive(),
@@ -571,7 +565,6 @@ export class CampaignScene extends Phaser.Scene {
       return;
     }
     if (level === 5) {
-      this.titleText.destroy(); this.objectiveText.destroy(); this.statusText.destroy(); this.hintText.destroy(); this.lumoStatusText.destroy();
       this.sleeplessTower = new SleeplessTowerLevel({
         scene: this, progress: this.progress, player: this.player, lumo: this.lumo, interactions: this.interactions,
         lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done), nextLevel: (lines) => this.nextLevel(lines), canStartStory: () => !this.dialogue.isActive(),
@@ -700,15 +693,6 @@ export class CampaignScene extends Phaser.Scene {
     const room = OBSERVATORY_ROOMS[roomId];
     this.clearActiveRoom();
     this.activeObservatoryRoom = roomId;
-    if (!this.titleText || !this.titleText.scene) {
-      const level = CAMPAIGN_LEVELS[8];
-      this.titleText = this.track(this.add.text(16, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-      this.objectiveText = this.track(this.add.text(16, 42, level.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-      this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
-      this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
-      this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
-    }
-    this.titleText.setText(`09  ${room.title} · ${CAMPAIGN_LEVELS[8].chapter}`);
     // The actor's foot body must match the authored 36x42 frame, baseline 40.
     this.player.setFootPlacement(OBSERVATORY_BODY.feetY, OBSERVATORY_BODY.bodyOffsetY,
       OBSERVATORY_BODY.bodyOffsetX, OBSERVATORY_BODY.width, OBSERVATORY_BODY.height);
@@ -878,7 +862,6 @@ export class CampaignScene extends Phaser.Scene {
       this.observatorySolids.set(`${roomId}-solid-${index}`, { rect, body });
     });
     this.syncObservatorySolids();
-    this.roomObjects.push(this.add.text(320, 344, 'WASD / ←↑→↓ Di chuyển    E Tương tác    F Đèn    H Gợi ý    J Sổ tay    ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
   }
 
   /** Every door shut, for building the full collider set once. */
@@ -1845,10 +1828,6 @@ export class CampaignScene extends Phaser.Scene {
         this.track(this.add.image(sx, sy, 'stepping_stone').setAlpha(0.72).setScale(0.85).setDepth(1.3));
       }
     }
-    const controls = this.progress.level === 0
-      ? `WASD Move    E Interact${this.progress.lanternPickedUp ? '    F Lantern' : ''}${this.progress.flags['l0-tablet-read'] ? '    SPACE Pulse' : ''}    J Journal    H Hint    ESC Pause`
-      : 'WASD / ←↑→↓ Move    E Interact    F Lantern    SPACE Pulse    J Journal    H Hint    ESC Pause';
-    this.controlsText = this.track(this.add.text(320, this.progress.level === 0 || this.progress.level === 1 ? 358 : 344, controls, { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
     const stage = this.progress.level;
     const landscape = this.add.graphics().setDepth(1.5);
     if (!hasCampaignBackground && stage === 3) {
@@ -2973,90 +2952,84 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private refreshHud(): void {
-    let objectiveTextChanged = false;
-    if (this.progress.level === 7 && this.ruinsLevel) {
-      this.objectiveText?.setText(this.ruinsLevel.getObjectiveText());
-      this.statusText?.setText(this.ruinsLevel.getStatusText());
-      if (this.lumoStatusText) this.lumoStatusText.setText('NHINH + LUMO');
-      objectiveTextChanged = true;
-    }
-    if (objectiveTextChanged) return;
-    if (this.progress.level === 3) { this.shatteredCreek?.refreshHud(); return; }
-    if (this.progress.level === 5) { this.sleeplessTower?.refreshHud(); return; }
-    if (this.progress.level === 8 && this.activeObservatoryRoom) {
+    const index = this.progress.level;
+    const level = CAMPAIGN_LEVELS[index];
+    const padded = String(index + 1).padStart(2, '0');
+    let objective = level.objective;
+    let status = '';
+    let lumo = '';
+    if (index === 7 && this.ruinsLevel) {
+      objective = this.ruinsLevel.getObjectiveText();
+      status = this.ruinsLevel.getStatusText();
+      lumo = 'NHINH + LUMO';
+    } else if (index === 3 && this.shatteredCreek) {
+      objective = this.shatteredCreek.getObjectiveText();
+      status = this.shatteredCreek.getStatusText();
+    } else if (index === 5 && this.sleeplessTower) {
+      objective = this.sleeplessTower.getObjectiveText();
+      status = this.sleeplessTower.getStatusText();
+    } else if (index === 8 && this.activeObservatoryRoom) {
       const roomId = this.activeObservatoryRoom;
       const guidance = observatoryGuidance(roomId, this.getObservatoryWorldState());
-      this.titleText?.setText(`09  ${OBSERVATORY_ROOMS[roomId].title}   ·   ${CAMPAIGN_LEVELS[8].chapter}`);
-      this.objectiveText?.setText(guidance.objective);
-      this.statusText?.setText(guidance.status);
-      this.lumoStatusText?.setText(guidance.lumo);
-      this.hintText?.setText('H · Gợi ý');
-      return;
-    }
-    const level = CAMPAIGN_LEVELS[this.progress.level];
-    if (this.progress.level === 4 && this.pathForTwoLevel) {
-      if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về');
-      return;
-    }
-    if (this.progress.level === 9 && this.heartLevel) {
-      this.objectiveText?.setText(this.heartLevel.getObjectiveText());
-      if (this.titleText) this.titleText.setText(`${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
-      this.statusText?.setText(this.heartLevel.getStatusText());
-      if (this.lumoStatusText) this.lumoStatusText.setText(this.heartLevel.getLumoStatusText());
-      return;
-    }
-    if (this.progress.level === 0) {
+      objective = guidance.objective;
+      status = guidance.status;
+      lumo = guidance.lumo;
+    } else if (index === 4 && this.pathForTwoLevel) {
+      objective = this.pathForTwoLevel.getObjectiveText();
+      status = this.pathForTwoLevel.getStatusText();
+      lumo = this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về';
+    } else if (index === 9 && this.heartLevel) {
+      objective = this.heartLevel.getObjectiveText();
+      status = this.heartLevel.getStatusText();
+      lumo = this.heartLevel.getLumoStatusText();
+    } else if (index === 0) {
       const step = this.getForestEdgeStep();
       if (step !== this.forestEdgeHintStep) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
-      const objective: Record<string, string> = {
+      const objectives: Record<string, string> = {
         wake: 'Tới gần chiếc đèn cũ và bia đá.', pickup: 'Gặp Lumo rồi nhận chiếc đèn bằng E.', light: 'Bật đèn bằng F để đọc bia đá.',
         tablet: 'Đứng cạnh bia và đọc dòng chữ.', pulse: 'Bật đèn rồi dùng SPACE để tìm dấu chân.',
         ring: 'Đứng trong vòng đá và giữ đèn bật.', exit: 'Cổng đã mở. Đi tới lối đi và nhấn E.',
       };
-      if (this.objectiveText) this.objectiveText.setText(objective[step]);
-      if (this.controlsText) this.controlsText.setText(`WASD Move    E Interact${this.progress.lanternPickedUp ? '    F Lantern' : ''}${this.progress.flags['l0-tablet-read'] ? '    SPACE Pulse' : ''}    J Journal    H Hint    ESC Pause`);
-    }
-    if(this.progress.level===1){
-      const count=this.value('rune-sequence');
-      const stage=this.getWoodsTutorialStage();
+      objective = objectives[step];
+      status = `Bia: ${this.progress.flags['l0-tablet-read'] ? 'đã đọc' : 'chưa đọc'} · Dấu chân: ${this.progress.flags['l0-footprints-found'] ? 'đã thấy' : 'chưa thấy'} · Cổng: ${this.progress.flags['l0-gate-open'] ? 'mở' : 'đóng'}`;
+      lumo = 'NHINH + LUMO';
+    } else if (index === 1) {
+      const count = this.value('rune-sequence');
+      const stage = this.getWoodsTutorialStage();
       this.updateWoodsTutorialCue(stage);
-      const objective:Record<WoodsTutorialStage,string>={
-        exit:'Cổng đã mở. Đến bậc thang và nhấn E để xuống Thư viện.',
-        sequence:`Chuỗi cổ tự: ${count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.`,
-        poem:'Mẩu thơ ngay trước mặt. Đọc bằng E.',
-        observe:'Theo lối vào khoảng đất trống. Dùng SPACE để soi ba bia.',
+      const objectives: Record<WoodsTutorialStage, string> = {
+        exit: 'Cổng đã mở. Đến bậc thang và nhấn E để xuống Thư viện.',
+        sequence: `Chuỗi cổ tự: ${count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.`,
+        poem: 'Mẩu thơ ngay trước mặt. Đọc bằng E.',
+        observe: 'Theo lối vào khoảng đất trống. Dùng SPACE để soi ba bia.',
       };
-      if(this.objectiveText)this.objectiveText.setText(objective[stage]);
-      if(this.controlsText)this.controlsText.setText('WASD Move    E Interact    SPACE Pulse    J Journal    H Hint    ESC Pause');
+      objective = objectives[stage];
+      status = `Cổ tự: ${count}/3 · Bài thơ: ${this.progress.flags['l1-poem-read'] ? 'đã đọc' : 'chưa đọc'} · Cổng: ${this.progress.flags['l1-open'] ? 'mở' : 'đóng'} · J sổ tay`;
+      lumo = 'NHINH + LUMO';
+    } else if (index === 2 && this.libraryLevel) {
+      objective = this.libraryLevel.getObjectiveText();
+      status = this.libraryLevel.getStatusText();
+      lumo = 'NHINH + LUMO';
+    } else if (index === 6 && this.gardenLevel) {
+      objective = this.gardenLevel.getObjectiveText();
+      status = this.gardenLevel.getStatusText();
+      lumo = 'LUMO · đi cùng Nhinh';
     }
-    if (this.progress.level === 2 && this.libraryLevel) {
-      this.objectiveText?.setText(this.libraryLevel.getObjectiveText());
-      this.statusText?.setText(this.libraryLevel.getStatusText());
-    }
-    if (this.progress.level === 6 && this.gardenLevel) {
-      this.objectiveText?.setText(this.gardenLevel.getObjectiveText());
-      this.statusText?.setText(this.gardenLevel.getStatusText());
-    }
-    if (this.titleText) this.titleText.setText(this.progress.level === 8 && this.activeObservatoryRoom
-      ? `09  ${OBSERVATORY_ROOMS[this.activeObservatoryRoom].title}   ·   ${level.chapter}`
-      : `${String(this.progress.level + 1).padStart(2, '0')}  ${level.title}   ·   ${level.chapter}`);
-    // Level 03 writes its own status line above (LibraryLevel.getStatusText), so this generic line skips it.
-    if (this.statusText && this.progress.level !== 2) {
-      const levelIndex = this.progress.level;
-      const state = levelIndex === 0 ? `Bia: ${this.progress.flags['l0-tablet-read'] ? 'đã đọc' : 'chưa đọc'} · Dấu chân: ${this.progress.flags['l0-footprints-found'] ? 'đã thấy' : 'chưa thấy'} · Cổng: ${this.progress.flags['l0-gate-open'] ? 'mở' : 'đóng'}`
-        : levelIndex === 1 ? `Cổ tự: ${this.value('rune-sequence')}/3 · Bài thơ: ${this.progress.flags['l1-poem-read'] ? 'đã đọc' : 'chưa đọc'} · Cổng: ${this.progress.flags['l1-open']?'mở':'đóng'} · J sổ tay`
-        : levelIndex === 3 ? `Cầu: ${Number(Boolean(this.progress.flags['l3-latch-a'])) + Number(Boolean(this.progress.flags['l3-latch-b']))}/2 · G1 ${this.value('g1')} / G2 ${this.value('g2')} / G3 ${this.value('g3')}`
-        : levelIndex === 4 ? `Cửa: ${Number(Boolean(this.progress.flags['l4-latch-a'])) + Number(Boolean(this.progress.flags['l4-latch-b'])) + Number(Boolean(this.progress.flags['l4-latch-c']))}/3 · Lumo: ${this.progress.flags['l4-reunited'] ? 'đã trở lại' : 'theo mốc'}`
-        : levelIndex === 5 ? `Nhánh A/B: ${this.value('tower-g1') === 1 && this.value('tower-g0') === 2 && this.lantern.lanternOn ? 'A sáng' : 'A tắt'} / ${this.value('tower-g2') === 3 && this.value('tower-g0') === 2 && this.lantern.lanternOn ? 'B sáng' : 'B tắt'} · Nước: ${this.progress.flags['l5-water-returned'] ? 'đã trả' : 'đang bị hút'}`
-        : levelIndex === 6 && this.gardenLevel ? this.gardenLevel.getStatusText()
-        : levelIndex === 7 ? `Mắt: ${Number(this.isRuinsOuterBeamReady('left')) + Number(this.isRuinsOuterBeamReady('right'))}/2 · Bóng giữa: ${this.value('statue') === 2 ? 'đúng' : 'chưa đúng'} · Điện thờ: ${this.progress.flags['l7-solved'] ? 'mở' : 'khóa'}`
-        : levelIndex === 9 ? `Tinh thể: ${['memory', 'hope', 'balance'].filter((s) => this.progress.flags[`l9-${s}`]).length}/3 · Nhánh: ${Number(this.value('heart-memory') === 1) + Number(this.value('heart-balance') === 2)}/2 · Lumo: ${this.progress.flags['l9-at-heart'] ? 'đang tới ấn' : 'chưa gọi'}`
-        : `Đèn: ${this.lantern.lanternOn ? 'BẬT' : 'TẮT'} · Lumo: đang đi cùng`;
-      this.statusText.setText(state);
-    }
-    if (this.lumoStatusText) this.lumoStatusText.setText(this.progress.level === 4
-      ? (this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về')
-      : this.progress.level === 6 ? 'LUMO · đi cùng Nhinh'
-        : this.progress.level >= 5 && this.progress.level !== 8 ? 'LUMO · E gọi tới ấn' : 'NHINH + LUMO');
+    // Level names and chapter tags stay in English everywhere; only the body copy is Vietnamese.
+    this.hud.setTitle(`${padded}  ${level.title}   ·   ${level.chapter}`);
+    this.hud.setObjective(objective);
+    this.hud.setStatus(status);
+    this.hud.setLumo(lumo);
+    this.hud.setKeys({
+      move: true,
+      run: true,
+      interact: true,
+      lantern: this.progress.lanternPickedUp,
+      pulse: PULSE_LEVELS.includes(index) && this.lantern.lanternInHand && this.lantern.lanternOn
+        && (index !== 0 || this.progress.flags['l0-tablet-read'] === true),
+      journal: true,
+      hint: true,
+      pause: true,
+    });
   }
 }

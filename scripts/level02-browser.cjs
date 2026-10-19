@@ -21,7 +21,7 @@ fs.mkdirSync(out,{recursive:true});
     const s=window.__LAST_LANTERN_GAME__?.scene.getScene('CampaignScene');
     if(!s?.player)return null;
     const p=s.player.sprite,b=p.body;
-    return {level:s.progress.level,flags:{...s.progress.flags},counters:{...s.progress.counters},x:p.x,y:p.y,depth:p.depth,body:{x:b.x,y:b.y,width:b.width,height:b.height},line:s.dialogue.fullLineText,dialogue:s.dialogue.isActive(),reveals:[...s.activeRevealedRunes],target:s.interactions.getActiveTarget()?.id,objective:s.objectiveText?.text,tutorialCue:{visible:s.woodsTutorialCue?.visible,stage:s.woodsTutorialCue?.getData('stage'),target:s.woodsTutorialCue?.getData('target')},objects:s.objects.filter(o=>o.getData?.('woodsId')).map(o=>({x:o.x,y:o.y,depth:o.depth,key:o.texture?.key,visible:o.visible,alpha:o.alpha,text:o.text,width:o.displayWidth,height:o.displayHeight,data:o.data?.getAll?.()}))};
+    return {level:s.progress.level,flags:{...s.progress.flags},counters:{...s.progress.counters},x:p.x,y:p.y,depth:p.depth,body:{x:b.x,y:b.y,width:b.width,height:b.height},line:s.dialogue.fullLineText,dialogue:s.dialogue.isActive(),reveals:[...s.activeRevealedRunes],target:s.interactions.getActiveTarget()?.id,objective:s.hud?.objectiveText?.text,tutorialCue:{visible:s.woodsTutorialCue?.visible,stage:s.woodsTutorialCue?.getData('stage'),target:s.woodsTutorialCue?.getData('target')},objects:s.objects.filter(o=>o.getData?.('woodsId')).map(o=>({x:o.x,y:o.y,depth:o.depth,key:o.texture?.key,visible:o.visible,alpha:o.alpha,text:o.text,width:o.displayWidth,height:o.displayHeight,data:o.data?.getAll?.()}))};
   });
   const runeBodies=()=>page.evaluate(()=>{
     const s=window.__LAST_LANTERN_GAME__?.scene.getScene('CampaignScene');if(!s)return [];

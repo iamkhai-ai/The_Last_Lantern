@@ -28,7 +28,7 @@ console.log(`Artifacts: ${out}`);
     return { level: s.progress.level, flags: { ...s.progress.flags }, picked: s.progress.lanternPickedUp, lampOn: s.lantern.lanternOn,
       dialogue: s.dialogue.isActive(), inputLocked: s.dialogue.isInputLocked(performance.now()), line: s.dialogue.fullLineText,
       x: p.x, y: p.y, body: { x: body.x, y: body.y, width: body.width, height: body.height }, depth: p.depth,
-      target: s.interactions.getActiveTarget()?.id ?? null, objective: s.objectiveText?.text, charge: s.forestEdgeChargeMs,
+      target: s.interactions.getActiveTarget()?.id ?? null, objective: s.hud?.objectiveText?.text, charge: s.forestEdgeChargeMs,
       lumoVisible: s.lumo.sprite.visible, pulseCooldown: s.lantern.getCooldownRatio(),
       objects: s.objects.filter(o => o.texture && o.getData('forestEdgeId')).map(o => ({ id:o.getData('forestEdgeId'),x:o.x,y:o.y,depth:o.depth,texture:o.texture.key })) };
   });

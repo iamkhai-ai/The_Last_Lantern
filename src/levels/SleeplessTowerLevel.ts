@@ -145,7 +145,6 @@ export class SleeplessTowerLevel {
   private visuals = new Map<string, Phaser.GameObjects.Image>();
   private beams?: Phaser.GameObjects.Graphics;
   private panel?: Phaser.GameObjects.Image;
-  private hud: Phaser.GameObjects.Text[] = [];
   private state!: TowerState;
   private route: Point[] = [];
   private routeIndex = 0;
@@ -181,7 +180,6 @@ export class SleeplessTowerLevel {
     this.drawMachine();
     this.addSolids();
     this.registerActions();
-    this.drawHud();
     this.updateVisuals(deriveTowerLive(this.state, this.lumoPoint()));
     this.saveState();
     lumo.setVisible(true);
@@ -253,8 +251,7 @@ export class SleeplessTowerLevel {
     this.cleaned = true;
     this.colliders.forEach((collider) => { if (collider.active) collider.destroy(); });
     this.objects.forEach((object) => { if (object.active) object.destroy(); });
-    this.hud.forEach((text) => { if (text.active) text.destroy(); });
-    this.colliders = []; this.objects = []; this.hud = []; this.visuals.clear(); this.bodies = [];
+    this.colliders = []; this.objects = []; this.visuals.clear(); this.bodies = [];
     this.panel = undefined;
     this.ctx.interactions.clear();
   }
@@ -637,18 +634,7 @@ export class SleeplessTowerLevel {
   }
 
   private updateHud(live: TowerLiveState): void {
-    if (!this.hud.length) return;
-    this.hud[1].setText(this.objectiveFor(live));
-    this.hud[2].setText(this.statusFor(live));
     if (this.stepKey !== live.step) { this.stepKey = live.step; this.hintIndex = 0; }
-  }
-
-  private drawHud(): void {
-    const { scene } = this.ctx;
-    this.hud.push(this.keep(scene.add.text(16, 13, '06  Ngọn Tháp Không Ngủ · Hy vọng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86)));
-    this.hud.push(this.keep(scene.add.text(16, 42, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86)));
-    this.hud.push(this.keep(scene.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86)));
-    this.hud.push(this.keep(scene.add.text(624, 320, 'E Tương tác · F Đèn · H Gợi ý · J Ghi chép · ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 5, y: 3 } }).setOrigin(1, 0).setDepth(86)));
   }
 
   private showPanel(): void {

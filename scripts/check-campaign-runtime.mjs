@@ -633,8 +633,9 @@ function makeFrameScene(level, { controllers = [] } = {}) {
       update: (_dt, x, y) => calls.lumo.push({ x, y }),
       sprite: { x: 300, y: 270, visible: true, getBounds: () => bounds },
     },
-    lantern: { lanternInHand: true, lanternOn: true, update: () => { calls.lantern += 1; } },
+    lantern: { lanternInHand: true, lanternOn: true, update: () => { calls.lantern += 1; }, getCooldownRatio: () => 0 },
     interactions: { update: () => { calls.interactions += 1; } },
+    hud: { update: () => undefined, setHidden: () => undefined },
     keys: { esc: {} },
     calls,
     /** Saving is not what this harness measures; the frame stand-in just absorbs it. */

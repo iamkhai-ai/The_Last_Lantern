@@ -48,7 +48,6 @@ export class ShatteredCreekController {
   private hintIndex = 0;
   private state!: CreekState;
   private cleaned = false;
-  private hud: Phaser.GameObjects.Text[] = [];
   private stepKey = '';
 
   constructor(private readonly ctx: Context) {}
@@ -90,7 +89,6 @@ export class ShatteredCreekController {
     for (const [id, entry] of Object.entries(SHATTERED_CREEK.objects)) if ('base' in entry) this.addWorldCollider(`prop-${id}`, entry.base.x + entry.base.width / 2, entry.base.y + entry.base.height / 2, entry.base.width, entry.base.height);
     SHATTERED_CREEK.objects.exit.posts.forEach((post, index) => this.addWorldCollider(`exit-post-${index}`, post.x + post.width / 2, post.y + post.height / 2, post.width, post.height));
     this.registerActions();
-    this.drawHud();
     this.updateVisuals();
     this.ctx.lumo.setVisible(true);
     if (!this.ctx.progress.flags['intro-3']) { this.ctx.progress.flags['intro-3'] = true; this.ctx.save(); this.ctx.say(OPENING); }
@@ -167,7 +165,7 @@ export class ShatteredCreekController {
     this.cleaned = true;
     this.colliders.forEach((collider) => collider.destroy());
     this.objects.forEach((object) => object.destroy());
-    this.colliders = []; this.objects = []; this.visuals.clear(); this.bodies = []; this.colliderBodies.clear(); this.hud = [];
+    this.colliders = []; this.objects = []; this.visuals.clear(); this.bodies = []; this.colliderBodies.clear();
   }
 
   private registerActions(): void {
@@ -365,24 +363,22 @@ export class ShatteredCreekController {
     label.setData('creekLabel', id); this.keep(label);
   }
 
-  private drawHud(): void {
-    const { scene } = this.ctx;
-    this.hud.push(scene.add.text(16, 13, '04  Suối Trăng Vỡ · Hy vọng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '13px', fontStyle: 'bold', color: '#f7dfaa', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-    this.hud.push(scene.add.text(16, 42, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
-    this.hud.push(scene.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
-    this.hud.push(scene.add.text(624, 320, 'E Tương tác · F Đèn · H Gợi ý · J Ghi chép · ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 5, y: 3 } }).setOrigin(1, 0).setDepth(86));
+  public getObjectiveText(): string { return this.objectiveFor(deriveCreekState(this.state)); }
+
+  public getStatusText(): string {
+    const glyph = (id: 'g1' | 'g2' | 'g3'): string => this.state[id] === 0 ? '—' : id === 'g3' ? this.state[id] === 1 ? '/' : '\\' : this.state[id] === 1 ? '\\' : '/';
+    return `Tập: ${this.state.practiceComplete ? 'xong' : 'thử'} · Cầu: ${Number(this.state.latchA) + Number(this.state.latchB)}/2 · G1 ${glyph('g1')} / G2 ${glyph('g2')} / G3 ${glyph('g3')}`;
   }
 
   public refreshHud(): void { this.updateHud(deriveCreekState(this.state)); }
 
-  private updateHud(live: CreekLiveState): void {
-    if (!this.hud.length) return;
+  private objectiveFor(live: CreekLiveState): string {
     const goals: Record<CreekLiveState['step'], string> = { practice: 'Thử đặt đèn và gương nhỏ cạnh lối vào.', pickup: 'Thu hồi đèn bằng E.', main: 'Đặt đèn chính rồi điều hướng tia qua gương.', 'latch-a': 'Gài chốt cầu đầu bên bờ Tây.', reroute: 'Giữ cầu đầu rồi điều hướng tia sang gương trên đảo.', 'latch-b': 'Gài chốt cầu thứ hai trên đảo.', retrieve: this.state.source ? 'Thu hồi đèn khỏi bệ.' : 'Đặt đèn lên bệ chính rồi thu hồi.', relief: 'Đọc phù điêu bờ Đông.', exit: 'Đến trạm dẫn nước.' };
     const placedPowerStep = ['practice', 'main', 'latch-a', 'reroute', 'latch-b'].includes(live.step) && this.state.source !== null;
-    const goal = !this.state.lanternOn && placedPowerStep ? 'Đèn đang tắt. Nhấn F để bật tia sáng.' : live.step === 'main' && this.state.source === null ? 'Đặt đèn lên bệ chính bằng E.' : goals[live.step];
-    this.hud[1].setText(goal);
-    const glyph = (id: 'g1' | 'g2' | 'g3'): string => this.state[id] === 0 ? '—' : id === 'g3' ? this.state[id] === 1 ? '/' : '\\' : this.state[id] === 1 ? '\\' : '/';
-    this.hud[2].setText(`Tập: ${this.state.practiceComplete ? 'xong' : 'thử'} · Cầu: ${Number(this.state.latchA) + Number(this.state.latchB)}/2 · G1 ${glyph('g1')} / G2 ${glyph('g2')} / G3 ${glyph('g3')}`);
+    return !this.state.lanternOn && placedPowerStep ? 'Đèn đang tắt. Nhấn F để bật tia sáng.' : live.step === 'main' && this.state.source === null ? 'Đặt đèn lên bệ chính bằng E.' : goals[live.step];
+  }
+
+  private updateHud(live: CreekLiveState): void {
     if (this.stepKey !== live.step) { this.stepKey = live.step; this.hintIndex = 0; }
   }
 }

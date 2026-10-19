@@ -36,13 +36,13 @@ export class PathForTwoLevel {
   private doorPostImages=new Map<string,Phaser.GameObjects.Image[]>();
   private doorBodies = new Map<string,Phaser.Physics.Arcade.StaticBody>(); private protected: Phaser.GameObjects.GameObject[]=[];
   private route: PathRoutePoint[]=[]; private routeIndex=0; private assignment='follow'; private lumoRoom:PathRoomId='entry';
-  private roomTitle?:Phaser.GameObjects.Text; private roomObjective?:Phaser.GameObjects.Text; private routeGraphics?:Phaser.GameObjects.Graphics;
+  private routeGraphics?:Phaser.GameObjects.Graphics;
   private inkTrail?:Phaser.GameObjects.TileSprite;
   /** Held-E guard: armed by a room change, cleared by the E key coming back up (see update()). */
   private interactReleasePending=false; private interactKey?:Phaser.Input.Keyboard.Key;
   private hintIndex=0; private hintStage=''; private destroyed=false; private lastLantern=false;
   private pendingStoryBeats:Array<{lines:DialogueLine[];onComplete?:()=>void}>=[];
-  private lastCheckpoint=0; private roomStatus?:Phaser.GameObjects.Text; private roomControls?:Phaser.GameObjects.Text; private beckoningQueued=false; private litObservationQueued=false;
+  private lastCheckpoint=0; private beckoningQueued=false; private litObservationQueued=false;
   constructor(o:PathForTwoLevelOptions){this.scene=o.scene;this.progress=o.progress;this.player=o.player;this.lumo=o.lumo;this.interactions=o.interactions;this.lantern=o.lantern;this.save=o.save;this.say=o.say;this.nextLevel=o.nextLevel;this.canStartStory=o.canStartStory;this.lastLantern=this.lantern.lanternOn;}
   private get lanternOn(){return this.lantern.lanternOn;}
   public build():void{
@@ -98,7 +98,7 @@ export class PathForTwoLevel {
     this.advanceLumo(dt); this.updateDoors(); this.updateInkProgress(); this.updateReunion();
     this.flushPendingStoryBeat();
     if(this.scene.time.now-this.lastCheckpoint>=600){this.lastCheckpoint=this.scene.time.now;if(this.isSafe(this.room,{x:this.player.x,y:this.player.y})){this.progress.flags['l4-room']=this.room;this.progress.counters['player-level']=4;this.progress.counters['player-x']=Math.round(this.player.x);this.progress.counters['player-y']=Math.round(this.player.y);this.save();}}
-    this.refreshArt();this.roomTitle?.setText(`05  ${PATH_ROOMS[this.room].title}`); this.roomObjective?.setText(this.getObjectiveText()); this.refreshStatus();
+    this.refreshArt();
   }
   public getProtectedPromptBounds():PromptRect[]{return this.protected.filter((o):o is Phaser.GameObjects.Image=>o instanceof Phaser.GameObjects.Image&&o.active&&o.visible).map(o=>o.getBounds());}
   public getObjectiveText():string{
@@ -220,7 +220,7 @@ export class PathForTwoLevel {
       if(e.art.startsWith('call')||e.art.startsWith('latch')||e.id==='spiral')this.protected.push(image);
       image.setData('path-id',e.id);
     }
-    this.addDoors();this.drawRoomHud();this.registerRoomInteractions();this.refreshArt();
+    this.addDoors();this.registerRoomInteractions();this.refreshArt();
   }
   private drawTubeRoutes():void{
     if(!this.routeGraphics)return;
@@ -351,16 +351,6 @@ export class PathForTwoLevel {
   }
   private isDoorLatched(id:string):boolean{return id==='a'?this.progress.flags['l4-latch-a']===true:id==='b'?this.progress.flags['l4-latch-b']===true:id==='c'?this.progress.flags['l4-latch-c']===true:false;}
   private isDoorPowered(id:string):boolean{return id==='practice'?this.hasPower('practice'):this.hasPower(id as 'a'|'b'|'c')||this.isDoorLatched(id);}
-  private drawRoomHud():void{
-    this.roomTitle=this.scene.add.text(16,13,`05  ${PATH_ROOMS[this.room].title}`,{fontFamily:'Segoe UI, sans-serif',fontSize:'13px',fontStyle:'bold',color:'#f7dfaa',backgroundColor:'#07151cbb',padding:{x:8,y:5}}).setDepth(86);
-    this.track(this.roomTitle);
-    this.roomObjective=this.scene.add.text(16,42,'',{fontFamily:'Segoe UI, sans-serif',fontSize:'11px',color:'#e5eee8',backgroundColor:'#07151cbb',padding:{x:8,y:5}}).setDepth(86);
-    this.track(this.roomObjective);
-    this.roomStatus=this.scene.add.text(16,320,'',{fontFamily:'Segoe UI, sans-serif',fontSize:'9px',color:'#d3e5dc',backgroundColor:'#07151cbb',padding:{x:8,y:4}}).setDepth(86);
-    this.track(this.roomStatus);
-    this.roomControls=this.scene.add.text(624,340,'WASD di chuyển · E tương tác · F đèn · H gợi ý · J sổ tay',{fontFamily:'Segoe UI, sans-serif',fontSize:'8px',color:'#ffe680',backgroundColor:'#07151cbb',padding:{x:7,y:2}}).setOrigin(1,0).setDepth(86);
-    this.track(this.roomControls);
-  }
   private registerRoomInteractions():void{
     const reg=(c:InteractableConfig)=>this.interactions.register(c);const def=PATH_ROOMS[this.room];
     // Standing props: prompt, enabled and the action share one layout predicate (`isPathApproachAllowed`,
@@ -745,7 +735,7 @@ export class PathForTwoLevel {
       this.save();
     }
   }
-  private refresh():void{this.refreshArt();this.updateDoors();this.refreshStatus();}
+  private refresh():void{this.refreshArt();this.updateDoors();}
   private refreshArt():void{
     for(const object of this.objects){
       if(!(object instanceof Phaser.GameObjects.Image))continue;
@@ -771,7 +761,6 @@ export class PathForTwoLevel {
       if(texture)object.setTexture(texture);
     }
   }
-  private refreshStatus():void{this.roomStatus?.setText(this.getStatusText());}
   private prepareLevelExit():void{
     const position=this.getLumoPosition();
     this.progress.counters['lumo-x']=position.x;
