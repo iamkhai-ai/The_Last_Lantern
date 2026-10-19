@@ -9,9 +9,9 @@ import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
   auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
-  getHeartStage, heartArtCandidates, heartArtNativeSize, heartFinalActionAlreadyDone, heartFinalActionSource, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
+  getHeartStage, heartArtCandidates, heartArtNativeSize, heartFinalActionAlreadyDone, heartFinalActionSource, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
   HEART_G0_ID, HEART_LANE_COLORS, HEART_MAT_ID, HEART_MOON_SHADOW, HEART_OVERLOAD_CHECKPOINT, HEART_PROPS,
-  HEART_RING_LANES, HEART_ROOT_LANES, HEART_SEAL_ID, HEART_SEAL_RADIUS, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
+  HEART_RING_LANES, HEART_SEAL_ID, HEART_SEAL_RADIUS, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
   HEART_STATUE_SHADOW, isHeartPositionSafe, nearestSafeHeartSpawn, normalizeHeartProgress,
   resolveHeartLumoMode, resolveHeartRestoreState, type HeartBranchId, type HeartFinalSource, type HeartElement, type HeartPoint, type HeartPuzzleState, type HeartStage,
 } from '../data/heartOfElariaLayout';

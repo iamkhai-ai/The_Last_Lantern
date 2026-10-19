@@ -751,6 +751,16 @@ const pressHeartF = (scene) => bind(methodSource('handleLanternKey', heartSource
 
 const CASES = [
   {
+    name: 'a_direct_load_into_the_creek_or_the_tower_can_tear_down_its_hud',
+    run: () => {
+      // Levels 3 and 5 replace the shared HUD texts with their own. The texts exist only when an earlier level in the same
+      // session created them, so a Continue from a fresh page load must not call destroy() on an undefined field.
+      const source = readFileSync(SCENE_FILE, 'utf8');
+      assert.equal(source.includes('this.titleText.destroy()'), false, 'the HUD teardown for levels 3 and 5 uses optional chaining');
+      assert.equal((source.match(/this\.titleText\?\.destroy\(\)/g) ?? []).length, 2, 'both the creek and the tower teardown are guarded');
+    },
+  },
+  {
     name: 'heart_final_f_commits_once_from_hand_even_mid_overload',
     run: () => {
       const scene = makeHeartFinalScene({ inHand: true, placed: false, overload: true });
