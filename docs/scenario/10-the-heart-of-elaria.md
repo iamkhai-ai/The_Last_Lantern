@@ -118,6 +118,8 @@ Không tự tắt đèn thay người chơi. Không buộc người chơi đợi
 
 *Hai người đi trên lối mòn. Hiện tên đoạn kết: THE LAST DAWN. Chuyển sang màn cảm ơn và credits khi người chơi tiếp tục hội thoại bằng E.*
 
+> **Ghi chú triển khai (đợt sửa 05–10):** hành động cuối chỉ còn một đường — F với đèn sáng sau khi rễ đã chốt, từ tay ở bất kỳ đâu hoặc tại bệ khi đứng đúng chỗ (quyết định D6). Toàn bộ phần sau F (§6–§7) do `EndingScene` dựng và là chủ duy nhất của timeline (D7); đoạn lặng 1,4 giây không thể bỏ qua; nếu đèn còn nằm tắt trên bệ, Nhinh lấy nó trước cảnh ngồi.
+
 ## 8. Gợi ý H, thử lại và trạng thái cuối
 
 Trong câu đố ba nhánh:

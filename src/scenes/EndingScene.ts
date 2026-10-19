@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { getNhinhTexture } from '../art/CampaignArt';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SaveSystem } from '../systems/SaveSystem';
-import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
+import { CampaignSaveSystem, readEndingBeat, type CampaignEndingBeat, type CampaignProgress } from '../systems/CampaignSaveSystem';
+import { CampaignEndingSequence } from '../systems/CampaignEndingSequence';
+import { DialogueSystem } from '../systems/DialogueSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
 
@@ -33,6 +35,14 @@ export class EndingScene extends Phaser.Scene {
   private bodyText?: Phaser.GameObjects.Text;
   private quoteText?: Phaser.GameObjects.Text;
   private confirmText?: Phaser.GameObjects.Text;
+  /** Campaign cinematic: the beat machine's renderer, the dialogue box it speaks through, and its input gate. */
+  private sequence?: CampaignEndingSequence;
+  private dialogue?: DialogueSystem;
+  private promptText?: Phaser.GameObjects.Text;
+  private pauseText?: Phaser.GameObjects.Text;
+  private paused = false;
+  /** False after a key press has been used, until that key is released: one release between any two actions. */
+  private pressReady = true;
 
   constructor() {
     super({ key: 'EndingScene' });
@@ -40,13 +50,21 @@ export class EndingScene extends Phaser.Scene {
 
   public create(data?: { showCredits?: boolean; campaign?: boolean }): void {
     this.campaignEnding = data?.campaign === true;
-    const showCredits = data?.showCredits === true || !this.campaignEnding;
+    // A completed campaign resumes at the saved ending beat; only the credits beat (or an explicit request) shows the menu.
+    const progress = this.campaignEnding ? CampaignSaveSystem.load() : undefined;
+    const resumeBeat = progress ? readEndingBeat(progress.flags) : 'night-call';
+    const cinematic = Boolean(progress) && data?.showCredits !== true && resumeBeat !== 'credits';
+    const showCredits = !cinematic;
     // The campaign credits default to the safe row; the legacy ending keeps its
     // established default because it never pages through closing text first.
     this.selectedIndex = this.campaignEnding ? 1 : 0;
     this.menuMode = 'credits';
     this.restartConfirmed = false;
     this.buttons = [];
+    if (cinematic && progress) {
+      this.createCinematic(progress, resumeBeat);
+      return;
+    }
 
     // Build Dawn Heart Tree backdrop matching 05_final_dawn.png
     WorldFactory.buildZone(this, 'hub', 3, true);
@@ -89,7 +107,7 @@ export class EndingScene extends Phaser.Scene {
     const quote = this.add.text(
       320,
       114,
-      showCredits ? '“Even the smallest light can lead us home.”' : 'ĐÊM ĐI HẾT CON ĐƯỜNG CỦA NÓ',
+      '“Even the smallest light can lead us home.”',
       {
         fontFamily: 'Georgia, serif',
         fontSize: '15px',
@@ -104,7 +122,7 @@ export class EndingScene extends Phaser.Scene {
     const body = this.add.text(
       320,
       168,
-      showCredits ? 'Ba mảnh trái tim Ký Ức • Hy Vọng • Cân Bằng đã hợp nhất.\nKhi Nhinh tự tay tắt ngọn đèn lồng, bóng tối và ánh sáng\nđã tìm lại nhịp thở hài hòa trên khắp khu rừng Elaria.\n\nCảm ơn bạn đã hoàn thành The Last Lantern — Khu Rừng Ánh Sáng!' : 'Nhinh tắt đèn. Những tia sáng cũ rút khỏi Cây Mẹ; vòng ngày đêm lại chuyển động.\n\nNhinh: “Lumo?”\n\nMột tiếng dế vang lên. Nước chảy qua suối, lá khẽ lay.\n\nLumo: “Tôi đây.”  Nhinh: “Tôi vẫn thấy cậu.”',
+      'Ba mảnh trái tim Ký Ức • Hy Vọng • Cân Bằng đã hợp nhất.\nKhi Nhinh tự tay tắt ngọn đèn lồng, bóng tối và ánh sáng\nđã tìm lại nhịp thở hài hòa trên khắp khu rừng Elaria.\n\nCảm ơn bạn đã hoàn thành The Last Lantern — Khu Rừng Ánh Sáng!',
       {
         fontFamily: 'Segoe UI, sans-serif',
         fontSize: '11.5px',
@@ -227,7 +245,7 @@ export class EndingScene extends Phaser.Scene {
     this.registerShutdownGuard();
     if (!this.input?.keyboard) return;
     if (showCredits) this.wireCreditsInput();
-    else this.wireDialogueInput();
+    else this.wireSequenceInput();
   }
 
   private wireCreditsInput(): void {
@@ -252,22 +270,60 @@ export class EndingScene extends Phaser.Scene {
     this.onKey('keydown-E', (event) => this.handleAdvance(event));
   }
 
-  private wireDialogueInput(): void {
-    const pages = [
-      'Nhinh tắt đèn. Những tia sáng cũ rút khỏi Cây Mẹ; vòng ngày đêm lại chuyển động.\n\nNhinh: “Lumo?”\n\nMột tiếng dế vang lên. Nước chảy qua suối, lá khẽ lay.\n\nLumo: “Tôi đây.”  Nhinh: “Tôi vẫn thấy cậu.”',
-      'Bình minh đi qua khu vườn, dòng suối và những ô cửa trên tháp.\n\nThe Shadow nhìn về chân trời.\n\nThe Shadow: “Trời sáng rồi.”\n\nLumo: “Lần này, chúng ta đã để đêm đi hết con đường của nó.”',
-      'Lumo đậu lên quai chiếc đèn đã tắt. Một chiếc lá non mắc trên quai.\n\nNhinh: “Trước hết, mình đi xem khu rừng vào ban ngày.”\n\nLumo: “Tôi đi cùng được không?”\n\nNhinh: “Đó là lối đi cho hai người mà.”',
-    ];
-    let page = 0;
-    this.bodyText?.setText(pages[page]);
-    this.quoteText?.setText('BÌNH MINH TỰ TÌM ĐƯỢC ĐƯỜNG VỀ');
-    const advance = (event?: KeyboardEvent) => {
-      if (event?.repeat) return;
-      page += 1;
-      if (page < pages.length) this.bodyText?.setText(pages[page]);
-      else this.scene.restart({ showCredits: true, campaign: this.campaignEnding });
-    };
-    this.onKey('keydown-E', advance);
+  /**
+   * The cinematic's input. E, Space and Enter share one handler (registered by identifier, so the credits handlers
+   * stay the only arrows for those events): a press acts only when it is a fresh keydown that follows a real
+   * release, it advances the dialogue box first and the beat machine after it, and it can never skip the silence.
+   */
+  private wireSequenceInput(): void {
+    const press = (event?: KeyboardEvent): void => this.handleSequencePress(event);
+    const release = (): void => { this.pressReady = true; };
+    for (const code of ['keydown-E', 'keydown-SPACE', 'keydown-ENTER']) this.onKey(code, press);
+    for (const code of ['keyup-E', 'keyup-SPACE', 'keyup-ENTER']) this.onKey(code, release);
+    this.onKey('keydown-ESC', (event) => { if (!event?.repeat) this.togglePause(); });
+  }
+
+  private handleSequencePress(event?: KeyboardEvent): void {
+    if (event?.repeat || !this.pressReady || this.paused) return;
+    this.pressReady = false;
+    this.advanceSequence();
+  }
+
+  private advanceSequence(): void {
+    if (this.paused) return;
+    if (this.dialogue?.isActive()) {
+      this.dialogue.handleAdvanceInput(performance.now());
+      return;
+    }
+    this.sequence?.advance();
+  }
+
+  private togglePause(): void {
+    this.paused = !this.paused;
+    this.pauseText?.setVisible(this.paused);
+  }
+
+  private createCinematic(progress: CampaignProgress, beat: CampaignEndingBeat): void {
+    this.cameras.main.setBackgroundColor(0x050b16);
+    this.paused = false;
+    this.pressReady = true;
+    this.dialogue = new DialogueSystem(this);
+    this.sequence = new CampaignEndingSequence({
+      scene: this,
+      progress,
+      save: () => CampaignSaveSystem.save(progress),
+      showDialogue: (lines, onComplete) => this.dialogue?.startDialogue(lines, onComplete),
+      stopDialogue: () => this.dialogue?.stop(),
+      showCredits: () => this.scene.restart({ campaign: true, showCredits: true }),
+    });
+    const style = { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', fontStyle: 'bold', color: '#ffe680', backgroundColor: '#07151ccc', padding: { x: 8, y: 4 } };
+    const click = (): void => this.advanceSequence();
+    this.promptText = this.add.text(628, 352, '', style).setOrigin(1, 1).setDepth(96).setVisible(false);
+    this.promptText.setInteractive({ useHandCursor: true });
+    this.promptText.on('pointerdown', click);
+    this.pauseText = this.add.text(320, 24, 'Tạm dừng · ESC để tiếp tục', style).setOrigin(0.5, 0).setDepth(97).setVisible(false);
+    this.wireInput(false);
+    this.sequence.start(beat);
   }
 
   /**
@@ -320,6 +376,11 @@ export class EndingScene extends Phaser.Scene {
   private teardownInput(): void {
     this.clearKeyListeners();
     this.clearShutdownGuard();
+    // The cinematic's timers and dialogue die with the scene: nothing of it can fire into the next one.
+    this.sequence?.destroy();
+    this.sequence = undefined;
+    this.dialogue?.stop();
+    this.dialogue = undefined;
   }
 
   public playAgain(): void {
@@ -343,5 +404,11 @@ export class EndingScene extends Phaser.Scene {
 
   public update(_time: number, delta: number): void {
     this.effectsSystem?.update(delta);
+    if (!this.sequence) return;
+    const dt = Math.min(delta, 50);
+    if (!this.paused) this.dialogue?.update(dt);
+    this.sequence.update(dt, this.paused);
+    const prompt = this.paused ? null : this.sequence.getPrompt();
+    this.promptText?.setText(prompt ?? '').setVisible(prompt !== null);
   }
 }
