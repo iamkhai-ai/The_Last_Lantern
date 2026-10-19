@@ -665,7 +665,9 @@ export class CampaignScene extends Phaser.Scene {
     if (!['entrance', 'corridor', 'observatory'].includes(String(this.progress.flags['l8-lumo-room']))) this.progress.flags['l8-lumo-room'] = 'entrance';
     const lumoRoom = this.getObservatoryLumoRoom();
     this.lumo.setVisible(lumoRoom === roomId);
-    this.lumo.sprite.setPosition(this.progress.counters['l8-lumo-x'] ?? this.progress.counters['lumo-x'] ?? this.lumoTarget.x, this.progress.counters['l8-lumo-y'] ?? this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
+    // Both saved axes or neither: the generic lumo-x/lumo-y are stale from earlier levels and never used here.
+    const savedLumo = this.progress.counters['l8-lumo-x'] !== undefined && this.progress.counters['l8-lumo-y'] !== undefined;
+    this.lumo.sprite.setPosition(savedLumo ? this.progress.counters['l8-lumo-x'] : this.lumoTarget.x, savedLumo ? this.progress.counters['l8-lumo-y'] : this.lumoTarget.y);
     this.progress.roomId = roomId;
     this.progress.roomSpawn = { x: safeSpawn[0], y: safeSpawn[1] };
     this.save();
