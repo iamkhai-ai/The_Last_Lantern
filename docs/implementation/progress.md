@@ -1,5 +1,10 @@
 # Progress and decisions
 
+## Current state — Levels 05–10 repair (2026-10-19)
+
+- All ten levels are implemented and integrated; the repair of Levels 05–10 (tasks T00–T14 of `docs/superpowers/plans/2026-10-18-levels-05-10-repair.md`) is complete at the source level on branch `codex/levels-05-10-repair-2` (frozen source revision `84367c1659958fe3c97862c091d715d846dcbf33`). Evidence, limits and open items: [levels-05-10-repair-report.md](levels-05-10-repair-report.md).
+- Not done and not claimed: independent reviews of the frozen revision (BLOCKED), browser or human playthrough of any level (only one-off Canvas-renderer looks at some scenes), sound for the ending. The older sections below are history from the Level 01–04 slices.
+
 ## Scope
 
 Current slice: rebuild **Level 06 (The Sleepless Tower, campaign index 5)** on branch `codex/level-06-spatial-rebuild` from `test-develop` `33fa1c3`. Level 05 is handled by a separate worktree; another chat owns the remaining levels. Earlier Level 04/02/01 history below is retained as context. Main checkout contains unrelated edits and remains untouched.

@@ -12,6 +12,12 @@ Trò chơi **2D Top-Down Pixel Art Cozy Mystery & Light Puzzle Adventure** xây 
 > [docs/implementation/integration-log.md](docs/implementation/integration-log.md). Chưa có lượt chơi
 > trên browser hoặc bởi người thật trên nhánh này.
 
+## 0. Trạng thái hiện tại
+
+Chiến dịch gồm **10 màn** (Khu Rừng Quên Lãng → Trái Tim Elaria) cộng đoạn kết `THE LAST DAWN`, mỗi màn có layout và kiểm tra riêng. Cấu trúc 4 khu và 3 câu đố ở các mục bên dưới là bản đầu của dự án và chưa được viết lại theo chiến dịch. Tình trạng kiểm chứng và các việc còn mở: `docs/implementation/levels-05-10-repair-report.md`, `docs/implementation/progress.md`.
+
+Kiểm tra thuần (không cần trình duyệt): `for f in scripts/check-*.mjs; do node "$f" || break; done`, rồi `node node_modules/typescript/bin/tsc --noEmit` và `npm run build`. Chưa có playthrough toàn tuyến do người chơi thực hiện.
+
 ## 1. Cách cài đặt & chạy dự án
 
 ```bash

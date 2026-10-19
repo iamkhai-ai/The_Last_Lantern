@@ -17,7 +17,7 @@
 
 - Cổng/vòm chuyển màn: trigger đặt ngay dưới vòm theo hướng đi vào (đi từ phía trong màn) — ví dụ `FOREST_EDGE.objects.gate.exit = (486, 151)`, `SHATTERED_CREEK.objects.exit.stand = (568, 286)`.
 - Vật ven nước/chướng ngại không thể tiếp cận từ nam: đặt `stand` ở cạnh tiếp cận hợp lệ — ví dụ `SHATTERED_CREEK.objects.latchA/B.stand` nằm phía đường đi + khóa bằng `canApproach` theo bờ.
-- Màn index ≥ 4 (màn 5 trở đi) hiện chưa mở; khi kích hoạt phải rà lại toàn bộ trigger theo luật này.
+- Cả 10 màn đều mở trong chiến dịch. Mỗi màn có controller/layout riêng (màn 01–02 inline trong `CampaignScene`); mọi trigger phải theo luật này và được kiểm bằng script `scripts/check-*.mjs` của màn đó. Điều khiển đứng (có chân đế) chỉ trả lời E từ mặt nam của chân đế (`towerCanApproachFront` ở màn 06 là ví dụ); điều khiển tường/cửa dùng ngoại lệ ở mục này và ghi lý do trong data.
 
 ## 4. Quy trình kiểm tra
 
