@@ -189,7 +189,8 @@ export function migrateTowerProgress(progress: { flags: Record<string, boolean |
   const migrated = flags['l5-layout-v2'] === true;
   if (!migrated) {
     // Legacy pose space: the working configuration was g0=2, g1=1, g2=3 -> new space g0=0 (splitter), g1=2 (aim A), g2=1 (aim B).
-    progress.counters['tower-g0'] = progress.counters['tower-g0'] === 2 ? 0 : 0;
+    // Every legacy G0 value lands on the splitter (0): the old working pose had g0=2, which is the splitter's new home.
+    progress.counters['tower-g0'] = 0;
     progress.counters['tower-g1'] = progress.counters['tower-g1'] === 1 ? 2 : 0;
     progress.counters['tower-g2'] = progress.counters['tower-g2'] === 3 ? 1 : 0;
     const assign = flags['l5-lumo-assign'];

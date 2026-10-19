@@ -110,7 +110,12 @@ NOT_RUN: WebGL rendering of any scene; a full playthrough of any level; sound; t
 
 ### Independent review
 
-BLOCKED: the plan asks for two independent read-only reviewers on the frozen revision. No reviewer was dispatched in this session (no subagent was authorised and the named reviewer runtime was not available), so no finding has been reviewed independently. The review package is the diff `afbea49..84367c1659958fe3c97862c091d715d846dcbf33`.
+Two read-only reviewers ran on revision `142086ef8db3b86a07fd551f2340dd039bbf3561` (diff `afbea49..142086e`). Both finished. Their findings and the fixes made in response:
+
+- **Flow/state (reviewer 1).** Fixed: the observatory memory tween could call `setTexture` on a destroyed Shadow when the player left the room mid-tween (`CampaignScene.ts`, memory overlay `finish`). Guarded with `active`. Recorded as open: a completed-save early return in `CampaignScene.create` leaves fields unset if `update` runs in the same frame (not reachable from the menu, since completed saves route to the ending first); the garden shadow beat does not defer for pause or an open dialogue; the ruins controller is not torn down before level 8 (no visible effect found); the Ruins Shadow walk is in-memory only; `CampaignSaveSystem` nulls the whole campaign on one invalid optional key.
+- **Scenario/spatial (reviewer 2).** Fixed: level 07 dialogue for §3, §4, the held/rejoined beat, the §5 nursery and the §5 sprout reflection now uses the scenario lines verbatim with the scenario speakers. Fixed: the dead ternary in the tower legacy migration (`g0` maps to 0 as before; no behaviour change). Recorded as open: the garden floor is walkable inside the HUD bands (spawn at y 300 can reach y 342; the arch opens to y 12); the observatory loop sill and trigger sit in the bottom band; the HUD band is stated as 0–58 and 0–70 in different docs; the root bed is listed as non-solid but is solid at runtime; the H ladders for levels 07 and 09 are paraphrased rather than verbatim; `campaignLevels.ts` generic hints for levels 06–10 are stale; the south-face E test does not check the body's x against the footprint.
+
+Checks after the fixes: `tsc --noEmit` passes, all 16 `scripts/check-*.mjs` pass, `npm run build` passes. The reviews were static; no browser playthrough was run on this revision.
 
 ### Open items carried forward
 

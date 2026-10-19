@@ -1227,7 +1227,7 @@ export class CampaignScene extends Phaser.Scene {
     const waitingKey = getShadowArtKey('waiting');
     const guardianKey = getShadowArtKey('guardian-waiting');
     overlay?.setVisible(true);
-    if (shadow && memoryKey && this.textures.exists(memoryKey)) shadow.setTexture(memoryKey);
+    if (shadow?.active && memoryKey && this.textures.exists(memoryKey)) shadow.setTexture(memoryKey);
     let guardian: Phaser.GameObjects.Image | undefined;
     if (guardianKey && this.textures.exists(guardianKey)) {
       guardian = this.add.image(OBSERVATORY_SHADOW.guardianGround.x, OBSERVATORY_SHADOW.guardianGround.y, guardianKey)
@@ -1235,9 +1235,10 @@ export class CampaignScene extends Phaser.Scene {
       this.roomObjects.push(guardian);
       this.tweens.add({ targets: guardian, alpha: 0.65, duration: 700 });
     }
+    // The room may be torn down mid-tween (exit taken): every callback checks the objects it touches.
     const finish = (): void => {
-      overlay?.setVisible(false);
-      if (shadow && waitingKey && this.textures.exists(waitingKey)) shadow.setTexture(waitingKey);
+      if (overlay?.active) overlay.setVisible(false);
+      if (shadow?.active && waitingKey && this.textures.exists(waitingKey)) shadow.setTexture(waitingKey);
       if (guardian?.active) guardian.destroy();
     };
     this.say([...OBSERVATORY_MEMORY_RECORDING], () => {

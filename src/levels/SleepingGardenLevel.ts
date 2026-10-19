@@ -43,27 +43,25 @@ const CANOPY_BEAT: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Nghe kìa.' },
 ];
 const PRACTICE_OBSERVED: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Hai chậu thử này giống hệt hai cây lớn ngoài vườn.' },
-  { speaker: 'Lumo', text: 'Một chậu mở ra khi có sáng…' },
-  { speaker: 'Nhinh', text: '…chậu kia vươn ra khi tối.' },
-  { speaker: 'Lumo', text: 'Chúng cần hai điều khác nhau. Mình nhớ rồi.' },
+  { speaker: 'Nhinh', text: 'Hoa cần sáng để nâng thanh. Rễ chỉ vươn khi đèn tắt.' },
+  { speaker: 'Lumo', text: 'Ánh của tôi không làm rễ co lại.' },
+  { speaker: 'Nhinh', text: 'Cậu có thể đi cùng tôi lúc tắt đèn.' },
 ];
 const RETRACT_CUE: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Cầu rễ đang rút lại!' },
-  { speaker: 'Lumo', text: 'Mở được cửa thì lại mất cầu…' },
-  { speaker: 'Nhinh', text: 'Mình tắt đèn để qua, tới bờ bên kia rồi tính.' },
+  { speaker: 'Nhinh', text: 'Mở được cửa thì lại mất cầu.' },
+  { speaker: 'Lumo', text: 'Tay chốt sau cửa có giữ được thanh chắn không?' },
 ];
 const HELD_REJOINED: DialogueLine[] = [
-  { speaker: 'Lumo', text: 'Thanh chắn vẫn giữ. Rễ cũng đang vươn ra.' },
-  { speaker: 'Nhinh', text: 'Một bên cần sáng, một bên cần tối. Giờ mình đi được cả hai lối.' },
+  { speaker: 'Lumo', text: 'Cửa vẫn mở. Rễ cũng đã nối lại rồi.' },
+  { speaker: 'Nhinh', text: 'Giờ chúng không cần cùng phản ứng theo chiếc đèn nữa.' },
 ];
 const NURSERY_SCENE: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Nước đã chảy tới vườn ươm. Chiếc lá mới vừa mở.' },
+  { speaker: 'Lumo', text: 'Nó vừa mọc thêm một chiếc lá.' },
+  { speaker: 'Nhinh', text: 'Có nước. Có lúc nghỉ. Có lẽ nó đã đợi cả hai.' },
   { speaker: 'Lumo', text: 'Tôi cứ nghĩ nếu làm mọi nơi sáng hơn…' },
-  { speaker: 'Nhinh', text: 'Cậu muốn giúp khu vườn tỉnh dậy.' },
+  { speaker: 'Nhinh', text: 'Cậu muốn giúp rừng tỉnh dậy.' },
   { speaker: 'Lumo', text: 'Nhưng có những thứ cần được ngủ.' },
-  { speaker: 'Nhinh', text: 'Hoa Nhật mở trong sáng. Rễ Nguyệt vươn trong tối.' },
-  { speaker: 'Lumo', text: 'Vậy mà chúng vẫn lớn lên cạnh nhau.' },
+  { speaker: 'Nhinh', text: 'Mình biết thêm được một điều rồi.' },
   { speaker: 'Lumo', text: 'Cứ ngủ đi. Chúng tôi sẽ giữ đường nước mở.' },
 ];
 const SIDE_LATCHED: DialogueLine[] = [
@@ -72,8 +70,8 @@ const SIDE_LATCHED: DialogueLine[] = [
 ];
 const SPROUT_BEFORE: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Mầm cây vẫn khép. Nó cần nước và một khoảng tối để nghỉ.' }];
 const SPROUT_AFTER: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Lá mới đã mở hẳn.' },
-  { speaker: 'Lumo', text: 'Cứ để nó ngủ thêm. Mình giữ nước cho nó.' },
+  { speaker: 'Nhinh', text: 'Lá mới mềm hơn những chiếc cũ.' },
+  { speaker: 'Lumo', text: 'Ngày mai chắc nó sẽ lớn thêm. Khi ngày mai trở lại.' },
 ];
 // Scenario §7 verbatim. The silhouette is only seen, never named: it does not reveal who the Shadow is.
 const ENDING: DialogueLine[] = [
