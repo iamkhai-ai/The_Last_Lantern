@@ -181,7 +181,7 @@ export class CampaignScene extends Phaser.Scene {
     this.dialogue = new DialogueSystem(this);
     this.pauseMenu = new PauseMenu(this, {
       onResume: () => undefined,
-      onRestart: () => { CampaignSaveSystem.clear(); this.scene.restart({ newGame: true }); },
+      onRestart: () => { CampaignSaveSystem.clear(); this.scene.start('PrologueScene'); },
       onMainMenu: () => this.scene.start('MenuScene'),
     });
     const keyboard = this.input.keyboard;

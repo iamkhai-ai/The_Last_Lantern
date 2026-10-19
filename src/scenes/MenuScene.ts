@@ -12,6 +12,8 @@ export class MenuScene extends Phaser.Scene {
   private selectedIndex = 0;
   private hasSavedGame = false;
   private actions: Array<() => void> = [];
+  /** Guards a held/double-fired New Game activation from clearing or starting twice. */
+  private starting = false;
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -20,6 +22,7 @@ export class MenuScene extends Phaser.Scene {
   public create(): void {
     this.hasSavedGame = CampaignSaveSystem.hasSave() || SaveSystem.hasSave();
     this.selectedIndex = 0;
+    this.starting = false;
     this.menuButtons = [];
     this.actions = [];
 
@@ -248,10 +251,12 @@ export class MenuScene extends Phaser.Scene {
   }
 
   public startNewGame(): void {
+    if (this.starting) return;
+    this.starting = true;
     CampaignSaveSystem.clear();
     SaveSystem.clear();
     SoundSystem.playLanternToggle(true);
-    this.scene.start('CampaignScene', { newGame: true });
+    this.scene.start('PrologueScene');
   }
 
   public continueGame(): void {

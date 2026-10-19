@@ -423,7 +423,7 @@ const CASES = [
     },
   },
   {
-    name: 'confirm_clears_the_campaign_save_exactly_once_and_starts_a_new_campaign',
+    name: 'confirm_clears_the_campaign_save_exactly_once_and_routes_through_the_prologue',
     run: () => {
       const scene = makeScene({ campaign: true });
       scene.wireInput(true);
@@ -433,8 +433,8 @@ const CASES = [
       scene.triggerSelected();
       assert.equal(scene.calls.campaignCleared, 1, 'the confirmed choice clears the campaign save once');
       assert.equal(scene.calls.started.length, 1, 'the confirmed choice starts exactly one scene');
-      assert.equal(scene.calls.started[0].key, 'CampaignScene', 'the confirmed choice starts the campaign anew');
-      assert.equal(scene.calls.started[0].data?.newGame, true, 'the new campaign is an explicit New Game');
+      assert.equal(scene.calls.started[0].key, 'PrologueScene', 'the confirmed choice routes through the prologue');
+      assert.equal(scene.calls.started[0].data, undefined, 'the prologue owns the one-shot newGame handoff');
       scene.triggerSelected();
       assert.equal(scene.calls.campaignCleared, 1, 'a repeat of the confirmation does not clear a second time');
     },
@@ -450,7 +450,7 @@ const CASES = [
       assert.equal(scene.menuMode, 'confirm', 'a click on Play Again opens the confirmation');
       invokePointer(scene, 'pointerdown', 1);
       assert.equal(scene.calls.campaignCleared, 1, 'confirming the click clears the save once');
-      assert.equal(scene.calls.started[0].key, 'CampaignScene', 'confirming the click starts a new campaign');
+      assert.equal(scene.calls.started[0].key, 'PrologueScene', 'confirming the click routes through the prologue');
     },
   },
   {
