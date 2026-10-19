@@ -23,6 +23,8 @@ import {
   OBSERVATORY_STAMPS,
   OBSERVATORY_WALLS,
   fitObservatoryArt,
+  OBSERVATORY_SHADOW,
+  observatoryPlacedLightVisible,
   isObservatoryApproachAllowed,
   isObservatoryGateApproachAllowed,
   nearestSafeObservatorySpawn,
@@ -51,7 +53,12 @@ import { InteractionSystem } from '../systems/InteractionSystem';
 import { LanternSystem } from '../systems/LanternSystem';
 import { CampaignProgress, CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { consumeCampaignNewGameIntent } from '../systems/CampaignStartIntent';
-import { deriveObservatoryState } from '../systems/ObservatoryPuzzle';
+import { deriveObservatoryState, type ObservatoryDerivedState } from '../systems/ObservatoryPuzzle';
+import {
+  OBSERVATORY_BEAT_NO_BEAM, OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
+  OBSERVATORY_MEMORY_CAPTION, OBSERVATORY_MEMORY_LUMO, OBSERVATORY_MEMORY_MERGE_CAPTION, OBSERVATORY_MEMORY_RECORDING,
+  OBSERVATORY_MEMORY_SHADOW, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_OPENING_ENTRANCE, type ObservatoryLine,
+} from '../data/observatoryStory';
 import { SoundSystem } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
 import { PauseMenu } from '../ui/PauseMenu';
@@ -70,7 +77,7 @@ const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Tháp vẫn đang hút nước và phát sáng.' }, { speaker: 'Lumo', text: 'Tôi có thể giữ ấn ở trên cao. Cậu nối hai luồng sáng còn lại nhé.' }],
   [{ speaker: 'Nhinh', text: 'Khu vườn đã ngủ quá lâu. Cây nắng và rễ trăng vẫn còn đây.' }, { speaker: 'Lumo', text: 'Chúng cần hai điều khác nhau: ánh sáng ấm và một khoảng tối dịu.' }],
   [{ speaker: 'Nhinh', text: 'Hai mắt ngoài hướng về bàn cân. Mắt ở giữa lại nằm trong một hốc tối.' }, { speaker: 'Lumo', text: 'Có lẽ câu đố cần cả ánh sáng lẫn một vùng không có ánh sáng.' }],
-  [{ speaker: 'Nhinh', text: 'Ba phòng quan sát cùng hướng về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Tôi nghe tiếng mưa trong ký ức. Có ai đó đã gọi tôi từ tòa tháp này.' }],
+  [...OBSERVATORY_OPENING_ENTRANCE],
   [{ speaker: 'Nhinh', text: 'Ba tinh thể đã tìm được đường về đây.' }, { speaker: 'Lumo', text: 'Trái tim Cây Mẹ cần chúng ta cùng giữ ánh sáng và bóng tối cân bằng.' }],
 ];
 
@@ -114,6 +121,13 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryBridgePendingRemoval = false;
   private observatoryBridgeTraversalSide: 'near' | 'far' | null = null;
   private observatoryMiniatureIndex = 0;
+  /** Opened door sills: wall-coloured while the door is shut, floor-coloured once it is open. */
+  private observatorySillVisuals = new Map<string, Phaser.GameObjects.Graphics>();
+  /** While set, an unassigned Lumo hovers here instead of following Nhinh (the corridor opening beat). */
+  private observatoryLumoHold: { x: number; y: number } | null = null;
+  private observatoryBeats: ObservatoryLine[][] = [];
+  private observatoryWasThroughSeal = false;
+  private observatoryGuardian?: Phaser.GameObjects.Image;
   /** Objective row that the current hint ladder belongs to. */
   private observatoryHintKey = '';
   private hintIndex = 0;
@@ -341,6 +355,10 @@ export class CampaignScene extends Phaser.Scene {
         this.save();
       }
     }
+    if (this.progress.level === 8 && this.activeObservatoryRoom) {
+      this.lantern.setPlacedLightVisible(observatoryPlacedLightVisible(this.activeObservatoryRoom, this.lantern.lanternPlaced));
+      this.flushObservatoryBeats();
+    }
     this.lantern.update(dt, this.player.x, this.player.y);
     this.updateForestEdgeProgress(dt);
     if (this.progress.level === 8 && this.activeObservatoryRoom) {
@@ -464,7 +482,7 @@ export class CampaignScene extends Phaser.Scene {
       this.objectiveText = this.track(this.add.text(16, 42, definition.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
       this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
       this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
-      if (level === 6) this.statusText.setWordWrapWidth(470, true); // two rows max inside y320..360, never under the right-hand hint
+      if (level === 6 || level === 8) this.statusText.setWordWrapWidth(470, true); // two rows max inside y320..360, never under the right-hand hint
     }
     this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
     if (level === 2) {
@@ -619,6 +637,7 @@ export class CampaignScene extends Phaser.Scene {
       this.objectiveText = this.track(this.add.text(16, 42, level.objective, { fontFamily: 'Segoe UI, sans-serif', fontSize: '11px', color: '#e5eee8', backgroundColor: '#07151cbb', padding: { x: 8, y: 5 } }).setDepth(86));
       this.statusText = this.track(this.add.text(16, 320, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#d3e5dc', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setDepth(86));
       this.hintText = this.track(this.add.text(624, 320, 'H · Gợi ý', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#ffe680', backgroundColor: '#07151cbb', padding: { x: 8, y: 4 } }).setOrigin(1, 0).setDepth(86));
+      this.statusText.setWordWrapWidth(470, true); // two rows max inside y320..360, left of the hint
       this.lumoStatusText = this.track(this.add.text(624, 13, '', { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', color: '#b8f5d4', backgroundColor: '#07151cbb', padding: { x: 7, y: 5 } }).setOrigin(1, 0).setDepth(86));
     }
     this.titleText.setText(`09  ${room.title} · ${CAMPAIGN_LEVELS[8].chapter}`);
@@ -658,30 +677,92 @@ export class CampaignScene extends Phaser.Scene {
     this.save();
     this.refreshObservatoryDoors();
     this.refreshObservatoryPuzzle();
-    if (!this.progress.flags['intro-8']) {
-      this.progress.flags['intro-8'] = true;
-      this.save();
-      this.dialogue.startDialogue(OPENING[8]);
-    }
+    this.playObservatoryOpening(roomId);
     this.refreshHud();
+  }
+
+  /**
+   * Scenario section 2 in two beats: the wheel and the arrival in the entrance, then the recognition at the spiral tube
+   * the first time the corridor is entered. Lumo is really in the corridor for the second beat and hovers at the tube
+   * mouth while it plays; a save that is already past the corridor never replays it.
+   */
+  private playObservatoryOpening(roomId: ObservatoryRoomId): void {
+    const flags = this.progress.flags;
+    if (flags['intro-8'] !== true) {
+      flags['intro-8'] = true;
+      this.save();
+      if (roomId === 'entrance') { this.say([...OBSERVATORY_OPENING_ENTRANCE]); return; }
+    }
+    if (roomId === 'corridor' && flags['intro-8-corridor'] !== true) {
+      flags['intro-8-corridor'] = true;
+      this.save();
+      if (flags['l8-door-a-latched'] === true) return;
+      const tube = OBSERVATORY_ROOMS.corridor.waypoints.find((waypoint) => waypoint.id === 'lumo-tube-entry')!.position;
+      this.observatoryLumoHold = { x: tube.x + 6, y: tube.y + 22 };
+      this.say([...OBSERVATORY_OPENING_CORRIDOR], () => { this.observatoryLumoHold = null; });
+    }
+  }
+
+  private showObservatoryCaption(text: string): void {
+    const label = this.add.text(320, 66, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', fontStyle: 'italic', color: '#f2e6c4', backgroundColor: '#07151ccc', padding: { x: 8, y: 4 }, align: 'center', wordWrap: { width: 480 } })
+      .setOrigin(0.5, 0).setDepth(85);
+    this.roomObjects.push(label);
+    this.tweens.add({ targets: label, alpha: 0, delay: 3600, duration: 600, onComplete: () => { if (label.active) label.destroy(); } });
+  }
+
+  private queueObservatoryBeat(lines: readonly ObservatoryLine[]): void {
+    this.observatoryBeats.push([...lines]);
+  }
+
+  private flushObservatoryBeats(): void {
+    if (!this.observatoryBeats.length || this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
+    const next = this.observatoryBeats.shift();
+    if (next) this.say(next);
+  }
+
+  /** True when Lumo is not on a called route or holding the seal, so he walks with Nhinh between rooms. */
+  private isObservatoryLumoFree(): boolean {
+    const steps = this.getObservatoryLumoSteps();
+    if (steps.length > 0 && this.value('l8-lumo-route-index') < steps.length) return false;
+    return this.progress.flags['l8-lumo-destination'] !== 'lumo-seal';
   }
 
   /** Visible masonry for every permanent solid, so colliders always match art. */
   private drawObservatoryWalls(roomId: ObservatoryRoomId): void {
+    // Permanent masonry only: the thresholds are doors and get their own sill visual that follows the door state.
     const rects: ObsRect[] = [
       ...OBSERVATORY_WALLS[roomId],
-      ...observatoryAlcoves(roomId).flatMap((alcove) => [...alcove.jambs, alcove.threshold]),
+      ...observatoryAlcoves(roomId).flatMap((alcove) => [...alcove.jambs]),
     ];
     const walls = this.add.graphics().setDepth(1);
-    for (const rect of rects) {
-      walls.fillStyle(0x232a34, 0.85);
-      walls.fillRect(rect.x, rect.y, rect.width, rect.height);
-      walls.fillStyle(0x39485a, 0.95);
-      walls.fillRect(rect.x, rect.y, rect.width, Math.min(8, rect.height));
-      walls.lineStyle(1, 0x0d1a22, 0.65);
-      walls.strokeRect(rect.x, rect.y, rect.width, rect.height);
-    }
+    for (const rect of rects) this.paintObservatoryWall(walls, rect);
     this.roomObjects.push(walls);
+    for (const alcove of observatoryAlcoves(roomId)) {
+      const sill = this.add.graphics().setDepth(1.2);
+      this.roomObjects.push(sill);
+      this.observatorySillVisuals.set(alcove.id, sill);
+      this.paintObservatorySill(sill, alcove.threshold, observatoryDoorOpen(alcove.doorId, this.getObservatoryWorldState()));
+    }
+  }
+
+  private paintObservatoryWall(graphics: Phaser.GameObjects.Graphics, rect: ObsRect): void {
+    graphics.fillStyle(0x232a34, 0.85);
+    graphics.fillRect(rect.x, rect.y, rect.width, rect.height);
+    graphics.fillStyle(0x39485a, 0.95);
+    graphics.fillRect(rect.x, rect.y, rect.width, Math.min(8, rect.height));
+    graphics.lineStyle(1, 0x0d1a22, 0.65);
+    graphics.strokeRect(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  /** A shut door's threshold reads as masonry; an open one reads as walkable floor (a sill), never as a wall. */
+  private paintObservatorySill(graphics: Phaser.GameObjects.Graphics, rect: ObsRect, open: boolean): void {
+    graphics.clear();
+    if (!open) { this.paintObservatoryWall(graphics, rect); return; }
+    graphics.fillStyle(0x56677a, 0.9);
+    graphics.fillRect(rect.x, rect.y, rect.width, rect.height);
+    graphics.lineStyle(1, 0x9bd8dd, 0.45);
+    for (let x = rect.x + 12; x < rect.x + rect.width; x += 24) graphics.lineBetween(x, rect.y + 2, x, rect.y + rect.height - 2);
+    graphics.lineBetween(rect.x, rect.y + rect.height / 2, rect.x + rect.width, rect.y + rect.height / 2);
   }
 
   private drawObservatoryWallArt(roomId: ObservatoryRoomId): void {
@@ -721,14 +802,16 @@ export class CampaignScene extends Phaser.Scene {
     if (roomId === 'observatory') {
       // The Shadow waits beside the final record; the translucent memory frame
       // replaces the waiting pose once the record has been read.
-      const shadowKey = getShadowArtKey(this.progress.flags['l8-record-read'] === true ? 'memory-overlay' : 'waiting');
+      const shadowKey = getShadowArtKey('waiting');
       if (shadowKey && this.textures.exists(shadowKey)) {
-        const shadow = this.add.image(468, 250, shadowKey).setOrigin(0.5, 1).setDisplaySize(36, 48)
-          .setDepth(10 + 250 / 10).setAlpha(0.9);
+        // Native 48x64 pose on a spot clear of every control; the memory pose is used only while the record plays.
+        const shadow = this.add.image(OBSERVATORY_SHADOW.ground.x, OBSERVATORY_SHADOW.ground.y, shadowKey).setOrigin(0.5, 1)
+          .setDepth(10 + OBSERVATORY_SHADOW.ground.y / 10).setAlpha(0.95);
         this.roomObjects.push(shadow);
         this.observatoryShadowVisual = shadow;
       }
-      const overlay = this.add.rectangle(320, 180, 640, 360, 0xf0b463, 0.14).setDepth(94).setVisible(false);
+      // Under the interaction prompt (82) and the HUD (86): the memory tints the room without hiding the controls.
+      const overlay = this.add.rectangle(320, 180, 640, 360, 0xf0b463, 0.14).setDepth(84).setVisible(false);
       this.roomObjects.push(overlay);
       this.observatoryMemoryOverlay = overlay;
     }
@@ -791,7 +874,7 @@ export class CampaignScene extends Phaser.Scene {
       this.observatorySolids.set(`${roomId}-solid-${index}`, { rect, body });
     });
     this.syncObservatorySolids();
-    this.roomObjects.push(this.add.text(320, 344, 'WASD / ←↑→↓ Di chuyển    E Tương tác    F Đèn    H Gợi ý    J Sổ tay    ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(0.5, 1).setDepth(87));
+    this.roomObjects.push(this.add.text(624, 360, 'E Tương tác · F Đèn · H Gợi ý · J Sổ tay · ESC Tạm dừng', { fontFamily: 'Segoe UI, sans-serif', fontSize: '9px', color: '#d8e3da', backgroundColor: '#07151ccc', padding: { x: 5, y: 3 } }).setOrigin(1, 1).setDepth(87));
   }
 
   /** Every door shut, for building the full collider set once. */
@@ -846,6 +929,9 @@ export class CampaignScene extends Phaser.Scene {
     this.observatorySolids.clear();
     this.observatoryBridgeStones = [];
     this.observatoryShadowVisual = undefined;
+    this.observatoryGuardian = undefined;
+    this.observatorySillVisuals.clear();
+    this.observatoryLumoHold = null;
     this.observatoryMemoryOverlay = undefined;
     this.observatoryReturnLoopVisual = undefined;
     for (const object of this.roomObjects) object.destroy();
@@ -1061,10 +1147,10 @@ export class CampaignScene extends Phaser.Scene {
             return;
           }
           if (this.isObservatoryCompletionReady()) {
-            this.nextLevel([
-              { speaker: 'Nhinh', text: 'Bản ghi đã được giữ, Lumo đã trở về và Tinh thể Cân Bằng đang sáng trong tay mình.' },
-              { speaker: 'Lumo', text: 'Lần này mình đi cùng nhau.' },
-            ]);
+            // Companion handoff: Level 10 places Lumo from its own authored entry. Room-local Level 09 coordinates and
+            // the stale generic Lumo counters mean nothing there, so they are cleared instead of carried across.
+            for (const key of ['lumo-x', 'lumo-y', 'lumo-target-x', 'lumo-target-y']) delete this.progress.counters[key];
+            this.nextLevel([...OBSERVATORY_EXIT_LINES]);
           } else {
             this.say([{ speaker: 'Nhinh', text: observatoryFinalDoorBlockReason(state) }]);
           }
@@ -1131,41 +1217,63 @@ export class CampaignScene extends Phaser.Scene {
           this.observatoryElementVisuals.delete('balance-crystal');
           // The Shadow stays beside the record until dawn (scenario §6).
           this.observatoryShadowVisual?.setAlpha(0.95);
-          this.say([
-            { speaker: 'The Shadow', text: 'Hãy đưa vòng ngày đêm đi tiếp. Khi tới lúc buông tay, đừng để nỗi sợ giữ tay con lại.' },
-            { speaker: 'Lumo', text: 'Ông có đi cùng chúng tôi không?' },
-            { speaker: 'The Shadow', text: 'Ta sẽ ở lại tới khi đêm này kết thúc.' },
-          ]);
+          this.say([...OBSERVATORY_CRYSTAL_LINES]);
         },
       );
     }
   }
 
   /**
-   * The last record: the room stays visible under a translucent amber memory
-   * layer while the Guardian's exchange plays (scenario §5), and The Shadow
-   * takes the Guardian's place beside the pedestal afterwards.
+   * The last record (scenario section 5): the room stays visible under a translucent amber layer while the Guardian's
+   * recording and the memory exchange play; a white flash erases the end; Lumo remembers; The Shadow steps into the
+   * place the Guardian stood, the two figures overlap and the memory dissolves; The Shadow answers, and the scene stops
+   * on his last line. Nothing is added about the girl.
    */
   private playObservatoryMemory(): void {
-    this.observatoryMemoryOverlay?.setVisible(true);
-    const shadowKey = getShadowArtKey('memory-overlay');
-    if (shadowKey && this.textures.exists(shadowKey) && this.observatoryShadowVisual) {
-      this.observatoryShadowVisual.setTexture(shadowKey);
+    const shadow = this.observatoryShadowVisual;
+    const overlay = this.observatoryMemoryOverlay;
+    const memoryKey = getShadowArtKey('memory-overlay');
+    const waitingKey = getShadowArtKey('waiting');
+    const guardianKey = getShadowArtKey('guardian-waiting');
+    overlay?.setVisible(true);
+    if (shadow && memoryKey && this.textures.exists(memoryKey)) shadow.setTexture(memoryKey);
+    let guardian: Phaser.GameObjects.Image | undefined;
+    if (guardianKey && this.textures.exists(guardianKey)) {
+      guardian = this.add.image(OBSERVATORY_SHADOW.guardianGround.x, OBSERVATORY_SHADOW.guardianGround.y, guardianKey)
+        .setOrigin(0.5, 1).setDepth(10 + OBSERVATORY_SHADOW.guardianGround.y / 10 + 0.05).setAlpha(0);
+      this.roomObjects.push(guardian);
+      this.observatoryGuardian = guardian;
+      this.tweens.add({ targets: guardian, alpha: 0.65, duration: 700 });
     }
-    this.say([
-      { speaker: 'Ký Ức', text: 'Bão đã tan. Họ bảo tôi để bánh xe ngày đêm chạy lại.' },
-      { speaker: 'Ký Ức', text: 'Nhưng nếu đèn tắt đúng lúc con tìm được đường thì sao?' },
-      { speaker: 'Ký Ức', text: 'Lumo, bay qua đường ống. Giữ mạch phía Bắc cho tôi. Chỉ thêm một đêm nữa.' },
-      { speaker: 'Ký Ức', text: 'Tôi giữ được. Ông cứ chờ ở cửa sổ.' },
-      { speaker: 'Lumo', text: 'Tôi đã giữ ấn. Tôi tưởng mình đang giúp ông ấy đưa mọi người về.' },
-      { speaker: 'Nhinh', text: 'Cậu nhớ lại rồi.' },
-      { speaker: 'Lumo', text: 'Khi Cây Mẹ vỡ, mọi thứ trong đầu tôi cũng vỡ theo. Nhưng tôi vẫn nhớ rằng phải giữ đèn sáng.' },
-      { speaker: 'Nhinh', text: 'Ông là Người Bảo Vệ.' },
-      { speaker: 'The Shadow', text: 'Ta là phần ký ức còn mắc lại trong đêm ấy. Ta đã đợi lâu đến mức quên cả việc cho khu rừng nghỉ.' },
-      { speaker: 'The Shadow', text: 'Ta muốn dẫn một người về nhà. Rồi giữ cả khu rừng ở lại cùng nỗi chờ của mình.' },
-      { speaker: 'Nhinh', text: 'Con gái ông đã trở về chưa?' },
-      { speaker: 'The Shadow', text: 'Phần ký ức này không có câu trả lời đó.' },
-    ], () => this.observatoryMemoryOverlay?.setVisible(false));
+    const finish = (): void => {
+      overlay?.setVisible(false);
+      if (shadow && waitingKey && this.textures.exists(waitingKey)) shadow.setTexture(waitingKey);
+      if (guardian?.active) guardian.destroy();
+      this.observatoryGuardian = undefined;
+    };
+    this.say([...OBSERVATORY_MEMORY_RECORDING], () => {
+      this.showObservatoryCaption(OBSERVATORY_MEMORY_CAPTION);
+      this.cameras.main.flash(500, 255, 245, 220, true);
+      if (guardian?.active) this.tweens.add({ targets: guardian, alpha: 0.35, duration: 600 });
+      this.say([...OBSERVATORY_MEMORY_LUMO], () => {
+        this.showObservatoryCaption(OBSERVATORY_MEMORY_MERGE_CAPTION);
+        const home = OBSERVATORY_SHADOW.ground.x;
+        if (shadow?.active) {
+          this.tweens.add({
+            targets: shadow, x: OBSERVATORY_SHADOW.guardianGround.x, duration: 900,
+            onComplete: () => {
+              if (guardian?.active) this.tweens.add({ targets: guardian, alpha: 0, duration: 800 });
+              this.tweens.add({
+                targets: overlay ?? [], alpha: 0, duration: 800, delay: 400,
+                onComplete: () => { if (overlay?.active) overlay.setAlpha(1); finish(); },
+              });
+              this.tweens.add({ targets: shadow, x: home, duration: 700, delay: 1000 });
+            },
+          });
+        } else finish();
+        this.time.delayedCall(2200, () => this.say([...OBSERVATORY_MEMORY_SHADOW]));
+      });
+    });
   }
 
   public callObservatoryLumo(destination: 'seal' | 'recall'): void {
@@ -1218,6 +1326,12 @@ export class CampaignScene extends Phaser.Scene {
     }
     const destination = OBSERVATORY_ROOMS[exit.toRoom].spawns.find((spawn) => spawn.id === exit.destinationSpawnId);
     if (!destination) return;
+    // A free Lumo goes through the door with Nhinh; a called or sealing Lumo keeps his own route and room.
+    if (this.isObservatoryLumoFree()) {
+      this.progress.flags['l8-lumo-room'] = exit.toRoom;
+      this.progress.counters['l8-lumo-x'] = destination.position.x - 20;
+      this.progress.counters['l8-lumo-y'] = destination.position.y - 18;
+    }
     this.progress.roomId = exit.toRoom;
     this.progress.roomSpawn = { ...destination.position };
     this.progress.counters['player-level'] = 8;
@@ -1345,6 +1459,10 @@ export class CampaignScene extends Phaser.Scene {
       const open = observatoryDoorOpen(alcove.doorId, state);
       image.setTexture(open ? 'woods_arch_open' : 'woods_arch_locked');
       image.setAlpha(open ? 0.5 : 1);
+    }
+    for (const alcove of OBSERVATORY_ALCOVES) {
+      const sill = this.observatorySillVisuals.get(alcove.id);
+      if (sill) this.paintObservatorySill(sill, alcove.threshold, observatoryDoorOpen(alcove.doorId, state));
     }
     for (const door of this.roomDoors.values()) {
       const open = this.isObservatoryExitOpen(door.exit);
@@ -1506,8 +1624,9 @@ export class CampaignScene extends Phaser.Scene {
         : destination === 'lantern-source' ? OBSERVATORY_ROOMS.entrance.waypoints.find((point) => point.id === 'lantern-source')?.position : undefined;
       const unassigned = !destinationWaypoint || this.progress.flags['l8-lumo-arrived'] === 'lantern-source';
       if (unassigned) {
-        // Unassigned Lumo follows Nhinh inside the active room, like Levels 01-08.
-        this.lumoTarget = {
+        // Unassigned Lumo follows Nhinh inside the active room, like Levels 01-08 (and through the doors: see
+        // transitionObservatory). The corridor opening beat parks him at the tube mouth while it plays.
+        this.lumoTarget = this.observatoryLumoHold ?? {
           x: Phaser.Math.Clamp(this.player.x - 20, 28, 610),
           y: Phaser.Math.Clamp(this.player.y - 22, 58, 300),
         };
@@ -1579,6 +1698,26 @@ export class CampaignScene extends Phaser.Scene {
     this.lantern.lanternOn = this.progress.lanternOn;
   }
 
+  /**
+   * Scenario section 4's conditional lines, each tied to a real transition so they never replay every frame:
+   * the roots-lit pair plays once when the far door opens on the direct route; the no-beam line plays when a live,
+   * parked lantern's beam stops reaching Lumo's seal while he still holds it.
+   */
+  private queueObservatoryStateBeats(state: ObservatoryDerivedState): void {
+    const routeId = state.activeBeamPath.routeId;
+    if (this.activeObservatoryRoom === 'observatory' && state.sunDoorUnlocked && !state.bridgeEligible && routeId === 'g2-direct-sun'
+      && this.progress.flags['l8-beat-roots-lit'] !== true) {
+      this.progress.flags['l8-beat-roots-lit'] = true;
+      this.save();
+      this.queueObservatoryBeat(OBSERVATORY_BEAT_ROOTS_LIT);
+    }
+    const throughSeal = routeId !== 'off' && routeId !== 'door-a';
+    if (this.observatoryWasThroughSeal && !throughSeal && state.lumoAtSeal && this.lantern.lanternPlaced && this.lantern.lanternOn) {
+      this.queueObservatoryBeat(OBSERVATORY_BEAT_NO_BEAM);
+    }
+    this.observatoryWasThroughSeal = throughSeal;
+  }
+
   private refreshObservatoryPuzzle(): void {
     if (!this.activeObservatoryRoom) return;
     const state = this.getObservatoryState();
@@ -1598,6 +1737,7 @@ export class CampaignScene extends Phaser.Scene {
         else statue.setAngle(facing * 90);
       }
     }
+    this.queueObservatoryStateBeats(state);
     const lock = this.observatoryPuzzleVisuals.get('sun-lock');
     if (lock instanceof Phaser.GameObjects.Image) lock.setTexture(state.sunDoorUnlocked ? 'lock_sun_on' : 'lock_sun_off');
     const pedestal = this.observatoryPuzzleVisuals.get('lantern-pedestal');

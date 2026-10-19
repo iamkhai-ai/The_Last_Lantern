@@ -19,6 +19,8 @@ export class LanternSystem {
   public placedY = 0;
   public isDawnMode = false;
   public isOverloadMode = false;
+  /** Paint the halo of a lamp parked on its pedestal. Logic never changes; only the render of the placed light. */
+  private placedLightVisible = true;
 
   private flickerTime = 0;
   private pulseCooldownRemaining = 0; // ms
@@ -53,6 +55,10 @@ export class LanternSystem {
       if (!scene.textures.exists('level01_darkness_falloff')) throw new Error('Missing Level 01 darkness falloff texture');
       this.forestEdgeShade = scene.add.image(0, 0, 'level01_darkness_falloff').setDepth(68.5);
     }
+  }
+
+  public setPlacedLightVisible(visible: boolean): void {
+    this.placedLightVisible = visible;
   }
 
   public onPulse(cb: PulseCallback): void {
@@ -104,6 +110,11 @@ export class LanternSystem {
     return true;
   }
 
+  /** Where the carried lamp's light sits relative to the player; the halo and every beam from the carried lamp share it. */
+  public getCarriedLightPosition(playerX: number, playerY: number): { x: number; y: number } {
+    return { x: playerX + 6, y: playerY + 2 };
+  }
+
   public getCooldownRatio(): number {
     return Math.max(0, Math.min(1, this.pulseCooldownRemaining / LanternSystem.PULSE_COOLDOWN_MS));
   }
@@ -115,8 +126,9 @@ export class LanternSystem {
       this.pulseCooldownRemaining = Math.max(0, this.pulseCooldownRemaining - dt);
     }
 
-    const lightX = this.lanternPlaced ? this.placedX : playerX + 6;
-    const lightY = this.lanternPlaced ? this.placedY - 6 : playerY + 2;
+    const carried = this.getCarriedLightPosition(playerX, playerY);
+    const lightX = this.lanternPlaced ? this.placedX : carried.x;
+    const lightY = this.lanternPlaced ? this.placedY - 6 : carried.y;
 
     // Gentle 2-4% organic flicker
     const flicker = 1 + Math.sin(this.flickerTime * 2.3) * 0.025 + Math.cos(this.flickerTime * 5.7) * 0.012;
@@ -149,7 +161,7 @@ export class LanternSystem {
       const shadeY = Math.round(lightY);
       this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);
       this.fillForestEdgeDarknessOutside(shadeX, shadeY, size, darknessAlpha);
-    } else if (this.lanternOn && (this.lanternInHand || this.lanternPlaced)) {
+    } else if (this.lanternOn && (this.lanternInHand || (this.lanternPlaced && this.placedLightVisible))) {
       // Night mode with warm lantern light active (radius ~115 world px)
       this.haloSprite.setVisible(true);
       this.haloSprite.setPosition(lightX, lightY);

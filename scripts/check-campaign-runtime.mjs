@@ -50,12 +50,17 @@ import {
   observatorySolidRects,
 } from '../src/data/observatoryLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
+import { observatoryPlacedLightVisible } from '../src/data/observatoryLayout.ts';
 import { CAMPAIGN_LEVELS } from '../src/data/campaignLevels.ts';
 import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import {
   getHeartPrerequisiteFeedback, HEART_CONFIRM_ID, HEART_MAT_ID, HEART_SEAL_ID, HEART_SEAL_RADIUS, resolveHeartLumoMode,
 } from '../src/data/heartOfElariaLayout.ts';
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
+import {
+  OBSERVATORY_BEAT_NO_BEAM, OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
+  OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_OPENING_ENTRANCE,
+} from '../src/data/observatoryStory.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SCENE_FILE = join(rootDir, 'src/scenes/CampaignScene.ts');
@@ -153,7 +158,7 @@ function bind(source, symbols, label) {
 
 const NO_SYMBOLS = {};
 /** Layout symbols the extracted snippets close over. */
-const CALLBACK_SYMBOLS = { observatoryDoorOpen, observatoryDoorBlockReason, observatoryFinalDoorBlockReason };
+const CALLBACK_SYMBOLS = { observatoryDoorOpen, observatoryDoorBlockReason, observatoryFinalDoorBlockReason, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES };
 const STATE_SYMBOLS = { deriveObservatoryState };
 const READY_SYMBOLS = { observatoryCompletionReady };
 const STRIP_SYMBOLS = { observatoryDoorOpen, observatoryReturnLoopLane, OBSERVATORY_RETURN_LOOP_VISUAL_ID };
@@ -370,6 +375,7 @@ function makeRoomBuildPort(calls) {
       setDepth() { return object; },
       setVisible() { return object; },
       setText() { return object; },
+      setWordWrapWidth() { return object; },
       setName(value) { object.name = value; return object; },
       setPosition(x, y) { object.x = x; object.y = y; return object; },
       setSize(width, height) { object.width = width; object.height = height; return object; },
@@ -431,6 +437,7 @@ const STUBBED_BUILD_PORTS = [
   'clearActiveRoom', 'drawObservatoryBackground', 'drawObservatoryWalls', 'drawObservatoryWallArt',
   'buildObservatoryStamps', 'buildObservatoryElements', 'buildObservatoryRootBed', 'buildObservatoryDoors',
   'buildObservatorySolids', 'buildObservatoryBeams', 'addObservatoryExit', 'restoreObservatoryLanternPlacement',
+  'playObservatoryOpening',
 ];
 
 const roomBuilds = new Map();
@@ -601,7 +608,7 @@ let frameStep = null;
  */
 function stepFrame(scene, delta = 16) {
   if (!frameStep || frameStep.delta !== delta) {
-    frameStep = { delta, run: bind(methodSource('update'), { Phaser: PHASER_PORTS, isRuinsPositionSafe, delta }, 'update()') };
+    frameStep = { delta, run: bind(methodSource('update'), { Phaser: PHASER_PORTS, isRuinsPositionSafe, observatoryPlacedLightVisible, delta }, 'update()') };
   }
   frameStep.run(scene);
 }
@@ -615,7 +622,7 @@ function stepFrame(scene, delta = 16) {
 function makeFrameScene(level, { controllers = [] } = {}) {
   const calls = {
     player: 0, lumo: [], lantern: 0, interactions: 0, dialogue: 0, hud: 0, observatoryLumo: 0,
-    observatoryRefresh: 0, forestEdgeProgress: 0, woodsFirefly: 0, legacy: [], controller: [],
+    observatoryRefresh: 0, forestEdgeProgress: 0, woodsFirefly: 0, legacy: [], controller: [], placedLight: [], beatFlushes: 0,
   };
   const bounds = { x: 0, y: 0, width: 36, height: 42 };
   const scene = {
@@ -633,7 +640,11 @@ function makeFrameScene(level, { controllers = [] } = {}) {
       update: (_dt, x, y) => calls.lumo.push({ x, y }),
       sprite: { x: 300, y: 270, visible: true, getBounds: () => bounds },
     },
-    lantern: { lanternInHand: true, lanternOn: true, update: () => { calls.lantern += 1; } },
+    lantern: {
+      lanternInHand: true, lanternOn: true, lanternPlaced: false,
+      update: () => { calls.lantern += 1; },
+      setPlacedLightVisible: (visible) => { calls.placedLight.push(visible); },
+    },
     interactions: { update: () => { calls.interactions += 1; } },
     keys: { esc: {} },
     calls,
@@ -647,6 +658,7 @@ function makeFrameScene(level, { controllers = [] } = {}) {
     updateObservatoryCrossingState: () => { calls.observatoryRefresh += 1; },
     refreshObservatoryDoors: () => { calls.observatoryRefresh += 1; },
     refreshObservatoryPuzzle: () => { calls.observatoryRefresh += 1; },
+    flushObservatoryBeats: () => { calls.beatFlushes += 1; },
   };
   for (const name of LEGACY_PASS) scene[name] = () => calls.legacy.push(name);
   for (const field of controllers) {
@@ -699,6 +711,122 @@ function legacyPassExcludedLevels() {
  * ------------------------------------------------------------------ */
 
 const CASES = [
+  {
+    name: 'observatory_opening_plays_in_two_beats_once',
+    run: () => {
+      const source = methodSource('playObservatoryOpening');
+      const symbols = { OBSERVATORY_OPENING_ENTRANCE, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_ROOMS, roomId: undefined };
+      const play = (scene, roomId) => bind(source, { ...symbols, roomId }, 'playObservatoryOpening()')(scene);
+      const make = (flags = {}) => {
+        const scene = makeScene({ flags });
+        scene.observatoryLumoHold = null;
+        scene.say = (lines, done) => { scene.calls.say.push(lines); scene.done = done; };
+        return scene;
+      };
+      const fresh = make();
+      play(fresh, 'entrance');
+      assert.deepEqual(fresh.calls.say[0].map((line) => line.text), OBSERVATORY_OPENING_ENTRANCE.map((line) => line.text), 'the entrance plays its three authored lines');
+      assert.equal(fresh.progress.flags['intro-8'], true);
+      play(fresh, 'entrance');
+      assert.equal(fresh.calls.say.length, 1, 'the entrance beat never repeats');
+      assert.equal(fresh.progress.flags['intro-8-corridor'], undefined, 'the entrance does not spend the corridor beat');
+
+      play(fresh, 'corridor');
+      assert.equal(fresh.calls.say.length, 2, 'the first corridor entry plays the second beat');
+      assert.deepEqual(fresh.calls.say[1].map((line) => line.text), OBSERVATORY_OPENING_CORRIDOR.map((line) => line.text));
+      assert.ok(fresh.observatoryLumoHold && fresh.observatoryLumoHold.x > 90 && fresh.observatoryLumoHold.y < 140, 'Lumo hovers at the spiral tube mouth while it plays');
+      fresh.done();
+      assert.equal(fresh.observatoryLumoHold, null, 'and goes back to following Nhinh when it ends');
+      play(fresh, 'corridor');
+      assert.equal(fresh.calls.say.length, 2, 'the corridor beat never repeats');
+
+      const past = make({ 'intro-8': true, 'l8-door-a-latched': true });
+      play(past, 'corridor');
+      assert.equal(past.calls.say.length, 0, 'a save already past the corridor never replays the beat');
+      assert.equal(past.progress.flags['intro-8-corridor'], true, 'and records it as spent');
+    },
+  },
+  {
+    name: 'observatory_free_lumo_walks_through_doors_but_a_called_lumo_keeps_his_room',
+    run: () => {
+      const free = bind(methodSource('isObservatoryLumoFree'), NO_SYMBOLS, 'isObservatoryLumoFree()');
+      const withSteps = (flags, counters = {}) => {
+        const scene = makeScene({ flags, counters });
+        scene.getObservatoryLumoSteps = () => (flags['l8-lumo-route-json'] ? JSON.parse(flags['l8-lumo-route-json']) : []);
+        return scene;
+      };
+      assert.equal(free(withSteps({})), true, 'a fresh Lumo is free');
+      assert.equal(free(withSteps({ 'l8-lumo-destination': 'lumo-seal', 'l8-lumo-arrived': 'lumo-seal' })), false, 'Lumo holding the seal stays at the seal');
+      assert.equal(free(withSteps({ 'l8-lumo-destination': 'lumo-seal', 'l8-lumo-route-json': JSON.stringify([{ roomId: 'corridor', x: 1, y: 1 }]) })), false, 'a travelling Lumo keeps his route');
+      assert.equal(free(withSteps({ 'l8-lumo-destination': 'lantern-source', 'l8-lumo-arrived': 'lantern-source' })), true, 'a recalled Lumo follows Nhinh again');
+      const transition = methodSource('transitionObservatory');
+      assert.ok(transition.includes('this.isObservatoryLumoFree()') && transition.includes("this.progress.flags['l8-lumo-room'] = exit.toRoom"),
+        'transitionObservatory moves a free Lumo into the new room with Nhinh');
+    },
+  },
+  {
+    name: 'observatory_conditional_beats_fire_on_transitions_only',
+    run: () => {
+      const beatSource = methodSource('queueObservatoryStateBeats'); // `state` is the method parameter, so it comes in as a symbol
+      const beats = (scene, state) => bind(beatSource, { OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_BEAT_NO_BEAM, state }, 'queueObservatoryStateBeats()')(scene);
+      const make = (room = 'observatory') => {
+        const scene = makeScene({ roomId: room, lanternPlaced: true, lanternInHand: false, lanternOn: true });
+        scene.queued = [];
+        scene.queueObservatoryBeat = (lines) => scene.queued.push(lines);
+        scene.observatoryWasThroughSeal = false;
+        return scene;
+      };
+      const direct = { activeBeamPath: { routeId: 'g2-direct-sun' }, sunDoorUnlocked: true, bridgeEligible: false, lumoAtSeal: true };
+      const scene = make();
+      beats(scene, direct); beats(scene, direct); beats(scene, direct);
+      assert.equal(scene.queued.length, 1, 'the roots-lit pair plays once, not every frame');
+      assert.deepEqual(scene.queued[0].map((line) => line.text), OBSERVATORY_BEAT_ROOTS_LIT.map((line) => line.text));
+      assert.equal(scene.progress.flags['l8-beat-roots-lit'], true);
+      const elsewhere = make('corridor'); beats(elsewhere, direct);
+      assert.equal(elsewhere.queued.length, 0, 'the roots line belongs to the observatory');
+      const split = { activeBeamPath: { routeId: 'g2-split' }, sunDoorUnlocked: true, bridgeEligible: false, lumoAtSeal: true };
+      const quiet = make(); beats(quiet, split);
+      assert.equal(quiet.queued.length, 0, 'the split route does not say the roots are lit');
+
+      const turned = make('entrance');
+      const through = { activeBeamPath: { routeId: 'g0-to-g1' }, sunDoorUnlocked: false, bridgeEligible: false, lumoAtSeal: true };
+      const away = { activeBeamPath: { routeId: 'off' }, sunDoorUnlocked: false, bridgeEligible: false, lumoAtSeal: true };
+      beats(turned, through);
+      assert.equal(turned.queued.length, 0, 'a live beam through the seal says nothing');
+      beats(turned, away);
+      assert.equal(turned.queued.length, 1, 'turning G0 away while Lumo holds the seal makes him say so');
+      assert.equal(turned.queued[0][0].text, OBSERVATORY_BEAT_NO_BEAM[0].text);
+      beats(turned, away); beats(turned, away);
+      assert.equal(turned.queued.length, 1, 'and only once per change');
+      const dark = make('entrance'); dark.lantern.lanternOn = false;
+      beats(dark, through); beats(dark, away);
+      assert.equal(dark.queued.length, 0, 'switching the lamp off is not a re-aimed beam');
+      const free = make('entrance');
+      beats(free, through); beats(free, { ...away, lumoAtSeal: false });
+      assert.equal(free.queued.length, 0, 'without a held seal there is nothing for Lumo to say');
+    },
+  },
+  {
+    name: 'observatory_frame_paints_a_parked_lamp_only_in_its_room',
+    run: () => {
+      for (const [room, expected] of [['entrance', true], ['corridor', false], ['observatory', false]]) {
+        const scene = makeFrameScene(8);
+        scene.activeObservatoryRoom = room;
+        scene.lantern.lanternPlaced = true;
+        stepFrame(scene);
+        assert.deepEqual(scene.calls.placedLight, [expected], `${room}: a parked lamp's halo is ${expected ? 'painted' : 'hidden'}`);
+        assert.equal(scene.calls.beatFlushes, 1, `${room}: queued story beats flush once per frame`);
+      }
+      const carried = makeFrameScene(8);
+      carried.lantern.lanternPlaced = false;
+      stepFrame(carried);
+      assert.deepEqual(carried.calls.placedLight, [true], 'a carried lamp lights every room');
+      const other = makeFrameScene(3);
+      stepFrame(other);
+      assert.deepEqual(other.calls.placedLight, [], 'other levels never touch the placed-light switch');
+    },
+  },
+
   {
     name: 'return_loop_action_commits_and_refreshes',
     run: () => {
@@ -868,9 +996,12 @@ const CASES = [
       assert.equal(scene.observatoryElementVisuals.has('balance-crystal'), false, 'the crystal art leaves the room with it');
       const ready = scene.getObservatoryWorldState();
       assert.equal(observatoryCompletionReady(ready), true, 'the completion predicate holds on the real world state');
+      scene.progress.counters['lumo-x'] = 300; scene.progress.counters['lumo-y'] = 120; // stale Level 09 / older generic coordinates
       runRegistered('final-door-control', scene);
       assert.equal(scene.calls.nextLevel.length, 1, 'the far-bank control hands over to the next level');
-      assert.equal(scene.calls.nextLevel[0].length, 2, 'the handover plays its two authored lines');
+      assert.deepEqual(scene.calls.nextLevel[0].map((line) => line.text), OBSERVATORY_EXIT_LINES.map((line) => line.text), 'the handover plays the scenario\'s three exit lines');
+      assert.equal(scene.progress.counters['lumo-x'], undefined, 'the stale generic Lumo coordinates are cleared for Level 10');
+      assert.equal(scene.progress.counters['lumo-y'], undefined);
     },
   },
   {

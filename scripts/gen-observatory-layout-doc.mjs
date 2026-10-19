@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path';
 import {
   OBSERVATORY_ALCOVES, OBSERVATORY_BODY, OBSERVATORY_BRIDGE_LANE, OBSERVATORY_ELEMENTS,
   OBSERVATORY_FINAL_DOOR_HEAD, OBSERVATORY_FLOORS, OBSERVATORY_JAMB_THICKNESS,
-  OBSERVATORY_NON_SOLID_IDS, OBSERVATORY_ROOT_BED, OBSERVATORY_STAMPS, OBSERVATORY_WALLS,
+  OBSERVATORY_NON_SOLID_IDS, OBSERVATORY_PLACED_LIGHT_ROOM, OBSERVATORY_ROOT_BED, OBSERVATORY_SHADOW, OBSERVATORY_STAMPS, OBSERVATORY_WALLS,
   observatoryArtRect, observatoryPrompt,
 } from '../src/data/observatoryLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
@@ -21,8 +21,8 @@ const rect = (r) => `${r.x},${r.y},${r.width},${r.height}`;
 const point = (p) => `${p.x},${p.y}`;
 const ROOMS = ['entrance', 'corridor', 'observatory'];
 const ROOM_TITLE = {
-  entrance: 'tiền sảnh (`lobby-base`)',
-  corridor: 'hành lang phòng sao (`star-chart-base`)',
+  entrance: 'tiền sảnh (composed stone floor; the `lobby-base` staging board is not used)',
+  corridor: 'hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used)',
   observatory: 'phòng thiên văn (`observatory-clean-base`)',
 };
 
@@ -231,5 +231,17 @@ p('  every solid, art registration, control parity, scene wiring and save guards
 p('- `npm run build` — `tsc --noEmit` plus the Vite production build.');
 p('- Playtest is a manual step: no automated browser run is claimed here.');
 
+p();
+p('## Repair T10 — Shadow, placed light, sills, guidance, story');
+p();
+p(`- The Shadow stands at ground (${point(OBSERVATORY_SHADOW.ground)}) as a native ${OBSERVATORY_SHADOW.art.width}x${OBSERVATORY_SHADOW.art.height} pose, with a solid footprint (${rect(OBSERVATORY_SHADOW.footprint)}) on the far bank, north of the final record and clear of every stand and of the passage leaving the bridge. The Guardian of the memory stands at (${point(OBSERVATORY_SHADOW.guardianGround)}); the Shadow steps into that place during the record and walks back.`);
+p('- A lamp parked on its pedestal is painted only in the `' + OBSERVATORY_PLACED_LIGHT_ROOM + '` room (`observatoryPlacedLightVisible`); its logic (beam source at the pedestal) is unchanged. A carried lamp lights every room.');
+p('- The entrance and the corridor have no painted base. They are composed from `ground_stone` tiles, masonry from `OBSERVATORY_WALLS` and the real controls, so no fake G0, lamp, door or caption panel is printed under the room. The observatory keeps `observatory-clean-base`.');
+p('- Door thresholds are drawn as sills: wall-coloured while the door is shut, floor-coloured once open (`paintObservatorySill`). Jambs stay permanent masonry. `final-door-head` is one rectangle in both the pure model and the engine, solid until the final door is latched.');
+p('- Objective, status and prompts are room-aware and share `observatoryDoorOpen`: a latched Sun door reads "đã gài (giữ mở)" with the beam off; the final-door control reads "E · Trở về Cây Mẹ" only when `observatoryCompletionReady`, otherwise it names the first missing step.');
+p('- Opening (scenario section 2): beat one (three lines) in the entrance; beat two (four lines) the first time the corridor is entered, with Lumo really in the corridor hovering at the tube mouth. A free Lumo walks through doors with Nhinh; a called or sealing Lumo keeps his route and room.');
+p('- Conditional lines (section 4): the roots-lit pair plays once when the far door opens on the direct route; the no-beam line plays when a live, parked lamp stops reaching the seal while Lumo still holds it.');
+p('- Record (section 5): all sixteen spoken lines in three parts with a white flash, the merge of the two figures and a final silence; no line about the girl. Companion handoff: leaving for Level 10 clears the generic Lumo counters so Level 10 places him from its own entry.');
+p('- NOT_RUN: raster review of the composed entrance/corridor against the old boards, the sill art, and the white-flash/merge timing in WebGL (checked once in the Canvas renderer only).');
 writeFileSync(join(rootDir, 'docs/implementation/09-layout.md'), `${lines.join('\n')}\n`, 'utf8');
 console.log(`docs/implementation/09-layout.md written (${lines.length} lines)`);

@@ -411,6 +411,27 @@ export function observatoryElementSolids(roomId: ObservatoryRoomKey): readonly O
  * Dynamic structures: root bed, bridge lane, floor stamps
  * ------------------------------------------------------------------ */
 
+/**
+ * The Shadow waits on the far bank, north of the final record and clear of the loop control, the bridge exit and
+ * every stand. His footprint is a solid (the only prop that is not an ObsElement); the Guardian of the memory
+ * stands one step east of him and he steps into that place during the record (scenario section 5).
+ */
+export const OBSERVATORY_SHADOW = {
+  art: { width: 48, height: 64 },
+  ground: { x: 424, y: 190 } as ObsPoint,
+  footprint: { x: 410, y: 174, width: 28, height: 16 } as ObsRect,
+  guardianGround: { x: 466, y: 190 } as ObsPoint,
+} as const;
+
+/**
+ * The lantern's logic stays on the pedestal, but its halo is only painted in the room that holds it: a lamp parked
+ * in the entrance never lights the corridor or the observatory. A carried lamp lights every room it is in.
+ */
+export const OBSERVATORY_PLACED_LIGHT_ROOM: ObservatoryRoomKey = 'entrance';
+export function observatoryPlacedLightVisible(roomId: ObservatoryRoomKey, lanternPlaced: boolean): boolean {
+  return !lanternPlaced || roomId === OBSERVATORY_PLACED_LIGHT_ROOM;
+}
+
 export const OBSERVATORY_ROOT_BED: ObsRect = { x: 340, y: 152, width: 44, height: 148 };
 /** The crossing lane cut through the bed; walkable only while the bridge holds. */
 export const OBSERVATORY_BRIDGE_LANE: ObsRect = { x: 340, y: 202, width: 44, height: 48 };
@@ -544,6 +565,7 @@ export function observatorySolidRects(roomId: ObservatoryRoomKey, state: ObsWorl
     const held = occupied.some((body) => rectsOverlap(body, OBSERVATORY_BRIDGE_LANE));
     if (!state.bridgeEligible && !held) rects.push(OBSERVATORY_BRIDGE_LANE);
     if (!state.finalDoorLatched) rects.push(OBSERVATORY_FINAL_DOOR_HEAD);
+    rects.push(OBSERVATORY_SHADOW.footprint);
   }
   return rects;
 }
@@ -703,6 +725,18 @@ export function observatoryFinalDoorBlockReason(state: ObsWorldState): string {
   return '';
 }
 
+/** Remaining completion steps in play order; the first one is what a prompt or objective names. */
+export function observatoryCompletionMissing(state: ObsWorldState): string[] {
+  const missing: string[] = [];
+  if (!state.finalDoorLatched) missing.push('gài chốt cửa cuối');
+  if (!state.returnLoopOpen) missing.push('mở lối đá vòng');
+  if (!state.lanternRetrieved || state.lanternPlaced) missing.push('thu hồi đèn về tay');
+  if (!state.lumoRecalled || state.lumoAtSeal) missing.push('gọi Lumo về bên đèn');
+  if (!state.recordRead) missing.push('đọc bản ghi cuối');
+  if (!state.crystalTaken) missing.push('nhận Tinh thể Cân Bằng');
+  return missing;
+}
+
 export function observatoryCompletionReady(state: ObsWorldState): boolean {
   return state.finalDoorLatched && state.returnLoopOpen && state.lanternRetrieved && !state.lanternPlaced
     && state.lumoRecalled && state.recordRead && state.crystalTaken;
@@ -730,40 +764,71 @@ export function observatoryGuidance(roomId: ObservatoryRoomKey, state: ObsWorldS
   };
 }
 
+const ROOM_NAME: Record<ObservatoryRoomKey, string> = { entrance: 'tiền sảnh', corridor: 'hành lang phòng sao', observatory: 'phòng thiên văn' };
+
+/** Door status that shares the door predicate: a latched door stays "giữ mở" even when its beam is off. */
+function observatoryDoorStatus(doorId: ObservatoryDoorKey, state: ObsWorldState): string {
+  if (observatoryDoorLatched(doorId, state)) return doorId === 'return-loop' ? 'đã mở' : 'đã gài (giữ mở)';
+  return observatoryDoorOpen(doorId, state) ? 'đang mở' : 'đang khóa';
+}
+
+/**
+ * Objective row, room-aware: it names the next missing step AND where to do it, and it never sends the player
+ * to a room they are already standing in.
+ */
 export function observatoryObjective(roomId: ObservatoryRoomKey, state: ObsWorldState): string {
-  if (state.crystalTaken) return 'Quay lại chốt cửa cuối và nhấn E để trở về Cây Mẹ.';
-  if (state.recordRead) return 'Nhận Tinh thể Cân Bằng trong vòng trăng bằng E.';
-  if (state.returnLoopOpen && (!state.lanternRetrieved || state.lanternPlaced)) {
-    return 'Theo lối đá vòng về bệ đèn ở tiền sảnh và thu hồi đèn bằng E.';
+  const here = (target: ObservatoryRoomKey): boolean => roomId === target;
+  if (state.crystalTaken) {
+    return here('observatory')
+      ? 'Nhấn E ở chốt cửa cuối (tường phía bắc, bờ bên kia) để trở về Cây Mẹ.'
+      : 'Quay lại chốt cửa cuối ở phòng thiên văn và nhấn E để trở về Cây Mẹ.';
   }
-  if (state.returnLoopOpen && !state.lumoRecalled) return 'Gọi Lumo trở về bên bệ đèn bằng E.';
-  if (state.returnLoopOpen && state.lumoRecalled) return 'Đọc bản ghi cuối cạnh The Shadow bằng E.';
+  if (state.recordRead) return 'Nhận Tinh thể Cân Bằng trong vòng trăng ở phòng thiên văn bằng E.';
+  if (state.returnLoopOpen) {
+    if (!state.lanternRetrieved || state.lanternPlaced) {
+      return here('entrance') ? 'Thu hồi đèn trên bệ đá bằng E.' : 'Theo lối đá vòng về bệ đèn ở tiền sảnh và thu hồi đèn bằng E.';
+    }
+    if (!state.lumoRecalled || state.lumoAtSeal) {
+      return here('corridor') ? 'Gọi Lumo trở về bên đèn bằng E ở ống dẫn.' : 'Gọi Lumo trở về bên đèn bằng E ở ống dẫn trong hành lang phòng sao.';
+    }
+    return here('observatory') ? 'Đọc bản ghi cuối cạnh The Shadow bằng E.' : 'Về phòng thiên văn và đọc bản ghi cuối cạnh The Shadow bằng E.';
+  }
   if (!state.bridgeCrossed) {
-    if (state.bridgeEligible) return 'Băng qua cầu rễ sang bờ bên kia.';
-    if (state.sunDoorUnlocked) return 'Xoay tượng cho mặt rộng che luống rễ để cầu rễ mọc.';
-    if (!state.lanternPlaced) return 'Đặt đèn đang bật lên bệ đá ở tiền sảnh bằng E.';
-    if (!observatoryDoorOpen('door-a', state) && !state.doorALatched) return 'Xoay G0 cho tia sáng chiếu vào mắt cửa A.';
-    if (!state.doorALatched) return 'Đi tới cửa A ở tường phía đông và nhấn E để sang hành lang phòng sao.';
-    if (!state.lumoAtSeal) return 'Đứng trước ống dẫn ở hành lang phòng sao và gọi Lumo tới ấn bằng E.';
-    if (state.mirrors.g0 !== 1) return 'Quay lại tiền sảnh và xoay G0 sang nấc 1.';
-    if (state.mirrors.g1 !== 2) return 'Xoay G1 sang nấc 2 trong hành lang phòng sao.';
-    return 'Đi tới cửa Mặt Trời ở tường phía đông hành lang và nhấn E.';
+    if (here('observatory')) {
+      if (state.bridgeEligible) return 'Băng qua cầu rễ sang bờ bên kia.';
+      if (!state.sunDoorUnlocked) return 'Khóa Nhật chưa sáng: kiểm tra đèn trên bệ, ấn của Lumo và G0, G1, G2.';
+      if (state.activeBeamRoute === 'g2-split') return 'Xoay tượng cho mặt rộng che luống rễ để cầu rễ mọc.';
+      return 'Ánh sáng đang phủ lên rễ. Xoay G2 sang nấc 1 để dẫn tia qua khung chia, rồi xoay tượng che luống rễ.';
+    }
+    if (!state.lanternPlaced) return here('entrance') ? 'Đặt đèn đang bật lên bệ đá bằng E.' : 'Quay về tiền sảnh và đặt đèn đang bật lên bệ đá.';
+    if (!state.doorALatched) {
+      if (here('entrance')) {
+        return observatoryDoorOpen('door-a', state)
+          ? 'Đi tới cửa A ở tường phía đông và nhấn E để sang hành lang phòng sao.'
+          : 'Xoay G0 về nấc 0 cho tia sáng chiếu vào mắt cửa A.';
+      }
+      return 'Gài chốt cửa A ở phía tây hành lang (chốt nằm ngay trước cửa) bằng E để cửa giữ mở.';
+    }
+    if (!state.lumoAtSeal) {
+      return here('corridor') ? 'Đứng trước ống dẫn trên tường hành lang và nhấn E để gọi Lumo tới ấn.' : 'Sang hành lang phòng sao và gọi Lumo tới ấn bằng ống dẫn.';
+    }
+    if (state.mirrors.g0 !== 1) return here('entrance') ? 'Xoay G0 sang nấc 1 để tia đi qua ống tới ấn.' : 'Quay lại tiền sảnh và xoay G0 sang nấc 1.';
+    if (state.mirrors.g1 !== 2) return here('corridor') ? 'Xoay G1 sang nấc 2 để tia phản chiếu sang phòng thiên văn.' : 'Sang hành lang phòng sao và xoay G1 sang nấc 2.';
+    if (!observatoryDoorOpen('sun-door', state)) return `Cửa Mặt Trời còn khép. ${observatoryDoorBlockReason('sun-door', state)}`;
+    return 'Đi tới cửa Mặt Trời ở tường phía đông hành lang và nhấn E để sang phòng thiên văn.';
   }
-  if (roomId === 'observatory') {
-    if (!state.finalDoorLatched) return 'Gài chốt cửa cuối ở tường phía bắc bằng E.';
-    if (!state.returnLoopOpen) return 'Mở lối đá vòng bằng E để giữ đường quay lại.';
-    return 'Nhấn E ở chốt cửa cuối để trở về Cây Mẹ.';
-  }
-  return 'Tiến lại gần vật cần dùng và nhấn E.';
+  // Crossed the bridge, loop still shut.
+  if (!here('observatory')) return 'Quay lại phòng thiên văn qua cửa Mặt Trời và hoàn tất bờ bên kia.';
+  if (!state.finalDoorLatched) return 'Gài chốt cửa cuối ở tường phía bắc bằng E.';
+  return 'Mở lối đá vòng bằng E để giữ đường quay lại.';
 }
 
 export function observatoryStatus(roomId: ObservatoryRoomKey, state: ObsWorldState): string {
-  const doorA = state.doorALatched ? 'đã gài' : state.doorAUnlocked ? 'đang mở' : 'đang khóa';
-  const sun = state.sunDoorUnlocked ? 'đang mở' : 'đang khóa';
+  const doorA = observatoryDoorStatus('door-a', state);
+  const sun = observatoryDoorStatus('sun-door', state);
   const bed = state.bridgeEligible ? 'cầu đã mọc' : state.rootBedShadowed ? 'rễ trong bóng' : 'rễ còn sáng';
-  const room = roomId === 'entrance' ? 'tiền sảnh' : roomId === 'corridor' ? 'hành lang phòng sao' : 'phòng thiên văn';
   const lamp = state.lanternPlaced ? 'trên bệ' : 'trong tay';
-  return `Phòng: ${room} · Đèn: ${lamp} (${state.lanternOn ? 'bật' : 'tắt'})`
+  return `Phòng: ${ROOM_NAME[roomId]} · Đèn: ${lamp} (${state.lanternOn ? 'bật' : 'tắt'})`
     + ` · G0 ${state.mirrors.g0} / G1 ${state.mirrors.g1} / G2 ${state.mirrors.g2} · Tượng ${state.statue}`
     + ` · Cửa A ${doorA} · Cửa Mặt Trời ${sun} · ${bed} · Lối vòng ${state.returnLoopOpen ? 'đã mở' : 'chưa mở'}`;
 }
@@ -847,12 +912,13 @@ export function observatoryPrompt(id: string, state: ObsWorldState): string {
       if (!state.doorAUnlocked) return `E · Kiểm tra chốt cửa A — ${observatoryDoorBlockReason('door-a', state)}`;
       return 'E · Gài chốt cửa A từ bên trong';
     case 'sun-door-control':
-      return state.sunDoorUnlocked ? 'Cửa Mặt Trời đang mở' : `E · Kiểm tra cửa Mặt Trời — ${observatoryDoorBlockReason('sun-door', state)}`;
+      return observatoryDoorOpen('sun-door', state) ? 'Cửa Mặt Trời đang mở' : `E · Kiểm tra cửa Mặt Trời — ${observatoryDoorBlockReason('sun-door', state)}`;
     case 'root-bed':
       return state.bridgeEligible ? 'Luống rễ đã kết thành cầu'
         : `E · Xem luống rễ — ${observatoryBridgeBlockReason(state)}`;
     case 'final-door-control':
-      return state.finalDoorLatched ? 'Chốt cửa cuối đã gài' : `E · Gài chốt cửa cuối`;
+      if (!state.finalDoorLatched) return state.bridgeCrossed ? 'E · Gài chốt cửa cuối' : 'E · Chốt cửa cuối (qua cầu rễ trước)';
+      return observatoryCompletionReady(state) ? 'E · Trở về Cây Mẹ' : `E · Cửa cuối đã gài — còn cần: ${observatoryCompletionMissing(state)[0]}`;
     case 'stone-return-loop':
       return state.returnLoopOpen ? 'Lối đá vòng đã mở' : `E · Mở lối đá vòng — ${observatoryDoorBlockReason('return-loop', state)}`;
     case 'final-record':
