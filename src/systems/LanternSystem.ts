@@ -3,7 +3,8 @@ import { SoundSystem } from './SoundSystem';
 
 export type PulseCallback = (x: number, y: number, maxRadius: number) => void;
 
-// Level 02 (Whispering Woods) night lighting: a falloff-shaded lantern box inside a dark forest.
+// Forest night lighting, shared by Level 01 (Forgotten Forest Edge) and Level 02 (Whispering Woods):
+// a falloff-shaded lantern box inside a dark forest.
 const WOODS_SHADE_SIZE_LIT = 300;
 const WOODS_DARKNESS_LIT = 0.80;
 const WOODS_HALO_SCALE_LIT = 0.80;
@@ -151,19 +152,8 @@ export class LanternSystem {
       const pulseAlpha = 0.36 + Math.sin(this.flickerTime * 4) * 0.12;
       this.darknessOverlay.fillStyle(0xfff5cc, pulseAlpha);
       this.darknessOverlay.fillRect(0, 0, 640, 360);
-    } else if (this.forestEdgeLighting) {
-      const activeLantern = this.lanternOn && (this.lanternInHand || this.lanternPlaced);
-      this.haloSprite.setVisible(true);
-      this.haloSprite.setPosition(lightX, lightY);
-      this.haloSprite.setScale((activeLantern ? 0.68 : 0.28) * flicker);
-      this.haloSprite.setAlpha(activeLantern ? 0.42 : 0.12);
-      const darknessAlpha = activeLantern ? 0.92 : 0.94;
-      const size = activeLantern ? 232 : 76;
-      const shadeX = Math.round(lightX);
-      const shadeY = Math.round(lightY);
-      this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);
-      this.fillForestEdgeDarknessOutside(shadeX, shadeY, size, darknessAlpha);
-    } else if (this.woodsLighting) {
+    } else if (this.forestEdgeLighting || this.woodsLighting) {
+      // Level 01 and Level 02 share one forest recipe (the Level 01 flag only changes the missing-texture message).
       const activeLantern = this.lanternOn && (this.lanternInHand || this.lanternPlaced);
       this.haloSprite.setVisible(true);
       this.haloSprite.setPosition(lightX, lightY);

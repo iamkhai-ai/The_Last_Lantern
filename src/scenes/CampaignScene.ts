@@ -4,7 +4,9 @@ import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
-import { buildWoodsDecor, WOODS_MOSS_COLOR, WOODS_MOTTLE_COLOR, type WoodsDecor } from '../data/whisperingWoodsDecor';
+import { buildWoodsDecor } from '../data/whisperingWoodsDecor';
+import { buildForestEdgeDecor } from '../data/forestEdgeDecor';
+import { FOREST_DECOR_TEXTURES, FOREST_MOSS_COLOR, FOREST_MOTTLE_COLOR, type ForestDecor } from '../data/forestDecor';
 import { LIBRARY_LAYOUT, resolveLibrarySpawn } from '../data/libraryLayout';
 import { LibraryLevel } from '../levels/LibraryLevel';
 import { PathForTwoLevel } from '../levels/PathForTwoLevel';
@@ -63,15 +65,26 @@ import { SleepingGardenLevel } from '../levels/SleepingGardenLevel';
 
 type KeySet = { e: Phaser.Input.Keyboard.Key; f: Phaser.Input.Keyboard.Key; h: Phaser.Input.Keyboard.Key; j: Phaser.Input.Keyboard.Key; space: Phaser.Input.Keyboard.Key; esc: Phaser.Input.Keyboard.Key };
 
-// Level 02 (Whispering Woods) visual constants. Rendering only; layout and collision live in whisperingWoodsLayout.ts.
+// Forest visual constants, shared by Level 01 (Forgotten Forest Edge) and Level 02 (Whispering Woods).
+// Rendering only; layout and collision live in whisperingWoodsLayout.ts and forestEdgeLayout.ts.
 const WOODS_GRASS_TINT = 0x5c7663;
 const WOODS_PATH_TINT = 0x8a7558;
 const WOODS_PATH_ALPHA = 0.62;
 const WOODS_GLOW_DEPTH = 69.2;
 const WOODS_GLOW_CYAN = 0x7df2d4;
+const WOODS_GLOW_WARM = 0xffe680;
 const WOODS_GATE_GLOW = { x: 510, y: 150 };
 const WOODS_POEM_GLOW = { x: 136, y: 236 };
 const WOODS_RUNE_GLOW_Y_OFFSET = -30;
+// Level 01 accent glows. Positions are authored for the Level 01 art; visibility follows progress or the live art.
+const FOREST_EDGE_LANTERN_GLOW = { x: 224, y: 226 };
+const FOREST_EDGE_GATE_GLOW = { x: 486, y: 126 };
+const FOREST_EDGE_EYE_GLOW = { x: 538, y: 122 };
+const FOREST_EDGE_TABLET_GLOW = { x: 300, y: 200 };
+const FOREST_EDGE_RING_GLOW = { x: 410, y: 210 };
+/** Path depth: Level 01 keeps its original 0.6; Level 02 keeps 0.55. */
+const FOREST_EDGE_PATH_DEPTH = 0.6;
+const WOODS_PATH_DEPTH = 0.55;
 
 const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Trời vẫn chưa sáng sao?' }, { speaker: 'Nhinh', text: 'Mình nhớ con đường vào rừng… Còn đoạn sau thì mờ quá.' }],
@@ -121,6 +134,11 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryBridgeStones: Phaser.GameObjects.Image[] = [];
   private footprintTrail?: Phaser.GameObjects.Graphics;
   private forestEdgeGuide?: Phaser.GameObjects.Graphics;
+  /** Level 01 accent glows. Each is rebuilt by buildLevel(); visibility follows progress or the live eye/tablet art. */
+  private forestEdgeLanternGlow?: Phaser.GameObjects.Image;
+  private forestEdgeEyeGlow?: Phaser.GameObjects.Image;
+  private forestEdgeTabletGlow?: Phaser.GameObjects.Image;
+  private forestEdgeRingGlow?: Phaser.GameObjects.Image;
   private memoryLayerLabels = new Map<string, Phaser.GameObjects.Text>();
   private memorySocketLabels = new Map<number, Phaser.GameObjects.Text>();
   private campaignBeamGraphics?: Phaser.GameObjects.Graphics;
@@ -522,6 +540,10 @@ export class CampaignScene extends Phaser.Scene {
     this.objects = [];
     this.woodsRuneGlows.clear();
     this.forestEdgeGuide = undefined;
+    this.forestEdgeLanternGlow = undefined;
+    this.forestEdgeEyeGlow = undefined;
+    this.forestEdgeTabletGlow = undefined;
+    this.forestEdgeRingGlow = undefined;
     this.memoryLayerLabels.clear();
     this.memorySocketLabels.clear();
     this.interactions.clear();
@@ -1747,38 +1769,17 @@ export class CampaignScene extends Phaser.Scene {
         ? 'ground_dirt'
         : 'ground_grass';
     const tint: Record<string, number> = { woods: 0x728f73, library: 0xb9a882, creek: 0x809dad, tower: 0x9b9078, garden: 0xb2c68e, ruins: 0x82918c, observatory: 0x7182a0, heart: 0xd8b978 };
-    // Level 02 decor is generated once per build and shared by the ground and the decor passes below.
-    const woodsDecor: WoodsDecor | undefined = this.progress.level === 1 ? buildWoodsDecor() : undefined;
+    // Forest decor (Level 01 and Level 02) is generated once per build and shared by the floor and the decor passes below.
+    const forestDecor: ForestDecor | undefined = hasCampaignBackground ? undefined
+      : this.progress.level === 0 ? buildForestEdgeDecor()
+        : this.progress.level === 1 ? buildWoodsDecor() : undefined;
     if (hasCampaignBackground) {
       this.track(this.add.image(0, 0, backgroundKey).setOrigin(0).setDisplaySize(640, 360).setDepth(0));
     } else {
-      const groundTint = this.progress.level === 1 ? WOODS_GRASS_TINT : (tint[biome] ?? 0xffffff);
+      const groundTint = forestDecor ? WOODS_GRASS_TINT : (tint[biome] ?? 0xffffff);
       this.track(this.add.tileSprite(0, 0, 640, 360, tiles).setOrigin(0).setTint(groundTint).setDepth(0));
-      if (woodsDecor) {
-        const mottle = this.add.graphics().setDepth(0.3);
-        // Each patch is two nested ellipses so its edge reads soft rather than hard-stroked.
-        for (const patch of woodsDecor.mottling.shadows) {
-          mottle.fillStyle(WOODS_MOTTLE_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width, patch.height);
-          mottle.fillStyle(WOODS_MOTTLE_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width * 0.6, patch.height * 0.6);
-        }
-        for (const patch of woodsDecor.mottling.moss) {
-          mottle.fillStyle(WOODS_MOSS_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width, patch.height);
-          mottle.fillStyle(WOODS_MOSS_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width * 0.6, patch.height * 0.6);
-        }
-        this.track(mottle);
-        const paths = this.add.graphics().setDepth(0.55);
-        paths.fillStyle(0xffffff,1);
-        for (const polygon of woodsDecor.paths) paths.fillPoints(polygon.map(({x,y})=>new Phaser.Geom.Point(x,y)),true);
-        const mask=paths.createGeometryMask();
-        const pathTexture=this.add.tileSprite(0,0,640,360,'ground_dirt').setOrigin(0).setTint(WOODS_PATH_TINT).setAlpha(WOODS_PATH_ALPHA).setDepth(.55).setMask(mask);
-        paths.setVisible(false);
-        this.track(paths);this.track(pathTexture);
-        for (const stamp of woodsDecor.pathEdge.shadows) {
-          this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setDepth(stamp.depth));
-        }
-        for (const stamp of woodsDecor.pathEdge.tufts) {
-          this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
-        }
+      if (forestDecor) {
+        this.drawForestFloor(forestDecor, this.progress.level === 0 ? FOREST_EDGE_PATH_DEPTH : WOODS_PATH_DEPTH);
       } else if (this.progress.level === 2) {
         this.track(this.add.tileSprite(96, 64, 448, 244, 'ground_stone').setOrigin(0).setTint(0xd8c69c).setAlpha(0.42).setDepth(0.4));
         this.track(this.add.tileSprite(276, 76, 88, 232, 'ground_stone').setOrigin(0).setTint(0xefe0ba).setAlpha(0.35).setDepth(0.5));
@@ -1790,24 +1791,7 @@ export class CampaignScene extends Phaser.Scene {
       decor.fillRect(0, 0, 640, 360);
     }
     if (this.progress.level === 0) {
-      const pathMask = this.add.graphics();
-      pathMask.fillStyle(0xffffff, 1);
-      pathMask.fillPoints([
-        new Phaser.Geom.Point(248, 304), new Phaser.Geom.Point(221, 282), new Phaser.Geom.Point(195, 265),
-        new Phaser.Geom.Point(192, 252), new Phaser.Geom.Point(198, 243), new Phaser.Geom.Point(238, 234),
-        new Phaser.Geom.Point(280, 235), new Phaser.Geom.Point(319, 230), new Phaser.Geom.Point(341, 221),
-        new Phaser.Geom.Point(365, 207), new Phaser.Geom.Point(389, 197), new Phaser.Geom.Point(405, 191),
-        new Phaser.Geom.Point(431, 171), new Phaser.Geom.Point(468, 151), new Phaser.Geom.Point(504, 151),
-        new Phaser.Geom.Point(511, 160), new Phaser.Geom.Point(494, 178), new Phaser.Geom.Point(454, 197),
-        new Phaser.Geom.Point(420, 220), new Phaser.Geom.Point(399, 226), new Phaser.Geom.Point(379, 234),
-        new Phaser.Geom.Point(357, 248), new Phaser.Geom.Point(333, 258), new Phaser.Geom.Point(288, 263),
-        new Phaser.Geom.Point(255, 262), new Phaser.Geom.Point(252, 272), new Phaser.Geom.Point(282, 293),
-      ], true);
-      const path = this.add.tileSprite(0, 0, 640, 360, 'ground_dirt').setOrigin(0).setTint(0xb9a783).setAlpha(0.88).setDepth(0.6);
-      path.setMask(pathMask.createGeometryMask());
-      pathMask.setVisible(false);
-      this.track(pathMask);
-      this.track(path);
+      // The Level 01 dirt path is drawn by drawForestFloor() with the same Chaikin-smoothed recipe as Level 02.
       const ring = FOREST_EDGE.objects.ring.ground;
       decor.lineStyle(2, 0xffe680, this.progress.flags['l0-footprints-found'] ? 0.5 : 0.16);
       decor.strokeCircle(ring.x, ring.y, 17);
@@ -1829,7 +1813,7 @@ export class CampaignScene extends Phaser.Scene {
       for (const rock of WHISPERING_WOODS.rocks) {
         const image = this.add.image(rock.x, rock.y, 'rock_blocker').setOrigin(0.5,1).setDepth(woodsDepth(rock.y)); image.setData('woodsId', rock.id); this.track(image);
       }
-      if (woodsDecor) this.drawWoodsDecor(woodsDecor);
+      if (forestDecor) this.drawForestDecor(forestDecor);
     }
     if (!hasCampaignBackground && this.progress.level === 0) {
       for (const [index, tree] of FOREST_EDGE.objects.trees.entries()) {
@@ -1841,11 +1825,9 @@ export class CampaignScene extends Phaser.Scene {
         const image = this.add.image(rock.anchor.x, rock.anchor.y, 'rock_blocker').setOrigin(0.5, 1).setDepth(worldDepth(rock.anchor.y));
         image.setData('forestEdgeId', rock.id); this.track(image);
       }
-      for (const [x, y] of [[90, 180], [160, 260], [346, 260], [552, 205], [340, 144], [270, 178], [205, 238], [260, 230], [322, 216], [365, 190], [438, 160], [500, 194]] as Array<[number, number]>) {
-        this.track(this.add.image(x, y, 'tuft_grass').setAlpha(0.75).setDepth(3));
-      }
+      if (forestDecor) this.drawForestDecor(forestDecor);
     } else if (!hasCampaignBackground && this.progress.level !== 1) {
-      // Level 02 replaces this legacy border/bush/grass scatter with drawWoodsDecor().
+      // Forest levels (01 and 02) replace this legacy border/bush/grass scatter with drawForestDecor(); other biomes keep it.
       const isStoneRoom = biome === 'library' || biome === 'ruins' || biome === 'observatory';
       const tree = isStoneRoom ? 'ruin_pillar' : 'tree_woods';
       const borderSpots: Array<[number, number]> = isStoneRoom
@@ -1931,6 +1913,7 @@ export class CampaignScene extends Phaser.Scene {
         const stamp = this.addLevelArt('footprints-pulse', x, y, 20, 28, 4);
         stamp?.setOrigin(0.5, 0.5).setRotation(forestEdgeFootprintRotation(index, FOREST_EDGE.objects.trail, FOREST_EDGE.objects.ring.ground)).setAlpha(0.8).setData('forestEdgeId', `footprint-${index}`);
       }
+      this.addForestEdgeGlows();
     } else if (level === 1) {
       this.addWoodsGate();
       for (const id of RUNE_ORDER) this.addWoodsArt(`rune-${id}`, `runestone_${id}_sleeping`, WHISPERING_WOODS.anchors[id], WOODS_RUNE_ART.width, WOODS_RUNE_ART.height);
@@ -1971,6 +1954,7 @@ export class CampaignScene extends Phaser.Scene {
         this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; this.lantern.lanternOn = false;
         const pickup = getLevelArtKey(0, 'pickup-lantern');
         this.objects.find((object) => object instanceof Phaser.GameObjects.Image && object.texture.key === pickup)?.destroy();
+        this.forestEdgeLanternGlow?.setVisible(false);
         this.say([{ speaker: 'Nhinh', text: 'Hãy giữ ánh sáng cho đến khi mọi người trở về.' }, { speaker: 'Lumo', text: 'Một lời nhắn tốt mà. Cậu thử thắp đèn đi.' }]);
         this.hintIndex = 0; this.save();
       }, () => !this.progress.lanternPickedUp && this.progress.flags['l0-lumo-met'] === true, 'pedestal_empty');
@@ -2645,6 +2629,7 @@ export class CampaignScene extends Phaser.Scene {
       const tablet = this.objects.find((object) => object.getData('forestEdgeId') === 'tablet');
       const tabletKey = getLevelArtKey(0, this.progress.lanternOn ? 'beacon-stone-illuminated' : 'beacon-stone-hidden');
       if (tablet instanceof Phaser.GameObjects.Image && tabletKey && this.textures.exists(tabletKey) && tablet.texture.key !== tabletKey) tablet.setTexture(tabletKey);
+      this.syncForestEdgeTabletGlow();
       this.setForestEdgeArt('sun-eye', this.progress.flags['l0-gate-open'] ? 'sun-eye-full' : this.forestEdgeChargeMs > 0 ? 'sun-eye-receiving' : 'sun-eye-dormant');
     } else if (level === 2) {
       this.setLevelArtAt(548, 194, this.progress.flags['l2-memory'] ? 'room-well-open' : 'room-well-closed');
@@ -2664,9 +2649,47 @@ export class CampaignScene extends Phaser.Scene {
     if (!key || !this.textures.exists(key)) return;
     const image = this.objects.find((object) => object.getData('forestEdgeId') === id);
     if (image instanceof Phaser.GameObjects.Image && image.texture.key !== key) image.setTexture(key);
+    // The eye glow is driven from the same call that sets the eye art, so it always matches the texture on screen.
+    if (id === 'sun-eye') this.syncForestEdgeEyeGlow(filename);
+  }
+
+  /** Level 01 accent glows (ADD blend, WOODS_GLOW_DEPTH). Rendering only: no forestEdgeId, no interaction, no collision. */
+  private addForestEdgeGlows(): void {
+    const lantern = this.track(this.add.image(FOREST_EDGE_LANTERN_GLOW.x, FOREST_EDGE_LANTERN_GLOW.y, 'light_radial')
+      .setTint(WOODS_GLOW_WARM).setScale(0.45).setAlpha(0.4).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH)
+      .setVisible(!this.progress.lanternPickedUp));
+    this.tweens.add({ targets: lantern, alpha: { from: 0.4, to: 0.6 }, duration: 1600, yoyo: true, repeat: -1 });
+    this.forestEdgeLanternGlow = lantern;
+    this.track(this.add.image(FOREST_EDGE_GATE_GLOW.x, FOREST_EDGE_GATE_GLOW.y, 'light_radial')
+      .setScale(0.6).setAlpha(0.4).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH));
+    this.forestEdgeEyeGlow = this.track(this.add.image(FOREST_EDGE_EYE_GLOW.x, FOREST_EDGE_EYE_GLOW.y, 'light_radial')
+      .setTint(WOODS_GLOW_WARM).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH).setVisible(false));
+    this.forestEdgeTabletGlow = this.track(this.add.image(FOREST_EDGE_TABLET_GLOW.x, FOREST_EDGE_TABLET_GLOW.y, 'light_radial')
+      .setTint(0x9fe8d8).setScale(0.3).setAlpha(0.4).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH).setVisible(false));
+    this.forestEdgeRingGlow = this.track(this.add.image(FOREST_EDGE_RING_GLOW.x, FOREST_EDGE_RING_GLOW.y, 'light_radial')
+      .setTint(WOODS_GLOW_CYAN).setScale(0.25).setAlpha(0.35).setBlendMode(Phaser.BlendModes.ADD).setDepth(WOODS_GLOW_DEPTH)
+      .setVisible(this.progress.flags['l0-footprints-found'] === true));
+    this.syncForestEdgeTabletGlow();
+  }
+
+  /** Eye glow follows the eye art: hidden while dormant, brighter while the charge is received and once the gate is full. */
+  private syncForestEdgeEyeGlow(filename: string): void {
+    const glow = this.forestEdgeEyeGlow;
+    if (!glow) return;
+    if (filename === 'sun-eye-receiving') glow.setVisible(true).setScale(0.25).setAlpha(0.45);
+    else if (filename === 'sun-eye-full') glow.setVisible(true).setScale(0.35).setAlpha(0.7);
+    else glow.setVisible(false);
+  }
+
+  /** Tablet glow shows only while the tablet displays its illuminated art. It reads the live texture, so every texture choice stays in sync. */
+  private syncForestEdgeTabletGlow(): void {
+    const lit = getLevelArtKey(0, 'beacon-stone-illuminated');
+    const tablet = this.objects.find((object) => object.getData('forestEdgeId') === 'tablet');
+    this.forestEdgeTabletGlow?.setVisible(tablet instanceof Phaser.GameObjects.Image && lit !== null && tablet.texture.key === lit);
   }
 
   private revealForestEdgeFootprints(): void {
+    this.forestEdgeRingGlow?.setVisible(true);
     FOREST_EDGE.objects.trail.forEach((point, index) => {
       if (this.objects.some((object) => object.getData('forestEdgeId') === `footprint-${index}`)) return;
       const stamp = this.addLevelArt('footprints-pulse', point.x, point.y, 20, 28, 4);
@@ -2845,15 +2868,48 @@ export class CampaignScene extends Phaser.Scene {
     }
   }
 
-  /** Level 02 forest: back canopy rows, side trees, bottom bushes, ground cover, and path-edge stamps. */
-  private drawWoodsDecor(decor: WoodsDecor): void {
-    const tree = (texture: string) => (this.textures.exists(texture) ? texture : 'tree_woods');
+  /**
+   * Shared forest floor for Level 01 and Level 02: soft mottling, the Chaikin-smoothed dirt path as a geometry mask,
+   * and path-edge breakup stamps. The caller draws the base grass tile first. Rendering only.
+   */
+  private drawForestFloor(decor: ForestDecor, pathDepth: number): void {
+    const mottle = this.add.graphics().setDepth(0.3);
+    // Each patch is two nested ellipses so its edge reads soft rather than hard-stroked.
+    for (const patch of decor.mottling.shadows) {
+      mottle.fillStyle(FOREST_MOTTLE_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width, patch.height);
+      mottle.fillStyle(FOREST_MOTTLE_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width * 0.6, patch.height * 0.6);
+    }
+    for (const patch of decor.mottling.moss) {
+      mottle.fillStyle(FOREST_MOSS_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width, patch.height);
+      mottle.fillStyle(FOREST_MOSS_COLOR, patch.alpha * 0.6).fillEllipse(patch.x, patch.y, patch.width * 0.6, patch.height * 0.6);
+    }
+    this.track(mottle);
+    const paths = this.add.graphics().setDepth(pathDepth);
+    paths.fillStyle(0xffffff, 1);
+    for (const polygon of decor.paths) paths.fillPoints(polygon.map(({ x, y }) => new Phaser.Geom.Point(x, y)), true);
+    const mask = paths.createGeometryMask();
+    const pathTexture = this.add.tileSprite(0, 0, 640, 360, 'ground_dirt').setOrigin(0).setTint(WOODS_PATH_TINT).setAlpha(WOODS_PATH_ALPHA).setDepth(pathDepth).setMask(mask);
+    paths.setVisible(false);
+    this.track(paths); this.track(pathTexture);
+    // Edge shadows must sit just above the dirt overlay to soften its rim. Level 02 (path 0.55) keeps its pinned 0.58;
+    // Level 01 (path 0.6) lifts them to 0.61, still below the edge tufts (0.62).
+    for (const stamp of decor.pathEdge.shadows) {
+      this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setDepth(Math.max(stamp.depth, pathDepth + 0.01)));
+    }
+    for (const stamp of decor.pathEdge.tufts) {
+      this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
+    }
+  }
+
+  /** Shared forest decor for Level 01 and Level 02: back canopy rows, side trees, bottom bushes, ground cover. No actor or walkable meaning. */
+  private drawForestDecor(decor: ForestDecor): void {
+    const tree = (texture: string) => (this.textures.exists(texture) ? texture : FOREST_DECOR_TEXTURES.treeA);
     for (const t of [...decor.backTrees, ...decor.sideTrees]) {
       this.track(this.add.image(t.x, t.baseY, tree(t.texture)).setOrigin(0.5, 1).setFlipX(t.flipX)
         .setScale(t.scale).setTint(t.tint).setDepth(woodsDepth(t.baseY)));
     }
     for (const bush of decor.frontBushes) {
-      this.track(this.add.image(bush.x, bush.baseY, 'bush_woods').setOrigin(0.5, 1).setScale(bush.scale).setTint(bush.tint)
+      this.track(this.add.image(bush.x, bush.baseY, FOREST_DECOR_TEXTURES.bush).setOrigin(0.5, 1).setScale(bush.scale).setTint(bush.tint)
         .setAlpha(bush.alpha).setDepth(woodsDepth(bush.baseY)));
     }
     for (const tuft of decor.groundCover.tufts) {
@@ -2863,7 +2919,7 @@ export class CampaignScene extends Phaser.Scene {
     for (const mushroom of decor.groundCover.mushrooms) {
       this.track(this.add.image(mushroom.x, mushroom.y, mushroom.texture).setScale(mushroom.scale).setTint(mushroom.tint)
         .setAlpha(mushroom.alpha).setDepth(mushroom.depth));
-      if (mushroom.texture === 'mushroom_cyan') {
+      if (mushroom.texture === FOREST_DECOR_TEXTURES.mushroomCyan) {
         // Small additive glow on the cap (mushroom y - 5). The mushroom sprite stays under actors, but the glow must sit
         // above the darkness overlay (68-68.5) or it is swallowed; being additive light, it never hides anything.
         this.track(this.add.image(mushroom.x, mushroom.y - 5, 'light_radial').setScale(0.05).setTint(WOODS_GLOW_CYAN)

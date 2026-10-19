@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
   buildWoodsDecor, chaikinClosed, pointInPolygon, WOODS_BUSH_TEXTURE_HEIGHT, WOODS_DECOR_SEED,
 } from '../src/data/whisperingWoodsDecor.ts';
@@ -7,6 +8,15 @@ import { WHISPERING_WOODS } from '../src/data/whisperingWoodsLayout.ts';
 const decor = buildWoodsDecor();
 assert.deepEqual(buildWoodsDecor(), decor, 'decor generator is deterministic for a fixed seed');
 assert.equal(typeof WOODS_DECOR_SEED, 'number', 'seed is a fixed numeric constant');
+
+// Hard guard: the approved Level 02 output is pinned byte-for-byte. A changed seed, draw order, constant or
+// texture choice in forestDecor.ts changes this hash, so the shared generator cannot silently restyle Level 02.
+const APPROVED_WOODS_DECOR_SHA256 = 'a5d5271a3f63c98b2588d7e8b0e3c5b1cf793a509e3a27b94e737c69878b17a3';
+assert.equal(
+  createHash('sha256').update(JSON.stringify(buildWoodsDecor())).digest('hex'),
+  APPROVED_WOODS_DECOR_SHA256,
+  'Level 02 decor output matches the approved pass (sha256 guard)',
+);
 
 const anchorsAndStands = [...Object.values(WHISPERING_WOODS.stands), ...Object.values(WHISPERING_WOODS.anchors)];
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);

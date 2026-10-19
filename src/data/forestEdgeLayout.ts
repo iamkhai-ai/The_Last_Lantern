@@ -41,6 +41,19 @@ export const FOREST_EDGE_SOLIDS: Rect[] = [
   ...FOREST_EDGE.objects.rocks.map(({ anchor }) => ({ x: anchor.x - 13, y: anchor.y - 14, width: 26, height: 14 })),
 ];
 
+/** Walkable dirt path through the forest edge, raw (before Chaikin smoothing). Point order is the polygon outline. */
+export const FOREST_EDGE_GROUND_PATH: readonly Point[] = [
+  { x: 248, y: 304 }, { x: 221, y: 282 }, { x: 195, y: 265 },
+  { x: 192, y: 252 }, { x: 198, y: 243 }, { x: 238, y: 234 },
+  { x: 280, y: 235 }, { x: 319, y: 230 }, { x: 341, y: 221 },
+  { x: 365, y: 207 }, { x: 389, y: 197 }, { x: 405, y: 191 },
+  { x: 431, y: 171 }, { x: 468, y: 151 }, { x: 504, y: 151 },
+  { x: 511, y: 160 }, { x: 494, y: 178 }, { x: 454, y: 197 },
+  { x: 420, y: 220 }, { x: 399, y: 226 }, { x: 379, y: 234 },
+  { x: 357, y: 248 }, { x: 333, y: 258 }, { x: 288, y: 263 },
+  { x: 255, y: 262 }, { x: 252, y: 272 }, { x: 282, y: 293 },
+];
+
 export function feetAt(center: Point): Point {
   return { x: center.x, y: center.y + FOREST_EDGE.player.footOffsetY };
 }
