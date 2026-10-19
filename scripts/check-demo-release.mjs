@@ -302,7 +302,7 @@ const MENU_METHODS = [
   'cancelNewGame', 'activateConfirm', 'onConfirmPointer', 'triggerSelected',
   'moveSelection', 'refreshMenuHighlight', 'wireInput', 'armConfirm', 'onKey',
   'clearKeyListeners', 'registerShutdownGuard', 'clearShutdownGuard', 'teardownInput',
-  'continueGame', 'openBlockedSaveMessage', 'setConfirmVisible',
+  'continueGame', 'openBlockedSaveMessage', 'setConfirmVisible', 'hasAnySave',
 ];
 
 function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStage, noSave = false } = {}) {
@@ -815,6 +815,48 @@ const CASES = [
       assert.equal(harness.scene.menuMode, 'confirm-new-game', 'any existing save opens the warning');
       assert.equal(harness.calls.legacyCleared, 0);
       assertStorageUntouched(harness.storage, harness.before);
+    },
+  },
+  {
+    name: 'demo_new_game_rechecks_a_campaign_save_added_after_menu_create',
+    run: () => {
+      const harness = makeMenuHarness({ policy: policyFor('demo'), noSave: true });
+      assert.equal(harness.scene.hasSavedGame, false, 'the menu was created with no save');
+      // Another tab (or the browser test) writes a valid index-5 save after
+      // MenuScene.create() cached hasSavedGame = false.
+      CampaignSaveSystem.save({ ...CampaignSaveSystem.createDefaultProgress(), level: 5 });
+      const before = harness.storage.snapshot();
+      harness.storage.ops.set = 0;
+      harness.storage.ops.remove = 0;
+
+      harness.scene.startNewGame();
+      assert.equal(harness.scene.menuMode, 'confirm-new-game',
+        'the destructive New Game re-checks storage and warns about the late save');
+      assert.equal(harness.scene.confirmSelectedIndex, 0, 'the late-save warning defaults to Cancel');
+      assert.equal(harness.calls.started.length, 0, 'the late save is not erased and the prologue does not start');
+      assert.equal(harness.calls.campaignCleared, 0);
+      assert.equal(harness.calls.legacyCleared, 0);
+      assertStorageUntouched(harness.storage, before);
+    },
+  },
+  {
+    name: 'demo_new_game_rechecks_a_legacy_save_added_after_menu_create',
+    run: () => {
+      const harness = makeMenuHarness({ policy: policyFor('demo'), noSave: true });
+      assert.equal(harness.scene.hasSavedGame, false, 'the menu was created with no save');
+      SaveSystem.save({ ...SaveSystem.createDefaultProgress(), stage: 'hub_initial' });
+      const before = harness.storage.snapshot();
+      harness.storage.ops.set = 0;
+      harness.storage.ops.remove = 0;
+
+      harness.scene.startNewGame();
+      assert.equal(harness.scene.menuMode, 'confirm-new-game',
+        'a legacy save that appeared after create also opens the warning');
+      assert.equal(harness.scene.confirmSelectedIndex, 0, 'the late legacy-save warning defaults to Cancel');
+      assert.equal(harness.calls.started.length, 0, 'the legacy save is not erased and the prologue does not start');
+      assert.equal(harness.calls.legacyCleared, 0);
+      assert.equal(harness.calls.campaignCleared, 0);
+      assertStorageUntouched(harness.storage, before);
     },
   },
   {

@@ -1092,6 +1092,7 @@ function makeMenuScene({ completed = false, campaignSave = false, legacy = null 
     SoundSystem: { playLanternToggle() { calls.lantern += 1; }, playMirrorRotate() {}, isMuted() { return false; } },
   };
   scene.startNewGame = bindMethod(methodUnit(menuSource, 'startNewGame', 'MenuScene'), symbols, 'MenuScene.startNewGame()');
+  scene.hasAnySave = bindMethod(methodUnit(menuSource, 'hasAnySave', 'MenuScene'), symbols, 'MenuScene.hasAnySave()');
   scene.beginNewGame = bindMethod(methodUnit(menuSource, 'beginNewGame', 'MenuScene'), symbols, 'MenuScene.beginNewGame()');
   scene.continueGame = bindMethod(methodUnit(menuSource, 'continueGame', 'MenuScene'), symbols, 'MenuScene.continueGame()');
   scene.triggerSelected = bindMethod(methodUnit(menuSource, 'triggerSelected', 'MenuScene'), symbols, 'MenuScene.triggerSelected()');

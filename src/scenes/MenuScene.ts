@@ -48,7 +48,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   public create(): void {
-    this.hasSavedGame = CampaignSaveSystem.hasSave() || SaveSystem.hasSave();
+    this.hasSavedGame = this.hasAnySave();
     this.selectedIndex = 0;
     this.starting = false;
     this.menuButtons = [];
@@ -377,10 +377,18 @@ export class MenuScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Storage is re-queried at the destructive action, not only when the menu was
+   * drawn: another tab can write a save after create() cached `hasSavedGame`.
+   */
+  private hasAnySave(): boolean {
+    return CampaignSaveSystem.hasSave() || SaveSystem.hasSave();
+  }
+
   public startNewGame(): void {
     if (this.starting) return;
     if (this.menuMode === 'confirm-new-game') return;
-    if (RELEASE_POLICY.isDemo && this.hasSavedGame) {
+    if (RELEASE_POLICY.isDemo && this.hasAnySave()) {
       this.requestNewGameConfirmation();
       return;
     }
