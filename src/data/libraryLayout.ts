@@ -24,13 +24,23 @@ export const LIBRARY_LAYOUT = {
   ] as LibraryPoint[],
   // Just south of the dais edge; the small radius keeps the South seat (320,282) targeted.
   confirm: { x: 320, y: 216, radius: 9 },
-  shelves: [{ x: 50, y: 150 }, { x: 598, y: 120 }] as LibraryPoint[],
-  mural: { x: 500, y: 144, scale: 0.75 },
-  muralStand: { x: 500, y: 226 },
-  exit: { x: 566, y: 286, anchorY: 312, width: 110 },
+  // The big east shelf left with the old south-wall gate: the arch now fills that corner.
+  shelves: [{ x: 50, y: 150 }] as LibraryPoint[],
+  // Shifted 12px west so the north-wall arch (LIBRARY_LAYOUT.exit) does not cover the panel art.
+  mural: { x: 488, y: 144, scale: 0.75 },
+  muralStand: { x: 488, y: 226 },
+  // North-wall gate, built like the Level 02 arch (WHISPERING_WOODS.gate): `y` is the interaction
+  // stand just inside the doorway on its south side (Level 02 uses 8px above its post base), `anchorY`
+  // is the arch base against the north wall. Rule 3: a level gate stand sits on the approach side.
+  exit: { x: 580, y: 170, radius: 24, anchorY: 178, width: 96 },
+  // Free-standing inscription tablet beside the entry path: the first thing a new player meets.
+  // `y` is the south stand; `baseY` is the tablet's floor contact. The stone is 52 tall so its read
+  // label (anchored to the image bounds, 8px above the top) clears the rack art boxes to the west and
+  // lands above the stone instead of being pushed out over the well.
+  inscription: { x: 232, y: 282, baseY: 270, width: 30, height: 52, radius: 22 },
   checkpoints: [
     { x: 214, y: 288 }, { x: 66, y: 278 }, { x: 320, y: 282 },
-    { x: 500, y: 226 }, { x: 566, y: 286 },
+    { x: 488, y: 226 }, { x: 580, y: 196 },
   ] as LibraryPoint[],
   actor: { bodyX: 11, bodyY: 37, bodyWidth: 14, bodyHeight: 6, feetY: 19 },
   art: { rack: 48, shelf: 80, panelWidth: 87, panelHeight: 111 },
@@ -40,24 +50,35 @@ export const LIBRARY_LAYOUT = {
 /** Footprint of the central well dais (approximates the core radius of 46). */
 export const LIBRARY_DAIS: LibraryRect = { x: 284, y: 158, width: 72, height: 60 };
 
+/** The inscription tablet's small footprint: 20x10 with its south edge on the tablet base. */
+export const LIBRARY_INSCRIPTION_SOLID: LibraryRect = {
+  x: LIBRARY_LAYOUT.inscription.x - 10,
+  y: LIBRARY_LAYOUT.inscription.baseY - 10,
+  width: 20,
+  height: 10,
+};
+
 export const LIBRARY_SOLID_RECTS: LibraryRect[] = [
   // Solid footprints fill the visible prop faces, so their sides and backs block too.
   { x: 28, y: 223, width: 76, height: 50 },
   { x: 12, y: 112, width: 76, height: 78 },
-  { x: 560, y: 82, width: 76, height: 78 },
   { x: 108, y: 102, width: 48, height: 48 },
   { x: 156, y: 102, width: 48, height: 48 },
   { x: 108, y: 212, width: 48, height: 48 },
   { x: 156, y: 212, width: 48, height: 48 },
-  { x: 458, y: 90, width: 84, height: 110 },
+  { x: 446, y: 90, width: 84, height: 110 },
   LIBRARY_DAIS,
-  // Exit posts block only their base footprint (bottom 24px of the 110px-wide arch at anchorY 312);
-  // the upper post is drawn behind the player when the player stands north of the base.
-  { x: 511, y: 288, width: 37, height: 24 },
-  { x: 585, y: 288, width: 37, height: 24 },
+  LIBRARY_INSCRIPTION_SOLID,
+  // North-wall gate, built like the Level 02 arch: the backing fills the wall above the doorway and
+  // the two post bases block the sides, so the player can only enter through the arch opening.
+  // Backing 532..628 x 80..144; posts 532..564 and 596..628, base 144..178; opening 564..596.
+  { x: 532, y: 80, width: 96, height: 64 },
+  { x: 532, y: 144, width: 32, height: 34 },
+  { x: 596, y: 144, width: 32, height: 34 },
 ];
 
-export const LIBRARY_EXIT_THRESHOLD: LibraryRect = { x: 548, y: 309, width: 36, height: 7 };
+/** Fills the arch opening between the two post bases; disabled while the exit is open. */
+export const LIBRARY_EXIT_THRESHOLD: LibraryRect = { x: 564, y: 144, width: 32, height: 22 };
 
 const LIBRARY_WALLS: LibraryRect[] = [
   { x: 8, y: 80, width: 16, height: 230 },
