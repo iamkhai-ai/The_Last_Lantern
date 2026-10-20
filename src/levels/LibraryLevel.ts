@@ -504,9 +504,9 @@ export class LibraryLevel {
     // Dark backing disc above the well art keeps the start sun readable on the carved lid.
     const backing = this.scene.add.graphics().setDepth(LIBRARY_LAYOUT.groundDepth - 0.45);
     backing.fillStyle(0x0d1414, 0.75);
-    backing.fillCircle(start.x, markY, 13);
+    backing.fillCircle(start.x, markY, 16);
     this.track(backing);
-    this.addImage('bright-horizon-sun', start.x, markY, 30, 30, LIBRARY_LAYOUT.groundDepth - 0.4).setTint(LIBRARY_WARM);
+    this.addImage('bright-horizon-sun', start.x, markY, 38, 38, LIBRARY_LAYOUT.groundDepth - 0.4).setTint(LIBRARY_WARM);
     // Soft warm glow above the darkness so the start marker stays visible with the lantern off.
     const glow = this.scene.add.image(start.x, markY, 'light_radial')
       .setTint(LIBRARY_WARM).setBlendMode(Phaser.BlendModes.ADD).setScale(0.18).setAlpha(0.45).setDepth(LIBRARY_GLOW_DEPTH);
@@ -1031,7 +1031,10 @@ export class LibraryLevel {
   }
 
   private updateExitTextures(open: boolean): void {
-    const texture = open ? 'woods_arch_open' : 'woods_arch_locked';
+    // `woods_arch_open` is only the shut door made brighter, so the open gate uses the real passage art (a dark
+    // tunnel mouth) from the Whispering Woods set; it is loaded for every level.
+    const passage = getLevelArtKey(1, 'woods_arch_open_passage');
+    const texture = open ? (passage && this.scene.textures.exists(passage) ? passage : 'woods_arch_open') : 'woods_arch_locked';
     const baseKey = this.createArchLayerTexture(texture, 'base');
     if (this.exitBaseImage && this.exitBaseImage.texture.key !== baseKey) this.exitBaseImage.setTexture(baseKey);
     const layers = ['header', 'left-post', 'right-post'];

@@ -37,7 +37,14 @@ def glyph(name):
         d.ellipse((20,2,28,11),fill=rim);d.line([(25,3),(23,5),(23,8),(25,10)],fill='#495b48',width=1)
     return im
 for n in ['chim','la','thuyen','hat']:save('border-'+n,glyph(n),'native identity icon only')
-low=blank();d=ImageDraw.Draw(low);d.ellipse((21,25,27,31),fill=gold);d.line((13,30,35,30),fill='#ced3b5');d.line((15,33,23,33),fill='#9bbaaf');d.line((27,33,33,33),fill='#9bbaaf')
+low=blank();d=ImageDraw.Draw(low)
+# Sunrise: a large half-disc on a thick horizon, five rays fanning above it and water ticks below, so it reads as a
+# rising sun at tablet size instead of a small bump on a hairline.
+hx,hy=24,31
+for x0,y0,x1,y1 in [(24,21,24,17),(31,24,33,21),(17,24,15,21),(33,28,36,27),(15,28,12,27)]:d.line((x0,y0,x1,y1),fill=gold,width=1)
+d.pieslice((hx-7,hy-7,hx+7,hy+7),180,360,fill=gold);d.pieslice((hx-3,hy-3,hx+3,hy+3),180,360,fill='#fbe9a6')
+d.line((12,hy,36,hy),fill='#ced3b5',width=2)
+d.line((15,35,22,35),fill='#9bbaaf');d.line((26,35,33,35),fill='#9bbaaf')
 save('bright-horizon-sun',low,'native shared clue: Chim and Thuyen byte-identical')
 for kind in ['sun','moon']:
     im=blank();d=ImageDraw.Draw(im);d.arc((13,17,35,37),185,255,fill=gold,width=1);d.arc((13,17,35,37),285,355,fill=gold,width=1)
@@ -61,7 +68,7 @@ for state in ['empty','occupied','selected']:
     if state=='selected':
         for x,y,sx,sy in [(1,1,1,1),(46,1,-1,1),(1,46,1,-1),(46,46,-1,-1)]:d.line([(x,y+sy*8),(x,y),(x+sx*8,y)],fill=gold,width=2)
     save('socket-'+state,im,'native socket state; occupied is neutral seating placeholder under actual tablet')
-im=Image.new('RGBA',(20,16));d=ImageDraw.Draw(im);d.ellipse((7,3,13,9),fill=gold);d.line((2,9,18,9),fill=gold,width=2);d.line((5,12,15,12),fill='#b5c5ad');save('start-horizon',im,'native scenario start icon; no ordering labels')
+im=Image.new('RGBA',(20,16));d=ImageDraw.Draw(im);d.line((10,3,10,1),fill=gold);d.line((14,5,16,3),fill=gold);d.line((6,5,4,3),fill=gold);d.line((17,8,19,7),fill=gold);d.line((3,8,1,7),fill=gold);d.pieslice((5,4,15,14),180,360,fill=gold);d.line((1,9,19,9),fill='#ced3b5',width=2);d.line((4,12,16,12),fill='#b5c5ad');save('start-horizon',im,'native scenario start icon; no ordering labels')
 im=Image.new('RGBA',(24,12));d=ImageDraw.Draw(im);d.line((2,6,20,6),fill='#9dbbad',width=2);d.line([(16,2),(21,6),(16,10)],fill='#9dbbad',width=2);save('route-cue',im,'native directional connector; rotate at composition; no tablet identities')
 book=fit(B/'sources/test-book-body-generated.png',(56,40));save('test-book-body',book,'generated body normalized nearest','assets/levels/03-library-beneath-the-roots/sources/test-book-body-generated.png')
 for state in ['bright','dark']:

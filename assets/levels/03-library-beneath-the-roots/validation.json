@@ -83,7 +83,7 @@
         0,
         255
       ],
-      "sha256": "550c8daef91ac2857f8a336636d3b039131c157f4c49bb263a4faef527dada6b"
+      "sha256": "b1d56a083977c49d837db29f3ec2f950316379d0aa39490b00f334eadc7bb501"
     },
     {
       "file": "assets/levels/03-library-beneath-the-roots/sprites/bright-high-sun.png",
@@ -167,7 +167,7 @@
         0,
         255
       ],
-      "sha256": "b26b9406e5c07f2120c3cf3ed90bf75b397b03e69c00e24ab35fb8893b16234d"
+      "sha256": "69eb73f88d009c028cb848da1bf2e828ced7d78d8e239831fcb0dceab0e49f5d"
     },
     {
       "file": "assets/levels/03-library-beneath-the-roots/sprites/tablet-chim-dark.png",
@@ -223,7 +223,7 @@
         0,
         255
       ],
-      "sha256": "7070327529e1da03715f961f530b5c5e3517b15637d9ed03ec431cacf7bf8643"
+      "sha256": "85a830b4fc302afe7f894486bbc3ff288bf4be4f2e4747117e4d2b99fc1b7b11"
     },
     {
       "file": "assets/levels/03-library-beneath-the-roots/sprites/tablet-thuyen-dark.png",
@@ -321,7 +321,7 @@
         0,
         255
       ],
-      "sha256": "fd61e0477f42651b7123fe1ac276a4b6c815b1b58160a88d1d1396d01416fb51"
+      "sha256": "3ffd64f32f4d0bb23edd24114122512bd63aab6a175b26841c0a28adce2264be"
     },
     {
       "file": "assets/levels/03-library-beneath-the-roots/sprites/route-cue.png",
