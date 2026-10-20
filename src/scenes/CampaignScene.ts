@@ -56,6 +56,7 @@ import { LanternSystem, LIBRARY_LIGHTING } from '../systems/LanternSystem';
 import { CampaignProgress, CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { consumeCampaignNewGameIntent } from '../systems/CampaignStartIntent';
 import { RELEASE_POLICY } from '../config/releaseConfig';
+import { applyLevelSelection, reachedLevel } from '../systems/levelSelect';
 import { deriveObservatoryState, type ObservatoryDerivedState } from '../systems/ObservatoryPuzzle';
 import {
   OBSERVATORY_BEAT_NO_BEAM, OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
@@ -241,6 +242,12 @@ export class CampaignScene extends Phaser.Scene {
       onResume: () => undefined,
       onRestart: () => { CampaignSaveSystem.clear(); this.scene.start('PrologueScene'); },
       onMainMenu: () => this.scene.start('MenuScene'),
+    }, {
+      // The demo build lists only its own slice of level titles; the reach is capped at the same index.
+      names: CAMPAIGN_LEVELS.slice(0, RELEASE_POLICY.lastPlayableLevelIndex + 1).map((level) => level.title),
+      getCurrent: () => this.progress.level,
+      getReached: () => reachedLevel(this.progress, RELEASE_POLICY.lastPlayableLevelIndex),
+      onSelect: (index) => this.selectLevel(index),
     });
     this.hud = new CampaignHud(this);
     const keyboard = this.input.keyboard;
@@ -254,10 +261,15 @@ export class CampaignScene extends Phaser.Scene {
       esc: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC),
     };
     keyboard.on('keydown-E', () => {
-      if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
-      else if (!this.pauseMenu.isOpen()) this.interactions.tryInteract(performance.now());
+      if (this.pauseMenu.isOpen()) this.pauseMenu.triggerSelected();
+      else if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
+      else this.interactions.tryInteract(performance.now());
     });
     keyboard.on('keydown-SPACE', () => {
+      if (this.pauseMenu.isOpen()) {
+        this.pauseMenu.triggerSelected();
+        return;
+      }
       if (this.dialogue.isActive()) {
         this.dialogue.handleAdvanceInput(performance.now());
         return;
@@ -312,6 +324,13 @@ export class CampaignScene extends Phaser.Scene {
       else if (!this.pauseMenu.isOpen()) this.pauseMenu.open();
       else this.pauseMenu.close();
     });
+    // While the pause menu is open it owns the navigation keys. Each handler does nothing when the menu is closed.
+    const whenPaused = (action: () => void) => (): void => { if (this.pauseMenu.isOpen()) action(); };
+    for (const key of ['UP', 'W']) keyboard.on(`keydown-${key}`, whenPaused(() => this.pauseMenu.moveSelection(-1)));
+    for (const key of ['DOWN', 'S']) keyboard.on(`keydown-${key}`, whenPaused(() => this.pauseMenu.moveSelection(1)));
+    for (const key of ['LEFT', 'A']) keyboard.on(`keydown-${key}`, whenPaused(() => this.pauseMenu.changeLevelChoice(-1)));
+    for (const key of ['RIGHT', 'D']) keyboard.on(`keydown-${key}`, whenPaused(() => this.pauseMenu.changeLevelChoice(1)));
+    keyboard.on('keydown-ENTER', whenPaused(() => this.pauseMenu.triggerSelected()));
 
     this.lantern.onPulse((x, y, radius) => {
       this.progress.flags['pulse-used'] = true;
@@ -2545,6 +2564,18 @@ export class CampaignScene extends Phaser.Scene {
       SoundSystem.playGateOpen();
       this.scene.restart();
     });
+  }
+
+  /**
+   * Travels from the pause menu to a level already reached. The puzzles stay solved (see applyLevelSelection). Nothing
+   * runs while a conversation, the ending or the redirect is on screen.
+   */
+  private selectLevel(target: number): void {
+    if (this.dialogue.isActive() || this.heartEnd || this.redirecting) return;
+    if (!applyLevelSelection(this.progress, target, RELEASE_POLICY.lastPlayableLevelIndex)) return;
+    this.save();
+    SoundSystem.playGateOpen();
+    this.scene.restart();
   }
 
   /** Level 10's ending: HeartOfElariaLevel has already saved `l9-complete`, so only the scene switch is left. */
