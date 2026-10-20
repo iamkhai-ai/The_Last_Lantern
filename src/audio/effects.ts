@@ -117,20 +117,20 @@ export const gateOpen: Recipe = (ctx, out, t) => {
 };
 
 /**
- * One light footstep, in the manner of a top-down action game: a soft, short "tup" rather than a recorded stride.
- * Almost all of it is a low thump with a fast fall in pitch; on top sits a very short, filtered touch of the sole
+ * One light footstep, in the manner of a top-down action game: a soft, short "tap" rather than a recorded stride.
+ * It is a brief, small tone (well above the body's weight, so nothing booms) with a slight fall in pitch; with it sits a very short, filtered touch of the sole
  * (a faint rustle on grass, a duller scuff on soil). The two feet differ slightly in pitch and every step varies a
  * little, so a walk is never a machine-gun of identical hits. Running is a touch higher, shorter and firmer.
  */
 export function footstep(ctx: BaseAudioContext, out: AudioNode, t: number, o: { surface: EffectSurface; running: boolean; foot: 0 | 1 }): void {
   const soil = o.surface === 'soil';
   const pitch = (0.93 + Math.random() * 0.14) * (o.foot === 1 ? 1.06 : 1) * (o.running ? 1.12 : 1);
-  const thump = (soil ? 125 : 155) * pitch;
-  const firm = o.running ? 1.25 : 1;
-  tone(ctx, out, { t, freq: thump, endFreq: thump * 0.52, dur: o.running ? 0.06 : 0.075, peak: (soil ? 0.065 : 0.058) * firm, attack: 0.002, lowpass: 600 });
+  const thump = (soil ? 270 : 340) * pitch;
+  const firm = o.running ? 1.2 : 1;
+  tone(ctx, out, { t, freq: thump, endFreq: thump * 0.7, dur: o.running ? 0.032 : 0.04, peak: (soil ? 0.03 : 0.026) * firm, attack: 0.002, lowpass: 900 });
   noise(ctx, out, {
-    t, dur: 0.024, peak: (soil ? 0.011 : 0.008) * firm, attack: 0.002,
-    type: soil ? 'lowpass' : 'bandpass', freq: (soil ? 800 : 1800) * pitch, q: 0.7,
+    t, dur: 0.02, peak: (soil ? 0.01 : 0.009) * firm, attack: 0.002,
+    type: soil ? 'lowpass' : 'bandpass', freq: (soil ? 1300 : 2200) * pitch, q: 0.7,
   });
 }
 

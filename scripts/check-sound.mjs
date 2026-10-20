@@ -142,7 +142,7 @@ await test('a footstep is one short, soft voice with no loop and no timer', asyn
   const [thumpPeak] = ctx.envelopes[0].gain.ramps[0];
   const [noisePeak] = ctx.envelopes[1].gain.ramps[0];
   assert.ok(thumpPeak <= 0.08, `soft thump (${thumpPeak})`);
-  assert.ok(noisePeak < thumpPeak * 0.3, `the noise stays well under the thump (${noisePeak} vs ${thumpPeak})`);
+  assert.ok(noisePeak < thumpPeak * 0.5, `the noise stays under the tone (${noisePeak} vs ${thumpPeak})`);
 });
 
 await test('footsteps alternate feet and differ by surface and by running', async () => {
