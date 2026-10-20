@@ -2,7 +2,7 @@
 
 **Status:** Approved by the user on 2026-10-19. Restored in the isolated feature worktree on 2026-10-19.
 
-**Provenance (honest reconstruction, not a byte-exact restore):** The original approved document at this path was lost when the main checkout switched branches during unrelated work. No exact copy survives in the repository. This document reconstructs the approved design from the approved design summary in the art handoff README (SHA-256 `0f4d2d06466e638b6e38e0c1996f892ced31427ed08f552176a7578bd5d615e1`) and the approved implementation plan (SHA-256 `9f15a170d18c46d3a6edbfd4d8c99431d056da66473e3b464f6892b5229c5830`), including its Global Constraints. It preserves the approved story, the four-panel/eight-line copy, and the binding constraints from those two sources. Wording that was not preserved verbatim is restated, not invented as new scope. If a detail is missing here, the approved summary and plan constraints take precedence and the gap goes back to Sol instead of being filled locally.
+**Provenance (honest reconstruction, not a byte-exact restore):** The original approved document at this path was lost when the main checkout switched branches during unrelated work. No exact copy survives in the repository. This document reconstructs the approved design from the approved design summary in the art handoff README (SHA-256 `0f4d2d06466e638b6e38e0c1996f892ced31427ed08f552176a7578bd5d615e1`) and the approved implementation plan (SHA-256 `9f15a170d18c46d3a6edbfd4d8c99431d056da66473e3b464f6892b5229c5830`), including its Global Constraints. It preserves the approved story, the approved four-panel/eight-turn original copy, and the binding constraints from those two sources. Wording that was not preserved verbatim is restated, not invented as new scope. If a detail is missing here, the approved summary and plan constraints take precedence and the gap goes back to Sol instead of being filled locally.
 
 ## 1. Goal and timing
 
@@ -38,31 +38,51 @@ Static data (panel ids, texture keys, speaker/text lines) belongs in a separate 
 
 Runtime images are 1280×720 indexed PNGs, 256-color palette, no dithering, each at most 1 MiB and at most 4 MiB total before base64 inlining. Full source masters stay in the external art handoff; masters are never imported into Vite or the application.
 
-## 4. Panel and dialogue copy (exact)
+## 4. Panel narration and dialogue (approved copy)
 
-The prologue has exactly four panels and exactly eight dialogue lines, in this order: 1 + 3 + 2 + 2. This copy is the approved copy and is not to be rewritten during implementation.
+The user approved the expanded narration/dialogue on 2026-10-20. Keep the four panels and their art unchanged. Each listed entry is one manually advanced turn; the scene has 4, 8, 8, and 8 turns respectively. Narration uses the speaker label `Lời dẫn`.
 
-**Panel 01 — road home.** Warm sunset and an unnamed home village ahead.
+**Panel 01 — road home.** Warm sunset; the village windows begin to glow.
 
-- Nhinh: "Qua khúc đường này là tới làng rồi."
+- Lời dẫn: “Chiều xuống trên con đường ven rừng. Dưới thung lũng, những ô cửa trong làng đã bắt đầu sáng đèn.”
+- Nhinh: “Mọi người thắp đèn cả rồi. Hôm nay mình về muộn quá.”
+- Lời dẫn: “Cậu kéo lại chiếc khăn, rảo bước về phía những mái nhà quen thuộc. Chỉ cần đi hết đoạn đường này, cậu sẽ về tới nhà.”
+- Nhinh: “May mà vẫn còn nhìn rõ đường.”
 
-**Panel 02 — voice in the trees.** At the fork, last sunset behind; Nhinh turns toward a small golden light in the forest.
+**Panel 02 — voice in the trees.** Nhinh hears a faint voice, sees a tiny golden light, and chooses to help despite the fading sunset.
 
-- Tiếng gọi: "Có ai… nghe thấy tôi không?"
-- Nhinh: "Bạn bị lạc à?"
-- Nhinh: "Đợi nhé. Tôi tới đây."
+- Lời dẫn: “Giữa tiếng lá xào xạc, một giọng nói rất khẽ vang lên. Nhinh dừng chân, lắng nghe.”
+- Tiếng gọi: “Có ai… nghe thấy tôi không?”
+- Nhinh: “Ai đấy? Bạn đang ở đâu?”
+- Lời dẫn: “Một đốm sáng vàng hiện lên giữa những thân cây, rồi khuất sau tán lá. Không có tiếng trả lời.”
+- Nhinh: “Bạn bị lạc à?”
+- Lời dẫn: “Nhinh ngoái nhìn về phía làng. Trời sắp tối. Cậu biết mình nên về — nhưng người kia có thể vẫn đang chờ một tiếng đáp.”
+- Nhinh: “Tôi nghe thấy rồi. Bạn cứ ở yên đó nhé.”
+- Nhinh: “Tôi sẽ tìm bạn, rồi mình cùng ra ngoài.”
 
-**Panel 03 — path disappears.** Safe misty forest floor; the path vanishes in fog; Nhinh looks back.
+**Panel 03 — path disappears.** Safe forest floor; the fog hides the path and the light is gone.
 
-- Nhinh: "Tiếng gọi vừa ở đây mà…"
-- Nhinh: "Mình vừa đi từ phía nào nhỉ?"
+- Lời dẫn: “Sương dày lên quanh những gốc cây. Nhinh đi thêm một quãng, nhưng không còn thấy đốm sáng. Tiếng gọi cũng im bặt.”
+- Nhinh: “Tôi tới rồi đây. Bạn còn ở đó không?”
+- Lời dẫn: “Cậu đứng đợi. Chỉ có tiếng nước nhỏ từ những chiếc lá.”
+- Nhinh: “Vừa nãy rõ ràng là phía này mà…”
+- Lời dẫn: “Nhinh quay lại tìm lối cũ. Những ô cửa sáng đèn đã khuất. Giữa lớp sương, thân cây nào trông cũng giống thân cây cậu vừa đi qua.”
+- Nhinh: “Mình rẽ ở gốc cây kia… hay là chỗ này?”
+- Nhinh: “Bình tĩnh. Cứ quay lại từng đoạn một thôi.”
+- Lời dẫn: “Nhưng sau một hồi tìm kiếm, cậu vẫn không nhận ra chỗ rẽ ban đầu.”
 
-**Panel 04 — waiting for morning.** Nhinh rests under roots in a damp clearing, unlit brass lantern on the ground left of a plain mossy tablet; still-blue pre-dawn forest.
+**Panel 04 — waiting for morning.** Nhinh rests by the same unlit lantern and mossy tablet; the forest remains blue and dark.
 
-- Nhinh: "Nghỉ một lát thôi."
-- Nhinh: "Sáng lên rồi mình sẽ tìm được đường về."
+- Lời dẫn: “Khi đôi chân đã mỏi, Nhinh dừng dưới một gốc cây lớn. Bên cạnh đám rễ có một bia đá phủ rêu và chiếc đèn cũ không cháy.”
+- Nhinh: “Đi tiếp thế này chỉ lạc xa hơn thôi.”
+- Lời dẫn: “Cậu ngồi xuống, kéo chiếc khăn sát cổ. Trong rừng không còn tiếng bước chân nào ngoài tiếng của chính mình.”
+- Nhinh: “Người gọi lúc nãy… không biết đã tìm được đường ra chưa.”
+- Lời dẫn: “Nhinh lắng nghe thêm một lần nữa, rồi tựa lưng vào gốc cây.”
+- Nhinh: “Mình nghỉ một lát thôi. Đợi sương tan đã.”
+- Nhinh: “Sáng lên rồi mình sẽ tìm được đường về.”
+- Lời dẫn: “Cậu nhắm mắt. Trong đầu Nhinh, những ô cửa ở làng vẫn còn sáng.”
 
-After the last line, the scene fades into the existing gameplay; no closing text, pickup, or save write is added.
+After the final narration, the scene fades into the unchanged Level 01 opening; it does not replay “Trời vẫn chưa sáng sao?” here. No closing text, pickup, or save write is added.
 
 ## 5. Presentation, input, and UI
 
