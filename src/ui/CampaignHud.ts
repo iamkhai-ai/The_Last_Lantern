@@ -28,32 +28,27 @@ const PULSE_READY_CSS = '#7df2d4';
 const PULSE_COOLING_CSS = '#d8b869';
 
 const PANEL_RADIUS = 5;
+// One fixed-width mission plate holds chapter, objective and progress; there is no second card.
 const TOP_X = 12;
 const TOP_Y = 8;
-const TOP_MIN_WIDTH = 240;
-const TOP_MAX_WIDTH = 460;
-const TOP_MAX_HEIGHT = 60;
+const TOP_WIDTH = 248;
+const TOP_MAX_HEIGHT = 78;
 const TOP_PAD_X = 8;
 const TOP_PAD_Y = 6;
 const TOP_LINE_GAP = 2;
+const STATUS_ALPHA = 0.72;
 const LUMO_X = 628;
-const LUMO_Y = 8;
-const LUMO_PAD_X = 7;
-const LUMO_PAD_Y = 5;
-const STATUS_X = 12;
-const STATUS_BOTTOM = 334;
-const STATUS_PAD_X = 7;
-const STATUS_PAD_Y = 2;
-const STATUS_MAX_WIDTH = 540;
+const LUMO_Y = 9;
 const ROW_LEFT = 12;
 const ROW_RIGHT = 628;
 const KEYS_X = 320;
 const KEYS_Y = 347;
-const CHIP_HEIGHT = 18;
-const CHIP_GAP = 6;
-const CHIP_PAD_LEFT = 5;
-const CHIP_PAD_RIGHT = 6;
-const CHIP_KEY_GAP = 4;
+const CHIP_HEIGHT = 14;
+const CHIP_GAP = 12;
+const CHIP_KEY_PAD = 4;
+const CHIP_KEY_GAP = 5;
+const ESC_X = 628;
+const ESC_SIZE = 8;
 // The pulse badge lives in the 24px band between the status row (bottom 333)
 // and the canvas edge, so its arc and ready ring must stay inside it.
 const PULSE_BADGE_RADIUS = 8;
@@ -80,11 +75,15 @@ const CRYSTAL_INSET = 12;
 const CRYSTAL_SPACING = 16;
 const CRYSTAL_RADIUS = 7;
 
+/** The only keys that get a chip: the always-on trio plus whichever lantern action the level allows. */
+const CHIP_ORDER: readonly HudKeyId[] = ['move', 'run', 'interact', 'lantern', 'pulse'];
+
 /**
  * Fixed HUD geometry, exported so the source-only checks can prove the pulse
  * badge, its ready ring and the whole key row stay on the 640x360 canvas.
  */
 export const HUD_LAYOUT = {
+  chipOrder: CHIP_ORDER,
   rowLeft: ROW_LEFT,
   rowRight: ROW_RIGHT,
   rowCenter: KEYS_X,
@@ -95,7 +94,7 @@ export const HUD_LAYOUT = {
   arcStroke: PULSE_ARC_STROKE,
   flashRadius: PULSE_FLASH_RADIUS,
   flashStroke: PULSE_FLASH_STROKE,
-  statusBottom: STATUS_BOTTOM,
+  topBottom: TOP_Y + TOP_MAX_HEIGHT,
   toastY: TOAST_Y,
 } as const;
 
@@ -111,7 +110,7 @@ const KEY_DEFS: Record<HudKeyId, { key: string; label: string }> = {
   run: { key: '⇧', label: 'Chạy' },
   interact: { key: 'E', label: 'Tương tác' },
   lantern: { key: 'F', label: 'Đèn' },
-  pulse: { key: 'SPACE', label: 'Pulse' },
+  pulse: { key: 'SPACE', label: 'Xung sáng' },
   journal: { key: 'J', label: 'Sổ tay' },
   hint: { key: 'H', label: 'Gợi ý' },
   pause: { key: 'ESC', label: 'Tạm dừng' },
@@ -132,6 +131,7 @@ export class CampaignHud {
   private readonly objectiveText: Phaser.GameObjects.Text;
   private readonly statusText: Phaser.GameObjects.Text;
   private readonly lumoText: Phaser.GameObjects.Text;
+  private readonly escText: Phaser.GameObjects.Text;
   private readonly chipGraphics: Phaser.GameObjects.Graphics;
   private readonly keyTexts = new Map<HudKeyId, Phaser.GameObjects.Text>();
   private readonly labelTexts = new Map<HudKeyId, Phaser.GameObjects.Text>();
@@ -165,16 +165,17 @@ export class CampaignHud {
     this.toastLayer = scene.add.container(0, 0).setDepth(88);
 
     this.panelGraphics = scene.add.graphics();
-    this.titleText = this.makeText(TOP_X + TOP_PAD_X, TOP_Y + TOP_PAD_Y, '', 13, AMBER, true);
-    this.objectiveText = this.makeText(TOP_X + TOP_PAD_X, TOP_Y + TOP_PAD_Y, '', 10.5, BODY);
-    this.statusText = this.makeText(STATUS_X + STATUS_PAD_X, STATUS_BOTTOM, '', 10, STATUS);
-    this.lumoText = this.makeText(LUMO_X - LUMO_PAD_X, LUMO_Y + LUMO_PAD_Y, '', 10, MINT);
-    // One title line and at most two objective lines: with the paddings that is a 57px panel, which keeps
-    // the authored "top HUD band" (y < ~66) instead of letting a long string grow over the playfield.
-    this.titleText.setWordWrapWidth(TOP_MAX_WIDTH - TOP_PAD_X * 2, true).setMaxLines(1);
-    this.objectiveText.setWordWrapWidth(TOP_MAX_WIDTH - TOP_PAD_X * 2, true).setMaxLines(2);
-    this.statusText.setWordWrapWidth(STATUS_MAX_WIDTH - STATUS_PAD_X * 2, true).setMaxLines(2);
-    this.lumoText.setOrigin(1, 0);
+    this.titleText = this.makeText(TOP_X + TOP_PAD_X, TOP_Y + TOP_PAD_Y, '', 8.5, AMBER, true);
+    this.objectiveText = this.makeText(TOP_X + TOP_PAD_X, TOP_Y + TOP_PAD_Y, '', 11, BODY);
+    this.statusText = this.makeText(TOP_X + TOP_PAD_X, TOP_Y + TOP_PAD_Y, '', 8.5, STATUS);
+    this.lumoText = this.makeText(LUMO_X, LUMO_Y, '', 8, MINT);
+    // Chapter, objective (max two lines) and the progress line share ONE plate, so the HUD has a single
+    // hierarchy anchor instead of four equally weighted cards.
+    const innerWidth = TOP_WIDTH - TOP_PAD_X * 2;
+    this.titleText.setWordWrapWidth(innerWidth, true).setMaxLines(1);
+    this.objectiveText.setWordWrapWidth(innerWidth, true).setMaxLines(2);
+    this.statusText.setWordWrapWidth(innerWidth, true).setMaxLines(2).setAlpha(STATUS_ALPHA);
+    this.lumoText.setOrigin(1, 0).setAlpha(0.68);
     this.panelLayer.add([this.panelGraphics, this.titleText, this.objectiveText, this.statusText, this.lumoText]);
 
     this.chipGraphics = scene.add.graphics();
@@ -188,9 +189,13 @@ export class CampaignHud {
     }
     this.pulseChip = scene.add.container(0, KEYS_Y).setVisible(false);
     this.pulseGraphics = scene.add.graphics();
-    this.pulseLabel = this.makeText(PULSE_LABEL_X, 0, 'Pulse', 9, PULSE_READY_CSS, true).setOrigin(0, 0.5);
+    this.pulseLabel = this.makeText(PULSE_LABEL_X, 0, KEY_DEFS.pulse.label, 9, PULSE_READY_CSS, true).setOrigin(0, 0.5);
     this.pulseChip.add([this.pulseGraphics, this.pulseLabel]);
     this.chipLayer.add(this.pulseChip);
+    // Pause stays discoverable without a chip: a quiet corner label instead of a keycap in the row.
+    this.escText = this.makeText(ESC_X, KEYS_Y, `${KEY_DEFS.pause.key} · ${KEY_DEFS.pause.label}`, ESC_SIZE, KEY_TEXT)
+      .setOrigin(1, 0.5).setAlpha(0.6);
+    this.chipLayer.add(this.escText);
 
     this.toastGraphics = scene.add.graphics().setVisible(false);
     this.toastText = this.makeText(TOAST_X, TOAST_Y, '', 10.5, HINT, true).setOrigin(0.5, 0.5).setVisible(false);
@@ -274,7 +279,7 @@ export class CampaignHud {
   }
 
   public notePulseBlocked(remainingMs: number): void {
-    this.showToast(`Pulse còn ${(remainingMs / 1000).toFixed(1)} giây`);
+    this.showToast(`Xung sáng còn ${(remainingMs / 1000).toFixed(1)} giây`);
     this.pulseShake = PULSE_SHAKE_MS;
   }
 
@@ -317,29 +322,46 @@ export class CampaignHud {
     const graphics = this.panelGraphics;
     graphics.clear();
     this.drawTopPanel(graphics);
-    this.drawStatusPanel(graphics);
-    this.drawLumoChip(graphics);
+    this.drawLumoTag();
   }
 
   private drawTopPanel(graphics: Phaser.GameObjects.Graphics): void {
     const title = this.titleText.text;
     const objective = this.objectiveText.text;
-    if (title === '' && objective === '') {
+    const status = this.statusText.text;
+    if (title === '' && objective === '' && status === '') {
       this.titleText.setVisible(false);
       this.objectiveText.setVisible(false);
+      this.statusText.setVisible(false);
       this.topPanelBottom = TOP_Y;
       return;
     }
-    this.titleText.setVisible(true).setPosition(TOP_X + TOP_PAD_X, TOP_Y + TOP_PAD_Y);
-    const objectiveY = TOP_Y + TOP_PAD_Y + Math.ceil(this.titleText.height) + TOP_LINE_GAP;
-    this.objectiveText.setVisible(true).setPosition(TOP_X + TOP_PAD_X, objectiveY);
-    const inner = Math.ceil(Math.max(this.titleText.width, this.objectiveText.width));
+    const left = TOP_X + TOP_PAD_X;
     const gutter = this.crystals ? CRYSTAL_GUTTER : 0;
-    const width = Math.min(TOP_MAX_WIDTH, Math.max(TOP_MIN_WIDTH, inner + TOP_PAD_X * 2 + gutter));
-    const height = Math.min(TOP_MAX_HEIGHT, objectiveY + Math.ceil(this.objectiveText.height) + TOP_PAD_Y - TOP_Y);
+    const wrapWidth = TOP_WIDTH - TOP_PAD_X * 2 - gutter;
+    let y = TOP_Y + TOP_PAD_Y;
+    if (title !== '') {
+      this.titleText.setVisible(true).setPosition(left, y).setWordWrapWidth(wrapWidth, true);
+      y += Math.ceil(this.titleText.height) + TOP_LINE_GAP;
+    } else {
+      this.titleText.setVisible(false);
+    }
+    if (objective !== '') {
+      this.objectiveText.setVisible(true).setPosition(left, y).setWordWrapWidth(wrapWidth, true);
+      y += Math.ceil(this.objectiveText.height) + TOP_LINE_GAP;
+    } else {
+      this.objectiveText.setVisible(false);
+    }
+    if (status !== '') {
+      this.statusText.setVisible(true).setPosition(left, y).setWordWrapWidth(wrapWidth, true);
+      y += Math.ceil(this.statusText.height);
+    } else {
+      this.statusText.setVisible(false);
+    }
+    const height = Math.min(TOP_MAX_HEIGHT, Math.ceil(y + TOP_PAD_Y - TOP_Y));
     this.topPanelBottom = TOP_Y + height;
-    this.drawPanel(graphics, TOP_X, TOP_Y, width, height);
-    if (this.crystals) this.drawCrystals(graphics, TOP_X + width - CRYSTAL_INSET, TOP_Y + 12);
+    this.drawPanel(graphics, TOP_X, TOP_Y, TOP_WIDTH, height);
+    if (this.crystals) this.drawCrystals(graphics, TOP_X + TOP_WIDTH - CRYSTAL_INSET, TOP_Y + 14);
     if (this.toastText.visible) this.redrawToast();
   }
 
@@ -371,28 +393,13 @@ export class CampaignHud {
     });
   }
 
-  /** Anchored to its bottom edge so a two-line status grows upward, away from the key row. */
-  private drawStatusPanel(graphics: Phaser.GameObjects.Graphics): void {
-    if (this.statusText.text === '') {
-      this.statusText.setVisible(false);
-      return;
-    }
-    const width = Math.min(STATUS_MAX_WIDTH, Math.ceil(this.statusText.width) + STATUS_PAD_X * 2);
-    const height = Math.ceil(this.statusText.height) + STATUS_PAD_Y * 2;
-    const y = STATUS_BOTTOM - height;
-    this.statusText.setVisible(true).setPosition(STATUS_X + STATUS_PAD_X, y + STATUS_PAD_Y);
-    this.drawPanel(graphics, STATUS_X, y, width, height);
-  }
-
-  private drawLumoChip(graphics: Phaser.GameObjects.Graphics): void {
+  /** The companion name is a quiet watermark, not a second card: no fill, no stroke, no keycap. */
+  private drawLumoTag(): void {
     if (this.lumoText.text === '') {
       this.lumoText.setVisible(false);
       return;
     }
-    this.lumoText.setVisible(true).setPosition(LUMO_X - LUMO_PAD_X, LUMO_Y + LUMO_PAD_Y);
-    const width = Math.ceil(this.lumoText.width) + LUMO_PAD_X * 2;
-    const height = Math.ceil(this.lumoText.height) + LUMO_PAD_Y * 2;
-    this.drawPanel(graphics, LUMO_X - width, LUMO_Y, width, height);
+    this.lumoText.setVisible(true).setPosition(LUMO_X, LUMO_Y);
   }
 
   private layoutKeys(): void {
@@ -404,16 +411,18 @@ export class CampaignHud {
     }
     this.pulseChip.setVisible(false);
     this.pulseVisible = false;
+    this.escText.setVisible(this.keyVisibility.pause);
 
     const pulseLabelWidth = this.measurePulseLabel();
     const widths = new Map<HudKeyId, number>();
-    for (const id of KEY_ORDER) {
+    // Only the contextual action chips are drawn; journal/hint/pause live in the pause menu instead.
+    for (const id of CHIP_ORDER) {
       if (!this.keyVisibility[id]) continue;
       widths.set(id, id === 'pulse'
-        ? PULSE_OUTER * 2 + CHIP_KEY_GAP + pulseLabelWidth + CHIP_PAD_RIGHT
+        ? PULSE_OUTER * 2 + CHIP_KEY_GAP + pulseLabelWidth
         : this.measureChip(id));
     }
-    const visible = KEY_ORDER.filter((id) => widths.has(id));
+    const visible = CHIP_ORDER.filter((id) => widths.has(id));
     const total = visible.reduce((sum, id) => sum + (widths.get(id) ?? 0), 0) + CHIP_GAP * Math.max(0, visible.length - 1);
     let x = centerKeyRow(total);
     for (const id of visible) {
@@ -426,14 +435,16 @@ export class CampaignHud {
         this.updatePulseLabel();
         this.drawPulseChip();
       } else {
-        graphics.fillStyle(KEY_FACE, 1);
-        graphics.fillRoundedRect(x, KEYS_Y - CHIP_HEIGHT / 2, width, CHIP_HEIGHT, 3);
-        graphics.lineStyle(1, PANEL_STROKE, STROKE_ALPHA);
-        graphics.strokeRoundedRect(x, KEYS_Y - CHIP_HEIGHT / 2, width, CHIP_HEIGHT, 3);
         const keyText = this.keyTexts.get(id)!;
         const labelText = this.labelTexts.get(id)!;
-        keyText.setVisible(true).setPosition(x + CHIP_PAD_LEFT, KEYS_Y);
-        labelText.setVisible(true).setPosition(x + CHIP_PAD_LEFT + Math.ceil(keyText.width) + CHIP_KEY_GAP, KEYS_Y);
+        const keyWidth = Math.ceil(keyText.width) + CHIP_KEY_PAD * 2;
+        // A keycap around the glyph only; the action name sits on the world with no box of its own.
+        graphics.fillStyle(KEY_FACE, 0.95);
+        graphics.fillRoundedRect(x, KEYS_Y - CHIP_HEIGHT / 2, keyWidth, CHIP_HEIGHT, 2);
+        graphics.lineStyle(1, PANEL_STROKE, 0.5);
+        graphics.strokeRoundedRect(x, KEYS_Y - CHIP_HEIGHT / 2, keyWidth, CHIP_HEIGHT, 2);
+        keyText.setVisible(true).setPosition(x + CHIP_KEY_PAD, KEYS_Y);
+        labelText.setVisible(true).setPosition(x + keyWidth + CHIP_KEY_GAP, KEYS_Y).setAlpha(0.85);
       }
       x += width + CHIP_GAP;
     }
@@ -445,17 +456,17 @@ export class CampaignHud {
     if (!keyText || !labelText) return 0;
     keyText.setText(KEY_DEFS[id].key);
     labelText.setText(KEY_DEFS[id].label);
-    return CHIP_PAD_LEFT + Math.ceil(keyText.width) + CHIP_KEY_GAP + Math.ceil(labelText.width) + CHIP_PAD_RIGHT;
+    return Math.ceil(keyText.width) + CHIP_KEY_PAD * 2 + CHIP_KEY_GAP + Math.ceil(labelText.width);
   }
 
   private measurePulseLabel(): number {
-    this.pulseLabel.setText('Pulse');
+    this.pulseLabel.setText(KEY_DEFS.pulse.label);
     return Math.ceil(this.pulseLabel.width);
   }
 
   private updatePulseLabel(): void {
     const cooling = this.pulseCooldown > 0;
-    this.pulseLabel.setText(cooling ? `${(this.pulseCooldown * (PULSE_COOLDOWN_MS / 1000)).toFixed(1)}s` : 'Pulse');
+    this.pulseLabel.setText(cooling ? `${(this.pulseCooldown * (PULSE_COOLDOWN_MS / 1000)).toFixed(1)}s` : KEY_DEFS.pulse.label);
     this.pulseLabel.setColor(cooling ? PULSE_COOLING_CSS : PULSE_READY_CSS);
   }
 

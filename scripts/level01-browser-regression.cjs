@@ -32,6 +32,8 @@ console.log(`Artifacts: ${out}`);
       dialogue: s.dialogue.isActive(), inputLocked: s.dialogue.isInputLocked(performance.now()), line: s.dialogue.fullLineText,
       x: p.x, y: p.y, body: { x: body.x, y: body.y, width: body.width, height: body.height }, depth: p.depth,
       target: s.interactions.getActiveTarget()?.id ?? null, objective: s.hud?.objectiveText?.text, charge: s.forestEdgeChargeMs,
+      hudChips: [...s.hud.keyTexts.entries()].filter(([, t]) => t.visible).map(([id]) => id),
+      hudEsc: s.hud.escText.visible, hudPulse: s.hud.pulseVisible, hudPlateBottom: s.hud.topPanelBottom, hudStatusVisible: s.hud.statusText.visible,
       lumoVisible: s.lumo.sprite.visible, pulseCooldown: s.lantern.getCooldownRatio(),
       lanternGlow: { x: s.forestEdgeLanternGlow?.x, y: s.forestEdgeLanternGlow?.y },
       tabletGlow: { x: s.forestEdgeTabletGlow?.x, y: s.forestEdgeTabletGlow?.y },
@@ -88,6 +90,10 @@ console.log(`Artifacts: ${out}`);
     await dismiss();
     let s=await state(); assert.equal(s.level,0); assert.equal(s.picked,false);
     assert.ok(Math.abs(s.x - FOREST_EDGE.player.spawn.x) < 1, 'fresh game uses the relocated spawn');
+    assert.deepEqual(s.hudChips, ['move', 'run', 'interact'], 'the HUD chips only the three opening actions');
+    assert.equal(s.hudPulse, false, 'no pulse badge before the lantern and tablet teach it');
+    assert.equal(s.hudEsc, true, 'pause stays discoverable through the quiet ESC label');
+    assert.ok(s.hudPlateBottom <= 78, `the mission plate stays compact (bottom ${s.hudPlateBottom})`);
     assert.equal(s.objects.find(o => o.id === 'lantern')?.x, lamp.anchor.x, 'lantern artwork follows its new layout anchor');
     assert.equal(s.objects.find(o => o.id === 'tablet')?.x, tablet.anchor.x, 'tablet artwork follows its relocated trigger and solid');
     assert.deepEqual(s.lanternGlow, { x: lamp.anchor.x, y: lamp.anchor.y - 12 });
@@ -125,10 +131,17 @@ console.log(`Artifacts: ${out}`);
     assert.equal((await state()).target,'tablet','relocated tablet answers from the south');
     await tap('e'); await dismiss(); assert.equal((await state()).flags['l0-tablet-read'],true);
     await mark('relocated lantern and tablet keep south-side interaction');
-    assert.ok(FOREST_EDGE.objects.ring.ground.x - (await state()).x >= 180, 'reading the tablet leaves the ring farther east');
+    const afterRead = await state();
+    assert.deepEqual(afterRead.hudChips, ['move', 'run', 'interact', 'lantern'],
+      'picking up the lantern adds the tool chip without a utility row');
+    assert.ok(Math.abs(afterRead.x - tablet.stand.x) < 6, 'the reader stands at the tablet');
+    assert.ok(FOREST_EDGE.objects.ring.ground.x - tablet.stand.x >= 180, 'reading the tablet leaves the ring farther east');
     await shot('tablet-read-wide-approach');
     await page.waitForTimeout(3100); await tap('Space'); await dismiss();
     assert.equal((await state()).flags['l0-footprints-found'],true);
+    assert.deepEqual((await state()).hudChips, ['move', 'run', 'interact', 'lantern'],
+      'once the tablet teaches Pulse, the chip row keeps four actions');
+    assert.equal((await state()).hudPulse, true, 'the pulse badge joins the row when the lantern can pulse');
     for(const line of ['Có dấu chân thật! Chúng dẫn về phía cổng.','Có lẽ trước đây người ta cũng đi lối này.','Mình theo thử xem.']) assert.ok(observedDialogue.has(line),`Missing first-discovery dialogue: ${line}`);
     await page.waitForTimeout(3100); await tap('Space'); assert.equal((await state()).dialogue,false,'Repeated Pulse must not replay footprint discovery dialogue');
     assert.equal((await state()).objects.filter(o => /^footprint-/.test(o.id)).length, FOREST_EDGE.objects.trail.length,

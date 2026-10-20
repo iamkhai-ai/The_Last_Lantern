@@ -103,12 +103,24 @@ const pulseFlashTop = HUD_LAYOUT.keysY - HUD_LAYOUT.flashRadius - HUD_LAYOUT.fla
 const pulseFlashBottom = HUD_LAYOUT.keysY + HUD_LAYOUT.flashRadius + HUD_LAYOUT.flashStroke / 2;
 assert.ok(Math.max(pulseArcBottom, pulseFlashBottom) <= 360,
   `the pulse arc/ready ring bottom (${Math.max(pulseArcBottom, pulseFlashBottom)}) must stay inside the 360px canvas`);
-assert.ok(Math.min(pulseArcTop, pulseFlashTop) >= HUD_LAYOUT.statusBottom,
-  `the pulse arc/ready ring top (${Math.min(pulseArcTop, pulseFlashTop)}) must clear the status panel bottom (${HUD_LAYOUT.statusBottom})`);
-assert.ok(HUD_LAYOUT.keysY - HUD_LAYOUT.badgeRadius >= HUD_LAYOUT.statusBottom,
-  'the pulse badge itself stays clear of the status panel');
+assert.ok(Math.min(pulseArcTop, pulseFlashTop) >= HUD_LAYOUT.topBottom + 200,
+  `the pulse arc/ready ring top (${Math.min(pulseArcTop, pulseFlashTop)}) must stay in the bottom HUD band`);
 assert.ok(HUD_LAYOUT.badgeRadius <= HUD_LAYOUT.arcRadius && HUD_LAYOUT.arcRadius < HUD_LAYOUT.flashRadius,
   'the arc sits outside the badge and the ready ring sits outside the arc');
+
+/* ------------------------------------------- the mission plate stays a compact corner card */
+
+assert.ok(HUD_LAYOUT.topBottom <= 90,
+  `the mission plate never grows past y=${HUD_LAYOUT.topBottom}; a taller card would eat the playfield`);
+assert.equal(HUD_LAYOUT.topBottom, 86, 'chapter + objective + progress leave the plate 78px tall at most');
+assert.deepEqual([...HUD_LAYOUT.chipOrder], ['move', 'run', 'interact', 'lantern', 'pulse'],
+  'the HUD only chips the three movement/interaction keys plus the lantern action');
+assert.equal(/drawStatusPanel|drawLumoChip/.test(sources.hud), false,
+  'progress is drawn inside the mission plate and Lumo has no card of its own');
+assert.match(sources.hud, /this\.escText\.setVisible\(this\.keyVisibility\.pause\)/,
+  'pause stays discoverable through the quiet ESC label instead of a keycap');
+assert.match(sources.hud, /const CHIP_ORDER: readonly HudKeyId\[\] = \[/,
+  'CampaignHud.ts owns one authored chip order');
 
 /* ---------------------------------------------- the key row is clamped to 12..628 */
 
@@ -122,10 +134,17 @@ for (const total of [0, 100, 300, 450, 616]) {
 }
 assert.equal(centerKeyRow(616), 12, 'a full key row is clamped to the left bound');
 assert.equal(centerKeyRow(0), 320, 'a lone chip stays centred');
-assert.ok(HUD_LAYOUT.keysY - HUD_LAYOUT.chipHeight / 2 >= HUD_LAYOUT.statusBottom,
-  'the keycap band clears the status panel');
+assert.ok(HUD_LAYOUT.keysY - HUD_LAYOUT.chipHeight / 2 - 3 >= HUD_LAYOUT.topBottom,
+  'the keycap band clears the mission plate');
 assert.ok(HUD_LAYOUT.keysY + HUD_LAYOUT.chipHeight / 2 <= 360,
   'the keycap band stays inside the canvas');
+
+/* ----------------------------------- the full key map lives in the pause menu, not the HUD */
+
+const pauseMenu = read('src/ui/PauseMenu.ts');
+for (const token of ['WASD', 'Chạy', 'Tương tác', 'Đèn', 'Xung sáng', 'Sổ tay', 'Gợi ý', 'Tạm dừng']) {
+  assert.ok(pauseMenu.includes(token), `PauseMenu.ts documents the ${token} control the HUD no longer chips`);
+}
 
 /* ------------------------------------------- the toast clears the measured top panel */
 

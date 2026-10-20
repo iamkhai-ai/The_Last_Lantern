@@ -34,6 +34,9 @@ export class PauseMenu {
     this.bg.lineStyle(1.5, 0xd8b869, 0.9);
     this.bg.fillRoundedRect(180, 70, 280, 220, 8);
     this.bg.strokeRoundedRect(180, 70, 280, 220, 8);
+    // The HUD keeps only contextual action chips, so the full key map lives here.
+    this.bg.lineStyle(1, 0x3b5c63, 0.7);
+    this.bg.lineBetween(196, 254, 444, 254);
 
     const title = scene.add.text(320, 102, 'TẠM DỪNG (PAUSED)', {
       fontFamily: 'Segoe UI, sans-serif',
@@ -69,7 +72,20 @@ export class PauseMenu {
       return txt;
     });
 
-    this.container = scene.add.container(0, 0, [this.bg, title, ...this.items]);
+    const controls = [
+      'WASD/↑↓←→ Đi · ⇧ Chạy · E Tương tác · F Đèn',
+      'SPACE Xung sáng · J Sổ tay · H Gợi ý · ESC Tạm dừng',
+    ].map((line, idx) => {
+      const txt = scene.add.text(320, 264 + idx * 13, line, {
+        fontFamily: 'Segoe UI, sans-serif',
+        fontSize: '8.5px',
+        color: '#8fa9a4',
+      });
+      txt.setOrigin(0.5, 0.5);
+      return txt;
+    });
+
+    this.container = scene.add.container(0, 0, [this.bg, title, ...this.items, ...controls]);
     this.container.setDepth(98);
     this.container.setVisible(false);
   }
