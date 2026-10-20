@@ -444,6 +444,7 @@ export class CampaignScene extends Phaser.Scene {
         ...(this.ruinsLevel?.getProtectedPromptBounds() ?? []),
         ...(this.heartLevel?.getProtectedPromptBounds() ?? []),
       ],
+      this.player.getFootBody(),
     );
     this.libraryLevel?.update();
     if (this.progress.level === 6) this.gardenLevel?.update(dt);

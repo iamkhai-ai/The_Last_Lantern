@@ -24,6 +24,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 import { layoutInteractionPrompt } from '../src/systems/interactionPromptLayout.ts';
+import { isFootInReach } from '../src/systems/interactionReach.ts';
 import {
   choosePathCallAction, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe,
   isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_ROOMS,
@@ -95,6 +96,15 @@ function transpile(code, label) {
   }
 }
 
+/** A module-level function declaration compiled with the named symbols it closes over. */
+function localFunctionWith(file, name, symbols) {
+  const declaration = findNode(file, (node) => ts.isFunctionDeclaration(node) && node.name?.text === name);
+  assert.ok(declaration, `${name} is still authored in its source file`);
+  const js = transpile(nodeText(declaration), name);
+  const names = Object.keys(symbols);
+  return new Function(...names, `"use strict";\n${js}\nreturn ${name};`)(...names.map((key) => symbols[key]));
+}
+
 function localFunction(file, name) {
   const declaration = findNode(file, (node) => ts.isFunctionDeclaration(node) && node.name?.text === name);
   assert.ok(declaration, `${name} is still authored in its source file`);
@@ -129,9 +139,11 @@ function compile(file, methodName, owner, params, symbols) {
 }
 
 const effectiveRadius = localFunction(INTERACTION_SOURCE, 'effectiveRadius');
+/** The shared range test `update()` and `tryInteract()` both call; it closes over the radius and the foot test. */
+const isInRange = localFunctionWith(INTERACTION_SOURCE, 'isInRange', { effectiveRadius, isFootInReach });
 const runUpdate = compile(INTERACTION_SOURCE, 'update', 'InteractionSystem',
-  ['playerX', 'playerY', 'canInteract', 'playerBounds', 'protectedBounds'], { layoutInteractionPrompt, effectiveRadius });
-const runTryInteract = compile(INTERACTION_SOURCE, 'tryInteract', 'InteractionSystem', ['now'], { effectiveRadius });
+  ['playerX', 'playerY', 'canInteract', 'playerBounds', 'protectedBounds', 'footBody'], { layoutInteractionPrompt, isInRange });
+const runTryInteract = compile(INTERACTION_SOURCE, 'tryInteract', 'InteractionSystem', ['now'], { isInRange });
 /** The room-change path: `drawRoom()` calls this before a room registers its own controls. */
 const runClear = compile(INTERACTION_SOURCE, 'clear', 'InteractionSystem', [], {});
 
