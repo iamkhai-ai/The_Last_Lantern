@@ -610,7 +610,8 @@ export class CampaignScene extends Phaser.Scene {
         LIBRARY_LAYOUT.actor.bodyX, LIBRARY_LAYOUT.actor.bodyWidth, LIBRARY_LAYOUT.actor.bodyHeight);
       const spawn = resolveLibrarySpawn(
         typeof savedPlayerX === 'number' && typeof savedPlayerY === 'number' ? { x: savedPlayerX, y: savedPlayerY } : undefined,
-        this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true,
+        // The gate opens with the crystal alone; a legacy save with the crystal but no fifth painting counts as open.
+        this.progress.flags['l2-crystal'] === true,
       );
       this.player.setPosition(spawn.x, spawn.y);
     } else if (level !== 4 && level !== 6 && level !== 9) {
