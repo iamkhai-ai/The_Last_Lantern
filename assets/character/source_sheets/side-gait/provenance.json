@@ -23,5 +23,36 @@
     "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
     "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png"
   ],
-  "discarded_attempts": "Whole-character model edits did not produce a clear opposite step; diagnostic PNGs remain in the task artifacts. A later legs-only generation returned HTTP400 moderation_blocked, output stage, category other, request63d15c0c-05ee-407d-994c-eda268fe9792."
+  "discarded_attempts": "Whole-character model edits did not produce a clear opposite step; diagnostic PNGs remain in the task artifacts. A later legs-only generation returned HTTP400 moderation_blocked, output stage, category other, request63d15c0c-05ee-407d-994c-eda268fe9792.",
+  "heel_follow_up": {
+    "reason": "User spotted notched heel in preview; original5x4 boot cutout tapered to one bottom pixel.",
+    "repair": "Closed heel and outsole with two fully opaque5-pixel rows; retain original generated color texture and foot direction. Remove obsolete external leg fragments below the preserved hand band.",
+    "boot_alpha_masks": {
+      "left/walk": [
+        "..##.",
+        ".###.",
+        "#####",
+        "#####"
+      ],
+      "left/run": [
+        "..##.",
+        ".###.",
+        "#####",
+        "#####"
+      ],
+      "right/walk": [
+        ".##..",
+        ".###.",
+        "#####",
+        "#####"
+      ],
+      "right/run": [
+        ".##..",
+        ".###.",
+        "#####",
+        "#####"
+      ]
+    },
+    "prior_revision": "38924801e9913e2dd24e0b15544b6ca014ed8d81"
+  }
 }

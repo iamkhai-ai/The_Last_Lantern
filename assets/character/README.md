@@ -68,3 +68,6 @@ Phần chân dùng boot cutout từ ảnh `image_gen` và xử lý PNG bằng Py
 Phần sửa được ghi vào sáu source sheet gốc. `prepare_frames.py` tiếp tục tái tạo đủ 240 frame, catalog và contact sheet từ những sheet này, không có override runtime. Prompt, ảnh tham chiếu được chọn và tọa độ xử lý nằm trong `source_sheets/side-gait/`; các prompt/provenance cũ là lịch sử trước lần sửa này. Model thực tế sau công cụ tích hợp không được công cụ công bố.
 
 Kiểm tra vòng animation bằng `node scripts/check-player-gait.mjs`. Kiểm tra file và tái tạo bằng lệnh `ALLOW_CATALOG_OVERWRITE=1` đã nêu ở trên. Hash khác nhau chỉ xác nhận file khác nhau; kiểm tra hình học/tọa độ chân và xem animation mới xác nhận nhịp đổi chân. Lần sửa này không xác nhận chất lượng animation của sáu hướng còn lại.
+
+
+Theo phản hồi về gót bị khuyết, mẫu giày5×4 đã được sửa gót và đế: hai hàng dưới đầy đủ5 pixel alpha255, không còn hàng đế thu về một pixel. Đã loại phần chân cũ còn sót ngoài vùng ghép. Tọa độ khớp và vòng bước giữ nguyên; ghi chú theo sau nằm trong `source_sheets/side-gait/provenance.json`.
