@@ -572,6 +572,7 @@ export class CampaignScene extends Phaser.Scene {
       const saved = this.progress.counters['player-level'] === level && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
         ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] } : undefined;
       this.shatteredCreek.build(saved);
+      SoundSystem.playAmbientCreek();
       this.refreshHud();
       return;
     }
@@ -1921,6 +1922,7 @@ export class CampaignScene extends Phaser.Scene {
     if (level === 0) {
       action('lamp', 'E · Nhận đèn lồng', FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
         this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; this.lantern.lanternOn = false;
+        SoundSystem.playUiItemGet();
         const pickup = getLevelArtKey(0, 'pickup-lantern');
         this.objects.find((object) => object instanceof Phaser.GameObjects.Image && object.texture.key === pickup)?.destroy();
         this.forestEdgeLanternGlow?.setVisible(false);
@@ -2576,6 +2578,7 @@ export class CampaignScene extends Phaser.Scene {
       this.progress.lanternOn = true;
       this.progress.flags['pulse-used'] = true;
       this.save();
+      SoundSystem.playGateOpen();
       this.scene.restart();
     });
   }

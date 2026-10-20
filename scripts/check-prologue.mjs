@@ -1008,7 +1008,7 @@ const CASES = [
         refreshHighlight() { calls.refresh += 1; },
         container: { setVisible() {} },
       };
-      const symbols = { SoundSystem: { toggleMute() {} } };
+      const symbols = { SoundSystem: { toggleMute() {}, playUiClick() {}, playUiCancel() {} } };
       scene.triggerSelected = bindMethod(methodUnit(pauseSource, 'triggerSelected', 'PauseMenu'), symbols, 'PauseMenu.triggerSelected()');
       scene.moveSelection = bindMethod(methodUnit(pauseSource, 'moveSelection', 'PauseMenu'), symbols, 'PauseMenu.moveSelection()');
       scene.close = bindMethod(methodUnit(pauseSource, 'close', 'PauseMenu'), symbols, 'PauseMenu.close()');
@@ -1115,7 +1115,7 @@ function makeMenuScene({ completed = false, campaignSave = false, legacy = null 
       load() { return scene.legacy ?? { stage: 'hub_initial' }; },
       hasSave() { return scene.legacy !== null; },
     },
-    SoundSystem: { playLanternToggle() { calls.lantern += 1; }, playMirrorRotate() {}, isMuted() { return false; } },
+    SoundSystem: { playLanternToggle() { calls.lantern += 1; }, playMirrorRotate() {}, playUiClick() {}, playUiCancel() {}, isMuted() { return false; } },
   };
   scene.startNewGame = bindMethod(methodUnit(menuSource, 'startNewGame', 'MenuScene'), symbols, 'MenuScene.startNewGame()');
   scene.hasAnySave = bindMethod(methodUnit(menuSource, 'hasAnySave', 'MenuScene'), symbols, 'MenuScene.hasAnySave()');

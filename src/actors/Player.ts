@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getNhinhTexture } from '../art/CampaignArt';
+import { SoundSystem } from '../systems/SoundSystem';
 
 export type FacingDirection =
   | 'down'
@@ -22,6 +23,8 @@ export class Player {
   private footBodyOffsetY = 27;
   private animTimer = 0;
   private animStep = 0;
+  private footstepTimer = 0;
+  private footstepInterval = 320;
   private actionAnimation: 'pulse' | 'lantern_on' | 'lantern_off' | null = null;
   private actionElapsed = 0;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -123,10 +126,18 @@ export class Player {
         this.animTimer = 0;
         this.animStep = (this.animStep + 1) % 3;
       }
+      // Footstep sound
+      this.footstepTimer += dt;
+      const interval = isRunning ? this.footstepInterval * 0.7 : this.footstepInterval;
+      if (this.footstepTimer >= interval) {
+        this.footstepTimer = 0;
+        SoundSystem.playFootstepGrass();
+      }
     } else {
       body.setVelocity(0, 0);
       this.animStep = 0;
       this.animTimer = 0;
+      this.footstepTimer = 0;
     }
 
     const isRunning = Boolean(this.keys?.SHIFT?.isDown || this.cursors?.shift?.isDown);

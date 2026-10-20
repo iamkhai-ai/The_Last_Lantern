@@ -192,14 +192,14 @@ export class MenuScene extends Phaser.Scene {
   private moveSelection(delta: number): void {
     if (this.menuMode === 'confirm-new-game') {
       this.confirmSelectedIndex = (this.confirmSelectedIndex + delta + 2) % 2;
-      SoundSystem.playMirrorRotate();
+      SoundSystem.playUiClick();
       this.refreshMenuHighlight();
       return;
     }
     this.selectedIndex =
       (this.selectedIndex + delta + this.menuButtons.length) %
       this.menuButtons.length;
-    SoundSystem.playMirrorRotate();
+    SoundSystem.playUiClick();
     this.refreshMenuHighlight();
   }
 
@@ -288,7 +288,7 @@ export class MenuScene extends Phaser.Scene {
     this.confirmArmed = !this.activationViaKey;
     this.confirmText?.setText(NEW_GAME_CONFIRM_TEXT);
     this.setConfirmVisible(true);
-    SoundSystem.playMirrorRotate();
+    SoundSystem.playUiClick();
   }
 
   private cancelNewGame(): void {
@@ -298,7 +298,7 @@ export class MenuScene extends Phaser.Scene {
     this.confirmArmed = false;
     this.selectedIndex = this.selectedIndexBeforeConfirm;
     this.setConfirmVisible(false);
-    SoundSystem.playMirrorRotate();
+    SoundSystem.playUiCancel();
   }
 
   private confirmNewGame(): void {
