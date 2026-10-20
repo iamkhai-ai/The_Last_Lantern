@@ -13,18 +13,49 @@ const creekMechanismArt = (filename: string): string | null => getLevelArtKey(3,
 type Context = { scene: Phaser.Scene; player: Player; lumo: Lumo; lantern: LanternSystem; interactions: InteractionSystem; progress: CampaignProgress; save: () => void; say: Say; nextLevel: (lines: DialogueLine[]) => void; isDialogueActive: () => boolean };
 
 const OPENING: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Mặt suối không chuyển động.' },
-  { speaker: 'Lumo', text: 'Nước từng chảy qua đây tới tận rễ Cây Mẹ.' },
-  { speaker: 'Nhinh', text: 'Còn cây kia… ba khoảng trống trong thân có phải chỗ đặt tinh thể không?' },
-  { speaker: 'Lumo', text: 'Phải. Khi có đủ ba mảnh, chúng ta sẽ thắp sáng trái tim nó.' },
-  { speaker: 'Nhinh', text: 'Trước hết, phải qua được bờ bên kia.' },
-  { speaker: 'Lumo', text: 'Những chiếc cầu này nhận sức từ ánh sáng.' },
-  { speaker: 'Nhinh', text: 'Thử dùng chiếc đèn của mình xem.' },
-  { speaker: 'Lumo', text: 'Bệ nhỏ cạnh lối vào là nơi an toàn để thử đặt đèn và xoay gương.' },
+  { speaker: 'Nhinh', text: 'Suối chỉ còn ngần này nước thôi sao?' },
+  { speaker: 'Lumo', text: 'Trước kia, nước chảy suốt ngày đêm ở đây.' },
+  { speaker: 'Nhinh', text: 'Cây lớn phía kia… là Cây Mẹ à?' },
+  { speaker: 'Lumo', text: 'Ừ. Ba hốc trống trên thân là chỗ đặt những mảnh tinh thể.' },
+  { speaker: 'Nhinh', text: 'Vậy mình đang đi đúng hướng. Nhưng làm sao sang được bờ bên kia?' },
+  { speaker: 'Lumo', text: 'Những cây cầu ở đây cần ánh sáng mới hiện ra.' },
+  { speaker: 'Nhinh', text: 'Có bệ đèn với một chiếc gương nhỏ cạnh lối vào. Mình thử ở đó trước nhé?' },
 ];
 const OPEN_PRACTICE: DialogueLine[] = [
-  { speaker: 'Nhinh', text: 'Đặt đèn xuống thì tia giữ yên. Xoay gương mới đổi đường đi.' },
-  { speaker: 'Lumo', text: 'Và mình vẫn lấy đèn lại được. Cậu thử thêm cũng không sao.' },
+  { speaker: 'Nhinh', text: 'Bông hoa bằng đá mà cũng mở được!' },
+  { speaker: 'Lumo', text: 'Cậu vừa dùng gương đưa ánh sáng tới nó đấy.' },
+  { speaker: 'Nhinh', text: 'Vậy mình thử với những chiếc gương bên suối xem. Để tôi lấy đèn đã.' },
+];
+const FIRST_BRIDGE: DialogueLine[] = [
+  { speaker: 'Lumo', text: 'Có cầu rồi! Nhưng mới tới hòn đảo.' },
+  { speaker: 'Nhinh', text: 'Tay chốt kia nối với chân cầu. Thử gài xem có giữ được nó không.' },
+];
+const LATCH_A_DONE: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Khớp rồi. Chốt đã giữ cầu lại.' }];
+const REROUTE_TO_ISLAND: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Tia đã đổi hướng mà cầu vẫn còn!' },
+  { speaker: 'Lumo', text: 'Giờ ánh sáng đã tới được chiếc gương trên đảo. Mình thử xoay nó nhé.' },
+];
+const LATCH_B_DONE: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Cả hai đoạn cầu đã giữ chắc rồi. Mình quay lại lấy đèn thôi.' }];
+const LATCH_UNPOWERED: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Chốt chưa ăn khớp. Có lẽ cầu phải hiện lên trước.' }];
+const LATCH_REPEAT: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Chốt vẫn chắc. Đổi hướng ánh sáng cũng không làm cầu mất nữa.' }];
+const UNSAFE_ON_BRIDGE: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Khoan đã. Mình phải lên bờ trước khi đổi ánh sáng.' }];
+const UNSAFE_RETURN_PATH: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Đổi tia lúc này sẽ mất đường về. Mình phải gài chốt trước đã.' }];
+const RELIEF_LAMP_REMINDER: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Suýt nữa thì quên đèn. Mình quay lại lấy đã.' }];
+const RELIEF_FIRST: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Những tia sáng này… đều hướng về Cây Mẹ.' },
+  { speaker: 'Nhinh', text: 'Người này cũng mang một chiếc đèn. Có phải người trong bức tranh ở thư viện không?' },
+  { speaker: 'Lumo', text: 'Mưa… Đêm đó mưa lớn lắm.' },
+  { speaker: 'Nhinh', text: 'Có phải người này đang thắp sáng để dẫn người đi lạc về không?' },
+  { speaker: 'Lumo', text: 'Tôi không biết. Tôi chỉ nhớ tiếng chuông trên tháp. Nó kêu mãi giữa tiếng mưa.' },
+  { speaker: 'Nhinh', text: 'Nhưng trong hình, nước vẫn chảy tới gốc cây. Chuyện gì đã làm nó ngừng lại nhỉ?' },
+  { speaker: 'Lumo', text: 'Đường nước đi qua trạm phía trước. Có lẽ ở đó còn ghi lại chuyện đã xảy ra.' },
+];
+const RELIEF_REPEAT: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Ánh sáng hướng về Cây Mẹ, còn nước vẫn chảy dưới chân tháp.' }];
+const EXIT_LEAVE_LAMP: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Đèn vẫn còn trên bệ. Mình phải mang theo.' }];
+const EXIT_UNREAD_RELIEF: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Mình chưa xem bức phù điêu kia. Biết đâu có thêm manh mối.' }];
+const EXIT_NEXT: DialogueLine[] = [
+  { speaker: 'Lumo', text: 'Chỗ đó vừa sáng khi tôi tới gần.' },
+  { speaker: 'Nhinh', text: 'Có lẽ trạm này vẫn còn hoạt động. Mình vào xem nhé?' },
 ];
 const HINTS: Record<CreekLiveState['step'], string[]> = {
   practice: ['Bệ nhỏ và gương thử cạnh lối vào không nối với cầu.', 'E đặt đèn lên bệ nhỏ; E ở gương xoay qua các hướng.', 'Xoay gương thử cho tia chạm bông hoa đá.'],
@@ -91,7 +122,7 @@ export class ShatteredCreekController {
     this.registerActions();
     this.updateVisuals();
     this.ctx.lumo.setVisible(true);
-    if (!this.ctx.progress.flags['intro-3']) { this.ctx.progress.flags['intro-3'] = true; this.ctx.save(); this.ctx.say(OPENING); }
+    this.startOpening();
   }
 
   public update(): void {
@@ -114,12 +145,17 @@ export class ShatteredCreekController {
         this.ctx.say(OPEN_PRACTICE);
       } else if (live.eyeA && !this.ctx.progress.flags['l3-eye-a-dialogue']) {
         this.ctx.progress.flags['l3-eye-a-dialogue'] = true; this.ctx.save();
-        this.ctx.say([{ speaker: 'Lumo', text: 'Có đường rồi! Nhưng mới tới hòn đảo.' }, { speaker: 'Nhinh', text: 'Tay chốt này có thể giữ các phiến đá. Mình sẽ gài trước khi đổi tia.' }]);
+        this.ctx.say(FIRST_BRIDGE);
       } else if (this.state.latchA && live.mainSegments.some((segment) => segment.hit === 'g3') && !this.ctx.progress.flags['l3-reroute-dialogue']) {
         this.ctx.progress.flags['l3-reroute-dialogue'] = true; this.ctx.save();
-        this.ctx.say([{ speaker: 'Nhinh', text: 'Cầu vẫn còn. Giờ chiếc gương cuối cùng đã ở trong tầm với.' }, { speaker: 'Lumo', text: 'Mình đã mở đường cho chính mình.' }]);
+        this.ctx.say(REROUTE_TO_ISLAND);
       }
     }
+  }
+
+  private startOpening(): void {
+    if (this.ctx.progress.flags['intro-3']) return;
+    this.ctx.progress.flags['intro-3'] = true; this.ctx.save(); this.ctx.say(OPENING);
   }
 
   public toggleLantern(): boolean {
@@ -227,24 +263,23 @@ export class ShatteredCreekController {
     const live = deriveCreekState(this.state);
     const already = which === 'A' ? this.state.latchA : this.state.latchB;
     const powered = which === 'A' ? live.eyeA : live.eyeB;
-    if (already) { this.ctx.say([{ speaker: 'Nhinh', text: 'Đã giữ chắc. Đổi ánh sáng sẽ không làm cầu này mất nữa.' }]); return; }
-    if (which === 'B' && !this.state.latchA) { this.ctx.say([{ speaker: 'Nhinh', text: 'Mình cần giữ cầu đầu bằng chốt trước khi mở đoạn tiếp theo.' }]); return; }
-    if (!powered) { this.ctx.say([{ speaker: 'Nhinh', text: 'Mắt nhận vẫn tối. Hãy dẫn tia tới đây trước.' }]); return; }
+    if (already) { this.ctx.say(LATCH_REPEAT); return; }
+    if (which === 'B' && !this.state.latchA) { this.ctx.say(LATCH_UNPOWERED); return; }
+    if (!powered) { this.ctx.say(LATCH_UNPOWERED); return; }
     if (which === 'A') {
       this.state.latchA = true; this.ctx.progress.flags['l3-latch-a'] = true;
-      this.ctx.say([{ speaker: 'Nhinh', text: 'Chốt đã ăn khớp. Cầu này sẽ giữ vững khi mình đổi tia.' }]);
-    } else { this.state.latchB = true; this.ctx.progress.flags['l3-latch-b'] = true; }
+      this.ctx.say(LATCH_A_DONE);
+    } else {
+      this.state.latchB = true; this.ctx.progress.flags['l3-latch-b'] = true;
+      this.ctx.say(LATCH_B_DONE);
+    }
     this.saveState();
   }
 
   private readRelief(): void {
-    if (!this.state.lanternRetrieved || this.state.source !== null) { this.ctx.say([{ speaker: 'Nhinh', text: 'Mình nên thu hồi đèn trước khi đọc tiếp.' }]); return; }
+    if (!this.state.lanternRetrieved || this.state.source !== null) { this.ctx.say(RELIEF_LAMP_REMINDER); return; }
     const first = !this.state.memo; this.state.memo = true; this.ctx.progress.flags['l3-memo'] = true; this.saveState();
-    this.ctx.say(first ? [
-      { speaker: 'Nhinh', text: 'Tất cả tia sáng đều hướng về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Đêm ấy có một cơn bão rất lớn.' },
-      { speaker: 'Nhinh', text: 'Người này gom ánh sáng để dẫn người đi lạc về sao?' }, { speaker: 'Lumo', text: 'Tôi nhớ tiếng chuông trên tháp. Nó kêu mãi.' },
-      { speaker: 'Nhinh', text: 'Nhưng dòng nước trong tranh vẫn chảy. Có điều gì xảy ra sau đó.' }, { speaker: 'Lumo', text: 'Đường dẫn nước đi qua trạm phía trước. Có lẽ còn bản ghi ở đó.' },
-    ] : [{ speaker: 'Nhinh', text: 'Tất cả tia sáng đều hướng về Cây Mẹ.' }]);
+    this.ctx.say(first ? RELIEF_FIRST : RELIEF_REPEAT);
   }
 
   private hintsFor(live: CreekLiveState): string[] {
@@ -259,11 +294,13 @@ export class ShatteredCreekController {
   }
 
   private exit(): void {
+    if (this.state.source !== null || !this.state.lanternRetrieved) { this.ctx.say(EXIT_LEAVE_LAMP); return; }
+    if (!this.state.memo) { this.ctx.say(EXIT_UNREAD_RELIEF); return; }
     if (!canCompleteCreek(this.state)) {
-      const missing = [!this.state.latchA && 'gài chốt cầu đầu', !this.state.latchB && 'gài chốt cầu thứ hai', this.state.source !== null || !this.state.lanternRetrieved ? 'thu hồi đèn' : '', !this.state.memo && 'đọc phù điêu'].filter(Boolean).join(', ');
+      const missing = [!this.state.latchA && 'gài chốt cầu đầu', !this.state.latchB && 'gài chốt cầu thứ hai'].filter(Boolean).join(', ');
       this.ctx.say([{ speaker: 'Nhinh', text: `Trạm chưa mở. Mình còn cần ${missing}.` }]); return;
     }
-    this.ctx.nextLevel([{ speaker: 'Lumo', text: 'Chỗ đó vừa sáng khi tôi tới gần.' }, { speaker: 'Nhinh', text: 'Có lẽ lần này họ đang đợi cậu.' }]);
+    this.ctx.nextLevel(EXIT_NEXT);
   }
 
   private drawGround(): void {
@@ -353,8 +390,7 @@ export class ShatteredCreekController {
   private point(): Point { return { x: this.ctx.player.x, y: this.ctx.player.y }; }
   private keep<T extends Phaser.GameObjects.GameObject>(object: T): T { this.objects.push(object); return object; }
   private refuseUnsafe(reason: 'occupied-bridge' | 'stranded-east' | 'stranded-island'): void {
-    const text = reason === 'occupied-bridge' ? 'Đi tới bờ an toàn trước khi tắt đèn hoặc đổi tia.' : 'Cấu hình này sẽ cắt đường quay về. Hãy gài chốt trước.';
-    this.ctx.say([{ speaker: 'Nhinh', text }]);
+    this.ctx.say(reason === 'occupied-bridge' ? UNSAFE_ON_BRIDGE : UNSAFE_RETURN_PATH);
   }
   private saveState(): void { this.state.lanternOn = this.ctx.lantern.lanternOn; this.ctx.progress.lanternOn = this.state.lanternOn; this.ctx.progress.counters.g1 = this.state.g1; this.ctx.progress.counters.g2 = this.state.g2; this.ctx.progress.counters.g3 = this.state.g3; this.ctx.progress.counters['l3-practice'] = this.state.practice; this.ctx.progress.flags['l3-practice-complete'] = this.state.practiceComplete; this.ctx.progress.flags['l3-latch-a'] = this.state.latchA; this.ctx.progress.flags['l3-latch-b'] = this.state.latchB; if (this.state.source) this.ctx.progress.flags['l3-lamp-source'] = this.state.source; else delete this.ctx.progress.flags['l3-lamp-source']; this.ctx.progress.flags['l3-lantern-retrieved'] = this.state.lanternRetrieved; this.ctx.save(); }
 

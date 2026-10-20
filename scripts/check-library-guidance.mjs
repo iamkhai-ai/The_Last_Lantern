@@ -87,24 +87,58 @@ const findControl = (registered, id) => {
   return control;
 };
 
-// The book teaches both ink layers and the complete rack / socket / confirmation path.
+// The book's approved observations follow the current light; the two-layer exchange fires once,
+// on the read that completes both, in either order. Control keys stay in the H instruction channel.
 {
   const { level, progress, registered, dialogue } = createLevel();
   assert.match(findControl(registered, 'library-book').getPrompt(), /E.*lớp mực.*F đổi đèn/);
   level.readBook();
-  assert.match(textOf(dialogue.at(-1)), /F đổi đèn.*E đọc lại trang/);
+  assert.equal(textOf(dialogue.at(-1)), 'Một bông hoa màu vàng. Những cánh hoa đều khép lại.',
+    'the lit reading is the approved observation');
+  assert.equal(dialogue.at(-1).length, 1, 'one observed layer says only that observation');
+  assert.equal(progress.flags['l2-book-practice'], undefined, 'the two-layer exchange waits for both layers');
   level.lantern.lanternOn = false;
   level.readBook();
-  const guidance = textOf(dialogue.at(-1));
-  for (const phrase of ['Đèn bật', 'đèn tắt', 'E ở giá đá', 'đổi chỗ', 'dấu mặt trời phía Bắc', 'chiều kim đồng hồ', 'bệ giữa', 'chủ động kiểm tra', 'Bốn phiến là bốn thời khắc']) {
-    assert.ok(guidance.includes(phrase), `book guidance explains ${phrase}`);
+  const both = textOf(dialogue.at(-1));
+  for (const phrase of ['Có hình trăng lưỡi liềm bằng mực xanh trên trang giấy.',
+    'Vẫn trang giấy ấy, mà bật đèn với tắt đèn lại thấy hai hình khác nhau.',
+    'Có những nét chỉ hiện ra trong bóng tối.',
+    'Mình thử xem những phiến đá kia có giống vậy không.']) {
+    assert.ok(both.includes(phrase), `the completed book reading includes "${phrase}"`);
   }
-  assert.equal(progress.flags['l2-book-practice'], true, 'safe-practice exchange triggers after both book layers');
+  assert.doesNotMatch(both, /Nhấn [FE]|E ở|cơn chấn động/, 'characters speak neither key steps nor removed events');
+  assert.equal(progress.flags['l2-book-practice'], true, 'the two-layer exchange triggers after both book layers');
   assert.equal(progress.flags['l2-bird-lit'], undefined, 'book demonstration does not consume a main puzzle tablet');
-  // Re-reading the book after practice repeats only the observation, never the full guidance.
+  // Re-reading the book after both layers repeats only the current observation.
   level.readBook();
   assert.equal(dialogue.at(-1).length, 1, 'a re-read of the book speaks one observation line');
-  assert.doesNotMatch(textOf(dialogue.at(-1)), /E ở giá đá/, 'a re-read does not repeat the guidance');
+  assert.equal(textOf(dialogue.at(-1)), 'Có hình trăng lưỡi liềm bằng mực xanh trên trang giấy.');
+}
+{
+  // Dark first, then lit: the same exchange must fire, exactly once.
+  const { level, progress, dialogue } = createLevel({}, false);
+  level.readBook();
+  assert.equal(textOf(dialogue.at(-1)), 'Có hình trăng lưỡi liềm bằng mực xanh trên trang giấy.');
+  level.lantern.lanternOn = true;
+  level.readBook();
+  assert.match(textOf(dialogue.at(-1)), /Vẫn trang giấy ấy/, 'the exchange also fires when the lit layer is second');
+  assert.equal(progress.flags['l2-book-practice'], true);
+  level.readBook();
+  assert.equal(dialogue.at(-1).length, 1, 'the exchange never replays');
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Vẫn trang giấy ấy/);
+}
+{
+  // The instruction channel still covers F, E select/deselect/place/swap and the centre check.
+  const { level, dialogue } = createLevel();
+  for (let press = 0; press < 3; press += 1) level.showHint();
+  const hints = dialogue.slice(-3);
+  const hint = hints.map(textOf).join('\n');
+  for (const lines of hints) {
+    assert.equal(lines[0].speaker, 'Hệ thống', 'key guidance speaks as the system');
+  }
+  for (const phrase of ['F', 'E ở giá đá', 'bỏ chọn', 'đổi chỗ', 'bệ giữa', 'dấu mặt trời phía Bắc']) {
+    assert.ok(hint.includes(phrase), `the instruction channel explains ${phrase}`);
+  }
 }
 
 // H remains state-aware: stale readiness flags do not skip observations; only H tier 3 gives the map.
@@ -261,34 +295,42 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
   assert.deepEqual(flashes.map((flash) => [flash.x, flash.y]), [[487, 118]], 'the mural sun pulses once');
 }
 
-// Bird and boat dark layers state the arrow direction; the rotation message points at the sun marker.
+// Dark tablet readings use the approved descriptions; the rack label identifies which tablet was read.
 {
   const { registered, dialogue } = createLevel({}, false);
   pickRack(registered, 'Chim').onInteract();
-  assert.match(textOf(dialogue.at(-1)), /Mũi tên chỉ lên: mặt trời đang nhô khỏi chân trời\./);
+  assert.equal(textOf(dialogue.at(-1)), 'Một mũi tên hướng lên, vượt qua đường chân trời.');
   pickRack(registered, 'Thuyền').onInteract();
-  assert.match(textOf(dialogue.at(-1)), /Mũi tên chỉ xuống: mặt trời đang lặn\./);
+  assert.equal(textOf(dialogue.at(-1)), 'Một mũi tên hướng xuống, qua đường chân trời.');
 }
 
-// The inscription is the same wording on the plaque, in the journal and in the opening dialogue.
+// The approved inscription is identical on the plaque, in the journal and in the opening reading.
 {
-  const inscription = '“Một ngày khởi đầu khi mặt trời nhô khỏi chân trời và khép lại khi trăng lên cao. Hãy đặt nó trở lại vòng của mình.”';
+  const inscription = '“Mặt trời lên, ngày bắt đầu. Mặt trời lặn, đêm nối tiếp. Hãy đưa bốn thời khắc trở lại vòng ngày đêm.”';
   const { level, progress, registered, dialogue } = createLevel();
   level.startOpeningDialogue();
-  const introReading = dialogue.at(-1).find((line) => line.text.startsWith('Dòng khắc trên bệ đá: '));
-  assert.ok(introReading, 'the opening dialogue includes the inscription reading');
-  assert.equal(introReading.speaker, 'Nhinh', 'Nhinh reads the inscription aloud');
-  const introPointer = dialogue.at(-1).at(-1);
-  assert.equal(introPointer.speaker, 'Lumo', 'the intro ends with Lumo pointing at the book desk');
-  assert.match(introPointer.text, /Cuốn sách trên bàn bên trái.*nhấn F đổi đèn/, 'the closing intro line names the book and the F key');
-  assert.ok(introReading.text.startsWith('Dòng khắc trên bệ đá: '), 'the opening line introduces the reading');
-  assert.ok(introReading.text.endsWith(inscription), 'opening dialogue quotes the inscription');
+  const intro = dialogue.at(-1);
+  assert.deepEqual(intro.slice(0, 4).map((line) => [line.speaker, line.text]), [
+    ['Nhinh', 'Rễ cây ôm cả những giá sách…'],
+    ['Lumo', 'Mùi giấy này… Tôi vẫn còn nhớ.'],
+    ['Nhinh', 'Còn bốn phiến đá kia? Trông chúng vừa với những hốc quanh giếng.'],
+    ['Lumo', 'Trên bệ có chữ. Cậu đọc thử xem.'],
+  ], 'the opening follows the approved entrance lines');
+  const introReading = intro.find((line) => line.text === inscription);
+  assert.ok(introReading, 'the opening dialogue quotes the approved inscription exactly');
+  assert.equal(introReading.speaker, 'Hệ thống', 'the plaque inscription uses the presentation channel, not a character');
+  assert.deepEqual(intro.slice(-2).map((line) => [line.speaker, line.text]), [
+    ['Nhinh', 'Bốn phiến đá, bốn thời khắc… Có lẽ mình phải xếp chúng lại.'],
+    ['Lumo', 'Có cuốn sách đang mở trên bàn kia. Biết đâu nó chỉ cách đọc những hình này.'],
+  ], 'the opening ends by pointing at the open book');
+  assert.equal(intro.some((line) => line.text.includes('chấn động')), false, 'the removed event line does not play');
   findControl(registered, 'library-inscription').onInteract();
-  assert.equal(textOf(dialogue.at(-1)), inscription, 'plaque reads the new inscription');
+  assert.equal(textOf(dialogue.at(-1)), inscription, 'plaque reads the approved inscription');
   level.showJournal();
-  assert.ok(textOf(dialogue.at(-1)).includes(`Dòng khắc: ${inscription}`), 'journal records the new inscription');
+  assert.ok(textOf(dialogue.at(-1)).includes(`Dòng khắc: ${inscription}`), 'journal records the approved inscription');
   assert.equal(progress.flags['l2-inscription-read'], true);
-  assert.doesNotMatch(readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8'), /Đừng bỏ quên/, 'old inscription wording is gone');
+  assert.doesNotMatch(readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8'), /Đừng bỏ quên|cơn chấn động/,
+    'old inscription/event wording is gone');
 }
 
 // Racks name the tablet they offer; an empty rack (its tablet already seated) offers no prompt at all.
@@ -319,14 +361,16 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
   findControl(registered, 'library-seat-1').onInteract();
   assert.equal(toasts.at(-1), 'Hãy chọn một phiến ở giá đá trước.', 'an empty seat with nothing selected gives a toast');
   findControl(registered, 'library-confirm').onInteract();
-  assert.equal(toasts.at(-1), 'Còn 4 hốc trống. Đặt đủ bốn phiến rồi hãy kiểm tra.', 'the check reports the missing seats as a toast');
+  assert.equal(toasts.at(-1), 'Vẫn còn hốc trống. Hãy đặt đủ bốn phiến trước khi kiểm tra.',
+    'the check reports missing seats with the approved short notice');
   assert.equal(progress.flags['l2-check-failed'], undefined, 'a check with missing seats is not a failed arrangement');
   pickRack(registered, 'Lá').onInteract();
   findControl(registered, 'library-seat-1').onInteract();
   assert.equal(toasts.at(-1), 'Đã đặt phiến vào hốc Đông', 'placing a tablet names the seat by its direction');
   assert.equal(dialogue.some((lines) => textOf(lines).includes('Đã đặt')), false, 'placement is not shown as dialogue');
   findControl(registered, 'library-confirm').onInteract();
-  assert.equal(toasts.at(-1), 'Còn 3 hốc trống. Đặt đủ bốn phiến rồi hãy kiểm tra.', 'the missing count follows the seats');
+  assert.equal(toasts.at(-1), 'Vẫn còn hốc trống. Hãy đặt đủ bốn phiến trước khi kiểm tra.',
+    'the same short notice repeats while seats stay empty');
 }
 {
   const { level, registered, toasts } = createLevel({ 'l2-memory': true, 'memory-slots-json': '[0,1,2,-1]' });
@@ -378,33 +422,63 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
   assert.equal(toasts.at(-1), 'Bỏ chọn phiến Lá', 'deselecting confirms with a toast');
 }
 
-// Lumo's two-layer tip plays once; a re-read of a seen layer gives one short line.
+// Pair remarks wait for both layers of both tablets, work in either observation order, and never repeat.
 {
-  const { level, progress, registered, dialogue, toasts } = createLevel({}, true);
+  const { level, progress, registered, dialogue } = createLevel({}, true);
   const rack = (id) => registered.find((item) => item.id === id);
-  rack('library-rack-1').onInteract();
+  rack('library-rack-1').onInteract(); // Chim lit
+  rack('library-rack-0').onInteract(); // Thuyền lit
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Thảo nào/, 'one layer of each horizon tablet is not enough');
   level.lantern.lanternOn = false;
-  rack('library-rack-1').onInteract();
-  assert.match(textOf(dialogue.at(-1)), /Hai lớp ghép lại/, 'the first two-layer comparison speaks the tip');
-  assert.equal(progress.flags['l2-two-layer-tip'], true, 'the tip is recorded');
+  rack('library-rack-1').onInteract(); // Chim dark
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Thảo nào/, 'the pair waits for both layers of both tablets');
+  rack('library-rack-0').onInteract(); // Thuyền dark completes the horizon pair
+  assert.match(textOf(dialogue.at(-1)), /Thảo nào hai hình trông giống nhau/, 'the horizon pair speaks after all four layers');
+  assert.match(textOf(dialogue.at(-1)), /Nếu cứ để đèn sáng thì mình đã bỏ sót những mũi tên rồi/);
+  assert.equal(progress.flags['l2-horizon-pair-read'], true);
   level.lantern.lanternOn = true;
-  rack('library-rack-3').onInteract();
+  rack('library-rack-0').onInteract(); // re-read Thuyền under the other layer
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Thảo nào/, 'the horizon pair does not repeat');
   level.lantern.lanternOn = false;
-  rack('library-rack-3').onInteract();
-  assert.doesNotMatch(textOf(dialogue.at(-1)), /Hai lớp ghép lại/, 'the tip does not repeat');
-  rack('library-rack-3').onInteract();
-  assert.equal(toasts.at(-1), 'Bỏ chọn phiến Lá');
-  rack('library-rack-1').onInteract();
-  assert.equal(dialogue.at(-1).length, 1, 're-reading a seen layer gives a single line');
-  assert.match(textOf(dialogue.at(-1)), /^Chim: Mũi tên chỉ lên/, 'the single line is the clue itself');
+
+  // Dark layers first for the arc pair: the comparison still waits for the lit layers.
+  rack('library-rack-3').onInteract(); // Lá dark
+  rack('library-rack-2').onInteract(); // Hạt dark
+  assert.equal(textOf(dialogue.at(-1)), 'Đường cung vươn tới đỉnh. Nhưng không thấy mặt trời hay mặt trăng.',
+    'the seed dark layer is described, never skipped');
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Khi tắt đèn, hai đường cung/, 'the arc pair waits for the lit layers');
+  level.lantern.lanternOn = true;
+  rack('library-rack-2').onInteract(); // Hạt lit
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Khi tắt đèn, hai đường cung/, 'one lit layer is still not enough');
+  rack('library-rack-3').onInteract(); // Lá lit completes the arc pair and all layers
+  assert.match(textOf(dialogue.at(-1)), /Khi tắt đèn, hai đường cung này giống hệt nhau/);
+  assert.match(textOf(dialogue.at(-1)), /một phiến là mặt trời, một phiến là mặt trăng/);
+  assert.equal(progress.flags['l2-arc-pair-read'], true);
+  assert.match(textOf(dialogue.at(-1)), /Mình đã xem đủ cả hai lớp rồi\. Giờ thử xếp chúng lại xem\./);
+  assert.equal(progress.flags['l2-clues-ready'], true);
+  rack('library-rack-1').onInteract(); // re-read a seen layer
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /Mình đã xem đủ cả hai lớp rồi/, 'the all-layers remark does not repeat');
+}
+
+// The "arrange them now" remark is not spoken when the ring has already been restored.
+{
+  const { level } = createLevel({ 'l2-memory': true, 'memory-slots-json': '[0,1,2,3]' }, true);
+  for (const stone of ['bird', 'leaf', 'boat', 'seed']) level.readTablet(stone);
+  level.lantern.lanternOn = false;
+  let last = [];
+  for (const stone of ['bird', 'leaf', 'boat', 'seed']) last = level.readTablet(stone);
+  assert.doesNotMatch(textOf(last), /Mình đã xem đủ cả hai lớp rồi/,
+    'the arrange-now remark is skipped after the ring is restored');
+  assert.match(textOf(last), /Đường cung vươn tới đỉnh/,
+    'the seed dark layer still describes the arc after the solve');
 }
 
 // The Hạt lit reading is the same in the observation and the journal.
 {
   const { level, registered, dialogue } = createLevel({}, true);
   registered.find((item) => item.id === 'library-rack-2').onInteract();
-  const described = 'Mặt trăng ở cao. Đường cung quanh nó bị khuyết.';
-  assert.equal(textOf(dialogue.at(-1)), `Hạt: ${described}`, 'the observed Hạt lit layer uses the shared description');
+  const described = 'Mặt trăng ở trên cao. Đường cung quanh nó còn thiếu một đoạn.';
+  assert.equal(textOf(dialogue.at(-1)), described, 'the observed Hạt lit layer uses the shared description');
   level.showJournal();
   assert.ok(textOf(dialogue.at(-1)).includes(`Hạt · Đèn bật: ${described}`), 'the journal repeats the same Hạt description');
 }
@@ -447,7 +521,8 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
     }
   }
   const source = readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8');
-  for (const banned of ['vạch', 'chân trời sáng', 'hốc đích', 'lối rễ', 'Qua lối', 'Giá đá trống', 'ngày, chiều', 'Cậu đã', 'Đọc bức tranh sau vách', 'Giếng đã mở']) {
+  for (const banned of ['vạch', 'chân trời sáng', 'hốc đích', 'lối rễ', 'Qua lối', 'Giá đá trống', 'ngày, chiều', 'Cậu đã', 'Đọc bức tranh sau vách', 'Giếng đã mở',
+    'Hai lớp ghép lại', 'Cùng một mặt trời sát chân trời', 'Bật đèn thì thấy cánh hoa', 'Dòng khắc trên bệ đá', 'cơn chấn động', 'Đúng thứ tự rồi', 'Còn ${missing} hốc trống']) {
     assert.equal(source.includes(banned), false, `LibraryLevel.ts no longer says "${banned}"`);
   }
 }
@@ -459,10 +534,10 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
   assert.equal(textOf(dialogue.at(-1)), 'Cổng đá vẫn đóng. Có lẽ phải khôi phục vòng ngày đêm ở giữa phòng trước.');
   progress.flags['l2-memory'] = true;
   level.useExit();
-  assert.equal(textOf(dialogue.at(-1)), 'Cổng vẫn đóng. Tinh thể trong giếng đang chờ.');
+  assert.equal(textOf(dialogue.at(-1)), 'Viên tinh thể vẫn còn trên bệ. Mình mang theo đã.');
   progress.flags['l2-crystal'] = true;
   level.useExit();
-  assert.equal(textOf(dialogue.at(-1)), 'Cổng vẫn đóng. Hãy đọc bức tranh thứ năm sau vách rễ.');
+  assert.equal(textOf(dialogue.at(-1)), 'Vách rễ vừa mở ra một bức tranh nữa. Mình chưa xem nó.');
 }
 
 // Visual cues: the exit glow is dim and cool while shut, the book glow pulses until practice,

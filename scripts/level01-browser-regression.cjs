@@ -129,7 +129,7 @@ console.log(`Artifacts: ${out}`);
     await shot('tablet-read-wide-approach');
     await page.waitForTimeout(3100); await tap('Space'); await dismiss();
     assert.equal((await state()).flags['l0-footprints-found'],true);
-    for(const line of ['Có người từng đi qua đây.','Và họ để lại đường cho chúng ta. Đi cùng tôi nhé?','Đi cùng nhau.']) assert.ok(observedDialogue.has(line),`Missing first-discovery dialogue: ${line}`);
+    for(const line of ['Có dấu chân thật! Chúng dẫn về phía cổng.','Có lẽ trước đây người ta cũng đi lối này.','Mình theo thử xem.']) assert.ok(observedDialogue.has(line),`Missing first-discovery dialogue: ${line}`);
     await page.waitForTimeout(3100); await tap('Space'); assert.equal((await state()).dialogue,false,'Repeated Pulse must not replay footprint discovery dialogue');
     assert.equal((await state()).objects.filter(o => /^footprint-/.test(o.id)).length, FOREST_EDGE.objects.trail.length,
       'all six marks in the longer footprint trail are rendered');
