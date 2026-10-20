@@ -283,12 +283,21 @@ function makePathScene(room, flags, extra = {}) {
   scene.doorEnabled = compile('doorEnabled', ['id'], {});
   scene.callMark = compile('callMark', ['id'], {});
   scene.callEligible = compile('callEligible', ['mark'], {});
-  scene.latchCBlockReason = compile('latchCBlockReason', [], {});
+  scene.latchCBlockReason = compile('latchCBlockReason', [], {
+    INK_NOT_SEEN: controllerConstant('INK_NOT_SEEN'), MARK_NOT_CALLED: controllerConstant('MARK_NOT_CALLED'),
+  });
   scene.interactionEnabled = compile('interactionEnabled', ['id'], {});
   scene.prompt = compile('prompt', ['id'], { PLATE_ROOMS: controllerConstant('PLATE_ROOMS'), choosePathCallAction });
-  scene.interact = compile('interact', ['id'], { MEMORY: controllerConstant('MEMORY'), choosePathCallAction });
+  scene.interact = compile('interact', ['id'], {
+    MEMORY: controllerConstant('MEMORY'), choosePathCallAction,
+    LATCH_A_LINES: controllerConstant('LATCH_A_LINES'), NEXT_MARK_UNLATCHED: controllerConstant('NEXT_MARK_UNLATCHED'),
+  });
   scene.getObjectiveText = compile('getObjectiveText', [], { PATH_ROOMS, getPathExitBlock, isInsidePracticeAlcove, pathDoorShouldClose });
-  scene.useDoor = compile('useDoor', ['id'], { getPathExitBlock, getPathBackArrival });
+  scene.useDoor = compile('useDoor', ['id'], {
+    getPathExitBlock, getPathBackArrival,
+    STILL_TRAVELLING: controllerConstant('STILL_TRAVELLING'), MARK_NOT_CALLED: controllerConstant('MARK_NOT_CALLED'),
+    TOWER_NEEDS_LUMO: controllerConstant('TOWER_NEEDS_LUMO'),
+  });
   return scene;
 }
 
@@ -305,12 +314,16 @@ function bindTravelPipeline(scene) {
   scene.localRoute = compile('localRoute', ['mark'], { PLATE_ROOMS: plateRooms, getPathLocalLeg });
   scene.pipeRoute = compile('pipeRoute', ['from', 'to'], { getPathPipePoint });
   scene.buildAssignmentRoute = compile('buildAssignmentRoute', ['mark', 'playerPoint'], { PLATE_ROOMS: plateRooms });
-  scene.send = compile('send', ['mark'], {});
-  scene.recallToCall = compile('recallToCall', ['id'], {});
+  scene.send = compile('send', ['mark'], {
+    SEND_LINES: controllerConstant('SEND_LINES'), LATCHED_CALL_LINES: controllerConstant('LATCHED_CALL_LINES'),
+  });
+  scene.recallToCall = compile('recallToCall', ['id'], {
+    RECALL_LINES: controllerConstant('RECALL_LINES'), FINAL_RECALL_LINES: controllerConstant('FINAL_RECALL_LINES'),
+  });
   scene.isPairedPipeHop = compile('isPairedPipeHop', ['target'], { isValidPathPipeHop, isNearPathPipeEndpoint });
   scene.cancelInvalidRoute = compile('cancelInvalidRoute', [], {});
-  scene.completeRoute = compile('completeRoute', ['room'], {});
-  scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete'], {});
+  scene.completeRoute = compile('completeRoute', ['room'], { PRACTICE_ARRIVAL: controllerConstant('PRACTICE_ARRIVAL') });
+  scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete', 'guard', 'onStale'], {});
   scene.flushPendingStoryBeat = compile('flushPendingStoryBeat', [], {});
   scene.advanceLumo = compile('advanceLumo', ['dt'], {});
   scene.isTravelling = compile('isTravelling', [], {});
@@ -454,8 +467,22 @@ controllerCase('the_C_handle_answers_before_the_ink_is_found', () => {
   assert.equal(scene.progress.flags['l4-latch-c'], undefined, 'an early E never latches the exit');
   assert.equal(scene.said.length, 1, 'an early E gives exactly one inspection line');
   const text = saidText(scene);
-  assert.ok(text.includes('F'), `the line names the lantern key (${text})`);
-  assert.ok(text.includes('vạch mực'), `the line names the ink trail to walk (${text})`);
+  // The approved §7 line is character speech and no longer carries the key name; the lantern key
+  // stays in the existing instruction channel (objective), which this controller still writes.
+  assert.equal(text, 'Những vệt trên nền còn mờ quá. Mình thử tắt đèn để xem chúng dẫn tới đâu.',
+    `the early handle uses the approved missing-observation line (${text})`);
+  assert.ok(scene.getObjectiveText().includes('F'),
+    `the separate instruction channel still names the lantern key (${scene.getObjectiveText()})`);
+});
+
+controllerCase('the_objective_stops_asking_for_a_C_call_once_C_is_held', () => {
+  const scene = makePathScene('ink', { 'l4-latch-b': true, 'l4-called-c': true }, { player: { x: 300, y: 240 } });
+  scene.power.c = true;
+  const text = scene.getObjectiveText();
+  assert.ok(text.includes('F'), `the instruction channel still names the lantern key (${text})`);
+  assert.equal(text.includes('gọi Lumo tới ấn C'), false,
+    `a legal C-before-ink call is not advertised again (${text})`);
+  assert.ok(text.includes('vạch mực'), `the remaining ink instruction is still truthful (${text})`);
 });
 
 controllerCase('the_objective_follows_the_main_progress_once_A_has_started', () => {
