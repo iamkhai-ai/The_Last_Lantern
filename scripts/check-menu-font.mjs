@@ -3,20 +3,35 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 
-const transpile = source => ts.transpileModule(source.replace(/^import .*;\r?\n/gm, '').replace(/\bexport /g, ''), {
-  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
-}).outputText;
+// Vite's `import.meta.glob` is build-time syntax: it cannot survive the
+// `module: None` transpile this harness uses, so the boot harness evaluates the
+// scene with an empty asset map (the SFX batch is covered by check-sound.mjs).
+const transpile = source => ts.transpileModule(
+  source
+    .replace(/^import .*;\r?\n/gm, '')
+    .replace(/\bexport /g, '')
+    .replace(/import\.meta\.glob\([^)]*\)/g, '({})'),
+  { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } },
+).outputText;
 
 // The existing asynchronous boot boundary must wait before constructing menu text.
 const starts = [];
 let releaseFont, fontCalls = 0;
 const ready = new Promise(resolve => { releaseFont = resolve; });
 const bootSource = readFileSync(new URL('../src/scenes/BootScene.ts', import.meta.url), 'utf8');
-const BootScene = new Function('Phaser', 'AssetLoader', 'ProceduralTextures', 'loadMenuFont', `${transpile(bootSource)}\nreturn BootScene;`)(
-  { Scene: class { scene = { start: key => starts.push(key) }; } },
+const BootScene = new Function('Phaser', 'AssetLoader', 'ProceduralTextures', 'loadMenuFont', 'SoundSystem', `${transpile(bootSource)}\nreturn BootScene;`)(
+  {
+    Scene: class {
+      scene = { start: key => starts.push(key) };
+      sound = {};
+      load = { audio() {}, once() {}, on() {}, start() {} };
+      cache = { audio: { exists: () => false } };
+    },
+  },
   { load: async () => ({ loaded: [], missing: [] }) },
   { generateAll() {} },
   () => { fontCalls++; return ready; },
+  { setSoundManager() {}, registerLoadedKey() {}, hasSfx: () => false },
 );
 const boot = new BootScene();
 const task = boot.boot();

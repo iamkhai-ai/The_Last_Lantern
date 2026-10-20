@@ -23,8 +23,9 @@ export class Player {
   private footBodyOffsetY = 27;
   private animTimer = 0;
   private animStep = 0;
-  private footstepTimer = 0;
-  private footstepInterval = 320;
+  /** Last frame's position, used to drive the footstep bed from real movement. */
+  private lastX = 0;
+  private lastY = 0;
   private actionAnimation: 'pulse' | 'lantern_on' | 'lantern_off' | null = null;
   private actionElapsed = 0;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -43,6 +44,8 @@ export class Player {
     this.sprite = scene.physics.add.sprite(x, y, initialTexture);
     this.sprite.setDepth(20);
     this.sprite.setCollideWorldBounds(true);
+    this.lastX = x;
+    this.lastY = y;
     this.shadow = scene.add.image(x, y + 17, 'shadow_blob');
     this.shadow.setDepth(9);
 
@@ -76,8 +79,13 @@ export class Player {
       if (this.actionElapsed >= 330) this.actionAnimation = null;
     }
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    // Footsteps follow real displacement, so pushing into a wall stays silent.
+    const moved = Math.abs(this.sprite.x - this.lastX) + Math.abs(this.sprite.y - this.lastY) > 0.1;
+    this.lastX = this.sprite.x;
+    this.lastY = this.sprite.y;
     if (!canMove) {
       body.setVelocity(0, 0);
+      SoundSystem.setWalking(false);
       this.updateTexture(false, false, hasLanternInHand, lanternOn);
       this.updateGroundDepth();
       return;
@@ -126,20 +134,13 @@ export class Player {
         this.animTimer = 0;
         this.animStep = (this.animStep + 1) % 3;
       }
-      // Footstep sound
-      this.footstepTimer += dt;
-      const interval = isRunning ? this.footstepInterval * 0.7 : this.footstepInterval;
-      if (this.footstepTimer >= interval) {
-        this.footstepTimer = 0;
-        SoundSystem.playFootstepGrass();
-      }
     } else {
       body.setVelocity(0, 0);
       this.animStep = 0;
       this.animTimer = 0;
-      this.footstepTimer = 0;
     }
 
+    SoundSystem.setWalking(moved);
     const isRunning = Boolean(this.keys?.SHIFT?.isDown || this.cursors?.shift?.isDown);
     this.updateTexture(isMoving, isRunning, hasLanternInHand, lanternOn);
     this.updateGroundDepth();
