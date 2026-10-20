@@ -1,3 +1,5 @@
+import type { ReachFootprint } from '../systems/interactionReach';
+
 export type ZoneId = 'hub' | 'woods' | 'creek' | 'ruins';
 
 export type QuestStage =
@@ -73,4 +75,11 @@ export interface InteractableConfig {
    * answer, so `[E]` never appears without accepting the press.
    */
   isInReach?: (playerX: number, playerY: number) => boolean;
+  /**
+   * Optional. Measures the approach from the player's foot body to this object's collision rectangle
+   * (`isFootInReach`), instead of from the sprite centre. Replaces the padded radius when a foot body
+   * is passed to `InteractionSystem.update()`; the control's own `isInReach` still takes priority.
+   * `x`/`y`/`radius` stay set: they anchor the prompt and order candidates. RULE_GAMES.md §1.
+   */
+  reach?: ReachFootprint;
 }

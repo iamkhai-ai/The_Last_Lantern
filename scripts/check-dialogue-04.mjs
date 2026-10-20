@@ -147,6 +147,7 @@ function makeCreek({ state = freshState(), flags = {}, x = 68, y = 286 } = {}) {
     saveState() { saved.push(1); },
     colliderBodies: new Map(),
     updateVisuals() {},
+    animateWater() {},
     updateHud() {},
     point() { return { x: this.ctx.player.x, y: this.ctx.player.y }; },
   };

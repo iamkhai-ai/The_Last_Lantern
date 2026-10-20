@@ -2,12 +2,25 @@ import Phaser from 'phaser';
 import { InteractableConfig } from '../types/gameTypes';
 import { layoutInteractionPrompt } from './interactionPromptLayout';
 import type { PromptRect } from './interactionPromptLayout';
+import { isFootInReach } from './interactionReach';
+import type { ReachRect } from './interactionReach';
 
 /** A small world-space cushion; no meter-to-pixel scale is defined by the game. */
 const INTERACTION_RADIUS_PADDING = 8;
 
 function effectiveRadius(item: InteractableConfig): number {
   return item.radius + INTERACTION_RADIUS_PADDING;
+}
+
+/**
+ * Range test shared by `update()` and `tryInteract()`. Order: the control's own predicate, then the
+ * foot-to-footprint test when the control opts in and a foot body is known, then the padded radius
+ * (the path every control without `reach` keeps, and every caller that passes no foot body).
+ */
+function isInRange(item: InteractableConfig, playerX: number, playerY: number, footBody: ReachRect | undefined): boolean {
+  if (item.isInReach) return item.isInReach(playerX, playerY) === true;
+  if (item.reach && footBody) return isFootInReach(footBody, item.reach);
+  return Math.hypot(playerX - item.x, playerY - item.y) <= effectiveRadius(item);
 }
 
 export class InteractionSystem {
@@ -19,6 +32,7 @@ export class InteractionSystem {
   private promptText: Phaser.GameObjects.Text;
   private lastInteractTime = 0;
   private lastPlayerPosition = { x: 0, y: 0 };
+  private lastFootBody: ReachRect | undefined;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -48,8 +62,16 @@ export class InteractionSystem {
     this.interactables.push(config);
   }
 
-  public update(playerX: number, playerY: number, canInteract: boolean, playerBounds?: PromptRect, protectedBounds: PromptRect[] = []): void {
+  public update(
+    playerX: number,
+    playerY: number,
+    canInteract: boolean,
+    playerBounds?: PromptRect,
+    protectedBounds: PromptRect[] = [],
+    footBody?: ReachRect,
+  ): void {
     this.lastPlayerPosition = { x: playerX, y: playerY };
+    this.lastFootBody = footBody;
     if (!canInteract) {
       this.activeTarget = null;
       this.promptContainer.setVisible(false);
@@ -67,10 +89,10 @@ export class InteractionSystem {
 
       const dist = Math.hypot(playerX - item.x, playerY - item.y);
       // A control that owns its own approach shape (a stone answered from all four sides) replaces the
-      // radial test with its predicate; every control without one keeps the padded radius exactly as before.
+      // radial test with its predicate; a control that opts in with `reach` is measured from the foot body;
+      // every other control keeps the padded radius exactly as before.
       // `dist` is still measured: it orders candidates that are both in reach.
-      const inReach = item.isInReach ? item.isInReach(playerX, playerY) === true : dist <= effectiveRadius(item);
-      if (!inReach) continue;
+      if (!isInRange(item, playerX, playerY, footBody)) continue;
 
       // Among the candidates that already pass the gates above, a control that owns the standing
       // position keeps it even when a neighbouring prop is nearer. Controls that do not opt in are
@@ -113,14 +135,12 @@ export class InteractionSystem {
     if (!this.activeTarget) return false;
     const target = this.activeTarget;
     // The press re-validates the whole approach condition the prompt and the selection agreed on:
-    // enabled, a live prompt, the range (the control's own `isInReach` when it opts in, else the padded
-    // radius), and — for a control that owns the standing position — that the feet are still inside it.
+    // enabled, a live prompt, the range (the control's own `isInReach`, else the foot body against `reach`,
+    // else the padded radius), and — for a control that owns the standing position — that the feet are still inside it.
     // A state change between update() and E can never fire a control the player has already left or that
     // has since gone quiet.
     const disabled = target.isEnabled ? !target.isEnabled() : false;
-    const outOfRange = target.isInReach
-      ? target.isInReach(this.lastPlayerPosition.x, this.lastPlayerPosition.y) !== true
-      : Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > effectiveRadius(target);
+    const outOfRange = !isInRange(target, this.lastPlayerPosition.x, this.lastPlayerPosition.y, this.lastFootBody);
     const lostOwnership = target.ownsPosition
       ? target.ownsPosition(this.lastPlayerPosition.x, this.lastPlayerPosition.y) !== true
       : false;

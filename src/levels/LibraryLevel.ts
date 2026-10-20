@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { getLevelArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
-import { LIBRARY_DAIS, LIBRARY_EXIT_THRESHOLD, LIBRARY_LAYOUT, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
+import { LIBRARY_DAIS, LIBRARY_EXIT_THRESHOLD, LIBRARY_LAYOUT, LIBRARY_MURAL_SOLID, LIBRARY_RACK_SOLIDS, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
@@ -543,6 +543,8 @@ export class LibraryLevel {
       onInteract: () => this.readBook() });
     LIBRARY_LAYOUT.racks.forEach((point, rackIndex) => this.register({
       id: `library-rack-${rackIndex}`, x: point.x, y: point.y + LIBRARY_LAYOUT.rackStandOffset, radius: 22,
+      // RULE_GAMES §1: measured from the foot body to the rack block, so E shows flush against its south face.
+      reach: { rect: LIBRARY_RACK_SOLIDS[rackIndex] },
       getPrompt: () => {
         const stone = this.rackStone(rackIndex);
         return stone ? `E · Xem và chọn phiến ${LABELS[stone]}` : '';
@@ -570,11 +572,14 @@ export class LibraryLevel {
         ? (this.objects.find((object) => object.getData('library-crystal') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.collectCrystal(), isEnabled: () => this.progress.flags['l2-memory'] === true && this.progress.flags['l2-crystal'] !== true });
     this.register({ id: 'library-mural', x: LIBRARY_LAYOUT.muralStand.x, y: LIBRARY_LAYOUT.muralStand.y, radius: 22,
+      reach: { rect: LIBRARY_MURAL_SOLID },
       getPrompt: () => this.progress.flags['l2-fifth-viewed'] ? 'E · Đọc lại bức tranh thứ năm' : 'E · Đọc bức tranh thứ năm sau vách rễ',
       getPromptBounds: () => this.objects.find((object) => object.getData('library-mural') === true) instanceof Phaser.GameObjects.Image
         ? (this.objects.find((object) => object.getData('library-mural') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.readMural(), isEnabled: () => this.progress.flags['l2-crystal'] === true });
     this.register({ id: 'library-exit', x: LIBRARY_LAYOUT.exit.x, y: LIBRARY_LAYOUT.exit.y, radius: LIBRARY_LAYOUT.exit.radius,
+      // RULE_GAMES §3 (arch exception): E shows just south of the doorway slot between the two posts only.
+      reach: { rect: LIBRARY_EXIT_THRESHOLD, face: 'south', sideMargin: 0 },
       getPrompt: () => this.isExitOpen() ? 'E · Qua cổng đá' : 'E · Kiểm tra cổng đá phía Đông Bắc',
       getPromptBounds: () => this.exitImages[0]?.getBounds() ?? null,
       onInteract: () => this.useExit(), isEnabled: () => true });

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { getNhinhTexture } from '../art/CampaignArt';
 import { SoundSystem } from '../systems/SoundSystem';
+import type { ReachRect } from '../systems/interactionReach';
 
 export type FacingDirection =
   | 'down'
@@ -145,6 +146,12 @@ export class Player {
     const isRunning = Boolean(this.keys?.SHIFT?.isDown || this.cursors?.shift?.isDown);
     this.updateTexture(isMoving, isRunning, hasLanternInHand, lanternOn);
     this.updateGroundDepth();
+  }
+
+  /** The foot collision body in world space: the rect interaction reach is measured from (RULE_GAMES.md §1). */
+  public getFootBody(): ReachRect {
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    return { x: body.x, y: body.y, width: body.width, height: body.height };
   }
 
   public playLanternAction(isOn: boolean): void {

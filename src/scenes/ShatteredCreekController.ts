@@ -10,6 +10,20 @@ import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 
 type Say = (lines: DialogueLine[], done?: () => void) => void;
 const creekMechanismArt = (filename: string): string | null => getLevelArtKey(3, `mechanisms/${filename}`);
+
+/** Water flows south, towards the player (1 = south, -1 = north). */
+const FLOW_DIRECTION = 1;
+/** The creek is nearly dry when the level opens (see the opening dialogue) and runs stronger as each span is restored. */
+const FLOW_BASE = 0.3;
+const FLOW_PER_BRIDGE = 0.35;
+/** Scroll speed in px/s at full strength, slowest (deepest) layer first. Each texture wraps vertically. */
+const WATER_LAYERS = [
+  { art: 'creek-water-deep', speed: 9, depth: 0.1, fadesWithFlow: false },
+  { art: 'creek-water-streaks', speed: 26, depth: 0.11, fadesWithFlow: true },
+  { art: 'creek-water-glints', speed: 40, depth: 0.12, fadesWithFlow: true },
+] as const;
+/** The painted backdrop is re-cut so its chasm mouths sit over the rivers; the yard frame fades over this many px. */
+const WATER_FADE = 14;
 type Context = { scene: Phaser.Scene; player: Player; lumo: Lumo; lantern: LanternSystem; interactions: InteractionSystem; progress: CampaignProgress; save: () => void; say: Say; nextLevel: (lines: DialogueLine[]) => void; isDialogueActive: () => boolean };
 
 const OPENING: DialogueLine[] = [
@@ -80,6 +94,10 @@ export class ShatteredCreekController {
   private state!: CreekState;
   private cleaned = false;
   private stepKey = '';
+  private flowLayers: Array<{ sprite: Phaser.GameObjects.TileSprite; speed: number; fadesWithFlow: boolean }> = [];
+  private moonGlitter?: Phaser.GameObjects.Image;
+  private flowStrength = FLOW_BASE;
+  private flowSnapped = false;
 
   constructor(private readonly ctx: Context) {}
 
@@ -132,6 +150,7 @@ export class ShatteredCreekController {
     if (laneA) laneA.enable = !live.bridgeA;
     if (laneB) laneB.enable = !live.bridgeB;
     this.updateVisuals();
+    this.animateWater(live);
     this.updateHud(live);
     let discoveryChanged = false;
     if (live.eyeA && !this.ctx.progress.flags['l3-eye-a-discovered']) { this.ctx.progress.flags['l3-eye-a-discovered'] = true; discoveryChanged = true; }
@@ -201,7 +220,7 @@ export class ShatteredCreekController {
     this.cleaned = true;
     this.colliders.forEach((collider) => collider.destroy());
     this.objects.forEach((object) => object.destroy());
-    this.colliders = []; this.objects = []; this.visuals.clear(); this.bodies = []; this.colliderBodies.clear();
+    this.flowLayers = []; this.moonGlitter = undefined; this.colliders = []; this.objects = []; this.visuals.clear(); this.bodies = []; this.colliderBodies.clear();
   }
 
   private registerActions(): void {
@@ -305,6 +324,7 @@ export class ShatteredCreekController {
 
   private drawGround(): void {
     const { scene } = this.ctx;
+    if (this.drawComposedScene()) return;
     const backdropKey = getLevelArtKey(3, 'creek-scene-base');
     if (backdropKey && scene.textures.exists(backdropKey)) {
       const background = scene.add.image(0, 0, backdropKey).setOrigin(0, 0).setDisplaySize(640, 360).setCrop(0, 0, 640, 88).setDepth(0); this.keep(background);
@@ -314,6 +334,62 @@ export class ShatteredCreekController {
     for (const river of water) this.keep(scene.add.tileSprite(river.x + river.width / 2, river.y + river.height / 2, river.width, river.height, 'tile_water').setTint(0x8cc0c5).setDepth(0.1));
     for (const river of water) for (const x of [river.x, river.x + river.width]) this.keep(scene.add.tileSprite(x, river.y + river.height / 2, 4, river.height, 'stepping_stone').setTint(0x8c988b).setDepth(1));
     this.addBridge('a', 'west'); this.addBridge('b', 'east');
+  }
+
+  /**
+   * One painted image for the whole yard (frame, kerbed flagstone banks, bank rims, painted chasm mouths) with the two
+   * river channels transparent, over live water layers. Returns false when any art is missing so the plain tile
+   * ground below still works.
+   */
+  private drawComposedScene(): boolean {
+    const { scene } = this.ctx;
+    const composite = getLevelArtKey(3, 'creek-scene-composite');
+    const keys = WATER_LAYERS.map((layer) => getLevelArtKey(3, layer.art));
+    const foam = getLevelArtKey(3, 'creek-water-foam');
+    const moon = getLevelArtKey(3, 'creek-moon-streak');
+    if (!composite || !foam || !moon || keys.some((key) => !key) || ![composite, foam, moon, ...keys].every((key) => scene.textures.exists(key as string))) return false;
+    const { bounds, water } = SHATTERED_CREEK;
+    const top = bounds.y - WATER_FADE;
+    const height = bounds.height + WATER_FADE * 2;
+    for (const river of water) {
+      const cx = river.x + river.width / 2;
+      const cy = top + height / 2;
+      WATER_LAYERS.forEach((layer, index) => {
+        const sprite = scene.add.tileSprite(cx, cy, river.width, height, keys[index] as string).setDepth(layer.depth);
+        this.keep(sprite);
+        this.flowLayers.push({ sprite, speed: layer.speed, fadesWithFlow: layer.fadesWithFlow });
+      });
+      const foamWidth = scene.textures.get(foam).getSourceImage().width;
+      for (const [x, flip] of [[river.x + foamWidth / 2, false], [river.x + river.width - foamWidth / 2, true]] as const) {
+        const sprite = scene.add.tileSprite(x, cy, foamWidth, height, foam).setDepth(0.13).setFlipX(flip);
+        this.keep(sprite);
+        this.flowLayers.push({ sprite, speed: 14, fadesWithFlow: true });
+      }
+    }
+    // Moon glitter under the painted moon pool above the west river.
+    this.moonGlitter = scene.add.image(water[0].x + water[0].width / 2, bounds.y - 4, moon).setOrigin(0.5, 0).setBlendMode(Phaser.BlendModes.ADD).setDepth(0.15);
+    this.keep(this.moonGlitter);
+    this.keep(scene.add.image(0, 0, composite).setOrigin(0, 0).setDisplaySize(640, 360).setDepth(0.2));
+    this.addBridge('a', 'west'); this.addBridge('b', 'east');
+    return true;
+  }
+
+  /** The current strengthens with each restored span; the textures scroll by integrating speed over frame time. */
+  private animateWater(live: CreekLiveState): void {
+    if (this.flowLayers.length === 0) return;
+    const target = Math.min(1, FLOW_BASE + FLOW_PER_BRIDGE * ((live.bridgeA ? 1 : 0) + (live.bridgeB ? 1 : 0)));
+    const dt = Math.min(0.05, this.ctx.scene.game.loop.delta / 1000);
+    if (!this.flowSnapped) { this.flowStrength = target; this.flowSnapped = true; }
+    this.flowStrength += (target - this.flowStrength) * Math.min(1, dt * 1.2);
+    for (const layer of this.flowLayers) {
+      layer.sprite.tilePositionY -= FLOW_DIRECTION * layer.speed * this.flowStrength * dt;
+      if (layer.fadesWithFlow) layer.sprite.setAlpha(0.25 + 0.75 * this.flowStrength);
+    }
+    if (this.moonGlitter) {
+      const t = this.ctx.scene.time.now / 1000;
+      this.moonGlitter.setAlpha((0.45 + 0.25 * Math.sin(t * 1.7)) * (0.5 + 0.5 * this.flowStrength));
+      this.moonGlitter.setScale(1 + 0.04 * Math.sin(t * 2.3), 1);
+    }
   }
 
   private drawMechanisms(): void {

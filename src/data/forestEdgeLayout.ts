@@ -42,6 +42,23 @@ export const FOREST_EDGE_SOLIDS: Rect[] = [
   ...FOREST_EDGE.objects.rocks.map(({ anchor }) => ({ x: anchor.x - 13, y: anchor.y - 14, width: 26, height: 14 })),
 ];
 
+/** The lantern pedestal's visual footprint (20x28 above its anchor). It has no collision; E answers from its base. */
+export const FOREST_EDGE_LANTERN_PEDESTAL: Rect = {
+  x: FOREST_EDGE.objects.lantern.anchor.x - 10,
+  y: FOREST_EDGE.objects.lantern.anchor.y - 28,
+  width: 20,
+  height: 28,
+};
+
+/** The doorway slot between the two gate posts: the only spot the gate's E prompt answers from (RULE_GAMES.md §3). */
+const [FOREST_GATE_LEFT_POST, FOREST_GATE_RIGHT_POST] = FOREST_EDGE.objects.gate.posts;
+export const FOREST_EDGE_GATE_SLOT: Rect = {
+  x: FOREST_GATE_LEFT_POST.x + FOREST_GATE_LEFT_POST.width,
+  y: FOREST_GATE_LEFT_POST.y,
+  width: FOREST_GATE_RIGHT_POST.x - (FOREST_GATE_LEFT_POST.x + FOREST_GATE_LEFT_POST.width),
+  height: FOREST_GATE_LEFT_POST.height,
+};
+
 /** Walkable dirt path through the forest edge, raw (before Chaikin smoothing). Point order is the polygon outline. */
 export const FOREST_EDGE_GROUND_PATH: readonly Point[] = [
   { x: 176, y: 304 }, { x: 149, y: 282 }, { x: 123, y: 265 },
