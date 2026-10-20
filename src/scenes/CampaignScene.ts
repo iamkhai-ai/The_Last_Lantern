@@ -13,7 +13,7 @@ import { PathForTwoLevel } from '../levels/PathForTwoLevel';
 import { RuinsOfTwoHalvesLevel } from '../levels/RuinsOfTwoHalvesLevel';
 import { isRuinsPositionSafe } from '../data/ruinsOfTwoHalvesLayout';
 import { HeartOfElariaLevel } from '../levels/HeartOfElariaLevel';
-import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
+import { canChargeForestEdgeReceiver, canUseForestEdgePulse, feetAt, FOREST_EDGE, FOREST_EDGE_GATE_SLOT, FOREST_EDGE_LANTERN_PEDESTAL, FOREST_EDGE_SOLIDS, isForestEdgeCenterWalkable, resolveForestEdgeSpawn, worldDepth } from '../data/forestEdgeLayout';
 import { forestEdgeFootprintRotation, forestEdgeGuideTarget } from '../data/forestEdgeGuidance';
 import { OBSERVATORY_ROOMS, type ObservatoryExit, type ObservatoryRoomId, type ObservatoryRoomPoint, type ObservatoryWaypointId } from '../data/observatoryRooms';
 import {
@@ -51,6 +51,7 @@ import {
 } from '../data/observatoryLayout';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
+import type { ReachFootprint } from '../systems/interactionReach';
 import { LanternSystem, LIBRARY_LIGHTING } from '../systems/LanternSystem';
 import { CampaignProgress, CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { consumeCampaignNewGameIntent } from '../systems/CampaignStartIntent';
@@ -2029,7 +2030,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private registerLevel(level: number): void {
-    const action = (id: string, label: string | (() => string), x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean) => this.addAction(id, label, x, y, fn, enabled, texture, isInReach);
+    const action = (id: string, label: string | (() => string), x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean, reach?: ReachFootprint) => this.addAction(id, label, x, y, fn, enabled, texture, isInReach, reach);
     if (level === 0) {
       action('lamp', 'E · Nhận đèn lồng', FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
         this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; this.lantern.lanternOn = false;
@@ -2044,10 +2045,10 @@ export class CampaignScene extends Phaser.Scene {
           { speaker: 'Lumo', text: 'Tôi cũng không nhớ… Cậu thử thắp lên xem. Có khi nó vẫn còn dùng được.' },
         ]);
         this.hintIndex = 0; this.save();
-      }, () => !this.progress.lanternPickedUp && this.progress.flags['l0-lumo-met'] === true, 'pedestal_empty');
+      }, () => !this.progress.lanternPickedUp && this.progress.flags['l0-lumo-met'] === true, 'pedestal_empty', undefined, { rect: FOREST_EDGE_LANTERN_PEDESTAL });
       action('lantern-inscription', 'E · Xem dòng khắc trên đèn', FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
         this.say([{ speaker: 'Nhinh', text: 'Quai đèn đã mòn nhẵn. Chắc trước đây có người mang nó bên mình suốt.' }]);
-      }, () => this.progress.lanternPickedUp, 'pedestal_empty');
+      }, () => this.progress.lanternPickedUp, 'pedestal_empty', undefined, { rect: FOREST_EDGE_LANTERN_PEDESTAL });
       action('tablet', 'E · Đọc bia đá', FOREST_EDGE.objects.tablet.stand.x, FOREST_EDGE.objects.tablet.stand.y, () => {
         const inscription = 'Khách qua rừng, hãy tìm dấu chân dưới lớp sương. Ánh sáng đánh thức điều mắt thường bỏ quên.';
         if (!this.lantern.lanternOn) {
@@ -2065,7 +2066,7 @@ export class CampaignScene extends Phaser.Scene {
             { speaker: 'Lumo', text: 'Ánh đèn chưa tới được đó. Cậu thử phát một xung sáng xem.' },
           ]
           : [{ speaker: 'Nhinh', text: inscription }]);
-      }, () => this.progress.lanternPickedUp, 'beacon_stone');
+      }, () => this.progress.lanternPickedUp, 'beacon_stone', undefined, { rect: FOREST_EDGE.objects.tablet.solid });
       action('gate', () => this.progress.flags['l0-gate-open'] ? 'E · Qua cổng rừng' : 'E · Kiểm tra cổng', FOREST_EDGE.objects.gate.exit.x, FOREST_EDGE.objects.gate.exit.y, () => {
         if (this.progress.flags['l0-gate-open']) {
           this.nextLevel([
@@ -2081,7 +2082,7 @@ export class CampaignScene extends Phaser.Scene {
             { speaker: 'Nhinh', text: 'Có lẽ mình phải đứng ở đó?' },
           ]);
         }
-      }, () => true, 'woods_arch_open');
+      }, () => true, 'woods_arch_open', undefined, { rect: FOREST_EDGE_GATE_SLOT, face: 'south', sideMargin: 0 });
     } else if (level === 1) {
       const stands=WHISPERING_WOODS.stands;
       // RULE_GAMES.md §3 exception (2026-10-20): the poem and the three rune stones answer E from every
@@ -2212,7 +2213,7 @@ export class CampaignScene extends Phaser.Scene {
     return { x: 350, y: 260 };
   }
 
-  private addAction(id: string, label: string | (() => string), x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean): void {
+  private addAction(id: string, label: string | (() => string), x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean, reach?: ReachFootprint): void {
     if ((id.includes('exit') || id === 'stairs') && this.progress.level !== 1) {
       const hasGateProp = this.objects.some((object) =>
         object instanceof Phaser.GameObjects.Image
@@ -2225,14 +2226,12 @@ export class CampaignScene extends Phaser.Scene {
       );
       if (!hasGateProp) this.addProp(texture, x, y, 0.8);
     }
-    this.interactions.register({ id, x, y, getPromptBounds: this.getActionPromptBounds(id, x, y), radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()), ...(isInReach ? { isInReach } : {}) });
+    this.interactions.register({ id, x, y, getPromptBounds: this.getActionPromptBounds(id, x, y), radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()), ...(isInReach ? { isInReach } : {}), ...(reach ? { reach } : {}) });
   }
 
   private getActionPromptBounds(id: string, x: number, y: number): (() => { x: number; y: number; width: number; height: number } | null) | undefined {
     if (this.progress.level === 0) {
-      if (id === 'lamp' || id === 'lantern-inscription') return () => ({
-        x: FOREST_EDGE.objects.lantern.anchor.x - 10, y: FOREST_EDGE.objects.lantern.anchor.y - 28, width: 20, height: 28,
-      });
+      if (id === 'lamp' || id === 'lantern-inscription') return () => ({ ...FOREST_EDGE_LANTERN_PEDESTAL });
       if (id === 'tablet') return () => ({
         x: FOREST_EDGE.objects.tablet.anchor.x - 24, y: FOREST_EDGE.objects.tablet.anchor.y - 60, width: 48, height: 60,
       });
