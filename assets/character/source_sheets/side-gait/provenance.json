@@ -8,7 +8,7 @@
   "original_generated_path": "C:/Users/Admin/.codex/generated_images/01a157be-4e27-70e3-9f34-77ad94820cd6/exec-977a97ab-b414-454d-98b9-eee1a46639cf.png",
   "prompt": "Use case: precise-object-edit. EDIT the attached 3-column by 4-row sprite sheet, maintaining the same exact grid, character scale, pose centers and truly transparent background. Row1 left walk, row2 left run, row3 right walk, row4 right run. The 3 columns are gait phase A, passing, OPPOSITE gait phase B. The source has 36x42 logical pixels per sprite enlarged10x, total1080x1680. Output the same three columns and four rows. No labels, grid lines, background or margins. The girl MUST stay bare-handed with no lantern.\nTask: repair ONLY the pants, TWO LEGS and TWO BOOTS below the cream cloak, preserving hood, face, red scarf, cloak and hands. The existing phaseA and phaseB repeat the SAME leading leg. Make the near-side leg's motion unmistakable: COLUMN1 the NEAR leg is forward IN THE FACING DIRECTION, its shin and toe clearly in front; far leg is BEHIND and lifted with bent knee. COLUMN2 is a narrow passing pose: the supporting foot is under the hip, the other leg bent and passing. COLUMN3 the NEAR leg is now BACKWARD BEHIND the hip, its knee and boot swing behind, while the FAR leg steps FORWARD. Swap foreground/background leg layering and the shin highlights across columns1and3. Very important: do not just change boot size, head bob, scarf, or which heel is raised while keeping the same leg ahead. Actually alternate the anatomical near and far legs. Use a readable slightly lighter brown for near leg/boot and deep dark brown for far leg/boot, from the original palette, so the exchange of their positions is visible at tiny game resolution. No additional legs or boots. Frame1 and frame3 must have visibly distinct silhouettes, the bent raised leg and grounded straight leg must exchange position.\nWalk rows: small alternating steps with one boot planted at logical baseline y40. Run rows: more stretched legs, stronger bent raised knee and more trailing heel; phaseA/B oppose one another. This plays A-passing-B-passing repeatedly. Keep feet attached naturally to hip and body placement; sprites have roomy transparent space above their heads. Pure horizontal facing throughout. Same pixel-art character and same tiny36x42 pixel cluster style as reference, hard square pixel edges, no vector, smoothpainting or new effects. Do not redesign any upper body or head. Genuine alpha transparency, no checkerboard, no ground shadows.",
   "postprocessing_authorization": "User explicitly approved Python PNG editing in this chat.",
-  "postprocessing": "Boot cutouts from the generated reference are articulated at separate near/far hip, knee and foot positions. Near/far roles exchange in phases 0 and 2; phase 1 is passing. Original pixels above y32, coat hem, hands, scarf and lantern patches are preserved. Corrected lower regions are baked into six original source sheets, then the existing prepare_frames.py generates all 240 runtime frames.",
+  "postprocessing": "Legs are redrawn by build_side_gait_legs.py from the baseline commit: a 2-px outlined pants limb per leg ending in a 7x5 outlined boot, near/far roles exchanging in phases 0 and 2, phase 1 passing. Original pixels above y32, coat hem, hands, scarf and lantern patches are preserved. Corrected lower regions are baked into six original source sheets, then the existing prepare_frames.py generates all 240 runtime frames.",
   "runtime_cycle": [
     0,
     1,
@@ -53,6 +53,67 @@
         "#####"
       ]
     },
-    "prior_revision": "38924801e9913e2dd24e0b15544b6ca014ed8d81"
+    "prior_revision": "38924801e9913e2dd24e0b15544b6ca014ed8d81",
+    "superseded_by": "leg_redraw"
+  },
+  "leg_redraw": {
+    "reason": "The 5x4 boot cutout left boots without outline or heel shape, legs read as thin sticks, and the passing pose hid the swing boot behind the hem. Measured against the baseline, row-40 sole width fell from 13-14 px to 5 px and foot pixels (rows 36-41) fell about 40%.",
+    "script": "build_side_gait_legs.py",
+    "boot": {
+      "size": [
+        7,
+        5
+      ],
+      "template_facing_right": [
+        ".OOO...",
+        ".OhbO..",
+        ".OhbbO.",
+        "ObbbbsO",
+        "OOOOOOO"
+      ],
+      "left": "mirrored",
+      "sole": "one full 7-px row at y=40 for the planted boot"
+    },
+    "outline_rgb": [
+      6,
+      2,
+      1
+    ],
+    "near_boot_rgb_mid_highlight_shade": [
+      [
+        72,
+        30,
+        16
+      ],
+      [
+        104,
+        48,
+        24
+      ],
+      [
+        46,
+        19,
+        10
+      ]
+    ],
+    "far_boot_rgb_mid_highlight_shade": [
+      [
+        60,
+        26,
+        14
+      ],
+      [
+        84,
+        39,
+        20
+      ],
+      [
+        40,
+        17,
+        9
+      ]
+    ],
+    "verification": "Regenerated 36 frames equal the authored frames pixel for pixel; the other 204 runtime frames are unchanged; body-scale anchors still pass; check-player-gait.mjs passes 25 cases.",
+    "prior_revision": "1af600019b1cfa6132e356c42d3ab557d3f7ef59"
   }
 }
