@@ -11,6 +11,9 @@ const observedDialogue = new Set();
 console.log(`Level 01 browser regression: ${baseUrl}`);
 console.log(`Artifacts: ${out}`);
 (async () => {
+  const { FOREST_EDGE } = await import('../src/data/forestEdgeLayout.ts');
+  const lamp = FOREST_EDGE.objects.lantern;
+  const tablet = FOREST_EDGE.objects.tablet;
   const launchOptions = { headless: true };
   if (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE) launchOptions.executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
   const browser = await chromium.launch(launchOptions);
@@ -30,6 +33,12 @@ console.log(`Artifacts: ${out}`);
       x: p.x, y: p.y, body: { x: body.x, y: body.y, width: body.width, height: body.height }, depth: p.depth,
       target: s.interactions.getActiveTarget()?.id ?? null, objective: s.hud?.objectiveText?.text, charge: s.forestEdgeChargeMs,
       lumoVisible: s.lumo.sprite.visible, pulseCooldown: s.lantern.getCooldownRatio(),
+      lanternGlow: { x: s.forestEdgeLanternGlow?.x, y: s.forestEdgeLanternGlow?.y },
+      tabletGlow: { x: s.forestEdgeTabletGlow?.x, y: s.forestEdgeTabletGlow?.y },
+      promptBounds: s.progress.level === 0 ? {
+        lantern: s.getActionPromptBounds('lamp', 0, 0)?.(),
+        tablet: s.getActionPromptBounds('tablet', 0, 0)?.(),
+      } : null,
       objects: s.objects.filter(o => o.texture && o.getData('forestEdgeId')).map(o => ({ id:o.getData('forestEdgeId'),x:o.x,y:o.y,depth:o.depth,texture:o.texture.key })) };
   });
   const mark = async name => { const s = await state(); results.push({ name, status: 'PASS', state: s }); console.log(name, JSON.stringify({x:s.x,y:s.y,picked:s.picked,lampOn:s.lampOn,flags:s.flags})); };
@@ -78,22 +87,59 @@ console.log(`Artifacts: ${out}`);
     await shot('opening');
     await dismiss();
     let s=await state(); assert.equal(s.level,0); assert.equal(s.picked,false);
+    assert.ok(Math.abs(s.x - FOREST_EDGE.player.spawn.x) < 1, 'fresh game uses the relocated spawn');
+    assert.equal(s.objects.find(o => o.id === 'lantern')?.x, lamp.anchor.x, 'lantern artwork follows its new layout anchor');
+    assert.equal(s.objects.find(o => o.id === 'tablet')?.x, tablet.anchor.x, 'tablet artwork follows its relocated trigger and solid');
+    assert.deepEqual(s.lanternGlow, { x: lamp.anchor.x, y: lamp.anchor.y - 12 });
+    assert.deepEqual(s.tabletGlow, { x: tablet.anchor.x, y: tablet.anchor.y - 30 });
+    assert.deepEqual(s.promptBounds.lantern, { x: lamp.anchor.x - 10, y: lamp.anchor.y - 28, width: 20, height: 28 });
+    assert.deepEqual(s.promptBounds.tablet, { x: tablet.anchor.x - 24, y: tablet.anchor.y - 60, width: 48, height: 60 });
+    await mark('relocated opening artwork and glows align with the layout');
     await tap('f'); await tap('Space');
     s=await state(); assert.equal(s.lampOn,false); assert.ok(!s.flags['l0-tablet-read']); assert.ok(!s.flags['l0-footprints-found']);
     await mark('early controls do not skip tutorial');
-    await move(224,251); await dismiss(); await tap('e'); await dismiss();
+    await move(lamp.stand.x,lamp.stand.y); await dismiss();
+    assert.equal((await state()).target,'lamp','lantern answers from the south');
+    await move(lamp.anchor.x + 28,lamp.anchor.y - 18);
+    assert.notEqual((await state()).target,'lamp','lantern east side is quiet');
+    await move(lamp.anchor.x,lamp.anchor.y - 43,'y');
+    assert.notEqual((await state()).target,'lamp','lantern north side is quiet');
+    await move(lamp.anchor.x - 28,lamp.anchor.y - 18);
+    assert.notEqual((await state()).target,'lamp','lantern west side is quiet');
+    await move(lamp.stand.x,lamp.stand.y,'y');
+    await tap('e'); await dismiss();
     s=await state(); assert.equal(s.picked,true); assert.equal(s.lampOn,false);
     await mark('nearby meeting and lantern pickup');
-    await move(300,250); await moveAxis('y',238); await tap('e'); await dismiss();
+    await move(tablet.stand.x,FOREST_EDGE.checkpoints.tablet.y); await moveAxis('y',tablet.stand.y); await tap('e'); await dismiss();
     assert.ok(!(await state()).flags['l0-tablet-read']);
     await mark('unlit tablet remains unread');
     await tap('f'); await tap('Space'); assert.ok(!(await state()).flags['l0-footprints-found']); assert.equal((await state()).pulseCooldown,0,'Pulse must not fire or consume cooldown before tablet teaches it');
+    await move(tablet.anchor.x + 32,tablet.anchor.y - 30);
+    assert.notEqual((await state()).target,'tablet','tablet east side is quiet');
+    await move(tablet.anchor.x,tablet.anchor.y - 80,'y');
+    assert.notEqual((await state()).target,'tablet','tablet north side is quiet');
+    await move(tablet.anchor.x - 32,tablet.anchor.y - 30);
+    assert.notEqual((await state()).target,'tablet','tablet west side is quiet');
+    await move(tablet.stand.x,FOREST_EDGE.checkpoints.tablet.y,'y');
+    await moveAxis('y',tablet.stand.y);
+    assert.equal((await state()).target,'tablet','relocated tablet answers from the south');
     await tap('e'); await dismiss(); assert.equal((await state()).flags['l0-tablet-read'],true);
+    await mark('relocated lantern and tablet keep south-side interaction');
+    assert.ok(FOREST_EDGE.objects.ring.ground.x - (await state()).x >= 180, 'reading the tablet leaves the ring farther east');
+    await shot('tablet-read-wide-approach');
     await page.waitForTimeout(3100); await tap('Space'); await dismiss();
     assert.equal((await state()).flags['l0-footprints-found'],true);
     for(const line of ['Có người từng đi qua đây.','Và họ để lại đường cho chúng ta. Đi cùng tôi nhé?','Đi cùng nhau.']) assert.ok(observedDialogue.has(line),`Missing first-discovery dialogue: ${line}`);
     await page.waitForTimeout(3100); await tap('Space'); assert.equal((await state()).dialogue,false,'Repeated Pulse must not replay footprint discovery dialogue');
+    assert.equal((await state()).objects.filter(o => /^footprint-/.test(o.id)).length, FOREST_EDGE.objects.trail.length,
+      'all six marks in the longer footprint trail are rendered');
     await shot('trail'); await mark('lit tablet then Pulse reveals trail');
+    // Follow the longer approach using real movement; the ring must not charge on the way.
+    for (const point of FOREST_EDGE.objects.trail) {
+      await move(point.x,point.y - FOREST_EDGE.player.footOffsetY,'y');
+      assert.ok(!(await state()).flags['l0-gate-open'], 'walking the trail does not charge the ring early');
+    }
+    await shot('approaching-ring');
     await tap('f');
     await move(486,191); await moveAxis('y',151);
     await page.keyboard.down('w'); await page.waitForTimeout(800); await page.keyboard.up('w'); await page.waitForTimeout(120);
@@ -120,7 +166,7 @@ console.log(`Artifacts: ${out}`);
     // With a save present "Hành trình mới" asks for confirmation first: open it, pick "Bắt đầu lại", confirm.
     await tap('s'); await tap('Enter'); await tap('ArrowRight'); await tap('Enter'); await skipPrologue(); await dismiss();
     assert.equal((await state()).level,0);assert.equal((await state()).picked,false);assert.ok(!(await state()).flags['l0-gate-open']);await mark('explicit second NewGame resets progress');
-    await move(224,251);await dismiss();await tap('e');await dismiss();assert.equal((await state()).picked,true);
+    await move(lamp.stand.x,lamp.stand.y);await dismiss();await tap('e');await dismiss();assert.equal((await state()).picked,true);
     await tap('Escape');await clickWorld(320,177);await clickWorld(320,177);await skipPrologue();await dismiss();
     assert.equal((await state()).level,0);assert.equal((await state()).picked,false);await mark('confirmed pause Restart resets progress');
     assert.deepEqual(errors,[]);

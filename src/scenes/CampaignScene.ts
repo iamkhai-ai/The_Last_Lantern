@@ -81,10 +81,10 @@ const WOODS_GATE_GLOW = { x: 510, y: 150 };
 const WOODS_POEM_GLOW = { x: 136, y: 236 };
 const WOODS_RUNE_GLOW_Y_OFFSET = -30;
 // Level 01 accent glows. Positions are authored for the Level 01 art; visibility follows progress or the live art.
-const FOREST_EDGE_LANTERN_GLOW = { x: 224, y: 226 };
+const FOREST_EDGE_LANTERN_GLOW = { x: FOREST_EDGE.objects.lantern.anchor.x, y: FOREST_EDGE.objects.lantern.anchor.y - 12 };
 const FOREST_EDGE_GATE_GLOW = { x: 486, y: 126 };
 const FOREST_EDGE_EYE_GLOW = { x: 538, y: 122 };
-const FOREST_EDGE_TABLET_GLOW = { x: 300, y: 200 };
+const FOREST_EDGE_TABLET_GLOW = { x: FOREST_EDGE.objects.tablet.anchor.x, y: FOREST_EDGE.objects.tablet.anchor.y - 30 };
 const FOREST_EDGE_RING_GLOW = { x: 410, y: 210 };
 /** Path depth: Level 01 keeps its original 0.6; Level 02 keeps 0.55. */
 const FOREST_EDGE_PATH_DEPTH = 0.6;
@@ -1785,7 +1785,7 @@ export class CampaignScene extends Phaser.Scene {
       this.footprintTrail = this.add.graphics().setDepth(4);
       this.footprintTrail.fillStyle(0xd7e6dc, 0.8);
       this.footprintTrail.fillStyle(0xe5f0d5, 0.16);
-      this.footprintTrail.fillEllipse(360, 232, 78, 31);
+      this.footprintTrail.fillEllipse(FOREST_EDGE.pulseDiscovery.center.x, FOREST_EDGE.pulseDiscovery.center.y - 3, 150, 31);
       this.footprintTrail.setVisible(this.progress.flags['l0-footprints-found'] === true);
       this.track(this.footprintTrail);
     }
@@ -1870,7 +1870,11 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private addNarrativeProps(level: number): void {
-    const props: Array<[string, number, number]> = level === 0 ? [['beacon_stone', 300, 230], ['woods_arch_locked', 486, 166], ['pedestal_empty', 410, 225]]
+    const props: Array<[string, number, number]> = level === 0 ? [
+      ['beacon_stone', FOREST_EDGE.objects.tablet.anchor.x, FOREST_EDGE.objects.tablet.anchor.y],
+      ['woods_arch_locked', FOREST_EDGE.objects.gate.anchor.x, FOREST_EDGE.objects.gate.anchor.y],
+      ['pedestal_empty', FOREST_EDGE.objects.ring.anchor.x, FOREST_EDGE.objects.ring.anchor.y],
+    ]
       : level === 1 ? []
       : level === 4 ? [['receiver_off', 320, 85], ['lock_moon_off', 220, 130], ['lock_moon_off', 420, 130], ['lock_sun_off', 320, 218]]
       : level === 5 ? [['pedestal_lit', 120, 205], ['mirror_0', 160, 170], ['mirror_1', 250, 170], ['mirror_2', 350, 170], ['receiver_off', 470, 145], ['receiver_off', 470, 205], ['lock_sun_off', 320, 80], ['mural_tablet', 535, 86]]
@@ -2249,8 +2253,12 @@ export class CampaignScene extends Phaser.Scene {
 
   private getActionPromptBounds(id: string, x: number, y: number): (() => { x: number; y: number; width: number; height: number } | null) | undefined {
     if (this.progress.level === 0) {
-      if (id === 'lamp' || id === 'lantern-inscription') return () => ({ x: 214, y: 210, width: 20, height: 28 });
-      if (id === 'tablet') return () => ({ x: 276, y: 170, width: 48, height: 60 });
+      if (id === 'lamp' || id === 'lantern-inscription') return () => ({
+        x: FOREST_EDGE.objects.lantern.anchor.x - 10, y: FOREST_EDGE.objects.lantern.anchor.y - 28, width: 20, height: 28,
+      });
+      if (id === 'tablet') return () => ({
+        x: FOREST_EDGE.objects.tablet.anchor.x - 24, y: FOREST_EDGE.objects.tablet.anchor.y - 60, width: 48, height: 60,
+      });
       if (id === 'gate') return () => ({ x: 410, y: 10, width: 152, height: 156 });
     }
 

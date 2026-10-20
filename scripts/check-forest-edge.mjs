@@ -19,6 +19,28 @@ const guideMethod = campaignScene.slice(guideMethodStart, guideMethodEnd);
 const close = (a, b) => Math.abs(a - b) < 1e-9;
 assert.deepEqual(feetAt({ x: 410, y: 191 }), { x: 410, y: 210 });
 assert.equal(FOREST_EDGE.player.body.height, 6, 'runtime footprint uses the authored six-pixel height');
+// Keep the opening cluster 72 px west of its old layout; the destination stays put.
+assert.deepEqual(FOREST_EDGE.player.spawn, { x: 208, y: 286 }, 'fresh start moves left with the opening path');
+assert.deepEqual(FOREST_EDGE.objects.lantern.anchor, { x: 152, y: 238 }, 'lantern moves 72 px left');
+assert.deepEqual(FOREST_EDGE.objects.lantern.stand, { x: 152, y: 251 }, 'lantern interaction follows its art');
+assert.deepEqual(FOREST_EDGE.objects.tablet.anchor, { x: 228, y: 230 }, 'tablet moves 72 px left');
+assert.deepEqual(FOREST_EDGE.objects.tablet.stand, { x: 228, y: 238 }, 'tablet keeps its south-side interaction');
+assert.deepEqual(FOREST_EDGE.objects.tablet.solid, { x: 214, y: 218, width: 28, height: 12 }, 'tablet collider follows its art');
+assert.deepEqual(FOREST_EDGE.checkpoints.start, FOREST_EDGE.player.spawn, 'start checkpoint follows the new spawn');
+assert.deepEqual(FOREST_EDGE.checkpoints.tablet, { x: 228, y: 250 }, 'tablet checkpoint moves with the opening cluster');
+assert.deepEqual(FOREST_EDGE.objects.ring.ground, { x: 410, y: 210 }, 'standing destination does not move');
+assert.deepEqual(FOREST_EDGE.objects.gate.anchor, { x: 486, y: 166 }, 'exit gate does not move');
+assert.ok(FOREST_EDGE.objects.ring.ground.x - FOREST_EDGE.objects.tablet.stand.x >= 180,
+  'tablet-to-ring horizontal separation leaves the destination outside the main lantern box');
+assert.ok(FOREST_EDGE.objects.trail.length >= 6, 'longer approach has enough footprint marks to follow');
+assert.ok(FOREST_EDGE.objects.trail[0].x - FOREST_EDGE.objects.tablet.anchor.x <= 35,
+  'the first revealed footprints start near the relocated tablet');
+for (let i = 1; i < FOREST_EDGE.objects.trail.length; i += 1) {
+  const prev = FOREST_EDGE.objects.trail[i - 1];
+  const next = FOREST_EDGE.objects.trail[i];
+  assert.ok(next.x > prev.x && Math.hypot(next.x - prev.x, next.y - prev.y) <= 35,
+    'footprints form a continuous eastbound trail to the unchanged ring');
+}
 assert.equal(canUseForestEdgePulse(false), false, 'SPACE cannot pulse before the tablet teaches it');
 assert.equal(canUseForestEdgePulse(true), true, 'reading the tablet enables Pulse');
 assert.equal(forestEdgeGuideTarget('wake'), 'lantern', 'opening points toward the lantern');
@@ -101,8 +123,12 @@ assert.equal(canChargeForestEdgeReceiver({ x: ringFeet.x + 17, y: ringFeet.y }, 
 const restoredNorth = resolveForestEdgeSpawn({ x: 486, y: 110 }, { tabletRead: true, footprintsFound: false, gateOpen: false });
 assert.ok(restoredNorth.y >= FOREST_EDGE.objects.gate.exit.y);
 assert.equal(isForestEdgeCenterWalkable(restoredNorth, false), true);
-const restoredInsideTablet = resolveForestEdgeSpawn({ x: 300, y: 200 }, { tabletRead: true, footprintsFound: false, gateOpen: false });
+const restoredInsideTablet = resolveForestEdgeSpawn({ x: FOREST_EDGE.objects.tablet.anchor.x, y: 200 }, { tabletRead: true, footprintsFound: false, gateOpen: false });
 assert.deepEqual(restoredInsideTablet, FOREST_EDGE.checkpoints.tablet);
+assert.deepEqual(resolveForestEdgeSpawn({ x: 300, y: 250 }, { tabletRead: true }), { x: 300, y: 250 },
+  'valid saves from the old tablet approach still restore in place');
+assert.deepEqual(resolveForestEdgeSpawn({ x: 228, y: 204 }, { tabletRead: true }), FOREST_EDGE.checkpoints.tablet,
+  'a saved position inside the relocated tablet falls back to its new south checkpoint');
 const restoredDuringCharge = resolveForestEdgeSpawn(FOREST_EDGE.objects.ring.stand, { tabletRead: true, footprintsFound: true, gateOpen: false });
 assert.deepEqual(restoredDuringCharge, FOREST_EDGE.objects.ring.stand);
 const restoredOpenGate = resolveForestEdgeSpawn(undefined, { gateOpen: true });
