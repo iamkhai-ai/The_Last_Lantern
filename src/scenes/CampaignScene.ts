@@ -2109,7 +2109,7 @@ export class CampaignScene extends Phaser.Scene {
           {speaker:'Lumo',text:'Một chút. Người Elaria từng lưu lại chuyện của khu rừng ở đó.'},
           {speaker:'Nhinh',text:'Biết đâu có gì giúp mình tìm đường. Mình xuống xem nhé?'},
         ]);
-      }, undefined, 'woods_arch_open');
+      }, undefined, 'woods_arch_open', undefined, { rect: WHISPERING_WOODS.gate.threshold, face: 'south', sideMargin: 0 });
     }
   }
 
