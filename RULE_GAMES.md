@@ -6,6 +6,7 @@
 
 - Tâm vùng trigger (`x, y` truyền vào `interactions.register`) phải nằm ở mép nam / cạnh trước của vật thể — thường là `vật.y + nửa chiều cao visible + khe hở nhỏ`, bán kính nhỏ (≈22–24px). KHÔNG đặt trigger trùng tâm vật thể và KHÔNG dùng bán kính lớn chạm tới được phía bắc.
 - Hệ quả bắt buộc: đứng phía sau lưng / phía bắc / đông / tây sát vật thể → KHÔNG được hiện prompt; chỉ khi vòng xuống phía trước (nam) mới hiện.
+- Tầm với đo bằng khoảng cách thân bàn chân tới khối va chạm (`reach`, ≤10 px, mép nam), không đo từ tâm sprite. Vật khai báo `reach` (xem `src/systems/interactionReach.ts`) dùng `isFootInReach`; vật chưa khai báo giữ bán kính cũ.
 - Ví dụ chuẩn: `LIBRARY_LAYOUT.confirm = (320, 224)` — mép nam bệ giữa giếng màn 3, radius 22; bàn sách màn 3 đứng `(66, 278)`; các `stand` của creek nằm sát chân vật.
 
 ## 2. Vật phẳng trên nền (hốc, ô, phiến đá): trong ô + mép nam
