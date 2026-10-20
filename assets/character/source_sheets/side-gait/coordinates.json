@@ -1,0 +1,750 @@
+{
+  "boot_templates": {
+    "left/walk": {
+      "boot_crop": [
+        5,
+        37,
+        13,
+        41
+      ],
+      "boot_size": [
+        5,
+        4
+      ]
+    },
+    "left/run": {
+      "boot_crop": [
+        4,
+        37,
+        12,
+        41
+      ],
+      "boot_size": [
+        5,
+        4
+      ]
+    },
+    "right/walk": {
+      "boot_crop": [
+        21,
+        37,
+        29,
+        41
+      ],
+      "boot_size": [
+        5,
+        4
+      ]
+    },
+    "right/run": {
+      "boot_crop": [
+        22,
+        37,
+        29,
+        41
+      ],
+      "boot_size": [
+        5,
+        4
+      ]
+    }
+  },
+  "frames": [
+    {
+      "file": "nhinh_left_walk_0.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        14,
+        40
+      ],
+      "far_foot": [
+        21,
+        38
+      ],
+      "lamp_preserved_box": [
+        9,
+        32,
+        13,
+        38
+      ],
+      "preserved_lower_pixels": 192,
+      "sha256": "f55e718e939f96dd8f6b0103fbca59ee513f6a01529405263c1d549446c0e6ee"
+    },
+    {
+      "file": "nhinh_left_walk_1.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        18,
+        40
+      ],
+      "far_foot": [
+        16,
+        37
+      ],
+      "lamp_preserved_box": [
+        10,
+        32,
+        15,
+        39
+      ],
+      "preserved_lower_pixels": 205,
+      "sha256": "0611d24ef4e2c798b777a58216cbefb0553f74b6c0cf4a8637e07f720f57819e"
+    },
+    {
+      "file": "nhinh_left_walk_2.png",
+      "hip_x": 19,
+      "hem_y": 34,
+      "near_foot": [
+        22,
+        38
+      ],
+      "far_foot": [
+        15,
+        40
+      ],
+      "lamp_preserved_box": [
+        11,
+        32,
+        15,
+        38
+      ],
+      "preserved_lower_pixels": 189,
+      "sha256": "3152f8cd8b9f664bb75464396edc6141d80e5b1da5132c1b90c3d98a71aa1bde"
+    },
+    {
+      "file": "nhinh_right_walk_0.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        20,
+        40
+      ],
+      "far_foot": [
+        13,
+        38
+      ],
+      "lamp_preserved_box": [
+        19,
+        32,
+        27,
+        38
+      ],
+      "preserved_lower_pixels": 209,
+      "sha256": "6d1f2f6b7dad7742ce4437d4ccfbeff6baa1f65a5ad6c9508aa275b03ce1d277"
+    },
+    {
+      "file": "nhinh_right_walk_1.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        16,
+        40
+      ],
+      "far_foot": [
+        18,
+        37
+      ],
+      "lamp_preserved_box": [
+        19,
+        32,
+        27,
+        38
+      ],
+      "preserved_lower_pixels": 202,
+      "sha256": "a5d7d035d892289d0b6b417c4fae84ae00e2ad22e6bfddc25c59e5e4e82fc35f"
+    },
+    {
+      "file": "nhinh_right_walk_2.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        14,
+        38
+      ],
+      "far_foot": [
+        21,
+        40
+      ],
+      "lamp_preserved_box": [
+        20,
+        32,
+        27,
+        38
+      ],
+      "preserved_lower_pixels": 208,
+      "sha256": "193428c7afbe67c213473f8bc482a52cae1bc5724af2d4a7dceb5b7628255bf8"
+    },
+    {
+      "file": "nhinh_left_run_0.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        11,
+        40
+      ],
+      "far_foot": [
+        24,
+        36
+      ],
+      "lamp_preserved_box": [
+        8,
+        32,
+        16,
+        37
+      ],
+      "preserved_lower_pixels": 192,
+      "sha256": "424c63162ab34c5bef178f1d8571aedc5d6e3de959209666093470e83eaf5518"
+    },
+    {
+      "file": "nhinh_left_run_1.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        18,
+        40
+      ],
+      "far_foot": [
+        16,
+        35
+      ],
+      "lamp_preserved_box": [
+        9,
+        32,
+        13,
+        39
+      ],
+      "preserved_lower_pixels": 190,
+      "sha256": "a9d5420bda7de740723d0be307e2541f37a854891f01aeac9bae8af05c779f6a"
+    },
+    {
+      "file": "nhinh_left_run_2.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        24,
+        36
+      ],
+      "far_foot": [
+        11,
+        40
+      ],
+      "lamp_preserved_box": [
+        8,
+        32,
+        16,
+        38
+      ],
+      "preserved_lower_pixels": 200,
+      "sha256": "2d9e74e3cb9f62d8ae5e73a5adb50f66c5cea7cfef53d2ec5f0eb65dc8f2ae4f"
+    },
+    {
+      "file": "nhinh_right_run_0.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        23,
+        40
+      ],
+      "far_foot": [
+        10,
+        36
+      ],
+      "lamp_preserved_box": [
+        20,
+        32,
+        29,
+        38
+      ],
+      "preserved_lower_pixels": 200,
+      "sha256": "e5eec5d69a95c832d61bc3d1905f5f4a6b32354b318523bb6c7a2b250ddfb977"
+    },
+    {
+      "file": "nhinh_right_run_1.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        16,
+        40
+      ],
+      "far_foot": [
+        18,
+        35
+      ],
+      "lamp_preserved_box": [
+        20,
+        32,
+        30,
+        39
+      ],
+      "preserved_lower_pixels": 216,
+      "sha256": "9b1b31010f4e8813db4f16215af0dffbcc3e2f09532e102a72d5237fddc75f3c"
+    },
+    {
+      "file": "nhinh_right_run_2.png",
+      "hip_x": 17,
+      "hem_y": 33,
+      "near_foot": [
+        11,
+        36
+      ],
+      "far_foot": [
+        24,
+        40
+      ],
+      "lamp_preserved_box": [
+        23,
+        32,
+        30,
+        37
+      ],
+      "preserved_lower_pixels": 183,
+      "sha256": "df3bcecae77b7706eb344b92f0a11648aabfc63339d864c4fa3902cf4f1c509c"
+    },
+    {
+      "file": "nhinh_left_walk_lit_0.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        14,
+        40
+      ],
+      "far_foot": [
+        21,
+        38
+      ],
+      "lamp_preserved_box": [
+        4,
+        32,
+        11,
+        37
+      ],
+      "preserved_lower_pixels": 186,
+      "sha256": "b4166fe2d4b5a19ef15aab97c1ba2593fbf320b447a30817a65be16703aa7949"
+    },
+    {
+      "file": "nhinh_left_walk_lit_1.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        16,
+        40
+      ],
+      "far_foot": [
+        14,
+        37
+      ],
+      "lamp_preserved_box": [
+        5,
+        32,
+        14,
+        38
+      ],
+      "preserved_lower_pixels": 207,
+      "sha256": "1f7da0a4daa66bf50079f47df37404b513696272f74e7a60f9d5c02bca51eb62"
+    },
+    {
+      "file": "nhinh_left_walk_lit_2.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        20,
+        38
+      ],
+      "far_foot": [
+        13,
+        40
+      ],
+      "lamp_preserved_box": [
+        5,
+        32,
+        14,
+        38
+      ],
+      "preserved_lower_pixels": 203,
+      "sha256": "788ec97e88a5b253be3b573db3a8a8904396f8b6cf27045a7cfb9837d145b72e"
+    },
+    {
+      "file": "nhinh_right_walk_lit_0.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        20,
+        40
+      ],
+      "far_foot": [
+        13,
+        38
+      ],
+      "lamp_preserved_box": [
+        22,
+        32,
+        32,
+        38
+      ],
+      "preserved_lower_pixels": 201,
+      "sha256": "d22ed6bb1e4a63f4a82857e66cd3373ebfb06a72cff7cb29ef664f78e2a15286"
+    },
+    {
+      "file": "nhinh_right_walk_lit_1.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        17,
+        40
+      ],
+      "far_foot": [
+        19,
+        37
+      ],
+      "lamp_preserved_box": [
+        23,
+        32,
+        32,
+        38
+      ],
+      "preserved_lower_pixels": 196,
+      "sha256": "5148792806f4e143482d4f7b24ac2f409345ff2fe56635663aa7d09a6d2ef2f9"
+    },
+    {
+      "file": "nhinh_right_walk_lit_2.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        13,
+        38
+      ],
+      "far_foot": [
+        20,
+        40
+      ],
+      "lamp_preserved_box": [
+        25,
+        32,
+        33,
+        38
+      ],
+      "preserved_lower_pixels": 188,
+      "sha256": "21236fa737334cc47350de9324037792b782465a52664c8acc59647136be1cf2"
+    },
+    {
+      "file": "nhinh_left_run_lit_0.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        10,
+        40
+      ],
+      "far_foot": [
+        23,
+        36
+      ],
+      "lamp_preserved_box": [
+        3,
+        32,
+        13,
+        38
+      ],
+      "preserved_lower_pixels": 198,
+      "sha256": "568006769c643c56238b2f63beedda8b967de3b276648926c8674434a1fc5734"
+    },
+    {
+      "file": "nhinh_left_run_lit_1.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        17,
+        40
+      ],
+      "far_foot": [
+        15,
+        35
+      ],
+      "lamp_preserved_box": [
+        5,
+        32,
+        14,
+        37
+      ],
+      "preserved_lower_pixels": 197,
+      "sha256": "0e8a4e453346f4af5e589e9ba03faf8e141fe72aa8c356d686ede107fec0ebfd"
+    },
+    {
+      "file": "nhinh_left_run_lit_2.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        24,
+        36
+      ],
+      "far_foot": [
+        11,
+        40
+      ],
+      "lamp_preserved_box": [
+        3,
+        32,
+        13,
+        36
+      ],
+      "preserved_lower_pixels": 179,
+      "sha256": "b7a380f9e835359ee691af64a021126814c93a1a8c745a7a95529d976ae22769"
+    },
+    {
+      "file": "nhinh_right_run_lit_0.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        25,
+        40
+      ],
+      "far_foot": [
+        12,
+        36
+      ],
+      "lamp_preserved_box": [
+        23,
+        32,
+        34,
+        38
+      ],
+      "preserved_lower_pixels": 199,
+      "sha256": "87d4cebece54e4e4397ff2ad4df5d78625f2b15f701d1dedea8e730378b92777"
+    },
+    {
+      "file": "nhinh_right_run_lit_1.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        18,
+        40
+      ],
+      "far_foot": [
+        20,
+        35
+      ],
+      "lamp_preserved_box": [
+        23,
+        32,
+        33,
+        38
+      ],
+      "preserved_lower_pixels": 200,
+      "sha256": "573ccf8d3e8d48e3a1f33d26385f5daa6662a91eb20580eea70ea295356d9bb4"
+    },
+    {
+      "file": "nhinh_right_run_lit_2.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        11,
+        36
+      ],
+      "far_foot": [
+        24,
+        40
+      ],
+      "lamp_preserved_box": [
+        22,
+        32,
+        33,
+        38
+      ],
+      "preserved_lower_pixels": 202,
+      "sha256": "832ccb6ff400ac41c3ad363a594c3f6ca7ad1dd0f1d83f87a65f6149d131efa6"
+    },
+    {
+      "file": "nhinh_left_walk_nolamp_0.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        14,
+        40
+      ],
+      "far_foot": [
+        21,
+        38
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 177,
+      "sha256": "74ea8c7a58c46e1acdb0f69cd493f4897404341d5507ef40ecd300627711820e"
+    },
+    {
+      "file": "nhinh_left_walk_nolamp_1.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        17,
+        40
+      ],
+      "far_foot": [
+        15,
+        37
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 179,
+      "sha256": "e2b20adbc383910d0064d9edd59b6daa61d0c8e9e2365f7f14e9adf191f0f1f8"
+    },
+    {
+      "file": "nhinh_left_walk_nolamp_2.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        21,
+        38
+      ],
+      "far_foot": [
+        14,
+        40
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 178,
+      "sha256": "392085b56ab3aada0f16f14ca134db4999fbb8f94ed02dd7bce64e0c3ac0f19b"
+    },
+    {
+      "file": "nhinh_right_walk_nolamp_0.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        20,
+        40
+      ],
+      "far_foot": [
+        13,
+        38
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 181,
+      "sha256": "eb1e8fbf87426ee43e2e2aeea84069612f47cfdf351ca9b0cba22c6b14be07cb"
+    },
+    {
+      "file": "nhinh_right_walk_nolamp_1.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        17,
+        40
+      ],
+      "far_foot": [
+        19,
+        37
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 178,
+      "sha256": "64775dadd23931c556653abbe7b398dffbc7f45696e73b47c0e8d81da2e1ee2b"
+    },
+    {
+      "file": "nhinh_right_walk_nolamp_2.png",
+      "hip_x": 14,
+      "hem_y": 34,
+      "near_foot": [
+        11,
+        38
+      ],
+      "far_foot": [
+        18,
+        40
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 178,
+      "sha256": "8dcdb4ee4e0ed369ea5f8fe4f984867800d81ee60f01d9f529f41ce3e8b81331"
+    },
+    {
+      "file": "nhinh_left_run_nolamp_0.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        10,
+        40
+      ],
+      "far_foot": [
+        23,
+        36
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 175,
+      "sha256": "4df8997a7eeadc5396b59789c976b53c22480b0b1f8d85a9ba1ec24cc3e16dfc"
+    },
+    {
+      "file": "nhinh_left_run_nolamp_1.png",
+      "hip_x": 18,
+      "hem_y": 34,
+      "near_foot": [
+        18,
+        40
+      ],
+      "far_foot": [
+        16,
+        35
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 172,
+      "sha256": "4cedcf8ac3ae10bdc6efb6c07cb03a024f32e48eab189f293b1979387d27d106"
+    },
+    {
+      "file": "nhinh_left_run_nolamp_2.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        22,
+        36
+      ],
+      "far_foot": [
+        9,
+        40
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 172,
+      "sha256": "02bcce5db618e39724e77a6204afa5152d982096d54f6d6274cc26ee610eedff"
+    },
+    {
+      "file": "nhinh_right_run_nolamp_0.png",
+      "hip_x": 16,
+      "hem_y": 34,
+      "near_foot": [
+        23,
+        40
+      ],
+      "far_foot": [
+        10,
+        36
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 171,
+      "sha256": "c006577de72457b14a2c98e130a3839527b120ea129161253bb2cb6c02dcd773"
+    },
+    {
+      "file": "nhinh_right_run_nolamp_1.png",
+      "hip_x": 17,
+      "hem_y": 34,
+      "near_foot": [
+        17,
+        40
+      ],
+      "far_foot": [
+        19,
+        35
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 180,
+      "sha256": "7ebcc94445ee0dcb0e18f2a769f5672a4c250b1a4e962dcc7435878ca0cdd5c8"
+    },
+    {
+      "file": "nhinh_right_run_nolamp_2.png",
+      "hip_x": 15,
+      "hem_y": 34,
+      "near_foot": [
+        9,
+        36
+      ],
+      "far_foot": [
+        22,
+        40
+      ],
+      "lamp_preserved_box": null,
+      "preserved_lower_pixels": 175,
+      "sha256": "a5a3c55fdec5928274d0799af73ee512635b940272872c73ef78132b179c93cf"
+    }
+  ]
+}

@@ -46,7 +46,7 @@ Bộ lõi (128 frame) dùng 8 sheet 4×4 gồm 16 pose/hướng (`idle`; `walk 0
 
 Công đoạn xử lý cắt theo lưới ô, lấy vùng nhân vật có alpha, thu nhỏ bằng nearest-neighbor, đặt giữa và căn đáy nội dung tại `y=40` trên canvas `36×42`. Pivot gợi ý khi nhập game là `(0.5, 1)`. Với `pulse`, đáy nội dung có thể gồm hạt sáng nên điểm chạm chân vẫn cần rà soát.
 
-128 frame lõi giữ nguyên tỷ lệ nguồn chung và dữ liệu PNG trước lần sửa tỷ lệ. 112 biến thể chuyển động được tái tạo trực tiếp từ sheet gốc, dùng tỷ lệ đồng nhất theo cả hai trục để chiều cao từ đỉnh mũ đến đế giày bằng frame lõi cùng hướng, trạng thái chuyển động và số frame. Các mốc nguồn trong `body-scale-anchors.json` đã được đối chiếu trên ảnh: đèn nằm dưới đỉnh mũ và trên đế giày ở các pose này. Không dùng chiều rộng khăn/đèn hoặc kích thước hiệu ứng pulse để quyết định tỷ lệ cơ thể; không ép mọi bounding box alpha giống nhau. Pipeline dừng nếu nội dung vượt vùng an toàn 34×40 px, thay vì tự thu nhỏ hoặc cắt mất nội dung. `frames.json` lưu crop, tỷ lệ thực tế, bounding box đầu ra, mốc cơ thể, frame tham chiếu và hash mới. Các file provenance/prompt gốc là lịch sử lần tạo ảnh; hash frame trong đó mô tả kết quả cũ, catalog hiện tại là `frames.json`.
+Trong lần chuẩn hóa tỷ lệ trước đây, 128 frame lõi giữ nguyên tỷ lệ nguồn chung và dữ liệu PNG. 112 biến thể chuyển động được tái tạo trực tiếp từ sheet gốc, dùng tỷ lệ đồng nhất theo cả hai trục để chiều cao từ đỉnh mũ đến đế giày bằng frame lõi cùng hướng, trạng thái chuyển động và số frame. Các mốc nguồn trong `body-scale-anchors.json` đã được đối chiếu trên ảnh: đèn nằm dưới đỉnh mũ và trên đế giày ở các pose này. Không dùng chiều rộng khăn/đèn hoặc kích thước hiệu ứng pulse để quyết định tỷ lệ cơ thể; không ép mọi bounding box alpha giống nhau. Pipeline dừng nếu nội dung vượt vùng an toàn 34×40 px, thay vì tự thu nhỏ hoặc cắt mất nội dung. `frames.json` lưu crop, tỷ lệ thực tế, bounding box đầu ra, mốc cơ thể, frame tham chiếu và hash mới. Các file provenance/prompt gốc là lịch sử lần tạo ảnh; hash frame trong đó mô tả kết quả cũ, catalog hiện tại là `frames.json`.
 
 ## Kiểm tra và giới hạn
 
@@ -57,3 +57,14 @@ Kiểm tra chiều cao dùng bounding box của mask cơ thể nguồn sau cùng
 **Đã xem trực quan contact sheet:** đã kiểm tra `nhinh_contact_sheet.png`, `nhinh_state_variants_contact_sheet.png` và `nhinh_all_poses_contact_sheet.png`; cả 8 hướng đều đọc rõ trạng thái đèn tắt, đèn sáng (`_lit`) và tay không (`_nolamp`).
 
 **Chất lượng hiện tại là prototype, cần chỉnh pixel trước production.** Đã sửa việc biến thể `down_lit`, `down_nolamp` (walk/run) và `downleft_lit` bị thu nhỏ độc lập bằng cách chuẩn hóa toàn bộ 112 biến thể theo pose lõi. AI vẫn chưa khóa chính xác hình thể và tay cầm đèn qua mọi pose: tỷ lệ đầu/thân, dáng nghiêng và chi tiết pixel của sheet gốc có thể khác nhau dù chiều cao cơ thể đã khớp; một số frame run/pulse nghiêng góc khác hướng dự kiến; nhịp bước và điểm chạm chân có thể giật khi lặp. Game nạp 240 frame runtime qua `src/art/CampaignArt.ts` (đã loại trừ các file `*contact_sheet*.png` khỏi bundle runtime); chưa rà animation trực quan trong engine cho đủ 8 hướng × mọi trạng thái.
+
+
+## Sửa nhịp bước ngang — 2026-10-20
+
+Đã sửa 36 frame `left`/`right` × `walk`/`run` × ba trạng thái đèn. Pha 0 đặt chân gần phía trước, pha 1 đi qua giữa, pha 2 đưa chân gần về sau và chân xa lên trước. Runtime lặp `0 → 1 → 2 → 1` cho hai hướng ngang; sáu hướng còn lại giữ vòng ba frame hiện có.
+
+Phần chân dùng boot cutout từ ảnh `image_gen` và xử lý PNG bằng Python theo sự cho phép của người dùng. Các khớp chân gần/xa được đặt riêng để đổi vai ở hai nửa chu kỳ; hướng mũi giày giữ theo hướng nhân vật. 32 hàng pixel phía trên giữ nguyên, cùng các vùng bảo toàn gấu áo, tay, khăn và đèn. 36 frame vẫn 36×42 RGBA, chân chạm hàng 40; 204 frame còn lại giữ nguyên dữ liệu pixel và hash.
+
+Phần sửa được ghi vào sáu source sheet gốc. `prepare_frames.py` tiếp tục tái tạo đủ 240 frame, catalog và contact sheet từ những sheet này, không có override runtime. Prompt, ảnh tham chiếu được chọn và tọa độ xử lý nằm trong `source_sheets/side-gait/`; các prompt/provenance cũ là lịch sử trước lần sửa này. Model thực tế sau công cụ tích hợp không được công cụ công bố.
+
+Kiểm tra vòng animation bằng `node scripts/check-player-gait.mjs`. Kiểm tra file và tái tạo bằng lệnh `ALLOW_CATALOG_OVERWRITE=1` đã nêu ở trên. Hash khác nhau chỉ xác nhận file khác nhau; kiểm tra hình học/tọa độ chân và xem animation mới xác nhận nhịp đổi chân. Lần sửa này không xác nhận chất lượng animation của sáu hướng còn lại.

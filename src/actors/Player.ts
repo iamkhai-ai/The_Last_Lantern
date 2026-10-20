@@ -121,7 +121,8 @@ export class Player {
       this.animTimer += dt * (isRunning ? 1.35 : 1);
       if (this.animTimer >= 150) {
         this.animTimer = 0;
-        this.animStep = (this.animStep + 1) % 3;
+        const phaseCount = this.facing === 'left' || this.facing === 'right' ? 4 : 3;
+        this.animStep = (this.animStep + 1) % phaseCount;
       }
     } else {
       body.setVelocity(0, 0);
@@ -155,7 +156,9 @@ export class Player {
     lanternOn: boolean
   ): void {
     const pose = isMoving ? (isRunning ? 'run' : 'walk') : 'idle';
-    const frame = isMoving ? this.animStep : 0;
+    // Side poses are opposite strides around one shared passing pose.
+    const horizontal = this.facing === 'left' || this.facing === 'right';
+    const frame = isMoving ? (horizontal ? [0, 1, 2, 1][this.animStep % 4] : this.animStep % 3) : 0;
     const actionFrame = this.actionAnimation ? Math.min(2, Math.floor(this.actionElapsed / 110)) : 0;
     const actionTexture = this.actionAnimation
       ? getNhinhTexture(this.actionAnimation, this.facing, actionFrame)

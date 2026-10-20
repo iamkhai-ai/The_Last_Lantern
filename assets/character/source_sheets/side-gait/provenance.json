@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "request": "Correct alternating legs in left/right walk and run for all three lantern states.",
+  "baseline_commit": "7d0ee94a4853093bbd2d0568c225a8998aff98ff",
+  "generation_tool": "Built-in image_gen",
+  "resolved_image_model": "Not exposed by tool; user approved built-in tool instead of requiring gpt 2.5 sunburst.",
+  "generated_reference": "generated-reference.png",
+  "original_generated_path": "C:/Users/Admin/.codex/generated_images/01a157be-4e27-70e3-9f34-77ad94820cd6/exec-977a97ab-b414-454d-98b9-eee1a46639cf.png",
+  "prompt": "Use case: precise-object-edit. EDIT the attached 3-column by 4-row sprite sheet, maintaining the same exact grid, character scale, pose centers and truly transparent background. Row1 left walk, row2 left run, row3 right walk, row4 right run. The 3 columns are gait phase A, passing, OPPOSITE gait phase B. The source has 36x42 logical pixels per sprite enlarged10x, total1080x1680. Output the same three columns and four rows. No labels, grid lines, background or margins. The girl MUST stay bare-handed with no lantern.\nTask: repair ONLY the pants, TWO LEGS and TWO BOOTS below the cream cloak, preserving hood, face, red scarf, cloak and hands. The existing phaseA and phaseB repeat the SAME leading leg. Make the near-side leg's motion unmistakable: COLUMN1 the NEAR leg is forward IN THE FACING DIRECTION, its shin and toe clearly in front; far leg is BEHIND and lifted with bent knee. COLUMN2 is a narrow passing pose: the supporting foot is under the hip, the other leg bent and passing. COLUMN3 the NEAR leg is now BACKWARD BEHIND the hip, its knee and boot swing behind, while the FAR leg steps FORWARD. Swap foreground/background leg layering and the shin highlights across columns1and3. Very important: do not just change boot size, head bob, scarf, or which heel is raised while keeping the same leg ahead. Actually alternate the anatomical near and far legs. Use a readable slightly lighter brown for near leg/boot and deep dark brown for far leg/boot, from the original palette, so the exchange of their positions is visible at tiny game resolution. No additional legs or boots. Frame1 and frame3 must have visibly distinct silhouettes, the bent raised leg and grounded straight leg must exchange position.\nWalk rows: small alternating steps with one boot planted at logical baseline y40. Run rows: more stretched legs, stronger bent raised knee and more trailing heel; phaseA/B oppose one another. This plays A-passing-B-passing repeatedly. Keep feet attached naturally to hip and body placement; sprites have roomy transparent space above their heads. Pure horizontal facing throughout. Same pixel-art character and same tiny36x42 pixel cluster style as reference, hard square pixel edges, no vector, smoothpainting or new effects. Do not redesign any upper body or head. Genuine alpha transparency, no checkerboard, no ground shadows.",
+  "postprocessing_authorization": "User explicitly approved Python PNG editing in this chat.",
+  "postprocessing": "Boot cutouts from the generated reference are articulated at separate near/far hip, knee and foot positions. Near/far roles exchange in phases 0 and 2; phase 1 is passing. Original pixels above y32, coat hem, hands, scarf and lantern patches are preserved. Corrected lower regions are baked into six original source sheets, then the existing prepare_frames.py generates all 240 runtime frames.",
+  "runtime_cycle": [
+    0,
+    1,
+    2,
+    1
+  ],
+  "source_sheets": [
+    "source_sheets/nhinh_left_generated.png",
+    "source_sheets/nhinh_right_generated.png",
+    "source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+    "source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+    "source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+    "source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png"
+  ],
+  "discarded_attempts": "Whole-character model edits did not produce a clear opposite step; diagnostic PNGs remain in the task artifacts. A later legs-only generation returned HTTP400 moderation_blocked, output stage, category other, request63d15c0c-05ee-407d-994c-eda268fe9792."
+}
