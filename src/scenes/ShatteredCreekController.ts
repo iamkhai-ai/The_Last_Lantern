@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import { getLevelArtKey } from '../art/CampaignArt';
-import { SHATTERED_CREEK, canApproach, canCompleteCreek, deriveCreekState, migrateV1Creek, resolveCreekSpawn, unsafePowerChange, type CreekLiveState, type CreekState, type MirrorPose, type Point, type RaySegment } from '../data/shatteredCreekLayout';
+import { SHATTERED_CREEK, canApproach, pointOnBank, canCompleteCreek, deriveCreekState, migrateV1Creek, resolveCreekSpawn, unsafePowerChange, type CreekLiveState, type CreekState, type MirrorPose, type Point, type RaySegment } from '../data/shatteredCreekLayout';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
+import { isFootInReach, type ReachFootprint } from '../systems/interactionReach';
 
 type Say = (lines: DialogueLine[], done?: () => void) => void;
 const creekMechanismArt = (filename: string): string | null => getLevelArtKey(3, `mechanisms/${filename}`);
@@ -225,8 +226,13 @@ export class ShatteredCreekController {
 
   private registerActions(): void {
     const { interactions } = this.ctx;
-    const add = (id: string, x: number, y: number, prompt: () => string | null, onInteract: () => void, bank: 'west' | 'island' | 'east', artId: string) => {
-      const config: InteractableConfig = { id: `creek-${id}`, x, y, radius: 24, getPrompt: () => canApproach(this.point(), { x, y }, bank) ? prompt() : null, getPromptBounds: () => this.visuals.get(artId)?.getBounds() ?? null, isEnabled: () => canApproach(this.point(), { x, y }, bank) && prompt() !== null, onInteract: () => { if (canApproach(this.point(), { x, y }, bank)) onInteract(); } };
+    // `front` (optional) lets a control answer E from the foot body standing in front of its collision rectangle,
+    // in addition to the stand point. Only controls that pass it change behaviour.
+    const inApproach = (x: number, y: number, bank: 'west' | 'island' | 'east', front?: ReachFootprint): boolean =>
+      canApproach(this.point(), { x, y }, bank)
+      || (front !== undefined && pointOnBank(this.point(), bank) && isFootInReach(this.ctx.player.getFootBody(), front));
+    const add = (id: string, x: number, y: number, prompt: () => string | null, onInteract: () => void, bank: 'west' | 'island' | 'east', artId: string, front?: ReachFootprint) => {
+      const config: InteractableConfig = { id: `creek-${id}`, x, y, radius: 24, ...(front ? { isInReach: () => inApproach(x, y, bank, front) } : {}), getPrompt: () => inApproach(x, y, bank, front) ? prompt() : null, getPromptBounds: () => this.visuals.get(artId)?.getBounds() ?? null, isEnabled: () => inApproach(x, y, bank, front) && prompt() !== null, onInteract: () => { if (inApproach(x, y, bank, front)) onInteract(); } };
       interactions.register(config);
     };
     const practice = SHATTERED_CREEK.objects.practiceSource.stand;
@@ -243,7 +249,7 @@ export class ShatteredCreekController {
       add(`latch-${which.toLowerCase()}`, entry.stand.x, entry.stand.y, () => (which === 'A' ? this.state.latchA : this.state.latchB) ? 'E · Chốt đã giữ chắc' : `E · Gài chốt ${which === 'A' ? 'cầu đầu' : 'cầu hai'}`, () => this.latch(which), which === 'A' ? 'west' : 'island', `latch-${which === 'A' ? 'latchA' : 'latchB'}`);
     }
     const relief = SHATTERED_CREEK.objects.relief.stand;
-    add('relief', relief.x, relief.y, () => 'E · Đọc phù điêu', () => this.readRelief(), 'east', 'relief');
+    add('relief', relief.x, relief.y, () => 'E · Đọc phù điêu', () => this.readRelief(), 'east', 'relief', { rect: SHATTERED_CREEK.objects.relief.base, face: 'south' });
     const exit = SHATTERED_CREEK.objects.exit.stand;
     add('exit', exit.x, exit.y, () => canCompleteCreek(this.state) ? 'E · Qua trạm dẫn nước' : 'E · Kiểm tra trạm dẫn nước', () => this.exit(), 'east', 'exit');
   }
