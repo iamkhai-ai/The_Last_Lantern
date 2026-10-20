@@ -89,6 +89,8 @@ const FOREST_EDGE_RING_GLOW = { x: 410, y: 210 };
 /** Path depth: Level 01 keeps its original 0.6; Level 02 keeps 0.55. */
 const FOREST_EDGE_PATH_DEPTH = 0.6;
 const WOODS_PATH_DEPTH = 0.55;
+/** Indoor / stone floors use the soil footstep bed; every outdoor level uses grass. */
+const SOIL_FOOTSTEP_LEVELS = new Set<number>([2, 5, 7, 8, 9]);
 
 const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Trời vẫn chưa sáng sao?' }, { speaker: 'Nhinh', text: 'Sương vẫn dày quá… Không biết con đường về làng nằm ở phía nào.' }],
@@ -334,7 +336,13 @@ export class CampaignScene extends Phaser.Scene {
       this.refreshHud();
     });
     this.buildLevel();
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { this.shatteredCreek?.destroy(); this.sleeplessTower?.destroy(); this.gardenLevel?.destroy(); });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.shatteredCreek?.destroy();
+      this.sleeplessTower?.destroy();
+      this.gardenLevel?.destroy();
+      SoundSystem.stopFootsteps();
+      SoundSystem.stopAmbient();
+    });
   }
 
   public update(_time: number, delta: number): void {
@@ -546,6 +554,10 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private buildLevel(): void {
+    // Ambience and footstep surface belong to the level being built, so drop any
+    // loop left over from the previous one before the room is torn down.
+    SoundSystem.stopAmbient();
+    SoundSystem.setFootstepSurface(SOIL_FOOTSTEP_LEVELS.has(this.progress.level) ? 'soil' : 'grass');
     if (this.progress.level === 8) {
       this.buildObservatoryRoom(this.progress.roomId ?? 'entrance');
       return;
@@ -585,7 +597,7 @@ export class CampaignScene extends Phaser.Scene {
       const saved = this.progress.counters['player-level'] === level && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
         ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] } : undefined;
       this.shatteredCreek.build(saved);
-      SoundSystem.playAmbientCreek();
+      SoundSystem.startAmbientCreek();
       this.refreshHud();
       return;
     }

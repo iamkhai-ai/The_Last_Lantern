@@ -12,7 +12,8 @@ if (-not (Test-Path $curl)) {
     if ($cmd) { $curl = $cmd.Source } else { Write-Host "curl.exe not found. Install Git for Windows." -ForegroundColor Red; exit 1 }
 }
 
-$outDir = "src/assets/sfx"
+# Resolve the output folder from the repo root, not the caller's directory.
+$outDir = Join-Path (Split-Path -Parent $PSScriptRoot) "src/assets/sfx"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 $sounds = @(
@@ -52,8 +53,15 @@ foreach ($s in $sounds) {
     & $curl -s -o $out -H "User-Agent: $ua" -H "Referer: $referer" $url
     if (Test-Path $out) {
         $size = (Get-Item $out).Length
+        $magic = [System.IO.File]::ReadAllBytes($out)[0..2]
+        # An error page is bigger than 1 KB, so validate the container, not just the size.
+        $isMp3 = ($magic[0] -eq 0x49 -and $magic[1] -eq 0x44 -and $magic[2] -eq 0x33) -or
+                 ($magic[0] -eq 0xFF -and ($magic[1] -band 0xE0) -eq 0xE0)
         if ($size -lt 1000) {
             Write-Host "  FAILED (too small: $size bytes)" -ForegroundColor Red
+            Remove-Item $out
+        } elseif (-not $isMp3) {
+            Write-Host "  FAILED (not an MP3 payload: $size bytes)" -ForegroundColor Red
             Remove-Item $out
         } else {
             Write-Host "  OK ($size bytes)"

@@ -85,9 +85,24 @@ export class BootScene extends Phaser.Scene {
       this.load.audio(key, url);
     }
 
+    // Wait for the whole batch: resolving on the first FILE_LOAD_ERROR used to
+    // start the menu while the remaining files were still queued, so their keys
+    // never got registered even though the files were fine. The timer is only a
+    // safety net so a stalled batch can never block the menu.
+    const failed: string[] = [];
     await new Promise<void>((resolve) => {
-      this.load.once(Phaser.Loader.Events.COMPLETE, () => resolve());
-      this.load.once(Phaser.Loader.Events.FILE_LOAD_ERROR, () => resolve());
+      let settled = false;
+      const finish = (): void => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(guard);
+        resolve();
+      };
+      const guard = setTimeout(finish, 15000);
+      this.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => {
+        failed.push(file.key);
+      });
+      this.load.once(Phaser.Loader.Events.COMPLETE, finish);
       this.load.start();
     });
 
@@ -99,5 +114,6 @@ export class BootScene extends Phaser.Scene {
       }
     }
     console.info(`[BootScene] SFX: ${loaded}/${toLoad.length} loaded from Sound Effect Lab.`);
+    if (failed.length > 0) console.warn('[BootScene] SFX failed to load:', failed.join(', '));
   }
 }
