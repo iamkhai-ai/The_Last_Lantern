@@ -53,9 +53,9 @@ export const crystalPickup: Recipe = (ctx, out, t) => {
 };
 
 export const dialogueTick = (speaker: string): Recipe => (ctx, out, t) => {
-  if (speaker === 'Lumo') tone(ctx, out, { t, freq: 680, endFreq: 760, dur: 0.05, peak: 0.026, attack: 0.004 });
-  else if (speaker === 'Shadow' || speaker === 'The Shadow') tone(ctx, out, { t, freq: 175, endFreq: 155, type: 'triangle', dur: 0.06, peak: 0.035, attack: 0.004, lowpass: 500 });
-  else tone(ctx, out, { t, freq: 420, endFreq: 450, dur: 0.045, peak: 0.026, attack: 0.004, lowpass: 1200 });
+  if (speaker === 'Lumo') tone(ctx, out, { t, freq: 680, endFreq: 760, dur: 0.05, peak: 0.018, attack: 0.006 });
+  else if (speaker === 'Shadow' || speaker === 'The Shadow') tone(ctx, out, { t, freq: 175, endFreq: 155, type: 'triangle', dur: 0.06, peak: 0.024, attack: 0.006, lowpass: 500 });
+  else tone(ctx, out, { t, freq: 420, endFreq: 450, dur: 0.045, peak: 0.018, attack: 0.006, lowpass: 1200 });
 };
 
 /** Quiet cues for the ending's silence: a cricket, running water, a second cricket answering. */
@@ -116,21 +116,40 @@ export const gateOpen: Recipe = (ctx, out, t) => {
   bell(ctx, out, t + 0.7, 783.99, { peak: 0.06, dur: 1.2 });
 };
 
+/** A small mechanical latch: an unpitched contact and a short scrape, without a success fanfare. */
+export const mechanismLatch: Recipe = (ctx, out, t) => {
+  noise(ctx, out, { t, dur: 0.045, peak: 0.075, attack: 0.003, type: 'lowpass', freq: 1100, q: 0.5 });
+  noise(ctx, out, { t: t + 0.035, dur: 0.14, peak: 0.035, attack: 0.012, type: 'bandpass', freq: 730, endFreq: 380, q: 0.7 });
+};
+
+/** A gentle opening rush; the level's continuous water bed takes over as this tail ends. */
+export const waterRelease: Recipe = (ctx, out, t) => {
+  noise(ctx, out, { t, dur: 1.7, peak: 0.1, attack: 0.3, type: 'bandpass', freq: 700, endFreq: 1000, q: 0.5 });
+  noise(ctx, out, { t: t + 0.15, dur: 1.25, peak: 0.025, attack: 0.2, type: 'bandpass', freq: 2600, q: 0.5 });
+};
+
 /**
- * One light footstep, in the manner of a top-down action game: a soft, short "tap" rather than a recorded stride.
- * It is a brief, small tone (well above the body's weight, so nothing booms) with a slight fall in pitch; with it sits a very short, filtered touch of the sole
- * (a faint rustle on grass, a duller scuff on soil). The two feet differ slightly in pitch and every step varies a
- * little, so a walk is never a machine-gun of identical hits. Running is a touch higher, shorter and firmer.
+ * Forest steps are unpitched: a soft sole pressing earth, a little leaf crunch and a brief trailing brush.
+ * Filters, strength and buffer offsets vary each step; running makes the contact shorter and a little firmer.
+ * The legacy "soil" surface is used on indoor stone floors: a firmer unpitched sole contact and scuff, without leaves.
  */
 export function footstep(ctx: BaseAudioContext, out: AudioNode, t: number, o: { surface: EffectSurface; running: boolean; foot: 0 | 1 }): void {
   const soil = o.surface === 'soil';
   const pitch = (0.93 + Math.random() * 0.14) * (o.foot === 1 ? 1.06 : 1) * (o.running ? 1.12 : 1);
-  const thump = (soil ? 270 : 340) * pitch;
   const firm = o.running ? 1.2 : 1;
-  tone(ctx, out, { t, freq: thump, endFreq: thump * 0.7, dur: o.running ? 0.032 : 0.04, peak: (soil ? 0.03 : 0.026) * firm, attack: 0.002, lowpass: 900 });
+  if (!soil) {
+    const strength = firm * (0.92 + Math.random() * 0.16);
+    const length = o.running ? 0.8 : 1;
+    noise(ctx, out, { t, dur: 0.075 * length, peak: 0.065 * strength, attack: 0.007, type: 'lowpass', freq: 620 * pitch, q: 0.5 });
+    noise(ctx, out, { t: t + 0.008, dur: 0.085 * length, peak: 0.026 * strength, attack: 0.009, type: 'bandpass', freq: 1550 * pitch, q: 0.65 });
+    noise(ctx, out, { t: t + 0.025, dur: 0.065 * length, peak: 0.012 * strength, attack: 0.012, type: 'bandpass', freq: 3000 * pitch, q: 0.5 });
+    return;
+  }
+  const strength = firm * (0.92 + Math.random() * 0.16);
+  noise(ctx, out, { t, dur: o.running ? 0.035 : 0.045, peak: 0.07 * strength, attack: 0.002, type: 'lowpass', freq: 1250 * pitch, q: 0.5 });
   noise(ctx, out, {
-    t, dur: 0.02, peak: (soil ? 0.01 : 0.009) * firm, attack: 0.002,
-    type: soil ? 'lowpass' : 'bandpass', freq: (soil ? 1300 : 2200) * pitch, q: 0.7,
+    t: t + 0.009, dur: o.running ? 0.035 : 0.05, peak: 0.025 * strength, attack: 0.004,
+    type: 'bandpass', freq: 2300 * pitch, q: 0.55,
   });
 }
 

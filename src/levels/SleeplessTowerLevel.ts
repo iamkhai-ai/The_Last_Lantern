@@ -1,4 +1,5 @@
 import { HUD_LAYOUT } from '../ui/CampaignHud';
+import { SoundSystem } from '../systems/SoundSystem';
 import Phaser from 'phaser';
 import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
 import { TOWER, TOWER_SOLIDS, canCompleteTower, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanApproachFront, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
@@ -167,6 +168,7 @@ export class SleeplessTowerLevel {
   public build(savedCenter?: Point): void {
     const { progress, lantern, lumo, player, save } = this.ctx;
     this.state = migrateTowerProgress(progress);
+    SoundSystem.startAmbient(this.state.waterReturned ? 'tower-restored' : 'tower');
     progress.flags['l5-layout-v2'] = true;
     lantern.lanternInHand = this.state.source === null;
     lantern.lanternPlaced = this.state.source !== null;
@@ -398,16 +400,19 @@ export class SleeplessTowerLevel {
   private rotateBench(): void {
     this.state.practice = ((this.state.practice + 1) % 3) as MirrorPose;
     this.saveState();
+    SoundSystem.playMirrorRotate();
   }
 
   private rotateG0(): void {
     this.state.g0 = ((this.state.g0 + 1) % 3) as G0Pose;
     this.saveState();
+    SoundSystem.playMirrorRotate();
   }
 
   private rotateBranch(id: 'g1' | 'g2'): void {
     this.state[id] = ((this.state[id] + 1) % 3) as MirrorPose;
     this.saveState();
+    SoundSystem.playMirrorRotate();
   }
 
   private useCall(): void {
@@ -448,6 +453,9 @@ export class SleeplessTowerLevel {
     }
     this.state.waterReturned = true;
     this.saveState();
+    SoundSystem.playMechanismLatch();
+    SoundSystem.playWaterRelease();
+    SoundSystem.startAmbient('tower-restored');
     this.caption(SWITCH_CAPTION);
     this.ctx.scene.cameras.main.shake(260, 0.0015);
     this.ctx.say(SWITCHED);
@@ -466,6 +474,7 @@ export class SleeplessTowerLevel {
     this.visuals.get('crystal')?.destroy();
     this.visuals.delete('crystal');
     this.saveState();
+    SoundSystem.playCrystalPickup();
   }
 
   private useRecord(): void {

@@ -98,7 +98,7 @@ const WOODS_PATH_DEPTH = 0.55;
 /** Indoor / stone floors use the soil footstep bed; every outdoor level uses grass. */
 const SOIL_FOOTSTEP_LEVELS = new Set<number>([2, 5, 7, 8, 9]);
 /** Level index -> ambience theme (see audio/ambience.ts): the forest levels, the library, the creek, the tower's wind, ruins and observatory drones, and the heart tree's pad. */
-const AMBIENCE_BY_LEVEL: readonly AmbienceTheme[] = ['forest', 'forest', 'library', 'creek', 'forest', 'wind', 'forest', 'drone', 'drone', 'heart'];
+const AMBIENCE_BY_LEVEL: readonly AmbienceTheme[] = ['forest', 'forest', 'library', 'creek', 'forest', 'tower', 'garden', 'drone', 'drone', 'heart'];
 
 const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Trời vẫn chưa sáng sao?' }, { speaker: 'Nhinh', text: 'Sương vẫn dày quá… Không biết con đường về làng nằm ở phía nào.' }],
@@ -597,7 +597,10 @@ export class CampaignScene extends Phaser.Scene {
     // Ambience and footstep surface belong to the level being built, so drop any
     // loop left over from the previous one before the room is torn down.
     // The ambience belongs to the level being built: crossfade to its theme (asking for the one already playing is a no-op).
-    SoundSystem.startAmbient(AMBIENCE_BY_LEVEL[this.progress.level] ?? 'forest');
+    // Tower and garden choose their theme after restoring their normalized puzzle state.
+    if (this.progress.level !== 5 && this.progress.level !== 6) {
+      SoundSystem.startAmbient(AMBIENCE_BY_LEVEL[this.progress.level] ?? 'forest');
+    }
     SoundSystem.setFootstepSurface(SOIL_FOOTSTEP_LEVELS.has(this.progress.level) ? 'soil' : 'grass');
     // Level 8 returns before the teardown further down, so the level-7 ruins controller is released first.
     this.ruinsLevel?.destroy();

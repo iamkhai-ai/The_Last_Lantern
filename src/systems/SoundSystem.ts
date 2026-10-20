@@ -94,7 +94,7 @@ export class SoundSystem {
 
   /**
    * One footstep, called on the feet's plants (see Player). The two feet alternate, and the step is a short soft
-   * "tup" built on the spot, so there is nothing to loop, cut or keep in step with the animation but this call.
+   * contact built on the spot, so there is nothing to loop, cut or keep in step with the animation but this call.
    */
   public static playFootstep(running = false): void {
     const ctx = this.getContext();
@@ -218,5 +218,13 @@ export class SoundSystem {
 
   public static playGateOpen(): void {
     this.play(effects.gateOpen);
+  }
+
+  public static playMechanismLatch(): void {
+    this.play(effects.mechanismLatch);
+  }
+
+  public static playWaterRelease(): void {
+    this.play(effects.waterRelease);
   }
 }

@@ -1,12 +1,14 @@
 /**
  * Level ambience built from Web Audio nodes: wind, crickets, running water, a low drone, a warm pad and a sparse
- * bell melody. A theme is a mix of these layers; `startAmbience` fades it in and returns a handle that fades it out
+ * composed bell theme. A theme is a mix of these layers; `startAmbience` fades it in and returns a handle that fades it out
  * and releases every node and timer. The beds are continuous nodes (no timers); only the crickets, the water bubbles
- * and the melody use timers, to place their sparse events a moment ahead on the audio clock.
+ * and music use timers, to place their events a moment ahead on the audio clock.
  */
-import { bell, noiseBuffer, tone } from './synth.ts';
+import { noiseBuffer, tone } from './synth.ts';
+import { startMusic } from './music.ts';
 
-export type AmbienceTheme = 'forest' | 'library' | 'creek' | 'wind' | 'drone' | 'heart';
+export type AmbienceTheme = 'forest' | 'library' | 'creek' | 'wind' | 'drone' | 'heart'
+  | 'tower' | 'tower-restored' | 'garden' | 'garden-restored';
 
 export interface AmbienceHandle {
   stop(fadeSeconds: number): void;
@@ -156,39 +158,66 @@ const crickets: Layer = (ctx, _bed, events, level, _release, timers) => {
   timers.push(() => clearInterval(timer));
 };
 
-/** A sparse, quiet bell melody: one or two notes of a pentatonic scale, then a long silence. */
-const melody = (scale: readonly number[], minGap: number, maxGap: number): Layer => (ctx, _bed, events, level, _release, timers) => {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const schedule = (): void => {
-    timer = setTimeout(() => {
-      const t = ctx.currentTime + 0.05;
-      const first = scale[Math.floor(Math.random() * scale.length)];
-      bell(ctx, events, t, first, { peak: 0.02 * level, dur: 3.2, bright: 0.25 });
-      if (Math.random() < 0.5) {
-        const second = scale[Math.floor(Math.random() * scale.length)];
-        bell(ctx, events, t + 0.55, second, { peak: 0.016 * level, dur: 3.0, bright: 0.25 });
-      }
-      schedule();
-    }, (minGap + Math.random() * (maxGap - minGap)) * 1000);
+/** Two insects answer across the restored nursery, with long rests between pairs. */
+const gardenCrickets: Layer = (ctx, _bed, events, level, _release, timers) => {
+  const pair = (delay: number): void => {
+    const start = ctx.currentTime + delay;
+    const pitch = 4100 + Math.random() * 300;
+    for (let i = 0; i < 3; i += 1) tone(ctx, events, { t: start + i * 0.09, freq: pitch, dur: 0.045, peak: 0.01 * level, attack: 0.006 });
+    for (let i = 0; i < 2; i += 1) tone(ctx, events, { t: start + 0.8 + i * 0.11, freq: pitch * 0.86, dur: 0.055, peak: 0.008 * level, attack: 0.006 });
   };
-  schedule();
-  timers.push(() => { if (timer !== undefined) clearTimeout(timer); });
+  pair(1.0);
+  const timer = setInterval(() => { if (Math.random() < 0.7) pair(0.05); }, 6500);
+  timers.push(() => clearInterval(timer));
 };
 
-const PENTATONIC_A = [440, 493.88, 554.37, 659.25, 739.99];
-const PENTATONIC_LOW = [220, 261.63, 329.63, 392];
+/** The tower's working machinery: a quiet rounded hum breathing with the wheel. */
+const machine: Layer = (ctx, bed, _events, level, release) => {
+  const motor = ctx.createOscillator();
+  motor.type = 'triangle';
+  motor.frequency.value = 110;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 300;
+  const gain = ctx.createGain();
+  gain.gain.value = 0.025 * level;
+  const wheel = ctx.createOscillator();
+  wheel.frequency.value = 0.8;
+  const depth = ctx.createGain();
+  depth.gain.value = 0.009 * level;
+  wheel.connect(depth);
+  depth.connect(gain.gain);
+  motor.connect(filter);
+  filter.connect(gain);
+  gain.connect(bed);
+  motor.start();
+  wheel.start();
+  release.push(() => { motor.stop(); wheel.stop(); });
+};
+
+/** The composed theme shares the ambience fade and lifetime, including mute and scene shutdown. */
+const music: Layer = (ctx, _bed, events, level, _release, timers) => {
+  timers.push(startMusic(ctx, events, level));
+};
 
 const THEMES: Record<AmbienceTheme, ReadonlyArray<readonly [Layer, number]>> = {
-  forest: [[wind(420), 0.5], [crickets, 1], [melody(PENTATONIC_A, 8, 16), 1]],
-  library: [[drone, 1], [wind(300), 0.15], [melody(PENTATONIC_LOW, 7, 14), 1]],
-  creek: [[water, 1], [wind(350), 0.2], [melody(PENTATONIC_A, 10, 18), 0.8]],
-  wind: [[wind(380), 0.9]],
-  drone: [[drone, 1], [melody(PENTATONIC_LOW, 9, 16), 0.8]],
-  heart: [[pad, 1], [wind(320), 0.15], [melody(PENTATONIC_A, 6, 12), 1]],
+  forest: [[wind(420), 0.5], [crickets, 1], [music, 0.8]],
+  library: [[drone, 1], [wind(300), 0.15], [music, 0.55]],
+  creek: [[water, 1], [wind(350), 0.2], [music, 0.65]],
+  wind: [[wind(380), 0.9], [music, 0.5]],
+  drone: [[drone, 1], [music, 0.45]],
+  heart: [[pad, 1], [wind(320), 0.15], [music, 0.85]],
+  tower: [[wind(380), 0.25], [machine, 1], [music, 0.5]],
+  'tower-restored': [[wind(380), 0.25], [water, 0.35], [music, 0.5]],
+  garden: [[wind(420), 0.5], [music, 0.8]],
+  'garden-restored': [[wind(420), 0.4], [water, 0.4], [gardenCrickets, 1], [music, 0.8]],
 };
 
-/** How loud each theme's continuous bed sits (a gain on `bed`), measured so every bed lands near -37 dBFS RMS. */
-const BED_TRIM: Record<AmbienceTheme, number> = { forest: 0.2, library: 0.25, creek: 0.17, wind: 0.12, drone: 0.25, heart: 0.6 };
+/** Environmental bed trims. Story water layers sit lower to leave room for dialogue and the first insects. */
+const BED_TRIM: Record<AmbienceTheme, number> = {
+  forest: 0.2, library: 0.25, creek: 0.17, wind: 0.12, drone: 0.25, heart: 0.6,
+  tower: 0.5, 'tower-restored': 0.17, garden: 0.2, 'garden-restored': 0.17,
+};
 
 export function startAmbience(ctx: BaseAudioContext, out: AudioNode, theme: AmbienceTheme, fadeInSeconds = 1.5): AmbienceHandle {
   const master = ctx.createGain();
