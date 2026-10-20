@@ -3,7 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey, getShadowArtKey } from '../art/C
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
+import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, isWoodsStoneInReach, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsStoneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { buildWoodsDecor } from '../data/whisperingWoodsDecor';
 import { buildForestEdgeDecor } from '../data/forestEdgeDecor';
 import { FOREST_ART_ORIGIN, FOREST_DECOR_TEXTURES, FOREST_MOSS_COLOR, FOREST_MOTTLE_COLOR, type ForestDecor } from '../data/forestDecor';
@@ -636,7 +636,8 @@ export class CampaignScene extends Phaser.Scene {
         LIBRARY_LAYOUT.actor.bodyX, LIBRARY_LAYOUT.actor.bodyWidth, LIBRARY_LAYOUT.actor.bodyHeight);
       const spawn = resolveLibrarySpawn(
         typeof savedPlayerX === 'number' && typeof savedPlayerY === 'number' ? { x: savedPlayerX, y: savedPlayerY } : undefined,
-        this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true,
+        // The gate opens with the crystal alone; a legacy save with the crystal but no fifth painting counts as open.
+        this.progress.flags['l2-crystal'] === true,
       );
       this.player.setPosition(spawn.x, spawn.y);
     } else if (level !== 4 && level !== 6 && level !== 9) {
@@ -1939,7 +1940,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private registerLevel(level: number): void {
-    const action = (id: string, label: string | (() => string), x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone') => this.addAction(id, label, x, y, fn, enabled, texture);
+    const action = (id: string, label: string | (() => string), x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean) => this.addAction(id, label, x, y, fn, enabled, texture, isInReach);
     if (level === 0) {
       action('lamp', 'E · Nhận đèn lồng', FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
         this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; this.lantern.lanternOn = false;
@@ -1994,6 +1995,10 @@ export class CampaignScene extends Phaser.Scene {
       }, () => true, 'woods_arch_open');
     } else if (level === 1) {
       const stands=WHISPERING_WOODS.stands;
+      // RULE_GAMES.md §3 exception (2026-10-20): the poem and the three rune stones answer E from every
+      // side their foot body can touch, not only from the south stand. The stand still anchors the prompt
+      // and breaks ties, and each control keeps its existing enabled/label gating untouched.
+      const stoneReach = (id: WoodsStoneId) => (playerX: number, playerY: number) => isWoodsStoneInReach(id, { x: playerX, y: playerY });
       const poemLines: DialogueLine[] = [
         { speaker: 'Hệ thống', text: 'Trăng soi qua kẽ lá,\nLá gọi sao về đây.' },
         { speaker: 'Hệ thống', text: 'Sao canh rừng yên giấc,\nChờ nắng mai vén mây.' },
@@ -2003,8 +2008,8 @@ export class CampaignScene extends Phaser.Scene {
         this.say(first ? [...poemLines,
           {speaker:'Nhinh',text:'Trăng, lá, sao… Không biết có liên quan đến những tấm bia kia không.'},
           {speaker:'Lumo',text:'Mình thử soi chúng xem. Chiếc đèn đã giúp cậu tìm thấy dấu chân mà.'}] : [...poemLines]);
-      }, undefined, 'mural_tablet');
-      for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`);
+      }, undefined, 'mural_tablet', stoneReach('poem'));
+      for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`, stoneReach(id));
       action('stairs', () => this.progress.flags['l1-open'] ? 'E · Xuống Thư viện' : 'E · Kiểm tra cổng', stands.exit.x, stands.exit.y, () => {
         if (!this.progress.flags['l1-open']) { this.say([{speaker:'Nhinh',text:'Rễ cây quấn kín cả lối xuống rồi.'},{speaker:'Lumo',text:'Ở cổng ngoài, chiếc đèn đã mở được đường. Có lẽ những tấm bia ở đây cũng cần ánh sáng.'}]); return; }
         this.nextLevel([
@@ -2288,7 +2293,7 @@ export class CampaignScene extends Phaser.Scene {
     return { x: 350, y: 260 };
   }
 
-  private addAction(id: string, label: string | (() => string), x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone'): void {
+  private addAction(id: string, label: string | (() => string), x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean): void {
     if ((id.includes('exit') || id === 'stairs') && this.progress.level !== 1) {
       const hasGateProp = this.objects.some((object) =>
         object instanceof Phaser.GameObjects.Image
@@ -2301,7 +2306,7 @@ export class CampaignScene extends Phaser.Scene {
       );
       if (!hasGateProp) this.addProp(texture, x, y, 0.8);
     }
-    this.interactions.register({ id, x, y, getPromptBounds: this.getActionPromptBounds(id, x, y), radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
+    this.interactions.register({ id, x, y, getPromptBounds: this.getActionPromptBounds(id, x, y), radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()), ...(isInReach ? { isInReach } : {}) });
   }
 
   private getActionPromptBounds(id: string, x: number, y: number): (() => { x: number; y: number; width: number; height: number } | null) | undefined {
@@ -2819,6 +2824,11 @@ export class CampaignScene extends Phaser.Scene {
       this.track(this.add.image(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setDepth(Math.max(stamp.depth, pathDepth + 0.01)));
     }
     for (const stamp of decor.pathEdge.tufts) {
+      this.track(this.forestArtImage(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
+    }
+    // Opt-in dense rim band (Level 01): the same grass art packed along both sides of the edge, below every actor and
+    // prop. Decor only: no collision, no interaction, no walkable data.
+    for (const stamp of decor.pathEdge.denseTufts ?? []) {
       this.track(this.forestArtImage(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
     }
   }

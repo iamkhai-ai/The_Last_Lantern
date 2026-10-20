@@ -301,8 +301,11 @@ function progressFlagsPair(level) {
     'the gate points back to the crystal before it is taken');
   progress.flags['l2-crystal'] = true;
   level.useExit();
-  assert.deepEqual(lastSaid(calls), [['Nhinh', 'Vách rễ vừa mở ra một bức tranh nữa. Mình chưa xem nó.']],
-    'the gate points at the unread mural once the crystal is taken');
+  // Playtest decision 2026-10-20: the gate opens the moment the crystal is taken. The fifth painting is
+  // optional story, so the old "mural unread" closed-gate line ('Vách rễ vừa mở ra một bức tranh nữa. Mình
+  // chưa xem nó.') is no longer reachable at the gate; the departure conversation plays instead.
+  assert.ok(Array.isArray(calls.at(-1).next) && calls.at(-1).next.length > 0,
+    'with the crystal taken the gate opens straight away, even before the mural is read');
 }
 {
   const { level, calls } = createLevel({ 'l2-crystal': true, 'l2-fifth-viewed': true });

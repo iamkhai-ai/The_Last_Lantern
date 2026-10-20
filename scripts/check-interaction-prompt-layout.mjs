@@ -47,6 +47,17 @@ for (const id of ['poem', 'moon', 'leaf', 'star']) {
   const stand = WHISPERING_WOODS.stands[id];
   checkClear(`Woods ${id} stand`, target, actor(stand.x, stand.y), 198, 24);
   checkClear(`Woods ${id} solid contact`, target, actor(anchor.x, anchor.y - 16), 198, 24);
+  // RULE_GAMES §3 exception: these stones answer E from every side, so the label must stay clear of the
+  // actor and the artwork from the north, west and east too.
+  const fp = WHISPERING_WOODS.footprints[id];
+  const sideY = fp.y + fp.height / 2 - 19;
+  for (const [side, point] of [
+    ['north', { x: fp.x + fp.width / 2, y: fp.y - 22 }],
+    ['west', { x: fp.x - 7, y: sideY }],
+    ['east', { x: fp.x + fp.width + 7, y: sideY }],
+  ]) {
+    checkClear(`Woods ${id} ${side} contact`, target, actor(point.x, point.y), 198, 24);
+  }
 }
 checkClear('Woods poem at fresh entry', { x: 88, y: 190, width: 96, height: 80 }, actor(136, 286), 198, 24);
 for (const y of [140, 162, 181, 194]) {

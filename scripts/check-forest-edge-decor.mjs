@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { buildForestEdgeDecor, FOREST_EDGE_DECOR_SEED, forestEdgeDecorSite } from '../src/data/forestEdgeDecor.ts';
-import { chaikinClosed, FOREST_DECOR_TEXTURES, pointInPolygon } from '../src/data/forestDecor.ts';
-import { FOREST_EDGE, FOREST_EDGE_GROUND_PATH, FOREST_EDGE_SOLIDS } from '../src/data/forestEdgeLayout.ts';
+import { buildWoodsDecor } from '../src/data/whisperingWoodsDecor.ts';
+import {
+  buildForestDecor, chaikinClosed, DENSE_EDGE_SOLID_CLEARANCE, distanceToPolygonEdge, expandForestRect, FOREST_DECOR_TEXTURES,
+  pointInForestRect, pointInPolygon, resampleClosed,
+} from '../src/data/forestDecor.ts';
+import { FOREST_EDGE, FOREST_EDGE_GROUND_PATH, FOREST_EDGE_SOLIDS, worldDepth } from '../src/data/forestEdgeLayout.ts';
 
 const decor = buildForestEdgeDecor();
 assert.deepEqual(buildForestEdgeDecor(), decor, 'Level 01 decor generator is deterministic for a fixed seed');
@@ -173,5 +177,99 @@ const forestDecorEnd = scene.indexOf('\n  private normalizedWoodsRuneTexture(', 
 const forestDecorBody = scene.slice(forestDecorStart, forestDecorEnd);
 assert.ok(forestDecorStart >= 0 && forestDecorEnd > forestDecorStart, 'drawForestDecor is present in CampaignScene.ts');
 assert.doesNotMatch(forestDecorBody, /setData\(/, 'shared decor sets no forestEdgeId or woodsId');
+
+// Dense rim grass (opt-in, Level 01). The dirt path used to end on a hard line: one grass stamp every second 9 px slot,
+// and nothing at all within 22 px of an interaction mark. Level 01 now opts into a second, tighter band that straddles
+// the smoothed rim. It has to exist, stay inside the rim band on both sides, keep every mark and the gate clear, add
+// nothing but decor, and be deterministic.
+const site = forestEdgeDecorSite();
+const denseSpec = site.denseEdgeGrass;
+assert.ok(denseSpec, 'the Level 01 site opts into denseEdgeGrass');
+assert.ok(denseSpec.step > 0 && denseSpec.step <= 6.5, `dense band resamples the rim every ${denseSpec.step} px`);
+// Independent floor: a roadside-grass stamp is 48x32 at 0.9-1.2 scale, so its base has to stay at least this far off a
+// mark for no blades to sprout out of a prop. The band is deliberately tighter than the 26 px ground-cover radius
+// (which is measured for scattered tufts on open grass): the Level 01 trail marks sit inside a 35 px wide path, so a
+// 26 px disc would blank the whole middle third of this rim. Dense tufts are drawn at depth 0.62, below every prop and
+// the footprint trail, so they can never bury one.
+assert.ok(denseSpec.markClearance >= 12, `dense band keeps ${denseSpec.markClearance} px clear of the interaction marks`);
+assert.equal(buildWoodsDecor().pathEdge.denseTufts, undefined, 'no other level has a dense rim band: Level 02 keeps its exact JSON shape');
+
+// Opting in adds the dense band and nothing else: rebuilding the same site without denseEdgeGrass must equal this decor
+// once pathEdge.denseTufts is removed. That is the "Level 01 differs only by the added grass" guarantee, in code.
+const { denseEdgeGrass, ...siteWithoutDense } = site;
+const { denseTufts, ...pathEdgeWithoutDense } = decor.pathEdge;
+assert.deepEqual({ ...decor, pathEdge: pathEdgeWithoutDense }, buildForestDecor(siteWithoutDense),
+  'opting in changes pathEdge.denseTufts only; every other Level 01 decor list stays byte-identical');
+
+assert.ok(Array.isArray(denseTufts), 'pathEdge.denseTufts exists for the Level 01 site');
+assert.ok(denseTufts.length >= 150, `dense rim band has ${denseTufts.length} stamps`);
+assert.deepEqual(buildForestEdgeDecor().pathEdge.denseTufts, denseTufts, 'dense rim band is deterministic across two builds');
+
+const [rim] = decor.paths;
+const insideRim = (p) => pointInPolygon(p, rim);
+const gateOpening = expandForestRect(FOREST_EDGE.objects.gate.threshold, 10);
+const gateBacking = expandForestRect(FOREST_EDGE.objects.gate.backing, 8);
+const outwardMin = denseSpec.outward[0] - 0.5;
+const outwardMax = denseSpec.outward[1] + 0.5;
+const inwardMin = denseSpec.inward[0] - 0.5;
+const inwardMax = denseSpec.inward[1] + 0.5;
+for (const stamp of denseTufts) {
+  const p = { x: stamp.x, y: stamp.y };
+  const edgeDistance = distanceToPolygonEdge(p, rim);
+  const inside = insideRim(p);
+  assert.ok(GRASS.has(stamp.texture), `dense stamp texture ${stamp.texture} is a roadside-grass variant`);
+  assert.ok(stamp.scale >= 0.9 && stamp.scale <= 1.2, `dense stamp scale ${stamp.scale} in 0.9-1.2`);
+  assert.equal(stamp.alpha, 1, 'dense stamp alpha');
+  assert.equal(stamp.tint, 0xb2c3a8, 'dense stamp tint');
+  assert.equal(typeof stamp.flipX, 'boolean', 'dense stamp flipX is set');
+  assert.equal(stamp.depth, 0.62, 'dense stamp depth matches the edge tufts');
+  assert.ok(stamp.depth < worldDepth(FOREST_EDGE.world.top), `dense stamp depth ${stamp.depth} stays below the shallowest actor`);
+  // Band: outer stamps 3-10 px off the rim, over-rim stamps 1-4 px inside it (0.5 px for rounding and local curvature).
+  if (inside) {
+    assert.ok(edgeDistance >= inwardMin && edgeDistance <= inwardMax,
+      `over-rim stamp ${p.x},${p.y} sits ${edgeDistance.toFixed(2)} px inside the rim (band ${denseSpec.inward.join('-')})`);
+  } else {
+    assert.ok(edgeDistance >= outwardMin && edgeDistance <= outwardMax,
+      `outer stamp ${p.x},${p.y} sits ${edgeDistance.toFixed(2)} px outside the rim (band ${denseSpec.outward.join('-')})`);
+  }
+  // Keep-clear: no stamp on a mark (lantern, tablet, ring, gate stands, eye, checkpoints, trail marks), on the gate
+  // opening/backing, or inside a tree/rock/post footprint.
+  for (const mark of marks) {
+    assert.ok(dist(p, mark) >= denseSpec.markClearance,
+      `dense stamp ${p.x},${p.y} keeps ${denseSpec.markClearance} px clear of mark ${mark.x},${mark.y}`);
+  }
+  assert.equal(pointInForestRect(p, gateOpening), false, `dense stamp ${p.x},${p.y} stays out of the gate opening`);
+  assert.equal(pointInForestRect(p, gateBacking), false, `dense stamp ${p.x},${p.y} stays out of the gate backing`);
+  for (const solid of FOREST_EDGE_SOLIDS) {
+    assert.ok(distToRect(p, solid) >= DENSE_EDGE_SOLID_CLEARANCE,
+      `dense stamp ${p.x},${p.y} keeps ${DENSE_EDGE_SOLID_CLEARANCE} px clear of a solid footprint`);
+  }
+}
+
+// Both sides of the rim carry a real band, and it runs the whole path instead of clustering at one end.
+const outerStamps = denseTufts.filter((stamp) => !insideRim(stamp));
+const overRimStamps = denseTufts.filter(insideRim);
+assert.ok(overRimStamps.length >= 40, `${overRimStamps.length} over-rim stamps lean back over the dirt edge`);
+assert.ok(outerStamps.length >= 40, `${outerStamps.length} outer stamps soften the grass side`);
+const rimSamples = resampleClosed(rim, denseSpec.step);
+const coveredSamples = rimSamples.filter((p) => denseTufts.some((stamp) => dist(p, stamp) <= 10.5)).length;
+assert.ok(coveredSamples / rimSamples.length >= 0.8,
+  `dense band reaches ${coveredSamples}/${rimSamples.length} rim samples along the whole path`);
+const rimXs = rim.map((p) => p.x);
+const denseXs = denseTufts.map((s) => s.x);
+assert.ok(Math.min(...denseXs) <= Math.min(...rimXs) + 6, `dense band starts at the west end of the rim (${Math.min(...denseXs)})`);
+assert.ok(Math.max(...denseXs) >= Math.max(...rimXs) - 6, `dense band reaches the gate end of the rim (${Math.max(...denseXs)})`);
+const middleStamps = denseTufts.filter((stamp) => stamp.x >= 300 && stamp.x <= 400);
+assert.ok(middleStamps.length >= 20, `${middleStamps.length} dense stamps cross the middle of the path`);
+assert.ok(middleStamps.some((stamp) => stamp.y < 240) && middleStamps.some((stamp) => stamp.y >= 240),
+  'both long sides of the path get dense grass through its middle, where the rim used to be hardest');
+
+// Decor only: drawForestFloor draws the band from decor data, with no identity, interaction or collision attached.
+const floorStart = scene.indexOf('private drawForestFloor(');
+const floorEnd = scene.indexOf('\n  private drawForestDecor(', floorStart);
+assert.ok(floorStart >= 0 && floorEnd > floorStart, 'drawForestFloor is present in CampaignScene.ts');
+const floorBody = scene.slice(floorStart, floorEnd);
+assert.match(floorBody, /decor\.pathEdge\.denseTufts \?\? \[\]/, 'drawForestFloor renders the opt-in dense band');
+assert.doesNotMatch(floorBody, /setData\(|interactions\.register|\.physics|addSolid/, 'the forest floor adds no identity, interaction or collision');
 
 console.log('Level 01 forest decor checks PASS');

@@ -270,7 +270,7 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
 
 // Placing tablets, the correct check, and the crystal pickup each trigger their sound and glow.
 {
-  const { level, progress, registered } = createLevel({ 'memory-slots-json': '[-1,-1,-1,-1]' });
+  const { level, progress, registered, toasts } = createLevel({ 'memory-slots-json': '[-1,-1,-1,-1]' });
   const flashes = [];
   level.flashGlow = (x, y, delay, scale, peakAlpha) => flashes.push({ x, y, delay, scale, peakAlpha });
   sounds.length = 0;
@@ -292,7 +292,9 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
   findControl(registered, 'library-crystal').onInteract();
   assert.equal(progress.flags['l2-crystal'], true, 'the crystal is collected');
   assert.deepEqual(sounds, [['playCrystalPickup']], 'collecting the crystal plays the pickup chime');
-  assert.deepEqual(flashes.map((flash) => [flash.x, flash.y]), [[487, 118]], 'the mural sun pulses once');
+  assert.deepEqual(flashes.map((flash) => [flash.x, flash.y]), [[475, 118], [580, 140]],
+    'taking the crystal pulses the mural sun and the north-wall gate together');
+  assert.equal(toasts.at(-1), 'Lối ra đã mở', 'taking the crystal announces the open exit');
 }
 
 // Dark tablet readings use the approved descriptions; the rack label identifies which tablet was read.
@@ -388,12 +390,64 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
   assert.equal(level.selectedStone, null, 'a solved check clears the selected tablet');
   assert.equal(toasts.length, 0, 'a correct check shows no toast');
 }
+// The fifth painting is optional story: reading it records the flag and the short re-read line, but
+// the gate already opened with the crystal, so the mural never announces the exit.
 {
   const { level, progress, dialogue, toasts } = createLevel({ 'l2-crystal': true });
   level.say = (lines, done) => { dialogue.push(lines); done?.(); };
   level.readMural();
   assert.equal(progress.flags['l2-fifth-viewed'], true, 'the mural is read');
-  assert.equal(toasts.at(-1), 'Lối ra đã mở', 'the exit opening is confirmed by a toast once the mural dialogue completes');
+  assert.equal(toasts.length, 0, 'reading the optional mural does not announce the exit');
+  level.readMural();
+  assert.equal(textOf(dialogue.at(-1)), 'Những đường nứt chạy từ bánh xe về phía Cây Mẹ.',
+    'a re-read of the mural gives the short line');
+  level.showJournal();
+  assert.match(textOf(dialogue.at(-1)), /Những đường nứt chạy từ bánh xe về phía Cây Mẹ/,
+    'the journal keeps the fifth painting entry');
+}
+
+// C1 hints: once the crystal is taken the exit hint comes first and calls the painting optional. The
+// old 'mural' stage (walk to the wall painting before the gate opens) is gone.
+{
+  const { level, dialogue } = createLevel({ 'l2-memory': true, 'l2-crystal': true, 'memory-slots-json': '[0,1,2,3]' });
+  level.showHint();
+  assert.match(textOf(dialogue.at(-1)), /vòm cổng đá trên vách bắc/,
+    'the first exit hint points at the north-wall arch');
+  assert.doesNotMatch(textOf(dialogue.at(-1)), /vách rễ/,
+    'the first exit hint does not send the player to the painting');
+  level.showHint();
+  assert.match(textOf(dialogue.at(-1)), /Tới cổng đá phía Đông Bắc/,
+    'the second exit hint names the north-east gate');
+  level.showHint();
+  assert.match(textOf(dialogue.at(-1)), /tùy chọn/,
+    'the third exit hint marks the fifth painting optional');
+  for (const lines of dialogue) {
+    for (const line of lines) {
+      assert.equal(line.speaker, 'Hệ thống', 'exit hints speak as the system');
+      assert.doesNotMatch(line.text, /phải đọc bức tranh|Đọc bức tranh sau vách/,
+        `exit hint "${line.text}" never makes the painting a required step`);
+    }
+  }
+}
+
+// C1: the gate opens the moment the crystal is taken — the optional painting is never a key, and a
+// legacy save with the crystal but no painting counts as open (E at the gate advances the campaign).
+{
+  const { level, progress, registered, dialogue, toasts } = createLevel({ 'l2-memory': true, 'memory-slots-json': '[0,1,2,3]' });
+  let advanced = 0;
+  level.nextLevel = (lines) => { advanced += 1; dialogue.push(lines); };
+  assert.equal(findControl(registered, 'library-exit').getPrompt(), 'E · Kiểm tra cổng đá phía Đông Bắc',
+    'the shut gate names its north-east wall');
+  assert.equal(level.isExitOpen(), false, 'the gate starts shut');
+  findControl(registered, 'library-crystal').onInteract();
+  assert.equal(progress.flags['l2-crystal'], true, 'the crystal is collected');
+  assert.equal(progress.flags['l2-fifth-viewed'], undefined, 'the optional painting is still unread');
+  assert.equal(level.isExitOpen(), true, 'the crystal alone opens the gate');
+  assert.equal(toasts.at(-1), 'Lối ra đã mở', 'the opening is announced when the crystal is taken');
+  assert.equal(findControl(registered, 'library-exit').getPrompt(), 'E · Qua cổng đá', 'the open gate offers the passage');
+  findControl(registered, 'library-exit').onInteract();
+  assert.equal(advanced, 1, 'E at the open gate advances to the next level');
+  assert.match(textOf(dialogue.at(-1)), /Lối này dẫn ra suối/, 'the passage line leads to the next level');
 }
 
 // Seat E while the selected tablet already sits there only reads it: no re-placing, no false message.
@@ -486,14 +540,16 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
 // Objectives: one action per stage, plain words, under 70 characters.
 {
   const solvedFlags = { 'memory-slots-json': '[0,1,2,3]' };
+  const gateObjective = 'Tới cổng đá phía Đông Bắc và nhấn E. (Tranh thứ năm: tùy chọn)';
   const stages = [
     [{}, 'Đọc cuốn sách trên bàn, nhấn F đổi đèn rồi đọc lại.'],
     [{ 'l2-book-practice': true }, 'Đọc cả hai lớp (đèn bật/tắt) của bốn phiến trên giá.'],
     [{ 'l2-book-practice': true, 'memory-slots-json': '[0,-1,-1,-1]' }, 'Đặt bốn phiến vào bốn hốc theo vòng một ngày.'],
     [{ 'l2-book-practice': true, ...solvedFlags }, 'Đủ bốn phiến. Nhấn E ở bệ giữa để kiểm tra.'],
     [{ 'l2-memory': true, ...solvedFlags }, 'Nhấn E ở mép nam bệ giữa để nhận Tinh thể Ký Ức.'],
-    [{ 'l2-memory': true, 'l2-crystal': true, ...solvedFlags }, 'Nhấn E trước vách rễ để đọc bức tranh thứ năm.'],
-    [{ 'l2-memory': true, 'l2-crystal': true, 'l2-fifth-viewed': true, ...solvedFlags }, 'Tới cổng đá phía Đông Nam và nhấn E.'],
+    // The crystal alone opens the gate; the optional painting never blocks the objective.
+    [{ 'l2-memory': true, 'l2-crystal': true, ...solvedFlags }, gateObjective],
+    [{ 'l2-memory': true, 'l2-crystal': true, 'l2-fifth-viewed': true, ...solvedFlags }, gateObjective],
   ];
   for (const [flags, text] of stages) {
     const { level } = createLevel(flags);
@@ -521,23 +577,29 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
     }
   }
   const source = readFileSync(new URL('src/levels/LibraryLevel.ts', root), 'utf8');
-  for (const banned of ['vạch', 'chân trời sáng', 'hốc đích', 'lối rễ', 'Qua lối', 'Giá đá trống', 'ngày, chiều', 'Cậu đã', 'Đọc bức tranh sau vách', 'Giếng đã mở',
+  for (const banned of ['vạch', 'chân trời sáng', 'hốc đích', 'lối rễ', 'Qua lối', 'Giá đá trống', 'ngày, chiều', 'Cậu đã', 'Đọc bức tranh sau vách', 'Giếng đã mở', 'LIBRARY_PLAQUE', 'Đông Nam',
     'Hai lớp ghép lại', 'Cùng một mặt trời sát chân trời', 'Bật đèn thì thấy cánh hoa', 'Dòng khắc trên bệ đá', 'cơn chấn động', 'Đúng thứ tự rồi', 'Còn ${missing} hốc trống']) {
     assert.equal(source.includes(banned), false, `LibraryLevel.ts no longer says "${banned}"`);
   }
 }
 
-// Exit feedback: the locked-exit line names the stage that is still missing.
+// Exit feedback: the locked-exit line names the stage that is still missing, and the crystal alone
+// is enough to walk through (a legacy save with no fifth painting must not be trapped).
 {
   const { level, progress, dialogue } = createLevel();
+  let advanced = 0;
+  level.nextLevel = (lines) => { advanced += 1; dialogue.push(lines); };
   level.useExit();
   assert.equal(textOf(dialogue.at(-1)), 'Cổng đá vẫn đóng. Có lẽ phải khôi phục vòng ngày đêm ở giữa phòng trước.');
+  assert.equal(advanced, 0, 'the shut gate does not advance');
   progress.flags['l2-memory'] = true;
   level.useExit();
   assert.equal(textOf(dialogue.at(-1)), 'Viên tinh thể vẫn còn trên bệ. Mình mang theo đã.');
+  assert.equal(advanced, 0, 'the gate stays shut until the crystal is taken');
   progress.flags['l2-crystal'] = true;
   level.useExit();
-  assert.equal(textOf(dialogue.at(-1)), 'Vách rễ vừa mở ra một bức tranh nữa. Mình chưa xem nó.');
+  assert.equal(advanced, 1, 'a save with the crystal but no fifth painting walks straight through');
+  assert.match(textOf(dialogue.at(-1)), /Lối này dẫn ra suối/);
 }
 
 // Visual cues: the exit glow is dim and cool while shut, the book glow pulses until practice,
@@ -546,17 +608,25 @@ const pickRack = (registered, label) => registered.find((item) => item.id.starts
   const { level, progress } = createLevel({}, true);
   level.exitGlow = fakeVisual();
   level.bookGlow = fakeVisual();
-  refreshVisuals(level);
+  level.exitThresholdBody = { enable: true };
+  const archTextures = [];
+  level.updateExitTextures = (open) => archTextures.push(open);
+  const refresh = () => Object.getPrototypeOf(level).updateVisualState.call(level, true);
+  refresh();
   assert.equal(level.exitGlow.alpha, 0.15, 'the exit glow is dim while the gate is shut');
   assert.equal(level.exitGlow.tint, 0x7df2d4, 'the shut exit glow is cool cyan');
+  assert.equal(level.exitThresholdBody.enable, true, 'the shut gate keeps its threshold body');
+  assert.deepEqual(archTextures, [false], 'the arch art stays locked while the gate is shut');
   assert.equal(level.bookGlow.visible, true, 'the book glow shows until the book is practised');
+  // The crystal alone opens the gate; the optional fifth painting is not set here.
   progress.flags['l2-crystal'] = true;
-  progress.flags['l2-fifth-viewed'] = true;
-  refreshVisuals(level);
+  refresh();
+  assert.equal(level.exitThresholdBody.enable, false, 'the crystal disables the threshold body on its own');
+  assert.equal(archTextures.at(-1), true, 'the arch art swaps to the open one with the crystal');
   assert.equal(level.exitGlow.alpha, 0.4, 'the open exit glows bright');
   assert.equal(level.exitGlow.tint, 0xffffff, 'the open exit has no cyan tint');
   progress.flags['l2-book-practice'] = true;
-  refreshVisuals(level);
+  refresh();
   assert.equal(level.bookGlow.visible, false, 'the book glow ends once the book is practised');
 }
 {

@@ -67,15 +67,16 @@ const LIBRARY_CYAN = 0x7df2d4;
 const LIBRARY_WARM = 0xffe680;
 /** Gap between the warm seat flashes of a correct arrangement, clockwise from the North seat. */
 const SEAT_FLASH_STEP_MS = 120;
-// Placed below the HUD objective panel (which covers roughly y <= 65).
-const LIBRARY_PLAQUE = { x: 110, y: 78 };
-// The plaque is a warmer stone than the tablets and carries gold engraving, so it never reads as a fifth blank tablet.
-const LIBRARY_PLAQUE_STONE = 0xe6c995;
-const LIBRARY_PLAQUE_GOLD = 0xd8b869;
-const LIBRARY_PLAQUE_AREA = { min: 84, max: 140 };
-const LIBRARY_HANG_XS = [230, 306, 382, 458, 534];
-const LIBRARY_EXIT_GLOW = { x: 566, y: 262 };
-const LIBRARY_MURAL_SUN = { x: 487, y: 118 };
+// The inscription stands on the floor beside the entry path (geometry in LIBRARY_LAYOUT.inscription).
+// It is a warmer stone than the puzzle tablets and carries gold engraving, so it never reads as a fifth blank tablet.
+const LIBRARY_TABLET_STONE = 0xe6c995;
+const LIBRARY_TABLET_GOLD = 0xd8b869;
+/** The north-wall arch spans this x range; top-wall shelves and hanging lanterns skip it. */
+const LIBRARY_ARCH_CLEAR = { min: 532, max: 628 };
+const LIBRARY_HANG_XS = [230, 306, 382, 458];
+/** Warm cue inside the new north-wall doorway; also the flash position when the crystal opens it. */
+const LIBRARY_EXIT_GLOW = { x: 580, y: 140 };
+const LIBRARY_MURAL_SUN = { x: 475, y: 118 };
 const BORDER_NAMES: Record<Stone, string> = { bird: 'border-chim', leaf: 'border-la', boat: 'border-thuyen', seed: 'border-hat' };
 const INTRO: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Rễ cây ôm cả những giá sách…' },
@@ -125,6 +126,8 @@ export class LibraryLevel {
   private muralSunGlow?: Phaser.GameObjects.Image;
   /** Gentle warm pulse on the reading desk; visible only until the book has been practised. */
   private bookGlow?: Phaser.GameObjects.Image;
+  /** The free-standing inscription tablet: its image bounds anchor the read prompt. */
+  private inscriptionImage?: Phaser.GameObjects.Image;
   /** Exit glow: dim and cool while the stone gate is shut, bright once it opens. */
   private exitGlow?: Phaser.GameObjects.Image;
   /** Brighter core pulse shown while all four seats are filled and before the arrangement is checked. */
@@ -208,8 +211,8 @@ export class LibraryLevel {
 
   public getObjectiveText(): string {
     if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'Nhấn E ở mép nam bệ giữa để nhận Tinh thể Ký Ức.';
-    if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'Nhấn E trước vách rễ để đọc bức tranh thứ năm.';
-    if (this.isExitOpen()) return 'Tới cổng đá phía Đông Nam và nhấn E.';
+    // The gate opens the moment the crystal is taken; the fifth painting is optional story.
+    if (this.isExitOpen()) return 'Tới cổng đá phía Đông Bắc và nhấn E. (Tranh thứ năm: tùy chọn)';
     if (!this.progress.flags['l2-memory'] && this.allSeatsFilled()) return 'Đủ bốn phiến. Nhấn E ở bệ giữa để kiểm tra.';
     if (this.isBookStage()) return 'Đọc cuốn sách trên bàn, nhấn F đổi đèn rồi đọc lại.';
     if (!this.progress.flags['l2-memory'] && !this.allTabletLayersSeen() && !this.anyTabletPlaced()) return 'Đọc cả hai lớp (đèn bật/tắt) của bốn phiến trên giá.';
@@ -223,7 +226,7 @@ export class LibraryLevel {
     const observed = STONES.reduce((count, stone) => count
       + Number(this.progress.flags[`l2-${stone}-lit`] === true)
       + Number(this.progress.flags[`l2-${stone}-dark`] === true), 0);
-    if (this.progress.flags['l2-memory']) return `Vòng: đã phục hồi · Tinh thể: ${this.progress.flags['l2-crystal'] ? 'đã nhận' : 'chưa nhận'} · Bức tranh thứ năm: ${this.progress.flags['l2-fifth-viewed'] ? 'đã đọc' : 'chưa đọc'}`;
+    if (this.progress.flags['l2-memory']) return `Vòng: đã phục hồi · Tinh thể: ${this.progress.flags['l2-crystal'] ? 'đã nhận' : 'chưa nhận'} · Cổng: ${this.isExitOpen() ? 'mở' : 'đóng'} · Tranh thứ năm: ${this.progress.flags['l2-fifth-viewed'] ? 'đã đọc' : 'chưa đọc'}`;
     const selected = this.selectedStone === null ? '' : ` · Đang chọn: ${LABELS[STONES[this.selectedStone]]}`;
     return `Phiến trong hốc ${placed}/4 · Lớp đã đọc ${observed}/8${selected}`;
   }
@@ -258,8 +261,11 @@ export class LibraryLevel {
         finalHint,
       ],
       crystal: ['Đứng ở mép nam của bệ giữa để tới tinh thể.', 'Nhấn E ở bệ giữa để nhận Tinh thể Ký Ức.'],
-      mural: ['Tới vách rễ ở phía đông bắc của phòng.', 'Đứng trước vách rễ và nhấn E để đọc bức tranh thứ năm.'],
-      exit: ['Đi sang phía đông, qua dưới vòm cổng đá.', 'Tới cổng đá phía Đông Nam và nhấn E để đi tiếp.'],
+      exit: [
+        'Đi lên phía đông bắc, tới vòm cổng đá trên vách bắc.',
+        'Tới cổng đá phía Đông Bắc và nhấn E để đi tiếp.',
+        'Bức tranh thứ năm sau vách rễ là tùy chọn; cổng đã mở từ khi nhận tinh thể.',
+      ],
     };
     const choices = hints[stage];
     const message = choices[Math.min(this.hintIndex, choices.length - 1)];
@@ -356,12 +362,12 @@ export class LibraryLevel {
   }
 
   private drawRoomArt(): void {
-    const [leftShelf, rightShelf] = LIBRARY_LAYOUT.shelves;
-    this.addImage('room-bookshelf', leftShelf.x, leftShelf.y, 80, 80, this.depthAt(leftShelf.y + 40), true);
-    this.addImage('room-bookshelf', rightShelf.x, rightShelf.y, 80, 80, this.depthAt(rightShelf.y + 40), true);
+    for (const shelf of LIBRARY_LAYOUT.shelves) {
+      this.addImage('room-bookshelf', shelf.x, shelf.y, 80, 80, this.depthAt(shelf.y + 40), true);
+    }
     this.drawTopWallShelves();
     this.drawHangingLanterns();
-    this.drawInscriptionPlaque();
+    this.drawInscriptionTablet();
     this.addImage('room-test-desk', LIBRARY_LAYOUT.desk.x, LIBRARY_LAYOUT.desk.y,
       LIBRARY_LAYOUT.desk.width, LIBRARY_LAYOUT.desk.height, this.depthAt(LIBRARY_LAYOUT.desk.y + 27), true);
     this.bookLayers = [
@@ -389,10 +395,10 @@ export class LibraryLevel {
     this.addExitArt();
   }
 
-  /** A row of bookshelves along the top wall; the plaque area stays clear and the two big shelves are drawn separately. */
+  /** A row of bookshelves along the top wall; the north-wall arch stays clear and the big shelf is drawn separately. */
   private drawTopWallShelves(): void {
     for (let x = 40; x <= 600; x += 76) {
-      if (x >= LIBRARY_PLAQUE_AREA.min && x <= LIBRARY_PLAQUE_AREA.max) continue;
+      if (x + 32 > LIBRARY_ARCH_CLEAR.min && x - 32 < LIBRARY_ARCH_CLEAR.max) continue;
       this.track(this.scene.add.image(x, 80, this.textureKey('room-bookshelf'))
         .setOrigin(0.5, 1).setDisplaySize(64, 64).setTint(0x9a8f80).setDepth(this.depthAt(78)));
     }
@@ -414,28 +420,31 @@ export class LibraryLevel {
   }
 
   /**
-   * Carved inscription plaque: a warm stone with a sun glyph and three engraved lines on top.
+   * Carved inscription tablet standing on the floor beside the entry path: a warm stone with a sun
+   * glyph and three engraved lines on top, depth-sorted by its base like every other prop.
    * The interaction and its prompt bounds are registered in registerInteractions().
    */
-  private drawInscriptionPlaque(): void {
-    const { x, y } = LIBRARY_PLAQUE;
-    const depth = this.depthAt(78);
-    this.track(this.scene.add.image(x, y, this.textureKey('tablet-body'))
-      .setDisplaySize(26, 30).setTint(LIBRARY_PLAQUE_STONE).setDepth(depth));
+  private drawInscriptionTablet(): void {
+    const { x, baseY, width, height } = LIBRARY_LAYOUT.inscription;
+    const centerY = baseY - height / 2;
+    const depth = this.depthAt(baseY);
+    // Contact shadow so the free-standing stone reads as standing on the floor.
+    this.track(this.scene.add.ellipse(x, baseY - 2, width * 0.8, 6, 0x000000, 0.28).setDepth(depth - 0.1));
+    this.inscriptionImage = this.addImage('tablet-body', x, centerY, width, height, depth).setTint(LIBRARY_TABLET_STONE);
     const engraving = this.scene.add.graphics().setDepth(depth + 0.05);
-    engraving.lineStyle(1, LIBRARY_PLAQUE_GOLD, 0.8);
-    // Sun glyph: a half-disc on a short horizon line in the upper part of the plaque.
-    const horizonY = y - 7;
+    engraving.lineStyle(1, LIBRARY_TABLET_GOLD, 0.8);
+    // Sun glyph: a half-disc on a short horizon line in the upper part of the tablet.
+    const horizonY = centerY - 12;
     engraving.beginPath();
     engraving.arc(x, horizonY, 4, Math.PI, Math.PI * 2, false);
     engraving.strokePath();
     engraving.lineBetween(x - 8, horizonY, x + 8, horizonY);
     // Three engraved lines of text below the sun, each a little shorter than the last.
-    engraving.lineBetween(x - 7, y + 3, x + 7, y + 3);
-    engraving.lineBetween(x - 6, y + 7, x + 6, y + 7);
-    engraving.lineBetween(x - 7, y + 11, x + 5, y + 11);
+    engraving.lineBetween(x - 8, centerY + 4, x + 8, centerY + 4);
+    engraving.lineBetween(x - 7, centerY + 9, x + 7, centerY + 9);
+    engraving.lineBetween(x - 8, centerY + 14, x + 6, centerY + 14);
     this.track(engraving);
-    this.track(this.scene.add.image(x, y, 'light_radial')
+    this.track(this.scene.add.image(x, centerY, 'light_radial')
       .setBlendMode(Phaser.BlendModes.ADD).setScale(0.26).setAlpha(0.5).setDepth(LIBRARY_GLOW_DEPTH));
   }
 
@@ -519,8 +528,11 @@ export class LibraryLevel {
   }
 
   private registerInteractions(): void {
-    this.register({ id: 'library-inscription', x: 110, y: 102, radius: 22,
-      getPrompt: () => 'E · Đọc dòng khắc', getPromptBounds: () => ({ x: 102, y: 82, width: 16, height: 24 }),
+    const inscription = LIBRARY_LAYOUT.inscription;
+    this.register({ id: 'library-inscription', x: inscription.x, y: inscription.y, radius: inscription.radius,
+      getPrompt: () => 'E · Đọc dòng khắc',
+      // Rule 1: the stand sits on the tablet's south edge; the label anchors to the stone's own bounds.
+      getPromptBounds: () => this.inscriptionImage?.getBounds() ?? null,
       onInteract: () => {
         this.progress.flags['l2-inscription-read'] = true;
         this.save();
@@ -562,8 +574,8 @@ export class LibraryLevel {
       getPromptBounds: () => this.objects.find((object) => object.getData('library-mural') === true) instanceof Phaser.GameObjects.Image
         ? (this.objects.find((object) => object.getData('library-mural') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.readMural(), isEnabled: () => this.progress.flags['l2-crystal'] === true });
-    this.register({ id: 'library-exit', x: LIBRARY_LAYOUT.exit.x, y: LIBRARY_LAYOUT.exit.y, radius: 22,
-      getPrompt: () => this.isExitOpen() ? 'E · Qua cổng đá' : 'E · Kiểm tra cổng đá phía Đông Nam',
+    this.register({ id: 'library-exit', x: LIBRARY_LAYOUT.exit.x, y: LIBRARY_LAYOUT.exit.y, radius: LIBRARY_LAYOUT.exit.radius,
+      getPrompt: () => this.isExitOpen() ? 'E · Qua cổng đá' : 'E · Kiểm tra cổng đá phía Đông Bắc',
       getPromptBounds: () => this.exitImages[0]?.getBounds() ?? null,
       onInteract: () => this.useExit(), isEnabled: () => true });
   }
@@ -753,9 +765,13 @@ export class LibraryLevel {
     this.save();
     SoundSystem.playCrystalPickup();
     this.removeCrystalImage();
+    // Taking the crystal opens the gate: this call swaps the arch art and disables the threshold
+    // body in the same frame as the pickup.
     this.updateVisualState(true);
-    // The mural's sun brightens once as the crystal opens the wall.
+    // The mural's sun and the gate both brighten once as the crystal opens the wall.
     this.flashGlow(LIBRARY_MURAL_SUN.x, LIBRARY_MURAL_SUN.y, 0, 0.5, 0.9);
+    this.flashGlow(LIBRARY_EXIT_GLOW.x, LIBRARY_EXIT_GLOW.y, 0, 0.7, 0.9);
+    this.showToast('Lối ra đã mở');
     this.say([
       { speaker: 'Nhinh', text: 'Viên tinh thể này vẫn còn sáng.' },
       { speaker: 'Lumo', text: 'Ký Ức… Tôi nhớ ra rồi! Đây là một mảnh trái tim Cây Mẹ.' },
@@ -784,10 +800,10 @@ export class LibraryLevel {
       { speaker: 'Lumo', text: 'Có thể có liên quan. Nhưng tôi không nhớ người nói là ai.' },
       { speaker: 'Nhinh', text: 'Mình ghi lại đã. Cậu không cần cố nhớ ngay đâu.' },
     ], () => {
+      // Optional story only: the gate already opened when the crystal was taken.
       this.progress.flags['l2-fifth-viewed'] = true;
       this.save();
       this.updateVisualState(true);
-      this.showToast('Lối ra đã mở');
     });
   }
 
@@ -1123,15 +1139,16 @@ export class LibraryLevel {
   /** The locked-exit line names the next missing step for the player's current stage. */
   private exitBlockedMessage(): string {
     if (!this.progress.flags['l2-memory']) return 'Cổng đá vẫn đóng. Có lẽ phải khôi phục vòng ngày đêm ở giữa phòng trước.';
-    // Approved side copy: the crystal still rests on the well before the mural is read.
-    if (!this.progress.flags['l2-crystal']) return 'Viên tinh thể vẫn còn trên bệ. Mình mang theo đã.';
-    return 'Vách rễ vừa mở ra một bức tranh nữa. Mình chưa xem nó.';
+    // Approved side copy: the crystal still rests on the well. The gate opens with the crystal alone,
+    // so "crystal taken, painting unread" is no longer a closed-gate state and has no line here.
+    return 'Viên tinh thể vẫn còn trên bệ. Mình mang theo đã.';
   }
-  private isExitOpen(): boolean { return this.progress.flags['l2-crystal'] === true && this.progress.flags['l2-fifth-viewed'] === true; }
+  /** The gate opens the moment the crystal is taken; the fifth painting is optional story, never a key. */
+  private isExitOpen(): boolean { return this.progress.flags['l2-crystal'] === true; }
 
   private hintStage(): string {
     if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'crystal';
-    if (this.progress.flags['l2-crystal'] && !this.progress.flags['l2-fifth-viewed']) return 'mural';
+    // The exit comes first once it is open: reading the mural must never block the way forward.
     if (this.isExitOpen()) return 'exit';
     if (this.isBookStage()) return 'book';
     if (!this.allTabletLayersSeen() && !this.anyTabletPlaced()) return 'clues';

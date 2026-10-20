@@ -34,7 +34,13 @@ export const WHISPERING_WOODS = Object.freeze({
   player: Object.freeze({ footOffsetY: 19, body: Object.freeze({ width: 14, height: 6, offsetX: 11, offsetY: 37 }) }),
   anchors: Object.freeze({ poem: point(136, 270), moon: point(232, 242), leaf: point(326, 174), star: point(408, 266), gate: point(510, 190) }),
   stands,
-  footprints: Object.freeze({ poem: rect(102, 256, 68, 14), moon: rect(219, 230, 26, 12), leaf: rect(313, 162, 26, 12), star: rect(395, 254, 26, 12) }),
+  // Solid bases, not just the contact line: the south edge stays on each anchor y (stands, prompts and the
+  // southern collision stop are unchanged), and each stone is thickened north over its visible body and
+  // widened to its visible base. Measured art (alpha >= WOODS_RUNE_BODY_FIT.alphaThreshold): runes 25x39
+  // of a 40x52 canvas (displayed 1.5x, so 37.5x58.5 on screen, base 30-34 wide); poem 27x20 of 48x40
+  // (displayed 2x). Depth 24 is 55-65% of the 39px fitted rune body (WOODS_RUNE_BODY_FIT.height) and of
+  // the poem's 40px on-screen body; width 34 matches the 33-34.5px visible rune base.
+  footprints: Object.freeze({ poem: rect(102, 246, 68, 24), moon: rect(215, 218, 34, 24), leaf: rect(309, 150, 34, 24), star: rect(391, 242, 34, 24) }),
   gate: Object.freeze({ backing: rect(446, 96, 128, 60), leftPost: rect(456, 156, 20, 34), rightPost: rect(544, 156, 20, 34), threshold: rect(476, 156, 68, 22), promptY: 94, openStopY: 140, closedStopY: 162 }),
   trees: Object.freeze([[48,142],[125,112],[240,106],[350,108],[600,130],[48,230],[600,240],[65,310],[568,310]].map(([x,y], i) => Object.freeze({ id:`tree-${i}`, x, y, footprint:rect(x-9,y-14,18,14) }))),
   rocks: Object.freeze([[100,195],[552,292]].map(([x,y], i) => Object.freeze({ id:`rock-${i}`, x, y, footprint:rect(x-13,y-14,26,14) }))),
@@ -61,10 +67,12 @@ export function getWoodsTutorialStage(state: WoodsTutorialState): WoodsTutorialS
 function overlaps(a: WoodsRect, b: WoodsRect): boolean {
   return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 }
-function bodyRect(center: WoodsPoint): WoodsRect {
+/** The actor's 14x6 foot body in world space (the sprite is 36x42 with its centre on the actor point). */
+export function woodsFootBody(center: WoodsPoint): WoodsRect {
   const b = WHISPERING_WOODS.player.body;
   return rect(center.x + b.offsetX - 18, center.y + b.offsetY - 21, b.width, b.height);
 }
+function bodyRect(center: WoodsPoint): WoodsRect { return woodsFootBody(center); }
 export function isWoodsCenterWalkable(center: WoodsPoint, gateOpen = false): boolean {
   const f = feetAt(center);
   const body = bodyRect(center);
@@ -73,6 +81,33 @@ export function isWoodsCenterWalkable(center: WoodsPoint, gateOpen = false): boo
   return !solids.some((solid) => overlaps(body, solid));
 }
 export function isWoodsPointSafe(center: WoodsPoint, gateOpen = false): boolean { return isWoodsCenterWalkable(center, gateOpen); }
+
+export type WoodsStoneId = 'poem' | 'moon' | 'leaf' | 'star';
+/** How far the foot body may sit outside a stone footprint and still answer E (~10-12px). */
+export const WOODS_STONE_REACH_PADDING = 11;
+/** The authored south approach each stone keeps; the campaign spawns 10px south of the poem stand. */
+export const WOODS_STONE_APPROACH_RADIUS = 24;
+
+function rectGap(a: WoodsRect, b: WoodsRect): number {
+  const dx = Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0);
+  const dy = Math.max(a.y - (b.y + b.height), b.y - (a.y + a.height), 0);
+  return Math.hypot(dx, dy);
+}
+
+/**
+ * RULE_GAMES.md §3 exception (decision 2026-10-20): the Level 02 poem and rune stones answer the E
+ * prompt from all four sides. A stone is in reach while the actor's 14x6 foot body — the same rect
+ * `isWoodsCenterWalkable` collides with — is within `WOODS_STONE_REACH_PADDING` of its footprint, on any
+ * side. Each stone also keeps its authored south approach (`WOODS_STONE_APPROACH_RADIUS` around its
+ * stand) because that is where the level places the player: the campaign spawn (136,286) is 10px south
+ * of the poem stand, and the rune stands are how Level 02 is played. The circles stay 48px+ apart and the
+ * footprints leave 45px+ of clear floor between stones, so no stone answers from another one's stand.
+ */
+export function isWoodsStoneInReach(id: WoodsStoneId, player: WoodsPoint): boolean {
+  if (rectGap(woodsFootBody(player), WHISPERING_WOODS.footprints[id]) <= WOODS_STONE_REACH_PADDING) return true;
+  const stand = WHISPERING_WOODS.stands[id];
+  return Math.hypot(player.x - stand.x, player.y - stand.y) <= WOODS_STONE_APPROACH_RADIUS;
+}
 export function resolveWoodsSpawn(saved: WoodsPoint | undefined, gateOpen: boolean): WoodsPoint {
   const threshold=WHISPERING_WOODS.gate.threshold;
   const behindLockedGate=!gateOpen&&saved&&saved.x>=threshold.x-8&&saved.x<=threshold.x+threshold.width+8&&saved.y<WHISPERING_WOODS.gate.closedStopY;
