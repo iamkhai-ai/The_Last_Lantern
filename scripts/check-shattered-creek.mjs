@@ -49,7 +49,14 @@ const pathIsWalkable = (waypoints) => waypoints.slice(1).every((to, i) => {
 assert.equal(pathIsWalkable([{ x: 68, y: 286 }, { x: 100, y: 288 }, { x: 100, y: 229 }, { x: 76, y: 229 }, SHATTERED_CREEK.objects.source.stand]), true, 'practice-to-main detour clears the pedestal');
 assert.equal(pathIsWalkable([{ x: 76, y: 229 }, { x: 202, y: 229 }, SHATTERED_CREEK.objects.g1.stand, { x: 168, y: 205 }, { x: 168, y: 139 }, SHATTERED_CREEK.objects.g2.stand, { x: 168, y: 139 }, { x: 168, y: 205 }, { x: 224, y: 205 }, SHATTERED_CREEK.objects.latchA.stand]), true, 'west puzzle route clears G1 and reaches latch A');
 assert.equal(pathIsWalkable([SHATTERED_CREEK.objects.latchA.stand, { x: 228, y: 229 }, { x: 350, y: 229 }, { x: 320, y: 229 }, { x: 320, y: 139 }, SHATTERED_CREEK.objects.g3.stand, { x: 320, y: 139 }, { x: 320, y: 229 }, { x: 350, y: 229 }, SHATTERED_CREEK.objects.latchB.stand]), true, 'island route clears bridge and G3/receiver bases');
-assert.equal(pathIsWalkable([SHATTERED_CREEK.objects.latchB.stand, { x: 374, y: 229 }, { x: 480, y: 229 }, SHATTERED_CREEK.objects.relief.stand, { x: 568, y: 188 }, SHATTERED_CREEK.objects.exit.stand]), true, 'east route clears relief and enters the open station lane');
+// The relief panel and the exit arch are solid: the route reads the relief from its south face, then goes around the
+// arch through the strip in front of it (the arch body can no longer be walked through) and up to the steps.
+assert.equal(pathIsWalkable([SHATTERED_CREEK.objects.latchB.stand, { x: 374, y: 229 }, { x: 480, y: 229 }, { x: 480, y: 188 }, SHATTERED_CREEK.objects.relief.stand, { x: 500, y: 188 }, { x: 500, y: 288 }, { x: 568, y: 288 }, SHATTERED_CREEK.objects.exit.stand]), true, 'east route clears relief and reaches the exit steps from the front strip');
+assert.equal(creekCenterWalkable({ x: 546, y: 140 }, walkLive), false, 'the relief panel blocks its whole footprint');
+assert.equal(creekCenterWalkable({ x: 546, y: 188 }, walkLive), true, 'the relief stand in front of the panel stays walkable');
+assert.equal(creekCenterWalkable({ x: 568, y: 240 }, walkLive), false, 'the exit arch body cannot be walked into');
+assert.equal(pathIsWalkable([{ x: 568, y: 188 }, { x: 568, y: 286 }]), false, 'the exit cannot be reached by walking through the arch');
+assert.equal(creekCenterWalkable(SHATTERED_CREEK.objects.exit.stand, walkLive), true, 'the exit stand in front of the steps stays walkable');
 
 const noA = deriveCreekState({ ...base, lanternOn: false });
 assert.equal(unsafePowerChange({ x: 274, y: 229 }, a, noA), 'occupied-bridge');

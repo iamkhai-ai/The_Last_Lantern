@@ -27,8 +27,11 @@ export const SHATTERED_CREEK = {
     eyeB: { ground: p(350, 206), optical: p(350, 194), stand: p(350, 198), base: rect(342, 198, 16, 8) },
     latchA: { ground: p(224, 284), stand: p(224, 252), base: rect(214, 274, 20, 10) },
     latchB: { ground: p(374, 284), stand: p(374, 252), base: rect(364, 274, 20, 10) },
-    relief: { ground: p(546, 182), stand: p(546, 188), base: rect(498, 170, 96, 12) },
-    exit: { ground: p(568, 300), stand: p(568, 286), posts: [rect(530, 278, 22, 22), rect(584, 278, 22, 22)] },
+    // The relief is a 128x80 panel standing on the bank (x 482-610, y 102-182): the whole panel blocks, not just a strip at its foot.
+    relief: { ground: p(546, 182), stand: p(546, 188), base: rect(482, 102, 128, 80) },
+    // The exit arch is drawn 88 wide and ~87 tall from its ground line. Its two posts and the whole arch body above the
+    // steps block, so the player can only reach the doorway from the steps (the stand), never walk onto the painted arch.
+    exit: { ground: p(568, 300), stand: p(568, 286), posts: [rect(530, 278, 22, 22), rect(584, 278, 22, 22), rect(524, 213, 88, 65)] },
   },
   spawn: p(68, 286),
   practice: { mirror: 'practiceMirror', source: 'practiceSource', receiver: 'practiceEye' },
@@ -173,7 +176,7 @@ export function unsafePowerChange(center: Point, before: CreekLiveState, after: 
 }
 
 export function resolveCreekSpawn(saved: Point | undefined, live: CreekLiveState): Point {
-  const candidates = [saved, live.bridgeA && live.bridgeB ? p(480, 140) : undefined, live.bridgeA ? SHATTERED_CREEK.objects.g3.stand : undefined, SHATTERED_CREEK.spawn, SHATTERED_CREEK.objects.source.stand, SHATTERED_CREEK.objects.latchA.stand].filter((item): item is Point => Boolean(item));
+  const candidates = [saved, live.bridgeA && live.bridgeB ? p(480, 229) : undefined, live.bridgeA ? SHATTERED_CREEK.objects.g3.stand : undefined, SHATTERED_CREEK.spawn, SHATTERED_CREEK.objects.source.stand, SHATTERED_CREEK.objects.latchA.stand].filter((item): item is Point => Boolean(item));
   return candidates.find((candidate) => creekCenterWalkable(candidate, live) && (candidate.x < 244 || candidate.x < 396 && live.bridgeA || live.bridgeA && live.bridgeB)) ?? SHATTERED_CREEK.spawn;
 }
 

@@ -410,7 +410,7 @@ export class ShatteredCreekController {
     this.addImage('latch-latchA', creekMechanismArt('latch-west-unlatched'), objects.latchA.ground, 28, 32);
     this.addImage('latch-latchB', creekMechanismArt('latch-east-unlatched'), objects.latchB.ground, 28, 32);
     this.addImage('relief', getLevelArtKey(3, 'storm-relief'), objects.relief.ground, 128, 80);
-    this.addImage('exit', getLevelArtKey(1, 'woods_arch_open_passage'), objects.exit.ground, 88, 86.625, 5);
+    this.addImage('exit', this.exitTexture(), objects.exit.ground, 88, canCompleteCreek(this.state) ? 86.625 : 90.3, 5);
     for (const [id, name, x, y] of [['g1', 'G1 · •', 202, 150], ['g2', 'G2 · ••', 202, 84], ['g3', 'G3 · •••', 350, 84]] as const) this.addLabel(id, name, x, y);
     this.addLabel('practice-source-label', 'Bệ thử', 68, 238, 7);
     this.addLabel('practice-mirror-label', 'Gương thử', 132, 238, 7);
@@ -433,6 +433,7 @@ export class ShatteredCreekController {
     this.setImage('practice-source', creekMechanismArt(this.state.source === 'practice' ? this.state.lanternOn ? 'source-lit' : 'source-off-source' : 'source-empty'));
     this.setImage('eyeA', creekMechanismArt(live.eyeA ? 'receiver-on' : 'receiver-off'));
     this.setImage('eyeB', creekMechanismArt(live.eyeB ? 'receiver-on' : 'receiver-off'));
+    this.syncExitArt();
     this.setImage('latch-latchA', creekMechanismArt(`latch-west-${this.state.latchA ? 'latched' : 'unlatched'}`));
     this.setImage('latch-latchB', creekMechanismArt(`latch-east-${this.state.latchB ? 'latched' : 'unlatched'}`));
     for (const [id, side, ready, latched] of [['a', 'west', live.bridgeA, this.state.latchA], ['b', 'east', live.bridgeB, this.state.latchB]] as const) {
@@ -458,6 +459,16 @@ export class ShatteredCreekController {
     return creekMechanismArt(`mirror-${id === 'g1' ? '1' : id === 'g2' ? '2' : '3'}-${direction}`);
   }
 
+  /** The exit looks shut (the glowing seal) until the station can be entered, then shows the open tunnel mouth. */
+  private exitTexture(): string | null {
+    return canCompleteCreek(this.state) ? getLevelArtKey(1, 'woods_arch_open_passage') : 'woods_arch_locked';
+  }
+  private syncExitArt(): void {
+    const image = this.visuals.get('exit');
+    const key = this.exitTexture();
+    if (!image || !key || !this.ctx.scene.textures.exists(key) || image.texture.key === key) return;
+    image.setTexture(key).setDisplaySize(88, canCompleteCreek(this.state) ? 86.625 : 90.3);
+  }
   private addImage(id: string, texture: string | null, ground: Point, width: number, height: number, depth = 10 + ground.y / 10): void {
     if (!texture || !this.ctx.scene.textures.exists(texture)) return;
     const image = this.ctx.scene.add.image(ground.x, ground.y, texture).setOrigin(0.5, 1).setDisplaySize(width, height).setDepth(depth);
