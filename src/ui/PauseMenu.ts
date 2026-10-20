@@ -104,11 +104,13 @@ export class PauseMenu {
     if (!this.active) return;
     this.selectedIndex = (this.selectedIndex + delta + this.items.length) % this.items.length;
     this.confirmRestart = false;
+    SoundSystem.playUiClick();
     this.refreshHighlight();
   }
 
   public triggerSelected(): void {
     if (!this.active) return;
+    SoundSystem.playUiClick();
     if (this.selectedIndex === 0) {
       this.close();
       this.onResume();

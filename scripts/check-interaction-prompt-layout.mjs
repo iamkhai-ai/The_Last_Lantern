@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { layoutInteractionPrompt } from '../src/systems/interactionPromptLayout.ts';
+import { FOREST_EDGE } from '../src/data/forestEdgeLayout.ts';
 import { WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART } from '../src/data/whisperingWoodsLayout.ts';
 
 const intersects = (a, b) => a.x < b.x + b.width && a.x + a.width > b.x
@@ -17,14 +18,18 @@ const checkClear = (name, target, player, width = 140, height = 24, protectedBou
   return prompt;
 };
 
-const lantern = { x: 214, y: 210, width: 20, height: 28 };
-for (const [x, y] of [[224, 251], [204, 251], [244, 251], [224, 231], [224, 271]]) {
+const lamp = FOREST_EDGE.objects.lantern;
+const lantern = { x: lamp.anchor.x - 10, y: lamp.anchor.y - 28, width: 20, height: 28 };
+for (const [dx, dy] of [[0, 0], [-20, 0], [20, 0], [0, -20], [0, 20]]) {
+  const x = lamp.stand.x + dx, y = lamp.stand.y + dy;
   checkClear(`Lantern approach (${x},${y})`, lantern, actor(x, y));
 }
-checkClear('Lantern prompt avoids Lumo above the lamp', lantern, actor(224, 251), 140, 24, [actor(224, 203)]);
+checkClear('Lantern prompt avoids Lumo above the lamp', lantern, actor(lamp.stand.x, lamp.stand.y), 140, 24,
+  [actor(lamp.anchor.x, lamp.anchor.y - 35)]);
 
-const tablet = { x: 276, y: 170, width: 48, height: 60 };
-checkClear('Tablet south approach', tablet, actor(300, 238), 198, 24);
+const tabletAnchor = FOREST_EDGE.objects.tablet.anchor;
+const tablet = { x: tabletAnchor.x - 24, y: tabletAnchor.y - 60, width: 48, height: 60 };
+checkClear('Tablet south approach', tablet, actor(FOREST_EDGE.objects.tablet.stand.x, FOREST_EDGE.objects.tablet.stand.y), 198, 24);
 
 const gate = { x: 410, y: 10, width: 152, height: 156 };
 for (const y of [128, 151, 174]) checkClear(`Gate approach y=${y}`, gate, actor(486, y), 172, 24);

@@ -9,10 +9,11 @@ export interface ForestEdgeProp { id: ForestEdgeObjectId; anchor: Point; texture
 
 export const FOREST_EDGE = {
   world: { left: 0, right: 640, top: 96, bottom: 310 },
-  player: { spawn: { x: 280, y: 286 }, footOffsetY: 19, body: { width: 14, height: 6, offsetX: 11, offsetY: 37 } },
+  // The opening cluster sits 72 px farther west; the ring and gate stay fixed.
+  player: { spawn: { x: 208, y: 286 }, footOffsetY: 19, body: { width: 14, height: 6, offsetX: 11, offsetY: 37 } },
   objects: {
-    lantern: { anchor: { x: 224, y: 238 }, stand: { x: 224, y: 251 }, texture: 'pickup-lantern' },
-    tablet: { anchor: { x: 300, y: 230 }, stand: { x: 300, y: 238 }, solid: { x: 286, y: 218, width: 28, height: 12 } },
+    lantern: { anchor: { x: 152, y: 238 }, stand: { x: 152, y: 251 }, texture: 'pickup-lantern' },
+    tablet: { anchor: { x: 228, y: 230 }, stand: { x: 228, y: 238 }, solid: { x: 214, y: 218, width: 28, height: 12 } },
     ring: { anchor: { x: 410, y: 225 }, ground: { x: 410, y: 210 }, stand: { x: 410, y: 191 }, radius: 16, texture: 'stone-standing-ring' },
     gate: { anchor: { x: 486, y: 166 }, stand: { x: 486, y: 151 }, exit: { x: 486, y: 151 }, posts: [{ x: 410, y: 126, width: 50, height: 40 }, { x: 512, y: 126, width: 50, height: 40 }], header: { x: 447, y: 126, width: 78, height: 18 }, threshold: { x: 447, y: 126, width: 78, height: 18 }, backing: { x: 410, y: 96, width: 152, height: 30 } },
     eye: { anchor: { x: 538, y: 122 }, texture: 'sun-eye-dormant' },
@@ -24,12 +25,12 @@ export const FOREST_EDGE = {
       { id: 'tree-southeast', anchor: { x: 567, y: 313 } },
     ] as Array<{ id: ForestEdgeObjectId; anchor: Point }>,
     rocks: [{ id: 'rock-west', anchor: { x: 122, y: 204 } }, { id: 'rock-east', anchor: { x: 531, y: 279 } }] as Array<{ id: ForestEdgeObjectId; anchor: Point }>,
-    trail: [{ x: 330, y: 245 }, { x: 351, y: 234 }, { x: 372, y: 224 }, { x: 392, y: 216 }] as Point[],
+    trail: [{ x: 258, y: 245 }, { x: 285, y: 241 }, { x: 312, y: 236 }, { x: 339, y: 229 }, { x: 366, y: 221 }, { x: 392, y: 216 }] as Point[],
   },
   checkpoints: {
-    start: { x: 280, y: 286 }, tablet: { x: 300, y: 250 }, ring: { x: 410, y: 191 }, gate: { x: 486, y: 174 },
+    start: { x: 208, y: 286 }, tablet: { x: 228, y: 250 }, ring: { x: 410, y: 191 }, gate: { x: 486, y: 174 },
   } satisfies Record<string, Point>,
-  pulseDiscovery: { center: { x: 360, y: 235 }, radius: 195 },
+  pulseDiscovery: { center: { x: 324, y: 235 }, radius: 195 },
   chargeMs: 900,
 } as const;
 
@@ -43,15 +44,15 @@ export const FOREST_EDGE_SOLIDS: Rect[] = [
 
 /** Walkable dirt path through the forest edge, raw (before Chaikin smoothing). Point order is the polygon outline. */
 export const FOREST_EDGE_GROUND_PATH: readonly Point[] = [
-  { x: 248, y: 304 }, { x: 221, y: 282 }, { x: 195, y: 265 },
-  { x: 192, y: 252 }, { x: 198, y: 243 }, { x: 238, y: 234 },
-  { x: 280, y: 235 }, { x: 319, y: 230 }, { x: 341, y: 221 },
-  { x: 365, y: 207 }, { x: 389, y: 197 }, { x: 405, y: 191 },
+  { x: 176, y: 304 }, { x: 149, y: 282 }, { x: 123, y: 265 },
+  { x: 120, y: 252 }, { x: 126, y: 243 }, { x: 166, y: 234 },
+  { x: 208, y: 235 }, { x: 247, y: 230 }, { x: 287, y: 221 },
+  { x: 329, y: 207 }, { x: 371, y: 197 }, { x: 405, y: 191 },
   { x: 431, y: 171 }, { x: 468, y: 151 }, { x: 504, y: 151 },
   { x: 511, y: 160 }, { x: 494, y: 178 }, { x: 454, y: 197 },
-  { x: 420, y: 220 }, { x: 399, y: 226 }, { x: 379, y: 234 },
-  { x: 357, y: 248 }, { x: 333, y: 258 }, { x: 288, y: 263 },
-  { x: 255, y: 262 }, { x: 252, y: 272 }, { x: 282, y: 293 },
+  { x: 420, y: 220 }, { x: 399, y: 226 }, { x: 361, y: 234 },
+  { x: 321, y: 248 }, { x: 279, y: 258 }, { x: 216, y: 263 },
+  { x: 183, y: 262 }, { x: 180, y: 272 }, { x: 210, y: 293 },
 ];
 
 export function feetAt(center: Point): Point {

@@ -379,6 +379,8 @@ function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStag
       isMuted: () => false,
       playLanternToggle: () => { calls.lantern += 1; },
       playMirrorRotate: () => { calls.mirror += 1; },
+      playUiClick: () => {},
+      playUiCancel: () => {},
     },
   };
   for (const name of MENU_METHODS) {
@@ -422,7 +424,7 @@ function makeNextLevelScene(policy, level) {
       restart() { calls.restarts += 1; },
     },
   };
-  scene.nextLevel = bindMethod(CAMPAIGN_FILE, 'nextLevel', { RELEASE_POLICY: policy }, 'CampaignScene.nextLevel()');
+  scene.nextLevel = bindMethod(CAMPAIGN_FILE, 'nextLevel', { RELEASE_POLICY: policy, SoundSystem: { playGateOpen() {} } }, 'CampaignScene.nextLevel()');
   return scene;
 }
 

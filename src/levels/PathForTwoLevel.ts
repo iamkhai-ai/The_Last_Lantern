@@ -13,16 +13,64 @@ export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
   save: () => void; say: (lines: DialogueLine[], onComplete?: () => void) => void; nextLevel: (lines: DialogueLine[]) => void; canStartStory: () => boolean;
 }
+/**
+ * Approved Level 05 copy — docs/scenario/05-a-path-for-two-dialogue-approved.md.
+ * Every character line below is verbatim from that document; the controller predicates decide when
+ * a line is allowed to speak, so speech never claims a state that has not actually happened.
+ */
 const INTRO: DialogueLine[] = [
-  {speaker:'Nhinh',text:'Cửa không có tay mở ở phía này.'},{speaker:'Lumo',text:'Tôi thấy ánh sáng sau khe đá. Để tôi nhìn thử.'},
-  {speaker:'Nhinh',text:'Cậu vừa chui qua đó thật à?'},{speaker:'Lumo',text:'Nhỏ cũng có ích chứ. Bên này có một dấu giống cánh của tôi.'},
-  {speaker:'Nhinh',text:'Trên mốc ngoài này cũng có. Mình thử nối chúng lại nhé?'},
+  {speaker:'Nhinh',text:'Cửa đóng rồi. Phía này không có tay mở.'},
+  {speaker:'Lumo',text:'Có một đường ống nhỏ bên cạnh. Tôi chui qua được.'},
+  {speaker:'Nhinh',text:'Dấu cạnh đường ống trông giống cánh của cậu.'},
+  {speaker:'Lumo',text:'Để tôi đi theo đường này xem bên kia có gì nhé?'},
+  {speaker:'Nhinh',text:'Ừ. Tôi chờ ở đây.'},
 ];
-const ENDING: DialogueLine[] = [{speaker:'Nhinh',text:'Tháp vẫn đang lấy nước.'},{speaker:'Lumo',text:'Và vẫn sáng, dù chẳng còn ai trên đó.'},{speaker:'Nhinh',text:'Mình lên xem nó đang đợi điều gì.'}];
+const ENDING: DialogueLine[] = [
+  {speaker:'Nhinh',text:'Nước đang bị hút lên tháp.'},
+  {speaker:'Lumo',text:'Ngọn đèn trên đó vẫn sáng…'},
+  {speaker:'Nhinh',text:'Mình lên xem có cách trả nước về suối không.'},
+];
 const MEMORY: DialogueLine[] = [
-  {speaker:'Lumo',text:'Tôi đã đi qua đây.'},{speaker:'Nhinh',text:'Trong đêm bão?'},{speaker:'Lumo',text:'Tôi nhớ mình rất vội. Có ai đó đứng ngoài gọi… nhưng tôi không nghe rõ tên.'},
-  {speaker:'Nhinh',text:'Cậu có muốn nghỉ một chút không?'},{speaker:'Lumo',text:'Nếu đứng yên, tôi sợ sẽ quên mất.'},{speaker:'Nhinh',text:'Vậy mình ghi lại. Cậu không cần giữ tất cả một mình.'},{speaker:'Lumo',text:'Ghi cả vết xoắn này nhé.'},
+  {speaker:'Lumo',text:'Vết xoắn kia… Tôi đã thấy nó rồi.'},
+  {speaker:'Nhinh',text:'Trong đêm bão à?'},
+  {speaker:'Lumo',text:'Ừ. Tôi đã bay qua đường ống này. Có người gọi bên ngoài, nhưng tôi không nhớ họ gọi tên ai.'},
+  {speaker:'Nhinh',text:'Cậu có muốn nghỉ một lát không?'},
+  {speaker:'Lumo',text:'Tôi sợ lát nữa lại quên mất.'},
+  {speaker:'Nhinh',text:'Vậy tôi ghi lại ngay. Cậu nhớ thêm gì thì cứ nói, tôi sẽ chép.'},
+  {speaker:'Lumo',text:'Ghi cả vết xoắn này nhé.'},
 ];
+/** A request to walk to a mark — never an arrival report (approved §2/§3/§4). */
+const SEND_LINES: Record<'practice'|'a'|'b'|'c',DialogueLine[]> = {
+  practice:[{speaker:'Nhinh',text:'Lumo, cậu tới dấu kia rồi chờ tôi một chút được không?'},{speaker:'Lumo',text:'Được. Tôi đi đây!'}],
+  a:[{speaker:'Nhinh',text:'Cậu tới dấu bên kia giúp tôi nhé. Tôi sẽ tìm cách giữ cửa mở.'},{speaker:'Lumo',text:'Được. Cậu cứ từ từ.'}],
+  b:[{speaker:'Nhinh',text:'Bên này còn một dấu nữa. Cậu tới đó giúp tôi nhé?'},{speaker:'Lumo',text:'Được. Tôi đi đây.'}],
+  c:[{speaker:'Nhinh',text:'Cậu tới đầu bên kia nhé. Tôi sẽ theo những vạch trên nền.'},{speaker:'Lumo',text:'Được. Tôi sẽ chờ cậu ở đó.'}],
+};
+/** Approved §2 arrival: only queued when the shipped route actually reaches the practice plate. */
+const PRACTICE_ARRIVAL: DialogueLine[] = [
+  {speaker:'Lumo',text:'Tôi tới rồi. Cửa có mở không?'},
+  {speaker:'Nhinh',text:'Mở rồi! May mà cậu lọt qua được khe đó.'},
+  {speaker:'Lumo',text:'Nhỏ cũng có ích chứ. Tôi chờ ở đây, cậu cứ đi đi.'},
+];
+const RECALL_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Xong rồi, Lumo. Cậu trở lại đây nhé.'},{speaker:'Lumo',text:'Tôi về ngay.'}];
+const FINAL_RECALL_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Cửa đã có chốt giữ rồi. Lumo, cậu về đây nhé.'},{speaker:'Lumo',text:'Tôi về ngay.'}];
+/** Approved §6: only after `isActuallyReunited()` reports a real return, never on recall initiation. */
+const RETURN_LINES: DialogueLine[] = [{speaker:'Lumo',text:'Tôi về rồi.'},{speaker:'Nhinh',text:'Được rồi. Mình cùng lên nhé.'}];
+const LATCH_A_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Chốt đã giữ cửa rồi. Cậu có thể rời dấu đó.'},{speaker:'Lumo',text:'Vậy tôi không phải đứng đây mãi nữa!'}];
+const LATCHED_CALL_LINES: DialogueLine[] = [{speaker:'Lumo',text:'Cửa này đã có chốt giữ rồi. Tôi không cần đứng ở dấu nữa.'}];
+const FIRST_LIT_LINES: DialogueLine[] = [
+  {speaker:'Nhinh',text:'Trên nền có những vệt mực, nhưng mờ quá.'},
+  {speaker:'Lumo',text:'Thử tắt đèn xem. Giống trang sách trong thư viện ấy.'},
+  {speaker:'Nhinh',text:'Ừ. Có lẽ chúng chỉ đường qua hành lang.'},
+];
+const DARK_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Hiện rõ rồi! Những vạch này dẫn tới cuối hành lang.'}];
+const RELIT_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Ánh đèn lại làm những vạch trên nền mờ đi rồi.'}];
+const BECKON_LINES: DialogueLine[] = [{speaker:'Lumo',text:'Ở đây, Nhinh! Cậu sắp tới rồi.'},{speaker:'Nhinh',text:'Thấy cậu rồi!'}];
+const NEXT_MARK_UNLATCHED: DialogueLine[] = [{speaker:'Nhinh',text:'Khoan đã. Tôi chưa gài chốt cửa này. Cậu chờ thêm một chút nhé.'}];
+const STILL_TRAVELLING: DialogueLine[] = [{speaker:'Nhinh',text:'Lumo vẫn đang trên đường tới. Mình đợi cậu ấy một chút.'}];
+const MARK_NOT_CALLED: DialogueLine[] = [{speaker:'Nhinh',text:'Có một dấu ở bên kia cửa. Mình thử nhờ Lumo tới đó xem.'}];
+const INK_NOT_SEEN: DialogueLine[] = [{speaker:'Nhinh',text:'Những vệt trên nền còn mờ quá. Mình thử tắt đèn để xem chúng dẫn tới đâu.'}];
+const TOWER_NEEDS_LUMO: DialogueLine[] = [{speaker:'Nhinh',text:'Mình chưa thể đi mà bỏ Lumo ở lại. Phải gọi cậu ấy về đã.'}];
 const PLATE_ROOMS: Record<'practice'|'a'|'b'|'c',PathRoomId> = {practice:'entry',a:'entry',b:'relay',c:'ink'};
 
 export class PathForTwoLevel {
@@ -41,8 +89,14 @@ export class PathForTwoLevel {
   /** Held-E guard: armed by a room change, cleared by the E key coming back up (see update()). */
   private interactReleasePending=false; private interactKey?:Phaser.Input.Keyboard.Key;
   private hintIndex=0; private hintStage=''; private destroyed=false; private lastLantern=false;
-  private pendingStoryBeats:Array<{lines:DialogueLine[];onComplete?:()=>void}>=[];
+  /**
+   * A queued beat carries the condition that made it true. `flushPendingStoryBeat()` re-checks that
+   * condition at playback time, so an observation recorded before a light toggle, a recall, or a
+   * room change cannot speak later as if the current state were the old one.
+   */
+  private pendingStoryBeats:Array<{lines:DialogueLine[];onComplete?:()=>void;guard?:()=>boolean;onStale?:()=>void}>=[];
   private lastCheckpoint=0; private beckoningQueued=false; private litObservationQueued=false;
+  private darkObservationQueued=false; private relitQueued=false; private reunionQueued=false;
   constructor(o:PathForTwoLevelOptions){this.scene=o.scene;this.progress=o.progress;this.player=o.player;this.lumo=o.lumo;this.interactions=o.interactions;this.lantern=o.lantern;this.save=o.save;this.say=o.say;this.nextLevel=o.nextLevel;this.canStartStory=o.canStartStory;this.lastLantern=this.lantern.lanternOn;}
   private get lanternOn(){return this.lantern.lanternOn;}
   public build():void{
@@ -121,7 +175,11 @@ export class PathForTwoLevel {
       }
       return 'Tới bậc thang và nhấn E.';
     }
-    if(!this.progress.flags['l4-ink-revealed'])return 'Tắt đèn bằng F. Từ mốc bên trái, gọi Lumo tới ấn C rồi theo vạch mực.';
+    // C-before-ink is legal: once C is actually held, the instruction channel must stop asking for
+    // a call that already happened. The key stays in the instruction channel, not in character speech.
+    if(!this.progress.flags['l4-ink-revealed'])return this.hasPower('c')
+      ?'Tắt đèn bằng F rồi đi theo vạch mực tới cuối hành lang.'
+      :'Tắt đèn bằng F. Từ mốc bên trái, gọi Lumo tới ấn C rồi theo vạch mực.';
     if(!this.hasPower('c'))return 'Từ mốc bên trái, gọi Lumo tới ấn C trước khi đi tới cuối hành lang.';
     return 'Tới tay gài C và giữ cửa ra.';
   }
@@ -422,8 +480,8 @@ export class PathForTwoLevel {
   /** What still blocks the exit latch, in flow order; undefined means the handle may be used. */
   private latchCBlockReason():string|undefined{
     if(!this.progress.flags['l4-latch-b'])return'Cửa B cần được gài trước.';
-    if(!this.progress.flags['l4-ink-revealed'])return'Tắt đèn bằng F rồi đi theo vạch mực trong hành lang để tìm dấu trước.';
-    if(!this.hasPower('c'))return'Từ mốc bên trái, gọi Lumo tới ấn C trước khi gài cửa ra.';
+    if(!this.progress.flags['l4-ink-revealed'])return INK_NOT_SEEN[0].text;
+    if(!this.hasPower('c'))return MARK_NOT_CALLED[0].text;
     return undefined;
   }
   private interact(id:string):void{
@@ -433,12 +491,12 @@ export class PathForTwoLevel {
       if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]===true){this.send(mark);return;}
       const action=choosePathCallAction(this.assignment,mark,this.callEligible(mark));
       if(action==='recall'){this.recallToCall(id);return;}
-      if(mark==='b'&&!this.progress.flags['l4-latch-a']){this.say([{speaker:'Nhinh',text:'Mình nên giữ cửa A trước khi Lumo rời ấn.'}]);return;}
-      if(mark==='c'&&!this.progress.flags['l4-latch-b']){this.say([{speaker:'Nhinh',text:'Cửa B cần được gài trước.'}]);return;}
+      if(mark==='b'&&!this.progress.flags['l4-latch-a']){this.say(NEXT_MARK_UNLATCHED);return;}
+      if(mark==='c'&&!this.progress.flags['l4-latch-b']){this.say(NEXT_MARK_UNLATCHED);return;}
       this.send(mark);
       return;
     }
-    if(id==='latch-a'){if(this.room==='relay'&&this.progress.flags['l4-visited-relay']&&this.hasPower('a')){this.progress.flags['l4-latch-a']=true;this.progress.flags['l4-at-a']=false;this.say([{speaker:'Nhinh',text:'Cửa đã giữ được rồi. Cậu qua mốc tiếp theo nhé.'},{speaker:'Lumo',text:'Lần này cậu giữ đường cho tôi.'}]);this.save();}return;}
+    if(id==='latch-a'){if(this.room==='relay'&&this.progress.flags['l4-visited-relay']&&this.hasPower('a')){this.progress.flags['l4-latch-a']=true;this.progress.flags['l4-at-a']=false;this.say(LATCH_A_LINES);this.save();}return;}
     if(id==='latch-b'){if(this.room==='ink'&&this.progress.flags['l4-visited-ink']&&this.hasPower('b')){this.progress.flags['l4-latch-b']=true;this.progress.flags['l4-at-b']=false;this.save();}return;}
     if(id==='latch-c'){
       if(this.progress.flags['l4-latch-c']){this.recallToCall(id);return;}
@@ -454,7 +512,7 @@ export class PathForTwoLevel {
     }
   }
   private send(mark:'practice'|'a'|'b'|'c'):void{
-    if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]){this.say([{speaker:'Lumo',text:'Đường này đã giữ rồi. Tôi có thể đi cùng cậu.'}]);return;}
+    if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]){this.say(LATCHED_CALL_LINES);return;}
     this.assignment=mark;
     this.progress.flags['l4-assignment']=mark;
     this.progress.flags['l4-reunited']=false;
@@ -463,7 +521,13 @@ export class PathForTwoLevel {
     this.route=this.buildAssignmentRoute(mark,{x:this.player.x,y:this.player.y});
     this.routeIndex=0;
     this.persistRoute();
-    this.say([{speaker:'Nhinh',text:'Lumo, cậu ở lại dấu đó một chút được không?'},{speaker:'Lumo',text:'Được! Tôi sẽ chờ tới khi cậu gọi.'}]);this.save();
+    // C-before-ink is a legal path with no approved variant: §4's request promises to follow the
+    // floor lines, a premise that has not happened yet. Suppress that unsupported speech (and report
+    // the gap) instead of inventing copy or making the ink a requirement to call.
+    const cBeforeInk=mark==='c'&&this.progress.flags['l4-ink-revealed']!==true;
+    this.save();
+    if(cBeforeInk)return;
+    this.say(SEND_LINES[mark]);
   }
   private buildAssignmentRoute(mark:'a'|'b'|'c'|'practice',playerPoint:PathPoint):PathRoutePoint[]{
     const targetRoom=PLATE_ROOMS[mark];
@@ -520,6 +584,9 @@ export class PathForTwoLevel {
     if(finalRecall){this.progress.flags['l4-return-called']=true;this.progress.flags['l4-reunited']=false;}
     this.route=[{room:this.lumoRoom,x:this.lumo.sprite.x,y:this.lumo.sprite.y},...this.pipeRoute(this.lumoRoom,this.room),{room:this.room,x:point.x,y:point.y}];
     this.routeIndex=0;this.persistRoute();this.save();
+    // The final recall has its own approved request (§6); every other recall uses §2's. Neither line
+    // is the reunion: §6's "Tôi về rồi." waits for a real return in updateReunion().
+    this.say(finalRecall?FINAL_RECALL_LINES:RECALL_LINES);
   }
   private persistRoute():void{this.progress.flags['l4-route']=JSON.stringify(this.route);this.progress.counters['l4-route-index']=this.routeIndex;this.progress.flags['l4-lumo-room']=this.lumoRoom;}
   private advanceLumo(dt:number):void{
@@ -584,21 +651,27 @@ export class PathForTwoLevel {
     this.progress.flags['l4-lumo-room']=room;
     if(mark==='practice'||mark==='a'||mark==='b'||mark==='c'){
       this.progress.flags[`l4-at-${mark}`]=true;
-      if(mark==='practice')this.queueStoryBeat([
-        {speaker:'Lumo',text:'Tôi tới rồi. Cửa có mở không?'},
-        {speaker:'Nhinh',text:'Có. Khi cậu rời dấu, nó sẽ đóng lại đúng không?'},
-        {speaker:'Lumo',text:'Vậy trước khi gọi tôi về, hãy xem cậu có cần nó nữa không.'},
-      ]);
+      if(mark==='practice')this.queueStoryBeat(
+        PRACTICE_ARRIVAL,
+        undefined,
+        ()=>this.room==='entry'&&this.hasPower('practice'),
+      );
     }
   }
-  private queueStoryBeat(lines:DialogueLine[],onComplete?:()=>void):void{
-    this.pendingStoryBeats.push({lines,onComplete});
+  private queueStoryBeat(lines:DialogueLine[],onComplete?:()=>void,guard?:()=>boolean,onStale?:()=>void):void{
+    this.pendingStoryBeats.push({lines,onComplete,guard,onStale});
     this.flushPendingStoryBeat();
   }
   private flushPendingStoryBeat():void{
     if(!this.pendingStoryBeats.length||!this.canStartStory())return;
-    const next=this.pendingStoryBeats.shift();
-    if(next)this.say(next.lines,next.onComplete);
+    const next=this.pendingStoryBeats[0];
+    if(next.guard&&!next.guard()){
+      this.pendingStoryBeats.shift();
+      next.onStale?.();
+      return;
+    }
+    this.pendingStoryBeats.shift();
+    this.say(next.lines,next.onComplete);
   }
   private isTravelling():boolean{return this.routeIndex<this.route.length;}
   private getPowerState(){return{assignment:this.assignment,lumoRoom:this.lumoRoom,lumoX:this.lumo.sprite.x,lumoY:this.lumo.sprite.y};}
@@ -608,16 +681,16 @@ export class PathForTwoLevel {
     // Revalidate the very approach the prompt advertised, and refuse everything while the held-E
     // guard is armed (the room change has just happened).
     if(!this.doorEnabled(id as PathMark))return;
-    if(id==='practice'){if(!this.hasPower('practice'))this.say([{speaker:'Nhinh',text:'Cửa thử chỉ mở khi Lumo đã tới ấn bên kia.'}]);else this.say([{speaker:'Nhinh',text:'Cửa thử đã mở. Mình có thể đi qua rồi gọi Lumo về.'}]);return;}
+    if(id==='practice'){if(!this.hasPower('practice'))this.say(this.assignment==='practice'&&this.isTravelling()?STILL_TRAVELLING:MARK_NOT_CALLED);else this.say([{speaker:'Nhinh',text:'Cửa thử đã mở. Mình có thể đi qua rồi gọi Lumo về.'}]);return;}
     if(id==='c'){
       const blockedBy=getPathExitBlock({latchC:this.progress.flags['l4-latch-c']===true,memoRead:this.progress.flags['l4-memo']===true,reunited:this.isActuallyReunited()});
       if(blockedBy==='latch'){this.say([{speaker:'Nhinh',text:'Mình cần gài chốt C trước khi lên tháp.'}]);return;}
       if(blockedBy==='memo'){this.say([{speaker:'Nhinh',text:'Mình còn phải đọc vết xoắn để giữ lại ký ức.'}]);return;}
-      if(blockedBy==='companion'){this.say([{speaker:'Nhinh',text:'Gọi Lumo trở lại rồi mình cùng lên tháp.'}]);return;}
+      if(blockedBy==='companion'){this.say(TOWER_NEEDS_LUMO);return;}
       this.prepareLevelExit();
       return;
     }
-    const mark=id as 'a'|'b';if(!this.isDoorOpen(mark)){this.say([{speaker:'Nhinh',text:`Cần Lumo ở ấn ${mark.toUpperCase()} trước khi qua cửa.`}]);return;}
+    const mark=id as 'a'|'b';if(!this.isDoorOpen(mark)){this.say(this.assignment===mark&&this.isTravelling()?STILL_TRAVELLING:MARK_NOT_CALLED);return;}
     if(mark==='a'&&this.room==='entry'){this.transition('relay',{x:110,y:251},'l4-visited-relay');return;}
     if(mark==='a'&&this.room==='relay'){this.transition('entry',getPathBackArrival('a'),'l4-room');return;}
     if(mark==='b'&&this.room==='relay'){this.transition('ink',{x:82,y:251},'l4-visited-ink');return;}
@@ -695,24 +768,64 @@ export class PathForTwoLevel {
     }
   }
   private updateInkProgress():void{
-    // The layout's own corridor rect: the band the 348×48 mark is drawn over and the masonry leaves open.
-    const atCorridor=rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),PATH_INK_CORRIDOR);
+    // The layout's own corridor rect: the band the 348×48 mark is drawn over and the masonry leaves
+    // open. Every ink observation needs the player actually standing on that band.
+    const atCorridor=this.isAtInkCorridor();
     if(this.room==='ink'&&!this.lanternOn&&!this.progress.flags['l4-ink-revealed']&&atCorridor){
       this.progress.flags['l4-ink-revealed']=true;
       this.save();
     }
-    if(this.room==='ink'&&this.lanternOn&&!this.progress.flags['l4-ink-observed-lit']&&!this.litObservationQueued){
+    // First lit look (approved §4): only before the dark observation exists. It never claims the
+    // trail was visible before; it says the marks are faint.
+    //
+    // The Lumo analogy ("Giống trang sách trong thư viện ấy.") and Nhinh's "Ừ" reply presuppose that
+    // both book layers were actually observed in Library Level. The Library exit only requires
+    // l2-crystal + l2-fifth-viewed, so a legal save can arrive with neither book layer. Keep the full
+    // approved exchange only when the premise is real; otherwise speak the approved factual first
+    // line alone (never invent a replacement, never leave the dangling reply, never add a gate).
+    const bothBookLayers=this.progress.flags['l2-book-lit']===true&&this.progress.flags['l2-book-dark']===true;
+    if(this.room==='ink'&&this.lanternOn&&atCorridor&&!this.progress.flags['l4-ink-revealed']
+      &&!this.progress.flags['l4-ink-observed-lit']&&!this.litObservationQueued){
       this.litObservationQueued=true;
       this.queueStoryBeat(
-        [{speaker:'Nhinh',text:'Đường vạch lại biến mất.'},{speaker:'Lumo',text:'Giống những trang sách dưới rễ cây.'},{speaker:'Nhinh',text:'Mình tắt đèn. Cậu chờ ở đầu bên kia nhé.'}],
+        bothBookLayers?FIRST_LIT_LINES:[FIRST_LIT_LINES[0]],
         ()=>{this.progress.flags['l4-ink-observed-lit']=true;this.litObservationQueued=false;this.save();},
+        ()=>this.room==='ink'&&this.lanternOn&&this.isAtInkCorridor()&&this.progress.flags['l4-ink-revealed']!==true,
+        ()=>{this.litObservationQueued=false;},
       );
     }
+    // Dark look (approved §4): recorded at the real corridor observation, and spoken only while the
+    // corridor is still unlit and already revealed.
+    if(this.room==='ink'&&!this.lanternOn&&atCorridor&&this.progress.flags['l4-ink-revealed']===true
+      &&!this.progress.flags['l4-ink-dark-said']&&!this.darkObservationQueued){
+      this.darkObservationQueued=true;
+      this.queueStoryBeat(
+        DARK_LINES,
+        ()=>{this.progress.flags['l4-ink-dark-said']=true;this.darkObservationQueued=false;this.save();},
+        ()=>this.room==='ink'&&!this.lanternOn&&this.isAtInkCorridor()&&this.progress.flags['l4-ink-revealed']===true,
+        ()=>{this.darkObservationQueued=false;},
+      );
+    }
+    // Relit look (approved §4): only once the dark trail has actually been observed.
+    if(this.room==='ink'&&this.lanternOn&&atCorridor&&this.progress.flags['l4-ink-revealed']===true
+      &&!this.progress.flags['l4-ink-relit-said']&&!this.relitQueued){
+      this.relitQueued=true;
+      this.queueStoryBeat(
+        RELIT_LINES,
+        ()=>{this.progress.flags['l4-ink-relit-said']=true;this.relitQueued=false;this.save();},
+        ()=>this.room==='ink'&&this.lanternOn&&this.isAtInkCorridor()&&this.progress.flags['l4-ink-revealed']===true,
+        ()=>{this.relitQueued=false;},
+      );
+    }
+    // The near-end beckon needs a plate holder who is actually there; a recall before playback makes
+    // the queued line stale and it is dropped instead of pretending Lumo is still waiting.
     if(this.room==='ink'&&this.player.x>=500&&this.hasPower('c')&&!this.progress.flags['l4-beckoned']&&!this.beckoningQueued){
       this.beckoningQueued=true;
       this.queueStoryBeat(
-        [{speaker:'Lumo',text:'Ở đây, Nhinh! Cậu sắp tới rồi.'},{speaker:'Nhinh',text:'Thấy cậu rồi.'}],
+        BECKON_LINES,
         ()=>{this.progress.flags['l4-beckoned']=true;this.beckoningQueued=false;this.save();},
+        ()=>this.room==='ink'&&this.player.x>=500&&this.hasPower('c'),
+        ()=>{this.beckoningQueued=false;},
       );
     }
     if(this.lastLantern!==this.lanternOn){
@@ -724,6 +837,9 @@ export class PathForTwoLevel {
       }
     }
   }
+  private isAtInkCorridor():boolean{
+    return rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),PATH_INK_CORRIDOR);
+  }
   private isActuallyReunited():boolean{
     return isActuallyReunited({assignment:this.assignment,travelling:this.isTravelling(),playerRoom:this.room,lumoRoom:this.lumoRoom,
       player:{x:this.player.x,y:this.player.y},lumo:{x:this.lumo.sprite.x,y:this.lumo.sprite.y}});
@@ -733,6 +849,18 @@ export class PathForTwoLevel {
     if(reunited!==Boolean(this.progress.flags['l4-reunited'])){
       this.progress.flags['l4-reunited']=reunited;
       this.save();
+    }
+    // Approved §6: the reunion speech is a second, later state. It is queued only after a real
+    // same-room return and is re-validated at playback, never at recall initiation.
+    if(reunited&&this.progress.flags['l4-return-called']===true
+      &&!this.progress.flags['l4-reunion-said']&&!this.reunionQueued){
+      this.reunionQueued=true;
+      this.queueStoryBeat(
+        RETURN_LINES,
+        ()=>{this.progress.flags['l4-reunion-said']=true;this.reunionQueued=false;this.save();},
+        ()=>this.isActuallyReunited()&&this.progress.flags['l4-return-called']===true,
+        ()=>{this.reunionQueued=false;},
+      );
     }
   }
   private refresh():void{this.refreshArt();this.updateDoors();}

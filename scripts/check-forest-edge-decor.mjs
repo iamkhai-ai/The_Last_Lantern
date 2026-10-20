@@ -12,14 +12,20 @@ const decor = buildForestEdgeDecor();
 assert.deepEqual(buildForestEdgeDecor(), decor, 'Level 01 decor generator is deterministic for a fixed seed');
 assert.equal(typeof FOREST_EDGE_DECOR_SEED, 'number', 'Level 01 seed is a fixed numeric constant');
 
-// The ground path moved out of CampaignScene unchanged: 27 points, same order, same values as the old inline polygon.
-const OLD_INLINE_GROUND_PATH = [
-  [248, 304], [221, 282], [195, 265], [192, 252], [198, 243], [238, 234], [280, 235], [319, 230], [341, 221],
-  [365, 207], [389, 197], [405, 191], [431, 171], [468, 151], [504, 151], [511, 160], [494, 178], [454, 197],
-  [420, 220], [399, 226], [379, 234], [357, 248], [333, 258], [288, 263], [255, 262], [252, 272], [282, 293],
+// Opening path shifts west and tapers into the unchanged ring/gate approach.
+const WIDER_OPENING_GROUND_PATH = [
+  [176, 304], [149, 282], [123, 265], [120, 252], [126, 243], [166, 234], [208, 235], [247, 230], [287, 221],
+  [329, 207], [371, 197], [405, 191], [431, 171], [468, 151], [504, 151], [511, 160], [494, 178], [454, 197],
+  [420, 220], [399, 226], [361, 234], [321, 248], [279, 258], [216, 263], [183, 262], [180, 272], [210, 293],
 ];
 assert.equal(FOREST_EDGE_GROUND_PATH.length, 27, 'ground path has 27 points');
-assert.deepEqual(FOREST_EDGE_GROUND_PATH.map(({ x, y }) => [x, y]), OLD_INLINE_GROUND_PATH, 'ground path equals the old inline polygon');
+assert.deepEqual(FOREST_EDGE_GROUND_PATH.map(({ x, y }) => [x, y]), WIDER_OPENING_GROUND_PATH,
+  'ground path joins the relocated opening cluster to the fixed destination');
+for (const point of FOREST_EDGE.objects.trail) {
+  assert.ok(pointInPolygon(point, decor.paths[0]), `footprint ${point.x},${point.y} stays on the smoothed dirt path`);
+}
+assert.ok(pointInPolygon(FOREST_EDGE.objects.lantern.stand, decor.paths[0]), 'relocated lantern approach stays on the path');
+assert.ok(pointInPolygon(FOREST_EDGE.checkpoints.tablet, decor.paths[0]), 'relocated tablet approach stays on the path');
 assert.equal(decor.paths.length, 1, 'one smoothed ground path');
 assert.equal(decor.paths[0].length, 27 * 8, 'three closed Chaikin passes on the 27-point path');
 assert.deepEqual(decor.paths[0], chaikinClosed(FOREST_EDGE_GROUND_PATH, 3), 'decor path is the Chaikin-smoothed layout path');
@@ -42,7 +48,7 @@ assert.equal(decor.groundCover.tufts.length, 32, 'ground grass count is exactly 
 assert.ok(decor.groundCover.mushrooms.length >= 8 && decor.groundCover.mushrooms.length <= 12, `mushroom count ${decor.groundCover.mushrooms.length}`);
 assert.equal(decor.mottling.shadows.length, 28, 'soft dark mottling count');
 assert.equal(decor.mottling.moss.length, 10, 'moss patch count');
-assert.ok(decor.pathEdge.tufts.length >= 12 && decor.pathEdge.tufts.length <= 18, `path edge grass count ${decor.pathEdge.tufts.length} (about double the old 9)`);
+assert.equal(decor.pathEdge.tufts.length, 19, 'longer western path keeps the same grass spacing (19 clear edge slots)');
 assert.ok(decor.pathEdge.shadows.length > 0, 'path edge has shadow blobs');
 assert.ok(Math.abs(decor.pathEdge.tufts.length - decor.pathEdge.shadows.length) <= 5, 'every second edge slot is grass, so grass and shadows stay in step');
 

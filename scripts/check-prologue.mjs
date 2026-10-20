@@ -5,7 +5,7 @@
  *
  * The renderer and the browser are stubbed, but the shipped code is not:
  *
- *  - the four-panel/eight-line copy is the data module itself, and the expected
+ *  - the four-panel narration/dialogue copy is the data module itself, and the expected
  *    strings below are the approved spec copy, not a copy of the module;
  *  - PrologueScene.ts is transpiled and its class instantiated, so init(),
  *    preload(), create(), update(), advance(), showPanel(), showLine(), finish()
@@ -49,31 +49,53 @@ const EXPECTED_PANELS = [
   {
     id: '01-road-home',
     textureKey: 'prologue-01-road-home',
-    lines: [{ speaker: 'Nhinh', text: 'Qua khúc đường này là tới làng rồi.' }],
+    lines: [
+      { speaker: 'Lời dẫn', text: 'Chiều xuống trên con đường ven rừng. Dưới thung lũng, những ô cửa trong làng đã bắt đầu sáng đèn.' },
+      { speaker: 'Nhinh', text: 'Mọi người thắp đèn cả rồi. Hôm nay mình về muộn quá.' },
+      { speaker: 'Lời dẫn', text: 'Cậu kéo lại chiếc khăn, rảo bước về phía những mái nhà quen thuộc. Chỉ cần đi hết đoạn đường này, cậu sẽ về tới nhà.' },
+      { speaker: 'Nhinh', text: 'May mà vẫn còn nhìn rõ đường.' },
+    ],
   },
   {
     id: '02-voice-in-trees',
     textureKey: 'prologue-02-voice-in-trees',
     lines: [
+      { speaker: 'Lời dẫn', text: 'Giữa tiếng lá xào xạc, một giọng nói rất khẽ vang lên. Nhinh dừng chân, lắng nghe.' },
       { speaker: 'Tiếng gọi', text: 'Có ai… nghe thấy tôi không?' },
+      { speaker: 'Nhinh', text: 'Ai đấy? Bạn đang ở đâu?' },
+      { speaker: 'Lời dẫn', text: 'Một đốm sáng vàng hiện lên giữa những thân cây, rồi khuất sau tán lá. Không có tiếng trả lời.' },
       { speaker: 'Nhinh', text: 'Bạn bị lạc à?' },
-      { speaker: 'Nhinh', text: 'Đợi nhé. Tôi tới đây.' },
+      { speaker: 'Lời dẫn', text: 'Nhinh ngoái nhìn về phía làng. Trời sắp tối. Cậu biết mình nên về — nhưng người kia có thể vẫn đang chờ một tiếng đáp.' },
+      { speaker: 'Nhinh', text: 'Tôi nghe thấy rồi. Bạn cứ ở yên đó nhé.' },
+      { speaker: 'Nhinh', text: 'Tôi sẽ tìm bạn, rồi mình cùng ra ngoài.' },
     ],
   },
   {
     id: '03-path-disappears',
     textureKey: 'prologue-03-path-disappears',
     lines: [
-      { speaker: 'Nhinh', text: 'Tiếng gọi vừa ở đây mà…' },
-      { speaker: 'Nhinh', text: 'Mình vừa đi từ phía nào nhỉ?' },
+      { speaker: 'Lời dẫn', text: 'Sương dày lên quanh những gốc cây. Nhinh đi thêm một quãng, nhưng không còn thấy đốm sáng. Tiếng gọi cũng im bặt.' },
+      { speaker: 'Nhinh', text: 'Tôi tới rồi đây. Bạn còn ở đó không?' },
+      { speaker: 'Lời dẫn', text: 'Cậu đứng đợi. Chỉ có tiếng nước nhỏ từ những chiếc lá.' },
+      { speaker: 'Nhinh', text: 'Vừa nãy rõ ràng là phía này mà…' },
+      { speaker: 'Lời dẫn', text: 'Nhinh quay lại tìm lối cũ. Những ô cửa sáng đèn đã khuất. Giữa lớp sương, thân cây nào trông cũng giống thân cây cậu vừa đi qua.' },
+      { speaker: 'Nhinh', text: 'Mình rẽ ở gốc cây kia… hay là chỗ này?' },
+      { speaker: 'Nhinh', text: 'Bình tĩnh. Cứ quay lại từng đoạn một thôi.' },
+      { speaker: 'Lời dẫn', text: 'Nhưng sau một hồi tìm kiếm, cậu vẫn không nhận ra chỗ rẽ ban đầu.' },
     ],
   },
   {
     id: '04-waiting-for-morning',
     textureKey: 'prologue-04-waiting-for-morning',
     lines: [
-      { speaker: 'Nhinh', text: 'Nghỉ một lát thôi.' },
+      { speaker: 'Lời dẫn', text: 'Khi đôi chân đã mỏi, Nhinh dừng dưới một gốc cây lớn. Bên cạnh đám rễ có một bia đá phủ rêu và chiếc đèn cũ không cháy.' },
+      { speaker: 'Nhinh', text: 'Đi tiếp thế này chỉ lạc xa hơn thôi.' },
+      { speaker: 'Lời dẫn', text: 'Cậu ngồi xuống, kéo chiếc khăn sát cổ. Trong rừng không còn tiếng bước chân nào ngoài tiếng của chính mình.' },
+      { speaker: 'Nhinh', text: 'Người gọi lúc nãy… không biết đã tìm được đường ra chưa.' },
+      { speaker: 'Lời dẫn', text: 'Nhinh lắng nghe thêm một lần nữa, rồi tựa lưng vào gốc cây.' },
+      { speaker: 'Nhinh', text: 'Mình nghỉ một lát thôi. Đợi sương tan đã.' },
       { speaker: 'Nhinh', text: 'Sáng lên rồi mình sẽ tìm được đường về.' },
+      { speaker: 'Lời dẫn', text: 'Cậu nhắm mắt. Trong đầu Nhinh, những ô cửa ở làng vẫn còn sáng.' },
     ],
   },
 ];
@@ -439,21 +461,21 @@ function registeredArrows(file) {
 
 const CASES = [
   {
-    name: 'data_has_four_panels_and_eight_exact_lines',
+    name: 'data_has_four_panels_and_twenty_eight_exact_turns',
     run: () => {
       assert.equal(PROLOGUE_PANELS.length, 4, 'exactly four panels');
       assert.deepEqual(PROLOGUE_PANELS.map((panel) => panel.id), EXPECTED_PANELS.map((panel) => panel.id),
         'panel ids match the four runtime basenames, in order');
       assert.deepEqual(PROLOGUE_PANELS.map((panel) => panel.textureKey), EXPECTED_PANELS.map((panel) => panel.textureKey),
         "every texture key is 'prologue-' + id");
-      assert.deepEqual(PROLOGUE_PANELS.map((panel) => panel.lines.length), [1, 3, 2, 2], '1 + 3 + 2 + 2 lines');
+      assert.deepEqual(PROLOGUE_PANELS.map((panel) => panel.lines.length), [4, 8, 8, 8], '4 + 8 + 8 + 8 narration/dialogue turns');
       assert.deepEqual(
         PROLOGUE_PANELS.flatMap((panel) => panel.lines.map((line) => `${line.speaker}: ${line.text}`)),
         EXPECTED_PANELS.flatMap((panel) => panel.lines.map((line) => `${line.speaker}: ${line.text}`)),
         'the approved Vietnamese copy is verbatim',
       );
       const lines = PROLOGUE_PANELS.flatMap((panel) => panel.lines);
-      assert.equal(lines.length, 8, 'exactly eight lines');
+      assert.equal(lines.length, 28, 'exactly twenty-eight approved turns');
       assert.equal(lines.some((line) => line.text === 'Trời vẫn chưa sáng sao?'), false,
         'the prologue does not replay the Level 01 opening lines');
     },
@@ -500,7 +522,7 @@ const CASES = [
       const body = bundle.textAt(300);
       const hint = bundle.textAt(344);
       assert.ok(speaker && body && hint, 'speaker/body/hint text objects exist at their authored y positions');
-      assert.equal(speaker.text, 'Nhinh', 'the speaker of the first line is shown');
+      assert.equal(speaker.text, 'Lời dẫn', 'the opening narration is labelled');
       assert.equal(body.text, '', 'the body starts empty for the typewriter reveal');
       assert.equal(body.style.fontFamily, 'Segoe UI, sans-serif');
       assert.equal(body.style.fontSize, '12px');
@@ -551,12 +573,19 @@ const CASES = [
       assert.equal(body.text, EXPECTED_PANELS[0].lines[0].text, 'the first advance completes the current line');
       assert.equal(bundle.scene.lineIndex, 0, 'completing the text does not skip the line');
       bundle.press('E');
+      assert.equal(bundle.scene.lineIndex, 1, 'the next advance opens the next turn in panel 01');
+      assert.equal(bundle.scene.panelIndex, 0, 'the panel stays until its final turn');
+      assert.equal(bundle.textAt(282).text, 'Nhinh');
+      for (let line = 1; line < EXPECTED_PANELS[0].lines.length; line++) {
+        typeOut(bundle);
+        bundle.press('E');
+      }
       bundle.update(PANEL_FADE_MS - 1);
-      assert.equal(bundle.scene.panelIndex, 0, 'the second advance does not switch panels before the crossfade ends');
+      assert.equal(bundle.scene.panelIndex, 0, 'the final advance waits for the crossfade');
       bundle.update(1);
       assert.equal(bundle.scene.panelIndex, 1, 'the 450ms crossfade ends on panel 02');
       assert.equal(bundle.scene.lineIndex, 0);
-      assert.equal(bundle.textAt(282).text, 'Tiếng gọi');
+      assert.equal(bundle.textAt(282).text, 'Lời dẫn');
       typeOut(bundle);
       assert.equal(bundle.textAt(300).text, EXPECTED_PANELS[1].lines[0].text);
     },
@@ -566,17 +595,16 @@ const CASES = [
     run: () => {
       const bundle = makeScene().boot();
       bundle.scene.showPanel(1);
-      typeOut(bundle);
-      assert.equal(bundle.scene.lineIndex, 0);
-      bundle.press('E');
-      assert.equal(bundle.scene.lineIndex, 1, 'the second line is shown');
-      assert.equal(bundle.scene.panelIndex, 1, 'the panel did not change yet');
-      typeOut(bundle);
-      bundle.press('E');
-      assert.equal(bundle.scene.lineIndex, 2, 'the third line is shown');
-      assert.equal(bundle.scene.panelIndex, 1, 'the panel still did not change');
-      typeOut(bundle);
-      bundle.press('E');
+      for (let line = 0; line < EXPECTED_PANELS[1].lines.length; line++) {
+        assert.equal(bundle.scene.lineIndex, line, 'every approved turn is visited in order');
+        assert.equal(bundle.scene.panelIndex, 1, 'the panel stays active through every turn');
+        assert.equal(bundle.textAt(282).text, EXPECTED_PANELS[1].lines[line].speaker);
+        typeOut(bundle);
+        assert.equal(bundle.textAt(300).text, EXPECTED_PANELS[1].lines[line].text);
+        bundle.press('E');
+        assert.equal(Boolean(bundle.scene.transition), line === EXPECTED_PANELS[1].lines.length - 1,
+          'only the final turn starts a transition');
+      }
       bundle.update(PANEL_FADE_MS);
       assert.equal(bundle.scene.panelIndex, 2, 'only the last line advances the panel');
     },
@@ -586,14 +614,14 @@ const CASES = [
     run: () => {
       const bundle = makeScene().boot();
       bundle.scene.showPanel(1);
-      bundle.scene.showLine(2);
+      bundle.scene.showLine(EXPECTED_PANELS[1].lines.length - 1);
       typeOut(bundle);
       bundle.press('E');
       bundle.update(449);
       assert.equal(bundle.scene.panelIndex, 1, 'the crossfade has not switched panels before 450ms');
       assert.ok(bundle.scene.transition, 'the 450ms transition is still running at 449ms');
       bundle.press('E');
-      assert.equal(bundle.scene.lineIndex, 2, 'advance input is ignored during the crossfade');
+      assert.equal(bundle.scene.lineIndex, EXPECTED_PANELS[1].lines.length - 1, 'advance input is ignored during the crossfade');
       bundle.update(1);
       assert.equal(bundle.scene.transition, null, 'the transition ends at exactly 450ms');
       assert.equal(bundle.scene.panelIndex, 2, 'and the crossfade lands on the next panel');
@@ -616,7 +644,7 @@ const CASES = [
     run: () => {
       const bundle = makeScene().boot();
       bundle.scene.showPanel(3);
-      bundle.scene.showLine(1);
+      bundle.scene.showLine(EXPECTED_PANELS[3].lines.length - 1);
       typeOut(bundle);
       bundle.press('E');
       assert.equal(bundle.scene.finishing, true, 'the last line finishes the prologue');
@@ -668,7 +696,7 @@ const CASES = [
     run: () => {
       const bundle = makeScene().boot();
       bundle.scene.showPanel(3);
-      bundle.scene.showLine(1);
+      bundle.scene.showLine(EXPECTED_PANELS[3].lines.length - 1);
       typeOut(bundle);
       bundle.press('E');
       bundle.update(FINISH_FADE_MS);
@@ -829,12 +857,10 @@ const CASES = [
       assert.equal(bundle.background().textureKey, 'prologue-03-path-disappears');
 
       bundle.scene.showPanel(1);
-      typeOut(bundle);
-      bundle.press('E');
-      typeOut(bundle);
-      bundle.press('E');
-      typeOut(bundle);
-      bundle.press('E');
+      for (let line = 0; line < EXPECTED_PANELS[1].lines.length; line++) {
+        typeOut(bundle);
+        bundle.press('E');
+      }
       bundle.update(PANEL_FADE_MS);
       assert.equal(bundle.scene.panelIndex, 2, 'the missing-image panel still advances to the next panel');
       bundle.scene.finish();
@@ -982,7 +1008,7 @@ const CASES = [
         refreshHighlight() { calls.refresh += 1; },
         container: { setVisible() {} },
       };
-      const symbols = { SoundSystem: { toggleMute() {} } };
+      const symbols = { SoundSystem: { toggleMute() {}, playUiClick() {}, playUiCancel() {} } };
       scene.triggerSelected = bindMethod(methodUnit(pauseSource, 'triggerSelected', 'PauseMenu'), symbols, 'PauseMenu.triggerSelected()');
       scene.moveSelection = bindMethod(methodUnit(pauseSource, 'moveSelection', 'PauseMenu'), symbols, 'PauseMenu.moveSelection()');
       scene.close = bindMethod(methodUnit(pauseSource, 'close', 'PauseMenu'), symbols, 'PauseMenu.close()');
@@ -1089,7 +1115,7 @@ function makeMenuScene({ completed = false, campaignSave = false, legacy = null 
       load() { return scene.legacy ?? { stage: 'hub_initial' }; },
       hasSave() { return scene.legacy !== null; },
     },
-    SoundSystem: { playLanternToggle() { calls.lantern += 1; }, playMirrorRotate() {}, isMuted() { return false; } },
+    SoundSystem: { playLanternToggle() { calls.lantern += 1; }, playMirrorRotate() {}, playUiClick() {}, playUiCancel() {}, isMuted() { return false; } },
   };
   scene.startNewGame = bindMethod(methodUnit(menuSource, 'startNewGame', 'MenuScene'), symbols, 'MenuScene.startNewGame()');
   scene.hasAnySave = bindMethod(methodUnit(menuSource, 'hasAnySave', 'MenuScene'), symbols, 'MenuScene.hasAnySave()');
