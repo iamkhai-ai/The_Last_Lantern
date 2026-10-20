@@ -3,6 +3,8 @@ import type { ObservatoryRoomId } from '../data/observatoryRooms';
 export interface CampaignProgress {
   version: 1;
   level: number;
+  /** The furthest level ever reached (0-9). Optional: a save without it reads as `level`. Never decreases. */
+  furthest?: number;
   flags: Record<string, boolean | string>;
   counters: Record<string, number>;
   lanternOn: boolean;
@@ -140,6 +142,7 @@ export class CampaignSaveSystem {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
         version: 1,
         level: Math.max(0, Math.min(9, Math.floor(progress.level))),
+        furthest: Math.max(0, Math.min(9, Math.floor(Math.max(progress.furthest ?? 0, progress.level)))),
         flags: progress.flags,
         counters: progress.counters,
         lanternOn: progress.lanternOn,
@@ -189,6 +192,16 @@ export class CampaignSaveSystem {
     const level = data.level as number;
     if (!Number.isInteger(level) || level < 0 || level > 9) repaired = true;
     if (typeof data.lanternOn !== 'boolean' || typeof data.lanternPickedUp !== 'boolean') repaired = true;
+
+    // furthest: absent in older saves, which read as `level`. A present value must be an integer in [level, 9]; anything
+    // else (below level, above 9, not an integer, not a number) is repaired to `level`.
+    const clampedLevel = Math.max(0, Math.min(9, Math.floor(level)));
+    let furthest = clampedLevel;
+    if (data.furthest !== undefined) {
+      const f = data.furthest;
+      if (typeof f === 'number' && Number.isInteger(f) && f >= clampedLevel && f <= 9) furthest = f;
+      else repaired = true;
+    }
 
     const roomId = validRooms.includes(data.roomId as ObservatoryRoomId) ? data.roomId as ObservatoryRoomId : undefined;
     if (data.roomId !== undefined && roomId === undefined) repaired = true;
@@ -243,7 +256,8 @@ export class CampaignSaveSystem {
     return {
       progress: {
         version: 1,
-        level: Math.max(0, Math.min(9, Math.floor(level))),
+        level: clampedLevel,
+        furthest,
         flags,
         counters,
         lanternOn: Boolean(data.lanternOn),

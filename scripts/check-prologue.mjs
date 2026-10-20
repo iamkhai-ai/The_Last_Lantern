@@ -1001,6 +1001,7 @@ const CASES = [
         active: true,
         selectedIndex: 1,
         confirmRestart: false,
+        actions: ['resume', 'restart', 'sound', 'menu'],
         items: [{}, {}, {}, {}],
         onRestart() { calls.restart += 1; },
         onResume() { calls.resume += 1; },
@@ -1020,7 +1021,7 @@ const CASES = [
       assert.equal(calls.restart, 1, 'the confirmed restart runs exactly once');
 
       const cancelled = {
-        active: true, selectedIndex: 1, confirmRestart: false, items: [{}, {}, {}, {}],
+        active: true, selectedIndex: 1, confirmRestart: false, actions: ['resume', 'restart', 'sound', 'menu'], items: [{}, {}, {}, {}],
         onRestart() { calls.restart += 1; }, onResume() { calls.resume += 1; },
         onMainMenu() {}, refreshHighlight() {}, container: { setVisible() {} },
       };

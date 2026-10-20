@@ -1,14 +1,35 @@
 import Phaser from 'phaser';
 import { SoundSystem } from '../systems/SoundSystem';
 
+type PauseAction = 'resume' | 'levels' | 'restart' | 'sound' | 'menu';
+
+/**
+ * The level selector row, offered by CampaignScene only. `names` holds every level title; the row shows the level
+ * chosen, and the choice stays within [0, getReached()]. WorldScene passes no selector and keeps its four rows.
+ */
+export interface PauseLevelSelector {
+  readonly names: readonly string[];
+  getCurrent(): number;
+  getReached(): number;
+  onSelect(index: number): void;
+}
+
+const pad2 = (value: number): string => String(value).padStart(2, '0');
+
 export class PauseMenu {
   private scene: Phaser.Scene;
   private container: Phaser.GameObjects.Container;
   private bg: Phaser.GameObjects.Graphics;
   private items: Phaser.GameObjects.Text[] = [];
+  private readonly actions: readonly PauseAction[];
+  private readonly levels?: PauseLevelSelector;
   private selectedIndex = 0;
   private active = false;
   private confirmRestart = false;
+  /** The level the selector row points at. Reset to the current level on every open(). */
+  private levelChoice = 0;
+  /** Set after the first press on a different level; the second press travels. */
+  private confirmLevel = false;
 
   private onResume: () => void;
   private onRestart: () => void;
@@ -20,12 +41,17 @@ export class PauseMenu {
       onResume: () => void;
       onRestart: () => void;
       onMainMenu: () => void;
-    }
+    },
+    levels?: PauseLevelSelector
   ) {
     this.scene = scene;
     this.onResume = callbacks.onResume;
     this.onRestart = callbacks.onRestart;
     this.onMainMenu = callbacks.onMainMenu;
+    this.levels = levels;
+    this.actions = levels
+      ? ['resume', 'levels', 'restart', 'sound', 'menu']
+      : ['resume', 'restart', 'sound', 'menu'];
 
     this.bg = scene.add.graphics();
     this.bg.fillStyle(0x051014, 0.88);
@@ -46,27 +72,24 @@ export class PauseMenu {
     });
     title.setOrigin(0.5, 0.5);
 
-    const labels = [
-      'TIẾP TỤC (RESUME)',
-      'CHƠI LẠI TỪ ĐẦU (RESTART)',
-      'ÂM THANH: BẬT',
-      'MÀN HÌNH CHÍNH (MAIN MENU)',
-    ];
+    // With the selector the rows tighten to 26 px so five rows fit the frame; without it the layout is unchanged.
+    const rowStep = levels ? 26 : 32;
+    const rowTop = levels ? 134 : 145;
 
-    this.items = labels.map((label, idx) => {
-      const txt = scene.add.text(320, 145 + idx * 32, label, {
+    this.items = this.actions.map((action, idx) => {
+      const txt = scene.add.text(320, rowTop + idx * rowStep, this.labelFor(action), {
         fontFamily: 'Segoe UI, sans-serif',
-        fontSize: '13px',
+        fontSize: action === 'levels' ? '11px' : '13px',
         color: '#cddbd8',
       });
       txt.setOrigin(0.5, 0.5);
       txt.setInteractive({ useHandCursor: true });
       txt.on('pointerover', () => {
-        this.selectedIndex = idx;
+        this.setSelected(idx);
         this.refreshHighlight();
       });
       txt.on('pointerdown', () => {
-        this.selectedIndex = idx;
+        this.setSelected(idx);
         this.triggerSelected();
       });
       return txt;
@@ -105,7 +128,9 @@ export class PauseMenu {
   public open(): void {
     this.active = true;
     this.confirmRestart = false;
+    this.confirmLevel = false;
     this.selectedIndex = 0;
+    this.levelChoice = this.levels ? this.levels.getCurrent() : 0;
     this.refreshHighlight();
     this.container.setVisible(true);
   }
@@ -113,6 +138,7 @@ export class PauseMenu {
   public close(): void {
     this.active = false;
     this.confirmRestart = false;
+    this.confirmLevel = false;
     this.container.setVisible(false);
   }
 
@@ -120,6 +146,17 @@ export class PauseMenu {
     if (!this.active) return;
     this.selectedIndex = (this.selectedIndex + delta + this.items.length) % this.items.length;
     this.confirmRestart = false;
+    this.confirmLevel = false;
+    SoundSystem.playUiClick();
+    this.refreshHighlight();
+  }
+
+  /** Steps the level choice on the selector row, within [0, reached] and wrapping. Only works while that row is selected. */
+  public changeLevelChoice(delta: number): void {
+    if (!this.active || !this.levels || this.actions[this.selectedIndex] !== 'levels') return;
+    const count = this.levels.getReached() + 1;
+    this.levelChoice = (((this.levelChoice + delta) % count) + count) % count;
+    this.confirmLevel = false;
     SoundSystem.playUiClick();
     this.refreshHighlight();
   }
@@ -127,10 +164,13 @@ export class PauseMenu {
   public triggerSelected(): void {
     if (!this.active) return;
     SoundSystem.playUiClick();
-    if (this.selectedIndex === 0) {
+    const action = this.actions[this.selectedIndex];
+    if (action === 'resume') {
       this.close();
       this.onResume();
-    } else if (this.selectedIndex === 1) {
+    } else if (action === 'levels') {
+      this.activateLevels();
+    } else if (action === 'restart') {
       if (!this.confirmRestart) {
         this.confirmRestart = true;
         this.refreshHighlight();
@@ -138,31 +178,66 @@ export class PauseMenu {
         this.close();
         this.onRestart();
       }
-    } else if (this.selectedIndex === 2) {
+    } else if (action === 'sound') {
       SoundSystem.toggleMute();
       this.refreshHighlight();
-    } else if (this.selectedIndex === 3) {
+    } else if (action === 'menu') {
       this.close();
       this.onMainMenu();
     }
   }
 
+  /**
+   * On the current level, a press only steps the choice to the next reached level, so a mouse can change it. On a
+   * different level, the first press asks for confirmation and the second travels.
+   */
+  private activateLevels(): void {
+    if (!this.levels) return;
+    if (this.levelChoice === this.levels.getCurrent()) {
+      this.changeLevelChoice(1);
+      return;
+    }
+    if (!this.confirmLevel) {
+      this.confirmLevel = true;
+      this.refreshHighlight();
+      return;
+    }
+    this.levels.onSelect(this.levelChoice);
+    this.close();
+  }
+
+  /** Hover or click moves the selection. Moving to another row cancels a pending level confirmation. */
+  private setSelected(idx: number): void {
+    if (idx !== this.selectedIndex) this.confirmLevel = false;
+    this.selectedIndex = idx;
+  }
+
+  private labelFor(action: PauseAction): string {
+    if (action === 'resume') return 'TIẾP TỤC (RESUME)';
+    if (action === 'levels') return this.levelLabel();
+    if (action === 'restart') {
+      return this.confirmRestart ? 'XÁC NHẬN CHƠI LẠI? (NHẤN LẦN NỮA)' : 'CHƠI LẠI TỪ ĐẦU (RESTART)';
+    }
+    if (action === 'sound') return SoundSystem.isMuted() ? 'ÂM THANH: TẮT' : 'ÂM THANH: BẬT';
+    return 'MÀN HÌNH CHÍNH (MAIN MENU)';
+  }
+
+  private levelLabel(): string {
+    if (!this.levels) return '';
+    const number = pad2(this.levelChoice + 1);
+    if (this.confirmLevel) return `VÀO MÀN ${number}? NHẤN LẦN NỮA`;
+    const name = this.levels.names[this.levelChoice] ?? '';
+    // With nothing else reachable there is nothing to step through, so the arrows are left off.
+    return this.levels.getReached() > 0 ? `MÀN: ◂ ${number} · ${name} ▸` : `MÀN: ${number} · ${name}`;
+  }
+
   private refreshHighlight(): void {
-    const muteLabel = SoundSystem.isMuted() ? 'ÂM THANH: TẮT' : 'ÂM THANH: BẬT';
-    const restartLabel = this.confirmRestart
-      ? 'XÁC NHẬN CHƠI LẠI? (NHẤN LẦN NỮA)'
-      : 'CHƠI LẠI TỪ ĐẦU (RESTART)';
-
-    const baseLabels = [
-      'TIẾP TỤC (RESUME)',
-      restartLabel,
-      muteLabel,
-      'MÀN HÌNH CHÍNH (MAIN MENU)',
-    ];
-
     this.items.forEach((item, idx) => {
+      const action = this.actions[idx];
       const selected = idx === this.selectedIndex;
-      item.setText(selected ? `▸ ${baseLabels[idx]} ◂` : baseLabels[idx]);
+      // The level row carries its own arrows, so it is marked by colour alone.
+      const label = this.labelFor(action);
+      item.setText(selected && action !== 'levels' ? `▸ ${label} ◂` : label);
       item.setColor(selected ? '#ffe680' : '#cddbd8');
     });
   }
