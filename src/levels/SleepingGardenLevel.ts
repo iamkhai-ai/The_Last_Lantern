@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { SoundSystem } from '../systems/SoundSystem';
 import { getLevelArtKey, getSharedMechanismKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
@@ -132,6 +133,7 @@ export class SleepingGardenLevel {
 
   public build(): void {
     this.readState();
+    SoundSystem.startAmbient(this.state.waterFlowing ? 'garden-restored' : 'garden');
     this.player.setFootPlacement(GARDEN_ACTOR.feetY, 21 + GARDEN_ACTOR.bodyY, 18 + GARDEN_ACTOR.bodyX, GARDEN_ACTOR.bodyWidth, GARDEN_ACTOR.bodyHeight);
     const saved = this.progress.counters['player-level'] === 6 && Number.isFinite(this.progress.counters['player-x']) && Number.isFinite(this.progress.counters['player-y'])
       ? { x: this.progress.counters['player-x'], y: this.progress.counters['player-y'] }
@@ -682,28 +684,38 @@ export class SleepingGardenLevel {
   }
 
   private pullHandle(): void {
+    if (this.destroyed || this.state.canopyShut) return;
     this.state.canopyShut = true;
     this.progress.flags['l6-canopy-shut'] = true;
     this.held = { ...NO_HELD_SPANS };
     this.save();
     this.pulsePlants();
-    this.say(CANOPY_BEAT);
+    SoundSystem.playMechanismLatch();
+    this.say(CANOPY_BEAT, () => {
+      if (!this.destroyed && !this.state.waterFlowing) SoundSystem.playEndingCue('cricket');
+    });
   }
 
   private latchWest(): void {
+    if (this.destroyed || this.state.sunLatched) return;
     this.state.sunLatched = true;
     this.progress.flags['l6-sun-latched'] = true;
     this.progress.flags['l6-sun-open'] = true;
     this.progress.flags['l6-moon-open'] = true;
     this.save();
+    SoundSystem.playMechanismLatch();
     this.say([{ speaker: 'Nhinh', text: 'Chốt đá đã giữ thanh chắn.' }, { speaker: 'Lumo', text: 'Giờ bóng tối cũng không đóng được lối này.' }]);
   }
 
   private openDrain(): void {
+    if (this.destroyed || this.state.waterFlowing) return;
     this.state.waterFlowing = true;
     this.progress.flags['l6-water-flowing'] = true;
     this.progress.flags['l6-moon-open'] = true;
     this.save();
+    SoundSystem.playMechanismLatch();
+    SoundSystem.playWaterRelease();
+    SoundSystem.startAmbient('garden-restored');
     this.queueBeat(NURSERY_SCENE, () => {
       this.state.lumoRealized = true;
       this.progress.flags['l6-lumo-realized'] = true;
@@ -712,10 +724,12 @@ export class SleepingGardenLevel {
   }
 
   private latchEast(): void {
+    if (this.destroyed || this.state.returnLatched) return;
     this.state.returnLatched = true;
     this.progress.flags['l6-return-latched'] = true;
     this.progress.flags['l6-bridge-crossed'] = true;
     this.save();
+    SoundSystem.playMechanismLatch();
     this.say(SIDE_LATCHED);
   }
 

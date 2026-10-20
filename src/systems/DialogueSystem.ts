@@ -133,14 +133,15 @@ export class DialogueSystem {
     if (!this.active) return;
 
     if (this.visibleChars < this.fullLineText.length) {
-      this.charTimer += dt;
-      const charsToAdd = Math.max(1, Math.floor(this.charTimer / 16));
+      this.charTimer += Math.max(0, dt);
+      const charsToAdd = Math.floor((this.charTimer + 1e-6) / 16);
       if (charsToAdd > 0) {
-        this.charTimer = 0;
+        this.charTimer = Math.max(0, this.charTimer - charsToAdd * 16);
         const prev = this.visibleChars;
         this.visibleChars = Math.min(this.fullLineText.length, this.visibleChars + charsToAdd);
         this.bodyText.setText(this.fullLineText.slice(0, this.visibleChars));
-        if (Math.floor(this.visibleChars / 4) !== Math.floor(prev / 4)) {
+        // A softer tick every six characters; no frame-rate-dependent chatter or catch-up burst.
+        if (Math.floor(this.visibleChars / 6) !== Math.floor(prev / 6)) {
           const line = this.queue[this.currentIndex];
           if (line) SoundSystem.playDialogueTick(line.speaker);
         }

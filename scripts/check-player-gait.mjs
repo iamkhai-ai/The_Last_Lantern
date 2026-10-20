@@ -19,7 +19,7 @@ new Function('require', 'module', 'exports', outputText)(name => {
       return key;
     },
   };
-  if (name.endsWith('/SoundSystem')) return { SoundSystem: { playFootstepGrass() {}, setWalking() {} } };
+  if (name.endsWith('/SoundSystem')) return { SoundSystem: { playFootstep() {} } };
   throw new Error(`Unexpected dependency ${name}`);
 }, mod, mod.exports);
 const { Player } = mod.exports;

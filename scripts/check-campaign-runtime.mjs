@@ -770,8 +770,9 @@ function runShowHint(scene) {
 
 /** buildLevel() starts with the sound teardown, which is not under test here. */
 const BUILD_LEVEL_SYMBOLS = {
-  SoundSystem: { stopAmbient() {}, setFootstepSurface() {} },
+  SoundSystem: { startAmbient() {}, stopAmbient() {}, setFootstepSurface() {} },
   SOIL_FOOTSTEP_LEVELS: new Set(),
+  AMBIENCE_BY_LEVEL: [],
 };
 
 let buildLevelRun = null;

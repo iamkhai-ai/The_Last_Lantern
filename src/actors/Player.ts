@@ -24,6 +24,9 @@ export class Player {
   private footBodyOffsetY = 27;
   private animTimer = 0;
   private animStep = 0;
+  /** Footsteps: true while the body is really moving, and the animation phases since the last step. */
+  private stepping = false;
+  private stepTick = 0;
   /** Last frame's position, used to drive the footstep bed from real movement. */
   private lastX = 0;
   private lastY = 0;
@@ -86,7 +89,8 @@ export class Player {
     this.lastY = this.sprite.y;
     if (!canMove) {
       body.setVelocity(0, 0);
-      SoundSystem.setWalking(false);
+      this.stepping = false;
+      this.stepTick = 0;
       this.updateTexture(false, false, hasLanternInHand, lanternOn);
       this.updateGroundDepth();
       return;
@@ -117,6 +121,15 @@ export class Player {
 
       body.setVelocity(vx * speed, vy * speed);
 
+      // One step as soon as the body really moves (pushing into a wall stays silent), then one every two animation
+      // phases: the feet plant on every other phase of both the 4-phase side cycle and the 3-phase one.
+      if (!moved) this.stepping = false;
+      else if (!this.stepping) {
+        this.stepping = true;
+        this.stepTick = 0;
+        SoundSystem.playFootstep(isRunning);
+      }
+
       if (vx !== 0 && vy !== 0) {
         // Diagonal: combine vertical + horizontal (screen +y = down).
         if (vy < 0) {
@@ -135,14 +148,20 @@ export class Player {
         this.animTimer = 0;
         const phaseCount = this.facing === 'left' || this.facing === 'right' ? 4 : 3;
         this.animStep = (this.animStep + 1) % phaseCount;
+        this.stepTick += 1;
+        if (this.stepTick >= 2) {
+          this.stepTick = 0;
+          if (moved) SoundSystem.playFootstep(isRunning);
+        }
       }
     } else {
       body.setVelocity(0, 0);
       this.animStep = 0;
       this.animTimer = 0;
+      this.stepping = false;
+      this.stepTick = 0;
     }
 
-    SoundSystem.setWalking(moved);
     const isRunning = Boolean(this.keys?.SHIFT?.isDown || this.cursors?.shift?.isDown);
     this.updateTexture(isMoving, isRunning, hasLanternInHand, lanternOn);
     this.updateGroundDepth();
