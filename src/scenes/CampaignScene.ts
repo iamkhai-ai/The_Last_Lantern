@@ -2757,6 +2757,11 @@ export class CampaignScene extends Phaser.Scene {
     for (const stamp of decor.pathEdge.tufts) {
       this.track(this.forestArtImage(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
     }
+    // Opt-in dense rim band (Level 01): the same grass art packed along both sides of the edge, below every actor and
+    // prop. Decor only: no collision, no interaction, no walkable data.
+    for (const stamp of decor.pathEdge.denseTufts ?? []) {
+      this.track(this.forestArtImage(stamp.x, stamp.y, stamp.texture).setScale(stamp.scale).setTint(stamp.tint).setAlpha(stamp.alpha).setFlipX(stamp.flipX).setDepth(stamp.depth));
+    }
   }
 
   /**

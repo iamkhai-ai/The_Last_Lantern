@@ -15,6 +15,26 @@ export type ForestPoint = Readonly<{ x: number; y: number }>;
 export type ForestRect = Readonly<{ x: number; y: number; width: number; height: number }>;
 export type ForestSpan = Readonly<{ min: number; max: number }>;
 
+/**
+ * Opt-in extra grass that hides the hard rim of the dirt path. Only a level that sets it gets the band; every other
+ * level keeps a byte-identical decor output (the field is absent, not empty).
+ */
+export type ForestDenseEdgeGrass = Readonly<{
+  /** Resample step along the smoothed perimeter. Smaller is denser. */
+  step: number;
+  /** Distance band, in px outside the rim, for the tufts that sit on the grass side. */
+  outward: readonly [number, number];
+  /** Distance band, in px inside the rim, for the tufts whose blades lean back over the dirt edge. */
+  inward: readonly [number, number];
+  /**
+   * Base clearance from every `keepClear` point. Dense tufts are drawn below every prop (depth 0.62), so this only
+   * has to keep the base of the art off the marks; it is deliberately narrower than the ground-cover `keepClear.radius`.
+   */
+  markClearance: number;
+  /** Extra rectangles the band keeps out of (a gate threshold/opening, a doorway, ...). */
+  keepClearRects: readonly ForestRect[];
+}>;
+
 /** Everything a level contributes to its decor. Numbers that differ per level live here; shared numbers stay as constants. */
 export type ForestDecorSite = Readonly<{
   /** Fixed PRNG seed. Changing it reshuffles that level's decor, so a level keeps its seed. */
@@ -31,6 +51,8 @@ export type ForestDecorSite = Readonly<{
   gateSpan: ForestSpan;
   /** X spans cut out of the bottom bush band to keep a path open (may be empty). */
   bushSkip: readonly ForestSpan[];
+  /** Opt-in dense grass band along the smoothed path rim. Absent on levels that keep the plain edge breakup. */
+  denseEdgeGrass?: ForestDenseEdgeGrass;
 }>;
 
 export type ForestDecorTree = Readonly<{ texture: string; x: number; baseY: number; flipX: boolean; scale: number; tint: number }>;
@@ -47,7 +69,12 @@ export type ForestDecor = Readonly<{
   sideTrees: readonly ForestDecorTree[];
   frontBushes: readonly ForestDecorBush[];
   groundCover: Readonly<{ tufts: readonly ForestDecorProp[]; mushrooms: readonly ForestDecorProp[] }>;
-  pathEdge: Readonly<{ tufts: readonly ForestDecorProp[]; shadows: readonly ForestDecorProp[] }>;
+  pathEdge: Readonly<{
+    tufts: readonly ForestDecorProp[];
+    shadows: readonly ForestDecorProp[];
+    /** Opt-in dense band along the rim. Present only when the site sets `denseEdgeGrass`. */
+    denseTufts?: readonly ForestDecorProp[];
+  }>;
 }>;
 
 /**
@@ -208,6 +235,13 @@ const EDGE_GRASS_TINT = 0xc9d3c1;
 const EDGE_GRASS_ALPHA = 1;
 const EDGE_GRASS_DEPTH = 0.62;
 const EDGE_TUFT_MODULO = 2;
+// Dense edge grass (opt-in, Level 01): the same roadside art packed along the smoothed rim, just outside and just
+// inside the dirt edge, so the path no longer ends on a hard line. Own PRNG, so no existing draw moves.
+const DENSE_EDGE_SEED_XOR = 0x9e3779b1;
+const DENSE_EDGE_SCALE: readonly [number, number] = [0.9, 1.2];
+const DENSE_EDGE_GRASS_TINT = 0xb2c3a8;
+/** Dense tufts keep this far off tree, rock and post footprints so no blade sprouts out of a trunk. */
+export const DENSE_EDGE_SOLID_CLEARANCE = 4;
 const MUSHROOM_COUNT = 10;
 // Half scale: the 32x26 mushroom PNGs read as mossy boulders at native size and look like obstacles in the walkable field.
 const MUSHROOM_SCALE = 0.5;
@@ -355,6 +389,55 @@ export function buildForestDecor(site: ForestDecorSite): ForestDecor {
     });
   }
 
+  // Dense edge grass (opt-in): a second, tighter pass along the same smoothed rim. It runs after every existing
+  // draw and takes all of its numbers from its own PRNG, so nothing earlier (and no other level's output) changes.
+  // Stamps straddle the rim: some sit `outward` px on the grass side, the rest `inward` px over the dirt edge.
+  const denseBand: ForestDecorProp[] = [];
+  if (site.denseEdgeGrass) {
+    const spec = site.denseEdgeGrass;
+    const denseRand = createForestRandom((site.seed ^ DENSE_EDGE_SEED_XOR) >>> 0);
+    const denseBetween = (min: number, max: number) => min + (max - min) * denseRand();
+    const denseGrassTexture = () => FOREST_DECOR_TEXTURES.roadsideGrass[Math.floor(denseRand() * FOREST_DECOR_TEXTURES.roadsideGrass.length)];
+    const denseAllowed = (p: ForestPoint): boolean => p.x >= 8 && p.x <= 632 && p.y >= 96 && p.y <= 336
+      && spots.every((s) => Math.hypot(s.x - p.x, s.y - p.y) >= spec.markClearance)
+      && !site.keepClearRects.some((r) => pointInForestRect(p, r))
+      && !spec.keepClearRects.some((r) => pointInForestRect(p, r))
+      && site.solids.every((r) => distanceToRect(p, r) >= DENSE_EDGE_SOLID_CLEARANCE);
+    for (const polygon of paths) {
+      const samples = resampleClosed(polygon, spec.step);
+      for (let index = 0; index < samples.length; index += 1) {
+        const p = samples[index];
+        const previous = samples[(index - 1 + samples.length) % samples.length];
+        const next = samples[(index + 1) % samples.length];
+        const tangentX = next.x - previous.x;
+        const tangentY = next.y - previous.y;
+        const tangentLength = Math.hypot(tangentX, tangentY);
+        if (tangentLength === 0) continue;
+        // Outward normal. Its sign is decided by pointInPolygon instead of assuming the polygon winding.
+        let nx = -tangentY / tangentLength;
+        let ny = tangentX / tangentLength;
+        if (pointInPolygon({ x: p.x + nx * 2, y: p.y + ny * 2 }, polygon)) { nx = -nx; ny = -ny; }
+        // Every random draw happens for both sides of every sample, so rejecting a stamp cannot reshuffle the band.
+        const outwardDistance = denseBetween(spec.outward[0], spec.outward[1]);
+        const inwardDistance = denseBetween(spec.inward[0], spec.inward[1]);
+        const outwardTexture = denseGrassTexture();
+        const inwardTexture = denseGrassTexture();
+        const outwardFlipX = denseRand() < 0.5;
+        const inwardFlipX = denseRand() < 0.5;
+        const outwardScale = round2(denseBetween(DENSE_EDGE_SCALE[0], DENSE_EDGE_SCALE[1]));
+        const inwardScale = round2(denseBetween(DENSE_EDGE_SCALE[0], DENSE_EDGE_SCALE[1]));
+        const push = (q: ForestPoint, texture: string, flipX: boolean, scale: number) => {
+          if (!denseAllowed(q)) return;
+          denseBand.push({ texture, x: q.x, y: q.y, depth: EDGE_GRASS_DEPTH, flipX, scale, alpha: EDGE_GRASS_ALPHA, tint: DENSE_EDGE_GRASS_TINT });
+        };
+        const outside: ForestPoint = { x: round1(p.x + nx * outwardDistance), y: round1(p.y + ny * outwardDistance) };
+        if (!pointInPolygon(outside, polygon)) push(outside, outwardTexture, outwardFlipX, outwardScale);
+        const inside: ForestPoint = { x: round1(p.x - nx * inwardDistance), y: round1(p.y - ny * inwardDistance) };
+        if (pointInPolygon(inside, polygon)) push(inside, inwardTexture, inwardFlipX, inwardScale);
+      }
+    }
+  }
+
   return {
     paths,
     mottling: { shadows, moss },
@@ -362,6 +445,9 @@ export function buildForestDecor(site: ForestDecorSite): ForestDecor {
     sideTrees,
     frontBushes,
     groundCover: { tufts, mushrooms },
-    pathEdge: { tufts: edgeTufts, shadows: edgeShadows },
+    // The dense band is only part of the object when the site opts in, so other levels keep their exact JSON shape.
+    pathEdge: site.denseEdgeGrass
+      ? { tufts: edgeTufts, shadows: edgeShadows, denseTufts: denseBand }
+      : { tufts: edgeTufts, shadows: edgeShadows },
   };
 }
