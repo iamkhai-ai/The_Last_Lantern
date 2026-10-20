@@ -3,7 +3,7 @@ import { getLevelArtKey, getLevelBackgroundKey, getShadowArtKey } from '../art/C
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
-import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
+import { activateWoodsRune, canActivateWoodsRune, fitWoodsRuneArt, getWoodsTutorialStage, isWoodsStoneInReach, normalizeRuneProgress, resolveWoodsSpawn, RUNE_ORDER, WHISPERING_WOODS, WOODS_POEM_ART, WOODS_RUNE_ART, WOODS_RUNE_BODY_FIT, worldDepth as woodsDepth, type RuneId, type WoodsStoneId, type WoodsTutorialStage } from '../data/whisperingWoodsLayout';
 import { buildWoodsDecor } from '../data/whisperingWoodsDecor';
 import { buildForestEdgeDecor } from '../data/forestEdgeDecor';
 import { FOREST_ART_ORIGIN, FOREST_DECOR_TEXTURES, FOREST_MOSS_COLOR, FOREST_MOTTLE_COLOR, type ForestDecor } from '../data/forestDecor';
@@ -1917,7 +1917,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private registerLevel(level: number): void {
-    const action = (id: string, label: string | (() => string), x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone') => this.addAction(id, label, x, y, fn, enabled, texture);
+    const action = (id: string, label: string | (() => string), x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean) => this.addAction(id, label, x, y, fn, enabled, texture, isInReach);
     if (level === 0) {
       action('lamp', 'E · Nhận đèn lồng', FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
         this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; this.lantern.lanternOn = false;
@@ -1952,11 +1952,15 @@ export class CampaignScene extends Phaser.Scene {
       }, () => true, 'woods_arch_open');
     } else if (level === 1) {
       const stands=WHISPERING_WOODS.stands;
+      // RULE_GAMES.md §3 exception (2026-10-20): the poem and the three rune stones answer E from every
+      // side their foot body can touch, not only from the south stand. The stand still anchors the prompt
+      // and breaks ties, and each control keeps its existing enabled/label gating untouched.
+      const stoneReach = (id: WoodsStoneId) => (playerX: number, playerY: number) => isWoodsStoneInReach(id, { x: playerX, y: playerY });
       action('poem', 'E · Đọc mẩu bia thơ', stands.poem.x, stands.poem.y, () => {
         const first=!this.progress.flags['l1-poem-read']; this.progress.flags['l1-poem-read']=true; this.save();
         this.say(first ? [{speaker:'Hệ thống',text:'Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.'},{speaker:'Nhinh',text:'Trăng, Lá, Sao. Ba hình này cũng có ở bia ngoài kia.'},{speaker:'Lumo',text:'Nếu còn thấy được chúng. Nét khắc đã ngủ lâu lắm rồi.'},{speaker:'Lumo',text:'Ba bia nằm trong khoảng đất trống phía trước. Dùng SPACE gần bia để soi nét khắc, rồi chạm bia sáng bằng E.'}] : [{speaker:'Hệ thống',text:'Trăng đặt giọt bạc lên lá. Lá đưa lời thì thầm lên sao. Sao khép vòng trời, chờ một sớm mai.'}]);
-      }, undefined, 'mural_tablet');
-      for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`);
+      }, undefined, 'mural_tablet', stoneReach('poem'));
+      for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`, stoneReach(id));
       action('stairs', () => this.progress.flags['l1-open'] ? 'E · Xuống Thư viện' : 'E · Kiểm tra cổng', stands.exit.x, stands.exit.y, () => {
         if (!this.progress.flags['l1-open']) { this.say([{speaker:'Nhinh',text:'Rễ cây vẫn quấn kín lối xuống.'},{speaker:'Lumo',text:'Cổng đang chờ điều gì đó được nhớ lại.'}]); return; }
         this.nextLevel([{speaker:'Nhinh',text:'Có một căn phòng dưới gốc cây.'},{speaker:'Lumo',text:'Thư viện. Tôi nhớ từ đó.'},{speaker:'Nhinh',text:'Vậy xuống xem rừng đã ghi lại những gì.'}]);
@@ -2229,7 +2233,7 @@ export class CampaignScene extends Phaser.Scene {
     return { x: 350, y: 260 };
   }
 
-  private addAction(id: string, label: string | (() => string), x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone'): void {
+  private addAction(id: string, label: string | (() => string), x: number, y: number, onInteract: () => void, isEnabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean): void {
     if ((id.includes('exit') || id === 'stairs') && this.progress.level !== 1) {
       const hasGateProp = this.objects.some((object) =>
         object instanceof Phaser.GameObjects.Image
@@ -2242,7 +2246,7 @@ export class CampaignScene extends Phaser.Scene {
       );
       if (!hasGateProp) this.addProp(texture, x, y, 0.8);
     }
-    this.interactions.register({ id, x, y, getPromptBounds: this.getActionPromptBounds(id, x, y), radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()) });
+    this.interactions.register({ id, x, y, getPromptBounds: this.getActionPromptBounds(id, x, y), radius: this.progress.level === 0 || this.progress.level === 1 ? 24 : 35, getPrompt: () => isEnabled() ? (typeof label === 'function' ? label() : label) : null, onInteract, isEnabled: () => Boolean(isEnabled()), ...(isInReach ? { isInReach } : {}) });
   }
 
   private getActionPromptBounds(id: string, x: number, y: number): (() => { x: number; y: number; width: number; height: number } | null) | undefined {

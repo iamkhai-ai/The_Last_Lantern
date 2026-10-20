@@ -492,6 +492,61 @@ const CASES = [
     },
   },
   {
+    name: 'is_in_reach_replaces_the_radius_on_prompt_and_press',
+    run: () => {
+      // A control with its own approach shape: the shipped update() and tryInteract() must both consult it,
+      // and a control without one must keep the padded radius untouched (asserted right below).
+      let inReach = true;
+      const hits = { value: 0 };
+      const stone = {
+        id: 'stone', x: 200, y: 200, radius: 20,
+        getPrompt: () => 'E · Cổ tự',
+        isEnabled: () => true,
+        isInReach: () => inReach,
+        onInteract: () => { hits.value += 1; },
+      };
+      const system = makeSystem([stone]);
+
+      // 50px from the anchor: far outside the 20+8px radius, but the control's own predicate says yes.
+      assert.equal(selectWith(system, 250, 200), 'stone',
+        'the prompt is shown where isInReach() is true, even outside the padded radius');
+      assert.equal(system.promptContainer.visible, true, 'the prompt really renders for the opted-in control');
+      assert.equal(system.tryInteract(0), true, 'the same prompt is accepted on E');
+      assert.equal(hits.value, 1, 'the action ran once');
+
+      // Inside the radius but outside the predicate: the control is not advertised, so the radius really is
+      // replaced rather than OR-ed with the new approach.
+      inReach = false;
+      assert.equal(selectWith(system, 202, 200), null,
+        'a control whose isInReach() is false is not advertised even inside its padded radius');
+      assert.equal(system.promptContainer.visible, false, 'no prompt is shown outside the predicate');
+
+      // A predicate that goes false between update() and E must refuse the press on its own: no second
+      // update() runs here, so only the re-validation inside tryInteract() can catch it.
+      inReach = true;
+      assert.equal(selectWith(system, 250, 200), 'stone', 'the control is advertised again inside its predicate');
+      inReach = false;
+      assert.equal(system.tryInteract(1000), false, 'a press after the predicate goes false is refused');
+      assert.equal(system.activeTarget, null, 'the refused press clears the stale target');
+      assert.equal(hits.value, 1, 'the refused press runs no action');
+
+      // ...and the predicate being true again is accepted, because the press re-reads it live.
+      inReach = true;
+      system.update(250, 200, true);
+      assert.equal(system.tryInteract(2000), true, 'the press re-validates the live predicate, not a cached radius');
+
+      // A control without isInReach is untouched: the same 50px position is out of its radius.
+      const plain = {
+        id: 'plain', x: 200, y: 200, radius: 20, getPrompt: () => 'E · Vật', isEnabled: () => true,
+        onInteract: () => { hits.value += 100; },
+      };
+      assert.equal(selectWith(makeSystem([plain]), 250, 200), null,
+        'a control without isInReach still uses the padded radius');
+      assert.equal(selectWith(makeSystem([plain]), 220, 200), 'plain',
+        'and is unchanged at its own radius boundary');
+    },
+  },
+  {
     name: 'invalid_candidates_are_never_selected',
     run: () => {
       const owner = (extra) => {

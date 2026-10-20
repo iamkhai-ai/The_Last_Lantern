@@ -66,7 +66,11 @@ export class InteractionSystem {
       if (!label) continue;
 
       const dist = Math.hypot(playerX - item.x, playerY - item.y);
-      if (dist > effectiveRadius(item)) continue;
+      // A control that owns its own approach shape (a stone answered from all four sides) replaces the
+      // radial test with its predicate; every control without one keeps the padded radius exactly as before.
+      // `dist` is still measured: it orders candidates that are both in reach.
+      const inReach = item.isInReach ? item.isInReach(playerX, playerY) === true : dist <= effectiveRadius(item);
+      if (!inReach) continue;
 
       // Among the candidates that already pass the gates above, a control that owns the standing
       // position keeps it even when a neighbouring prop is nearer. Controls that do not opt in are
@@ -109,11 +113,14 @@ export class InteractionSystem {
     if (!this.activeTarget) return false;
     const target = this.activeTarget;
     // The press re-validates the whole approach condition the prompt and the selection agreed on:
-    // enabled, a live prompt, the radius, and — for a control that owns the standing position —
-    // that the feet are still inside it. A state change between update() and E can never fire a
-    // control the player has already left or that has since gone quiet.
+    // enabled, a live prompt, the range (the control's own `isInReach` when it opts in, else the padded
+    // radius), and — for a control that owns the standing position — that the feet are still inside it.
+    // A state change between update() and E can never fire a control the player has already left or that
+    // has since gone quiet.
     const disabled = target.isEnabled ? !target.isEnabled() : false;
-    const outOfRange = Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > effectiveRadius(target);
+    const outOfRange = target.isInReach
+      ? target.isInReach(this.lastPlayerPosition.x, this.lastPlayerPosition.y) !== true
+      : Math.hypot(this.lastPlayerPosition.x - target.x, this.lastPlayerPosition.y - target.y) > effectiveRadius(target);
     const lostOwnership = target.ownsPosition
       ? target.ownsPosition(this.lastPlayerPosition.x, this.lastPlayerPosition.y) !== true
       : false;

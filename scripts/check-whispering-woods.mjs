@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {
   WHISPERING_WOODS, WOODS_RUNE_ART, WOODS_POEM_ART, WOODS_RUNE_BODY_FIT, fitWoodsRuneArt, WOODS_RUNE_PROMPT_OFFSET_Y, WOODS_POEM_PROMPT_OFFSET_Y,
-  RUNE_ORDER, feetAt, getWoodsTutorialStage, isWoodsCenterWalkable, isWoodsPointSafe,
+  RUNE_ORDER, feetAt, getWoodsTutorialStage, isWoodsCenterWalkable, isWoodsPointSafe, isWoodsStoneInReach, woodsFootBody,
+  WOODS_STONE_REACH_PADDING, WOODS_STONE_APPROACH_RADIUS,
   resolveWoodsSpawn, normalizeRuneProgress, activateWoodsRune, canActivateWoodsRune,
 } from '../src/data/whisperingWoodsLayout.ts';
 
@@ -10,16 +11,16 @@ assert.deepEqual(WHISPERING_WOODS.player.body, { width: 14, height: 6, offsetX: 
 assert.deepEqual(WHISPERING_WOODS.stands.spawn,{x:136,y:286});
 assert.deepEqual(WHISPERING_WOODS.anchors.poem,{x:136,y:270});
 assert.deepEqual(WHISPERING_WOODS.stands.poem,{x:136,y:276});
-assert.deepEqual(WHISPERING_WOODS.footprints.poem,{x:102,y:256,width:68,height:14});
+assert.deepEqual(WHISPERING_WOODS.footprints.poem,{x:102,y:246,width:68,height:24});
 assert.deepEqual(WHISPERING_WOODS.anchors.moon,{x:232,y:242});
 assert.deepEqual(WHISPERING_WOODS.stands.moon,{x:232,y:248});
-assert.deepEqual(WHISPERING_WOODS.footprints.moon,{x:219,y:230,width:26,height:12});
+assert.deepEqual(WHISPERING_WOODS.footprints.moon,{x:215,y:218,width:34,height:24});
 assert.deepEqual(WHISPERING_WOODS.anchors.leaf,{x:326,y:174});
 assert.deepEqual(WHISPERING_WOODS.stands.leaf,{x:326,y:180});
-assert.deepEqual(WHISPERING_WOODS.footprints.leaf,{x:313,y:162,width:26,height:12});
+assert.deepEqual(WHISPERING_WOODS.footprints.leaf,{x:309,y:150,width:34,height:24});
 assert.deepEqual(WHISPERING_WOODS.anchors.star,{x:408,y:266});
 assert.deepEqual(WHISPERING_WOODS.stands.star,{x:408,y:272});
-assert.deepEqual(WHISPERING_WOODS.footprints.star,{x:395,y:254,width:26,height:12});
+assert.deepEqual(WHISPERING_WOODS.footprints.star,{x:391,y:242,width:34,height:24});
 assert.deepEqual(Object.keys(WHISPERING_WOODS.footprints).sort(),['leaf','moon','poem','star']);
 assert.equal('practice' in WHISPERING_WOODS.anchors,false,'runtime layout has no practice stone');
 assert.equal(Math.hypot(WHISPERING_WOODS.stands.spawn.x-WHISPERING_WOODS.stands.poem.x,WHISPERING_WOODS.stands.spawn.y-WHISPERING_WOODS.stands.poem.y)<=24,true,'fresh spawn starts inside poem interaction range');
@@ -100,6 +101,108 @@ for(const id of ['moon','leaf','star','poem']){
   const offset=id==='poem'?WOODS_POEM_PROMPT_OFFSET_Y:WOODS_RUNE_PROMPT_OFFSET_Y;
   assert.equal(anchor.y+offset<stand.y-20,true,`${id} prompt stays above the actor head`);
 }
+/* ------------------------------------------------------------------ *
+ * Level 02 stones: thick solid base + [E] from every side (RULE_GAMES §3)
+ * ------------------------------------------------------------------ */
+// Measured alpha>=96 bodies of the shipped art (Pillow, source pixels):
+//   runestone_{moon,leaf,star}_sleeping.png  40x52 canvas, body 25x39 at (8,5)-(32,43)
+//   runestone_*_revealed/_active             body 21..25 x 33..40, normalised to a 39px body by fitWoodsRuneArt
+//   poem_fragment.png                        48x40 canvas, body 27x20 at (11,13)-(37,32)
+// Runes are displayed at 1.5x (60x78) and the poem at 2x (96x80); the fitted rune body is 39px and the
+// poem's on-screen body is 40px, so a 24px-deep footprint is 60-62% of that body.
+const stoneIds = ['poem', 'moon', 'leaf', 'star'];
+const runeIds = ['moon', 'leaf', 'star'];
+for (const id of stoneIds) {
+  const anchor = WHISPERING_WOODS.anchors[id], fp = WHISPERING_WOODS.footprints[id];
+  assert.equal(fp.y + fp.height, anchor.y, `${id} footprint south edge stays on the anchor y`);
+  assert.equal(fp.x + fp.width / 2, anchor.x, `${id} footprint stays centred on the anchor x`);
+  assert.ok(fp.height >= 22 && fp.height <= 26, `${id} footprint depth ${fp.height} is the 22-26px band`);
+  const fittedBody = id === 'poem' ? 20 * 2 : WOODS_RUNE_BODY_FIT.height;
+  assert.ok(fp.height / fittedBody >= 0.55 && fp.height / fittedBody <= 0.65,
+    `${id} depth ${fp.height} covers 55-65% of the ${fittedBody}px visible body`);
+  if (id === 'poem') {
+    assert.ok(fp.width >= 27 * 2, `${id} footprint width ${fp.width} covers the measured 54px visible base`);
+  } else {
+    assert.ok(fp.width >= 30 && fp.width <= 34, `${id} footprint width ${fp.width} matches the 30-34px visible base`);
+    // The measured on-screen body widest row is 37.5px; the footprint matches the narrower visible *base*
+    // (20-23 source px x 1.5 = 30-34.5px), which is what the east/west approach has to cover.
+    assert.ok(fp.width / 1.5 >= 20 && fp.width / 1.5 <= 23, `${id} footprint width ${fp.width} is the measured base band`);
+  }
+}
+assert.deepEqual(stoneIds.slice(1), [...RUNE_ORDER], 'the three rune stones are the puzzle runes');
+
+const rectGap = (a, b) => Math.hypot(
+  Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0),
+  Math.max(a.y - (b.y + b.height), b.y - (a.y + a.height), 0),
+);
+const contactCenter = (id, side) => {
+  // The foot body spans center.y+16..center.y+22, so side contacts line that 6px span up with the footprint.
+  const fp = WHISPERING_WOODS.footprints[id], midY = fp.y + fp.height / 2 - 19;
+  if (side === 'north') return { x: fp.x + fp.width / 2, y: fp.y - 22 };              // foot body bottom on the north edge
+  if (side === 'south') return { x: fp.x + fp.width / 2, y: fp.y + fp.height - 16 };  // foot body top on the south edge
+  if (side === 'west') return { x: fp.x - 7, y: midY };                               // foot body right on the west edge
+  return { x: fp.x + fp.width + 7, y: midY };                                         // foot body left on the east edge
+};
+/** A walkable position 30px+ from the footprint and clear of the authored south approach. */
+const farProbe = (id, side) => {
+  const fp = WHISPERING_WOODS.footprints[id], stand = WHISPERING_WOODS.stands[id];
+  const base = contactCenter(id, side);
+  const normal = { north: { x: 0, y: -1 }, south: { x: 0, y: 1 }, west: { x: -1, y: 0 }, east: { x: 1, y: 0 } }[side];
+  const tangent = { x: normal.y, y: normal.x };
+  for (const lateral of [0, 40, -40, 80, -80]) {
+    for (let out = 30; out <= 80; out += 2) {
+      const p = { x: base.x + normal.x * out + tangent.x * lateral, y: base.y + normal.y * out + tangent.y * lateral };
+      if (!isWoodsCenterWalkable(p)) continue;
+      if (rectGap(woodsFootBody(p), fp) < 30) continue;
+      if (Math.hypot(p.x - stand.x, p.y - stand.y) <= WOODS_STONE_APPROACH_RADIUS + 1) continue;
+      return p;
+    }
+  }
+  return null;
+};
+for (const id of stoneIds) {
+  for (const side of ['north', 'east', 'west', 'south']) {
+    const contact = contactCenter(id, side);
+    assert.equal(isWoodsCenterWalkable(contact), true, `${id} ${side} contact is a walkable standing position`);
+    assert.ok(rectGap(woodsFootBody(contact), WHISPERING_WOODS.footprints[id]) <= 0.001,
+      `${id} ${side} contact really touches the footprint`);
+    assert.equal(isWoodsStoneInReach(id, contact), true, `${id} answers E from ${side} contact`);
+    const far = farProbe(id, side);
+    assert.ok(far, `${id} ${side} has a walkable probe 30px+ away`);
+    assert.ok(Math.hypot(far.x - WHISPERING_WOODS.stands[id].x, far.y - WHISPERING_WOODS.stands[id].y) > WOODS_STONE_APPROACH_RADIUS,
+      `${id} ${side} far probe is outside the authored approach`);
+    assert.equal(isWoodsStoneInReach(id, far), false,
+      `${id} is out of reach 30px+ away on the ${side} (${far.x},${far.y})`);
+    console.log(`      ${id} ${side}: contact (${contact.x},${contact.y}) reach=true, far (${far.x},${far.y}) reach=false`
+      + `, gap ${rectGap(woodsFootBody(far), WHISPERING_WOODS.footprints[id]).toFixed(1)}px`);
+  }
+  // The authored south approach is kept: the level plays from these stands, not only from contact.
+  assert.equal(isWoodsCenterWalkable(WHISPERING_WOODS.stands[id]), true, `${id} stand stays walkable`);
+  assert.equal(isWoodsStoneInReach(id, WHISPERING_WOODS.stands[id]), true, `${id} answers E at its authored stand`);
+}
+// Reach is a ~10-12px band, so it cannot answer across the stones or from the exit.
+assert.equal(WOODS_STONE_REACH_PADDING >= 10 && WOODS_STONE_REACH_PADDING <= 12, true, 'reach padding is 10-12px');
+for (const id of stoneIds) {
+  for (const other of stoneIds.filter((candidate) => candidate !== id)) {
+    assert.equal(isWoodsStoneInReach(id, WHISPERING_WOODS.stands[other]), false,
+      `${id} never answers from the ${other} stand`);
+  }
+  assert.equal(isWoodsStoneInReach(id, WHISPERING_WOODS.stands.exit), false, `${id} never answers from the exit stairs`);
+  assert.ok(Math.hypot(contactCenter(id, 'north').x - WHISPERING_WOODS.stands.exit.x,
+    contactCenter(id, 'north').y - WHISPERING_WOODS.stands.exit.y) > 32, `${id} north contact is outside the exit radius`);
+}
+// Fresh spawn (136,286): the poem is the only prompt, exactly as before this change.
+assert.equal(isWoodsStoneInReach('poem', WHISPERING_WOODS.stands.spawn), true, 'the campaign spawn keeps the poem prompt');
+for (const id of runeIds) {
+  assert.equal(isWoodsStoneInReach(id, WHISPERING_WOODS.stands.spawn), false, `the spawn does not advertise ${id}`);
+}
+// The exit route and the firefly route are untouched, and every waypoint the player walks on is still legal.
+assert.deepEqual(WHISPERING_WOODS.fireflyRoute, RUNE_ORDER.map((id) => WHISPERING_WOODS.anchors[id]),
+  'the firefly route still flies rune anchor to rune anchor');
+for (const waypoint of WHISPERING_WOODS.route) {
+  assert.equal(isWoodsCenterWalkable(waypoint, true), true, `route waypoint (${waypoint.x},${waypoint.y}) stays walkable`);
+}
+
 const tutorial=(patch={})=>getWoodsTutorialStage({open:false,sequence:0,poemRead:false,...patch});
 assert.equal(tutorial(),'poem','fresh entry guides the player to read first');
 assert.equal(tutorial({practiceComplete:true,practiceRevealed:true}),'poem','legacy practice flags do not alter the poem-first stage');
