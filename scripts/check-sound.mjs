@@ -1,6 +1,6 @@
 ﻿// Sound Effect Lab integration checks. Run: node scripts/check-sound.mjs
 // Covers the SFX manifest, the procedural fallback order, mute gating and the
-// single-instance footstep/ambience loops that replaced the per-step playback.
+// single-step footsteps (cut from the recorded beds and played on the footfalls) and the ambience loop.
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -59,8 +59,11 @@ class FakeSound {
     this.destroyed = false;
     this.plays = 0;
     this.stops = 0;
+    this.markers = [];
+    this.played = [];
   }
-  play() { this.isPlaying = true; this.plays += 1; return true; }
+  addMarker(marker) { this.markers.push(marker); return true; }
+  play(marker, config) { this.isPlaying = true; this.plays += 1; if (marker !== undefined) this.played.push({ marker, config }); return true; }
   stop() { this.isPlaying = false; this.stops += 1; return this; }
   destroy() { this.isPlaying = false; this.destroyed = true; return this; }
 }
@@ -171,55 +174,92 @@ await test('one-shots prefer the loaded file and skip the procedural tone', asyn
 
 // --- footsteps ---------------------------------------------------------------
 
-await test('footsteps are one looping instance that follows movement', () => {
+await test('a footstep is one cut step, not a loop, and never repeats back to back', () => {
   const Sound = loadSoundSystem();
   const manager = new FakeManager();
   Sound.setSoundManager(manager);
   Sound.registerLoadedKey('footstep_grass');
   Sound.registerLoadedKey('footstep_soil');
 
-  Sound.setWalking(true);
-  assert.equal(manager.added.length, 1, 'one footstep instance');
-  assert.equal(manager.added[0].key, 'footstep_grass');
-  assert.equal(manager.added[0].loop, true, 'footstep bed loops');
-  assert.equal(manager.added[0].isPlaying, true);
+  Sound.playFootstep();
+  assert.equal(manager.added.length, 3, 'a small pool of voices, built once');
+  assert.ok(manager.added.every(v => v.key === 'footstep_grass' && v.loop === false), 'grass voices, no loop');
+  assert.ok(manager.added.every(v => v.markers.length > 8), 'every voice knows every cut step');
+  assert.ok(manager.added.every(v => v.markers.every(m => m.duration > 0.2 && m.duration < 0.5 && m.start >= 0)), 'steps are short slices');
+  const played = () => manager.added.flatMap(v => v.played);
+  assert.equal(played().length, 1, 'one call plays exactly one step');
+  assert.match(played()[0].marker, /^step\d+$/);
 
-  Sound.setWalking(true);
-  Sound.setWalking(true);
-  assert.equal(manager.added.length, 1, 'repeated walking frames do not stack voices');
-
-  Sound.setWalking(false);
-  assert.equal(manager.added[0].isPlaying, false, 'stopping player stops the bed');
-  assert.equal(manager.added[0].destroyed, true, 'instance released');
-  Sound.setWalking(false);
-  assert.equal(manager.added.length, 1, 'idle frames stay quiet');
+  for (let i = 0; i < 40; i += 1) Sound.playFootstep(i % 2 === 0);
+  assert.equal(manager.added.length, 3, 'many steps never add voices');
+  const sequence = manager.added.flatMap(v => v.played.map(p => p.marker));
+  assert.equal(played().length, 41);
+  const voicesUsed = manager.added.filter(v => v.played.length > 0).length;
+  assert.equal(voicesUsed, 3, 'steps rotate over the voices so a quick step keeps the previous tail');
+  const byTime = []; // reconstruct the call order from the rotation: voice k plays calls k, k+3, k+6, ...
+  for (let call = 0; call < 41; call += 1) byTime.push(manager.added[call % 3].played[Math.floor(call / 3)].marker);
+  for (let i = 1; i < byTime.length; i += 1) assert.notEqual(byTime[i], byTime[i - 1], 'the same cut step never plays twice in a row');
+  assert.ok(new Set(sequence).size > 4, 'steps vary');
 });
 
-await test('footstep surface swap rebuilds the bed exactly once', () => {
+await test('walking is softer and lower than running, and both stay audible', () => {
+  const Sound = loadSoundSystem();
+  const manager = new FakeManager();
+  Sound.setSoundManager(manager);
+  Sound.registerLoadedKey('footstep_grass');
+  const volumes = { walk: [], run: [] };
+  const rates = { walk: [], run: [] };
+  for (let i = 0; i < 60; i += 1) {
+    for (const mode of ['walk', 'run']) {
+      Sound.playFootstep(mode === 'run');
+      const last = manager.added.flatMap(v => v.played).at(-1);
+      volumes[mode].push(last.config.volume);
+      rates[mode].push(last.config.rate);
+    }
+  }
+  const mean = list => list.reduce((a, b) => a + b, 0) / list.length;
+  assert.ok(mean(volumes.run) > mean(volumes.walk), 'running is louder');
+  assert.ok(mean(rates.run) > mean(rates.walk), 'running is higher in pitch');
+  assert.ok(Math.min(...volumes.walk) > 0.3, 'a walking step is never nearly silent');
+  assert.ok(Math.max(...volumes.run) <= 1, 'volumes stay within range');
+});
+
+await test('footsteps follow the level surface', () => {
   const Sound = loadSoundSystem();
   const manager = new FakeManager();
   Sound.setSoundManager(manager);
   Sound.registerLoadedKey('footstep_grass');
   Sound.registerLoadedKey('footstep_soil');
 
-  Sound.setWalking(true);
+  Sound.playFootstep();
   Sound.setFootstepSurface('soil');
-  assert.equal(manager.added.length, 2, 'grass bed replaced by soil bed');
-  assert.equal(manager.added[0].isPlaying, false, 'grass bed stopped');
-  assert.equal(manager.added[1].key, 'footstep_soil');
-  assert.equal(manager.added[1].isPlaying, true, 'soil bed playing while walking');
-
-  Sound.setWalking(false);
+  Sound.playFootstep();
+  assert.equal(manager.added.length, 6, 'a pool per surface');
+  assert.equal(manager.added.filter(v => v.key === 'footstep_soil').length, 3);
   Sound.setFootstepSurface('grass');
-  assert.equal(manager.added.length, 2, 'surface change while idle starts nothing');
+  Sound.playFootstep();
+  assert.equal(manager.added.length, 6, 'going back reuses the grass pool');
 });
 
-await test('footsteps stay silent without the surface file', () => {
+await test('footsteps stay silent without the surface file, when muted, and after shutdown release', () => {
   const Sound = loadSoundSystem();
   const manager = new FakeManager();
   Sound.setSoundManager(manager);
-  Sound.setWalking(true);
-  assert.equal(manager.added.length, 0, 'no bed when footstep_grass is missing');
+  Sound.playFootstep();
+  assert.equal(manager.added.length, 0, 'nothing without footstep_grass');
+
+  Sound.registerLoadedKey('footstep_grass');
+  Sound.playFootstep();
+  const voices = [...manager.added];
+  assert.equal(voices.length, 3);
+  Sound.stopFootsteps();
+  assert.ok(voices.every(v => v.destroyed), 'shutdown releases every voice');
+  Sound.playFootstep();
+  assert.equal(manager.added.length, 6, 'the next step rebuilds the voices');
+
+  Sound.toggleMute();
+  Sound.playFootstep();
+  assert.equal(manager.added.length, 6, 'muted: no new step');
 });
 
 // --- ambience ----------------------------------------------------------------
@@ -258,11 +298,12 @@ await test('ambience without its file stays silent instead of throwing', () => {
 
 // --- call sites --------------------------------------------------------------
 
-await test('player drives footsteps from movement and stops them when blocked', () => {
+await test('player plays a step when the body really moves, then on every other animation phase', () => {
   const playerSource = readFileSync(path.join(root, 'src/actors/Player.ts'), 'utf8');
-  assert.ok(!/playFootstep/.test(playerSource), 'per-step playback removed');
-  assert.ok(/SoundSystem\.setWalking\(moved\)/.test(playerSource), 'movement drives the bed');
-  assert.ok(/SoundSystem\.setWalking\(false\)/.test(playerSource), 'locked input stops the bed');
+  assert.ok(!/setWalking/.test(playerSource), 'the looping bed is gone');
+  assert.ok(/SoundSystem\.playFootstep\(isRunning\)/.test(playerSource), 'steps carry the running state');
+  assert.ok(/if \(!moved\) this\.stepping = false;[\s\S]{0,200}SoundSystem\.playFootstep/.test(playerSource), 'a first step once the body moves');
+  assert.ok(/this\.stepTick >= 2[\s\S]{0,120}if \(moved\) SoundSystem\.playFootstep/.test(playerSource), 'then one every two phases, only while moving');
   assert.ok(/lastX/.test(playerSource) && /lastY/.test(playerSource), 'real displacement is measured');
 });
 

@@ -1,13 +1,31 @@
 export type FootstepSurface = 'grass' | 'soil';
 
+/**
+ * The curated footstep files are 17-21 s recordings of a slow walk (one step every 0.6 s), not single steps. Looping
+ * them could not follow the character's feet (a foot plants every ~0.3 s walking and ~0.22 s running), and at the old
+ * volume they were barely audible. Single steps are cut out of them as markers and played one at a time, on the
+ * animation's footfalls, with a little variation. Each entry is [start of the step's transient in seconds, its level
+ * relative to the loudest step in the file]; the quiet or doubled steps were left out.
+ */
+const FOOTSTEP_STEPS: Record<FootstepSurface, ReadonlyArray<readonly [number, number]>> = {
+  grass: [[0.016, 0.58], [0.616, 0.61], [1.228, 0.93], [1.836, 0.98], [2.436, 0.79], [3.024, 0.65], [4.228, 0.84], [4.824, 0.86], [5.42, 0.97], [6.624, 0.58], [7.212, 0.77], [7.816, 0.81]],
+  soil: [[0.008, 0.59], [0.608, 0.85], [1.192, 0.58], [1.808, 0.63], [2.4, 0.68], [3.608, 0.75], [5.412, 0.58], [6.0, 0.85], [6.604, 0.75], [7.208, 0.85], [7.796, 0.67]],
+};
+/** Seconds kept before a step's transient, and the length of one cut step. */
+const FOOTSTEP_PRE_ROLL = 0.02;
+const FOOTSTEP_LENGTH = 0.34;
+/** Steps rotate over a few voices so a quick step never cuts the tail of the previous one. */
+const FOOTSTEP_VOICES = 3;
+
 export class SoundSystem {
   private static ctx: AudioContext | null = null;
   private static muted = false;
   private static soundManager: Phaser.Sound.BaseSoundManager | null = null;
   private static loadedKeys = new Set<string>();
-  private static walking = false;
   private static footstepSurface: FootstepSurface = 'grass';
-  private static footstepSound: Phaser.Sound.BaseSound | null = null;
+  private static footstepVoices = new Map<FootstepSurface, Phaser.Sound.BaseSound[]>();
+  private static footstepNext = 0;
+  private static lastStep = -1;
   private static ambientKey: string | null = null;
   private static ambientSound: Phaser.Sound.BaseSound | null = null;
 
@@ -68,51 +86,58 @@ export class SoundSystem {
     }
   }
 
-  /**
-   * The curated footstep files are 17-21 s walking beds, not single steps.
-   * Playing them per step stacked dozens of voices, so one looping instance
-   * now follows real movement and stops when the player stops.
-   */
   public static setFootstepSurface(surface: FootstepSurface): void {
-    if (this.footstepSurface === surface) return;
     this.footstepSurface = surface;
-    if (!this.walking) return;
-    this.stopFootsteps();
-    this.startFootstepLoop();
   }
 
-  public static setWalking(walking: boolean): void {
-    const unchanged = this.walking === walking;
-    this.walking = walking;
-    if (!walking) {
-      this.stopFootsteps();
-      return;
-    }
-    if (unchanged && this.footstepSound?.isPlaying) return;
-    this.startFootstepLoop();
-  }
-
-  private static startFootstepLoop(): void {
-    if (!this.soundManager) return;
+  /**
+   * One footstep, to be called on the feet's plants (see Player). A step is picked at random but never the same one
+   * twice in a row, with a small change of volume and pitch; running is a little louder and higher.
+   */
+  public static playFootstep(running = false): void {
+    if (this.muted || !this.soundManager) return;
     const key = `footstep_${this.footstepSurface}`;
-    if (!this.loadedKeys.has(key) || this.footstepSound?.isPlaying) return;
+    if (!this.loadedKeys.has(key)) return;
+    const steps = FOOTSTEP_STEPS[this.footstepSurface];
     try {
-      this.footstepSound = this.soundManager.add(key, { loop: true, volume: 0.22 });
-      this.footstepSound.play();
+      let voices = this.footstepVoices.get(this.footstepSurface);
+      if (!voices) {
+        voices = [];
+        for (let v = 0; v < FOOTSTEP_VOICES; v += 1) {
+          const sound = this.soundManager.add(key);
+          steps.forEach(([start], index) => {
+            sound.addMarker({ name: `step${index}`, start: Math.max(0, start - FOOTSTEP_PRE_ROLL), duration: FOOTSTEP_LENGTH });
+          });
+          voices.push(sound);
+        }
+        this.footstepVoices.set(this.footstepSurface, voices);
+      }
+      let index = Math.floor(Math.random() * steps.length);
+      if (index === this.lastStep) index = (index + 1) % steps.length;
+      this.lastStep = index;
+      // Even out the recorded steps (0.58-0.98 of the loudest) so the loudness varies only by the random part below.
+      const evenOut = Math.min(1.3, Math.max(0.85, 0.8 / steps[index][1]));
+      const volume = (running ? 0.55 : 0.45) * evenOut * (0.9 + Math.random() * 0.2);
+      const rate = (running ? 1.1 : 1) * (0.96 + Math.random() * 0.08);
+      const voice = voices[this.footstepNext];
+      this.footstepNext = (this.footstepNext + 1) % voices.length;
+      voice.play(`step${index}`, { volume, rate });
     } catch {
-      this.footstepSound = null;
+      // A footstep is never worth an error in the game loop.
     }
   }
 
+  /** Releases the footstep voices (scene shutdown); the next step rebuilds them. */
   public static stopFootsteps(): void {
-    const sound = this.footstepSound;
-    this.footstepSound = null;
-    if (!sound) return;
-    try {
-      sound.stop();
-      sound.destroy();
-    } catch {
-      // Ignore teardown races when the scene is shutting down.
+    const all = [...this.footstepVoices.values()].flat();
+    this.footstepVoices.clear();
+    for (const sound of all) {
+      try {
+        sound.stop();
+        sound.destroy();
+      } catch {
+        // Ignore teardown races when the scene is shutting down.
+      }
     }
   }
 
