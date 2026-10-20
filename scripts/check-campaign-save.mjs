@@ -43,6 +43,7 @@ function fullSave() {
   return {
     version: 1,
     level: 8,
+    furthest: 8,
     flags: {
       'intro-8': true,
       'l8-door-a-latched': true,
@@ -716,6 +717,74 @@ const CASES = [
       assert.equal('l8-lumo-room' in completed.flags, false, 'the Lumo repair applies to the same save');
       const unfinished = loadRaw({ version: 1, level: 9, flags: { 'l9-ending-beat': 'bogus' }, counters: {}, lanternOn: false, lanternPickedUp: false });
       assert.equal('l9-ending-beat' in unfinished.flags, false, 'an invalid beat on an unfinished save is dropped');
+    },
+  },
+  {
+    name: 'furthest_old_save_without_the_key_reads_as_level',
+    run: () => {
+      const progress = loadRaw({ version: 1, level: 4, flags: {}, counters: {}, lanternOn: false, lanternPickedUp: true });
+      assert.equal(progress.furthest, 4, 'a save without furthest reads as its level');
+      assert.equal(store.has(BACKUP), false, 'a missing furthest is not a repair, so no backup');
+    },
+  },
+  {
+    name: 'furthest_below_level_is_raised_and_marked_repaired',
+    run: () => {
+      const progress = loadRaw({ version: 1, level: 5, furthest: 2, flags: {}, counters: {}, lanternOn: false, lanternPickedUp: true });
+      assert.equal(progress.furthest, 5, 'furthest below level is raised to level');
+      assert.equal(store.has(BACKUP), true, 'a repaired furthest is backed up');
+    },
+  },
+  {
+    name: 'furthest_out_of_range_or_not_integer_becomes_level_and_marked_repaired',
+    run: () => {
+      for (const [bad, label] of [[12, 'above 9'], [4.5, 'not an integer'], ['7', 'not a number'], [null, 'null']]) {
+        const progress = loadRaw({ version: 1, level: 3, furthest: bad, flags: {}, counters: {}, lanternOn: false, lanternPickedUp: false });
+        assert.equal(progress.furthest, 3, `furthest ${label} becomes level`);
+        assert.equal(store.has(BACKUP), true, `furthest ${label} is marked repaired`);
+      }
+    },
+  },
+  {
+    name: 'furthest_valid_value_is_kept_without_repair',
+    run: () => {
+      const progress = loadRaw({ version: 1, level: 3, furthest: 7, flags: {}, counters: {}, lanternOn: false, lanternPickedUp: true });
+      assert.equal(progress.furthest, 7);
+      assert.equal(store.has(BACKUP), false, 'a valid furthest writes no backup');
+    },
+  },
+  {
+    name: 'furthest_round_trips_through_save_and_load',
+    run: () => {
+      store = new Map();
+      CampaignSaveSystem.save({ ...CampaignSaveSystem.createDefaultProgress(), level: 6, furthest: 8, lanternPickedUp: true });
+      const progress = CampaignSaveSystem.load();
+      assert.equal(progress.level, 6);
+      assert.equal(progress.furthest, 8, 'the furthest level survives a write and a read');
+    },
+  },
+  {
+    name: 'furthest_never_decreases_when_level_is_lower',
+    run: () => {
+      store = new Map();
+      CampaignSaveSystem.save({ ...CampaignSaveSystem.createDefaultProgress(), level: 2, furthest: 5 });
+      const progress = CampaignSaveSystem.load();
+      assert.equal(progress.level, 2);
+      assert.equal(progress.furthest, 5, 'going back to an earlier level keeps the furthest reached');
+    },
+  },
+  {
+    name: 'furthest_is_written_as_at_least_level_and_clamped',
+    run: () => {
+      store = new Map();
+      CampaignSaveSystem.save({ ...CampaignSaveSystem.createDefaultProgress(), level: 4 });
+      assert.equal(JSON.parse(store.get(KEY)).furthest, 4, 'an absent furthest is written as level');
+      store = new Map();
+      CampaignSaveSystem.save({ ...CampaignSaveSystem.createDefaultProgress(), level: 7, furthest: 3 });
+      assert.equal(JSON.parse(store.get(KEY)).furthest, 7, 'a stale furthest below level is raised to level');
+      store = new Map();
+      CampaignSaveSystem.save({ ...CampaignSaveSystem.createDefaultProgress(), level: 9, furthest: 12 });
+      assert.equal(JSON.parse(store.get(KEY)).furthest, 9, 'furthest is clamped to 9');
     },
   },
   {
