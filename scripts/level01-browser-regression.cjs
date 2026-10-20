@@ -91,7 +91,7 @@ console.log(`Artifacts: ${out}`);
     await tap('e'); await dismiss(); assert.equal((await state()).flags['l0-tablet-read'],true);
     await page.waitForTimeout(3100); await tap('Space'); await dismiss();
     assert.equal((await state()).flags['l0-footprints-found'],true);
-    for(const line of ['Có người từng đi qua đây.','Và họ để lại đường cho chúng ta. Đi cùng tôi nhé?','Đi cùng nhau.']) assert.ok(observedDialogue.has(line),`Missing first-discovery dialogue: ${line}`);
+    for(const line of ['Có dấu chân thật! Chúng dẫn về phía cổng.','Có lẽ trước đây người ta cũng đi lối này.','Mình theo thử xem.']) assert.ok(observedDialogue.has(line),`Missing first-discovery dialogue: ${line}`);
     await page.waitForTimeout(3100); await tap('Space'); assert.equal((await state()).dialogue,false,'Repeated Pulse must not replay footprint discovery dialogue');
     await shot('trail'); await mark('lit tablet then Pulse reveals trail');
     await tap('f');
