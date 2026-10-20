@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
-import { canCompleteTower, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCenterWalkable, TOWER, TOWER_SOLIDS } from '../src/data/towerLayout.ts';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
+import { canCompleteTower, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCanApproachFront, towerCenterWalkable, TOWER, TOWER_SOLIDS } from '../src/data/towerLayout.ts';
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const seal = { x: 350, y: 290 };
 const base = { source: 'main', lanternOn: true, g0: 0, g1: 2, g2: 1, practice: 1, practiceDone: true, lanternRetrieved: false, waterReturned: false, crystal: false, recordRead: false, reunited: false, lumoAssign: 'at-c' };
 const atSeal = (state) => deriveTowerLive(state, seal);
@@ -12,10 +17,10 @@ assert.ok(TOWER_SOLIDS.some((solid) => solid.width === 80 && solid.height === 10
 const split = atSeal(base);
 assert.equal(split.liveA, true); assert.equal(split.liveB, true); assert.equal(split.liveC, true); assert.equal(split.canSwitch, true);
 assert.ok(split.beams.some((beam) => beam.live && beam.to.x === 460 && beam.to.y === 162), 'live beam reaches eye A');
-assert.ok(split.beams.some((beam) => beam.live && beam.to.x === 460 && beam.to.y === 275), 'live beam reaches eye B');
+assert.ok(split.beams.some((beam) => beam.live && beam.to.x === TOWER.objects.eyeB.optical.x && beam.to.y === TOWER.objects.eyeB.optical.y), 'live beam reaches eye B');
 const directA = atSeal({ ...base, g0: 1 });
 assert.equal(directA.liveA, true); assert.equal(directA.liveB, false); assert.equal(directA.canSwitch, false);
-assert.ok(!directA.beams.some((beam) => beam.to.x === 460 && beam.to.y === 275), 'direct A does not light B');
+assert.ok(!directA.beams.some((beam) => beam.to.x === TOWER.objects.eyeB.optical.x && beam.to.y === TOWER.objects.eyeB.optical.y), 'direct A does not light B');
 const directB = atSeal({ ...base, g0: 2 });
 assert.equal(directB.liveB, true); assert.equal(directB.liveA, false);
 assert.equal(atSeal({ ...base, g1: 1 }).liveA, false, 'splitter A requires G1 pose 2');
@@ -69,7 +74,7 @@ for (const stand of [TOWER.spawn, TOWER.stairsStand, ...Object.values(TOWER.obje
   assert.equal(towerCenterWalkable(stand), true, `walkable authored stand ${JSON.stringify(stand)}`);
 }
 assert.equal(towerCenterWalkable({ x: 600, y: 250 }), false, 'chamber body blocks approach from the north');
-assert.equal(towerCenterWalkable({ x: 309, y: 280 }), false, 'G2 base blocks its own footprint');
+assert.equal(towerCenterWalkable({ x: 309, y: 262 }), false, 'G2 base blocks its own footprint');
 assert.equal(towerCenterWalkable({ x: 18, y: 150 }), false, 'west bound');
 assert.equal(towerCenterWalkable({ x: 622, y: 150 }), false, 'east bound');
 assert.equal(towerCenterWalkable({ x: 350, y: 100 }), true);
@@ -84,14 +89,14 @@ assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, 
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, TOWER.objects.benchMirror.stand]), true, 'bench mirror is approachable along the west lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.source.stand, TOWER.objects.g0.stand]), true, 'main lamp and G0 stands connect');
 assert.equal(sampled([TOWER.objects.g0.stand, TOWER.objects.g1.stand]), true, 'G1 stand is reachable without entering the prism base');
-assert.equal(sampled([TOWER.objects.g1.stand, { x: 275, y: 252 }, { x: 340, y: 252 }, { x: 340, y: 285 }, TOWER.objects.g2.stand]), true, 'G2 stand is reachable past the call pedestal');
-assert.equal(sampled([TOWER.objects.g2.stand, { x: 340, y: 285 }, { x: 470, y: 248 }, TOWER.objects.lever.stand]), true, 'lever is reachable around receiver B');
+assert.equal(sampled([TOWER.objects.g1.stand, { x: 275, y: 246 }, { x: 330, y: 246 }, { x: 330, y: 282 }, TOWER.objects.g2.stand]), true, 'G2 stand is reachable past the call pedestal');
+assert.equal(sampled([TOWER.objects.g2.stand, { x: 340, y: 285 }, { x: 500, y: 285 }, TOWER.objects.lever.stand]), true, 'lever is reachable around receiver B');
 assert.equal(sampled([TOWER.objects.lever.stand, { x: 545, y: 275 }, { x: 570, y: 285 }, TOWER.objects.chamber.stand]), true, 'chamber stand is reachable through the south lane');
-assert.equal(sampled([TOWER.objects.chamber.stand, { x: 520, y: 288 }, { x: 518, y: 210 }, TOWER.objects.record.stand]), true, 'record stand is reachable past the lever base');
-assert.equal(sampled([{ x: 135, y: 272 }, { x: 140, y: 255 }, { x: 270, y: 255 }, { x: 350, y: 262 }, TOWER.objects.call.stand]), true, 'call pedestal is reachable above the G2 base');
+assert.equal(sampled([TOWER.objects.chamber.stand, { x: 520, y: 288 }, { x: 518, y: 196 }, TOWER.objects.record.stand]), true, 'record stand is reachable past the lever base');
+assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.call.stand]), true, 'call pedestal is reachable along the south lane under the G2 base');
 assert.equal(sampled([TOWER.objects.call.stand, { x: 340, y: 288 }, { x: 150, y: 288 }, TOWER.stairsStand]), true, 'stairs are reachable along the south lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.stairsStand]), true, 'stairs connect to spawn');
-assert.equal(sampled([{ x: 135, y: 272 }, { x: 350, y: 272 }]), false, 'the straight lane to the call pedestal is honestly blocked by the G2 base');
+assert.equal(sampled([{ x: 135, y: 272 }, { x: 350, y: 272 }]), true, 'G2 front lane keeps the straight south lane open');
 assert.equal(towerCanApproach({ x: 350, y: 272 }, TOWER.objects.call.stand), true);
 assert.equal(towerCanApproach({ x: 100, y: 272 }, TOWER.objects.call.stand), false, 'E range is local');
 
@@ -111,4 +116,123 @@ const switched = migrateTowerProgress({ flags: { 'l5-power': true, 'l5-called-hi
 assert.equal(switched.waterReturned, true); assert.equal(switched.lumoAssign, 'at-c');
 assert.equal(migrateTowerProgress({ flags: {}, counters: {}, lanternOn: true }).waterReturned, false);
 assert.equal(migrateTowerProgress({ flags: { 'l5-lantern-placed': true, 'l5-lantern-retrieved': true }, counters: {}, lanternOn: true }).source, null);
+
+// T07: standing props answer E from their south face only (raw foot-body probes, all four sides).
+const g2 = TOWER.objects.g2;
+const g2Probe = (center) => towerCanApproachFront(center, g2.stand, g2.base);
+const baseBottom = g2.base.y + g2.base.height;
+const north = { x: g2.stand.x, y: g2.base.y - 22 };
+const east = { x: g2.base.x + g2.base.width + 7, y: g2.base.y - 14 };
+const west = { x: g2.base.x - 7, y: east.y };
+const south = { x: g2.stand.x, y: baseBottom - 16 + 2 };
+assert.equal(towerCenterWalkable(north) && towerCenterWalkable(east) && towerCenterWalkable(west) && towerCenterWalkable(south), true, 'all four G2 probes are real walkable positions');
+assert.ok(towerBodyRect(north).y + towerBodyRect(north).height <= g2.base.y, 'north probe body sits above the base');
+assert.ok(towerBodyRect(east).x >= g2.base.x + g2.base.width && towerBodyRect(east).y < baseBottom, 'east probe body is beside the base');
+assert.ok(towerBodyRect(west).x + towerBodyRect(west).width <= g2.base.x && towerBodyRect(west).y < baseBottom, 'west probe body is beside the base');
+assert.equal(towerCanApproach(north, g2.stand), true, 'range alone would accept the north probe, so the front rule is what blocks it');
+assert.equal(g2Probe(north), false, 'G2 north does not answer E'); assert.equal(g2Probe(east), false, 'G2 east does not answer E'); assert.equal(g2Probe(west), false, 'G2 west does not answer E');
+assert.equal(g2Probe(south), true, 'G2 south answers E'); assert.equal(g2Probe(g2.stand), true, 'G2 stand answers E');
+// every prop with a footprint: the stand sits at or below the front edge, and its four-side probes behave the same way.
+const standingProps = ['benchSource', 'benchMirror', 'source', 'g0', 'g1', 'g2', 'call', 'lever'].map((id) => [id, TOWER.objects[id]]);
+standingProps.push(['chamber', { stand: TOWER.objects.chamber.stand, base: TOWER.objects.chamber.solid }]);
+for (const [id, prop] of standingProps) {
+  assert.equal(towerCanApproachFront(prop.stand, prop.stand, prop.base), true, `${id} stand answers E`);
+  const n = { x: prop.stand.x, y: prop.base.y - 22 };
+  if (towerCenterWalkable(n)) assert.equal(towerCanApproachFront(n, prop.stand, prop.base), false, `${id} north does not answer E`);
+}
+// RULE_GAMES §1 x-span: beside a standing prop (footprint centre +/- (width/2 + 10) at the stand's row) E stays closed.
+// Obstacles are dropped so the front rule decides; where the probe is within E range, it must be walkable and in range first.
+for (const [id, prop] of standingProps) {
+  const reach = prop.base.width / 2 + 10;
+  for (const x of [prop.stand.x - reach, prop.stand.x + reach]) {
+    const probe = { x, y: prop.stand.y };
+    if (reach <= TOWER.interactionRange) assert.equal(towerCanApproach(probe, prop.stand, []), true, `${id} side probe at x=${x} is in range and in bounds`);
+    assert.equal(towerCanApproachFront(probe, prop.stand, prop.base, []), false, `${id} side probe at x=${x} does not answer E`);
+  }
+}
+// lever side spot from the review: (553,240) is 2px past the footprint's east edge (x=551) and stays closed; the 1px edge (552) answers.
+const lever = TOWER.objects.lever;
+assert.equal(towerCanApproach({ x: 553, y: 240 }, lever.stand), true, 'lever side spot is in range and walkable');
+assert.equal(towerCanApproachFront({ x: 553, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the east side at (553,240)');
+assert.equal(towerCanApproachFront({ x: 552, y: 240 }, lever.stand, lever.base), true, 'lever E answers at the 1px east edge');
+assert.equal(towerCanApproachFront({ x: 527, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the west side at (527,240)');
+// usable standing space in front of G2: at least 24px of walkable depth between its front edge and the south bound (layout contract).
+const southBound = TOWER.bounds.y + TOWER.bounds.height;
+assert.ok(southBound - baseBottom >= 24 + towerBodyRect(g2.stand).height, 'G2 keeps 24px of standing space in front of it');
+const frontCenters = [];
+for (let y = baseBottom - 22; y <= southBound; y += 1) if (towerCenterWalkable({ x: g2.stand.x, y }) && g2Probe({ x: g2.stand.x, y })) frontCenters.push(y);
+assert.ok(frontCenters.length >= 12, `G2 front window is usable (${frontCenters.length}px)`);
+// optics relation is preserved after the lift: branch B stays on one row with receiver B, directly under the prism right port.
+assert.equal(g2.optical.x, TOWER.objects.prism.right.x, 'G2 sits under the prism right port');
+assert.equal(g2.optical.y, TOWER.objects.eyeB.optical.y, 'G2 and receiver B share the beam row');
+// record panel: the stand clears the chamber body and the lever base and stays in front of the panel (panel art y140..172).
+const record = TOWER.objects.record.stand;
+assert.equal(towerCenterWalkable(record), true, 'record stand walkable');
+assert.ok(towerBodyRect(record).y > 172, 'record prompt sits in front of the panel art');
+assert.equal(towerCanApproach({ x: record.x, y: record.y }, record), true);
+assert.equal(sampled([TOWER.objects.chamber.stand, { x: 520, y: 288 }, { x: 518, y: 196 }, record]), true, 'record stand reachable');
 console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn and migration checks passed');
+
+// ---------------------------------------------------------------- H ladder is the scenario text (scenario 06 §6)
+// The placing step and the main puzzle (place, main, call, switch) share one ladder: scenario Mức 1-3, verbatim and in
+// order; repeated presses hold Mức 3. The bench (practice) keeps its own optional-bench ladder. The level file imports
+// Phaser, so its authored constants and methods are read from the TypeScript source and bound to a fake level.
+{
+  const scenario = readFileSync(path.join(ROOT, 'docs/scenario/06-the-sleepless-tower.md'), 'utf8');
+  const hits = [...scenario.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], '06 §6 lists Mức 1, 2, 3 in order');
+  const MUC = hits.map((m) => m[2].normalize('NFC'));
+
+  const levelFile = path.join(ROOT, 'src/levels/SleeplessTowerLevel.ts');
+  const levelAst = ts.createSourceFile(levelFile, readFileSync(levelFile, 'utf8'), ts.ScriptTarget.Latest, true);
+  const COMPILER = { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } };
+  const find = (predicate) => {
+    let found;
+    const visit = (node) => { if (found) return; if (predicate(node)) { found = node; return; } ts.forEachChild(node, visit); };
+    visit(levelAst);
+    return found;
+  };
+  const constantOf = (name, symbols = {}) => {
+    const decl = find((node) => ts.isVariableDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(decl?.initializer, `SleeplessTowerLevel still authors ${name}`);
+    const js = ts.transpileModule(`const __value = (${decl.initializer.getText(levelAst)});`, COMPILER).outputText;
+    return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __value;`)(...Object.values(symbols));
+  };
+  const methodOf = (name, symbols = {}) => {
+    const method = find((node) => ts.isMethodDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(method?.body, `SleeplessTowerLevel still authors ${name}()`);
+    const params = method.parameters.map((p) => p.name.getText(levelAst));
+    const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
+    return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(symbols));
+  };
+  const PUZZLE_HINTS = constantOf('PUZZLE_HINTS');
+  const PUZZLE_STEPS = constantOf('PUZZLE_STEPS');
+  const hintLadderOf = constantOf('hintLadderOf', { PUZZLE_STEPS });
+  const HINTS = constantOf('HINTS', { PUZZLE_HINTS });
+  const RECALL_FOLLOWING = constantOf('RECALL_FOLLOWING');
+  const showHint = methodOf('showHint', { deriveTowerLive: (state) => ({ step: state.step }), hintLadderOf });
+  const hintsFor = methodOf('hintsFor', { HINTS, RECALL_FOLLOWING });
+  assert.deepEqual(PUZZLE_HINTS.map((line) => line.text.normalize('NFC')), MUC, 'PUZZLE_HINTS is the 06 §6 Mức 1-3 verbatim');
+  // Presses on a fake level, one per step name in `steps`, as the H key would press them.
+  const presses = (steps, lumoAssign = 'at-c') => {
+    const spoken = [];
+    const level = {
+      state: { step: '', lumoAssign }, stepKey: '', hintIndex: 0, lumoPoint: () => seal,
+      ctx: { say(lines) { spoken.push(lines[0].text.normalize('NFC')); } },
+    };
+    level.hintsFor = hintsFor;
+    level.showHint = showHint;
+    for (const step of steps) { level.state = { step, lumoAssign }; level.showHint(); }
+    return spoken;
+  };
+  for (const step of ['place', 'main', 'call', 'switch']) {
+    assert.deepEqual(presses([step, step, step, step]), [MUC[0], MUC[1], MUC[2], MUC[2]], `${step}: presses give Mức 1, 2, 3 verbatim, then hold Mức 3`);
+  }
+  assert.deepEqual(presses(['place', 'main', 'call', 'switch']), [MUC[0], MUC[1], MUC[2], MUC[2]], 'the puzzle steps share one ladder, so presses keep their order across them');
+  assert.deepEqual(presses(['practice', 'main']), [HINTS.practice[0].text.normalize('NFC'), MUC[0]], 'leaving the bench starts the puzzle ladder at Mức 1');
+  assert.equal(HINTS.practice.some((line) => MUC.includes(line.text.normalize('NFC'))), false, 'the bench keeps its own optional-bench ladder');
+  assert.deepEqual(presses(['retrieve']), [HINTS.retrieve[0].text.normalize('NFC')], 'after the switch the lines are the stage-specific guidance');
+  assert.deepEqual(presses(['recall'], 'follow'), [RECALL_FOLLOWING[0].text.normalize('NFC')], 'a following Lumo keeps the recall guidance');
+}
+
+console.log('Sleepless Tower H ladder checks passed (place, main, call, switch are the scenario Mức 1-3 verbatim, in order).');

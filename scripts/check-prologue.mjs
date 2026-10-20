@@ -955,7 +955,7 @@ const CASES = [
 
       const completed = makeMenuScene({ completed: true, campaignSave: true, legacy: null });
       completed.continueGame();
-      assert.deepEqual(completed.calls.started, [{ key: 'EndingScene', data: { showCredits: true, campaign: true } }],
+      assert.deepEqual(completed.calls.started, [{ key: 'EndingScene', data: { campaign: true } }],
         'completed Continue still opens the campaign credits');
       assert.equal(completed.calls.campaignCleared, 0, 'completed Continue clears nothing');
 

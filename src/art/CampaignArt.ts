@@ -103,6 +103,15 @@ const sharedMechanismModules = import.meta.glob([
 const shadowCharacterModules = import.meta.glob([
   '../../assets/levels/shared/characters/the-shadow/sprites/waiting.png',
   '../../assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/shielding.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/stillness.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/turn.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/walk-right.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png',
+  '../../assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png',
 ], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 
 /**
@@ -113,9 +122,23 @@ const forestExpansionModules = import.meta.glob([
   '../../assets/environment/forest-expansion/sprites-v2/*.png',
 ], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 
+/** Shadow poses that are actually loaded (48x64 RGBA, bottom-centre pivot). Other files in the pack stay unregistered. */
+export type ShadowPose =
+  | 'waiting' | 'memory-overlay' | 'shielding' | 'stillness' | 'turn' | 'walk-right'
+  | 'dawn-afterimage' | 'dawn-dissolve-1' | 'dawn-dissolve-2' | 'dawn-empty' | 'guardian-waiting';
+
 const SHADOW_ART_KEYS: Record<string, string> = {
   'waiting.png': 'shadow_waiting',
   'memory-overlay.png': 'shadow_memory_overlay',
+  'shielding.png': 'shadow_shielding',
+  'stillness.png': 'shadow_stillness',
+  'turn.png': 'shadow_turn',
+  'walk-right.png': 'shadow_walk_right',
+  'dawn-afterimage.png': 'shadow_dawn_afterimage',
+  'dawn-dissolve-1.png': 'shadow_dawn_dissolve_1',
+  'dawn-dissolve-2.png': 'shadow_dawn_dissolve_2',
+  'dawn-empty.png': 'shadow_dawn_empty',
+  'guardian-waiting.png': 'shadow_guardian_waiting',
 };
 
 function normalize(value: string): string {
@@ -160,8 +183,8 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
   })),
 ];
 
-/** The Shadow's Level 09 frames, or null when the pack is absent. */
-export function getShadowArtKey(frame: 'waiting' | 'memory-overlay'): string | null {
+/** A registered Shadow pose, or null when the pack is absent. */
+export function getShadowArtKey(frame: ShadowPose): string | null {
   const key = SHADOW_ART_KEYS[`${frame}.png`];
   return CAMPAIGN_ART_FILES.some((asset) => asset.key === key) ? key : null;
 }
@@ -188,13 +211,10 @@ export function getLevelBackgroundKey(levelIndex: number, roomId?: string): stri
     9: 'sanctuary-base',
   };
   if (levelIndex === 8) {
-    // Every observatory room paints its own base: the lobby, the star-map
-    // corridor and the observatory. The observatory always uses the CLEAN base
-    // (observatory-clean-base); the hand-off base with the baked caption strip
-    // is never loaded into the runtime.
+    // Only the main room has a clean painted base (observatory-clean-base). `lobby-base` and `star-chart-base` are
+    // staging boards (fake G0, lamp, door and caption panels printed on the picture), so the entrance and the
+    // corridor are composed in the scene from stone floor tiles, masonry and the real controls instead.
     if (roomId === 'observatory') return getLevelArtKey(8, 'observatory-clean-base');
-    if (roomId === 'entrance') return getLevelArtKey(8, 'lobby-base');
-    if (roomId === 'corridor') return getLevelArtKey(8, 'star-chart-base');
     return null;
   }
   return backgrounds[levelIndex] ? getLevelArtKey(levelIndex, backgrounds[levelIndex]) : null;

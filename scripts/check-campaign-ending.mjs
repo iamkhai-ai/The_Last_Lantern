@@ -35,6 +35,14 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { existsSync } from 'node:fs';
+import {
+  CAMPAIGN_ENDING_BEATS, ENDING_ART_REQUIREMENTS, ENDING_PROMPT_CONTINUE, ENDING_PROMPT_CREDITS, EndingMachine, MONTAGE_SHOTS,
+  MONTAGE_SHOT_MIN_MS, MONTAGE_SHOT_MS, NIGHT_CALL_LINES, NIGHT_WAIT_MS, REASSURE_LINES, SEATED_LINES, SHADOW_DAWN_LINES,
+  SHADOW_DAWN_POSES, SHADOW_DAWN_POSE_MS, TRAIL_TITLE_MS, TREE_RETURN_LINES, endingBeatLines, endingResumeBeat, nextEndingBeat,
+} from '../src/data/campaignEnding.ts';
+import { CampaignSaveSystem, readEndingBeat } from '../src/systems/CampaignSaveSystem.ts';
+import { readPng } from './lib/readPng.mjs';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SCENE_FILE = join(rootDir, 'src/scenes/EndingScene.ts');
@@ -163,7 +171,7 @@ const ARROWS = registeredArrows();
 const METHOD_NAMES = [
   'playAgain', 'goToMainMenu', 'inputOptions', 'activateIndex', 'triggerSelected',
   'requestPlayAgain', 'cancelPlayAgain', 'confirmPlayAgain', 'moveSelection', 'refreshHighlight',
-  'wireInput', 'wireCreditsInput', 'wireDialogueInput', 'handleAdvance',
+  'wireInput', 'wireCreditsInput', 'wireSequenceInput', 'handleSequencePress', 'advanceSequence', 'togglePause', 'handleAdvance',
   'onKey', 'clearKeyListeners', 'registerShutdownGuard', 'clearShutdownGuard', 'teardownInput',
 ];
 
@@ -280,6 +288,11 @@ function makeScene({ campaign = true } = {}) {
     selectedIndex: 0,
     menuMode: 'credits',
     restartConfirmed: false,
+    paused: false,
+    pressReady: true,
+    sequence: undefined,
+    dialogue: undefined,
+    pauseText: makeText([]),
     shutdownHandler: undefined,
     keyListeners: [],
     buttons: [makeText(calls.buttonTexts), makeText(calls.buttonTexts)],
@@ -521,21 +534,202 @@ const CASES = [
     },
   },
   {
-    name: 'closing_text_advance_restarts_into_the_campaign_credits',
+    name: 'sequence_input_acts_once_per_fresh_press_and_needs_a_release',
     run: () => {
       const scene = makeScene({ campaign: true });
+      const advances = [];
+      scene.sequence = { advance: () => advances.push('advance'), canAdvance: () => true, destroy() {} };
       scene.wireInput(false);
-      assert.equal(scene.input.keyboard.count('keydown-E'), 1, 'the closing text registers exactly one advance handler');
-      // The dialogue handler is registered by identifier, so it is reached through the scene's ledger.
-      const handler = scene.keyListeners.find((listener) => listener.event === 'keydown-E')?.handler;
-      assert.ok(handler, 'the closing text advance handler is tracked');
-      handler();
-      handler();
-      assert.equal(scene.calls.restarted.length, 0, 'the first two presses only page the text');
-      handler();
-      assert.equal(scene.calls.restarted.length, 1, 'the third press hands over to the credits');
-      assert.equal(scene.calls.restarted[0]?.showCredits, true, 'the credits are shown on the restart');
-      assert.equal(scene.calls.restarted[0]?.campaign, true, 'the campaign flag survives the restart');
+      assert.equal(scene.input.keyboard.count('keydown-E'), 1, 'one keydown-E handler');
+      for (const key of ['keydown-E', 'keydown-SPACE', 'keydown-ENTER', 'keyup-E', 'keyup-SPACE', 'keyup-ENTER']) {
+        assert.equal(scene.input.keyboard.count(key), 1, `${key} is wired exactly once`);
+      }
+      scene.input.keyboard.domKeydown('E');
+      assert.equal(advances.length, 1, 'a fresh press advances once');
+      // a second keydown that reaches the handler without a release in between (a stuck or replayed key) is refused
+      const handler = scene.keyListeners.find((entry) => entry.event === 'keydown-E').handler;
+      handler({ repeat: false });
+      handler({ repeat: false });
+      assert.equal(advances.length, 1, 'no second action until the key has been released');
+      scene.input.keyboard.domKeyup('E');
+      scene.input.keyboard.domKeydown('SPACE');
+      assert.equal(advances.length, 2, 'after the release the next press acts');
+      scene.input.keyboard.domKeydown('SPACE');
+      scene.input.keyboard.domKeydown('SPACE');
+      assert.equal(advances.length, 2, 'auto-repeat never acts');
+    },
+  },
+  {
+    name: 'sequence_press_goes_to_the_dialogue_box_first',
+    run: () => {
+      const scene = makeScene({ campaign: true });
+      const log = [];
+      scene.dialogue = { isActive: () => true, handleAdvanceInput: () => { log.push('dialogue'); return true; } };
+      scene.sequence = { advance: () => log.push('sequence') };
+      scene.advanceSequence();
+      assert.deepEqual(log, ['dialogue'], 'while a line is on screen the press belongs to the dialogue box, not to the beat');
+      scene.dialogue.isActive = () => false;
+      scene.advanceSequence();
+      assert.deepEqual(log, ['dialogue', 'sequence'], 'with no dialogue the press advances the beat');
+      scene.paused = true;
+      scene.advanceSequence();
+      assert.deepEqual(log, ['dialogue', 'sequence'], 'while paused nothing advances');
+    },
+  },
+  {
+    name: 'escape_pauses_and_resumes_the_cinematic',
+    run: () => {
+      const scene = makeScene({ campaign: true });
+      scene.sequence = { advance() {}, destroy() {} };
+      scene.wireInput(false);
+      invokeHandler(scene, 'keydown-ESC', { repeat: false });
+      assert.equal(scene.paused, true, 'ESC pauses');
+      invokeHandler(scene, 'keydown-ESC', { repeat: true });
+      assert.equal(scene.paused, true, 'a held ESC does not flip it back');
+      invokeHandler(scene, 'keydown-ESC', { repeat: false });
+      assert.equal(scene.paused, false, 'ESC resumes');
+    },
+  },
+  {
+    name: 'the_silence_is_real_time_and_cannot_be_skipped',
+    run: () => {
+      const machine = new EndingMachine();
+      machine.begin('night-call');
+      assert.deepEqual(NIGHT_CALL_LINES.map((line) => `${line.speaker}: ${line.text}`), ['Nhinh: Lumo?'], 'the call is only Nhinh asking for Lumo');
+      assert.equal(machine.canAdvance(), false, 'the line is still being spoken');
+      assert.deepEqual(machine.press(), [], 'no skipping the call before it is spoken');
+      machine.dialogueFinished();
+      assert.equal(machine.prompt(), ENDING_PROMPT_CONTINUE, 'once the line is spoken the continue control appears');
+      assert.equal(machine.press()[0].beat, 'night-wait', 'the press after the call opens the silence');
+      for (let index = 0; index < 60; index += 1) machine.press();
+      assert.equal(machine.beat, 'night-wait', 'pressing E or Space never skips the silence');
+      assert.equal(machine.prompt(), null, 'no continue control is offered during the silence');
+      assert.deepEqual(machine.tick(NIGHT_WAIT_MS * 3, true), [], 'a paused scene does not run the silence');
+      assert.equal(machine.beat, 'night-wait');
+      machine.tick(NIGHT_WAIT_MS - 1, false);
+      assert.equal(machine.beat, 'night-wait', 'one millisecond short of the silence the beat is still waiting');
+      const effects = machine.tick(1, false);
+      assert.equal(effects.at(-1).beat, 'reassure', 'the full silence, unpaused, moves on by itself');
+      assert.ok(NIGHT_WAIT_MS >= 1400, 'the silence is at least 1.4 seconds');
+    },
+  },
+  {
+    name: 'the_ending_runs_its_beats_in_order_with_the_authored_lines',
+    run: () => {
+      const machine = new EndingMachine();
+      const entered = [];
+      const lineSets = [];
+      const record = (effects) => { for (const effect of effects) if (effect.type === 'enter') { entered.push(effect.beat); lineSets.push(effect.lines); } };
+      record(machine.begin('night-call'));
+      machine.dialogueFinished(); record(machine.press());
+      record(machine.tick(NIGHT_WAIT_MS, false));
+      assert.deepEqual(lineSets.at(-1).map((line) => line.text), ['Tôi đây.', 'Tôi vẫn thấy cậu.'], 'the reassurance is the two authored lines');
+      machine.dialogueFinished(); record(machine.press());
+      assert.equal(machine.beat, 'montage');
+      // montage: four shots, each with an observation beat before it can be skipped
+      for (let shot = 0; shot < MONTAGE_SHOTS.length; shot += 1) {
+        assert.equal(machine.shot, shot, `shot ${shot + 1} is on screen`);
+        assert.deepEqual(machine.press(), [], 'a shot cannot be skipped before it has been looked at');
+        machine.tick(MONTAGE_SHOT_MIN_MS, false);
+        assert.equal(machine.canAdvance(), true, 'after the observation beat it can be skipped');
+        if (shot < MONTAGE_SHOTS.length - 1) assert.equal(machine.press()[0].type, 'shot', 'E shows the next shot');
+        else record(machine.press());
+      }
+      assert.equal(machine.beat, 'shadow-dawn', 'after the last shot the observatory scene follows');
+      assert.deepEqual(machine.press(), [], 'the Shadow\'s line comes first');
+      machine.dialogueFinished();
+      const poses = [];
+      for (let step = 0; step < SHADOW_DAWN_POSES.length; step += 1) {
+        for (const effect of machine.tick(SHADOW_DAWN_POSE_MS, false)) if (effect.type === 'pose') poses.push(effect.index);
+      }
+      assert.deepEqual(poses, [0, 1, 2, 3], 'the Shadow fades through the four registered dawn poses in order');
+      assert.equal(machine.canAdvance(), true);
+      record(machine.press());
+      machine.dialogueFinished(); record(machine.press());   // tree-return -> seated
+      machine.dialogueFinished(); record(machine.press());   // seated -> trail-title
+      assert.equal(machine.beat, 'trail-title');
+      assert.equal(machine.canAdvance(), false, 'the credits are not offered before the title');
+      assert.deepEqual(machine.press(), [], 'E cannot jump to the credits before the title appears');
+      assert.equal(machine.tick(TRAIL_TITLE_MS, false).some((effect) => effect.type === 'title'), true, 'the title appears once the two figures have left');
+      assert.equal(machine.prompt(), ENDING_PROMPT_CREDITS, 'only then is the credits control offered');
+      record(machine.press());
+      assert.deepEqual(entered, [...CAMPAIGN_ENDING_BEATS.slice(0, 1), ...CAMPAIGN_ENDING_BEATS.slice(1)], 'every beat is entered, once, in the saved order');
+      assert.equal(nextEndingBeat('credits'), null);
+      assert.deepEqual(TREE_RETURN_LINES.map((line) => line.text), ['Lần này… chúng ta đã để đêm đi hết con đường của nó.', 'Và bình minh tự tìm được đường về.']);
+      assert.deepEqual(SHADOW_DAWN_LINES.map((line) => line.text), ['Trời sáng rồi.']);
+      assert.deepEqual(SEATED_LINES.map((line) => line.text), [
+        'Cậu vẫn mang nó theo chứ?', 'Có. Trên đường chắc sẽ còn lúc cần một ngọn đèn.', 'Còn khi không cần nữa?', 'Mình sẽ tắt đi.',
+        'Cậu định đi đâu?', 'Trước hết, đi xem khu rừng vào ban ngày.', 'Tôi đi cùng được không?', 'Đó là lối đi cho hai người mà.',
+      ], 'the seated scene is the eight authored lines in order');
+      for (const set of [NIGHT_CALL_LINES, REASSURE_LINES, SHADOW_DAWN_LINES, TREE_RETURN_LINES, SEATED_LINES]) {
+        for (const line of set) assert.equal(/cô bé|con gái|đã mất|còn sống/.test(line.text), false, 'the ending says nothing about the girl');
+      }
+    },
+  },
+  {
+    name: 'every_beat_resumes_from_its_own_checkpoint',
+    run: () => {
+      for (const beat of CAMPAIGN_ENDING_BEATS) {
+        assert.equal(endingResumeBeat(beat), beat, `${beat} resumes at ${beat}`);
+        const machine = new EndingMachine();
+        const effects = machine.begin(beat);
+        assert.equal(effects[0].type, 'enter'); assert.equal(machine.beat, beat);
+      }
+      // a resumed silence starts again from zero, and a resumed montage from its first shot
+      const wait = new EndingMachine(); wait.begin('night-wait');
+      assert.equal(wait.elapsed, 0); wait.tick(NIGHT_WAIT_MS - 100, false); wait.begin('night-wait'); assert.equal(wait.elapsed, 0);
+      const montage = new EndingMachine(); montage.begin('montage'); montage.tick(MONTAGE_SHOT_MS, false); assert.equal(montage.shot, 1);
+      montage.begin('montage'); assert.equal(montage.shot, 0, 'a resumed montage restarts at the garden');
+      assert.equal(new EndingMachine().begin('credits')[0].beat, 'credits');
+    },
+  },
+  {
+    name: 'ending_checkpoint_in_the_save_defaults_and_normalises',
+    run: () => {
+      assert.equal(readEndingBeat({}), 'night-call', 'a completed v1 save without a checkpoint starts the ending');
+      assert.equal(readEndingBeat({ 'l9-ending-beat': 'bogus' }), 'night-call', 'an unknown value never invents a chapter');
+      assert.equal(readEndingBeat({ 'l9-ending-beat': 'seated' }), 'seated');
+      const store = new Map();
+      globalThis.window = { localStorage: { getItem: (key) => store.get(key) ?? null, setItem: (key, value) => store.set(key, value), removeItem: (key) => store.delete(key) } };
+      const KEY = 'last-lantern-campaign-save-v1';
+      const put = (flags) => store.set(KEY, JSON.stringify({ version: 1, level: 9, flags, counters: {}, lanternOn: false, lanternPickedUp: true }));
+      put({ 'l9-complete': true, 'l9-ending-beat': 'bogus' });
+      assert.equal(CampaignSaveSystem.load().flags['l9-ending-beat'], 'night-call', 'an invalid beat on a completed save restarts the ending');
+      put({ 'l9-ending-beat': 'bogus' });
+      assert.equal('l9-ending-beat' in CampaignSaveSystem.load().flags, false, 'an invalid beat on an unfinished save is dropped');
+      put({ 'l9-complete': true, 'l9-ending-beat': 'montage' });
+      assert.equal(CampaignSaveSystem.load().flags['l9-ending-beat'], 'montage', 'a valid beat is kept as written');
+      delete globalThis.window;
+    },
+  },
+  {
+    name: 'ending_art_exists_at_native_size_and_the_cinematic_never_builds_the_credits_card',
+    run: () => {
+      const LEVEL_DIRS = ['01-forgotten-forest-edge', '02-whispering-woods', '03-library-beneath-the-roots', '04-shattered-moonlit-creek', '05-a-path-for-two', '06-the-sleepless-tower', '07-the-sleeping-garden', '08-ruins-of-two-halves', '09-dark-moon-observatory', '10-the-heart-of-elaria'];
+      for (const art of ENDING_ART_REQUIREMENTS) {
+        const file = join(rootDir, 'assets/levels', LEVEL_DIRS[art.level], 'sprites', `${art.file}.png`);
+        assert.ok(existsSync(file), `${art.file} exists`);
+        const png = readPng(file);
+        assert.deepEqual({ width: png.width, height: png.height }, { width: art.width, height: art.height }, `${art.file} keeps its native size`);
+      }
+      const seated = readPng(join(rootDir, 'assets/levels/10-the-heart-of-elaria/sprites/ending-nhinh-seated-unlit-leaf.png'));
+      assert.deepEqual({ width: seated.width, height: seated.height }, { width: 36, height: 42 }, 'the seated pose is the 36x42 gameplay pose, not the 144x168 insert');
+      for (const frame of [0, 1, 2]) assert.ok(existsSync(join(rootDir, `assets/character/nhinh_right_walk_nolamp_${frame}.png`)), `the off-lamp walk frame ${frame} exists`);
+      for (const pose of ['stillness', ...SHADOW_DAWN_POSES]) {
+        const png = readPng(join(rootDir, `assets/levels/shared/characters/the-shadow/sprites/${pose}.png`));
+        assert.deepEqual({ width: png.width, height: png.height }, { width: 48, height: 64 }, `Shadow pose ${pose} is 48x64`);
+      }
+      const registry = readFileSync(join(rootDir, 'src/art/CampaignArt.ts'), 'utf8');
+      for (const pose of ['stillness', ...SHADOW_DAWN_POSES]) assert.ok(registry.includes(`'${pose}.png'`), `the registry loads the ${pose} pose`);
+      const sequenceSource = readFileSync(join(rootDir, 'src/systems/CampaignEndingSequence.ts'), 'utf8');
+      for (const match of sequenceSource.matchAll(/getLevelArtKey\((\d), '([^']+)'\)/g)) {
+        const file = join(rootDir, 'assets/levels', LEVEL_DIRS[Number(match[1])], 'sprites', `${match[2]}.png`);
+        assert.ok(existsSync(file), `the sequence asks only for art that exists (${match[2]})`);
+      }
+      const sceneSource = readFileSync(SCENE_FILE, 'utf8');
+      assert.ok(sceneSource.indexOf('this.createCinematic(progress, resumeBeat)') < sceneSource.indexOf('card.setDepth(85)'),
+        'the cinematic starts before the credits card is built, so no opaque card covers the world during the ending');
+      assert.equal(sceneSource.includes('wireDialogueInput'), false, 'the three text pages are gone');
     },
   },
 ];

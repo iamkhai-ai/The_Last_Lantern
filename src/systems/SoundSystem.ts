@@ -243,6 +243,17 @@ export class SoundSystem {
     }
   }
 
+  /** Quiet cues for the ending's silence: a cricket, running water, a second cricket answering. */
+  public static playEndingCue(cue: 'cricket' | 'water' | 'answer'): void {
+    if (cue === 'cricket') {
+      for (let index = 0; index < 3; index += 1) this.playTone(4200, 0.05, 'sine', 0.025, 4400, index * 90);
+    } else if (cue === 'answer') {
+      for (let index = 0; index < 2; index += 1) this.playTone(3600, 0.06, 'sine', 0.02, 3800, index * 110);
+    } else {
+      for (let index = 0; index < 6; index += 1) this.playTone(500 + index * 70, 0.35, 'sine', 0.012, 380 + index * 50, index * 110);
+    }
+  }
+
   public static playDawnChord(): void {
     const chord = [261.63, 329.63, 392.0, 523.25, 659.25, 783.99];
     chord.forEach((f, idx) => {

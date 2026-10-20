@@ -15,7 +15,7 @@
 - Scope Level 06 (index 5) only. Keep other scenes/levels, character frames and save keys compatible.
 - Existing 640×360 viewport, Vietnamese dialogue/UI, English filenames. Use existing art with preserved aspect ratio; shared prism/mirrors/receivers and Level 05 C vocabulary are reused, not re-authored.
 - Feet=center+(0,19), body 14×6 offset(11,37). Full standing prop footprints are solid from all four directions. Rendering, physics, interaction and safe restore consume shared geometry.
-- Single local room; do not create a universal framework or repurpose other roomIds. Follow the shared measured prompt placement contract; HUD text bands y0..70/320..360 stay free of playable props.
+- Single local room; do not create a universal framework or repurpose other roomIds. Follow the shared measured prompt placement contract; HUD text bands y0..58/320..360 stay free of playable props.
 - Live conditions are recomputed every frame from source, poses and actual Lumo presence. No timers, no latching from history; occupying a stand is not completion. The Return-Flow lever latches only while A, B and C are all live, and only once.
 - Remove the coming-soon gate for index >= 4 (mirrors `codex/level-05-flow-redo`) so the legacy index 4 exit leads into the new Level 06 for end-to-end review; legacy index 5 routines are bypassed, not deleted.
 - No user save reset, external messaging, push or merge. Root handles final checks and two independent reviews on the same frozen source revision.

@@ -188,15 +188,19 @@ export const HEART_PROPS: readonly HeartElement[] = [
   prop('heart-balance-mirror', 'mirror_1', 530, 260, 36, 48, 'texture', 30, 22),
 ];
 
-/** Walkable floor sockets (rule 2: prompt only while the actor body stands inside the cell). */
+/**
+ * Walkable floor sockets (rule 2: prompt only while the actor body stands inside the cell). Each gate is the
+ * visible (alpha) box of its own art, measured from the PNG by scripts/check-campaign-art.mjs (±2px tolerance):
+ * the seal plate and the three floor locks previously gated 3-5px outside what the player can see.
+ */
 export const HEART_CELLS: readonly HeartElement[] = [
   cell('heart-memory', 'memory-alcove-empty', 158, 192, 58, 64, 22, 20),
   cell('heart-hope', 'hope-alcove-empty', 320, 200, 58, 64, 22, 20),
   cell('heart-balance', 'balance-alcove-empty', 480, 192, 58, 64, 22, 20),
-  cell('heart-seal', 'pressure-empty', 320, 244, 44, 28, 22, 16),
-  cell('heart-eye-left', 'lock_sun_off', 368, 282, 40, 33, 22, 18, 30),
-  cell('heart-moon', 'lock_moon_off', 416, 282, 40, 34, 22, 18, 30),
-  cell('heart-eye-right', 'lock_sun_off', 464, 282, 40, 33, 22, 18, 30),
+  cell('heart-seal', 'pressure-empty', 320, 244, 44, 28, 20, 11),
+  cell('heart-eye-left', 'lock_sun_off', 368, 282, 40, 33, 19, 15, 30),
+  cell('heart-moon', 'lock_moon_off', 416, 282, 40, 34, 19, 16, 30),
+  cell('heart-eye-right', 'lock_sun_off', 464, 282, 40, 33, 19, 15, 30),
   cell('heart-confirm', 'confirmation-root-waiting', 320, 278, 48, 32, 22, 16),
   cell('heart-rule-table', 'root-rule-reminder-table', 150, 284, 124, 48, 40, 18, 46),
 ];
@@ -681,6 +685,33 @@ export function getHeartExitBlock(state: HeartPuzzleState, complete: boolean): H
 export function isHeartFinalActionAvailable(state: HeartPuzzleState, lantern: { inHand: boolean; placed: boolean; on: boolean }): boolean {
   if (!state.latched) return false;
   return lantern.placed || lantern.inHand;
+}
+
+export type HeartFinalSource = 'hand' | 'pedestal';
+
+/**
+ * The one final action (scenario section 8, decision D6). With the roots latched and the lamp lit, F commits the
+ * ending immediately: from the hand at any place (even mid-overload dialogue), or at the pedestal when the lamp is
+ * parked there and Nhinh stands where the pedestal can be used. Anything else is not a final action.
+ */
+export function heartFinalActionSource(
+  state: Pick<HeartPuzzleState, 'latched'>,
+  lantern: { inHand: boolean; placed: boolean; on: boolean },
+  nearPedestal: boolean,
+): HeartFinalSource | null {
+  if (!state.latched || !lantern.on) return null;
+  if (lantern.inHand && !lantern.placed) return 'hand';
+  if (lantern.placed && nearPedestal) return 'pedestal';
+  return null;
+}
+
+/**
+ * A save written by the older F (roots latched, lamp parked and already dark, ending not committed) holds the final
+ * action already: restoring it completes the ending instead of asking for a relight or one more E. It only applies
+ * after the roots latched, and it never switches a lit lamp off.
+ */
+export function heartFinalActionAlreadyDone(save: { roots: boolean; lanternPlaced: boolean; lanternRetrieved: boolean; lanternOn: boolean; complete: boolean }): boolean {
+  return save.roots && save.lanternPlaced && !save.lanternRetrieved && !save.lanternOn && !save.complete;
 }
 
 /** F is meaningful only while the lantern is still lit and reachable by hand or on the pedestal. */

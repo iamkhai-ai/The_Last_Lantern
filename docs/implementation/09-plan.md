@@ -52,7 +52,7 @@ See `09-layout.md` for the full coordinate table. Summary of what is on top of w
 - Latched doors keep their brace art at depth 12 above the player only when the player is below the door's footprint; otherwise the player reads in front.
 - The memory overlay (scenario §5) renders at depth 95 above the room but keeps the room visible underneath (transparent amber).
 - Icons (16×16 state stickers) at depth 6 beside their prop, on floor pixels, never over the actor.
-- HUD text occupies y=0..70 and y=320..360; nothing playable is authored inside those bands except the bottom control hint line.
+- HUD text occupies y=0..58 and y=320..360; nothing playable is authored inside those bands except the bottom control hint line.
 
 ## Collision contract
 

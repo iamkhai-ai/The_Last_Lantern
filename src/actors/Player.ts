@@ -210,6 +210,11 @@ export class Player {
     this.shadow.setDepth(this.sprite.depth - 1);
   }
 
+  /** Fastest speed in px/s (running). The Shadow's solid uses it to look one step ahead of the player. */
+  public get maxSpeed(): number {
+    return Math.max(this.walkSpeed, this.runSpeed);
+  }
+
   public get x(): number {
     return this.sprite.x;
   }

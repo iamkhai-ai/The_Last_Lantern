@@ -33,11 +33,19 @@ function variableInitializer(name) {
   assert.ok(declaration?.initializer, `CampaignScene still authors ${name}`);
   return declaration.initializer;
 }
-/** Evaluate a literal initializer with no runtime dependencies. */
+/** The observatory story constants CampaignScene spreads into its authored arrays (src/data/observatoryStory.ts). */
+const STORY = (() => {
+  const js = ts.transpileModule(readFileSync(join(rootDir, 'src/data/observatoryStory.ts'), 'utf8'),
+    { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS } }).outputText;
+  const module = { exports: {} };
+  new Function('module', 'exports', js)(module, module.exports);
+  return module.exports;
+})();
+/** Evaluate a literal initializer whose only dependencies are the observatory story constants. */
 function evaluate(node) {
   const js = ts.transpileModule(`const __value = (${nodeText(node)});`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
-  return new Function(`"use strict";\n${js}\nreturn __value;`)();
+  return new Function(...Object.keys(STORY), `"use strict";\n${js}\nreturn __value;`)(...Object.values(STORY));
 }
 function methodBody(name) {
   const method = findNode((node) => ts.isMethodDeclaration(node) && nodeText(node.name) === name);

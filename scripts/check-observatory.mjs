@@ -23,6 +23,10 @@
  *    build registers those controls in a loop over the room's own data — a method
  *    that exists but is never called cannot hide behind either check. The
  *    registration itself is executed by scripts/check-campaign-runtime.mjs.
+ *  - every alcove's threshold, jambs, arch and transit circle sit between the HUD
+ *    bands (y 58..320), and the south sill pocket's transit circle is tested on the
+ *    foot-body centre grid: no legal centre inside it while the loop is shut (with
+ *    a margin), and legal centres spanning several px inside it once the loop opens.
  */
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -55,6 +59,7 @@ import {
   observatoryElementSolids,
   observatoryElements,
   observatoryGuidance,
+  observatoryHints,
   observatoryPrompt,
   observatoryReturnLoopLane,
   observatorySolidRects,
@@ -208,7 +213,8 @@ for (const element of OBSERVATORY_ELEMENTS) {
 // Every collider corresponds to visible art: solids == fitted art rects.
 for (const roomId of ROOMS) {
   for (const element of observatoryElements(roomId)) {
-    if (element.radius === 0 || OBSERVATORY_NON_SOLID_IDS.includes(element.id)) continue;
+    // The root bed is a ground mount: its collider is the dynamic bed rectangle, tested in the bed block below.
+    if (element.radius === 0 || element.id === 'root-bed' || OBSERVATORY_NON_SOLID_IDS.includes(element.id)) continue;
     const rect = observatoryArtRect(element);
     assert.ok(observatoryElementSolids(roomId).some((solid) => Math.abs(solid.x - rect.x) < 0.01
       && Math.abs(solid.y - rect.y) < 0.01 && solid.width === rect.width && solid.height === rect.height),
@@ -249,6 +255,34 @@ for (const roomId of ROOMS) {
       }
     }
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * 3b. The root bed blocks the foot body from all four cardinal sides
+ * ------------------------------------------------------------------ */
+// The bed is a ground mount, so its collider is the dynamic structure in observatorySolidRects (the element solids
+// above skip it). Its whole rectangle is tested from every cardinal contact: while the crossing lane is shut the lane
+// blocks too; once the bridge holds, the lane is the only opening and the bed still blocks from all four sides.
+{
+  const bed = OBSERVATORY_ROOT_BED;
+  const lane = OBSERVATORY_BRIDGE_LANE;
+  const contacts = [
+    { name: 'north', center: { x: bed.x + bed.width / 2, y: bed.y - 20 } },
+    { name: 'south', center: { x: bed.x + bed.width / 2, y: bed.y + bed.height - 20 } },
+    { name: 'west', center: { x: bed.x - 1, y: bed.y + bed.height - 20 } },
+    { name: 'east', center: { x: bed.x + bed.width + 1, y: bed.y + bed.height - 20 } },
+  ];
+  const laneCenter = { x: lane.x + lane.width / 2, y: lane.y + lane.height / 2 };
+  const hasLane = (stage) => observatorySolidRects('observatory', stage).some((solid) => solid.x === lane.x && solid.y === lane.y);
+  assert.equal(hasLane(STAGES.arrival), true, 'the crossing lane is shut before the bridge is eligible');
+  assert.equal(hasLane(STAGES.crossed), false, 'the crossing lane is walkable once the bridge holds');
+  for (const { name, center } of contacts) {
+    assert.ok(rectsOverlap(observatoryBody(center), bed), `root bed ${name} contact overlaps the bed`);
+    assert.equal(isObservatoryPositionSafe('observatory', center, STAGES.arrival), false, `root bed blocks the body from the ${name} while shut`);
+    assert.equal(isObservatoryPositionSafe('observatory', center, STAGES.crossed), false, `root bed blocks the body from the ${name} once the lane opens`);
+  }
+  assert.equal(isObservatoryPositionSafe('observatory', laneCenter, STAGES.arrival), false, 'the shut lane blocks the body');
+  assert.equal(isObservatoryPositionSafe('observatory', laneCenter, STAGES.crossed), true, 'the open lane lets the body cross the bed');
 }
 
 /* ------------------------------------------------------------------ *
@@ -342,6 +376,45 @@ assert.ok(reachable('observatory', farBankSpawn, STAGES.finished, pocketTarget, 
   'the loop pocket stays reachable from the far bank after the lantern is retrieved');
 assert.equal(reachable('observatory', entry('observatory'), STAGES.finished, pocketTarget, 12), false,
   'with the lantern back in hand the root bridge is gone, so the near bank cannot reach the far side');
+
+// South sill pocket: the transit circle is tested on the foot-body centre grid with the runtime's own
+// predicate (not only by flood fill). Shut: no legal centre is inside the circle and the nearest one keeps a
+// margin. Open: legal centres inside the circle span several px in x and y, so the trigger is not pixel-perfect.
+{
+  const pocket = loopAlcove;
+  const radius = pocket.triggerRadius;
+  const nearestAndInside = (stage) => {
+    let nearest = Infinity;
+    const inside = [];
+    for (let x = pocket.trigger.x - radius - 12; x <= pocket.trigger.x + radius + 12; x += 1) {
+      for (let y = pocket.trigger.y - radius - 12; y <= pocket.trigger.y + radius + 12; y += 1) {
+        if (!isObservatoryPositionSafe('observatory', { x, y }, stage)) continue;
+        const distance = Math.hypot(x - pocket.trigger.x, y - pocket.trigger.y);
+        nearest = Math.min(nearest, distance);
+        if (distance <= radius) inside.push({ x, y });
+      }
+    }
+    return { nearest, inside };
+  };
+  for (const [name, stage] of Object.entries(STAGES).filter(([, candidate]) => !candidate.returnLoopOpen)) {
+    const { nearest, inside } = nearestAndInside(stage);
+    assert.equal(inside.length, 0, `${name}: with the loop shut no legal centre lies inside the pocket transit circle`);
+    assert.ok(nearest - radius >= 8, `${name}: the nearest legal centre with the loop shut clears the circle by 8px (${nearest.toFixed(1)} vs ${radius})`);
+  }
+  for (const [name, stage] of Object.entries(STAGES).filter(([, candidate]) => candidate.returnLoopOpen)) {
+    const { inside } = nearestAndInside(stage);
+    assert.ok(inside.length > 0, `${name}: with the loop open a legal centre lies inside the pocket transit circle`);
+    const xs = inside.map((point) => point.x);
+    const ys = inside.map((point) => point.y);
+    assert.ok(Math.max(...xs) - Math.min(...xs) >= 6, `${name}: the open pocket trigger spans at least 6px in x`);
+    assert.ok(Math.max(...ys) - Math.min(...ys) >= 6, `${name}: the open pocket trigger spans at least 6px in y`);
+  }
+  // The south masonry under the sill closes the pocket from below (the HUD band hides it, it is never walkable).
+  assert.ok(observatorySolidRects('observatory', STAGES.finished).some((solid) => solid.x <= pocket.threshold.x
+    && solid.x + solid.width >= pocket.threshold.x + pocket.threshold.width
+    && solid.y <= pocket.threshold.y + pocket.threshold.height && solid.y + solid.height >= 360),
+  'masonry under the sill closes the pocket from the south');
+}
 
 // The opened loop's floor strip is data-owned: it stays inside the room's own
 // walkable band, between the side walls, and clear of the HUD (y<58) and the
@@ -514,13 +587,34 @@ for (const alcove of OBSERVATORY_ALCOVES) {
   const passage = horizontalWall ? alcove.threshold.width : alcove.threshold.height;
   assert.ok(passage >= 48, `${alcove.id} keeps an opening of at least 48px (got ${passage})`);
   const depth = horizontalWall ? alcove.threshold.height : alcove.threshold.width;
-  assert.ok(depth >= 34, `${alcove.id} keeps a real sill depth (got ${depth})`);
+  if (alcove.id === 'return-loop-observatory') {
+    // Exact geometry, not the generic >=34 sill depth: this south pocket must end above the
+    // status band (y=320), so its 20px depth is the space between the floor edge (y=300) and that band.
+    assert.deepEqual(alcove.threshold, { x: 496, y: 300, width: 48, height: 20 },
+      `${alcove.id} sill pocket is exactly the 20px between the floor edge (y=300) and the status band (y=320)`);
+  } else {
+    assert.ok(depth >= 34, `${alcove.id} keeps a real sill depth (got ${depth})`);
+  }
   assert.equal(alcove.jambs.length, 2, `${alcove.id} has two permanent jambs`);
   for (const jamb of alcove.jambs) {
     assert.equal(observatorySolidRects(alcove.roomId, STAGES.finished).some((solid) => solid.x === jamb.x
       && solid.y === jamb.y && solid.width === jamb.width && solid.height === jamb.height), true,
     `${alcove.id} jamb is registered as permanent masonry`);
   }
+}
+
+// Every alcove stays between the top HUD band (y<58) and the bottom status band (y>=320): its threshold,
+// jambs, arch and transit circle. The south pocket is the one that sits exactly on the status band edge.
+for (const alcove of OBSERVATORY_ALCOVES) {
+  const parts = [['threshold', alcove.threshold], ['arch', alcove.arch], ...alcove.jambs.map((jamb, index) => [`jamb ${index}`, jamb])];
+  for (const [name, part] of parts) {
+    assert.ok(part.y >= 58 && part.y + part.height <= 320,
+      `${alcove.id} ${name} stays between the HUD bands (${part.y}..${part.y + part.height})`);
+  }
+  const circleTop = alcove.trigger.y - alcove.triggerRadius;
+  const circleBottom = alcove.trigger.y + alcove.triggerRadius;
+  assert.ok(circleTop >= 58 && circleBottom <= 320,
+    `${alcove.id} transit circle stays between the HUD bands (${circleTop}..${circleBottom})`);
 }
 
 /* * ------------------------------------------------------------------ *
@@ -570,8 +664,14 @@ for (const base of ['lobby-base', 'star-chart-base', 'observatory-clean-base', '
   const levelEightBlock = mapping.slice(mapping.indexOf('if (levelIndex === 8)'), mapping.indexOf('return backgrounds[levelIndex]'));
   assert.equal(levelEightBlock.includes("'observatory-base'"), false,
     'the observatory never loads the hand-off base; only observatory-clean-base');
-  for (const room of ['entrance', 'corridor', 'observatory']) {
-    assert.ok(levelEightBlock.includes(`roomId === '${room}'`), `level 08 maps a base for the ${room} room`);
+  assert.ok(levelEightBlock.includes("roomId === 'observatory'"), 'level 08 maps the clean base for the observatory room');
+  // The entrance and the corridor are composed from tiles, masonry and real controls: the staging boards
+  // (fake G0, lamp, door and caption panels printed on the picture) never reach the runtime.
+  for (const staging of ['lobby-base', 'star-chart-base']) {
+    assert.equal(levelEightBlock.includes(`'${staging}'`), false, `${staging} is a staging board and is never mapped as a room base`);
+  }
+  for (const room of ['entrance', 'corridor']) {
+    assert.equal(levelEightBlock.includes(`roomId === '${room}'`), false, `the ${room} room has no painted base (it is composed in the scene)`);
   }
 }
 // Depth: no world sprite may out-rank the HUD (86) or the prompt container (82).
@@ -841,3 +941,108 @@ console.log('                 (the registration itself is executed by scripts/ch
 console.log('  wiring       : CampaignScene consumes the verified layout symbols');
 console.log(`  flow         : ${FLOW.length} authored steps trace spawn to crystal`);
 console.log('  save         : v1 observatory validations intact');
+
+/* ------------------------------------------------------------------ *
+ * 12. Repair T10: room-aware guidance, status predicate, Shadow spot, placed light, scenario lines
+ * ------------------------------------------------------------------ */
+{
+  const layout = await import('../src/data/observatoryLayout.ts');
+  const story = await import('../src/data/observatoryStory.ts');
+  const base = {
+    doorAUnlocked: false, sunDoorUnlocked: false, rootBedShadowed: false, bridgeEligible: false, lumoAtSeal: false, activeBeamRoute: 'off',
+    doorALatched: false, sunDoorLatched: false, finalDoorLatched: false, returnLoopOpen: false, bridgeCrossed: false,
+    lanternPlaced: false, lanternOn: true, lanternRetrieved: true, lumoRecalled: false, recordRead: false, crystalTaken: false,
+    miniatureViewed: false, mirrors: { g0: 0, g1: 0, g2: 0 }, statue: 0,
+  };
+  const obj = (room, over) => layout.observatoryObjective(room, { ...base, ...over });
+  // never send the player to the room they are standing in
+  assert.match(obj('entrance', { lanternPlaced: true, doorAUnlocked: true }), /cửa A.*đông/, 'entrance, lamp placed, door A open: go to the east door');
+  assert.match(obj('entrance', { lanternPlaced: true }), /G0 về nấc 0/, 'entrance, door A shut: aim G0 at the door eye');
+  const inCorridor = obj('corridor', { lanternPlaced: true, doorAUnlocked: true });
+  assert.match(inCorridor, /Gài chốt cửa A/, 'corridor, door A not latched: latch it from inside');
+  assert.equal(/Đi tới cửa A/.test(inCorridor), false, 'the corridor never says to walk to door A');
+  assert.match(obj('corridor', { lanternPlaced: true, doorALatched: true }), /ống dẫn/, 'corridor, no seal: use the tube');
+  assert.match(obj('entrance', { lanternPlaced: true, doorALatched: true }), /Sang hành lang/, 'entrance, no seal: go to the corridor first');
+  const seated = { lanternPlaced: true, doorALatched: true, lumoAtSeal: true };
+  assert.match(obj('entrance', { ...seated, mirrors: { g0: 0, g1: 0, g2: 0 } }), /Xoay G0 sang nấc 1/);
+  assert.match(obj('corridor', { ...seated, mirrors: { g0: 1, g1: 0, g2: 0 } }), /Xoay G1 sang nấc 2/);
+  const inObservatory = (over) => obj('observatory', { ...seated, doorALatched: true, mirrors: { g0: 1, g1: 2, g2: 0 }, ...over });
+  assert.equal(/cửa Mặt Trời/.test(inObservatory({ sunDoorUnlocked: true, sunDoorLatched: true, activeBeamRoute: 'g2-direct-sun' })), false, 'the observatory never says to go to the Sun door');
+  assert.match(inObservatory({ sunDoorUnlocked: true, activeBeamRoute: 'g2-direct-sun' }), /G2 sang nấc 1/, 'direct route: aim G2 through the splitter');
+  assert.match(inObservatory({ sunDoorUnlocked: true, activeBeamRoute: 'g2-split' }), /tượng/, 'split route: turn the statue');
+  assert.match(inObservatory({ sunDoorUnlocked: true, rootBedShadowed: true, bridgeEligible: true }), /cầu rễ/, 'bridge up: cross it');
+  assert.match(obj('corridor', { bridgeCrossed: true, lanternPlaced: true }), /Quay lại phòng thiên văn/, 'crossed but not finished and not in the room: go back');
+  assert.match(obj('observatory', { bridgeCrossed: true }), /chốt cửa cuối/);
+  assert.match(obj('observatory', { bridgeCrossed: true, finalDoorLatched: true }), /lối đá vòng/);
+  assert.match(obj('entrance', { bridgeCrossed: true, finalDoorLatched: true, returnLoopOpen: true, lanternPlaced: true }), /Thu hồi đèn/, 'in the entrance with the loop open: take the lamp');
+  assert.match(obj('corridor', { bridgeCrossed: true, finalDoorLatched: true, returnLoopOpen: true, lanternPlaced: true }), /tiền sảnh/, 'elsewhere: go to the entrance');
+
+  // status uses the shared door predicate: a latched Sun door stays open with the beam off
+  const latchedSun = layout.observatoryStatus('corridor', { ...base, sunDoorLatched: true });
+  assert.match(latchedSun, /Cửa Mặt Trời đã gài \(giữ mở\)/, 'latched Sun door reads as held open');
+  assert.match(layout.observatoryStatus('corridor', { ...base, sunDoorUnlocked: true }), /Cửa Mặt Trời đang mở/);
+  assert.match(layout.observatoryStatus('corridor', base), /Cửa Mặt Trời đang khóa/);
+  assert.equal(layout.observatoryDoorOpen('sun-door', { ...base, sunDoorLatched: true }), true, 'status and door share one predicate');
+
+  // final door control: return prompt only when everything is done; otherwise the first missing step
+  const done = { ...base, bridgeCrossed: true, finalDoorLatched: true, returnLoopOpen: true, recordRead: true, crystalTaken: true, lumoRecalled: true };
+  assert.equal(layout.observatoryPrompt('final-door-control', done), 'E · Trở về Cây Mẹ');
+  assert.match(layout.observatoryPrompt('final-door-control', { ...done, crystalTaken: false }), /nhận Tinh thể Cân Bằng/);
+  assert.match(layout.observatoryPrompt('final-door-control', { ...done, lanternPlaced: true, lanternRetrieved: false }), /thu hồi đèn/);
+  assert.match(layout.observatoryPrompt('final-door-control', { ...base, bridgeCrossed: true }), /^E · Gài chốt cửa cuối$/);
+  assert.match(layout.observatoryPrompt('final-door-control', base), /qua cầu rễ trước/);
+  assert.deepEqual(layout.observatoryCompletionMissing(done), [], 'nothing missing when everything is done');
+
+  // placed light: the lamp's halo is painted only in the room that holds it
+  assert.equal(layout.observatoryPlacedLightVisible('entrance', true), true);
+  assert.equal(layout.observatoryPlacedLightVisible('corridor', true), false, 'a parked lamp does not light the corridor');
+  assert.equal(layout.observatoryPlacedLightVisible('observatory', true), false, 'nor the observatory');
+  assert.equal(layout.observatoryPlacedLightVisible('observatory', false), true, 'a carried lamp lights every room');
+
+  // The Shadow's spot: native size, clear of every control stand and of the bridge exit, and his footprint is a real solid.
+  const spot = layout.OBSERVATORY_SHADOW;
+  assert.deepEqual(spot.art, { width: 48, height: 64 });
+  assert.equal(spot.footprint.x + spot.footprint.width / 2, spot.ground.x, 'footprint centred on his ground anchor');
+  assert.equal(spot.footprint.y + spot.footprint.height, spot.ground.y, 'footprint ends on his ground anchor');
+  const shadowArt = { x: spot.ground.x - 24, y: spot.ground.y - 64, width: 48, height: 64 };
+  for (const element of layout.OBSERVATORY_ELEMENTS.filter((candidate) => candidate.roomId === 'observatory' && candidate.radius > 0)) {
+    const art = layout.observatoryArtRect(element);
+    const overlaps = art.x < shadowArt.x + shadowArt.width && art.x + art.width > shadowArt.x && art.y < shadowArt.y + shadowArt.height && art.y + art.height > shadowArt.y;
+    assert.equal(overlaps, false, `The Shadow does not stand on ${element.id}`);
+    assert.ok(Math.hypot(element.stand.x - spot.ground.x, element.stand.y - spot.ground.y) > element.radius + 12, `${element.id} stand is clear of the Shadow`);
+  }
+  const everySolid = layout.observatorySolidRects('observatory', { ...base, finalDoorLatched: true, returnLoopOpen: true, bridgeEligible: true });
+  assert.ok(everySolid.some((rect) => rect.x === spot.footprint.x && rect.y === spot.footprint.y), 'the Shadow footprint is part of the room solids');
+  const bridgeExit = layout.OBSERVATORY_BRIDGE_LANE;
+  assert.ok(spot.footprint.y + spot.footprint.height < bridgeExit.y, 'his footprint stays north of the passage that leaves the bridge');
+  assert.ok(Math.hypot(spot.guardianGround.x - spot.ground.x, 0) <= 48, 'the Guardian stands within a figure width of him, so the two can overlap');
+
+  // scenario lines, verbatim: section 2 (7), 4 (2+1), 5 (16), 6 (3), 7 (3)
+  assert.equal(story.OBSERVATORY_OPENING_ENTRANCE.length + story.OBSERVATORY_OPENING_CORRIDOR.length, 7, 'section 2 has seven spoken lines in two beats');
+  assert.equal(story.OBSERVATORY_OPENING_ENTRANCE.at(-1).text, 'Không. Tôi nhớ tiếng nó từng quay.');
+  assert.equal(story.OBSERVATORY_OPENING_CORRIDOR[0].text, 'Chính đường này. Tôi đã bay từ trạm nước lên đây.');
+  assert.equal(story.OBSERVATORY_BEAT_ROOTS_LIT.length, 2); assert.equal(story.OBSERVATORY_BEAT_NO_BEAM.length, 1);
+  assert.equal(story.OBSERVATORY_MEMORY_SPOKEN_LINES.length, 16, 'section 5 keeps all sixteen spoken lines');
+  assert.deepEqual(story.OBSERVATORY_MEMORY_SPOKEN_LINES.slice(4, 6).map((line) => line.text), ['Tôi đã giữ ấn.', 'Tôi tưởng mình đang giúp ông ấy đưa mọi người về.'], 'the held-seal lines are separate');
+  assert.equal(story.OBSERVATORY_MEMORY_SPOKEN_LINES.at(-1).text, 'Phần ký ức này không có câu trả lời đó.', 'the scene ends on the Shadow\'s last line');
+  assert.equal(story.OBSERVATORY_CRYSTAL_LINES.length, 3); assert.equal(story.OBSERVATORY_EXIT_LINES.length, 3);
+  assert.deepEqual(story.OBSERVATORY_EXIT_LINES.map((line) => line.text), ['Tôi vẫn sợ.', 'Cậu cứ nói khi sợ. Mình sẽ cùng nhìn lại đường đi.', 'Vậy… mình về Cây Mẹ thôi.']);
+  for (const line of story.OBSERVATORY_MEMORY_SPOKEN_LINES) assert.equal(/cô bé (còn sống|đã mất)|đã mất/.test(line.text), false, 'no line settles the girl\'s fate');
+  console.log('  guidance     : room-aware objectives, shared door predicate, final-door prompts, Shadow spot, placed light, scenario lines');
+}
+
+// ---------------------------------------------------------------- H ladder is the scenario text (scenario 09 §7)
+// Every network-solve state (lamp placed, bridge not yet crossed) shows the scenario Mức 1-3 verbatim, in order.
+{
+  const hits = [...readFileSync(join(rootDir, 'docs/scenario/09-dark-moon-observatory.md'), 'utf8')
+    .matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], 'scenario 09 lists Mức 1, 2, 3 in order');
+  const MUC = hits.map((m) => m[2].normalize('NFC'));
+  for (const roomId of ROOMS) {
+    for (const stage of [STAGES.lampPlaced, STAGES.doorALatched, STAGES.beamToObservatory, STAGES.splitWithShadow]) {
+      assert.deepEqual([...observatoryHints(roomId, stage)], MUC, `${roomId}: the network solve shows Mức 1, 2, 3 verbatim`);
+    }
+  }
+}
+
+console.log('Observatory H ladder checks passed (network solve is the scenario Mức 1-3 verbatim, in order).');

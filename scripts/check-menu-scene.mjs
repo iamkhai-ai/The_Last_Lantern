@@ -134,7 +134,7 @@ fresh.key('Enter');
 assert.deepEqual(fresh.starts, [['PrologueScene']]);
 for (const [save, expected] of [
   [{ campaign: true }, ['CampaignScene']],
-  [{ campaign: true, completed: true }, ['EndingScene', { showCredits: true, campaign: true }]],
+  [{ campaign: true, completed: true }, ['EndingScene', { campaign: true }]],
   [{ legacy: true }, ['WorldScene', { progress: { stage: 'woods' } }]],
   [{ legacy: true, victory: true }, ['EndingScene']],
 ]) {

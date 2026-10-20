@@ -18,7 +18,7 @@
 - Cổng/vòm chuyển màn: trigger đặt ngay dưới vòm theo hướng đi vào (đi từ phía trong màn) — ví dụ `FOREST_EDGE.objects.gate.exit = (486, 151)`, `SHATTERED_CREEK.objects.exit.stand = (568, 286)`.
 - Vật ven nước/chướng ngại không thể tiếp cận từ nam: đặt `stand` ở cạnh tiếp cận hợp lệ — ví dụ `SHATTERED_CREEK.objects.latchA/B.stand` nằm phía đường đi + khóa bằng `canApproach` theo bờ.
 - **Màn 02 (Whispering Woods) — bia thơ và ba bia cổ tự: prompt hiện từ CẢ BỐN PHÍA (`isInReach`), theo quyết định thiết kế 2026-10-20.** Lý do: người chơi playtest đứng sau/sát hông bia vẫn phải thấy `[E]`, không chỉ khi vòng xuống mép nam. `isInReach` (`src/data/whisperingWoodsLayout.ts`, dùng chung với `isWoodsCenterWalkable` qua `woodsFootBody`) thay cho bán kính: thân bàn chân 14×6 nằm trong ~11px quanh footprint của bia ở bất kì phía nào. Mỗi bia vẫn giữ "lối vào nam" đã đặt (`WOODS_STONE_APPROACH_RADIUS` = 24 quanh `stands[id]`) vì đó là nơi màn chơi đặt người chơi — spawn màn (136,286) nằm 10px dưới `stands.poem`, và các `stand` của cổ tự là chỗ chơi thật. Bán kính 24px nhỏ hơn vùng chạm của bia bên cạnh nên không bia nào giật prompt của bia khác; `x`/`y` vẫn là `stand` để neo prompt và phân xử tie-break.
-- Màn index ≥ 4 (màn 5 trở đi) hiện chưa mở; khi kích hoạt phải rà lại toàn bộ trigger theo luật này.
+- Cả 10 màn đều mở trong chiến dịch. Mỗi màn có controller/layout riêng (màn 01–02 inline trong `CampaignScene`); mọi trigger phải theo luật này và được kiểm bằng script `scripts/check-*.mjs` của màn đó. Điều khiển đứng (có chân đế) chỉ trả lời E từ mặt nam của chân đế (`towerCanApproachFront` ở màn 06 là ví dụ); điều khiển tường/cửa dùng ngoại lệ ở mục này và ghi lý do trong data.
 
 ## 4. Quy trình kiểm tra
 

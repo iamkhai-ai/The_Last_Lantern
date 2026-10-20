@@ -176,7 +176,7 @@ export const OBSERVATORY_WALLS: Record<ObservatoryRoomKey, readonly ObsRect[]> =
     { x: 616, y: 152, width: 24, height: 148 },
     { x: 0, y: 300, width: 488, height: 60 },
     { x: 548, y: 300, width: 92, height: 60 },
-    { x: 496, y: 334, width: 48, height: 26 },
+    { x: 488, y: 320, width: 64, height: 40 },
   ],
 };
 
@@ -185,11 +185,13 @@ export const OBSERVATORY_WALLS: Record<ObservatoryRoomKey, readonly ObsRect[]> =
  * ------------------------------------------------------------------ */
 
 /**
- * Jambs are thicker (24px) than the opening is tall, so the nearest standing
- * point outside a locked alcove is always further away than the trigger radius.
- * That is what makes "unreachable while locked" a geometric fact instead of a
- * convention: with a 28px trigger and 24px jambs the closest outside foot body
- * is at least 32px from the trigger.
+ * Side alcoves: jambs are thicker (24px) than the opening is tall, so the nearest
+ * standing point outside a locked alcove is always further away than the trigger
+ * radius. That makes "unreachable while locked" a geometric fact instead of a
+ * convention: with a 28px trigger and 24px jambs the closest outside foot body is
+ * at least 32px from the trigger. The south return-loop pocket (8px jambs, 16px
+ * trigger) does not follow this rule; its exact geometry is checked by the "South
+ * sill pocket" block in scripts/check-observatory.mjs instead.
  */
 export const OBSERVATORY_JAMB_THICKNESS = 24;
 
@@ -240,14 +242,19 @@ export const OBSERVATORY_ALCOVES: readonly ObsAlcove[] = [
     label: 'Lối đá vòng',
   },
   {
-    // A south sill pocket: the foot body only reaches the trigger once the loop
-    // opens, because the main floor band stops at y=300.
+    // A 20px south sill pocket (y 300..320), the only alcove shallower than 48px:
+    // it must end above the bottom status band (y>=320). The floor band stops at
+    // y=300, so with the loop shut the lowest legal foot-body centre is (520,278),
+    // 26px from the trigger (radius 16, outside). With the loop open the body can
+    // stand inside the pocket with its bottom at y=320: centre (520,298), 6px from
+    // the trigger (inside). The south masonry under the sill (OBSERVATORY_WALLS,
+    // y 320..360) closes the pocket from below.
     id: 'return-loop-observatory', roomId: 'observatory', doorId: 'return-loop',
-    threshold: { x: 496, y: 300, width: 48, height: 34 },
-    jambs: [{ x: 488, y: 300, width: 8, height: 60 }, { x: 548, y: 300, width: 8, height: 60 }],
+    threshold: { x: 496, y: 300, width: 48, height: 20 },
+    jambs: [{ x: 488, y: 300, width: 8, height: 20 }, { x: 544, y: 300, width: 8, height: 20 }],
     inspect: { x: 520, y: 262 }, inspectRadius: 22,
-    trigger: { x: 520, y: 318 }, triggerRadius: 28,
-    arch: { x: 496, y: 300, width: 48, height: 34 },
+    trigger: { x: 520, y: 304 }, triggerRadius: 16,
+    arch: { x: 496, y: 284, width: 48, height: 36 },
     label: 'Lối đá vòng',
   },
 ];
@@ -286,11 +293,11 @@ const mirror = (index: number): ObsArtRef => ({ kind: 'texture', key: `mirror_${
 export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   // --- entrance / lobby: source pedestal, G0, and the safe practice miniature.
   {
-    id: 'lantern-pedestal', roomId: 'entrance', art: pedestal, nativeWidth: 36, nativeHeight: 46, scale: 1,
+    id: 'lantern-pedestal', roomId: 'entrance', art: pedestal, nativeWidth: 36, nativeHeight: 39, scale: 1,
     anchor: { x: 188, y: 232 }, stand: { x: 188, y: 250 }, radius: 22, approach: 'south',
   },
   {
-    id: 'g0', roomId: 'entrance', art: mirror(0), nativeWidth: 40, nativeHeight: 50, scale: 0.9,
+    id: 'g0', roomId: 'entrance', art: mirror(0), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
     anchor: { x: 432, y: 236 }, stand: { x: 432, y: 254 }, radius: 22, approach: 'south', rotatesWith: 'g0',
   },
   {
@@ -300,7 +307,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   },
   // --- corridor / star-map room.
   {
-    id: 'g1', roomId: 'corridor', art: mirror(1), nativeWidth: 40, nativeHeight: 50, scale: 0.9,
+    id: 'g1', roomId: 'corridor', art: mirror(1), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
     anchor: { x: 240, y: 216 }, stand: { x: 240, y: 234 }, radius: 22, approach: 'south', rotatesWith: 'g1',
   },
   {
@@ -318,7 +325,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 56, y: 204 }, stand: { x: 56, y: 222 }, radius: 22, approach: 'south',
   },
   {
-    id: 'sun-door-control', roomId: 'corridor', art: lockSun, nativeWidth: 36, nativeHeight: 44, scale: 1,
+    id: 'sun-door-control', roomId: 'corridor', art: lockSun, nativeWidth: 32, nativeHeight: 40, scale: 1,
     anchor: { x: 500, y: 260 }, stand: { x: 500, y: 278 }, radius: 22, approach: 'south',
   },
   {
@@ -327,7 +334,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   },
   // --- observatory: the combined puzzle room.
   {
-    id: 'g2', roomId: 'observatory', art: mirror(2), nativeWidth: 40, nativeHeight: 50, scale: 0.9,
+    id: 'g2', roomId: 'observatory', art: mirror(2), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
     anchor: { x: 168, y: 258 }, stand: { x: 168, y: 276 }, radius: 22, approach: 'south', rotatesWith: 'g2',
   },
   {
@@ -339,7 +346,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 296, y: 252 }, stand: { x: 296, y: 270 }, radius: 22, approach: 'south', rotatesWith: 'statue',
   },
   {
-    id: 'sun-lock', roomId: 'observatory', art: lockSun, nativeWidth: 36, nativeHeight: 44, scale: 0.85,
+    id: 'sun-lock', roomId: 'observatory', art: lockSun, nativeWidth: 32, nativeHeight: 40, scale: 0.85,
     anchor: { x: 176, y: 152 }, stand: { x: 176, y: 170 }, radius: 22, approach: 'south',
   },
   {
@@ -364,7 +371,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 500, y: 152 }, stand: { x: 500, y: 152 }, radius: 0, approach: 'gate', mount: 'ground',
   },
   {
-    id: 'stone-return-loop', roomId: 'observatory', art: receiver, nativeWidth: 40, nativeHeight: 48, scale: 0.7,
+    id: 'stone-return-loop', roomId: 'observatory', art: receiver, nativeWidth: 40, nativeHeight: 37, scale: 0.7,
     anchor: { x: 466, y: 252 }, stand: { x: 466, y: 270 }, radius: 22, approach: 'south',
   },
   {
@@ -372,7 +379,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
     anchor: { x: 418, y: 256 }, stand: { x: 418, y: 274 }, radius: 22, approach: 'south',
   },
   {
-    id: 'balance-crystal', roomId: 'observatory', art: crystal, nativeWidth: 42, nativeHeight: 50, scale: 0.6,
+    id: 'balance-crystal', roomId: 'observatory', art: crystal, nativeWidth: 42, nativeHeight: 78, scale: 0.5,
     anchor: { x: 568, y: 252 }, stand: { x: 568, y: 270 }, radius: 22, approach: 'south',
   },
 ];
@@ -383,7 +390,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
  * solid while locked).
  */
 export const OBSERVATORY_NON_SOLID_IDS = [
-  'lumo-tube', 'lumo-seal', 'learned-marks', 'final-door', 'root-bed',
+  'lumo-tube', 'lumo-seal', 'learned-marks', 'final-door',
   'door-a-control', 'final-door-control',
 ] as const;
 
@@ -398,8 +405,9 @@ export function observatoryElement(id: string): ObsElement | undefined {
 /**
  * Standing props are the level's real obstacles: anything drawn as a standing
  * object is solid, matching its visible art exactly. Wall-mounted art, walkable
- * floor art, the root bed (dynamic) and the two latch plates drawn on a door sill
- * are excluded, and so are ground mounts such as the practice miniature.
+ * floor art and the two latch plates drawn on a door sill are excluded, and so
+ * are ground mounts: the practice miniature, and the root bed, whose solid is the
+ * dynamic bed rectangle in observatorySolidRects.
  */
 export function observatoryElementSolids(roomId: ObservatoryRoomKey): readonly ObsRect[] {
   return observatoryElements(roomId)
@@ -410,6 +418,27 @@ export function observatoryElementSolids(roomId: ObservatoryRoomKey): readonly O
 /* ------------------------------------------------------------------ *
  * Dynamic structures: root bed, bridge lane, floor stamps
  * ------------------------------------------------------------------ */
+
+/**
+ * The Shadow waits on the far bank, north of the final record and clear of the loop control, the bridge exit and
+ * every stand. His footprint is a solid (the only prop that is not an ObsElement); the Guardian of the memory
+ * stands one step east of him and he steps into that place during the record (scenario section 5).
+ */
+export const OBSERVATORY_SHADOW = {
+  art: { width: 48, height: 64 },
+  ground: { x: 424, y: 190 } as ObsPoint,
+  footprint: { x: 410, y: 174, width: 28, height: 16 } as ObsRect,
+  guardianGround: { x: 466, y: 190 } as ObsPoint,
+} as const;
+
+/**
+ * The lantern's logic stays on the pedestal, but its halo is only painted in the room that holds it: a lamp parked
+ * in the entrance never lights the corridor or the observatory. A carried lamp lights every room it is in.
+ */
+export const OBSERVATORY_PLACED_LIGHT_ROOM: ObservatoryRoomKey = 'entrance';
+export function observatoryPlacedLightVisible(roomId: ObservatoryRoomKey, lanternPlaced: boolean): boolean {
+  return !lanternPlaced || roomId === OBSERVATORY_PLACED_LIGHT_ROOM;
+}
 
 export const OBSERVATORY_ROOT_BED: ObsRect = { x: 340, y: 152, width: 44, height: 148 };
 /** The crossing lane cut through the bed; walkable only while the bridge holds. */
@@ -544,6 +573,7 @@ export function observatorySolidRects(roomId: ObservatoryRoomKey, state: ObsWorl
     const held = occupied.some((body) => rectsOverlap(body, OBSERVATORY_BRIDGE_LANE));
     if (!state.bridgeEligible && !held) rects.push(OBSERVATORY_BRIDGE_LANE);
     if (!state.finalDoorLatched) rects.push(OBSERVATORY_FINAL_DOOR_HEAD);
+    rects.push(OBSERVATORY_SHADOW.footprint);
   }
   return rects;
 }
@@ -703,6 +733,18 @@ export function observatoryFinalDoorBlockReason(state: ObsWorldState): string {
   return '';
 }
 
+/** Remaining completion steps in play order; the first one is what a prompt or objective names. */
+export function observatoryCompletionMissing(state: ObsWorldState): string[] {
+  const missing: string[] = [];
+  if (!state.finalDoorLatched) missing.push('gài chốt cửa cuối');
+  if (!state.returnLoopOpen) missing.push('mở lối đá vòng');
+  if (!state.lanternRetrieved || state.lanternPlaced) missing.push('thu hồi đèn về tay');
+  if (!state.lumoRecalled || state.lumoAtSeal) missing.push('gọi Lumo về bên đèn');
+  if (!state.recordRead) missing.push('đọc bản ghi cuối');
+  if (!state.crystalTaken) missing.push('nhận Tinh thể Cân Bằng');
+  return missing;
+}
+
 export function observatoryCompletionReady(state: ObsWorldState): boolean {
   return state.finalDoorLatched && state.returnLoopOpen && state.lanternRetrieved && !state.lanternPlaced
     && state.lumoRecalled && state.recordRead && state.crystalTaken;
@@ -730,43 +772,85 @@ export function observatoryGuidance(roomId: ObservatoryRoomKey, state: ObsWorldS
   };
 }
 
+const ROOM_NAME: Record<ObservatoryRoomKey, string> = { entrance: 'tiền sảnh', corridor: 'hành lang phòng sao', observatory: 'phòng thiên văn' };
+
+/** Door status that shares the door predicate: a latched door stays "giữ mở" even when its beam is off. */
+function observatoryDoorStatus(doorId: ObservatoryDoorKey, state: ObsWorldState): string {
+  if (observatoryDoorLatched(doorId, state)) return doorId === 'return-loop' ? 'đã mở' : 'đã gài (giữ mở)';
+  return observatoryDoorOpen(doorId, state) ? 'đang mở' : 'đang khóa';
+}
+
+/**
+ * Objective row, room-aware: it names the next missing step AND where to do it, and it never sends the player
+ * to a room they are already standing in.
+ */
 export function observatoryObjective(roomId: ObservatoryRoomKey, state: ObsWorldState): string {
-  if (state.crystalTaken) return 'Quay lại chốt cửa cuối và nhấn E để trở về Cây Mẹ.';
-  if (state.recordRead) return 'Nhận Tinh thể Cân Bằng trong vòng trăng bằng E.';
-  if (state.returnLoopOpen && (!state.lanternRetrieved || state.lanternPlaced)) {
-    return 'Theo lối đá vòng về bệ đèn ở tiền sảnh và thu hồi đèn bằng E.';
+  const here = (target: ObservatoryRoomKey): boolean => roomId === target;
+  if (state.crystalTaken) {
+    return here('observatory')
+      ? 'Nhấn E ở chốt cửa cuối (tường phía bắc, bờ bên kia) để trở về Cây Mẹ.'
+      : 'Quay lại chốt cửa cuối ở phòng thiên văn và nhấn E để trở về Cây Mẹ.';
   }
-  if (state.returnLoopOpen && !state.lumoRecalled) return 'Gọi Lumo trở về bên bệ đèn bằng E.';
-  if (state.returnLoopOpen && state.lumoRecalled) return 'Đọc bản ghi cuối cạnh The Shadow bằng E.';
+  if (state.recordRead) return 'Nhận Tinh thể Cân Bằng trong vòng trăng ở phòng thiên văn bằng E.';
+  if (state.returnLoopOpen) {
+    if (!state.lanternRetrieved || state.lanternPlaced) {
+      return here('entrance') ? 'Thu hồi đèn trên bệ đá bằng E.' : 'Theo lối đá vòng về bệ đèn ở tiền sảnh và thu hồi đèn bằng E.';
+    }
+    if (!state.lumoRecalled || state.lumoAtSeal) {
+      return here('corridor') ? 'Gọi Lumo trở về bên đèn bằng E ở ống dẫn.' : 'Gọi Lumo trở về bên đèn bằng E ở ống dẫn trong hành lang phòng sao.';
+    }
+    return here('observatory') ? 'Đọc bản ghi cuối cạnh The Shadow bằng E.' : 'Về phòng thiên văn và đọc bản ghi cuối cạnh The Shadow bằng E.';
+  }
   if (!state.bridgeCrossed) {
-    if (state.bridgeEligible) return 'Băng qua cầu rễ sang bờ bên kia.';
-    if (state.sunDoorUnlocked) return 'Xoay tượng cho mặt rộng che luống rễ để cầu rễ mọc.';
-    if (!state.lanternPlaced) return 'Đặt đèn đang bật lên bệ đá ở tiền sảnh bằng E.';
-    if (!observatoryDoorOpen('door-a', state) && !state.doorALatched) return 'Xoay G0 cho tia sáng chiếu vào mắt cửa A.';
-    if (!state.doorALatched) return 'Đi tới cửa A ở tường phía đông và nhấn E để sang hành lang phòng sao.';
-    if (!state.lumoAtSeal) return 'Đứng trước ống dẫn ở hành lang phòng sao và gọi Lumo tới ấn bằng E.';
-    if (state.mirrors.g0 !== 1) return 'Quay lại tiền sảnh và xoay G0 sang nấc 1.';
-    if (state.mirrors.g1 !== 2) return 'Xoay G1 sang nấc 2 trong hành lang phòng sao.';
-    return 'Đi tới cửa Mặt Trời ở tường phía đông hành lang và nhấn E.';
+    if (here('observatory')) {
+      if (state.bridgeEligible) return 'Băng qua cầu rễ sang bờ bên kia.';
+      if (!state.sunDoorUnlocked) return 'Khóa Nhật chưa sáng: kiểm tra đèn trên bệ, ấn của Lumo và G0, G1, G2.';
+      if (state.activeBeamRoute === 'g2-split') return 'Xoay tượng cho mặt rộng che luống rễ để cầu rễ mọc.';
+      return 'Ánh sáng đang phủ lên rễ. Xoay G2 sang nấc 1 để dẫn tia qua khung chia, rồi xoay tượng che luống rễ.';
+    }
+    if (!state.lanternPlaced) return here('entrance') ? 'Đặt đèn đang bật lên bệ đá bằng E.' : 'Quay về tiền sảnh và đặt đèn đang bật lên bệ đá.';
+    if (!state.doorALatched) {
+      if (here('entrance')) {
+        return observatoryDoorOpen('door-a', state)
+          ? 'Đi tới cửa A ở tường phía đông và nhấn E để sang hành lang phòng sao.'
+          : 'Xoay G0 về nấc 0 cho tia sáng chiếu vào mắt cửa A.';
+      }
+      return 'Gài chốt cửa A ở phía tây hành lang (chốt nằm ngay trước cửa) bằng E để cửa giữ mở.';
+    }
+    if (!state.lumoAtSeal) {
+      return here('corridor') ? 'Đứng trước ống dẫn trên tường hành lang và nhấn E để gọi Lumo tới ấn.' : 'Sang hành lang phòng sao và gọi Lumo tới ấn bằng ống dẫn.';
+    }
+    if (state.mirrors.g0 !== 1) return here('entrance') ? 'Xoay G0 sang nấc 1 để tia đi qua ống tới ấn.' : 'Quay lại tiền sảnh và xoay G0 sang nấc 1.';
+    if (state.mirrors.g1 !== 2) return here('corridor') ? 'Xoay G1 sang nấc 2 để tia phản chiếu sang phòng thiên văn.' : 'Sang hành lang phòng sao và xoay G1 sang nấc 2.';
+    if (!observatoryDoorOpen('sun-door', state)) return `Cửa Mặt Trời còn khép. ${observatoryDoorBlockReason('sun-door', state)}`;
+    return 'Đi tới cửa Mặt Trời ở tường phía đông hành lang và nhấn E để sang phòng thiên văn.';
   }
-  if (roomId === 'observatory') {
-    if (!state.finalDoorLatched) return 'Gài chốt cửa cuối ở tường phía bắc bằng E.';
-    if (!state.returnLoopOpen) return 'Mở lối đá vòng bằng E để giữ đường quay lại.';
-    return 'Nhấn E ở chốt cửa cuối để trở về Cây Mẹ.';
-  }
-  return 'Tiến lại gần vật cần dùng và nhấn E.';
+  // Crossed the bridge, loop still shut.
+  if (!here('observatory')) return 'Quay lại phòng thiên văn qua cửa Mặt Trời và hoàn tất bờ bên kia.';
+  if (!state.finalDoorLatched) return 'Gài chốt cửa cuối ở tường phía bắc bằng E.';
+  return 'Mở lối đá vòng bằng E để giữ đường quay lại.';
 }
 
 export function observatoryStatus(roomId: ObservatoryRoomKey, state: ObsWorldState): string {
-  const doorA = state.doorALatched ? 'đã gài' : state.doorAUnlocked ? 'đang mở' : 'đang khóa';
-  const sun = state.sunDoorUnlocked ? 'đang mở' : 'đang khóa';
+  const doorA = observatoryDoorStatus('door-a', state);
+  const sun = observatoryDoorStatus('sun-door', state);
   const bed = state.bridgeEligible ? 'cầu đã mọc' : state.rootBedShadowed ? 'rễ trong bóng' : 'rễ còn sáng';
-  const room = roomId === 'entrance' ? 'tiền sảnh' : roomId === 'corridor' ? 'hành lang phòng sao' : 'phòng thiên văn';
   const lamp = state.lanternPlaced ? 'trên bệ' : 'trong tay';
-  return `Phòng: ${room} · Đèn: ${lamp} (${state.lanternOn ? 'bật' : 'tắt'})`
+  return `Phòng: ${ROOM_NAME[roomId]} · Đèn: ${lamp} (${state.lanternOn ? 'bật' : 'tắt'})`
     + ` · G0 ${state.mirrors.g0} / G1 ${state.mirrors.g1} / G2 ${state.mirrors.g2} · Tượng ${state.statue}`
     + ` · Cửa A ${doorA} · Cửa Mặt Trời ${sun} · ${bed} · Lối vòng ${state.returnLoopOpen ? 'đã mở' : 'chưa mở'}`;
 }
+
+/**
+ * Scenario 09 §7, Mức 1-3 verbatim: one H ladder for the whole network solve (lamp placed, bridge not yet
+ * crossed). Stage-specific lines stay only where §7 allows them: the lamp placement step before the network
+ * starts, the bridge/final-door step, and the post-solve record and crystal states.
+ */
+const OBSERVATORY_NETWORK_LADDER: readonly string[] = [
+  'Xem các đường nối trên tường. G0 dùng cho cả cửa vào lẫn đường tia tới phòng sao.',
+  'Giữ cửa vào bằng chốt rồi đổi nguồn sang phòng sao. Cửa cuối cần sáng, nhưng rễ cần bóng của tượng.',
+  'Gài cửa A, gọi tôi tới ấn, hướng G0 qua G1 tới G2. Chọn đường G2 qua khung tượng, che luống rễ rồi qua cầu và mở lối vòng.',
+];
 
 export function observatoryHints(roomId: ObservatoryRoomKey, state: ObsWorldState): readonly string[] {
   if (state.crystalTaken) {
@@ -796,29 +880,7 @@ export function observatoryHints(roomId: ObservatoryRoomKey, state: ObsWorldStat
       'Đèn phải nằm trên bệ đá ở tiền sảnh thì mạng sáng mới hoạt động.',
       'Đứng trước bệ đá ở tiền sảnh và nhấn E để đặt đèn.'];
   }
-  if (!state.doorALatched) {
-    return ['Xem các đường nối trên tường. G0 dùng cho cả cửa vào lẫn đường tia tới phòng sao.',
-      'Cửa A chỉ mở khi tia sáng chiếu vào mắt cửa; chốt phía trong sẽ giữ cửa mở lâu dài.',
-      'Vào hành lang phòng sao qua cửa A rồi gài chốt phía trong bằng E.'];
-  }
-  if (!state.lumoAtSeal) {
-    return ['Giữ cửa vào bằng chốt rồi đổi nguồn sáng sang phòng sao.',
-      'Đường ống trên tường hành lang có một ấn dành cho Lumo; chỉ khi Lumo giữ ấn thì tia mới đi tiếp.',
-      'Đứng trước ống dẫn ở hành lang phòng sao và nhấn E để gọi Lumo tới ấn.'];
-  }
-  if (!state.sunDoorUnlocked) {
-    return ['Gài cửa A, gọi Lumo tới ấn, hướng G0 qua G1 tới G2.',
-      'G0 nằm ở tiền sảnh; G1 nằm ở hành lang phòng sao; G2 nằm ở phòng thiên văn.',
-      'Xoay G0 sang nấc 1 và G1 sang nấc 2 rồi đi tới cửa Mặt Trời ở tường phía đông hành lang.'];
-  }
-  if (!state.rootBedShadowed) {
-    return ['Cửa cuối cần sáng, nhưng rễ cần bóng của tượng.',
-      'Khung chia tia gửi một nhánh lên khóa Nhật và một nhánh qua vị trí tượng tới luống rễ.',
-      'Xoay G2 vào khung chia tia (nấc 1) rồi xoay tượng cho mặt rộng che luống rễ.'];
-  }
-  return ['Khóa Nhật đã sáng, rễ đã nằm trong bóng và Lumo vẫn giữ ấn.',
-    'Cầu rễ mọc qua luống rễ ở giữa phòng thiên văn.',
-    'Đi theo cầu rễ sang bờ bên kia rồi gài chốt cửa cuối bằng E.'];
+  return OBSERVATORY_NETWORK_LADDER;
 }
 
 /** Prompt labels for every authored control; disabled gates always explain themselves. */
@@ -847,12 +909,13 @@ export function observatoryPrompt(id: string, state: ObsWorldState): string {
       if (!state.doorAUnlocked) return `E · Kiểm tra chốt cửa A — ${observatoryDoorBlockReason('door-a', state)}`;
       return 'E · Gài chốt cửa A từ bên trong';
     case 'sun-door-control':
-      return state.sunDoorUnlocked ? 'Cửa Mặt Trời đang mở' : `E · Kiểm tra cửa Mặt Trời — ${observatoryDoorBlockReason('sun-door', state)}`;
+      return observatoryDoorOpen('sun-door', state) ? 'Cửa Mặt Trời đang mở' : `E · Kiểm tra cửa Mặt Trời — ${observatoryDoorBlockReason('sun-door', state)}`;
     case 'root-bed':
       return state.bridgeEligible ? 'Luống rễ đã kết thành cầu'
         : `E · Xem luống rễ — ${observatoryBridgeBlockReason(state)}`;
     case 'final-door-control':
-      return state.finalDoorLatched ? 'Chốt cửa cuối đã gài' : `E · Gài chốt cửa cuối`;
+      if (!state.finalDoorLatched) return state.bridgeCrossed ? 'E · Gài chốt cửa cuối' : 'E · Chốt cửa cuối (qua cầu rễ trước)';
+      return observatoryCompletionReady(state) ? 'E · Trở về Cây Mẹ' : `E · Cửa cuối đã gài — còn cần: ${observatoryCompletionMissing(state)[0]}`;
     case 'stone-return-loop':
       return state.returnLoopOpen ? 'Lối đá vòng đã mở' : `E · Mở lối đá vòng — ${observatoryDoorBlockReason('return-loop', state)}`;
     case 'final-record':

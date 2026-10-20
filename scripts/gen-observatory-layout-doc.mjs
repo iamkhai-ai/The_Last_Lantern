@@ -11,8 +11,8 @@ import { dirname, join } from 'node:path';
 import {
   OBSERVATORY_ALCOVES, OBSERVATORY_BODY, OBSERVATORY_BRIDGE_LANE, OBSERVATORY_ELEMENTS,
   OBSERVATORY_FINAL_DOOR_HEAD, OBSERVATORY_FLOORS, OBSERVATORY_JAMB_THICKNESS,
-  OBSERVATORY_NON_SOLID_IDS, OBSERVATORY_ROOT_BED, OBSERVATORY_STAMPS, OBSERVATORY_WALLS,
-  observatoryArtRect, observatoryPrompt,
+  OBSERVATORY_NON_SOLID_IDS, OBSERVATORY_PLACED_LIGHT_ROOM, OBSERVATORY_ROOT_BED, OBSERVATORY_SHADOW, OBSERVATORY_STAMPS, OBSERVATORY_WALLS,
+  observatoryArtRect, observatoryBody, observatoryPrompt,
 } from '../src/data/observatoryLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
 
@@ -21,10 +21,31 @@ const rect = (r) => `${r.x},${r.y},${r.width},${r.height}`;
 const point = (p) => `${p.x},${p.y}`;
 const ROOMS = ['entrance', 'corridor', 'observatory'];
 const ROOM_TITLE = {
-  entrance: 'tiền sảnh (`lobby-base`)',
-  corridor: 'hành lang phòng sao (`star-chart-base`)',
+  entrance: 'tiền sảnh (composed stone floor; the `lobby-base` staging board is not used)',
+  corridor: 'hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used)',
   observatory: 'phòng thiên văn (`observatory-clean-base`)',
 };
+
+// Numbers quoted in the south-pocket sentences come from the data. The guards make the
+// generator fail instead of writing a sentence that no longer matches the geometry.
+const pocket = OBSERVATORY_ALCOVES.find((alcove) => alcove.id === 'return-loop-observatory');
+if (!pocket) throw new Error('return-loop-observatory alcove is missing');
+const sideAlcoves = OBSERVATORY_ALCOVES.filter((alcove) => alcove !== pocket);
+const sideRadius = sideAlcoves[0].triggerRadius;
+if (sideAlcoves.some((alcove) => alcove.triggerRadius !== sideRadius)) {
+  throw new Error('side alcoves do not share one trigger radius; reword the transit-circle sentence');
+}
+const observatoryFloor = OBSERVATORY_FLOORS.observatory;
+if (pocket.threshold.y !== observatoryFloor.y + observatoryFloor.height) {
+  throw new Error('the south pocket must open exactly at the observatory floor edge');
+}
+// Lowest centre with the loop shut: the foot body's bottom edge stays on the floor band.
+// observatoryBody() at the origin gives the body's offset from the centre (y 16, height 6).
+const bodyAtOrigin = observatoryBody({ x: 0, y: 0 });
+const lowestCentreY = observatoryFloor.y + observatoryFloor.height - bodyAtOrigin.y - bodyAtOrigin.height;
+const pocketGap = pocket.trigger.y - lowestCentreY;
+const pocketMargin = pocketGap - pocket.triggerRadius;
+if (pocketMargin <= 0) throw new Error('south pocket transit circle reaches a legal centre while the loop is shut');
 
 const artLabel = (element) => (element.art.kind === 'texture'
   ? `texture \`${element.art.key}\``
@@ -63,10 +84,12 @@ p(`  is **${OBSERVATORY_BODY.width}×${OBSERVATORY_BODY.height}** at \`center + 
 p('- Depth: floor art 0..7, door arches 3, ground-mounted art 3, bridge deck 6, standing props');
 p('  `10 + groundAnchorY/10`, memory overlay 94, prompt container 82, HUD 86. Darkness uses the shared');
 p('  `LanternSystem` overlay stack (68..71) instead of a level-local overlay.');
-p('- HUD text occupies y=0..58 and y=320..360. No collider, stand or prompt sits in those bands, and every');
-p('  world sprite sorts below prompt/HUD depth so nothing can draw over the HUD.');
+p('- HUD text occupies y=0..58 and y=320..360. No stand, transit circle, inspect control, door threshold, arch or');
+p('  walkable floor sits in those bands (checked for every alcove by `scripts/check-observatory.mjs`). Outer masonry');
+p('  may run under the status band as solid wall that is never walkable. Every world sprite sorts below the');
+p('  prompt/HUD depth so nothing can draw over the HUD.');
 p('- A door is a recessed alcove: a 48px opening, permanent jambs');
-p(`  ${OBSERVATORY_JAMB_THICKNESS}px thick, and a threshold that is solid only while the door is shut. The transit`);
+p(`  (${OBSERVATORY_JAMB_THICKNESS}px thick on the side alcoves, ${pocket.jambs[0].width}px on the south sill pocket), and a threshold that is solid only while the door is shut. The transit`);
 p('  trigger sits deep inside the alcove, so it is geometrically unreachable while locked, and a');
 p('  room-facing inspect control at the alcove mouth always names the missing prerequisite in Vietnamese.');
 p();
@@ -141,8 +164,8 @@ for (const roomId of ROOMS) {
   p(`- ${roomId}: ${OBSERVATORY_STAMPS[roomId].map((stamp) => `\`${stamp.id}\` ${rect(stamp)} depth ${stamp.depth}`).join(' · ')}`);
 }
 p();
-p('Non-colliding art — wall-mounted modules, walkable floor art, the dynamic root bed and the two latch');
-p(`plates painted on a door sill: \`${OBSERVATORY_NON_SOLID_IDS.join('`, `')}\`.`);
+p('Non-colliding art — wall-mounted modules, walkable floor art and the two latch plates painted on a door');
+p(`sill: \`${OBSERVATORY_NON_SOLID_IDS.join('`, `')}\`. The root bed is solid and is not listed here (see Dynamic structures).`);
 p();
 
 p('## Beam routing (pure, derived)');
@@ -196,7 +219,9 @@ for (const element of OBSERVATORY_ELEMENTS) {
 }
 p();
 p('- Every trigger centre sits at or below its object\'s south edge, or on the documented side/gate');
-p('  exception; standing north, east or west of a prop shows nothing, and radii stay 22..24 (exits 28..30).');
+p('  exception; standing north, east or west of a prop shows nothing, and control radii stay 22..24.');
+p(`- Transit circles are ${sideRadius}px, except the south sill pocket (${pocket.triggerRadius}px): its centre (${point(pocket.trigger)}) sits ${pocketGap}px from the nearest`);
+p(`  foot-body centre while the loop is shut, so the ${pocket.triggerRadius}px circle keeps a ${pocketMargin}px margin and still ends above y=320.`);
 p('- Every locked door and disabled control states the unmet prerequisite in Vietnamese via');
 p('  `observatoryDoorBlockReason`, `observatoryBridgeBlockReason`, `observatoryRecordBlockReason` and');
 p('  `observatoryFinalDoorBlockReason`.');
@@ -231,5 +256,17 @@ p('  every solid, art registration, control parity, scene wiring and save guards
 p('- `npm run build` — `tsc --noEmit` plus the Vite production build.');
 p('- Playtest is a manual step: no automated browser run is claimed here.');
 
+p();
+p('## Repair T10 — Shadow, placed light, sills, guidance, story');
+p();
+p(`- The Shadow stands at ground (${point(OBSERVATORY_SHADOW.ground)}) as a native ${OBSERVATORY_SHADOW.art.width}x${OBSERVATORY_SHADOW.art.height} pose, with a solid footprint (${rect(OBSERVATORY_SHADOW.footprint)}) on the far bank, north of the final record and clear of every stand and of the passage leaving the bridge. The Guardian of the memory stands at (${point(OBSERVATORY_SHADOW.guardianGround)}); the Shadow steps into that place during the record and walks back.`);
+p('- A lamp parked on its pedestal is painted only in the `' + OBSERVATORY_PLACED_LIGHT_ROOM + '` room (`observatoryPlacedLightVisible`); its logic (beam source at the pedestal) is unchanged. A carried lamp lights every room.');
+p('- The entrance and the corridor have no painted base. They are composed from `ground_stone` tiles, masonry from `OBSERVATORY_WALLS` and the real controls, so no fake G0, lamp, door or caption panel is printed under the room. The observatory keeps `observatory-clean-base`.');
+p('- Door thresholds are drawn as sills: wall-coloured while the door is shut, floor-coloured once open (`paintObservatorySill`). Jambs stay permanent masonry. `final-door-head` is one rectangle in both the pure model and the engine, solid until the final door is latched.');
+p('- Objective, status and prompts are room-aware and share `observatoryDoorOpen`: a latched Sun door reads "đã gài (giữ mở)" with the beam off; the final-door control reads "E · Trở về Cây Mẹ" only when `observatoryCompletionReady`, otherwise it names the first missing step.');
+p('- Opening (scenario section 2): beat one (three lines) in the entrance; beat two (four lines) the first time the corridor is entered, with Lumo really in the corridor hovering at the tube mouth. A free Lumo walks through doors with Nhinh; a called or sealing Lumo keeps his route and room.');
+p('- Conditional lines (section 4): the roots-lit pair plays once when the far door opens on the direct route; the no-beam line plays when a live, parked lamp stops reaching the seal while Lumo still holds it.');
+p('- Record (section 5): all sixteen spoken lines in three parts with a white flash, the merge of the two figures and a final silence; no line about the girl. Companion handoff: leaving for Level 10 clears the generic Lumo counters so Level 10 places him from its own entry.');
+p('- NOT_RUN: raster review of the composed entrance/corridor against the old boards, the sill art, and the white-flash/merge timing in WebGL (checked once in the Canvas renderer only).');
 writeFileSync(join(rootDir, 'docs/implementation/09-layout.md'), `${lines.join('\n')}\n`, 'utf8');
 console.log(`docs/implementation/09-layout.md written (${lines.length} lines)`);

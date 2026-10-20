@@ -144,3 +144,28 @@ console.log(`  shared cover  : index ${sharedOnly.join(', ')} rely on the shared
 console.log('  gating        : full build keeps all ten levels; the only coming-soon route is the demo slice boundary');
 console.log('  frame owners  : each controller, Lumo and the lantern system has one update() call site');
 console.log('  ending        : EndingScene reachable, completed campaigns resume at the ending');
+
+// ---------------------------------------------------------------- generic H fallback is the scenario text (06-10)
+// CAMPAIGN_LEVELS[i].hint is the fallback ladder. For levels 06-10 it is that level's scenario Mức 1-3, verbatim.
+// Level 10 uses the three-branch ladder (its primary ladder in scenario §8, not the overload set).
+{
+  const scenarioLadderOf = (file) => {
+    const md = read(`docs/scenario/${file}`);
+    const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+    assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
+    return hits.map((m) => m[2].normalize('NFC'));
+  };
+  const FALLBACK = {
+    5: '06-the-sleepless-tower.md',
+    6: '07-the-sleeping-garden.md',
+    7: '08-ruins-of-two-halves.md',
+    8: '09-dark-moon-observatory.md',
+    9: '10-the-heart-of-elaria.md',
+  };
+  for (const [index, file] of Object.entries(FALLBACK)) {
+    assert.deepEqual(CAMPAIGN_LEVELS[Number(index)].hint, scenarioLadderOf(file),
+      `CAMPAIGN_LEVELS[${index}] fallback hints are the ${file} Mức 1-3 verbatim`);
+  }
+}
+
+console.log('  H fallback    : levels 06-10 hint ladders are the scenario Mức 1-3 verbatim');

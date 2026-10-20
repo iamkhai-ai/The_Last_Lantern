@@ -16,8 +16,8 @@ Practice, migration state and the main machine stay separate: the bench is not w
 
 - Foot bounds for the full body: x=24..616, y=88..310 (`RECT(24,88,592,222)`). Feet = center+(0,19); Arcade body 14×6 rectangle relative to center (−7,+16). `bodyRect`, `walkable`, `canApproach` and the runtime colliders consume the same rectangles (Level 04 pattern).
 - Main floor is fully walkable; no water, no pits. Full standing prop footprints are solid from north/south/east/west: main lamp pedestal, G0 dial, prism base, G1/G2 mirror bases, receiver bases, call pedestal, lever base, chamber full body, bench source/mirror/prism bases and both bench eye heads. Wall visuals (rings board, status strip, tower lamp, window, record compartment, tubes, chevrons, plate C) are non-solid; plate C, tubes and chevrons stay below feet (depth 0..7).
-- Depth: backdrop 0; floor decor (plates, tubes, chevrons, fountain) ≤7; beams graphics 7; standing props 10+groundY/10; labels 15+h/10; actors and HUD keep existing scene depths. HUD text occupies y=0..70 and y=320..360 only; nothing playable is authored inside those bands.
-- Interaction radius 24 from the authored stand point, plus nearest-wins. Every control has a reachable stand whose body clears every solid; the pure check samples a route to each stand.
+- Depth: backdrop 0; floor decor (plates, tubes, chevrons, fountain) ≤7; beams graphics 7; standing props 10+groundY/10; labels 15+h/10; actors and HUD keep existing scene depths. HUD text occupies y=0..58 and y=320..360 only; nothing playable is authored inside those bands.
+- Interaction radius 24 from the authored stand point, plus nearest-wins. Standing props with a footprint answer E from their south face only (RULE_GAMES §1): `towerCanApproachFront` requires the foot body to sit at or below the footprint's bottom edge and the player's centre x to lie within the footprint's x span (1px tolerance), so range alone can no longer open a prop from north, east, or the side spots beside it. The record panel and the stairs are wall/door controls and keep the plain range rule (RULE_GAMES §3). Every control has a reachable stand whose body clears every solid; the pure check samples a route to each stand.
 - No PNG regeneration, no character frame changes, no new package. Shared mirrors/receivers/sources reuse the registered level 03/04 keys; prism states come from `shared/beam-splitter/`; C vocabulary (call mark, tubes, pressure mark) reuses the level 05 keys.
 
 ## Zone A — practice bench (top left, safe)
@@ -39,16 +39,16 @@ First lantern placement fires the §3 exchange. Reaching both-eye state once cou
 | G0 common dial | (212,242), `tower_G0_to_*` 40×48 | (201,232,22,10) | (212,262); optical (212,215). E cycles pose: 0 splitter (rod right), 1 to-A (rod up-right), 2 to-B (rod down-right) — art states match the pointer direction. |
 | Prism | center (292,209), shared prism 48×48 | (281,221,22,8) | No interaction. Ports: input (292,215), left (275,215), right (309,215). |
 | G1 branch mirror A | (275,187), shared mirror-1 32×40 | (264,177,22,10) | (275,218); optical (275,162). Receives the left branch from the south; pose 2 (`slash`) reflects east to A; pose 1 backslash and pose 0 horizontal go dark. |
-| G2 branch mirror B | (309,300), shared mirror-1 32×40 | (298,290,22,10) | (309,288); optical (309,275). Receives the right branch from the north; pose 1 (`backslash`) reflects east to B; pose 2 and 0 go dark. |
+| G2 branch mirror B | (309,280), shared mirror-1 32×40 | (298,270,22,10) | (309,272); optical (309,255). Lifted 20px (repair T07) so 30px of standing space exists in front of it; before, the stand sat above the base's front edge and E also answered from north, east and west. Receives the right branch from the north; pose 1 (`backslash`) reflects east to B; pose 2 and 0 go dark. |
 | Receiver A (stone eye) | (460,174), shared `receiver-*` 24×24 | (452,166,16,8) | optical (460,162); no interaction. |
-| Receiver B (stone eye) | (460,287), shared `receiver-*` 24×24 | (452,279,16,8) | optical (460,275); no interaction. |
+| Receiver B (stone eye) | (460,267), shared `receiver-*` 24×24 | (452,259,16,8) | optical (460,255), lifted with G2 so branch B keeps one beam row; no interaction. |
 
 Authored beam paths (engine graphics, never baked):
 - feed: (140,215)→(212,215); splitter feed: (212,215)→(292,215) into the prism input.
 - left branch: (275,215)→(275,162)→ G1; on pose 2 east to (460,162); dead stubs stay dim.
-- right branch: (309,215)→(309,275)→ G2; on pose 1 east to (460,275); dead stubs stay dim.
+- right branch: (309,215)→(309,255)→ G2; on pose 1 east to (460,255); dead stubs stay dim.
 - direct A (G0 pose 1): (212,215)→(247,180)→(292,180)→(292,162)→(460,162). The jog passes above the prism and clears G1's art and the status strip.
-- direct B (G0 pose 2): (212,215)→(240,243)→(440,243)→(440,275)→(460,275).
+- direct B (G0 pose 2): (212,215)→(240,243)→(440,243)→(440,255)→(460,255).
 
 Live conditions are recomputed every frame, never remembered, and go dormant after the Return Flow: `liveA = (source main && on && !waterReturned) && (g0==1 || (g0==0 && g1==2))`; `liveB = (source main && on && !waterReturned) && (g0==2 || (g0==0 && g2==1))`; `liveC = Lumo assignment at-C && Lumo within 8px of plate C`. Direct configurations light exactly one eye (scenario §4). After the switch the whole optics renders dormant — the authored routes stay drawn in the dim style without end marks, prisms return to dark and both receiver heads go off, matching the `after-return-flow` study; retrieving the lantern clears the beams entirely.
 
@@ -65,7 +65,7 @@ Live conditions are recomputed every frame, never remembered, and go dormant aft
 | Seal C + tube | `pressure-empty/occupied` 44×28 + tube straights/mouth (level 05 reuse) | plate (350,290); tube chute drawn under the pedestal, depth 6, rotated at 38×19 (uniform 0.594 scale keeps the sprite aspect) | Lumo's live third circuit. Instead of recalling mid-puzzle, the player may rotate G0 to keep A/B lit while Lumo holds C. |
 | Return-Flow lever | `tower_return_flow_waiting/held` 40×48 | (540,232) | (540,254), at the chamber door. E switches only while all three circuits are live; otherwise the machine waits and Nhinh explains what is missing. After the switch it is held (persistent) and E only reports the mode. |
 | Chamber | body `chamber-open` + `chamber-grille-overlay` while closed + `hope` crystal inside | ground (600,284), full body solid (560,180,80,104), crystal center (600,232) | Crystal visible behind the grille (README composition). Opens on Return Flow. E at (600,288) collects Hope once open. |
-| Window + record | `window-faded-red-scarf` 112×112 center (582,92); `record-compartment-closed/open` 88×32 center (582,156) | wall visuals | Record stand (530,182). Locked before the crystal; after collection plays the §5 exchange and repeat line. |
+| Window + record | `window-faded-red-scarf` 112×112 center (582,92); `record-compartment-closed/open` 88×32 center (582,156) | wall visuals | Record stand (549,192) (repair T07; was (530,182)): body x542..556,y208..214 clears the chamber body (x>=560) and the lever base (y>=222), and the prompt sits in front of the panel art (y140..172). Locked before the crystal; after collection plays the §5 exchange and repeat line. |
 
 ## Entry, exit, saves and migration
 
@@ -76,8 +76,17 @@ Live conditions are recomputed every frame, never remembered, and go dormant aft
 
 ## Guidance, story and checks
 
-- Exact scenario dialogue at every beat: §2 opening five lines, §3 bench arrival three lines, §4 one-circuit exchange, call-C exchange, three-circuit exchange, switch lines + narration, §5 record exchange and repeat line, §7 ending two lines. H cycles the scenario's three levels and post-switch guidance; J keeps learned facts (board note, split lesson, simultaneous conditions, guardian record).
+- Exact scenario dialogue at every beat: §2 opening five lines, §3 bench arrival three lines, §4 one-circuit exchange, call-C exchange, three-circuit exchange, switch lines + narration, §5 record exchange and repeat line, §7 ending two lines. H cycles the scenario's three levels (observation, relation, next action) for the practice, place, main, call and switch steps and gives post-switch guidance; the bench is optional learning and the objective says so; the reunion (recall → Lumo close again) is named in the HUD, H and the stairs refusal, and the refusal changes while Lumo is already flying back; J keeps learned facts (board note, split lesson, simultaneous conditions, guardian record).
 - HUD: title `06  Ngọn Tháp Không Ngủ · Hy vọng`, goal line per stage, status line `A/B/C` live glyphs + nước state + lamp source, controls line at y=320. HUD must never claim a live condition from history.
 - Required checks: production build; pure checks for four-direction solids, every stand reachable along a sampled route, both direct and split routes lighting the correct receivers only, condition loss reverting to waiting, C live only on actual Lumo presence, switch gating, spawn/restore fallbacks, migration idempotence and next-level index 6. Runtime/browser inspection and the human playthrough stay NOT_RUN until root reviews.
 
 Decisions recorded: the coming-soon gate is removed for index >= 4 (mirrors `codex/level-05-flow-redo`); with Level 05 still unmerged in this branch, legacy index 4 remains the in-branch path to Level 06 so the new level is reachable and reviewable end to end. The new controller replaces the legacy index-5 routines; legacy code is bypassed, not deleted.
+
+## Repair T07 — what changed and what stays open
+
+- G2 cluster lifted by 20px together with receiver B and every beam leg that touched row 275 (now 255); the optical relation prism-right → G2 → receiver B is unchanged and pinned by `check-sleepless-tower.mjs`.
+- Four-side raw foot-body probes for G2 (north, east, west rejected; south accepted) and the 24px front-space contract are asserted in the check; every other footprinted prop gets the same south-face rule through the shared helper. For each front-registered prop (bench source, bench mirror, main lamp, G0, G1, G2, call, lever, chamber), the check accepts the stand and rejects the centre positions footprint.width/2 + 10 east and west of the stand at its row; the lever side spot (553,240) is rejected. The tolerance is 1px, not 4px: the spot sits 2px past the lever footprint edge (x=551), so a 4px tolerance would accept it.
+- Machine stages that the scenario gives as stage directions are short captions, not dialogue: the Return-Flow mode change (with a brief camera shake), the record opening and the record fading out. The scarf and the flowers stay as art; the final window beat is not captioned.
+- The `Hệ thống` speaker line for the switch narration was removed.
+- Gaps of 18/23px between decorative bases (for example between the call base and neighbouring art) are decoration only and are not required routes; required routes keep >= 36px thresholds and >= 48px corridors.
+- Not changed: the tower lamp/fountain wall art sits behind the HUD title band (depth 8 vs HUD 86); their alpha was not measured here. NOT_RUN: browser/visual check of the lifted G2 cluster and the stairs landing at the lower-left spiral staircase of `tower-scene-base.png`.

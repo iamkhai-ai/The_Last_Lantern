@@ -26,10 +26,12 @@
 - Depth: floor art 0..7, door arches 3, ground-mounted art 3, bridge deck 6, standing props
   `10 + groundAnchorY/10`, memory overlay 94, prompt container 82, HUD 86. Darkness uses the shared
   `LanternSystem` overlay stack (68..71) instead of a level-local overlay.
-- HUD text occupies y=0..58 and y=320..360. No collider, stand or prompt sits in those bands, and every
-  world sprite sorts below prompt/HUD depth so nothing can draw over the HUD.
+- HUD text occupies y=0..58 and y=320..360. No stand, transit circle, inspect control, door threshold, arch or
+  walkable floor sits in those bands (checked for every alcove by `scripts/check-observatory.mjs`). Outer masonry
+  may run under the status band as solid wall that is never walkable. Every world sprite sorts below the
+  prompt/HUD depth so nothing can draw over the HUD.
 - A door is a recessed alcove: a 48px opening, permanent jambs
-  24px thick, and a threshold that is solid only while the door is shut. The transit
+  (24px thick on the side alcoves, 8px on the south sill pocket), and a threshold that is solid only while the door is shut. The transit
   trigger sits deep inside the alcove, so it is geometrically unreachable while locked, and a
   room-facing inspect control at the alcove mouth always names the missing prerequisite in Vietnamese.
 
@@ -37,11 +39,11 @@
 
 | room | floor band (x,y,w,h) | minX..maxX |
 | --- | --- | --- |
-| tiền sảnh (`lobby-base`) | 24,88,592,216 | 24..616 |
-| hành lang phòng sao (`star-chart-base`) | 24,88,592,216 | 24..616 |
+| tiền sảnh (composed stone floor; the `lobby-base` staging board is not used) | 24,88,592,216 | 24..616 |
+| hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used) | 24,88,592,216 | 24..616 |
 | phòng thiên văn (`observatory-clean-base`) | 24,152,592,148 | 24..616 |
 
-### Masonry — tiền sảnh (`lobby-base`)
+### Masonry — tiền sảnh (composed stone floor; the `lobby-base` staging board is not used)
 
 | rect (x,y,w,h) |
 | --- |
@@ -52,7 +54,7 @@
 | 616,88,24,68 |
 | 616,204,24,100 |
 
-### Masonry — hành lang phòng sao (`star-chart-base`)
+### Masonry — hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used)
 
 | rect (x,y,w,h) |
 | --- |
@@ -75,7 +77,7 @@
 | 616,152,24,148 |
 | 0,300,488,60 |
 | 548,300,92,60 |
-| 496,334,48,26 |
+| 488,320,64,40 |
 
 ### Door alcoves
 
@@ -86,60 +88,60 @@
 | `sun-door-corridor` | corridor | sun-door | 536,196,104,48 | 536,172,104,24 · 536,244,104,24 | 512,220 (22) | 604,220 (28) | 576,192,48,48 |
 | `sun-door-observatory` | observatory | sun-door | 24,190,80,48 | 24,166,80,24 · 24,238,80,24 | 118,214 (22) | 36,214 (28) | 56,186,48,48 |
 | `return-loop-entrance` | entrance | return-loop | 24,196,104,48 | 24,172,104,24 · 24,244,104,24 | 140,220 (22) | 36,220 (28) | 72,192,48,48 |
-| `return-loop-observatory` | observatory | return-loop | 496,300,48,34 | 488,300,8,60 · 548,300,8,60 | 520,262 (22) | 520,318 (28) | 496,300,48,34 |
+| `return-loop-observatory` | observatory | return-loop | 496,300,48,20 | 488,300,8,20 · 544,300,8,20 | 520,262 (22) | 520,304 (16) | 496,284,48,36 |
 
 ## Modules (art + stand + behaviour)
 
 The stand is the E trigger, authored at the object's **south edge** (RULE_GAMES.md 1) or its documented
 side. A standing prop sorts at `10 + anchor.y/10`; ground-mounted art sits at depth 3.
 
-### tiền sảnh (`lobby-base`)
+### tiền sảnh (composed stone floor; the `lobby-base` staging board is not used)
 
 | id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
 | --- | --- | --- | --- | --- | --- | --- |
-| `lantern-pedestal` | texture `pedestal_empty` | 36×46 ×1 | 188,232 | 170,186,36,46 | 188,250 (22) | south |
-| `g0` | texture `mirror_0` | 40×50 ×0.9 | 432,236 | 414,191,36,45 | 432,254 (22) | south |
+| `lantern-pedestal` | texture `pedestal_empty` | 36×39 ×1 | 188,232 | 170,193,36,39 | 188,250 (22) | south |
+| `g0` | texture `mirror_0` | 36×48 ×0.9 | 432,236 | 416,193,32,43 | 432,254 (22) | south |
 | `learned-marks` | level 8 `learned-marks-miniature` | 160×80 ×1 | 320,184 | 240,104,160,80 | 320,202 (24) | south, ground mount |
 
-### hành lang phòng sao (`star-chart-base`)
+### hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used)
 
 | id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
 | --- | --- | --- | --- | --- | --- | --- |
-| `g1` | texture `mirror_1` | 40×50 ×0.9 | 240,216 | 222,171,36,45 | 240,234 (22) | south |
+| `g1` | texture `mirror_1` | 36×48 ×0.9 | 240,216 | 224,173,32,43 | 240,234 (22) | south |
 | `lumo-tube` | level 4 `tube-mouth` | 64×32 ×1 | 105,88 | 73,56,64,32 | 105,106 (22) | south |
 | `lumo-seal` | level 7 `lock-moon-covered` | 32×40 ×1 | 320,88 | 304,48,32,40 | 320,106 (22) | south |
 | `door-a-control` | level 4 `latch-unlatched` | 28×32 ×1 | 56,204 | 42,172,28,32 | 56,222 (22) | south |
-| `sun-door-control` | level 7 `lock-sun-off` | 36×44 ×1 | 500,260 | 482,216,36,44 | 500,278 (22) | south |
+| `sun-door-control` | level 7 `lock-sun-off` | 32×40 ×1 | 500,260 | 484,220,32,40 | 500,278 (22) | south |
 | `star-map-table` | texture `ruins_altar` | 104×52 ×0.8 | 320,280 | 278.5,238,83,42 | 320,280 (—) | side |
 
 ### phòng thiên văn (`observatory-clean-base`)
 
 | id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
 | --- | --- | --- | --- | --- | --- | --- |
-| `g2` | texture `mirror_2` | 40×50 ×0.9 | 168,258 | 150,213,36,45 | 168,276 (22) | south |
+| `g2` | texture `mirror_2` | 36×48 ×0.9 | 168,258 | 152,215,32,43 | 168,276 (22) | south |
 | `splitter` | level 7 set `fixed-three-route-splitter-off / fixed-three-route-splitter-on` | 48×48 ×0.8 | 240,240 | 221,202,38,38 | 240,258 (22) | south |
 | `statue` | level 7 set `statue-notch-0 / statue-notch-1 / statue-notch-2 / statue-notch-3` | 64×88 ×0.8 | 296,252 | 270.5,182,51,70 | 296,270 (22) | south |
-| `sun-lock` | level 7 `lock-sun-off` | 36×44 ×0.85 | 176,152 | 160.5,115,31,37 | 176,170 (22) | south |
+| `sun-lock` | level 7 `lock-sun-off` | 32×40 ×0.85 | 176,152 | 162.5,118,27,34 | 176,170 (22) | south |
 | `root-bed` | texture `root-bed` | 44×148 ×1 | 362,300 | 340,152,44,148 | 330,252 (24) | side, ground mount |
 | `final-door-control` | level 3 `mechanisms/latch-east-unlatched` | 28×32 ×1 | 500,152 | 486,120,28,32 | 500,170 (22) | south, ground mount |
 | `final-door` | level 7 set `sanctuary-door-closed / sanctuary-door-open` | 104×76 ×0.62 | 500,152 | 468,105,64,47 | 500,152 (—) | gate, ground mount |
-| `stone-return-loop` | texture `receiver_off` | 40×48 ×0.7 | 466,252 | 452,218,28,34 | 466,270 (22) | south |
+| `stone-return-loop` | texture `receiver_off` | 40×37 ×0.7 | 466,252 | 452,226,28,26 | 466,270 (22) | south |
 | `final-record` | texture `ruins_altar` | 104×52 ×0.62 | 418,256 | 386,224,64,32 | 418,274 (22) | south |
-| `balance-crystal` | texture `crystal_balance` | 42×50 ×0.6 | 568,252 | 555.5,222,25,30 | 568,270 (22) | south |
+| `balance-crystal` | texture `crystal_balance` | 42×78 ×0.5 | 568,252 | 557.5,213,21,39 | 568,270 (22) | south |
 
 Rooms, spawns, exits and beam waypoints:
 
-- **tiền sảnh (`lobby-base`)**
+- **tiền sảnh (composed stone floor; the `lobby-base` staging board is not used)**
   - spawns: `entrance-start` 100,268 · `entrance-from-corridor` 500,180 · `entrance-from-return-loop` 176,268
   - exits: `entrance-to-corridor` (door-a; trigger 604,180; inspect 520,180 → corridor / corridor-from-entrance) · `entrance-return-loop-to-observatory` (return-loop; trigger 36,220; inspect 140,220 → observatory / observatory-far-bank)
   - waypoints: `lantern-source` (entrance 188,176) · `door-a-eye` (entrance 604,168)
-- **hành lang phòng sao (`star-chart-base`)**
+- **hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used)**
   - spawns: `corridor-from-entrance` 152,180 · `corridor-from-observatory` 516,190
   - exits: `corridor-to-entrance` (door-a; trigger 36,180; latch 56,222 → entrance / entrance-from-corridor) · `corridor-to-observatory` (sun-door; trigger 604,220; inspect 512,220 → observatory / observatory-from-corridor)
   - waypoints: `g1` (corridor 240,190) · `lumo-tube-entry` (corridor 105,78) · `lumo-seal` (corridor 320,80)
 - **phòng thiên văn (`observatory-clean-base`)**
   - spawns: `observatory-from-corridor` 128,200 · `observatory-near-bridge` 280,276 · `observatory-far-bank` 452,276
-  - exits: `observatory-to-corridor` (sun-door; trigger 36,214; inspect 118,214 → corridor / corridor-from-observatory) · `observatory-return-loop-to-entrance` (return-loop; trigger 520,318; inspect 520,262 → entrance / entrance-from-return-loop)
+  - exits: `observatory-to-corridor` (sun-door; trigger 36,214; inspect 118,214 → corridor / corridor-from-observatory) · `observatory-return-loop-to-entrance` (return-loop; trigger 520,304; inspect 520,262 → entrance / entrance-from-return-loop)
   - waypoints: `g2` (observatory 168,226) · `sun-lock` (observatory 176,133) · `splitter` (observatory 240,220) · `root-branch` (observatory 362,226)
 
 ## Dynamic structures
@@ -154,7 +156,7 @@ Rooms, spawns, exits and beam waypoints:
 | `sun-door-corridor` threshold | 536,196,104,48 | solid until the sun-door opens or latches |
 | `sun-door-observatory` threshold | 24,190,80,48 | solid until the sun-door opens or latches |
 | `return-loop-entrance` threshold | 24,196,104,48 | solid until the return-loop opens or latches |
-| `return-loop-observatory` threshold | 496,300,48,34 | solid until the return-loop opens or latches |
+| `return-loop-observatory` threshold | 496,300,48,20 | solid until the return-loop opens or latches |
 
 Ground stamps (painted floor decor, below the feet, never solid):
 
@@ -162,8 +164,8 @@ Ground stamps (painted floor decor, below the feet, never solid):
 - corridor: `pipe-run` 73,74,215,18 depth 2 · `latch-grille` 28,236,56,28 depth 2
 - observatory: `pipe-run` 344,60,264,18 depth 2 · `pipe-drop` 592,76,18,180 depth 2 · `loop-path` 472,266,96,32 depth 2 · `final-door-sill` 468,140,64,14 depth 2
 
-Non-colliding art — wall-mounted modules, walkable floor art, the dynamic root bed and the two latch
-plates painted on a door sill: `lumo-tube`, `lumo-seal`, `learned-marks`, `final-door`, `root-bed`, `door-a-control`, `final-door-control`.
+Non-colliding art — wall-mounted modules, walkable floor art and the two latch plates painted on a door
+sill: `lumo-tube`, `lumo-seal`, `learned-marks`, `final-door`, `door-a-control`, `final-door-control`. The root bed is solid and is not listed here (see Dynamic structures).
 
 ## Beam routing (pure, derived)
 
@@ -216,13 +218,15 @@ load and after every change; they are never persisted.
 | `statue` | E · Xoay tượng (hướng 0/3) |
 | `sun-lock` | E · Kiểm tra khóa Nhật |
 | `root-bed` | E · Xem luống rễ — Khóa Nhật chưa sáng: cần tia sáng đi tới đó. |
-| `final-door-control` | E · Gài chốt cửa cuối |
+| `final-door-control` | E · Chốt cửa cuối (qua cầu rễ trước) |
 | `stone-return-loop` | E · Mở lối đá vòng — Phải qua cầu rễ sang bờ bên kia trước. |
 | `final-record` | E · Đọc bản ghi cuối — Bản ghi chưa mở. Còn cần: mở lối đá vòng và gọi Lumo về bên đèn. |
 | `balance-crystal` | E · Nhận Tinh thể Cân Bằng |
 
 - Every trigger centre sits at or below its object's south edge, or on the documented side/gate
-  exception; standing north, east or west of a prop shows nothing, and radii stay 22..24 (exits 28..30).
+  exception; standing north, east or west of a prop shows nothing, and control radii stay 22..24.
+- Transit circles are 28px, except the south sill pocket (16px): its centre (520,304) sits 26px from the nearest
+  foot-body centre while the loop is shut, so the 16px circle keeps a 10px margin and still ends above y=320.
 - Every locked door and disabled control states the unmet prerequisite in Vietnamese via
   `observatoryDoorBlockReason`, `observatoryBridgeBlockReason`, `observatoryRecordBlockReason` and
   `observatoryFinalDoorBlockReason`.
@@ -256,3 +260,15 @@ validated by `CampaignSaveSystem` (save v1), and the `l8-lumo-*` fields keep the
   every solid, art registration, control parity, scene wiring and save guards.
 - `npm run build` — `tsc --noEmit` plus the Vite production build.
 - Playtest is a manual step: no automated browser run is claimed here.
+
+## Repair T10 — Shadow, placed light, sills, guidance, story
+
+- The Shadow stands at ground (424,190) as a native 48x64 pose, with a solid footprint (410,174,28,16) on the far bank, north of the final record and clear of every stand and of the passage leaving the bridge. The Guardian of the memory stands at (466,190); the Shadow steps into that place during the record and walks back.
+- A lamp parked on its pedestal is painted only in the `entrance` room (`observatoryPlacedLightVisible`); its logic (beam source at the pedestal) is unchanged. A carried lamp lights every room.
+- The entrance and the corridor have no painted base. They are composed from `ground_stone` tiles, masonry from `OBSERVATORY_WALLS` and the real controls, so no fake G0, lamp, door or caption panel is printed under the room. The observatory keeps `observatory-clean-base`.
+- Door thresholds are drawn as sills: wall-coloured while the door is shut, floor-coloured once open (`paintObservatorySill`). Jambs stay permanent masonry. `final-door-head` is one rectangle in both the pure model and the engine, solid until the final door is latched.
+- Objective, status and prompts are room-aware and share `observatoryDoorOpen`: a latched Sun door reads "đã gài (giữ mở)" with the beam off; the final-door control reads "E · Trở về Cây Mẹ" only when `observatoryCompletionReady`, otherwise it names the first missing step.
+- Opening (scenario section 2): beat one (three lines) in the entrance; beat two (four lines) the first time the corridor is entered, with Lumo really in the corridor hovering at the tube mouth. A free Lumo walks through doors with Nhinh; a called or sealing Lumo keeps his route and room.
+- Conditional lines (section 4): the roots-lit pair plays once when the far door opens on the direct route; the no-beam line plays when a live, parked lamp stops reaching the seal while Lumo still holds it.
+- Record (section 5): all sixteen spoken lines in three parts with a white flash, the merge of the two figures and a final silence; no line about the girl. Companion handoff: leaving for Level 10 clears the generic Lumo counters so Level 10 places him from its own entry.
+- NOT_RUN: raster review of the composed entrance/corridor against the old boards, the sill art, and the white-flash/merge timing in WebGL (checked once in the Canvas renderer only).

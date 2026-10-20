@@ -57,7 +57,7 @@ assert.equal(/WASD/.test(sources.scene), false,
 
 /* ------------------------------------------------- CampaignScene drives one shared HUD */
 
-assert.match(sources.scene, /import \{ CampaignHud, PULSE_LEVELS \} from '\.\.\/ui\/CampaignHud'/,
+assert.match(sources.scene, /import \{ CampaignHud, HUD_LAYOUT, PULSE_LEVELS \} from '\.\.\/ui\/CampaignHud'/,
   'CampaignScene imports the shared HUD');
 assert.match(sources.scene, /this\.hud = new CampaignHud\(this\)/,
   'CampaignScene creates exactly one shared HUD');

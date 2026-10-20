@@ -86,7 +86,7 @@ Không kết luận số phận cô bé; bản ghi chỉ xác nhận lý do ch�
 - **Mức 2 — quan hệ:** “Gương chung phải cấp cho lăng kính để hai nhánh cùng sáng. Tôi giữ điều kiện thứ ba.”
 - **Mức 3 — bước tiếp:** “Hướng G0 vào lăng kính, G1 vào A, G2 vào B. Gọi tôi tới C rồi dùng cần Trả dòng khi cả ba sáng.”
 
-Sau khi chuyển cần, H hướng dẫn lấy lại đèn, nhận tinh thể và nghe bản ghi còn chưa xem. Tương tác lại cửa sổ: **Nhinh:** “Ông đã đứng ở đây qua bao nhiêu đêm?”
+Sau khi chuyển cần, H hướng dẫn lấy lại đèn, nhận tinh thể và nghe bản ghi còn chưa xem. Bàn thử là phần học tùy chọn: mục tiêu và H nói rõ có thể đặt đèn thẳng lên bệ chính. Cuộc đoàn tụ với Lumo (gọi về ở mốc gọi, rồi đứng gần) là mốc hoàn thành được nêu trong HUD, H và lời từ chối ở bậc thang (quyết định D3 của đợt sửa 05–10). Tương tác lại cửa sổ: **Nhinh:** “Ông đã đứng ở đây qua bao nhiêu đêm?”
 
 ## 7. Kết màn và trạng thái giữ lại
 

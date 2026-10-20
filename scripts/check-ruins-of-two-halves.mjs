@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
+import ts from 'typescript';
 import {
   canLatchRuinsSanctuary, deriveRuinsPracticeState, deriveRuinsPuzzleState, getRuinsExitBlock, getRuinsSolid,
   getRuinsStage, isRuinsExitReady, isRuinsMainPuzzleEngaged, isRuinsPositionSafe, resolveRuinsSpawn, RUINS_BEAMS,
@@ -10,6 +11,9 @@ import {
   RUINS_SPAWN, RUINS_STANDS, RUINS_STATUE_SOLUTION, RUINS_WALL_FIXTURES, RUINS_WALLS, ruinsActorBody, ruinsDepthAt,
   ruinsNormalizeCounters, ruinsPointInQuad, ruinsQuadContainsRect,
   ruinsRectsOverlap, ruinsSegmentIntersectsQuad,
+  RUINS_SHADOW, ruinsNextStep, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSpotFor,
+  ruinsShadowFootprintAt, ruinsShadowSolidEnabled, ruinsShadowWalkResume,
+  RUINS_SHADOW_SOLID_EPS, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
 } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 
 /* -------------------------------------------------------------------------- */
@@ -67,7 +71,9 @@ for (let i = 0; i < RUINS_STANDS.length; i += 1) {
     const a = RUINS_STANDS[i];
     const b = RUINS_STANDS[j];
     const distance = Math.hypot(a.x - b.x, a.y - b.y);
-    assert.ok(distance >= 60, `stands ${a.id} and ${b.id} keep distinct nearest-target areas (${distance.toFixed(0)}px)`);
+    // The parked Shadow keeps a smaller (r18) talk circle beside the inscription: those pairs must not overlap, the rest keep 60px.
+    const needed = a.id === 'shadow-wait' || b.id === 'shadow-wait' ? a.radius + b.radius : 60;
+    assert.ok(distance >= needed, `stands ${a.id} and ${b.id} keep distinct nearest-target areas (${distance.toFixed(0)}px)`);
   }
 }
 
@@ -540,6 +546,13 @@ for (const prop of Object.values(RUINS_PROPS)) {
     width: prop.artWidth, height: prop.artHeight,
   };
 }
+for (const spot of Object.values(RUINS_SHADOW.spots)) {
+  // registered Shadow poses are 48x64 with a bottom-centre pivot on the spot's ground anchor
+  artBoxes[spot.stand.id] = {
+    x: spot.ground.x - RUINS_SHADOW.art.width / 2, y: spot.ground.y - RUINS_SHADOW.art.height,
+    width: RUINS_SHADOW.art.width, height: RUINS_SHADOW.art.height,
+  };
+}
 for (const fixture of RUINS_WALL_FIXTURES) {
   artBoxes[fixture.stand.id] = {
     x: fixture.artCenter.x - fixture.artWidth / 2, y: fixture.artCenter.y - fixture.artHeight / 2,
@@ -615,7 +628,7 @@ for (const notch of [0, 1, 2, 3]) {
   assert.ok(artTop + column.maxY >= solid.y, `practice column notch ${notch} reaches down into the solid base`);
 }
 // Procedurally drawn props have no PNG to measure; their solid must at least stay inside the art box.
-for (const id of ['pedestal', 'shadow-npc']) {
+for (const id of ['pedestal']) {
   const prop = RUINS_PROPS[id];
   const solid = getRuinsSolid(id);
   const artLeft = prop.artCenter.x - prop.artWidth / 2;
@@ -627,3 +640,240 @@ for (const id of ['pedestal', 'shadow-npc']) {
 }
 
 console.log('Level 08 geometry/state checks passed.');
+
+/* -------------------------------------------------------------------------- */
+/* 15. repair T09 — The Shadow's state, spots and walk                         */
+/* -------------------------------------------------------------------------- */
+
+assert.equal(ruinsShadowPhase({ latched: false, metShadow: false }), 'guard', 'before the latch he guards the seedlings');
+assert.equal(ruinsShadowPhase({ latched: true, metShadow: false }), 'relaxed', 'after the latch the hand comes down');
+assert.equal(ruinsShadowPhase({ latched: true, metShadow: true }), 'wait', 'after the talk he waits at the stair');
+assert.equal(ruinsShadowPhase({ latched: false, metShadow: true }), 'wait', 'a legacy save that met him never puts him back');
+assert.deepEqual(['guard', 'relaxed', 'wait'].map(ruinsShadowPoseFor), ['shielding', 'turn', 'waiting'], 'poses come from the registered Shadow set');
+assert.equal(ruinsShadowSpotFor('guard').id, 'guard'); assert.equal(ruinsShadowSpotFor('relaxed').id, 'guard'); assert.equal(ruinsShadowSpotFor('wait').id, 'wait');
+const bed = RUINS_PROPS['seedling-bed'];
+const guardSpot = RUINS_SHADOW.spots.guard;
+assert.ok(Math.hypot(guardSpot.ground.x - (bed.footprint.x + bed.footprint.width), guardSpot.ground.y - (bed.footprint.y + bed.footprint.height)) <= 40, 'the guard spot is right beside the seedling bed');
+for (const spot of Object.values(RUINS_SHADOW.spots)) {
+  assert.equal(spot.footprint.x + spot.footprint.width / 2, spot.ground.x, `${spot.id}: footprint is centred on the ground anchor`);
+  assert.equal(spot.footprint.y + spot.footprint.height, spot.ground.y, `${spot.id}: footprint ends on the ground anchor`);
+  assert.equal(safe({ x: spot.stand.x, y: spot.stand.y }), true, `${spot.id}: stand is walkable`);
+  const blockers = RUINS_BLOCKERS.filter((blocker) => ruinsRectsOverlap(blocker, spot.footprint) && !['north-wall'].includes(blocker.id));
+  assert.deepEqual(blockers.map((b) => b.id), [], `${spot.id}: the Shadow footprint does not sit inside another solid`);
+}
+// While he stands guard his footprint is solid; every control and the north door stay reachable around it.
+const withGuard = (center) => safe(center) && !ruinsRectsOverlap(ruinsActorBody(center), guardSpot.footprint);
+const reachAround = (start, target, tolerance = 22) => {
+  const queue = [start]; const seen = new Set([`${start.x},${start.y}`]);
+  for (let index = 0; index < queue.length; index += 1) {
+    const point = queue[index];
+    if (Math.hypot(point.x - target.x, point.y - target.y) <= tolerance) return true;
+    for (const [dx, dy] of [[4, 0], [-4, 0], [0, 4], [0, -4]]) {
+      const next = { x: point.x + dx, y: point.y + dy }; const key = `${next.x},${next.y}`;
+      if (seen.has(key) || !withGuard(next)) continue;
+      seen.add(key); queue.push(next);
+    }
+  }
+  return false;
+};
+for (const stand of RUINS_STANDS) assert.equal(reachAround(RUINS_SPAWN, { x: stand.x, y: stand.y }), true, `with the Shadow on guard, ${stand.id} stays reachable`);
+// the Shadow walks only across open floor, beside nothing solid, and ends on the waiting spot.
+const route = [guardSpot.ground, ...RUINS_SHADOW.path];
+for (const point of route) {
+  assert.ok(point.x >= RUINS_FLOOR.left && point.x <= RUINS_FLOOR.right && point.y >= RUINS_FLOOR.top && point.y <= RUINS_FLOOR.bottom, `waypoint ${point.x},${point.y} is inside the floor band`);
+  const hit = RUINS_BLOCKERS.filter((b) => b.prop && point.x >= b.x && point.x <= b.x + b.width && point.y >= b.y && point.y <= b.y + b.height);
+  assert.deepEqual(hit.map((b) => b.id), [], `waypoint ${point.x},${point.y} is not inside a standing prop`);
+}
+assert.deepEqual(route.at(-1), RUINS_SHADOW.spots.wait.ground, 'the walk ends on the waiting spot');
+for (let index = 1; index < route.length; index += 1) {
+  const a = route[index - 1]; const b = route[index];
+  for (let t = 0; t <= 1; t += 0.05) {
+    const x = a.x + (b.x - a.x) * t; const y = a.y + (b.y - a.y) * t;
+    const inProp = RUINS_BLOCKERS.some((blocker) => blocker.prop && x >= blocker.x && x <= blocker.x + blocker.width && y >= blocker.y && y <= blocker.y + blocker.height);
+    assert.equal(inProp, false, `the walk segment ${index} stays out of standing props`);
+  }
+}
+// the waiting spot never blocks the north door: its stand keeps its distance and the door approach stays open.
+const door = RUINS_WALL_FIXTURES.find((fixture) => fixture.id === 'north-door');
+const withWaiter = (center) => safe(center) && !ruinsRectsOverlap(ruinsActorBody(center), RUINS_SHADOW.spots.wait.footprint);
+assert.equal(withWaiter({ x: door.stand.x, y: door.stand.y }), true, 'the north door stand is open while he waits');
+// exit refusals name only the next missing step, never the whole solution.
+const puzzle = (over) => deriveRuinsPuzzleState({ lanternPlaced: true, lanternOn: true, statue: 0, leftMirror: 1, rightMirror: 0, ...over });
+assert.equal(ruinsNextStep(puzzle({ lanternPlaced: false })), 'place');
+assert.equal(ruinsNextStep(puzzle({ leftMirror: 3, rightMirror: 2, statue: 1 })), 'suns');
+assert.equal(ruinsNextStep(puzzle({ statue: 1 })), 'moon');
+assert.equal(ruinsNextStep(puzzle({})), 'confirm');
+/* -------------------------------------------------------------------------- */
+/* 16. the Shadow's moving footprint, the persisted walk and the restore guard */
+/* -------------------------------------------------------------------------- */
+
+// Both spots share one footprint offset and size, so the footprint that follows him is the rect he stands on.
+const guardSpotDef = RUINS_SHADOW.spots.guard;
+const waitSpotDef = RUINS_SHADOW.spots.wait;
+const footprintShape = (spot) => ({
+  x: spot.footprint.x - spot.ground.x, y: spot.footprint.y - spot.ground.y,
+  width: spot.footprint.width, height: spot.footprint.height,
+});
+assert.deepEqual(footprintShape(waitSpotDef), footprintShape(guardSpotDef), 'both Shadow spots share one footprint offset and size');
+assert.deepEqual(ruinsShadowFootprintAt(guardSpotDef.ground), guardSpotDef.footprint, 'the footprint helper reproduces the guard spot');
+assert.deepEqual(ruinsShadowFootprintAt(waitSpotDef.ground), waitSpotDef.footprint, 'the footprint helper reproduces the wait spot');
+
+// The walk as the Shadow actually travels it: the guard spot, then every waypoint, sampled every 4px.
+const walkRoute = [guardSpotDef.ground, ...RUINS_SHADOW.path];
+const walkSamples = [];
+for (let index = 1; index < walkRoute.length; index += 1) {
+  const from = walkRoute[index - 1];
+  const to = walkRoute[index];
+  const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 4);
+  for (let step = 0; step < steps; step += 1) {
+    walkSamples.push({ x: from.x + ((to.x - from.x) * step) / steps, y: from.y + ((to.y - from.y) * step) / steps });
+  }
+}
+walkSamples.push(walkRoute.at(-1));
+assert.ok(walkSamples.length > 60, `the walk is sampled along its whole length (${walkSamples.length} samples)`);
+
+// Every open stand and checkpoint, including the north door stand, that the player must keep reaching.
+const openTargets = [...RUINS_STANDS, ...RUINS_CHECKPOINTS.filter((point) => !point.requiresExit)];
+/** Every 4px-grid point the foot body reaches from the spawn with `extra` solids added. */
+const floodFromSpawn = (extra) => {
+  const queue = [{ x: RUINS_SPAWN.x, y: RUINS_SPAWN.y }];
+  const seen = new Set([`${RUINS_SPAWN.x},${RUINS_SPAWN.y}`]);
+  for (let index = 0; index < queue.length; index += 1) {
+    const point = queue[index];
+    for (const [dx, dy] of [[4, 0], [-4, 0], [0, 4], [0, -4]]) {
+      const next = { x: point.x + dx, y: point.y + dy };
+      const key = `${next.x},${next.y}`;
+      if (seen.has(key) || !isRuinsPositionSafe(next, extra)) continue;
+      seen.add(key);
+      queue.push(next);
+    }
+  }
+  return queue;
+};
+for (const ground of walkSamples) {
+  const footprint = ruinsShadowFootprintAt(ground);
+  const where = `${ground.x.toFixed(1)},${ground.y.toFixed(1)}`;
+  // The wait spot stands against the north wall (section 15 makes the same exception), so only that wall is exempt.
+  const hits = RUINS_BLOCKERS.filter((blocker) => blocker.id !== 'north-wall' && ruinsRectsOverlap(footprint, blocker));
+  assert.deepEqual(hits.map((blocker) => blocker.id), [], `the Shadow at ${where} never overlaps a standing prop or a side wall`);
+  const reached = floodFromSpawn([footprint]);
+  for (const target of openTargets) {
+    assert.equal(reached.some((point) => Math.hypot(point.x - target.x, point.y - target.y) <= 22), true,
+      `with the Shadow at ${where}, ${target.id} stays reachable from the spawn`);
+  }
+}
+
+// The footprint is a real solid. Parked, it yields only to real penetration: a foot body that touches the edge keeps it on.
+const yardFootprint = ruinsShadowFootprintAt({ x: 270, y: 142 });
+const parked = (footprint, playerBody) => ruinsShadowSolidEnabled({ footprint, playerBody, moving: false, stepPx: 0 });
+const walking = (footprint, playerBody, stepPx) => ruinsShadowSolidEnabled({ footprint, playerBody, moving: true, stepPx });
+assert.equal(parked(yardFootprint, ruinsActorBody({ x: 270, y: 120 })), false, 'a foot body inside the footprint switches the solid off for that frame');
+assert.equal(parked(yardFootprint, ruinsActorBody({ x: 270, y: 126 })), true, 'a foot body that only touches the footprint edge keeps the solid on');
+assert.equal(parked(yardFootprint, ruinsActorBody({ x: 270, y: 130 })), true, 'a foot body clear below the footprint keeps the solid on');
+for (const ground of walkRoute) {
+  const footprint = ruinsShadowFootprintAt(ground);
+  assert.equal(parked(footprint, ruinsActorBody({ x: ground.x, y: ground.y - 20 })), false,
+    `a player caught under the Shadow at ${ground.x},${ground.y} yields the solid`);
+}
+
+// Flush contact is not overlap. The body is at x 40..54, y 10..16; each footprint touches one edge, or is nudged by `nudge` into it.
+const solidBody = { x: 40, y: 10, width: 14, height: 6 };
+const touching = (side, nudge) => ({
+  left: { x: 12 + nudge, y: -5, width: 28, height: 36 },
+  right: { x: 54 - nudge, y: -5, width: 28, height: 36 },
+  above: { x: 33, y: -26 + nudge, width: 28, height: 36 },
+  below: { x: 33, y: 16 - nudge, width: 28, height: 36 },
+})[side];
+for (const side of ['left', 'right', 'above', 'below']) {
+  assert.equal(parked(touching(side, 0), solidBody), true, `exact flush contact on the ${side} edge keeps the parked solid on`);
+  assert.equal(parked(touching(side, 1e-12), solidBody), true, `1e-12 float penetration on the ${side} edge is not overlap`);
+  assert.equal(parked(touching(side, 1), solidBody), false, `1px real penetration on the ${side} edge switches the parked solid off`);
+}
+// Moving, the solid yields inside the step margin (stepPx + 1), flush contact included, and holds once the footprint is clear of it.
+const gapped = (gap) => ({ x: 40 - gap - 28, y: -5, width: 28, height: 36 });
+assert.equal(walking(gapped(1), solidBody, 2), false, 'moving with the footprint 1px from her body (stepPx 2) switches the solid off');
+assert.equal(walking(gapped(0), solidBody, 2), false, 'moving with flush contact inside the step margin switches the solid off');
+assert.equal(walking(gapped(2.9), solidBody, 2), false, 'moving with the footprint just inside stepPx + 1 switches the solid off');
+assert.equal(walking(gapped(3.5), solidBody, 2), true, 'moving with the footprint more than stepPx + 1 clear keeps the solid on');
+assert.equal(walking(gapped(10), solidBody, 2), true, 'moving with the footprint 10px from her body keeps the solid on');
+// No hysteresis while parked: a solid that was off for a walk comes back on as soon as the footprint is not penetrating.
+assert.equal(parked(gapped(1), solidBody), true, 'parked, the solid is on again while she stands 1px away: she cannot walk into a parked Shadow');
+assert.equal(RUINS_SHADOW_SOLID_EPS, 0.5, 'the penetration inset is half a pixel per side');
+
+// A saved walk resumes from the waypoint it had reached, and only from one the walk still crosses.
+assert.equal(RUINS_SHADOW_WALK_COUNTER, 'l7-shadow-walk-step');
+assert.equal(RUINS_SHADOW_WALK_START, -1);
+assert.equal(ruinsShadowWalkResume(undefined), null, 'no counter: there is no walk to resume');
+assert.deepEqual(ruinsShadowWalkResume(-1), { start: guardSpotDef.ground, next: 0 }, 'no waypoint reached yet: he resumes from the guard spot');
+assert.deepEqual(ruinsShadowWalkResume(0), { start: RUINS_SHADOW.path[0], next: 1 }, 'first waypoint reached: he resumes from it');
+assert.deepEqual(ruinsShadowWalkResume(1), { start: RUINS_SHADOW.path[1], next: 2 }, 'second waypoint reached: he resumes towards the last one');
+assert.equal(ruinsShadowWalkResume(2), null, 'the last waypoint ends the walk, so nothing resumes');
+for (const bad of [-2, 3, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+  assert.equal(ruinsShadowWalkResume(bad), null, `counter ${bad} resumes nothing`);
+}
+for (const counter of [-1, 0, 1]) {
+  const resume = ruinsShadowWalkResume(counter);
+  assert.deepEqual(resume.start, walkRoute[counter + 1], `counter ${counter} starts on the route point it names`);
+  assert.ok(resume.next < RUINS_SHADOW.path.length, `counter ${counter} targets a waypoint that exists`);
+}
+
+// Restore: a saved centre inside the Shadow's footprint is moved out, and a clear centre is kept as saved.
+for (const ground of walkRoute) {
+  const footprint = ruinsShadowFootprintAt(ground);
+  const saved = { x: ground.x, y: ground.y - 20 };
+  assert.equal(isRuinsPositionSafe(saved), true, `a centre inside the Shadow at ${ground.x},${ground.y} is walkable on the static floor`);
+  assert.equal(isRuinsPositionSafe(saved, [footprint]), false, `a centre inside the Shadow at ${ground.x},${ground.y} is not walkable with his footprint`);
+  const restored = resolveRuinsSpawn(saved, { exitReady: false, extraBlockers: [footprint] });
+  assert.equal(isRuinsPositionSafe(restored, [footprint]), true, `restore moves the player out of the Shadow at ${ground.x},${ground.y}`);
+  assert.deepEqual(resolveRuinsSpawn(saved, { exitReady: false }), saved, 'without the footprint the same centre is kept (the footprint is what moves it)');
+}
+
+console.log('Level 08 Shadow state, spots, walk and exit-guidance checks passed.');
+
+// ---------------------------------------------------------------- H ladder is the scenario text (scenario 08 §6)
+// suns and moon are one ladder: the scenario Mức 1-3, verbatim and in order. Shown by the shipped showHint().
+{
+  const md = readFileSync(new URL('../docs/scenario/08-ruins-of-two-halves.md', import.meta.url), 'utf8');
+  const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], 'scenario 08 lists Mức 1, 2, 3 in order');
+  const MUC = hits.map((m) => m[2].normalize('NFC'));
+
+  const levelText = readFileSync(new URL('../src/levels/RuinsOfTwoHalvesLevel.ts', import.meta.url), 'utf8');
+  const sourceFile = ts.createSourceFile('RuinsOfTwoHalvesLevel.ts', levelText, ts.ScriptTarget.Latest, true);
+  const COMPILER = { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } };
+  const find = (predicate) => {
+    let found;
+    const visit = (node) => { if (found) return; if (predicate(node)) { found = node; return; } ts.forEachChild(node, visit); };
+    visit(sourceFile);
+    return found;
+  };
+  const ladderSource = ['MAIN_LADDER', 'HINT_LADDER'].map((name) => {
+    const declaration = find((node) => ts.isVariableDeclaration(node) && node.name.getText(sourceFile) === name);
+    assert.ok(declaration?.initializer, `the Ruins level still authors ${name}`);
+    return ts.transpileModule(`const ${name} = ${declaration.initializer.getText(sourceFile)};`, COMPILER).outputText;
+  }).join('\n');
+  const { HINT_LADDER } = new Function(`"use strict";\n${ladderSource}\nreturn { HINT_LADDER };`)();
+  const method = find((node) => ts.isMethodDeclaration(node) && node.name.getText(sourceFile) === 'showHint');
+  assert.ok(method?.body, 'the Ruins level still authors showHint()');
+  const showHintJs = ts.transpileModule(`const __unit = function () ${method.body.getText(sourceFile)};`, COMPILER).outputText;
+  const showHint = new Function('HINT_LADDER', `"use strict";\n${showHintJs}\nreturn __unit;`)(HINT_LADDER);
+
+  const ALL_MET = { lightActive: true, leftAimed: true, rightAimed: true, moonCovered: true };
+  const presses = (stages, puzzle = ALL_MET) => {
+    const level = {
+      stage: '', puzzle, hintStage: '', hintIndex: 0, spoken: [],
+      getStage() { return this.stage; }, getPuzzleState() { return this.puzzle; },
+      say(lines) { this.spoken.push(lines[0].text); },
+    };
+    for (const stage of stages) { level.stage = stage; showHint.call(level); }
+    return level.spoken;
+  };
+  assert.deepEqual(presses(['suns', 'suns', 'moon', 'moon']), [MUC[0], MUC[1], MUC[2], MUC[2]], 'suns then moon: Mức 1, 2, 3 verbatim, then holds Mức 3');
+  assert.deepEqual(presses(['suns', 'moon', 'moon']), [MUC[0], MUC[1], MUC[2]], 'the moon step continues the suns ladder');
+  const missingLeft = { ...ALL_MET, leftAimed: false };
+  const named = presses(['suns', 'suns'], missingLeft);
+  assert.equal(named[0], MUC[0], 'the first press is verbatim Mức 1');
+  assert.ok(named[1].startsWith(`${MUC[1]} Còn thiếu:`), 'a later press keeps Mức 2 and names the missing condition');
+}
+
+console.log('Level 08 H ladder checks passed (suns and moon share the scenario Mức 1-3, verbatim and in order).');

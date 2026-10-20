@@ -413,3 +413,8 @@ for %f in (scripts\check-*.mjs) do @node "%f"     # 12 pure checks, all PASS
   trigger sits partly behind the status band, and Level 10 has two geometrically unavoidable
   nearest-target ties resolved by registration order.
 - Nothing was pushed to `origin`. All five merges exist only in the local `test-develop` branch.
+
+## Repair pass on Levels 05–10 (2026-10-19)
+
+Branch `codex/levels-05-10-repair-2` was cut from `codex/levels-05-10-repair` (`afbea49`, itself cut from `test-develop` `b09a19d`) and holds T07–T14 on top of T00–T06. Nothing was merged into `test-develop` or `main`; nothing was pushed from this pass. Commits: `1b7c8b1` (T07), `88d3863` (T08), `c57ed44` (T09), `d3ed5d0` (T10), `1373bbe` (T11), `27d4b1c` (T12), `312e4ae` (T13), `84367c1659958fe3c97862c091d715d846dcbf33` (T14 cleanup), then the documentation commit. The earlier "Remaining limits" of this log that said no level had been looked at in a browser are partly superseded: some scenes were looked at once in the Canvas renderer (see the repair report); no level has been played through and nothing was verified in WebGL.
+

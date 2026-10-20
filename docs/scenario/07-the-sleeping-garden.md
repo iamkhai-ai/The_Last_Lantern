@@ -91,6 +91,8 @@ Xem lại mầm cây: **Nhinh:** “Lá mới mềm hơn những chiếc cũ.”
 
 *Ở cổng điện thờ, một bóng người đi ngang vệt sáng. Bóng dừng cạnh những mầm cây, rồi biến sau tượng đá.*
 
+*(Cài đặt: bóng chỉ được nhìn thấy, không gọi tên. Phần thoại bên dưới phát sau khi bóng khuất; cảnh này nằm sau mốc kể chuyện ở vườn ươm, vốn là điều kiện hoàn thành — quyết định D3 của đợt sửa 05–10.)*
+
 **Lumo:** “Có ai ở đó.”\
 **Nhinh:** “Người ấy vừa che ánh sáng khỏi luống cây.”\
 **Lumo:** “Giống việc mình vừa làm?”\

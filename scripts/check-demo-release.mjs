@@ -771,7 +771,7 @@ const CASES = [
 
       const completed = makeMenuHarness({ policy: full, campaignLevel: 9, campaignFlags: { 'l9-complete': true } });
       completed.scene.continueGame();
-      assert.deepEqual(completed.calls.started, [{ key: 'EndingScene', data: { showCredits: true, campaign: true } }]);
+      assert.deepEqual(completed.calls.started, [{ key: 'EndingScene', data: { campaign: true } }]);
       assertStorageUntouched(completed.storage, completed.before);
 
       const legacyVictory = makeMenuHarness({ policy: full, legacyStage: 'victory' });

@@ -20,13 +20,13 @@ import {
   OBSERVATORY_ALCOVES,
   OBSERVATORY_BODY,
   OBSERVATORY_BRIDGE_LANE,
-  OBSERVATORY_ELEMENTS,
-  OBSERVATORY_FLOORS,
   OBSERVATORY_RETURN_LOOP_VISUAL_ID,
   OBSERVATORY_ROOT_BED,
   OBSERVATORY_STAMPS,
   OBSERVATORY_WALLS,
   fitObservatoryArt,
+  OBSERVATORY_SHADOW,
+  observatoryPlacedLightVisible,
   isObservatoryApproachAllowed,
   isObservatoryGateApproachAllowed,
   nearestSafeObservatorySpawn,
@@ -45,7 +45,6 @@ import {
   observatoryReturnLoopLane,
   observatorySolidRects,
   rectsOverlap,
-  type ObsAlcove,
   type ObsElement,
   type ObsRect,
   type ObsWorldState,
@@ -56,11 +55,16 @@ import { LanternSystem, LIBRARY_LIGHTING } from '../systems/LanternSystem';
 import { CampaignProgress, CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { consumeCampaignNewGameIntent } from '../systems/CampaignStartIntent';
 import { RELEASE_POLICY } from '../config/releaseConfig';
-import { deriveObservatoryState } from '../systems/ObservatoryPuzzle';
+import { deriveObservatoryState, type ObservatoryDerivedState } from '../systems/ObservatoryPuzzle';
+import {
+  OBSERVATORY_BEAT_NO_BEAM, OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
+  OBSERVATORY_MEMORY_CAPTION, OBSERVATORY_MEMORY_LUMO, OBSERVATORY_MEMORY_MERGE_CAPTION, OBSERVATORY_MEMORY_RECORDING,
+  OBSERVATORY_MEMORY_SHADOW, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_OPENING_ENTRANCE, type ObservatoryLine,
+} from '../data/observatoryStory';
 import { SoundSystem } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
 import { PauseMenu } from '../ui/PauseMenu';
-import { CampaignHud, PULSE_LEVELS } from '../ui/CampaignHud';
+import { CampaignHud, HUD_LAYOUT, PULSE_LEVELS } from '../ui/CampaignHud';
 import { ShatteredCreekController } from './ShatteredCreekController';
 import { SleeplessTowerLevel } from '../levels/SleeplessTowerLevel';
 import { SleepingGardenLevel } from '../levels/SleepingGardenLevel';
@@ -108,7 +112,7 @@ const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Tháp vẫn đang hút nước và phát sáng.' }, { speaker: 'Lumo', text: 'Tôi có thể giữ ấn ở trên cao. Cậu nối hai luồng sáng còn lại nhé.' }],
   [{ speaker: 'Nhinh', text: 'Khu vườn đã ngủ quá lâu. Cây nắng và rễ trăng vẫn còn đây.' }, { speaker: 'Lumo', text: 'Chúng cần hai điều khác nhau: ánh sáng ấm và một khoảng tối dịu.' }],
   [{ speaker: 'Nhinh', text: 'Hai mắt ngoài hướng về bàn cân. Mắt ở giữa lại nằm trong một hốc tối.' }, { speaker: 'Lumo', text: 'Có lẽ câu đố cần cả ánh sáng lẫn một vùng không có ánh sáng.' }],
-  [{ speaker: 'Nhinh', text: 'Ba phòng quan sát cùng hướng về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Tôi nghe tiếng mưa trong ký ức. Có ai đó đã gọi tôi từ tòa tháp này.' }],
+  [...OBSERVATORY_OPENING_ENTRANCE],
   [{ speaker: 'Nhinh', text: 'Ba tinh thể đã tìm được đường về đây.' }, { speaker: 'Lumo', text: 'Trái tim Cây Mẹ cần chúng ta cùng giữ ánh sáng và bóng tối cân bằng.' }],
 ];
 
@@ -117,6 +121,8 @@ export class CampaignScene extends Phaser.Scene {
   private player!: Player;
   private lumo!: Lumo;
   private lumoTarget = { x: 345, y: 265 };
+  /** Set when create() redirects a completed save to the ending: no player, dialogue or interactions exist yet. */
+  private redirecting = false;
   private lantern!: LanternSystem;
   private interactions!: InteractionSystem;
   private dialogue!: DialogueSystem;
@@ -128,7 +134,6 @@ export class CampaignScene extends Phaser.Scene {
   private campaignColliders: Phaser.Physics.Arcade.Collider[] = [];
   private campaignBodies = new Map<string, Phaser.Physics.Arcade.StaticBody>();
   private activeObservatoryRoom: ObservatoryRoomId | null = null;
-  private roomDoors = new Map<string, { image: Phaser.GameObjects.Image; body: Phaser.Physics.Arcade.StaticBody; exit: ObservatoryExit }>();
   /** Door-arch scenery per alcove (never a collider; the sill carries collision). */
   private observatoryAlcoveVisuals = new Map<string, Phaser.GameObjects.Image>();
   private observatoryPuzzleVisuals = new Map<string, Phaser.GameObjects.GameObject>();
@@ -156,8 +161,14 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryBridgePendingRemoval = false;
   private observatoryBridgeTraversalSide: 'near' | 'far' | null = null;
   private observatoryMiniatureIndex = 0;
-  /** Objective row that the current hint ladder belongs to. */
-  private observatoryHintKey = '';
+  /** Opened door sills: wall-coloured while the door is shut, floor-coloured once it is open. */
+  private observatorySillVisuals = new Map<string, Phaser.GameObjects.Graphics>();
+  /** While set, an unassigned Lumo hovers here instead of following Nhinh (the corridor opening beat). */
+  private observatoryLumoHold: { x: number; y: number } | null = null;
+  private observatoryBeats: ObservatoryLine[][] = [];
+  private observatoryWasThroughSeal = false;
+  /** Hint ladder (joined text) the observatory hint index belongs to; the objective row is not part of it. */
+  private observatoryHintLadderKey = '';
   private hintIndex = 0;
   private heartEnd = false;
   private hud!: CampaignHud;
@@ -204,7 +215,8 @@ export class CampaignScene extends Phaser.Scene {
       this.scene.start('ComingSoonScene', { mode: 'demo-save-blocked' });
       return;
     }
-    if (!newGameRequested && this.progress.flags['l9-complete'] === true) {
+    this.redirecting = !newGameRequested && this.progress.flags['l9-complete'] === true;
+    if (this.redirecting) {
       this.scene.start('EndingScene', { campaign: true });
       return;
     }
@@ -346,6 +358,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   public update(_time: number, delta: number): void {
+    if (this.redirecting) return;
     const dt = Math.min(delta, 50);
     const locked = this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen() || this.heartEnd;
     this.player.update(dt, !locked, this.lantern.lanternInHand, this.lantern.lanternOn);
@@ -360,7 +373,7 @@ export class CampaignScene extends Phaser.Scene {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) };
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
-    if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 330) };
+    if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 300) };
     if (this.progress.level === 7) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 30, 610), y: Phaser.Math.Clamp(this.player.y - 22, 84, 302) };
     if (this.progress.level === 8) this.updateObservatoryLumo(dt);
     else if (this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 9) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
@@ -402,6 +415,10 @@ export class CampaignScene extends Phaser.Scene {
         this.progress.counters['player-y'] = y;
         this.save();
       }
+    }
+    if (this.progress.level === 8 && this.activeObservatoryRoom) {
+      this.lantern.setPlacedLightVisible(observatoryPlacedLightVisible(this.activeObservatoryRoom, this.lantern.lanternPlaced));
+      this.flushObservatoryBeats();
     }
     this.lantern.update(dt, this.player.x, this.player.y);
     this.updateForestEdgeProgress(dt);
@@ -558,6 +575,9 @@ export class CampaignScene extends Phaser.Scene {
     // loop left over from the previous one before the room is torn down.
     SoundSystem.stopAmbient();
     SoundSystem.setFootstepSurface(SOIL_FOOTSTEP_LEVELS.has(this.progress.level) ? 'soil' : 'grass');
+    // Level 8 returns before the teardown further down, so the level-7 ruins controller is released first.
+    this.ruinsLevel?.destroy();
+    this.ruinsLevel = undefined;
     if (this.progress.level === 8) {
       this.buildObservatoryRoom(this.progress.roomId ?? 'entrance');
       return;
@@ -573,8 +593,6 @@ export class CampaignScene extends Phaser.Scene {
     this.pathForTwoLevel = undefined;
     this.sleeplessTower?.destroy();
     this.sleeplessTower = undefined;
-    this.ruinsLevel?.destroy();
-    this.ruinsLevel = undefined;
     this.heartLevel?.destroy();
     this.heartLevel = undefined;
     for (const object of this.objects) object.destroy();
@@ -660,8 +678,6 @@ export class CampaignScene extends Phaser.Scene {
     this.lantern.lanternPlaced = false;
     this.lantern.isDawnMode = false;
     this.lantern.isOverloadMode = false;
-    if (level === 7 && this.progress.flags['l7-lantern-placed']) this.lantern.placeLanternAt(120, 205);
-    if (level === 5 && this.progress.flags['l5-lantern-placed'] && !this.progress.flags['l5-lantern-retrieved']) this.lantern.placeLanternAt(120, 205);
     if (level === 2) {
       this.libraryLevel = new LibraryLevel({
         scene: this, progress: this.progress, player: this.player, interactions: this.interactions,
@@ -679,7 +695,8 @@ export class CampaignScene extends Phaser.Scene {
         scene: this, progress: this.progress, player: this.player, lumo: this.lumo,
         interactions: this.interactions, lantern: this.lantern, save: () => this.save(),
         say: (lines, done) => this.say(lines, done), nextLevel: (lines) => this.nextLevel(lines),
-        canStartStory: () => !this.dialogue.isActive(),
+        canStartStory: () => !this.dialogue.isActive() && !this.pauseMenu.isOpen(),
+        isPaused: () => this.pauseMenu.isOpen(),
       });
       this.gardenLevel.build();
     } else if (level === 7) {
@@ -693,6 +710,7 @@ export class CampaignScene extends Phaser.Scene {
         scene: this, progress: this.progress, player: this.player, lumo: this.lumo, interactions: this.interactions,
         lantern: this.lantern, save: () => this.save(), say: (lines, done) => this.say(lines, done),
         isDialogueLocked: () => this.dialogue.isInputLocked(performance.now()),
+        stopDialogue: () => this.dialogue.stop(),
         isPaused: () => this.pauseMenu.isOpen(),
         playLanternAction: (on) => this.player.playLanternAction(on),
         finish: () => this.finishHeartCampaign(),
@@ -753,36 +771,101 @@ export class CampaignScene extends Phaser.Scene {
     if (!['entrance', 'corridor', 'observatory'].includes(String(this.progress.flags['l8-lumo-room']))) this.progress.flags['l8-lumo-room'] = 'entrance';
     const lumoRoom = this.getObservatoryLumoRoom();
     this.lumo.setVisible(lumoRoom === roomId);
-    this.lumo.sprite.setPosition(this.progress.counters['l8-lumo-x'] ?? this.progress.counters['lumo-x'] ?? this.lumoTarget.x, this.progress.counters['l8-lumo-y'] ?? this.progress.counters['lumo-y'] ?? this.lumoTarget.y);
+    // Both saved axes or neither: the generic lumo-x/lumo-y are stale from earlier levels and never used here.
+    const savedLumo = this.progress.counters['l8-lumo-x'] !== undefined && this.progress.counters['l8-lumo-y'] !== undefined;
+    this.lumo.sprite.setPosition(savedLumo ? this.progress.counters['l8-lumo-x'] : this.lumoTarget.x, savedLumo ? this.progress.counters['l8-lumo-y'] : this.lumoTarget.y);
     this.progress.roomId = roomId;
     this.progress.roomSpawn = { x: safeSpawn[0], y: safeSpawn[1] };
     this.save();
     this.refreshObservatoryDoors();
     this.refreshObservatoryPuzzle();
-    if (!this.progress.flags['intro-8']) {
-      this.progress.flags['intro-8'] = true;
-      this.save();
-      this.dialogue.startDialogue(OPENING[8]);
-    }
+    this.playObservatoryOpening(roomId);
     this.refreshHud();
+  }
+
+  /**
+   * Scenario section 2 in two beats: the wheel and the arrival in the entrance, then the recognition at the spiral tube
+   * the first time the corridor is entered. Lumo is really in the corridor for the second beat and hovers at the tube
+   * mouth while it plays; a save that is already past the corridor never replays it.
+   */
+  private playObservatoryOpening(roomId: ObservatoryRoomId): void {
+    const flags = this.progress.flags;
+    if (flags['intro-8'] !== true) {
+      flags['intro-8'] = true;
+      this.save();
+      if (roomId === 'entrance') { this.say([...OBSERVATORY_OPENING_ENTRANCE]); return; }
+    }
+    if (roomId === 'corridor' && flags['intro-8-corridor'] !== true) {
+      flags['intro-8-corridor'] = true;
+      this.save();
+      if (flags['l8-door-a-latched'] === true) return;
+      const tube = OBSERVATORY_ROOMS.corridor.waypoints.find((waypoint) => waypoint.id === 'lumo-tube-entry')!.position;
+      this.observatoryLumoHold = { x: tube.x + 6, y: tube.y + 22 };
+      this.say([...OBSERVATORY_OPENING_CORRIDOR], () => { this.observatoryLumoHold = null; });
+    }
+  }
+
+  private showObservatoryCaption(text: string): void {
+    // Below the mission plate's tallest extent, so a two-line objective never sits under the caption.
+    const label = this.add.text(320, HUD_LAYOUT.topBottom + 4, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', fontStyle: 'italic', color: '#f2e6c4', stroke: '#07151c', strokeThickness: 3, padding: { x: 8, y: 4 }, align: 'center', wordWrap: { width: 480 } })
+      .setOrigin(0.5, 0).setDepth(85);
+    this.roomObjects.push(label);
+    this.tweens.add({ targets: label, alpha: 0, delay: 3600, duration: 600, onComplete: () => { if (label.active) label.destroy(); } });
+  }
+
+  private queueObservatoryBeat(lines: readonly ObservatoryLine[]): void {
+    this.observatoryBeats.push([...lines]);
+  }
+
+  private flushObservatoryBeats(): void {
+    if (!this.observatoryBeats.length || this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
+    const next = this.observatoryBeats.shift();
+    if (next) this.say(next);
+  }
+
+  /** True when Lumo is not on a called route or holding the seal, so he walks with Nhinh between rooms. */
+  private isObservatoryLumoFree(): boolean {
+    const steps = this.getObservatoryLumoSteps();
+    if (steps.length > 0 && this.value('l8-lumo-route-index') < steps.length) return false;
+    return this.progress.flags['l8-lumo-destination'] !== 'lumo-seal';
   }
 
   /** Visible masonry for every permanent solid, so colliders always match art. */
   private drawObservatoryWalls(roomId: ObservatoryRoomId): void {
+    // Permanent masonry only: the thresholds are doors and get their own sill visual that follows the door state.
     const rects: ObsRect[] = [
       ...OBSERVATORY_WALLS[roomId],
-      ...observatoryAlcoves(roomId).flatMap((alcove) => [...alcove.jambs, alcove.threshold]),
+      ...observatoryAlcoves(roomId).flatMap((alcove) => [...alcove.jambs]),
     ];
     const walls = this.add.graphics().setDepth(1);
-    for (const rect of rects) {
-      walls.fillStyle(0x232a34, 0.85);
-      walls.fillRect(rect.x, rect.y, rect.width, rect.height);
-      walls.fillStyle(0x39485a, 0.95);
-      walls.fillRect(rect.x, rect.y, rect.width, Math.min(8, rect.height));
-      walls.lineStyle(1, 0x0d1a22, 0.65);
-      walls.strokeRect(rect.x, rect.y, rect.width, rect.height);
-    }
+    for (const rect of rects) this.paintObservatoryWall(walls, rect);
     this.roomObjects.push(walls);
+    for (const alcove of observatoryAlcoves(roomId)) {
+      const sill = this.add.graphics().setDepth(1.2);
+      this.roomObjects.push(sill);
+      this.observatorySillVisuals.set(alcove.id, sill);
+      this.paintObservatorySill(sill, alcove.threshold, observatoryDoorOpen(alcove.doorId, this.getObservatoryWorldState()));
+    }
+  }
+
+  private paintObservatoryWall(graphics: Phaser.GameObjects.Graphics, rect: ObsRect): void {
+    graphics.fillStyle(0x232a34, 0.85);
+    graphics.fillRect(rect.x, rect.y, rect.width, rect.height);
+    graphics.fillStyle(0x39485a, 0.95);
+    graphics.fillRect(rect.x, rect.y, rect.width, Math.min(8, rect.height));
+    graphics.lineStyle(1, 0x0d1a22, 0.65);
+    graphics.strokeRect(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  /** A shut door's threshold reads as masonry; an open one reads as walkable floor (a sill), never as a wall. */
+  private paintObservatorySill(graphics: Phaser.GameObjects.Graphics, rect: ObsRect, open: boolean): void {
+    graphics.clear();
+    if (!open) { this.paintObservatoryWall(graphics, rect); return; }
+    graphics.fillStyle(0x56677a, 0.9);
+    graphics.fillRect(rect.x, rect.y, rect.width, rect.height);
+    graphics.lineStyle(1, 0x9bd8dd, 0.45);
+    for (let x = rect.x + 12; x < rect.x + rect.width; x += 24) graphics.lineBetween(x, rect.y + 2, x, rect.y + rect.height - 2);
+    graphics.lineBetween(rect.x, rect.y + rect.height / 2, rect.x + rect.width, rect.y + rect.height / 2);
   }
 
   private drawObservatoryWallArt(roomId: ObservatoryRoomId): void {
@@ -822,14 +905,16 @@ export class CampaignScene extends Phaser.Scene {
     if (roomId === 'observatory') {
       // The Shadow waits beside the final record; the translucent memory frame
       // replaces the waiting pose once the record has been read.
-      const shadowKey = getShadowArtKey(this.progress.flags['l8-record-read'] === true ? 'memory-overlay' : 'waiting');
+      const shadowKey = getShadowArtKey('waiting');
       if (shadowKey && this.textures.exists(shadowKey)) {
-        const shadow = this.add.image(468, 250, shadowKey).setOrigin(0.5, 1).setDisplaySize(36, 48)
-          .setDepth(10 + 250 / 10).setAlpha(0.9);
+        // Native 48x64 pose on a spot clear of every control; the memory pose is used only while the record plays.
+        const shadow = this.add.image(OBSERVATORY_SHADOW.ground.x, OBSERVATORY_SHADOW.ground.y, shadowKey).setOrigin(0.5, 1)
+          .setDepth(10 + OBSERVATORY_SHADOW.ground.y / 10).setAlpha(0.95);
         this.roomObjects.push(shadow);
         this.observatoryShadowVisual = shadow;
       }
-      const overlay = this.add.rectangle(320, 180, 640, 360, 0xf0b463, 0.14).setDepth(94).setVisible(false);
+      // Under the interaction prompt (82) and the HUD (86): the memory tints the room without hiding the controls.
+      const overlay = this.add.rectangle(320, 180, 640, 360, 0xf0b463, 0.14).setDepth(84).setVisible(false);
       this.roomObjects.push(overlay);
       this.observatoryMemoryOverlay = overlay;
     }
@@ -946,11 +1031,12 @@ export class CampaignScene extends Phaser.Scene {
     this.observatorySolids.clear();
     this.observatoryBridgeStones = [];
     this.observatoryShadowVisual = undefined;
+    this.observatorySillVisuals.clear();
+    this.observatoryLumoHold = null;
     this.observatoryMemoryOverlay = undefined;
     this.observatoryReturnLoopVisual = undefined;
     for (const object of this.roomObjects) object.destroy();
     this.roomObjects = [];
-    this.roomDoors.clear();
     this.activeObservatoryRoom = null;
     this.interactions.clear();
   }
@@ -1161,10 +1247,10 @@ export class CampaignScene extends Phaser.Scene {
             return;
           }
           if (this.isObservatoryCompletionReady()) {
-            this.nextLevel([
-              { speaker: 'Nhinh', text: 'Bản ghi đã được giữ, Lumo đã trở về và Tinh thể Cân Bằng đang sáng trong tay mình.' },
-              { speaker: 'Lumo', text: 'Lần này mình đi cùng nhau.' },
-            ]);
+            // Companion handoff: Level 10 places Lumo from its own authored entry. Room-local Level 09 coordinates and
+            // the stale generic Lumo counters mean nothing there, so they are cleared instead of carried across.
+            for (const key of ['lumo-x', 'lumo-y', 'lumo-target-x', 'lumo-target-y']) delete this.progress.counters[key];
+            this.nextLevel([...OBSERVATORY_EXIT_LINES]);
           } else {
             this.say([{ speaker: 'Nhinh', text: observatoryFinalDoorBlockReason(state) }]);
           }
@@ -1231,41 +1317,62 @@ export class CampaignScene extends Phaser.Scene {
           this.observatoryElementVisuals.delete('balance-crystal');
           // The Shadow stays beside the record until dawn (scenario §6).
           this.observatoryShadowVisual?.setAlpha(0.95);
-          this.say([
-            { speaker: 'The Shadow', text: 'Hãy đưa vòng ngày đêm đi tiếp. Khi tới lúc buông tay, đừng để nỗi sợ giữ tay con lại.' },
-            { speaker: 'Lumo', text: 'Ông có đi cùng chúng tôi không?' },
-            { speaker: 'The Shadow', text: 'Ta sẽ ở lại tới khi đêm này kết thúc.' },
-          ]);
+          this.say([...OBSERVATORY_CRYSTAL_LINES]);
         },
       );
     }
   }
 
   /**
-   * The last record: the room stays visible under a translucent amber memory
-   * layer while the Guardian's exchange plays (scenario §5), and The Shadow
-   * takes the Guardian's place beside the pedestal afterwards.
+   * The last record (scenario section 5): the room stays visible under a translucent amber layer while the Guardian's
+   * recording and the memory exchange play; a white flash erases the end; Lumo remembers; The Shadow steps into the
+   * place the Guardian stood, the two figures overlap and the memory dissolves; The Shadow answers, and the scene stops
+   * on his last line. Nothing is added about the girl.
    */
   private playObservatoryMemory(): void {
-    this.observatoryMemoryOverlay?.setVisible(true);
-    const shadowKey = getShadowArtKey('memory-overlay');
-    if (shadowKey && this.textures.exists(shadowKey) && this.observatoryShadowVisual) {
-      this.observatoryShadowVisual.setTexture(shadowKey);
+    const shadow = this.observatoryShadowVisual;
+    const overlay = this.observatoryMemoryOverlay;
+    const memoryKey = getShadowArtKey('memory-overlay');
+    const waitingKey = getShadowArtKey('waiting');
+    const guardianKey = getShadowArtKey('guardian-waiting');
+    overlay?.setVisible(true);
+    if (shadow?.active && memoryKey && this.textures.exists(memoryKey)) shadow.setTexture(memoryKey);
+    let guardian: Phaser.GameObjects.Image | undefined;
+    if (guardianKey && this.textures.exists(guardianKey)) {
+      guardian = this.add.image(OBSERVATORY_SHADOW.guardianGround.x, OBSERVATORY_SHADOW.guardianGround.y, guardianKey)
+        .setOrigin(0.5, 1).setDepth(10 + OBSERVATORY_SHADOW.guardianGround.y / 10 + 0.05).setAlpha(0);
+      this.roomObjects.push(guardian);
+      this.tweens.add({ targets: guardian, alpha: 0.65, duration: 700 });
     }
-    this.say([
-      { speaker: 'Ký Ức', text: 'Bão đã tan. Họ bảo tôi để bánh xe ngày đêm chạy lại.' },
-      { speaker: 'Ký Ức', text: 'Nhưng nếu đèn tắt đúng lúc con tìm được đường thì sao?' },
-      { speaker: 'Ký Ức', text: 'Lumo, bay qua đường ống. Giữ mạch phía Bắc cho tôi. Chỉ thêm một đêm nữa.' },
-      { speaker: 'Ký Ức', text: 'Tôi giữ được. Ông cứ chờ ở cửa sổ.' },
-      { speaker: 'Lumo', text: 'Tôi đã giữ ấn. Tôi tưởng mình đang giúp ông ấy đưa mọi người về.' },
-      { speaker: 'Nhinh', text: 'Cậu nhớ lại rồi.' },
-      { speaker: 'Lumo', text: 'Khi Cây Mẹ vỡ, mọi thứ trong đầu tôi cũng vỡ theo. Nhưng tôi vẫn nhớ rằng phải giữ đèn sáng.' },
-      { speaker: 'Nhinh', text: 'Ông là Người Bảo Vệ.' },
-      { speaker: 'The Shadow', text: 'Ta là phần ký ức còn mắc lại trong đêm ấy. Ta đã đợi lâu đến mức quên cả việc cho khu rừng nghỉ.' },
-      { speaker: 'The Shadow', text: 'Ta muốn dẫn một người về nhà. Rồi giữ cả khu rừng ở lại cùng nỗi chờ của mình.' },
-      { speaker: 'Nhinh', text: 'Con gái ông đã trở về chưa?' },
-      { speaker: 'The Shadow', text: 'Phần ký ức này không có câu trả lời đó.' },
-    ], () => this.observatoryMemoryOverlay?.setVisible(false));
+    // The room may be torn down mid-tween (exit taken): every callback checks the objects it touches.
+    const finish = (): void => {
+      if (overlay?.active) overlay.setVisible(false);
+      if (shadow?.active && waitingKey && this.textures.exists(waitingKey)) shadow.setTexture(waitingKey);
+      if (guardian?.active) guardian.destroy();
+    };
+    this.say([...OBSERVATORY_MEMORY_RECORDING], () => {
+      this.showObservatoryCaption(OBSERVATORY_MEMORY_CAPTION);
+      this.cameras.main.flash(500, 255, 245, 220, true);
+      if (guardian?.active) this.tweens.add({ targets: guardian, alpha: 0.35, duration: 600 });
+      this.say([...OBSERVATORY_MEMORY_LUMO], () => {
+        this.showObservatoryCaption(OBSERVATORY_MEMORY_MERGE_CAPTION);
+        const home = OBSERVATORY_SHADOW.ground.x;
+        if (shadow?.active) {
+          this.tweens.add({
+            targets: shadow, x: OBSERVATORY_SHADOW.guardianGround.x, duration: 900,
+            onComplete: () => {
+              if (guardian?.active) this.tweens.add({ targets: guardian, alpha: 0, duration: 800 });
+              this.tweens.add({
+                targets: overlay ?? [], alpha: 0, duration: 800, delay: 400,
+                onComplete: () => { if (overlay?.active) overlay.setAlpha(1); finish(); },
+              });
+              this.tweens.add({ targets: shadow, x: home, duration: 700, delay: 1000 });
+            },
+          });
+        } else finish();
+        this.time.delayedCall(2200, () => this.say([...OBSERVATORY_MEMORY_SHADOW]));
+      });
+    });
   }
 
   public callObservatoryLumo(destination: 'seal' | 'recall'): void {
@@ -1318,6 +1425,12 @@ export class CampaignScene extends Phaser.Scene {
     }
     const destination = OBSERVATORY_ROOMS[exit.toRoom].spawns.find((spawn) => spawn.id === exit.destinationSpawnId);
     if (!destination) return;
+    // A free Lumo goes through the door with Nhinh; a called or sealing Lumo keeps his own route and room.
+    if (this.isObservatoryLumoFree()) {
+      this.progress.flags['l8-lumo-room'] = exit.toRoom;
+      this.progress.counters['l8-lumo-x'] = destination.position.x - 20;
+      this.progress.counters['l8-lumo-y'] = destination.position.y - 18;
+    }
     this.progress.roomId = exit.toRoom;
     this.progress.roomSpawn = { ...destination.position };
     this.progress.counters['player-level'] = 8;
@@ -1446,11 +1559,9 @@ export class CampaignScene extends Phaser.Scene {
       image.setTexture(open ? 'woods_arch_open' : 'woods_arch_locked');
       image.setAlpha(open ? 0.5 : 1);
     }
-    for (const door of this.roomDoors.values()) {
-      const open = this.isObservatoryExitOpen(door.exit);
-      door.body.enable = !open;
-      door.image.setTexture(open ? (door.exit.doorId === 'sun-door' ? 'lock_sun_on' : 'woods_arch_open') : (door.exit.doorId === 'sun-door' ? 'lock_sun_off' : 'woods_arch_locked'));
-      door.image.setAlpha(open ? 0.45 : 1);
+    for (const alcove of OBSERVATORY_ALCOVES) {
+      const sill = this.observatorySillVisuals.get(alcove.id);
+      if (sill) this.paintObservatorySill(sill, alcove.threshold, observatoryDoorOpen(alcove.doorId, state));
     }
     this.syncObservatorySolids();
   }
@@ -1606,8 +1717,9 @@ export class CampaignScene extends Phaser.Scene {
         : destination === 'lantern-source' ? OBSERVATORY_ROOMS.entrance.waypoints.find((point) => point.id === 'lantern-source')?.position : undefined;
       const unassigned = !destinationWaypoint || this.progress.flags['l8-lumo-arrived'] === 'lantern-source';
       if (unassigned) {
-        // Unassigned Lumo follows Nhinh inside the active room, like Levels 01-08.
-        this.lumoTarget = {
+        // Unassigned Lumo follows Nhinh inside the active room, like Levels 01-08 (and through the doors: see
+        // transitionObservatory). The corridor opening beat parks him at the tube mouth while it plays.
+        this.lumoTarget = this.observatoryLumoHold ?? {
           x: Phaser.Math.Clamp(this.player.x - 20, 28, 610),
           y: Phaser.Math.Clamp(this.player.y - 22, 58, 300),
         };
@@ -1679,6 +1791,26 @@ export class CampaignScene extends Phaser.Scene {
     this.lantern.lanternOn = this.progress.lanternOn;
   }
 
+  /**
+   * Scenario section 4's conditional lines, each tied to a real transition so they never replay every frame:
+   * the roots-lit pair plays once when the far door opens on the direct route; the no-beam line plays when a live,
+   * parked lantern's beam stops reaching Lumo's seal while he still holds it.
+   */
+  private queueObservatoryStateBeats(state: ObservatoryDerivedState): void {
+    const routeId = state.activeBeamPath.routeId;
+    if (this.activeObservatoryRoom === 'observatory' && state.sunDoorUnlocked && !state.bridgeEligible && routeId === 'g2-direct-sun'
+      && this.progress.flags['l8-beat-roots-lit'] !== true) {
+      this.progress.flags['l8-beat-roots-lit'] = true;
+      this.save();
+      this.queueObservatoryBeat(OBSERVATORY_BEAT_ROOTS_LIT);
+    }
+    const throughSeal = routeId !== 'off' && routeId !== 'door-a';
+    if (this.observatoryWasThroughSeal && !throughSeal && state.lumoAtSeal && this.lantern.lanternPlaced && this.lantern.lanternOn) {
+      this.queueObservatoryBeat(OBSERVATORY_BEAT_NO_BEAM);
+    }
+    this.observatoryWasThroughSeal = throughSeal;
+  }
+
   private refreshObservatoryPuzzle(): void {
     if (!this.activeObservatoryRoom) return;
     const state = this.getObservatoryState();
@@ -1698,6 +1830,7 @@ export class CampaignScene extends Phaser.Scene {
         else statue.setAngle(facing * 90);
       }
     }
+    this.queueObservatoryStateBeats(state);
     const lock = this.observatoryPuzzleVisuals.get('sun-lock');
     if (lock instanceof Phaser.GameObjects.Image) lock.setTexture(state.sunDoorUnlocked ? 'lock_sun_on' : 'lock_sun_off');
     const pedestal = this.observatoryPuzzleVisuals.get('lantern-pedestal');
@@ -1858,33 +1991,6 @@ export class CampaignScene extends Phaser.Scene {
         this.track(this.add.image(sx, sy, 'stepping_stone').setAlpha(0.72).setScale(0.85).setDepth(1.3));
       }
     }
-    const stage = this.progress.level;
-    const landscape = this.add.graphics().setDepth(1.5);
-    if (!hasCampaignBackground && stage === 3) {
-      landscape.fillStyle(0x123d58, 0.82); landscape.fillRect(245, 145, 175, 195);
-      landscape.fillStyle(0x66bfd0, 0.25); landscape.fillEllipse(330, 195, 140, 22); landscape.fillEllipse(300, 300, 120, 18);
-      landscape.fillStyle(0xa1b79a, 0.72); landscape.fillRect(235, 218, 195, 12);
-      landscape.lineStyle(2, 0x9bd8dd, 0.22); landscape.lineBetween(260, 162, 405, 162); landscape.lineBetween(258, 176, 400, 176);
-    } else if (!hasCampaignBackground && stage === 4) {
-      landscape.lineStyle(7, 0x7c786a, 0.56); landscape.lineBetween(295, 86, 295, 280); landscape.lineBetween(440, 86, 440, 280);
-      landscape.lineStyle(1, 0xb8a87d, 0.42); landscape.lineBetween(300, 100, 435, 100); landscape.lineBetween(300, 270, 435, 270);
-      landscape.lineStyle(3, this.lantern.lanternOn ? 0x8b8d76 : 0x88e4d4, this.lantern.lanternOn ? 0.25 : 0.8);
-      landscape.beginPath(); landscape.moveTo(300, 230); landscape.lineTo(350, 230); landscape.lineTo(385, 245); landscape.lineTo(435, 245); landscape.strokePath();
-    } else if (!hasCampaignBackground && stage === 5) {
-      landscape.lineStyle(2, 0xd1ba83, 0.42); landscape.strokeCircle(320, 175, 128); landscape.strokeCircle(320, 175, 92);
-      landscape.fillStyle(0x1f5567, 0.55); landscape.fillRect(535, 82, 12, 202); landscape.lineStyle(3, 0x6acfe0, 0.6); landscape.lineBetween(541, 278, 541, 98);
-    } else if (!hasCampaignBackground && stage === 6) {
-      landscape.fillStyle(0x245263, 0.78); landscape.fillRect(0, 246, 640, 28);
-      landscape.lineStyle(2, 0x66bfd0, 0.45); landscape.lineBetween(0, 246, 640, 246); landscape.lineBetween(0, 274, 640, 274);
-      landscape.lineStyle(2, 0xb9d08b, 0.5); landscape.lineBetween(70, 185, 570, 185); landscape.lineBetween(70, 292, 570, 292);
-    } else if (!hasCampaignBackground && stage === 7) {
-      landscape.lineStyle(3, 0xa9a18d, 0.32); landscape.strokeCircle(320, 180, 122); landscape.strokeCircle(320, 180, 76);
-      landscape.lineStyle(1, 0xd1bf94, 0.2); landscape.lineBetween(320, 58, 320, 300); landscape.lineBetween(198, 180, 442, 180);
-    } else if (!hasCampaignBackground && stage === 9) {
-      landscape.lineStyle(3, 0xe9d18b, 0.55); landscape.strokeCircle(320, 160, 76); landscape.strokeCircle(320, 160, 110);
-      landscape.lineStyle(2, 0x74bd95, 0.5); landscape.lineBetween(320, 210, 320, 292); landscape.lineBetween(270, 238, 190, 275); landscape.lineBetween(370, 238, 450, 275);
-    }
-    this.track(landscape);
   }
 
   private addNarrativeProps(level: number): void {
@@ -1893,14 +1999,8 @@ export class CampaignScene extends Phaser.Scene {
       ['woods_arch_locked', FOREST_EDGE.objects.gate.anchor.x, FOREST_EDGE.objects.gate.anchor.y],
       ['pedestal_empty', FOREST_EDGE.objects.ring.anchor.x, FOREST_EDGE.objects.ring.anchor.y],
     ]
-      : level === 1 ? []
-      : level === 4 ? [['receiver_off', 320, 85], ['lock_moon_off', 220, 130], ['lock_moon_off', 420, 130], ['lock_sun_off', 320, 218]]
-      : level === 5 ? [['pedestal_lit', 120, 205], ['mirror_0', 160, 170], ['mirror_1', 250, 170], ['mirror_2', 350, 170], ['receiver_off', 470, 145], ['receiver_off', 470, 205], ['lock_sun_off', 320, 80], ['mural_tablet', 535, 86]]
-      : level === 7 ? [['guardian_statue', 320, 170], ['lock_sun_off', 200, 126], ['lock_sun_off', 440, 126], ['lock_moon_off', 320, 222], ['ruins_altar', 320, 82], ['pedestal_empty', 120, 205], ['mirror_1', 220, 175], ['mirror_1', 420, 175], ['receiver_off', 200, 126], ['receiver_off', 440, 126], ...(this.progress.flags['l7-solved'] ? [['shadow_npc', 320, 98] as [string, number, number]] : [])]
-      : level === 8 ? [['mirror_0', 220, 175], ['mirror_2', 420, 175], ['shadow_npc', 320, 114], ['crystal_balance', 320, 68]]
-      : [['heart_tree_0', 320, 157], ['crystal_memory', 158, 192], ['crystal_hope', 320, 200], ['crystal_balance', 480, 192], ['pedestal_empty', 100, 205], ['mirror_0', 220, 220], ['mirror_0', 420, 220], ['mirror_1', 320, 200], ['receiver_off', 180, 145], ['receiver_off', 460, 145], ['guardian_statue', 400, 125], ['lock_sun_off', 180, 145], ['lock_sun_off', 460, 145], ['lock_moon_off', 320, 125]];
+      : [];
     for (const [key, x, y] of props) {
-      if (level === 9 && key === 'heart_tree_0') continue;
       this.addProp(key, x, y, level === 0 || key === 'woods_arch_locked' || key === 'heart_tree_0' ? 1 : 0.9);
     }
     if (level === 0) {
@@ -1923,20 +2023,8 @@ export class CampaignScene extends Phaser.Scene {
       this.addWoodsGlows();
       this.createWoodsTutorialCue();
       this.updateRuneRevealVisuals();
-    } else if (level === 4) {
-      this.addLevelArt('call-idle', 320, 85, 26, 26, 8);
-    } else if (level === 5) {
-      this.addLevelArt('tower-lamp-dim', 541, 108, 48, 48, 8);
-    } else if (level === 9) {
-      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
-        const state = this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty';
-        this.addLevelArt(`${name}-alcove-${state}`, x, y, 52, 52, 8);
-      }
-      const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.addLevelArt(core, 320, 115, 46, 46, 8);
     }
     if (level === 1) this.drawFireflyRoute();
-    if (level === 5 && this.progress.flags['l5-power'] === true && !this.progress.flags['l5-crystal']) this.addProp('crystal_hope', 445, 168, 0.9);
   }
 
   private registerLevel(level: number): void {
@@ -2020,127 +2108,6 @@ export class CampaignScene extends Phaser.Scene {
           {speaker:'Nhinh',text:'Biết đâu có gì giúp mình tìm đường. Mình xuống xem nhé?'},
         ]);
       }, undefined, 'woods_arch_open');
-    } else if (level === 4) {
-      action('call-a', 'E · Gọi Lumo tới mốc A', 220, 130, () => this.callLumo('a', 220, 130), () => !this.progress.flags['l4-latch-a'], 'lock_moon_on');
-      action('call-b', 'E · Gọi Lumo tới mốc B', 420, 130, () => this.callLumo('b', 420, 130), () => this.progress.flags['l4-latch-a'] === true && !this.progress.flags['l4-latch-b'], 'lock_moon_on');
-      action('call-c', 'E · Gọi Lumo tới mốc C', 320, 218, () => this.callLumo('c', 320, 218), () => this.progress.flags['l4-latch-b'] === true && !this.progress.flags['l4-latch-c'], 'lock_moon_on');
-      action('latch-a', 'E · Gài chốt cửa A', 320, 160, () => { this.progress.flags['l4-latch-a'] = true; this.save(); }, () => this.progress.flags['l4-at-a'] && !this.progress.flags['l4-latch-a'], 'receiver_off');
-      action('latch-b', 'E · Gài chốt cửa B', 320, 198, () => { this.progress.flags['l4-latch-b'] = true; this.save(); }, () => this.progress.flags['l4-at-b'] && this.progress.flags['l4-latch-a'] && !this.progress.flags['l4-latch-b'], 'receiver_off');
-      action('ink-trail', 'E · Soi vạch mực dưới nền', 405, 245, () => {
-        this.progress.flags['l4-ink-revealed'] = true;
-        this.save();
-        this.say([{ speaker: 'Nhinh', text: 'Vạch mực chỉ hiện khi đèn tắt.' }, { speaker: 'Lumo', text: 'Ánh của tôi đủ để cậu thấy đường. Tôi đang chờ ở đầu kia.' }]);
-      }, () => this.progress.flags['l4-at-c'] === true && !this.lantern.lanternOn && !this.progress.flags['l4-ink-revealed'], 'receiver_on');
-      action('latch-c', 'E · Gài chốt cửa ra', 500, 275, () => { this.progress.flags['l4-latch-c'] = true; this.save(); }, () => this.progress.flags['l4-at-c'] && this.progress.flags['l4-latch-b'] && this.progress.flags['l4-ink-revealed'] && !this.lantern.lanternOn && !this.progress.flags['l4-latch-c'], 'receiver_off');
-      action('recall-lumo', 'E · Gọi Lumo trở lại', 320, 275, () => {
-        this.progress.flags['l4-return-called'] = true;
-        this.progress.flags['l4-reunited'] = false;
-        this.lumoTarget = { x: this.player.x - 18, y: this.player.y - 20 };
-        this.save();
-        this.say([{ speaker: 'Nhinh', text: 'Lumo, cửa đã giữ rồi. Cậu về đây với mình nhé?' }, { speaker: 'Lumo', text: 'Tôi tới ngay.' }]);
-      }, () => this.progress.flags['l4-latch-c'] === true && !this.progress.flags['l4-reunited'], 'shadow_npc');
-      action('spiral', 'E · Đọc vết xoắn', 500, 85, () => { this.progress.flags['l4-memo'] = true; this.save(); this.say([{ speaker: 'Lumo', text: 'Tôi đã đi qua đây trong đêm bão. Có ai đó đứng ngoài gọi… nhưng tôi không nghe rõ tên.' }, { speaker: 'Nhinh', text: 'Mình ghi lại. Cậu không cần giữ tất cả một mình.' }]); }, () => this.progress.flags['l4-latch-c'] === true && !this.progress.flags['l4-memo'], 'mural_tablet');
-      action('tower-stairs', 'E · Lên tháp', 500, 85, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Tháp vẫn đang lấy nước.' }, { speaker: 'Lumo', text: 'Mình lên xem nó đang đợi điều gì.' }]), () => this.progress.flags['l4-memo'] === true && this.progress.flags['l4-reunited'] === true, 'woods_arch_open');
-    } else if (level === 5) {
-      this.registerMirror('tower-g0', 'Gương chung G0', 160, 170, 2);
-      this.registerMirror('tower-g1', 'Gương A', 210, 170, 1);
-      this.registerMirror('tower-g2', 'Gương B', 320, 130, 3);
-      action('tower-lantern-place', 'E · Đặt đèn lên bệ máy', 120, 205, () => {
-        this.lantern.placeLanternAt(120, 205);
-        this.progress.flags['l5-lantern-placed'] = true;
-        this.progress.flags['l5-lantern-retrieved'] = false;
-        this.progress.lanternOn = true;
-        this.save();
-      }, () => this.lantern.lanternInHand && this.lantern.lanternOn && !this.lantern.lanternPlaced && !this.progress.flags['l5-power'], 'pedestal_lit');
-      action('call-high-seal', 'E · Gọi Lumo tới ấn cao', 320, 80, () => this.callLumo('high', 320, 80), () => !this.progress.flags['l5-power'], 'lock_sun_on');
-      action('tower-return-flow', 'E · Gạt cần Trả dòng', 445, 168, () => {
-        const lumoHoldingSeal = this.progress.flags['l5-called-high'] === true
-          && Math.hypot(this.lumo.sprite.x - 320, this.lumo.sprite.y - 80) < 36;
-        const branchesReady = this.lantern.lanternPlaced && this.lantern.lanternOn
-          && this.value('tower-g0') === 2 && this.value('tower-g1') === 1 && this.value('tower-g2') === 3;
-        if (branchesReady && lumoHoldingSeal) {
-          this.progress.flags['l5-power'] = true;
-          this.progress.flags['l5-water-returned'] = true;
-          this.addProp('crystal_hope', 445, 168, 0.9);
-          this.say([{ speaker: 'Lumo', text: 'Cả ba vòng đều đang quay!' }, { speaker: 'Nhinh', text: 'Chuyển cần. Cậu giữ nguyên một chút.' }, { speaker: 'Nhinh', text: 'Nước đã đổi hướng. Máy tự giữ chế độ Trả dòng.' }, { speaker: 'Lumo', text: 'Tôi nghe tiếng suối!' }]);
-          this.save();
-        } else this.say([{ speaker: 'Nhinh', text: 'Cần vẫn khóa. Cần cả hai nhánh sáng cùng lúc và Lumo giữ ấn C.' }]);
-      }, () => !this.progress.flags['l5-power'], 'receiver_off');
-      action('tower-lantern-retrieve', 'E · Thu hồi đèn', 120, 205, () => { this.lantern.retrieveLantern(); this.progress.flags['l5-lantern-retrieved'] = true; this.progress.lanternOn = true; this.save(); }, () => this.progress.flags['l5-power'] === true && this.lantern.lanternPlaced && !this.progress.flags['l5-lantern-retrieved'], 'pedestal_lit');
-      action('hope-crystal', 'E · Nhận Tinh thể Hy Vọng', 445, 168, () => { this.progress.flags['l5-crystal'] = true; this.objects.find((object): object is Phaser.GameObjects.Image => object instanceof Phaser.GameObjects.Image && object.texture.key === 'crystal_hope')?.destroy(); this.save(); this.say([{ speaker: 'Nhinh', text: 'Tinh thể Hy Vọng đã được giải phóng.' }]); }, () => this.progress.flags['l5-power'] === true && this.progress.flags['l5-lantern-retrieved'] === true && !this.progress.flags['l5-crystal'], 'crystal_hope');
-      action('tower-recall-lumo', 'E · Gọi Lumo trở lại', 320, 80, () => { this.progress.flags['l5-return-called'] = true; this.lumoTarget = { x: this.player.x - 18, y: this.player.y - 20 }; this.save(); this.say([{ speaker: 'Nhinh', text: 'Cậu về được rồi, Lumo.' }, { speaker: 'Lumo', text: 'Tôi nghe thấy nước. Tôi tới ngay.' }]); }, () => this.progress.flags['l5-power'] === true && !this.progress.flags['l5-reunited'], 'shadow_npc');
-      action('tower-record', 'E · Nghe bản ghi bên cửa sổ', 535, 86, () => { this.progress.flags['l5-record-read'] = true; this.save(); this.say([{ speaker: 'Ký Ức', text: 'Đội tìm kiếm đã trở về. Con bé vẫn chưa có mặt. Cha sẽ giữ ngọn tháp sáng thêm một đêm. Nếu con nhìn thấy, cứ đi về phía ánh đèn. Cha ở đây.' }, { speaker: 'Nhinh', text: 'Ông ấy đang đợi con gái.' }, { speaker: 'Lumo', text: 'Tôi nhớ chiếc khăn này. Nó từng đỏ.' }, { speaker: 'Nhinh', text: 'Mình đã trả nước cho rừng. Chuyện ở Cây Mẹ vẫn cần được biết.' }]); }, () => this.progress.flags['l5-crystal'] === true && !this.progress.flags['l5-record-read'], 'mural_tablet');
-      action('tower-exit', 'E · Ra khu vườn', 560, 300, () => this.nextLevel([{ speaker: 'Lumo', text: 'Nước đã trở lại. Sao những cây nhỏ vẫn cúi đầu?' }, { speaker: 'Nhinh', text: 'Mình xuống gần xem.' }]), () => this.progress.flags['l5-record-read'] === true && this.progress.flags['l5-reunited'] === true, 'woods_arch_open');
-    } else if (level === 7) {
-      // Superseded by RuinsOfTwoHalvesLevel (registered in buildLevel). Kept only so the legacy
-      // `l7-*` flag names stay visible in history; this branch is unreachable for index 7.
-      this.registerMirror('ruins-left', 'Gương trái', 220, 175, 2);
-      this.registerMirror('ruins-right', 'Gương phải', 420, 175, 1);
-      action('place-ruins-lantern', 'E · Đặt đèn lên bệ', 120, 205, () => { this.lantern.placeLanternAt(120, 205); this.progress.lanternOn = true; this.progress.flags['l7-lantern-placed'] = true; this.save(); }, () => this.lantern.lanternInHand && !this.lantern.lanternPlaced, 'pedestal_empty');
-      action('retrieve-ruins-lantern', 'E · Nhận lại đèn', 120, 205, () => { this.lantern.retrieveLantern(); this.progress.lanternOn = true; this.progress.flags['l7-lantern-placed'] = false; this.save(); }, () => this.lantern.lanternPlaced && this.progress.flags['l7-solved'], 'pedestal_lit');
-      action('ruins-eye-left', 'E · Kiểm tra mắt nắng trái', 200, 126, () => { this.say([{ speaker: 'Nhinh', text: this.isRuinsOuterBeamReady('left') ? 'Mắt trái đang nhận tia.' : 'Mắt trái chưa nhận đủ ánh sáng.' }]); }, () => !this.progress.flags['l7-solved'], 'receiver_off');
-      action('ruins-eye-right', 'E · Kiểm tra mắt nắng phải', 440, 126, () => { this.say([{ speaker: 'Nhinh', text: this.isRuinsOuterBeamReady('right') ? 'Mắt phải đang nhận tia.' : 'Mắt phải chưa nhận đủ ánh sáng.' }]); }, () => !this.progress.flags['l7-solved'], 'receiver_off');
-      action('ruins-inscription', 'E · Đọc bia điện thờ', 320, 300, () => { this.progress.flags['l7-inscription-read'] = true; this.save(); this.say([{ speaker: 'Hệ thống', text: 'Mặt trời giữ đường đi. Mặt trăng giữ giờ nghỉ. Đừng đặt một bên vào chỗ của cả hai.' }]); }, () => !this.progress.flags['l7-inscription-read'], 'beacon_stone');
-      action('statue', 'E · Xoay tượng chắn sáng', 320, 170, () => { this.progress.counters['statue'] = (this.value('statue') + 1) % 4; this.save(); }, undefined, 'guardian_statue');
-      action('balance-lock', 'E · Thử bàn cân', 320, 82, () => {
-        if (this.isRuinsOuterBeamReady('left') && this.isRuinsOuterBeamReady('right') && this.value('statue') === 2) { this.progress.flags['l7-solved'] = true; this.progress.flags['l7-route-latched'] = true; this.say([{ speaker: 'Nhinh', text: 'Hai mắt ngoài sáng lên. Tia giữa nằm gọn trong bóng của pho tượng.' }, { speaker: 'Lumo', text: 'Cân bằng không có nghĩa là mọi thứ phải giống nhau.' }]); this.save(); }
-        else this.say([{ speaker: 'Nhinh', text: 'Bàn cân chưa ổn định. Cần hai mắt ngoài sáng đồng thời và bóng tượng phủ hốc giữa.' }]);
-      }, () => !this.progress.flags['l7-solved'], 'ruins_altar');
-      action('shadow-seal', 'E · Trò chuyện với The Shadow', 320, 98, () => { this.progress.flags['l7-met-shadow'] = true; this.save(); this.say([{ speaker: 'The Shadow', text: 'Ánh sáng không phải thứ duy nhất giữ thế giới cân bằng.' }, { speaker: 'Lumo', text: 'Tôi sợ điều mình sắp nhớ ra.' }, { speaker: 'Nhinh', text: 'Mình sẽ đọc cùng nhau.' }, { speaker: 'The Shadow', text: 'Dấu xoắn dưới đài dẫn tới nơi có thể nhìn thấy cả ba phòng.' }]); }, () => this.progress.flags['l7-solved'] && !this.progress.flags['l7-met-shadow'], 'shadow_npc');
-      action('ruins-exit', 'E · Vào đài thiên văn', 560, 300, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Đường này dẫn lên đài thiên văn.' }, { speaker: 'Lumo', text: 'Tôi nghe thấy tiếng mưa trong ký ức.' }]), () => this.progress.flags['l7-met-shadow'] === true && this.progress.flags['l7-lantern-placed'] !== true, 'woods_arch_open');
-    } else if (level === 8) {
-      this.registerMirror('obs-east', 'Gương Đông', 220, 175, 2);
-      this.registerMirror('obs-west', 'Gương Tây', 420, 175, 1);
-      action('observatory-1', 'E · Mở phòng quỹ đạo', 320, 260, () => { if (this.value('obs-east') === 2 && this.value('obs-west') === 1) this.setFlag('l8-room-one'); else this.say([{ speaker: 'Nhinh', text: 'Hai đường sáng chưa gặp nhau.' }]); }, undefined, 'receiver_off');
-      action('observatory-2', 'E · Gọi Lumo giữ ấn', 320, 114, () => this.callLumo('observatory', 320, 114), () => this.progress.flags['l8-room-one'] === true && !this.progress.flags['l8-room-two'], 'shadow_npc');
-      action('shadow-bridge', 'E · Bước qua cầu bóng', 320, 222, () => { if (!this.lantern.lanternOn && this.progress.flags['l8-room-two']) this.progress.flags['l8-room-three'] = true; else this.say([{ speaker: 'Nhinh', text: 'Cầu chỉ hiện khi đèn tắt và Lumo giữ ấn.' }]); }, () => this.progress.flags['l8-room-two'] && !this.progress.flags['l8-room-three'], 'stepping_stone');
-      action('balance-crystal', 'E · Nhận Tinh thể Cân Bằng', 320, 68, () => { this.progress.flags['l8-crystal'] = true; this.save(); }, () => this.progress.flags['l8-room-three'] && !this.progress.flags['l8-crystal'], 'crystal_balance');
-      action('observatory-exit', 'E · Trở về Cây Mẹ', 560, 300, () => this.nextLevel([{ speaker: 'Nhinh', text: 'Ba tinh thể đã trở lại. Mình hãy đưa chúng về Cây Mẹ.' }, { speaker: 'Lumo', text: 'Tôi sẽ không để cậu đi một mình.' }]), () => this.progress.flags['l8-crystal'], 'woods_arch_open');
-    } else {
-      (['memory', 'hope', 'balance'] as const).forEach((name, i) => action(`heart-${name}`, `E · Đặt tinh thể ${name === 'memory' ? 'Ký Ức' : name === 'hope' ? 'Hy Vọng' : 'Cân Bằng'}`, [158, 320, 480][i], [192, 200, 192][i], () => this.setFlag(`l9-${name}`), () => !this.progress.flags[`l9-${name}`], `crystal_${name}`));
-      action('heart-lantern-place', 'E · Đặt đèn lên bệ dẫn sáng', 100, 205, () => { this.lantern.placeLanternAt(100, 205); this.progress.lanternOn = true; this.progress.flags['l9-lantern-placed'] = true; this.save(); this.say([{ speaker: 'Nhinh', text: 'Ánh sáng đã được đặt ở tâm dẫn.' }]); }, () => this.lantern.lanternInHand && !this.lantern.lanternPlaced && !this.progress.flags['l9-roots'], 'pedestal_empty');
-      this.registerMirror('heart-memory', 'Gương Ký Ức', 220, 220, 1);
-      this.registerMirror('heart-balance', 'Gương Cân Bằng', 420, 220, 2);
-      this.registerMirror('heart-prism', 'Lăng kính', 320, 200, 1);
-      action('heart-left-eye', 'E · Chỉnh mắt nắng trái', 180, 145, () => { this.progress.counters['heart-left-eye'] = (this.value('heart-left-eye') + 1) % 2; this.save(); }, () => !this.progress.flags['l9-roots'], 'receiver_off');
-      action('heart-right-eye', 'E · Chỉnh mắt nắng phải', 460, 145, () => { this.progress.counters['heart-right-eye'] = (this.value('heart-right-eye') + 1) % 2; this.save(); }, () => !this.progress.flags['l9-roots'], 'receiver_off');
-      action('heart-statue', 'E · Xoay tượng vào hốc trăng', 400, 125, () => { this.progress.counters['heart-statue'] = (this.value('heart-statue') + 1) % 4; this.save(); }, () => !this.progress.flags['l9-roots'], 'guardian_statue');
-      action('heart-call-lumo', 'E · Gọi Lumo tới ấn hy vọng', 320, 125, () => this.callLumo('heart', 320, 125), () => !this.progress.flags['l9-roots'], 'shadow_npc');
-      action('heart-roots', 'E · Cân bằng hai mắt và hốc trăng', 320, 85, () => {
-        const lumoHoldingSeal = this.progress.flags['l9-called-heart'] === true
-          && Math.hypot(this.lumo.sprite.x - 320, this.lumo.sprite.y - 125) < 36;
-        const ready = this.progress.flags['l9-memory'] && this.progress.flags['l9-hope'] && this.progress.flags['l9-balance'] && this.lantern.lanternPlaced && this.lantern.lanternOn && this.value('heart-memory') === 1 && this.value('heart-balance') === 2 && this.value('heart-prism') === 1 && lumoHoldingSeal && this.value('heart-left-eye') === 1 && this.value('heart-right-eye') === 1 && this.value('heart-statue') === 2;
-        if (ready) { this.progress.flags['l9-roots'] = true; this.say([{ speaker: 'Nhinh', text: 'Hai mắt cùng sáng, còn hốc trăng được giữ trong bóng. Cây Mẹ đã nhận đủ ba tinh thể.' }, { speaker: 'Lumo', text: 'Tôi ở đây. Hãy lấy đèn về; chúng ta sẽ cùng khép vòng.' }]); this.save(); }
-        else {
-          const missing: string[] = [];
-          if (!this.progress.flags['l9-memory'] || !this.progress.flags['l9-hope'] || !this.progress.flags['l9-balance']) missing.push('đặt đủ ba tinh thể');
-          if (!this.lantern.lanternPlaced || !this.lantern.lanternOn) missing.push('đặt đèn đang bật lên bệ');
-          if (this.value('heart-memory') !== 1 || this.value('heart-balance') !== 2 || this.value('heart-prism') !== 1) missing.push('hướng lăng kính và hai nhánh đúng');
-          if (this.value('heart-left-eye') !== 1 || this.value('heart-right-eye') !== 1) missing.push('chiếu sáng cả hai mắt nắng');
-          if (this.value('heart-statue') !== 2) missing.push('để tượng phủ bóng lên hốc trăng');
-          if (!lumoHoldingSeal) missing.push('gọi Lumo tới ấn và chờ cậu ấy giữ vị trí');
-          this.say([{ speaker: 'Nhinh', text: `Còn thiếu: ${missing.join('; ')}.` }]);
-        }
-      }, () => !this.progress.flags['l9-roots'], 'heart_tree_0');
-      action('heart-lantern-retrieve', 'E · Nhận đèn và giữ nguồn sáng', 100, 205, () => {
-        const lampWasAlreadyOff = !this.lantern.lanternOn;
-        this.lantern.retrieveLantern();
-        this.progress.flags['l9-lantern-placed'] = false;
-        this.progress.flags['l9-lantern-retrieved'] = true;
-        if (lampWasAlreadyOff) {
-          this.lantern.lanternOn = false;
-          this.progress.lanternOn = false;
-          this.lantern.isOverloadMode = false;
-          this.save();
-          this.finishHeart();
-          return;
-        }
-        this.progress.lanternOn = true;
-        this.progress.flags['l9-overload'] = true;
-        this.lantern.isOverloadMode = true;
-        this.save();
-        this.say([{ speaker: 'Nhinh', text: 'Nguồn sáng trở về tay mình. Nó đang dâng quá ngưỡng!' }, { speaker: 'Lumo', text: 'Đừng buông tay. Khi đã sẵn sàng, hãy tắt đèn để ánh sáng tràn qua Cây Mẹ.' }]);
-      }, () => this.progress.flags['l9-roots'] && this.lantern.lanternPlaced && this.progress.flags['l9-lantern-retrieved'] !== true, 'pedestal_lit');
     }
   }
 
@@ -2149,39 +2116,6 @@ export class CampaignScene extends Phaser.Scene {
       this.activeRevealedRunes.clear();
       this.runeRevealExpiresAt = 0;
       this.updateRuneRevealVisuals();
-    }
-    if (this.progress.level === 4 || this.progress.level === 5) {
-      const current = { x: this.lumo.sprite.x, y: this.lumo.sprite.y };
-      for (const mark of ['a', 'b', 'c', 'high', 'observatory']) {
-        const p = this.getLumoMark(mark);
-        if (Math.hypot(current.x - p.x, current.y - p.y) < 36) {
-          const flag = `l${this.progress.level}-at-${mark}`;
-          if (this.progress.flags[`l${this.progress.level}-called-${mark}`] && !this.progress.flags[flag]) { this.progress.flags[flag] = true; this.save(); }
-        }
-      }
-    }
-    if (this.progress.level === 4 && this.progress.flags['l4-return-called'] === true && this.progress.flags['l4-reunited'] !== true) {
-      this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 58, 305) };
-      if (Math.hypot(this.lumo.sprite.x - this.lumoTarget.x, this.lumo.sprite.y - this.lumoTarget.y) < 30) {
-        this.progress.flags['l4-reunited'] = true;
-        this.save();
-        this.say([{ speaker: 'Lumo', text: 'Tôi về rồi. Mình cùng lên tháp nhé.' }]);
-      }
-    }
-    if (this.progress.level === 5 && this.progress.flags['l5-return-called'] === true && this.progress.flags['l5-reunited'] !== true) {
-      this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 58, 305) };
-      if (Math.hypot(this.lumo.sprite.x - this.lumoTarget.x, this.lumo.sprite.y - this.lumoTarget.y) < 30) {
-        this.progress.flags['l5-reunited'] = true;
-        this.save();
-        this.say([{ speaker: 'Lumo', text: 'Tôi đã trở lại. Mình cùng xuống vườn nhé.' }]);
-      }
-    }
-    if (this.progress.level === 9) {
-      const mark = this.getLumoMark('heart');
-      if (this.progress.flags['l9-called-heart'] && !this.progress.flags['l9-at-heart'] && Math.hypot(this.lumo.sprite.x - mark.x, this.lumo.sprite.y - mark.y) < 36) {
-        this.progress.flags['l9-at-heart'] = true;
-        this.save();
-      }
     }
     if (this.progress.level === 0 && this.lantern.lanternInHand) this.lantern.isDawnMode = false;
     if (dt > 0 && this.time.now - this.lastGateCheck > 1000) { this.lastGateCheck = this.time.now; }
@@ -2255,22 +2189,6 @@ export class CampaignScene extends Phaser.Scene {
     const progress=Math.min(1,this.woodsFlyPhase/1500), t=this.woodsFlyPhase<1500?progress:1;
     const x=origin.x+(target.x-origin.x)*t, y=origin.y+(target.y-origin.y)*t;
     fly.setPosition(x,y); glow.setPosition(x,y);
-  }
-
-  private registerMirror(id: string, label: string, x: number, y: number, goal: number): void {
-    this.addAction(`mirror-${id}`, `E · Xoay ${label} (${this.value(id)})`, x, y, () => {
-      this.progress.counters[id] = (this.value(id) + 1) % 4; this.save();
-    }, () => true, 'mirror_1');
-    this.addAction(`inspect-${id}`, `E · Xem hướng ${label}`, x, y - 30, () => this.say([{ speaker: 'Nhinh', text: `${label} đang ở hướng ${this.value(id)} trên bốn nấc.` }, { speaker: 'Hệ thống', text: `Gợi ý: hướng đích ${goal}.` }]), () => false, 'receiver_off');
-  }
-
-  private callLumo(mark: string, x: number, y: number): void {
-    this.lumoTarget = this.getLumoMark(mark, x, y);
-    this.progress.counters['lumo-target-x'] = this.lumoTarget.x;
-    this.progress.counters['lumo-target-y'] = this.lumoTarget.y;
-    const key = `l${this.progress.level}-called-${mark}`;
-    this.progress.flags[key] = true; this.save();
-    this.say([{ speaker: 'Nhinh', text: `Lumo, cậu tới mốc ${mark.toUpperCase()} giúp mình nhé?` }, { speaker: 'Lumo', text: 'Được! Tôi sẽ chờ tới khi cậu gọi.' }]);
   }
 
   private getLumoMark(mark: string, x?: number, y?: number): { x: number; y: number } {
@@ -2511,18 +2429,6 @@ export class CampaignScene extends Phaser.Scene {
     return image;
   }
 
-  private setLevelArtAt(x: number, y: number, filename: string): void {
-    const key = getLevelArtKey(this.progress.level, filename);
-    if (!key || !this.textures.exists(key)) return;
-    const image = this.objects.find((object): object is Phaser.GameObjects.Image =>
-      object instanceof Phaser.GameObjects.Image
-      && object.texture.key.startsWith('art_')
-      && Math.abs(object.x - x) < 0.1
-      && Math.abs(object.y - y) < 0.1,
-    );
-    if (image && image.texture.key !== key) image.setTexture(key);
-  }
-
   private refreshCampaignArtVisuals(level: number): void {
     if (level === 0) {
       const gateOpen = this.progress.flags['l0-gate-open'] === true;
@@ -2550,14 +2456,6 @@ export class CampaignScene extends Phaser.Scene {
       if (tablet instanceof Phaser.GameObjects.Image && tabletKey && this.textures.exists(tabletKey) && tablet.texture.key !== tabletKey) tablet.setTexture(tabletKey);
       this.syncForestEdgeTabletGlow();
       this.setForestEdgeArt('sun-eye', this.progress.flags['l0-gate-open'] ? 'sun-eye-full' : this.forestEdgeChargeMs > 0 ? 'sun-eye-receiving' : 'sun-eye-dormant');
-    } else if (level === 7) {
-      this.setLevelArtAt(320, 170, `statue-notch-${this.value('statue') % 4}`);
-    } else if (level === 9) {
-      for (const [name, x, y] of [['memory', 158, 192], ['hope', 320, 200], ['balance', 480, 192]] as const) {
-        this.setLevelArtAt(x, y, `${name}-alcove-${this.progress.flags[`l9-${name}`] ? 'inserted' : 'empty'}`);
-      }
-      const core = this.progress.flags['l9-roots'] ? 'core-latched' : this.progress.flags['l9-overload'] ? 'core-ready' : 'core-night';
-      this.setLevelArtAt(320, 115, core);
     }
   }
 
@@ -2657,93 +2555,21 @@ export class CampaignScene extends Phaser.Scene {
     this.scene.start('EndingScene', { campaign: true });
   }
 
-  private finishHeart(): void {
-    if (this.progress.flags['l9-complete']) return;
-    this.heartEnd = true;
-    this.progress.flags['l9-complete'] = true;
-    this.save();
-    this.say([{ speaker: 'Nhinh', text: 'Mình đã đi đủ xa. Bình minh có thể bắt đầu lại.' }, { speaker: 'Lumo', text: 'Và lần này, chúng ta sẽ cùng nhìn thấy nó.' }], () => this.scene.start('EndingScene', { campaign: true }));
-  }
-
-  private setFlag(flag: string): void { this.progress.flags[flag] = true; this.save(); SoundSystem.playMirrorRotate(); }
-
   private refreshCampaignPuzzleVisuals(): void {
     const level = this.progress.level;
     this.refreshCampaignArtVisuals(level);
-    if (![0, 3, 4, 5, 7, 9].includes(level)) return;
+    if (level !== 0) return; // every later level draws its own beams in its controller
     if (!this.campaignBeamGraphics || !this.campaignBeamGraphics.active) {
       this.campaignBeamGraphics = this.add.graphics().setDepth(6);
       this.track(this.campaignBeamGraphics);
     }
     const graphics = this.campaignBeamGraphics;
     graphics.clear();
-    const line = (points: Array<[number, number]>, active: boolean): void => {
-      graphics.lineStyle(3, active ? 0xffdf83 : 0x52636a, active ? 0.9 : 0.32);
-      graphics.beginPath();
-      graphics.moveTo(points[0][0], points[0][1]);
-      for (const [x, y] of points.slice(1)) graphics.lineTo(x, y);
-      graphics.strokePath();
-    };
-    if (level === 0) {
-      graphics.clear();
-      if (this.forestEdgeChargeMs > 0) {
-        const t = Math.min(1, this.forestEdgeChargeMs / FOREST_EDGE.chargeMs);
-        graphics.lineStyle(2 + t, 0xffe680, 0.35 + t * 0.55);
-        graphics.beginPath(); graphics.moveTo(this.player.x + 6, this.player.y + 2); graphics.lineTo(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8); graphics.strokePath();
-        graphics.fillStyle(0xffe680, 0.25 + t * 0.45); graphics.fillCircle(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8, 3 + t * 4);
-      }
-      return;
-    }
-    const light = this.lantern.lanternPlaced && this.lantern.lanternOn;
-    if (level === 4) {
-      graphics.lineStyle(5, 0x8b8d76, 0.78);
-      graphics.lineBetween(295, 80, 295, 280); graphics.lineBetween(440, 80, 440, 280);
-      graphics.lineStyle(3, this.progress.flags['l4-latch-a'] ? 0x83d6a2 : 0xffdf83, 0.85); graphics.lineBetween(295, 150, 295, 195);
-      graphics.lineStyle(3, this.progress.flags['l4-latch-b'] ? 0x83d6a2 : 0xffdf83, 0.85); graphics.lineBetween(440, 155, 440, 200);
-      graphics.lineStyle(2, this.lantern.lanternOn ? 0x8b8d76 : 0x88e4d4, this.lantern.lanternOn ? 0.22 : 0.85);
-      graphics.beginPath(); graphics.moveTo(300, 230); graphics.lineTo(350, 230); graphics.lineTo(385, 245); graphics.lineTo(435, 245); graphics.strokePath();
-      if (!this.lantern.lanternOn) {
-        graphics.lineStyle(3, 0x88e4d4, 0.9);
-        graphics.beginPath(); graphics.moveTo(350, 230); graphics.lineTo(385, 245); graphics.lineTo(430, 245); graphics.lineTo(475, 265); graphics.strokePath();
-        graphics.fillStyle(0x88e4d4, 0.82);
-        for (const [x, y] of [[350, 230], [385, 245], [430, 245], [475, 265]] as Array<[number, number]>) graphics.fillCircle(x, y, 3);
-      }
-      for (const [mark, x, y] of [['a', 220, 130], ['b', 420, 130], ['c', 320, 218]] as Array<[string, number, number]>) {
-        const arrived = this.progress.flags[`l4-at-${mark}`] === true;
-        graphics.fillStyle(arrived ? 0xffdf83 : 0x52636a, arrived ? 0.9 : 0.35); graphics.fillCircle(x, y, 7);
-      }
-      if (this.progress.flags['l4-latch-c']) { graphics.lineStyle(3, 0x83d6a2, 0.85); graphics.lineBetween(430, 275, 500, 275); }
-    } else if (level === 5) {
-      const common = light && this.value('tower-g0') === 2;
-      const a = common && this.value('tower-g1') === 1;
-      const b = common && this.value('tower-g2') === 3;
-      const c = this.progress.flags['l5-called-high'] === true && Math.hypot(this.lumo.sprite.x - 320, this.lumo.sprite.y - 80) < 36;
-      line([[120, 205], [160, 170]], light);
-      line([[160, 170], [250, 170], [470, 145]], a);
-      line([[160, 170], [250, 170], [350, 170], [470, 205]], b);
-      graphics.fillStyle(c ? 0xffdf83 : 0x52636a, c ? 0.9 : 0.32); graphics.fillCircle(320, 80, 9);
-      if (this.progress.flags['l5-water-returned']) {
-        graphics.lineStyle(3, 0x57cbe0, 0.85); graphics.beginPath(); graphics.moveTo(575, 100); graphics.lineTo(575, 280); graphics.strokePath();
-      }
-    } else if (level === 7) {
-      const left = this.isRuinsOuterBeamReady('left');
-      const right = this.isRuinsOuterBeamReady('right');
-      line([[120, 205], [320, 170], [200, 126]], left);
-      line([[120, 205], [320, 170], [440, 126]], right);
-      graphics.fillStyle(this.value('statue') === 2 ? 0x283743 : 0xffdf83, this.value('statue') === 2 ? 0.88 : 0.2);
-      graphics.fillEllipse(320, 221, 42, 18);
-      graphics.fillStyle(left && right ? 0xffdf83 : 0x52636a, left && right ? 0.95 : 0.4);
-      graphics.fillCircle(200, 126, 8); graphics.fillCircle(440, 126, 8);
-    } else {
-      const memory = light && this.value('heart-memory') === 1;
-      const balance = light && this.value('heart-balance') === 2;
-      const lumo = this.progress.flags['l9-called-heart'] === true && Math.hypot(this.lumo.sprite.x - 320, this.lumo.sprite.y - 125) < 36;
-      line([[100, 205], [320, 200]], light);
-      line([[320, 200], [220, 220], [180, 145]], memory);
-      line([[320, 200], [420, 220], [460, 145]], balance);
-      graphics.fillStyle(this.value('heart-statue') === 2 ? 0x283743 : 0xffdf83, this.value('heart-statue') === 2 ? 0.88 : 0.2); graphics.fillEllipse(320, 125, 42, 18);
-      graphics.fillStyle(lumo ? 0xffdf83 : 0x52636a, lumo ? 0.9 : 0.35); graphics.fillCircle(320, 125, 7);
-      graphics.fillStyle(this.progress.flags['l9-roots'] ? 0x83d6a2 : 0x52636a, this.progress.flags['l9-roots'] ? 0.85 : 0.3); graphics.fillRoundedRect(270, 152, 100, 9, 4);
+    if (this.forestEdgeChargeMs > 0) {
+      const t = Math.min(1, this.forestEdgeChargeMs / FOREST_EDGE.chargeMs);
+      graphics.lineStyle(2 + t, 0xffe680, 0.35 + t * 0.55);
+      graphics.beginPath(); graphics.moveTo(this.player.x + 6, this.player.y + 2); graphics.lineTo(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8); graphics.strokePath();
+      graphics.fillStyle(0xffe680, 0.25 + t * 0.45); graphics.fillCircle(FOREST_EDGE.objects.eye.anchor.x, FOREST_EDGE.objects.eye.anchor.y - 8, 3 + t * 4);
     }
   }
 
@@ -2752,12 +2578,6 @@ export class CampaignScene extends Phaser.Scene {
     return this.lantern.lanternPlaced && this.lantern.lanternOn && mirrorReady;
   }
   private value(key: string): number { return this.progress.counters[key] ?? 0; }
-  private savePlayerCheckpoint(): void {
-    this.progress.counters['player-level'] = this.progress.level;
-    this.progress.counters['player-x'] = this.player.x;
-    this.progress.counters['player-y'] = this.player.y;
-    this.save();
-  }
   private save(): void { CampaignSaveSystem.save(this.progress); }
   private getRunePositions(): Record<string, { x: number; y: number }> { return { moon: { x: 180, y: 204 }, leaf: { x: 320, y: 125 }, star: { x: 460, y: 204 } }; }
 
@@ -3009,8 +2829,10 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level === 9) { this.heartLevel?.showHint(); return; }
     if (this.progress.level === 8 && this.activeObservatoryRoom) {
       const guidance = observatoryGuidance(this.activeObservatoryRoom, this.getObservatoryWorldState());
-      if (this.observatoryHintKey !== guidance.objective) {
-        this.observatoryHintKey = guidance.objective;
+      // Keyed on the ladder text, not the objective row: one ladder serves several sub-objectives of the network solve.
+      const ladderKey = guidance.hints.join('\n');
+      if (this.observatoryHintLadderKey !== ladderKey) {
+        this.observatoryHintLadderKey = ladderKey;
         this.hintIndex = 0;
       }
       const index = Math.min(this.hintIndex, guidance.hints.length - 1);
