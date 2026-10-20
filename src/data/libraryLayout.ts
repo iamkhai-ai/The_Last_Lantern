@@ -58,15 +58,23 @@ export const LIBRARY_INSCRIPTION_SOLID: LibraryRect = {
   height: 10,
 };
 
-export const LIBRARY_SOLID_RECTS: LibraryRect[] = [
-  // Solid footprints fill the visible prop faces, so their sides and backs block too.
-  { x: 28, y: 223, width: 76, height: 50 },
-  { x: 12, y: 112, width: 76, height: 78 },
+/** The four 48x48 rack blocks, in `LIBRARY_LAYOUT.racks` order (each block is centred on its rack anchor). */
+export const LIBRARY_RACK_SOLIDS: LibraryRect[] = [
   { x: 108, y: 102, width: 48, height: 48 },
   { x: 156, y: 102, width: 48, height: 48 },
   { x: 108, y: 212, width: 48, height: 48 },
   { x: 156, y: 212, width: 48, height: 48 },
-  { x: 446, y: 90, width: 84, height: 110 },
+];
+
+/** The mural panel's collision block; its art and prompt anchor live at `LIBRARY_LAYOUT.mural`. */
+export const LIBRARY_MURAL_SOLID: LibraryRect = { x: 446, y: 90, width: 84, height: 110 };
+
+export const LIBRARY_SOLID_RECTS: LibraryRect[] = [
+  // Solid footprints fill the visible prop faces, so their sides and backs block too.
+  { x: 28, y: 223, width: 76, height: 50 },
+  { x: 12, y: 112, width: 76, height: 78 },
+  ...LIBRARY_RACK_SOLIDS,
+  LIBRARY_MURAL_SOLID,
   LIBRARY_DAIS,
   LIBRARY_INSCRIPTION_SOLID,
   // North-wall gate, built like the Level 02 arch: the backing fills the wall above the doorway and
