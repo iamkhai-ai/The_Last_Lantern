@@ -62,4 +62,15 @@ export interface InteractableConfig {
    * accepted.
    */
   ownsPosition?: (playerX: number, playerY: number) => boolean;
+  /**
+   * Optional. Replaces the radial range test for this control: `InteractionSystem` calls it with the
+   * actor position in `update()` and again in the re-validation inside `tryInteract()`, so a control
+   * whose approach is not a circle (a stone answered from all four sides, a face-only approach) can
+   * share one predicate between the prompt and the E press. `radius` is then unused for range but
+   * `x`/`y` still anchor the prompt and break nearest-target ties. Absent means the behaviour is
+   * exactly as before: the padded radius decides. Keep the debounce and `ownsPosition` semantics in
+   * mind — an opted-in control must still be disabled (or return a falsy prompt) where it may not
+   * answer, so `[E]` never appears without accepting the press.
+   */
+  isInReach?: (playerX: number, playerY: number) => boolean;
 }
