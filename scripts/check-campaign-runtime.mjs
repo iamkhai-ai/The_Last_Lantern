@@ -639,7 +639,8 @@ function makeFrameScene(level, { controllers = [] } = {}) {
     time: { now: 100000 },
     dialogue: { isInputLocked: () => false, isActive: () => false, update: () => { calls.dialogue += 1; } },
     pauseMenu: { isOpen: () => false, open: () => undefined },
-    player: { x: 320, y: 290, update: () => { calls.player += 1; }, sprite: { visible: true, getBounds: () => bounds } },
+    // The frame hands the foot body to interactions.update() (reach-opted controls); a 14x6 stand-in suffices here.
+    player: { x: 320, y: 290, update: () => { calls.player += 1; }, getFootBody: () => ({ x: 313, y: 306, width: 14, height: 6 }), sprite: { visible: true, getBounds: () => bounds } },
     lumo: {
       update: (_dt, x, y) => calls.lumo.push({ x, y }),
       sprite: { x: 300, y: 270, visible: true, getBounds: () => bounds },
