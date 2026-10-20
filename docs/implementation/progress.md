@@ -97,3 +97,22 @@ Current slice: rebuild **Level 06 (The Sleepless Tower, campaign index 5)** on b
 - Verification: NOT_RUN by worker per delegation. Root owns tests, build, reviews, and real-browser collision/prompt confirmation.
 - Final prompt/rim source revision: `1418693b553c9d5689734b1610c93bb5d814d93a`. PASS — root build (406 modules), three focused pure scripts, diff check, 355 browser prompt-placement fixtures across ten campaign levels and all Observatory rooms, live bridge-visibility bounds, 28 closed/open gate collision and restore cases, and the uninterrupted keyboard New Game → Level 02 / Continue / explicit-reset regression. Two independent Luna high final reviews found no actionable findings.
 - Details and verification limits: [level-01-prompt-and-rim-verification.md](level-01-prompt-and-rim-verification.md). The user's game remains running on port 5173 with the updated source. No push or merge into main performed.
+
+# Levels 01-03 playtest fixes - 2026-10-20
+
+Branch `fix/levels-01-03-playtest` (base `origin/test-develop` 2a528fe) = merge of three worker branches:
+`fix/l01-path-grass`, `fix/l02-stones`, `fix/l03-library`. Plan: docs/superpowers/plans/2026-10-20-levels-01-03-playtest-fixes.md.
+
+| Item | Result |
+| --- | --- |
+| L1 grass along both path edges | opt-in dense band (177 stamps), Level 02 decor hash unchanged |
+| L2 stone collision | poem/rune footprints 24px deep x 34px wide (south edge unchanged) |
+| L2 prompt from every side | `InteractableConfig.isInReach`; RULE_GAMES.md section 3 exception |
+| L3 gate opens on crystal | `isExitOpen()` = `l2-crystal`; fifth painting optional |
+| L3 gate on north wall | arch at (580, 178), player walks north through it |
+| L3 inscription near entry | free-standing tablet at (232, 270), only prompt at spawn |
+
+Verification: `tsc --noEmit` clean, `npm run build` OK (dist restored), all 24 `scripts/check-*.mjs` PASS,
+`level02-geometry.cjs` and `level01-browser-regression.cjs` PASS on the merged branch.
+`level02-browser.cjs` fails at the same assertion on the base commit and on this branch (pre-existing, contradictory expectation about the moon rune art).
+Independent DeepSeek review: Task A passed (4 minor notes); the Task B and C reviewers stalled and were stopped, so B and C were verified by the orchestrator (diff read, merged-tree checks, browser regressions, screenshots). Human replay of Levels 1-3 still pending.
