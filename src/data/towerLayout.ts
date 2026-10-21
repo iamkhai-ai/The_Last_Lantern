@@ -26,10 +26,14 @@ export const TOWER = {
     eyeA: { ground: p(460, 174), optical: p(460, 162), base: rect(452, 166, 16, 8) },
     eyeB: { ground: p(460, 267), optical: p(460, 255), base: rect(452, 259, 16, 8) },
     call: { ground: p(350, 252), stand: p(350, 272), base: rect(339, 242, 22, 10) },
-    lever: { ground: p(515, 232), stand: p(515, 254), base: rect(504, 222, 22, 10) },
+    // The lever sits 36px west of the chamber so the lane between them fits a 14px body with clearance on both sides.
+    lever: { ground: p(497, 232), stand: p(497, 254), base: rect(482, 222, 22, 10) },
     chamber: { ground: p(580, 284), stand: p(580, 288), solid: rect(540, 180, 80, 104), crystal: p(580, 232) },
     window: { center: p(565, 92) },
-    record: { center: p(565, 156), stand: p(533, 192) },
+    // Its body keeps 5px clear of the chamber, so the stand is reachable without an exact-fit column.
+    record: { center: p(565, 156), stand: p(528, 192) },
+    // The window and the record panel are wall art, so the strip above the chamber is solid (x 509..620, y 88..180 joins the chamber solid at y=180).
+    eastWall: { solid: rect(509, 88, 111, 92) },
     rings: { a: p(283, 120), b: p(307, 120), c: p(331, 120) },
   },
   lumo: {
@@ -182,6 +186,14 @@ export function getTowerExitBlock(state: TowerState): 'power' | 'lamp' | 'crysta
 }
 
 export function canCompleteTower(state: TowerState): boolean { return getTowerExitBlock(state) === null; }
+
+/**
+ * The call pedestal sends Lumo to C or recalls him. Once the machine has switched and Lumo is already back
+ * beside Nhinh, the mark has nothing left to do: sending him to C again would undo the reunion.
+ */
+export function canUseCallMark(state: TowerState): boolean {
+  return !(state.waterReturned && state.lumoAssign === 'follow');
+}
 
 export function resolveTowerSpawn(saved: Point | undefined): Point {
   return saved && towerCenterWalkable(saved) ? saved : TOWER.spawn;
