@@ -7,7 +7,8 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
-import { choosePathCallAction, buildPathSchematic, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathElementArtRect, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, PATH_BODY, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_INK_CORRIDOR, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_TUBE_MOUTHS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathElement, type PathMark, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
+import { isFootInReach } from '../systems/interactionReach';
+import { choosePathCallAction, buildPathSchematic, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathElementArtRect, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, PATH_BODY, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_INK_CORRIDOR, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_SIZE, PATH_TUBE_MOUTHS, pathActorBody, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathElement, type PathMark, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
 
 export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
@@ -72,6 +73,9 @@ const MARK_NOT_CALLED: DialogueLine[] = [{speaker:'Nhinh',text:'Có một dấu 
 const INK_NOT_SEEN: DialogueLine[] = [{speaker:'Nhinh',text:'Những vệt trên nền còn mờ quá. Mình thử tắt đèn để xem chúng dẫn tới đâu.'}];
 const TOWER_NEEDS_LUMO: DialogueLine[] = [{speaker:'Nhinh',text:'Mình chưa thể đi mà bỏ Lumo ở lại. Phải gọi cậu ấy về đã.'}];
 const PLATE_ROOMS: Record<'practice'|'a'|'b'|'c',PathRoomId> = {practice:'entry',a:'entry',b:'relay',c:'ink'};
+const STATION_MAP_TITLE='SƠ ĐỒ TRẠM';
+const STATION_MAP_CURRENT='Bạn đang ở đây';
+const STATION_MAP_EXPLANATION='Các đường nối thể hiện đường ống giữa những buồng của trạm.';
 
 export class PathForTwoLevel {
   private scene: Phaser.Scene; private progress: CampaignProgress; private player: Player; private lumo: Lumo;
@@ -84,7 +88,8 @@ export class PathForTwoLevel {
   private doorPostImages=new Map<string,Phaser.GameObjects.Image[]>();
   private doorBodies = new Map<string,Phaser.Physics.Arcade.StaticBody>(); private protected: Phaser.GameObjects.GameObject[]=[];
   private route: PathRoutePoint[]=[]; private routeIndex=0; private assignment='follow'; private lumoRoom:PathRoomId='entry';
-  private routeGraphics?:Phaser.GameObjects.Graphics;
+  private routeGraphics?:Phaser.GameObjects.Graphics; private stationMap?:Phaser.GameObjects.Container;
+  private gateMask?:Phaser.Display.Masks.GeometryMask; private gateMaskSource?:Phaser.GameObjects.Graphics;
   private inkTrail?:Phaser.GameObjects.TileSprite;
   /** Held-E guard: armed by a room change, cleared by the E key coming back up (see update()). */
   private interactReleasePending=false; private interactKey?:Phaser.Input.Keyboard.Key;
@@ -146,7 +151,7 @@ export class PathForTwoLevel {
     this.refresh();
   }
   public startOpeningDialogue():void{this.say(INTRO);}
-  public destroy():void{if(this.destroyed)return;this.destroyed=true;this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.interactions.clear();this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();}
+  public destroy():void{if(this.destroyed)return;this.destroyed=true;this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.gateMask?.destroy();this.gateMaskSource?.destroy();this.gateMask=undefined;this.gateMaskSource=undefined;this.stationMap?.destroy();this.stationMap=undefined;this.interactions.clear();this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();}
   public update(dt:number):void{
     if(this.destroyed)return; this.releaseInteractGuard();
     this.advanceLumo(dt); this.updateDoors(); this.updateInkProgress(); this.updateReunion();
@@ -251,8 +256,15 @@ export class PathForTwoLevel {
   private isSafe(room:PathRoomId,p:PathPoint):boolean{return isPathPositionSafe(room,p,{latches:{a:this.progress.flags['l4-latch-a']===true||this.hasPower('a'),b:this.progress.flags['l4-latch-b']===true||this.hasPower('b'),c:this.progress.flags['l4-latch-c']===true||this.hasPower('c'),practice:this.hasPower('practice')}});}
   private drawRoom():void{
     this.interactions.clear();this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.colliders=[];this.bodies=[];this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();this.protected=[];this.inkTrail=undefined;
-    const def=PATH_ROOMS[this.room]; const floor=this.scene.add.tileSprite(0,0,640,360,'ground_stone').setOrigin(0).setTint(this.room==='ink'?0x8f8f87:0xb4a88d).setDepth(0);this.track(floor);
-    const graphics=this.scene.add.graphics().setDepth(1);graphics.fillStyle(0x302b28,0.96);for(const wall of def.walls)graphics.fillRect(wall.x,wall.y,wall.width,wall.height);graphics.lineStyle(2,0x716351,0.7);for(const wall of def.walls)graphics.strokeRect(wall.x,wall.y,wall.width,wall.height);this.track(graphics);
+    this.gateMask?.destroy();this.gateMaskSource?.destroy();this.gateMask=undefined;this.gateMaskSource=undefined;
+    const def=PATH_ROOMS[this.room];
+    const environmentKey=getLevelArtKey(4,`${this.room}-environment-base`);
+    if(environmentKey&&this.scene.textures.exists(environmentKey)){
+      this.track(this.scene.add.image(0,0,environmentKey).setOrigin(0).setDepth(0));
+    }else{
+      const floor=this.scene.add.tileSprite(0,0,640,360,'ground_stone').setOrigin(0).setTint(this.room==='ink'?0x8f8f87:0xb4a88d).setDepth(0);this.track(floor);
+      const graphics=this.scene.add.graphics().setDepth(1);graphics.fillStyle(0x302b28,0.96);for(const wall of def.walls)graphics.fillRect(wall.x,wall.y,wall.width,wall.height);graphics.lineStyle(2,0x716351,0.7);for(const wall of def.walls)graphics.strokeRect(wall.x,wall.y,wall.width,wall.height);this.track(graphics);
+    }
     for(const wall of def.walls)this.addCollider(wall);
     for(const solid of def.solids)this.addCollider(solid);
     this.routeGraphics=this.scene.add.graphics().setDepth(5);this.track(this.routeGraphics);this.drawTubeRoutes();
@@ -282,6 +294,8 @@ export class PathForTwoLevel {
   }
   private drawTubeRoutes():void{
     if(!this.routeGraphics)return;
+    this.buildGateMask();
+    if(this.gateMask)this.routeGraphics.setMask(this.gateMask);
     const lines=PATH_ROUTE_LINES.filter(line=>line.room===this.room);
     for(const line of lines){
       const points=pathRoutePoints(line);
@@ -296,6 +310,30 @@ export class PathForTwoLevel {
       this.addTubeModules(points);
       this.addCable(line.mark,points);
     }
+  }
+  /**
+   * Positive complement of every 64×88 doorway in this room: the mask keeps the open floor and fills
+   * nothing under a gate, so route art behind a whole door footprint is hidden in both door states
+   * without moving the door above the player. Canvas ignores inverted stencil masks, so the grid is
+   * drawn positively rather than inverting one. Rebuilt per room and destroyed with the room.
+   */
+  private buildGateMask():void{
+    const gates=PATH_CONTROL_STANDS.filter(stand=>stand.room===this.room).flatMap(stand=>{
+      const face=getPathDoorFace(stand.id,this.room);
+      return face?[{x:face.x-32,y:face.base-88,width:64,height:88}]:[];
+    });
+    const xEdges=[0,640],yEdges=[0,360];
+    for(const gate of gates){xEdges.push(gate.x,gate.x+gate.width);yEdges.push(gate.y,gate.y+gate.height);}
+    const unique=(values:number[])=>[...new Set(values)].sort((a,b)=>a-b);
+    const xs=unique(xEdges),ys=unique(yEdges);
+    const source=this.scene.make.graphics();
+    source.fillStyle(0xffffff,1);
+    for(let xi=0;xi<xs.length-1;xi+=1)for(let yi=0;yi<ys.length-1;yi+=1){
+      const cell={x:xs[xi],y:ys[yi],width:xs[xi+1]-xs[xi],height:ys[yi+1]-ys[yi]};
+      const covered=gates.some(gate=>cell.x>=gate.x&&cell.x+cell.width<=gate.x+gate.width&&cell.y>=gate.y&&cell.y+cell.height<=gate.y+gate.height);
+      if(!covered)source.fillRect(cell.x,cell.y,cell.width,cell.height);
+    }
+    this.gateMaskSource=source;this.gateMask=source.createGeometryMask();
   }
   private addTubeModules(points:readonly PathPoint[]):void{
     const key=getLevelArtKey(4,'tube-straight');
@@ -312,6 +350,7 @@ export class PathForTwoLevel {
         // Keep native pixels, clipping symmetrically so the visible ends meet the run boundaries.
         image.setCrop((image.width-pieceLength)/2,0,pieceLength,image.height);
         this.track(image);
+        if(this.gateMask)image.setMask(this.gateMask);
       }
     }
   }
@@ -328,6 +367,7 @@ export class PathForTwoLevel {
           .setRotation(piece.angle).setDepth(6).setData('path-id','cable').setData('path-cable',mark);
         image.setCrop((image.width-piece.length)/2,0,piece.length,image.height);
         this.track(image);
+        if(this.gateMask)image.setMask(this.gateMask);
       }
     }
     const elbowKey=getLevelArtKey(4,'tube-elbow');
@@ -335,39 +375,105 @@ export class PathForTwoLevel {
     for(const corner of pathRouteCorners(points)){
       const image=this.scene.add.image(corner.x,corner.y,elbowKey).setRotation(corner.angle).setDepth(4.5);
       this.track(image);
+      if(this.gateMask)image.setMask(this.gateMask);
     }
   }
   /**
    * The station schematic beside this room's call marker: three room cells, the authored seals and
-   * both pipes, projected from `pathForTwoLayout` — geometry only, never a baked background.
+   * both pipes, projected from `pathForTwoLayout` — geometry only, never a baked background. It is
+   * drawn as a small wall-mounted stone plaque with a chamfered edge, one bronze rule, four corner
+   * pins and soft amber for the current room, so it reads as signage rather than a debug panel.
    */
   private drawStationSchematic():void{
     const slot=PATH_SCHEMATIC[this.room];
     const plan=buildPathSchematic();
-    const graphics=this.scene.add.graphics().setDepth(2);
+    const graphics=this.scene.add.graphics().setDepth(7);
     this.track(graphics);
-    graphics.fillStyle(0x101617,0.94);graphics.fillRect(slot.x-3,slot.y-3,slot.width+6,slot.height+6);
-    graphics.lineStyle(1,0x716351,0.9);graphics.strokeRect(slot.x-3,slot.y-3,slot.width+6,slot.height+6);
+    const left=slot.x-5,top=slot.y-5,right=slot.x+slot.width+5,bottom=slot.y+slot.height+5,chamfer=3;
+    graphics.fillStyle(0x2b2a26,0.98);
+    graphics.beginPath();
+    graphics.moveTo(left+chamfer,top);graphics.lineTo(right-chamfer,top);
+    graphics.lineTo(right,top+chamfer);graphics.lineTo(right,bottom-chamfer);
+    graphics.lineTo(right-chamfer,bottom);graphics.lineTo(left+chamfer,bottom);
+    graphics.lineTo(left,bottom-chamfer);graphics.lineTo(left,top+chamfer);
+    graphics.closePath();graphics.fillPath();
+    graphics.lineStyle(1,0x6e6557,0.9);
+    graphics.beginPath();graphics.moveTo(left+chamfer,top);graphics.lineTo(right-chamfer,top);
+    graphics.lineTo(right,top+chamfer);graphics.strokePath();
+    graphics.lineStyle(1,0x171512,1);
+    graphics.beginPath();graphics.moveTo(left,bottom-chamfer);graphics.lineTo(left+chamfer,bottom);
+    graphics.lineTo(right-chamfer,bottom);graphics.lineTo(right,bottom-chamfer);graphics.strokePath();
+    graphics.lineStyle(1,0x8a6a3b,0.9);graphics.strokeRect(slot.x-1,slot.y-1,slot.width+2,slot.height+2);
+    graphics.fillStyle(0xa88a56,0.9);
+    for(const [x,y] of [[left+4,top+4],[right-4,top+4],[left+4,bottom-4],[right-4,bottom-4]])graphics.fillCircle(x,y,1.6);
     for(const room of plan.rooms){
       const frame={x:slot.x+room.frame.x,y:slot.y+room.frame.y,width:room.frame.width,height:room.frame.height};
-      graphics.fillStyle(room.room===this.room?0x2c4a41:0x212728,1);graphics.fillRect(frame.x,frame.y,frame.width,frame.height);
-      graphics.lineStyle(1,0x8fae9a,0.9);graphics.strokeRect(frame.x,frame.y,frame.width,frame.height);
-      for(const seal of room.seals){
-        graphics.fillStyle(room.room===this.room?0xd8b869:0x6f8a7c,1);
-        graphics.fillRect(slot.x+seal.x-1,slot.y+seal.y-1,3,3);
-      }
+      const current=room.room===this.room;
+      graphics.fillStyle(current?0x4a3b27:0x25241f,current?0.8:0.9);graphics.fillRect(frame.x,frame.y,frame.width,frame.height);
+      graphics.lineStyle(1,current?0xb08a52:0x75664e,0.9);graphics.strokeRect(frame.x,frame.y,frame.width,frame.height);
+      graphics.fillStyle(current?0xe0b46a:0x93805c,0.95);
+      for(const seal of room.seals)graphics.fillRect(slot.x+seal.x-1,slot.y+seal.y-1,3,3);
     }
+    graphics.lineStyle(1,0x8c7650,0.85);
     for(const pipe of plan.pipes){
-      graphics.lineStyle(2,0x9bb99a,0.85);
       graphics.beginPath();
       graphics.moveTo(slot.x+pipe.from.x,slot.y+pipe.from.y);
       graphics.lineTo(slot.x+pipe.to.x,slot.y+pipe.to.y);
       graphics.strokePath();
     }
+    const title=this.scene.add.text(slot.x+slot.width/2,slot.y+1,STATION_MAP_TITLE,
+      {fontFamily:'Segoe UI, sans-serif',fontSize:'7px',color:'#c2a06a'}).setOrigin(0.5,0.5).setDepth(7.1);
+    this.track(title);
   }
+  /** One clean stone/brass board, built from the same layout data as the small plaque. */
+  private openStationMap():void{
+    if(this.stationMap||!this.canStartStory()||this.heldInteract())return;
+    this.closeStationMap();
+    const panel={x:44,y:65,width:552,height:180};
+    const scale=5;
+    const originX=(640-PATH_SCHEMATIC_SIZE.width*scale)/2;
+    const originY=88;
+    const plan=buildPathSchematic();
+    const container=this.scene.add.container(0,0).setDepth(90);
+    this.stationMap=container;
+    const graphics=this.scene.add.graphics();
+    container.add(graphics);
+    graphics.fillStyle(0x1b1915,0.97);graphics.fillRoundedRect(panel.x,panel.y,panel.width,panel.height,6);
+    graphics.lineStyle(1,0x8a6a3b,0.9);graphics.strokeRoundedRect(panel.x,panel.y,panel.width,panel.height,6);
+    graphics.lineStyle(1,0x6e6557,0.7);graphics.strokeRoundedRect(panel.x+5,panel.y+5,panel.width-10,panel.height-10,4);
+    const title=this.scene.add.text(320,77,STATION_MAP_TITLE,
+      {fontFamily:'Segoe UI, sans-serif',fontSize:'14px',fontStyle:'bold',color:'#e0c080'}).setOrigin(0.5,0.5);
+    container.add(title);
+    for(const room of plan.rooms){
+      const frame={x:originX+room.frame.x*scale,y:originY+room.frame.y*scale,width:room.frame.width*scale,height:room.frame.height*scale};
+      const current=room.room===this.room;
+      graphics.fillStyle(current?0x4a3b27:0x25241f,0.9);graphics.fillRect(frame.x,frame.y,frame.width,frame.height);
+      graphics.lineStyle(current?1.5:1,current?0xb08a52:0x75664e,0.9);graphics.strokeRect(frame.x,frame.y,frame.width,frame.height);
+      graphics.fillStyle(current?0xe0b46a:0x93805c,0.95);
+      for(const seal of room.seals)graphics.fillRect(originX+seal.x*scale-2,originY+seal.y*scale-2,4,4);
+      const name=this.scene.add.text(frame.x+frame.width/2,originY+18*scale+14,PATH_ROOMS[room.room].title,
+        {fontFamily:'Segoe UI, sans-serif',fontSize:'11px',color:current?'#e0c080':'#a99b83'}).setOrigin(0.5,0.5);
+      container.add(name);
+      if(current){
+        const mark=this.scene.add.text(name.x,originY+18*scale+32,STATION_MAP_CURRENT,
+          {fontFamily:'Segoe UI, sans-serif',fontSize:'9px',color:'#d8b869'}).setOrigin(0.5,0.5);
+        container.add(mark);
+      }
+    }
+    graphics.lineStyle(2,0x8c7650,0.9);
+    for(const pipe of plan.pipes){
+      graphics.beginPath();
+      graphics.moveTo(originX+pipe.from.x*scale,originY+pipe.from.y*scale);
+      graphics.lineTo(originX+pipe.to.x*scale,originY+pipe.to.y*scale);
+      graphics.strokePath();
+    }
+    this.say([{speaker:'Hệ thống',text:STATION_MAP_EXPLANATION}],()=>this.closeStationMap());
+  }
+  private closeStationMap():void{this.stationMap?.destroy();this.stationMap=undefined;}
   private addNativeArt(filename:string,x:number,y:number,rotation=0):void{
     const key=getLevelArtKey(4,filename);if(!key)return;
     const image=this.scene.add.image(x,y,key).setRotation(rotation).setDepth(4);this.track(image);
+    if(filename==='tube-mouth'&&this.gateMask)image.setMask(this.gateMask);
   }
   private addDoorFrameStrips(face:{id:string;x:number;base:number}):void{
     const artKey=getLevelArtKey(4,'door-open');
@@ -418,7 +524,14 @@ export class PathForTwoLevel {
     // Doors: the documented gate exception (RULE_GAMES §3) — one layout predicate for the room-side
     // arch approach, shared by prompt, enabled and the action.
     for(const stand of PATH_CONTROL_STANDS){if(stand.room!==this.room)continue;reg({id:`l4-door-${stand.id}`,x:stand.x,y:stand.y,radius:stand.radius,getPrompt:()=>this.doorPrompt(stand.id),getPromptBounds:()=>this.doorImages.get(stand.id)?.getBounds()??null,isEnabled:()=>this.doorEnabled(stand.id),onInteract:()=>this.useDoor(stand.id)});}
+    // The station board is read only from the floor south of its own plaque; no collider is added.
+    const slot=PATH_SCHEMATIC[this.room];
+    reg({id:'l4-station-map',x:slot.x+slot.width/2,y:slot.y+slot.height,radius:0,getPrompt:()=>this.stationMapPrompt(),getPromptBounds:()=>this.stationPlaqueBounds(),isEnabled:()=>this.stationMapEnabled(),isInReach:(x:number,y:number)=>this.atStationPlaque(x,y),onInteract:()=>this.openStationMap()});
   }
+  private stationPlaqueBounds():PathRect{const slot=PATH_SCHEMATIC[this.room];return{x:slot.x-5,y:slot.y-5,width:slot.width+10,height:slot.height+10};}
+  private atStationPlaque(x:number,y:number):boolean{return isFootInReach(pathActorBody({x,y}),{rect:this.stationPlaqueBounds(),face:'south',maxGap:10});}
+  private stationMapEnabled():boolean{return this.canStartStory()&&!this.heldInteract()&&this.atStationPlaque(this.player.x,this.player.y);}
+  private stationMapPrompt():string|null{return this.stationMapEnabled()?'E · Xem sơ đồ':null;}
   private heldInteract():boolean{return isPathInteractHeld(this.interactReleasePending,this.isInteractKeyDown());}
   private isInteractKeyDown():boolean{return this.interactKey?.isDown===true;}
   /** A room change arms the guard; E coming back up disarms it, so one held press cannot act twice. */

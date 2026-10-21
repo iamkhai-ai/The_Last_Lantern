@@ -377,7 +377,7 @@ export const PATH_SCHEMATIC_SIZE = { width: 78, height: 26 } as const;
 export const PATH_SCHEMATIC: Record<PathRoomId, PathRect> = {
   entry: { x: 281, y: 182, width: PATH_SCHEMATIC_SIZE.width, height: PATH_SCHEMATIC_SIZE.height },
   relay: { x: 251, y: 182, width: PATH_SCHEMATIC_SIZE.width, height: PATH_SCHEMATIC_SIZE.height },
-  ink: { x: 191, y: 88, width: PATH_SCHEMATIC_SIZE.width, height: PATH_SCHEMATIC_SIZE.height },
+  ink: { x: 191, y: 187, width: PATH_SCHEMATIC_SIZE.width, height: PATH_SCHEMATIC_SIZE.height },
 };
 export interface PathSchematicRoom { room: PathRoomId; frame: PathRect; seals: readonly PathPoint[]; }
 export interface PathSchematicPipe { pipe: PathPipeId; from: PathPoint; to: PathPoint; }

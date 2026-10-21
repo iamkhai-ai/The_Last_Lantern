@@ -1,0 +1,213 @@
+{
+  "room": {
+    "id": "relay",
+    "title": "Buồng Chuyển Dòng",
+    "spawn": {
+      "x": 110,
+      "y": 251
+    },
+    "entrySpawn": {
+      "x": 110,
+      "y": 251
+    },
+    "walls": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 640,
+        "height": 80
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "width": 24,
+        "height": 230
+      },
+      {
+        "x": 616,
+        "y": 80,
+        "width": 24,
+        "height": 230
+      },
+      {
+        "x": 24,
+        "y": 180,
+        "width": 424,
+        "height": 30
+      },
+      {
+        "x": 512,
+        "y": 180,
+        "width": 104,
+        "height": 30
+      },
+      {
+        "x": 0,
+        "y": 310,
+        "width": 88,
+        "height": 8
+      },
+      {
+        "x": 132,
+        "y": 310,
+        "width": 508,
+        "height": 8
+      },
+      {
+        "x": 0,
+        "y": 318,
+        "width": 640,
+        "height": 42
+      },
+      {
+        "x": 24,
+        "y": 300,
+        "width": 54,
+        "height": 10
+      },
+      {
+        "x": 142,
+        "y": 300,
+        "width": 474,
+        "height": 10
+      },
+      {
+        "x": 78,
+        "y": 230,
+        "width": 10,
+        "height": 58
+      },
+      {
+        "x": 132,
+        "y": 230,
+        "width": 10,
+        "height": 58
+      },
+      {
+        "x": 448,
+        "y": 122,
+        "width": 10,
+        "height": 58
+      },
+      {
+        "x": 502,
+        "y": 122,
+        "width": 10,
+        "height": 58
+      }
+    ],
+    "solids": [
+      {
+        "elementId": "call-a-far",
+        "x": 36,
+        "y": 180,
+        "width": 40,
+        "height": 48
+      },
+      {
+        "elementId": "latch-a",
+        "x": 166,
+        "y": 208,
+        "width": 28,
+        "height": 32
+      },
+      {
+        "elementId": "call-b",
+        "x": 340,
+        "y": 184,
+        "width": 40,
+        "height": 48
+      },
+      {
+        "x": 78,
+        "y": 230,
+        "width": 10,
+        "height": 88
+      },
+      {
+        "x": 132,
+        "y": 230,
+        "width": 10,
+        "height": 88
+      },
+      {
+        "x": 448,
+        "y": 122,
+        "width": 10,
+        "height": 88
+      },
+      {
+        "x": 502,
+        "y": 122,
+        "width": 10,
+        "height": 88
+      }
+    ],
+    "elements": [
+      {
+        "id": "call-a-far",
+        "art": "call-idle",
+        "x": 56,
+        "y": 228,
+        "width": 40,
+        "height": 48,
+        "stand": {
+          "x": 56,
+          "y": 252
+        }
+      },
+      {
+        "id": "latch-a",
+        "art": "latch-unlatched",
+        "x": 180,
+        "y": 240,
+        "width": 28,
+        "height": 32,
+        "stand": {
+          "x": 180,
+          "y": 264
+        }
+      },
+      {
+        "id": "call-b",
+        "art": "call-idle",
+        "x": 360,
+        "y": 232,
+        "width": 40,
+        "height": 48,
+        "stand": {
+          "x": 360,
+          "y": 256
+        }
+      },
+      {
+        "id": "plate-b",
+        "art": "pressure-empty",
+        "x": 546,
+        "y": 114,
+        "width": 44,
+        "height": 28,
+        "stand": {
+          "x": 546,
+          "y": 146
+        }
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "a",
+      "room": "relay",
+      "x": 110,
+      "base": 318,
+      "approach": "north"
+    },
+    {
+      "id": "b",
+      "room": "relay",
+      "x": 480,
+      "base": 210,
+      "approach": "south"
+    }
+  ]
+}

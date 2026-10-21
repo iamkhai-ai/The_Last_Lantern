@@ -1,0 +1,101 @@
+{
+  "source": "assets/levels/05-a-path-for-two/environment-v3/entry-sunburst-master.png",
+  "output": "assets/levels/05-a-path-for-two/sprites/entry-environment-base.png",
+  "size": [
+    640,
+    360
+  ],
+  "mode": "P",
+  "palette_limit": 128,
+  "dither": false,
+  "resample": "nearest",
+  "registration": {
+    "method": "piecewise-linear axis registration with nearest-neighbour sampling at pixel centres",
+    "source_coordinate_space": "640x360 nearest-neighbour resize of the raw master",
+    "axis_landmarks": {
+      "x": {
+        "source": [
+          0,
+          24,
+          130,
+          194,
+          307,
+          328,
+          444,
+          510,
+          616,
+          640
+        ],
+        "target": [
+          0,
+          24,
+          124,
+          188,
+          300,
+          320,
+          448,
+          512,
+          616,
+          640
+        ]
+      },
+      "y": {
+        "source": [
+          0,
+          66,
+          150,
+          178,
+          310,
+          360
+        ],
+        "target": [
+          0,
+          80,
+          180,
+          210,
+          310,
+          360
+        ]
+      }
+    },
+    "aligned_geometry": {
+      "door_slots_x": [
+        [
+          124,
+          188
+        ],
+        [
+          448,
+          512
+        ]
+      ],
+      "central_divider_x": [
+        300,
+        320
+      ],
+      "wall_bands_y": [
+        [
+          0,
+          80
+        ],
+        [
+          180,
+          210
+        ],
+        [
+          310,
+          360
+        ]
+      ]
+    },
+    "boundary_policy": "Each target landmark cell samples its source landmark; the adjacent target cell samples the adjacent source cell, so piecewise joins add no skipped or duplicated line."
+  },
+  "landmarks_note": "Source and destination landmarks were measured on the 640x360 nearest resize of source_sha256 eb2828a2ce148748f28e9eabcdfe38ba77c672b5aba5a44ba702f1504da216af. They are specific to that exact master: a different source hash is rejected instead of warped with these values.",
+  "source_sha256": "eb2828a2ce148748f28e9eabcdfe38ba77c672b5aba5a44ba702f1504da216af",
+  "expected_source_sha256": "eb2828a2ce148748f28e9eabcdfe38ba77c672b5aba5a44ba702f1504da216af",
+  "output_sha256": "54bd2b8f35641de67070fc7fdc7bc2b7c655c744a9463537149422a82f4f2554",
+  "bytes": 146878,
+  "geometry_source_sha256": "9cefc3d087e0ac6f0fd89eb35c59a6d23922c451c7ef82950d0b47e8e7cee4a2",
+  "entry_geometry_sha256": "8f2fb23c273bf88b26dde3d8f9a88ef967ae81b103fada2457e04f85a9fa3b7a",
+  "metadata_note": "Raw generated master retained unchanged; ICC copied if supplied; any other credentials remain in raw source."
+}

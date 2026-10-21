@@ -1,0 +1,114 @@
+{
+  "room": "ink",
+  "source": "ink-sunburst-master.png",
+  "source_dimensions": [
+    1672,
+    941
+  ],
+  "source_sha256": "5b7474297d1e7f4e1dc6d802efebe4eb6c34bc797283c3db9b7b4ef3c1caa0e0",
+  "output": "ink-environment-base.png",
+  "output_sha256": "ce7b2ad2ac60169934749a4c4ba76d7566f5b7bf36cc849c9e755df8d05fbe62",
+  "bytes": 150897,
+  "size": [
+    640,
+    360
+  ],
+  "mode": "P",
+  "opaque": true,
+  "palette_limit": 128,
+  "dither": false,
+  "resample": "nearest",
+  "registration": {
+    "sha256": "5b7474297d1e7f4e1dc6d802efebe4eb6c34bc797283c3db9b7b4ef3c1caa0e0",
+    "x": {
+      "source": [
+        0,
+        24,
+        42,
+        126,
+        176,
+        504,
+        532,
+        594,
+        616,
+        640
+      ],
+      "target": [
+        0,
+        24,
+        34,
+        130,
+        184,
+        532,
+        542,
+        606,
+        616,
+        640
+      ]
+    },
+    "y": {
+      "source": [
+        0,
+        80,
+        156,
+        184,
+        305,
+        360
+      ],
+      "target": [
+        0,
+        80,
+        150,
+        180,
+        310,
+        360
+      ]
+    },
+    "centre_x": [
+      184,
+      532
+    ],
+    "centre_y": {
+      "source": [
+        0,
+        80,
+        156,
+        184,
+        230,
+        245,
+        305,
+        360
+      ],
+      "target": [
+        0,
+        80,
+        190,
+        218,
+        266,
+        280,
+        310,
+        360
+      ]
+    },
+    "south_repair": [
+      34,
+      130
+    ],
+    "south_floor": [
+      60,
+      104
+    ],
+    "south_wall_y": 310
+  },
+  "south_cap": {
+    "y": 318,
+    "passage_width": 44,
+    "repair_x": [
+      34,
+      130
+    ],
+    "wall_sample_x": 220
+  },
+  "geometry_sha256": "5c8717406f0e37f865f099324e2d0d486db61ddc2887bbe92d2d0a4ddfc65f94",
+  "metadata": "Raw master retained byte-for-byte; ICC copied if supplied."
+}
