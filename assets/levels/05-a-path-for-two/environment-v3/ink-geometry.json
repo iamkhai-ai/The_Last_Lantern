@@ -1,0 +1,257 @@
+{
+  "room": {
+    "id": "ink",
+    "title": "Hành Lang Mực",
+    "spawn": {
+      "x": 82,
+      "y": 251
+    },
+    "entrySpawn": {
+      "x": 82,
+      "y": 251
+    },
+    "walls": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 640,
+        "height": 80
+      },
+      {
+        "x": 0,
+        "y": 80,
+        "width": 24,
+        "height": 230
+      },
+      {
+        "x": 616,
+        "y": 80,
+        "width": 24,
+        "height": 230
+      },
+      {
+        "x": 0,
+        "y": 310,
+        "width": 60,
+        "height": 8
+      },
+      {
+        "x": 104,
+        "y": 310,
+        "width": 536,
+        "height": 8
+      },
+      {
+        "x": 0,
+        "y": 318,
+        "width": 640,
+        "height": 42
+      },
+      {
+        "x": 184,
+        "y": 80,
+        "width": 348,
+        "height": 138
+      },
+      {
+        "x": 184,
+        "y": 266,
+        "width": 348,
+        "height": 44
+      },
+      {
+        "x": 24,
+        "y": 150,
+        "width": 10,
+        "height": 30
+      },
+      {
+        "x": 130,
+        "y": 150,
+        "width": 54,
+        "height": 30
+      },
+      {
+        "x": 532,
+        "y": 150,
+        "width": 10,
+        "height": 30
+      },
+      {
+        "x": 606,
+        "y": 150,
+        "width": 10,
+        "height": 30
+      },
+      {
+        "x": 50,
+        "y": 230,
+        "width": 10,
+        "height": 58
+      },
+      {
+        "x": 104,
+        "y": 230,
+        "width": 10,
+        "height": 58
+      },
+      {
+        "x": 542,
+        "y": 92,
+        "width": 10,
+        "height": 58
+      },
+      {
+        "x": 596,
+        "y": 92,
+        "width": 10,
+        "height": 58
+      }
+    ],
+    "solids": [
+      {
+        "elementId": "call-b-far",
+        "x": 48,
+        "y": 128,
+        "width": 40,
+        "height": 48
+      },
+      {
+        "elementId": "latch-b",
+        "x": 144,
+        "y": 208,
+        "width": 28,
+        "height": 32
+      },
+      {
+        "elementId": "call-c",
+        "x": 102,
+        "y": 142,
+        "width": 40,
+        "height": 48
+      },
+      {
+        "elementId": "latch-c",
+        "x": 526,
+        "y": 160,
+        "width": 28,
+        "height": 32
+      },
+      {
+        "x": 50,
+        "y": 230,
+        "width": 10,
+        "height": 88
+      },
+      {
+        "x": 104,
+        "y": 230,
+        "width": 10,
+        "height": 88
+      },
+      {
+        "x": 542,
+        "y": 92,
+        "width": 10,
+        "height": 88
+      },
+      {
+        "x": 596,
+        "y": 92,
+        "width": 10,
+        "height": 88
+      }
+    ],
+    "elements": [
+      {
+        "id": "call-b-far",
+        "art": "call-idle",
+        "x": 68,
+        "y": 176,
+        "width": 40,
+        "height": 48,
+        "stand": {
+          "x": 68,
+          "y": 198
+        }
+      },
+      {
+        "id": "latch-b",
+        "art": "latch-unlatched",
+        "x": 158,
+        "y": 240,
+        "width": 28,
+        "height": 32,
+        "stand": {
+          "x": 158,
+          "y": 264
+        }
+      },
+      {
+        "id": "call-c",
+        "art": "call-idle",
+        "x": 122,
+        "y": 190,
+        "width": 40,
+        "height": 48,
+        "stand": {
+          "x": 122,
+          "y": 210
+        }
+      },
+      {
+        "id": "plate-c",
+        "art": "pressure-empty",
+        "x": 558,
+        "y": 244,
+        "width": 44,
+        "height": 28,
+        "stand": {
+          "x": 558,
+          "y": 276
+        }
+      },
+      {
+        "id": "latch-c",
+        "art": "latch-unlatched",
+        "x": 540,
+        "y": 192,
+        "width": 28,
+        "height": 32,
+        "stand": {
+          "x": 550,
+          "y": 218
+        }
+      },
+      {
+        "id": "spiral",
+        "art": "swirl-memory-scratch",
+        "x": 622,
+        "y": 282,
+        "width": 30,
+        "height": 30,
+        "stand": {
+          "x": 596,
+          "y": 262
+        },
+        "approach": "side"
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "b",
+      "room": "ink",
+      "x": 82,
+      "base": 318,
+      "approach": "north"
+    },
+    {
+      "id": "c",
+      "room": "ink",
+      "x": 574,
+      "base": 180,
+      "approach": "south"
+    }
+  ]
+}

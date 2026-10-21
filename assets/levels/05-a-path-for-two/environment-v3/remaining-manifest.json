@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "approved_direction": "remaining-art-direction.md",
+  "created_at": "2026-10-21",
+  "scope": "Relay and ink static backgrounds only; entry, room geometry, actors, mechanisms, lighting, dialogue and saves unchanged",
+  "model": "gpt-image-2.5-sunburst",
+  "tool": "functions.codex_image_generate",
+  "technical": {"size": [640, 360], "mode": "P", "palette_limit": 128, "opaque": true, "dither": false, "filtering": "nearest", "origin": [0, 0], "depth": 0, "collision_role": "none"},
+  "common_reference": {"path": "../sprites/entry-environment-base.png", "attachment_id": "sha256:54bd2b8f35641de67070fc7fdc7bc2b7c655c744a9463537149422a82f4f2554", "purpose": "accepted entry materials, pixel scale and values, not geometry"},
+  "assets": [
+    {
+      "room": "relay",
+      "path": "../sprites/relay-environment-base.png",
+      "source": "relay-sunburst-master.png",
+      "source_sha256": "f69aa80d2ba6bc3d07dff67be9bfde6f1fc8d635dd9c50032909dc9774802297",
+      "generation_id": "img_3b00fa2464cd4861f0f3417c323b33f6",
+      "source_dimensions": [1672, 941],
+      "geometry_reference": {"path": "relay-geometry-guide.png", "attachment_id": "sha256:57280c069f2d9ea1bde8571b38aa6c0801282812e8337490cfff1fbaa4298c4b"},
+      "geometry": "relay-geometry.json",
+      "normalization": "relay-normalization-report.json",
+      "prompt_summary": "Spacious dry-waterworks relay hall; matching slate and brass wall braces, quiet flagstone. Follow relay guide, remove guide colours, leave both runtime gate footprints clear. No divider, baked controls, pipes, props, UI or glow.",
+      "output_sha256": "e9000e3f4481056d91927c2ee498d97bcc734f7e76f8322bd87a2c21954344cb",
+      "bytes": 158412
+    },
+    {
+      "room": "ink",
+      "path": "../sprites/ink-environment-base.png",
+      "source": "ink-sunburst-master.png",
+      "source_sha256": "5b7474297d1e7f4e1dc6d802efebe4eb6c34bc797283c3db9b7b4ef3c1caa0e0",
+      "generation_id": "img_45c87eea3ecd710853e59d767f4dcd93",
+      "source_dimensions": [1672, 941],
+      "geometry_reference": {"path": "ink-geometry-guide.png", "attachment_id": "sha256:4d0c48cd9319150565d4cd0cd16a004500358ce8dc1d591d28b152f88fde0e2a"},
+      "geometry": "ink-geometry.json",
+      "normalization": "ink-normalization-report.json",
+      "prompt_summary": "Heavy slate masonry encloses the level 348x48 floor corridor, matching quiet foyers and worn stone. Follow ink guide; runtime owns ink, memory engraving, pipes, gates and light. No luminous decoration, pits, water, stairs, UI or additional objects.",
+      "output_sha256": "ce7b2ad2ac60169934749a4c4ba76d7566f5b7bf36cc849c9e755df8d05fbe62",
+      "bytes": 150897
+    }
+  ],
+  "processing": "Pinned-master nearest native resize; measured piecewise registration, separate central/foyer vertical maps for ink; same-row masonry repair closes the south return pocket at y318 with its existing 44px passage; 128-colour export without dithering. Raw masters retained byte-for-byte. Entry export helper reused for nearest pixel copying and not edited.",
+  "reproduce": "python scripts/prepare-level05-remaining-environments.py",
+  "checks": ["python scripts/check-level05-remaining-environments.py", "node scripts/check-path-entry-environment.mjs"],
+  "runtime_evidence": "../../../../artifacts/level05-remaining-environments/runtime-evidence.json",
+  "verification": "38 repository Node check scripts, 9 Python export tests, TypeScript and production build passed. Runtime lantern/gate/geometry/map visual assertions passed; keyboard clearance verification recorded separately in runtime-evidence.json. Fixtures are not a full playthrough.",
+  "rights_note": "Generated with the user's authorized image subscription and approved model. Retain source/reference provenance. No third-party license or attribution exemption asserted; release terms require owner review."
+}

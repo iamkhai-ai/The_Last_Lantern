@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "art_direction_brief": "assets/levels/05-a-path-for-two/environment-v3/art-direction.md",
+  "scope": "Entry-room visual target only; relay and ink unchanged pending user review",
+  "assets": [
+    {
+      "id": "level05-entry-environment-base",
+      "role": "Opaque static floor/masonry plate below all existing runtime objects",
+      "path": "assets/levels/05-a-path-for-two/sprites/entry-environment-base.png",
+      "status": "in-engine-preview-awaiting-user-approval",
+      "technical": {
+        "dimensions": "640x360",
+        "alpha": false,
+        "anchor": "top-left",
+        "origin": [0, 0],
+        "depth": 0,
+        "frames": 1,
+        "filtering": "nearest",
+        "palette_limit": 128,
+        "collision_role": "none; existing PATH_ROOMS.entry geometry remains authoritative"
+      },
+      "visual_locks": ["fixed top-down RPG camera", "640x360 native integer grid", "entry floor/wall boundaries", "two 64x88 runtime door-art slots", "subdued slate/moss palette", "no baked gameplay objects, light halo or UI"],
+      "source": {
+        "kind": "reference-guided-generated",
+        "url_or_tool": "functions.codex_image_generate",
+        "model": "gpt-image-2.5-sunburst",
+        "created_at": "2026-10-21",
+        "creator": "OpenAI image tool; deterministic registration and export by project agent",
+        "raw_master": "assets/levels/05-a-path-for-two/environment-v3/entry-sunburst-master.png",
+        "raw_master_sha256": "eb2828a2ce148748f28e9eabcdfe38ba77c672b5aba5a44ba702f1504da216af",
+        "raw_dimensions": [1672, 941],
+        "reference_images": [
+          {"path": "assets/levels/05-a-path-for-two/sprites/station-scene-base.png", "attachment_id": "sha256:8f4d805a7db0ca2c14bc5f4cd40dbf768d272cc4ee26890905fdc0357401a90e", "purpose": "existing project material/style reference only; old layout discarded; upstream rights not independently revalidated"},
+          {"path": "assets/levels/05-a-path-for-two/environment-v3/entry-geometry-guide.png", "attachment_id": "sha256:777ecfca37572d6ed917f5a58e7a4ee8cb829113d56c35ddbb403f5daa439e38", "purpose": "authored geometry guidance; guide colors removed in generated result"}
+        ],
+        "prompt_summary": "Environment-only old damp waterworks beneath forest. Crisp top-down 16:9 pixel-art. Follow exact geometry plate: main hall24..616,210..310; upper alcoves24..300 and320..616,80..180; divider300..320; crosswall180..210; preserve two doorway slots124..188 and448..512. Large quiet slate floor stones, thick dark masonry, sparse moss and mineral tide marks. No actors, controls, doors, gates, pipes, cables, signage, UI, pools, stairs, new blocking props, neon or baked lamp glow. Existing station image supplies materials only, not layout.",
+        "license": "Generated with user's authorized connected image subscription; applicable tool/account terms require owner review before release; no invented third-party license",
+        "attribution": "No attribution requirement asserted; retain raw master and source/reference records",
+        "metadata": "Original master retained byte-for-byte with any supplied embedded credentials; normalization report records derivative processing"
+      },
+      "edits": ["nearest-neighbor native-size export", "source-specific piecewise registration of wall/floor boundaries to shipped geometry", "128-color palette, no dithering"],
+      "reproduce": [
+        "node --input-type=module -e \"import { PATH_ROOMS } from './src/data/pathForTwoLayout.ts'; import { writeFileSync } from 'node:fs'; writeFileSync('assets/levels/05-a-path-for-two/environment-v3/entry-geometry.json', JSON.stringify(PATH_ROOMS.entry,null,2));\"",
+        "python scripts/prepare-level05-entry-environment.py --source assets/levels/05-a-path-for-two/environment-v3/entry-sunburst-master.png"
+      ],
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true,
+        "technical_checks_passed": true,
+        "runtime_evidence": "artifacts/level05-environment-preview/level05-environment-evidence.json",
+        "results": "Opaque indexed PNG 640x360 / 128 colors / 146878 bytes. All 36 check-*.mjs, tsc and final production build passed. Chromium: 4 fixture states and 3 actual keyboard door-passage probes passed; console/page errors empty. Native and 2x images visually inspected. Not a full Level05 playthrough.",
+        "approved_by": "Direction approved by user; final entry-room artwork awaiting user review",
+        "normalization_report": "assets/levels/05-a-path-for-two/environment-v3/normalization-report.json"
+      }
+    }
+  ]
+}

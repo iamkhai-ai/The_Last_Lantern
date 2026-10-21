@@ -1,0 +1,84 @@
+{
+  "room": "relay",
+  "source": "relay-sunburst-master.png",
+  "source_dimensions": [
+    1672,
+    941
+  ],
+  "source_sha256": "f69aa80d2ba6bc3d07dff67be9bfde6f1fc8d635dd9c50032909dc9774802297",
+  "output": "relay-environment-base.png",
+  "output_sha256": "e9000e3f4481056d91927c2ee498d97bcc734f7e76f8322bd87a2c21954344cb",
+  "bytes": 158412,
+  "size": [
+    640,
+    360
+  ],
+  "mode": "P",
+  "opaque": true,
+  "palette_limit": 128,
+  "dither": false,
+  "resample": "nearest",
+  "registration": {
+    "sha256": "f69aa80d2ba6bc3d07dff67be9bfde6f1fc8d635dd9c50032909dc9774802297",
+    "x": {
+      "source": [
+        0,
+        24,
+        80,
+        138,
+        440,
+        510,
+        616,
+        640
+      ],
+      "target": [
+        0,
+        24,
+        78,
+        142,
+        448,
+        512,
+        616,
+        640
+      ]
+    },
+    "y": {
+      "source": [
+        0,
+        80,
+        178,
+        210,
+        305,
+        360
+      ],
+      "target": [
+        0,
+        80,
+        180,
+        210,
+        300,
+        360
+      ]
+    },
+    "south_repair": [
+      78,
+      142
+    ],
+    "south_floor": [
+      88,
+      132
+    ],
+    "south_wall_y": 300
+  },
+  "south_cap": {
+    "y": 318,
+    "passage_width": 44,
+    "repair_x": [
+      78,
+      142
+    ],
+    "wall_sample_x": 220
+  },
+  "geometry_sha256": "209ce925769283b19335b2f92907bb3ccaf8db8dba3bc48b00fe3e766dab6956",
+  "metadata": "Raw master retained byte-for-byte; ICC copied if supplied."
+}
