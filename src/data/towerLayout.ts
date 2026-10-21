@@ -29,7 +29,9 @@ export const TOWER = {
     lever: { ground: p(515, 232), stand: p(515, 254), base: rect(504, 222, 22, 10) },
     chamber: { ground: p(580, 284), stand: p(580, 288), solid: rect(540, 180, 80, 104), crystal: p(580, 232) },
     window: { center: p(565, 92) },
-    record: { center: p(565, 156), stand: p(533, 192) },
+    // Wall control (RULE_GAMES §3): approach west of the chamber, around the lever,
+    // rather than through their exact-body-width slit. Art and solids stay in place.
+    record: { center: p(565, 156), stand: p(520, 192) },
     rings: { a: p(283, 120), b: p(307, 120), c: p(331, 120) },
   },
   lumo: {

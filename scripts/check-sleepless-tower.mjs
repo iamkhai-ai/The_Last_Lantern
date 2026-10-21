@@ -85,6 +85,56 @@ const sampled = (waypoints) => waypoints.slice(1).every((to, i) => {
   const from = waypoints[i]; const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 4);
   return Array.from({ length: steps + 1 }, (_, n) => ({ x: from.x + (to.x - from.x) * n / steps, y: from.y + (to.y - from.y) * n / steps })).every((center) => towerCenterWalkable(center));
 });
+// Flood-fill the actual foot body against solids expanded by 1px. A route that only
+// threads an exact centre line through a body-width gap is deliberately rejected.
+const clearance = 1;
+const clearSolids = TOWER_SOLIDS.map((solid) => ({
+  x: solid.x - clearance, y: solid.y - clearance,
+  width: solid.width + clearance * 2, height: solid.height + clearance * 2,
+}));
+const stride = TOWER.bounds.x + TOWER.bounds.width + 1;
+const keyOf = ({ x, y }) => y * stride + x;
+const reachable = new Uint8Array(stride * (TOWER.bounds.y + TOWER.bounds.height + 1));
+const queue = [keyOf(TOWER.objects.chamber.stand)];
+reachable[queue[0]] = 1;
+for (let head = 0; head < queue.length; head++) {
+  const key = queue[head];
+  const center = { x: key % stride, y: Math.floor(key / stride) };
+  for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+    const next = { x: center.x + dx, y: center.y + dy };
+    if (!towerCenterWalkable(next, clearSolids)) continue;
+    const nextKey = keyOf(next);
+    if (!reachable[nextKey]) { reachable[nextKey] = 1; queue.push(nextKey); }
+  }
+}
+const recordStand = TOWER.objects.record.stand;
+assert.equal(reachable[keyOf(recordStand)], 1, 'record stand is flood-fill reachable from chamber with 1px clearance');
+const slitCenter = (TOWER.objects.lever.base.x + TOWER.objects.lever.base.width + TOWER.objects.chamber.solid.x) / 2;
+assert.ok(Math.abs(recordStand.x - slitCenter) <= TOWER.interactionRange, 'relocated stand stays inside the previous record prompt region');
+let clearPromptCells = 0;
+for (let x = recordStand.x - TOWER.interactionRange; x <= recordStand.x + TOWER.interactionRange; x++) {
+  for (let y = recordStand.y - TOWER.interactionRange; y <= recordStand.y + TOWER.interactionRange; y++) {
+    const point = { x, y };
+    if (!towerCanApproach(point, recordStand, clearSolids)) continue;
+    assert.equal(reachable[keyOf(point)], 1, 'every clear record prompt cell connects to the chamber stand');
+    clearPromptCells++;
+  }
+}
+const foot = towerBodyRect(recordStand);
+const westApproachX = TOWER.objects.lever.base.x - foot.width / 2 - clearance - 3;
+for (const offset of [-3, 0, 3]) {
+  // Equivalent for option (b): approach west of the lever rather than demanding the
+  // old exact x in the lever/chamber slit. The whole vertical approach tolerates drift.
+  for (let y = recordStand.y; y <= TOWER.objects.chamber.stand.y; y++) {
+    const point = { x: westApproachX + offset, y };
+    assert.equal(towerCenterWalkable(point, clearSolids), true, `west record approach tolerates x offset ${offset} at y=${y}`);
+    assert.equal(reachable[keyOf(point)], 1, 'west approach is connected to the chamber');
+  }
+  const point = { x: recordStand.x + offset, y: recordStand.y };
+  assert.equal(reachable[keyOf(point)], 1, `record stand tolerates x offset ${offset}`);
+  assert.equal(towerCanApproach(point, recordStand), true, 'clear approach stays within the record prompt');
+}
+console.log(`Sleepless Tower record clearance passed (${queue.length} reachable cells; ${clearPromptCells} clear prompt cells; west approach tolerates +/-3px).`);
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, TOWER.objects.benchSource.stand]), true, 'spawn reaches the bench source');
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, TOWER.objects.benchMirror.stand]), true, 'bench mirror is approachable along the west lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.source.stand, TOWER.objects.g0.stand]), true, 'main lamp and G0 stands connect');
@@ -92,7 +142,6 @@ assert.equal(sampled([TOWER.objects.g0.stand, TOWER.objects.g1.stand]), true, 'G
 assert.equal(sampled([TOWER.objects.g1.stand, { x: 275, y: 246 }, { x: 330, y: 246 }, { x: 330, y: 282 }, TOWER.objects.g2.stand]), true, 'G2 stand is reachable past the call pedestal');
 assert.equal(sampled([TOWER.objects.g2.stand, { x: 340, y: 285 }, { x: 500, y: 285 }, TOWER.objects.lever.stand]), true, 'lever is reachable around receiver B');
 assert.equal(sampled([TOWER.objects.lever.stand, { x: 545, y: 275 }, { x: 570, y: 285 }, TOWER.objects.chamber.stand]), true, 'chamber stand is reachable through the south lane');
-assert.equal(sampled([TOWER.objects.chamber.stand, { x: 533, y: 288 }, TOWER.objects.record.stand]), true, 'record stand is reachable through the one-character gap between chamber and lever');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.call.stand]), true, 'call pedestal is reachable along the south lane under the G2 base');
 assert.equal(sampled([TOWER.objects.call.stand, { x: 340, y: 288 }, { x: 150, y: 288 }, TOWER.stairsStand]), true, 'stairs are reachable along the south lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.stairsStand]), true, 'stairs connect to spawn');
@@ -177,7 +226,7 @@ const record = TOWER.objects.record.stand;
 assert.equal(towerCenterWalkable(record), true, 'record stand walkable');
 assert.ok(towerBodyRect(record).y > TOWER.objects.record.center.y + 16, 'record prompt sits in front of panel art');
 assert.equal(towerCanApproach({ x: record.x, y: record.y }, record), true);
-assert.equal(sampled([TOWER.objects.chamber.stand, { x: 533, y: 288 }, record]), true, 'record stand reachable');
+assert.equal(reachable[keyOf(record)], 1, 'record stand reachable without the exact-width slit');
 assert.deepEqual(TOWER.objects.chamber.ground, { x: 580, y: 284 });
 assert.deepEqual(TOWER.objects.chamber.solid, { x: 540, y: 180, width: 80, height: 104 });
 assert.deepEqual(TOWER.objects.chamber.crystal, { x: 580, y: 232 });
@@ -221,6 +270,50 @@ console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn
     const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
     return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(symbols));
   };
+  // Exercise the actual registered call action and prompt, not a copy of its rule.
+  const CALL_C = constantOf('CALL_C');
+  const useCall = methodOf('useCall', { TOWER, CALL_C });
+  const registerActions = methodOf('registerActions', { TOWER, towerCanApproach, towerCanApproachFront, canCompleteTower });
+  const callPrompt = methodOf('callPrompt');
+  const callFixture = (waterReturned, lumoAssign, reunited = false) => {
+    const configs = new Map(); const spoken = [];
+    const level = {
+      state: { ...base, waterReturned, lumoAssign, reunited },
+      route: [], routeIndex: 0, visuals: new Map(),
+      point: () => TOWER.objects.call.stand,
+      saveState() {}, useCall, callPrompt,
+      ctx: { lumo: { sprite: { ...TOWER.lumo.seal } }, progress: { flags: {} },
+        say: (lines) => spoken.push(lines), interactions: { register: (config) => configs.set(config.id, config) } },
+    };
+    registerActions.call(level);
+    return { level, call: configs.get('tower-call'), spoken };
+  };
+  for (const reunited of [false, true]) {
+    const { level, call, spoken } = callFixture(true, 'follow', reunited);
+    assert.doesNotMatch(call.getPrompt(), /Gọi Lumo tới ấn C/, 'after Return Flow the call prompt cannot offer C');
+    assert.match(call.getPrompt(), reunited ? /Lumo đang ở bên Nhinh/ : /Lumo đang bay về/, 'prompt reflects the real reunion state');
+    const before = structuredClone(level.state);
+    for (let press = 0; press < 3; press++) call.onInteract();
+    assert.deepEqual(level.state, before, 'post-switch repeated calls never send Lumo or clear reunion');
+    assert.equal(spoken.length, 0, 'post-switch call adds no dialogue');
+  }
+  for (const waterReturned of [false, true]) {
+    for (const assignment of ['to-c', 'at-c']) {
+      const { level, call } = callFixture(waterReturned, assignment);
+      assert.equal(call.getPrompt(), 'E · Gọi Lumo về');
+      call.onInteract();
+      assert.equal(level.state.lumoAssign, 'follow', 'a sent or holding Lumo can still be recalled');
+      assert.equal(level.ctx.progress.flags['l5-return-called'], true);
+      assert.deepEqual(level.route, []);
+    }
+  }
+  const beforeSwitch = callFixture(false, 'follow');
+  assert.equal(beforeSwitch.call.getPrompt(), 'E · Gọi Lumo tới ấn C');
+  beforeSwitch.call.onInteract();
+  assert.equal(beforeSwitch.level.state.lumoAssign, 'to-c', 'pre-switch send is preserved');
+  assert.equal(beforeSwitch.level.route.length, TOWER.lumo.route.length + 1);
+  assert.deepEqual(beforeSwitch.spoken, [CALL_C], 'pre-switch approved dialogue is unchanged');
+  console.log('Sleepless Tower call regression passed (pre-switch send/recall; post-switch recall/follow/reunion).');
   const PUZZLE_HINTS = constantOf('PUZZLE_HINTS');
   const PUZZLE_STEPS = constantOf('PUZZLE_STEPS');
   const hintLadderOf = constantOf('hintLadderOf', { PUZZLE_STEPS });
