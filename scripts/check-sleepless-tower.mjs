@@ -92,7 +92,7 @@ assert.equal(sampled([TOWER.objects.g0.stand, TOWER.objects.g1.stand]), true, 'G
 assert.equal(sampled([TOWER.objects.g1.stand, { x: 275, y: 246 }, { x: 330, y: 246 }, { x: 330, y: 282 }, TOWER.objects.g2.stand]), true, 'G2 stand is reachable past the call pedestal');
 assert.equal(sampled([TOWER.objects.g2.stand, { x: 340, y: 285 }, { x: 500, y: 285 }, TOWER.objects.lever.stand]), true, 'lever is reachable around receiver B');
 assert.equal(sampled([TOWER.objects.lever.stand, { x: 545, y: 275 }, { x: 570, y: 285 }, TOWER.objects.chamber.stand]), true, 'chamber stand is reachable through the south lane');
-assert.equal(sampled([TOWER.objects.chamber.stand, { x: 520, y: 288 }, { x: 518, y: 196 }, TOWER.objects.record.stand]), true, 'record stand is reachable past the lever base');
+assert.equal(sampled([TOWER.objects.chamber.stand, { x: 533, y: 288 }, TOWER.objects.record.stand]), true, 'record stand is reachable through the one-character gap between chamber and lever');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.call.stand]), true, 'call pedestal is reachable along the south lane under the G2 base');
 assert.equal(sampled([TOWER.objects.call.stand, { x: 340, y: 288 }, { x: 150, y: 288 }, TOWER.stairsStand]), true, 'stairs are reachable along the south lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.stairsStand]), true, 'stairs connect to spawn');
@@ -140,6 +140,13 @@ for (const [id, prop] of standingProps) {
   const n = { x: prop.stand.x, y: prop.base.y - 22 };
   if (towerCenterWalkable(n)) assert.equal(towerCanApproachFront(n, prop.stand, prop.base), false, `${id} north does not answer E`);
 }
+const chamber = TOWER.objects.chamber;
+assert.equal(towerCanApproachFront({ x: chamber.stand.x, y: chamber.solid.y - 22 }, chamber.stand, chamber.solid), false, 'chamber does not answer from the north');
+assert.equal(towerCanApproachFront({ x: chamber.solid.x - 7, y: chamber.stand.y }, chamber.stand, chamber.solid), false, 'chamber does not answer from the west');
+assert.equal(towerCanApproachFront({ x: chamber.solid.x + chamber.solid.width + 7, y: chamber.stand.y }, chamber.stand, chamber.solid), false, 'chamber does not answer from the east');
+assert.equal(towerCanApproachFront(chamber.stand, chamber.stand, chamber.solid), true, 'chamber answers from the south stand');
+assert.equal(towerCanApproach({ x: TOWER.objects.record.stand.x, y: TOWER.objects.record.stand.y }, TOWER.objects.record.stand), true, 'record wall control answers within range');
+assert.equal(towerCanApproach({ x: TOWER.objects.record.stand.x + 25, y: TOWER.objects.record.stand.y }, TOWER.objects.record.stand), false, 'record wall control stays local');
 // RULE_GAMES §1 x-span: beside a standing prop (footprint centre +/- (width/2 + 10) at the stand's row) E stays closed.
 // Obstacles are dropped so the front rule decides; where the probe is within E range, it must be walkable and in range first.
 for (const [id, prop] of standingProps) {
@@ -150,12 +157,12 @@ for (const [id, prop] of standingProps) {
     assert.equal(towerCanApproachFront(probe, prop.stand, prop.base, []), false, `${id} side probe at x=${x} does not answer E`);
   }
 }
-// lever side spot from the review: (553,240) is 2px past the footprint's east edge (x=551) and stays closed; the 1px edge (552) answers.
+// Lever now sits at x=515 with base x=504..526; its south face rule keeps side probes closed.
 const lever = TOWER.objects.lever;
-assert.equal(towerCanApproach({ x: 553, y: 240 }, lever.stand), true, 'lever side spot is in range and walkable');
-assert.equal(towerCanApproachFront({ x: 553, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the east side at (553,240)');
-assert.equal(towerCanApproachFront({ x: 552, y: 240 }, lever.stand, lever.base), true, 'lever E answers at the 1px east edge');
-assert.equal(towerCanApproachFront({ x: 527, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the west side at (527,240)');
+assert.equal(towerCanApproach({ x: 529, y: 240 }, lever.stand), true, 'lever east side spot is in range and walkable');
+assert.equal(towerCanApproachFront({ x: 529, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the east side');
+assert.equal(towerCanApproachFront({ x: 527, y: 240 }, lever.stand, lever.base), true, 'lever E answers at the 1px east edge');
+assert.equal(towerCanApproachFront({ x: 502, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the west side');
 // usable standing space in front of G2: at least 24px of walkable depth between its front edge and the south bound (layout contract).
 const southBound = TOWER.bounds.y + TOWER.bounds.height;
 assert.ok(southBound - baseBottom >= 24 + towerBodyRect(g2.stand).height, 'G2 keeps 24px of standing space in front of it');
@@ -165,12 +172,21 @@ assert.ok(frontCenters.length >= 12, `G2 front window is usable (${frontCenters.
 // optics relation is preserved after the lift: branch B stays on one row with receiver B, directly under the prism right port.
 assert.equal(g2.optical.x, TOWER.objects.prism.right.x, 'G2 sits under the prism right port');
 assert.equal(g2.optical.y, TOWER.objects.eyeB.optical.y, 'G2 and receiver B share the beam row');
-// record panel: the stand clears the chamber body and the lever base and stays in front of the panel (panel art y140..172).
+// Record panel: its authored center is (565,156), and the stand clears the chamber body and lever base.
 const record = TOWER.objects.record.stand;
 assert.equal(towerCenterWalkable(record), true, 'record stand walkable');
-assert.ok(towerBodyRect(record).y > 172, 'record prompt sits in front of the panel art');
+assert.ok(towerBodyRect(record).y > TOWER.objects.record.center.y + 16, 'record prompt sits in front of panel art');
 assert.equal(towerCanApproach({ x: record.x, y: record.y }, record), true);
-assert.equal(sampled([TOWER.objects.chamber.stand, { x: 520, y: 288 }, { x: 518, y: 196 }, record]), true, 'record stand reachable');
+assert.equal(sampled([TOWER.objects.chamber.stand, { x: 533, y: 288 }, record]), true, 'record stand reachable');
+assert.deepEqual(TOWER.objects.chamber.ground, { x: 580, y: 284 });
+assert.deepEqual(TOWER.objects.chamber.solid, { x: 540, y: 180, width: 80, height: 104 });
+assert.deepEqual(TOWER.objects.chamber.crystal, { x: 580, y: 232 });
+assert.deepEqual(TOWER.objects.window.center, { x: 565, y: 92 });
+assert.deepEqual(TOWER.objects.record.center, { x: 565, y: 156 });
+assert.deepEqual(TOWER.objects.lever.ground, { x: 515, y: 232 });
+assert.deepEqual(TOWER.objects.lever.base, { x: 504, y: 222, width: 22, height: 10 });
+assert.deepEqual(TOWER.objects.lever.stand, { x: 515, y: 254 });
+assert.deepEqual(TOWER.objects.rings, { a: { x: 283, y: 120 }, b: { x: 307, y: 120 }, c: { x: 331, y: 120 } });
 console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn and migration checks passed');
 
 // ---------------------------------------------------------------- H ladder is the scenario text (scenario 06 §6)

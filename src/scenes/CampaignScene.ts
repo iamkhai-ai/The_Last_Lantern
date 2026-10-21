@@ -2983,7 +2983,7 @@ export class CampaignScene extends Phaser.Scene {
       lumo = 'LUMO · đi cùng Nhinh';
     }
     // Level names and chapter tags stay in English everywhere; only the body copy is Vietnamese.
-    this.hud.setTitle(`${padded}  ${level.title}   ·   ${level.chapter}`);
+    this.hud.setTitle(index === 5 ? '06 · Ngọn Tháp Không Ngủ' : `${padded}  ${level.title}   ·   ${level.chapter}`);
     this.hud.setObjective(objective);
     this.hud.setStatus(status);
     this.hud.setLumo(lumo);

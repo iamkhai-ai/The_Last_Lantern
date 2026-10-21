@@ -1,7 +1,7 @@
 import { HUD_LAYOUT } from '../ui/CampaignHud';
 import { SoundSystem } from '../systems/SoundSystem';
 import Phaser from 'phaser';
-import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
+import { getLevelArtKey, getSharedMechanismKey, getTowerArtKey } from '../art/CampaignArt';
 import { TOWER, TOWER_SOLIDS, canCompleteTower, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanApproachFront, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import type { Player } from '../actors/Player';
@@ -128,16 +128,16 @@ const RECALL_FOLLOWING: DialogueLine[] = [
 ];
 
 const OBJECTIVE: Record<TowerStep, string> = {
-  practice: 'Bàn thử góc trên bên trái là phần học tùy chọn. Hoặc đặt đèn lên bệ chính giữa phòng.',
-  place: 'Đặt đèn lên bệ chính giữa phòng bằng E, bật bằng F.',
-  main: 'Điều hướng G0, G1, G2 để nhánh A và B cùng sáng.',
-  call: 'A và B đã sáng. Gọi Lumo tới ấn C bằng mốc gọi.',
-  switch: 'Cả ba mạch đang sáng. Gạt cần Trả dòng ở cửa buồng.',
-  retrieve: 'Máy đã giữ chế độ mới. Thu hồi đèn khỏi bệ bằng E.',
-  crystal: 'Tới buồng bên phải, nhận Tinh thể Hy Vọng.',
+  practice: 'Thử lăng kính (tuỳ chọn) · Đặt đèn.',
+  place: 'Đặt đèn lên bệ chính; bật bằng F.',
+  main: 'Hướng G0, G1, G2 để sáng A + B.',
+  call: 'A + B sáng. Gọi Lumo tới C.',
+  switch: 'Ba mạch sáng. Gạt cần Trả dòng.',
+  retrieve: 'Thu hồi đèn khỏi bệ bằng E.',
+  crystal: 'Nhận Tinh thể Hy Vọng trong buồng.',
   record: 'Nghe bản ghi dưới cửa sổ.',
-  recall: 'Gọi Lumo trở về bằng E ở mốc gọi, rồi đứng gần cậu ấy.',
-  exit: 'Xuống khu vườn bằng bậc thang góc dưới bên trái.',
+  recall: 'Gọi Lumo về ở mốc gọi.',
+  exit: 'Xuống vườn qua bậc thang.',
 };
 
 const EXIT_REFUSAL: Record<'power' | 'lamp' | 'crystal' | 'record' | 'companion', string> = {
@@ -150,6 +150,7 @@ const EXIT_REFUSAL: Record<'power' | 'lamp' | 'crystal' | 'record' | 'companion'
 
 export class SleeplessTowerLevel {
   private objects: Phaser.GameObjects.GameObject[] = [];
+  private ownedTweens: Phaser.Tweens.Tween[] = [];
   private colliders: Phaser.Physics.Arcade.Collider[] = [];
   private bodies: Phaser.Physics.Arcade.StaticBody[] = [];
   private visuals = new Map<string, Phaser.GameObjects.Image>();
@@ -260,6 +261,7 @@ export class SleeplessTowerLevel {
   public destroy(): void {
     if (this.cleaned) return;
     this.cleaned = true;
+    this.ownedTweens.splice(0).forEach((tween) => { if (tween.isPlaying()) tween.stop(); });
     this.colliders.forEach((collider) => { if (collider.active) collider.destroy(); });
     this.objects.forEach((object) => { if (object.active) object.destroy(); });
     this.colliders = []; this.objects = []; this.visuals.clear(); this.bodies = [];
@@ -519,38 +521,37 @@ export class SleeplessTowerLevel {
 
   private objectiveFor(live: TowerLiveState): string {
     const placedPower = this.state.source !== null && ['practice', 'place', 'main', 'call', 'switch'].includes(live.step);
-    if (placedPower && !this.state.lanternOn) return 'Đèn trên bệ đang tắt. Nhấn F để bật lại.';
-    if (live.step === 'recall' && this.state.lumoAssign === 'follow') return 'Lumo đang bay về. Đứng gần cậu ấy rồi xuống bậc thang.';
+    if (placedPower && !this.state.lanternOn) return 'Đèn tắt · Nhấn F để bật.';
+    if (live.step === 'recall' && this.state.lumoAssign === 'follow') return 'Lumo đang về. Đợi cậu ấy rồi xuống vườn.';
     return OBJECTIVE[live.step];
   }
 
   private statusFor(live: TowerLiveState): string {
     const glyph = (on: boolean): string => (on && !this.state.waterReturned ? '●' : '○');
-    const source = this.state.source === 'main' ? 'bệ chính' : this.state.source === 'practice' ? 'bàn thử' : 'trong tay';
-    const lumo = this.state.lumoAssign === 'follow' ? 'theo Nhinh' : this.state.lumoAssign === 'to-c' ? 'đang tới C' : 'ở ấn C';
-    return `Mạch A ${glyph(live.liveA)} · B ${glyph(live.liveB)} · C ${glyph(live.lumoAtC)} · Đèn: ${source} · Nước: ${this.state.waterReturned ? 'trả dòng' : 'đang hút'} · Lumo: ${lumo}`;
+    return `A ${glyph(live.liveA)} · B ${glyph(live.liveB)} · C ${glyph(live.liveC)} · Nước ${this.state.waterReturned ? '↓' : '↑'}`;
   }
 
   private drawBackdrop(): void {
-    const key = getLevelArtKey(5, 'tower-scene-base');
+    const key = getTowerArtKey('tower-scene-base');
     if (!key || !this.ctx.scene.textures.exists(key)) return;
     const background = this.ctx.scene.add.image(0, 0, key).setOrigin(0, 0).setDisplaySize(640, 360).setDepth(0);
     this.keep(background);
   }
 
   private drawMachine(): void {
-    const art5 = (filename: string): string | null => getLevelArtKey(5, filename);
+    const art5 = (filename: string): string | null => getTowerArtKey(filename);
     const art4 = (filename: string): string | null => getLevelArtKey(4, filename);
+    const art3 = (filename: string): string | null => getLevelArtKey(3, `mechanisms/${filename}`);
     const shared = (filename: string): string | null => getSharedMechanismKey(filename);
+    const mechanism = (filename: string): string | null => art3(filename) ?? shared(filename);
     const o = TOWER.objects;
     this.addImage('fountain', art5('fountain-up'), 307, 100, 56, 112, 8.0, 0.5);
     this.addImage('lamp', art5('tower-lamp-white'), 307, 84, 72, 72, 8.1, 0.5);
-    this.addImage('ring-a', art5('ring-A-off'), 368, 100, 40, 40, 8.4, 0.5);
-    this.addImage('ring-b', art5('ring-B-off'), 410, 100, 40, 40, 8.4, 0.5);
-    this.addImage('ring-c', art5('ring-C-off'), 452, 100, 40, 40, 8.4, 0.5);
-    this.addImage('strip', art5('waiting-for-live-circuits'), 410, 130, 104, 28, 8.5, 0.5);
-    this.addImage('window', art5('window-faded-red-scarf'), 582, 92, 112, 112, 8.2, 0.5);
-    this.addImage('record', art5('record-compartment-closed'), 582, 156, 88, 32, 8.3, 0.5);
+    this.addImage('ring-a', art5('ring-A-off'), TOWER.objects.rings.a.x, TOWER.objects.rings.a.y, 24, 24, 8.4, 0.5);
+    this.addImage('ring-b', art5('ring-B-off'), TOWER.objects.rings.b.x, TOWER.objects.rings.b.y, 24, 24, 8.4, 0.5);
+    this.addImage('ring-c', art5('ring-C-off'), TOWER.objects.rings.c.x, TOWER.objects.rings.c.y, 24, 24, 8.4, 0.5);
+    this.addImage('window', art5('window-faded-red-scarf'), o.window.center.x, o.window.center.y, 112, 112, 8.2, 0.5);
+    this.addImage('record', art5('record-compartment-closed'), o.record.center.x, o.record.center.y, 88, 32, 8.3, 0.5);
     this.addImage('intake', art5('tower-intake'), 66, 200, 112, 32, 6, 0.5);
     this.addImage('outflow', art5('tower-outflow'), 150, 302, 112, 32, 6, 0.5);
     this.visuals.get('outflow')?.setVisible(false);
@@ -561,22 +562,22 @@ export class SleeplessTowerLevel {
       this.keep(tube);
     }
     this.addImage('plate', art4('pressure-empty'), 350, 290, 44, 28, 6, 0.5);
-    this.addImage('bench-source', shared('source-empty'), o.benchSource.ground.x, o.benchSource.ground.y, 32, 44, this.depthAt(o.benchSource.ground.y));
-    this.addImage('bench-mirror', shared('mirror-1-horizontal'), o.benchMirror.ground.x, o.benchMirror.ground.y, 32, 40, this.depthAt(o.benchMirror.ground.y));
-    this.addImage('bench-prism', shared('prism-dark'), o.benchPrism.center.x, 140, 48, 48, this.depthAt(140));
-    this.addImage('bench-eye-a', shared('receiver-off'), o.benchEyeA.ground.x, o.benchEyeA.ground.y, 24, 24, this.depthAt(o.benchEyeA.ground.y));
-    this.addImage('bench-eye-b', shared('receiver-off'), o.benchEyeB.ground.x, o.benchEyeB.ground.y, 24, 24, this.depthAt(o.benchEyeB.ground.y));
-    this.addImage('source', shared('source-empty'), o.source.ground.x, o.source.ground.y, 32, 44, this.depthAt(o.source.ground.y));
+    this.addImage('bench-source', mechanism('source-empty'), o.benchSource.ground.x, o.benchSource.ground.y, 32, 44, this.depthAt(o.benchSource.ground.y));
+    this.addImage('bench-mirror', mechanism('mirror-1-horizontal'), o.benchMirror.ground.x, o.benchMirror.ground.y, 32, 40, this.depthAt(o.benchMirror.ground.y));
+    this.addImage('bench-prism', art5('prism-dark'), o.benchPrism.center.x, o.benchPrism.center.y + 24, 48, 48, this.depthAt(o.benchPrism.center.y + 24));
+    this.addImage('bench-eye-a', mechanism('receiver-off'), o.benchEyeA.ground.x, o.benchEyeA.ground.y, 24, 24, this.depthAt(o.benchEyeA.ground.y));
+    this.addImage('bench-eye-b', mechanism('receiver-off'), o.benchEyeB.ground.x, o.benchEyeB.ground.y, 24, 24, this.depthAt(o.benchEyeB.ground.y));
+    this.addImage('source', mechanism('source-empty'), o.source.ground.x, o.source.ground.y, 32, 44, this.depthAt(o.source.ground.y));
     this.addImage('g0', art5('G0-to-splitter'), o.g0.ground.x, o.g0.ground.y, 40, 48, this.depthAt(o.g0.ground.y));
-    this.addImage('prism', shared('prism-dark'), o.prism.center.x, o.prism.center.y + 24, 48, 48, this.depthAt(o.prism.center.y + 24));
-    this.addImage('g1', shared('mirror-1-horizontal'), o.g1.ground.x, o.g1.ground.y, 32, 40, this.depthAt(o.g1.ground.y));
-    this.addImage('g2', shared('mirror-2-horizontal'), o.g2.ground.x, o.g2.ground.y, 32, 40, this.depthAt(o.g2.ground.y));
-    this.addImage('eye-a', shared('receiver-off'), o.eyeA.ground.x, o.eyeA.ground.y, 24, 24, this.depthAt(o.eyeA.ground.y));
-    this.addImage('eye-b', shared('receiver-off'), o.eyeB.ground.x, o.eyeB.ground.y, 24, 24, this.depthAt(o.eyeB.ground.y));
+    this.addImage('prism', art5('prism-dark'), o.prism.center.x, o.prism.center.y + 24, 48, 48, this.depthAt(o.prism.center.y + 24));
+    this.addImage('g1', mechanism('mirror-1-horizontal'), o.g1.ground.x, o.g1.ground.y, 32, 40, this.depthAt(o.g1.ground.y));
+    this.addImage('g2', mechanism('mirror-2-horizontal'), o.g2.ground.x, o.g2.ground.y, 32, 40, this.depthAt(o.g2.ground.y));
+    this.addImage('eye-a', mechanism('receiver-off'), o.eyeA.ground.x, o.eyeA.ground.y, 24, 24, this.depthAt(o.eyeA.ground.y));
+    this.addImage('eye-b', mechanism('receiver-off'), o.eyeB.ground.x, o.eyeB.ground.y, 24, 24, this.depthAt(o.eyeB.ground.y));
     this.addImage('call', art4('call-idle'), o.call.ground.x, o.call.ground.y, 40, 48, this.depthAt(o.call.ground.y));
     this.addImage('lever', art5('return-flow-waiting'), o.lever.ground.x, o.lever.ground.y, 40, 48, this.depthAt(o.lever.ground.y));
-    this.addImage('chamber', art5('chamber-open'), o.chamber.stand.x, 284, 80, 104, this.depthAt(284));
-    this.addImage('grille', art5('chamber-grille-overlay'), o.chamber.stand.x, 284, 80, 104, this.depthAt(284) + 0.2);
+    this.addImage('chamber', art5('chamber-open'), o.chamber.ground.x, o.chamber.ground.y, 80, 104, this.depthAt(o.chamber.ground.y));
+    this.addImage('grille', art5('chamber-grille-overlay'), o.chamber.ground.x, o.chamber.ground.y, 80, 104, this.depthAt(o.chamber.ground.y) + 0.2);
     if (!this.state.crystal) {
       const crystalKey = 'crystal_hope';
       if (this.ctx.scene.textures.exists(crystalKey)) {
@@ -606,39 +607,35 @@ export class SleeplessTowerLevel {
   }
 
   private updateVisuals(live: TowerLiveState): void {
-    const art5 = (filename: string): string | null => getLevelArtKey(5, filename);
+    const art5 = (filename: string): string | null => getTowerArtKey(filename);
     const art4 = (filename: string): string | null => getLevelArtKey(4, filename);
     const shared = (filename: string): string | null => getSharedMechanismKey(filename);
+    const mechanism = (filename: string): string | null => getLevelArtKey(3, `mechanisms/${filename}`) ?? shared(filename);
     const benchDirection = (pose: MirrorPose): string => (pose === 1 ? 'slash' : pose === 2 ? 'backslash' : 'horizontal');
     const branchDirection = (pose: MirrorPose): string => (pose === 1 ? 'backslash' : pose === 2 ? 'slash' : 'horizontal');
     const set = (id: string, texture: string | null): void => {
       const image = this.visuals.get(id);
       if (image && texture && this.ctx.scene.textures.exists(texture) && image.texture.key !== texture) image.setTexture(texture);
     };
-    const sourceTexture = (placed: boolean): string | null => shared(!placed ? 'source-empty' : this.state.lanternOn ? 'source-lit' : 'source-off-source');
+    const sourceTexture = (placed: boolean): string | null => mechanism(!placed ? 'source-empty' : this.state.lanternOn ? 'source-lit' : 'source-off-source');
     set('bench-source', sourceTexture(this.state.source === 'practice'));
     set('source', sourceTexture(this.state.source === 'main'));
-    set('bench-mirror', shared(`mirror-1-${benchDirection(this.state.practice)}`));
-    set('g1', shared(`mirror-1-${branchDirection(this.state.g1)}`));
-    set('g2', shared(`mirror-2-${branchDirection(this.state.g2)}`));
+    set('bench-mirror', mechanism(`mirror-1-${benchDirection(this.state.practice)}`));
+    set('g1', mechanism(`mirror-1-${branchDirection(this.state.g1)}`));
+    set('g2', mechanism(`mirror-2-${branchDirection(this.state.g2)}`));
     set('g0', art5(`G0-to-${this.state.g0 === 0 ? 'splitter' : this.state.g0 === 1 ? 'A' : 'B'}`));
     const benchFeed = this.state.source === 'practice' && this.state.lanternOn && this.state.practice === 1 && !this.state.waterReturned;
     const prismFeed = this.state.source === 'main' && this.state.lanternOn && this.state.g0 === 0 && !this.state.waterReturned;
-    set('bench-prism', shared(benchFeed ? 'prism-receiving' : 'prism-dark'));
-    set('prism', shared(prismFeed ? 'prism-receiving' : 'prism-dark'));
-    set('bench-eye-a', shared(live.practiceLit ? 'receiver-on' : 'receiver-off'));
-    set('bench-eye-b', shared(live.practiceLit ? 'receiver-on' : 'receiver-off'));
-    set('eye-a', shared(live.liveA ? 'receiver-on' : 'receiver-off'));
-    set('eye-b', shared(live.liveB ? 'receiver-on' : 'receiver-off'));
+    set('bench-prism', art5(benchFeed ? 'prism-receiving' : 'prism-dark'));
+    set('prism', art5(prismFeed ? 'prism-receiving' : 'prism-dark'));
+    set('bench-eye-a', mechanism(live.practiceLit ? 'receiver-on' : 'receiver-off'));
+    set('bench-eye-b', mechanism(live.practiceLit ? 'receiver-on' : 'receiver-off'));
+    set('eye-a', mechanism(live.liveA ? 'receiver-on' : 'receiver-off'));
+    set('eye-b', mechanism(live.liveB ? 'receiver-on' : 'receiver-off'));
     const ring = (id: 'a' | 'b' | 'c', on: boolean): void => set(`ring-${id}`, art5(`ring-${id.toUpperCase()}-${on ? 'on' : 'off'}`));
     ring('a', live.liveA && !this.state.waterReturned);
     ring('b', live.liveB && !this.state.waterReturned);
     ring('c', live.lumoAtC && !this.state.waterReturned);
-    const strip = this.visuals.get('strip');
-    if (strip) {
-      strip.setVisible(!this.state.waterReturned);
-      if (!this.state.waterReturned) set('strip', art5(live.liveA && live.liveB && live.lumoAtC ? 'all-currently-powered' : 'waiting-for-live-circuits'));
-    }
     set('lamp', art5(this.state.waterReturned ? 'tower-lamp-dim' : 'tower-lamp-white'));
     set('fountain', art5(this.state.waterReturned ? 'fountain-down' : 'fountain-up'));
     this.visuals.get('intake')?.setVisible(!this.state.waterReturned);
@@ -651,9 +648,16 @@ export class SleeplessTowerLevel {
     this.beams?.clear();
     if (this.beams) {
       for (const beam of live.beams) {
-        this.beams.lineStyle(beam.live ? 3 : 2, beam.live ? 0xffdf83 : 0x8ca7a8, beam.live ? 0.9 : 0.45);
+        const isBranchA = beam.from.x === TOWER.objects.prism.left.x && beam.from.y === TOWER.objects.prism.left.y
+          || beam.to.x === TOWER.objects.eyeA.optical.x && beam.to.y === TOWER.objects.eyeA.optical.y;
+        const isBranchB = beam.from.x === TOWER.objects.prism.right.x && beam.from.y === TOWER.objects.prism.right.y
+          || beam.to.x === TOWER.objects.eyeB.optical.x && beam.to.y === TOWER.objects.eyeB.optical.y;
+        const color = isBranchA ? 0x7fd9df : isBranchB ? 0xb0c8ef : 0xffdf83;
+        this.beams.lineStyle(beam.live ? 7 : 4, color, beam.live ? 0.13 : 0.055);
         this.beams.lineBetween(beam.from.x, beam.from.y, beam.to.x, beam.to.y);
-        if (!beam.live && !this.state.waterReturned) { this.beams.fillStyle(0x8ca7a8, 0.6); this.beams.fillCircle(beam.to.x, beam.to.y, 3); }
+        this.beams.lineStyle(beam.live ? 2 : 1, beam.live ? color : 0x8ca7a8, beam.live ? 0.9 : 0.4);
+        this.beams.lineBetween(beam.from.x, beam.from.y, beam.to.x, beam.to.y);
+        if (!beam.live && !this.state.waterReturned) { this.beams.fillStyle(0x8ca7a8, 0.45); this.beams.fillCircle(beam.to.x, beam.to.y, 2); }
       }
     }
   }
@@ -664,7 +668,7 @@ export class SleeplessTowerLevel {
 
   private showPanel(): void {
     if (this.panel) return;
-    const key = getLevelArtKey(5, 'voice-record-panel');
+    const key = getTowerArtKey('voice-record-panel');
     if (!key || !this.ctx.scene.textures.exists(key)) return;
     this.panel = this.ctx.scene.add.image(320, 205, key).setDepth(80);
     this.keep(this.panel);
@@ -701,7 +705,11 @@ export class SleeplessTowerLevel {
   private caption(text: string): void {
     const { scene } = this.ctx;
     const label = this.keep(scene.add.text(320, HUD_LAYOUT.topBottom + 4, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', fontStyle: 'italic', color: '#f2e6c4', stroke: '#07151c', strokeThickness: 3, padding: { x: 8, y: 4 }, align: 'center', wordWrap: { width: 480 } }).setOrigin(0.5, 0).setDepth(84));
-    scene.tweens.add({ targets: label, alpha: 0, delay: 3200, duration: 600, onComplete: () => { if (label.active) label.destroy(); } });
+    const tween = scene.tweens.add({ targets: label, alpha: 0, delay: 3200, duration: 600, onComplete: () => {
+      if (label.active) label.destroy();
+      this.ownedTweens = this.ownedTweens.filter((owned) => owned !== tween);
+    } });
+    this.ownedTweens.push(tween);
   }
 
   private depthAt(y: number): number { return 10 + y / 10; }

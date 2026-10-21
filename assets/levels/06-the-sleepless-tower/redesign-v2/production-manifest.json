@@ -1,0 +1,979 @@
+{
+  "schema_version": 1,
+  "scope": "Level 06 local production sprites and background only",
+  "pixel_sampling": "nearest",
+  "exporter": "scripts/export-level06-art.py",
+  "sources_preserved": true,
+  "alpha_policy": "preserve source alpha; never harden translucency",
+  "shared_family_palette": "source-generated; palette is not forcibly quantized to avoid destroying glass/glow",
+  "assets": [
+    {
+      "file": "sprites/tower-scene-base.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "anchor": "full-frame",
+      "optical_ports": {},
+      "source": "sources/tower-scene-base-original.png",
+      "source_sha256": "4b3a4c12315ccef2672832fecd1d2a3698ecc8c5b9367fa4841a7ce05de68d1f",
+      "source_crop_xyxy": [
+        0,
+        0,
+        1672,
+        941
+      ],
+      "transform": {
+        "fit": "Lanczos full-frame resize",
+        "alpha_preserved": false
+      },
+      "export_sha256": "848bc661c6d8085504504466215051279e218a509e60730e1fd080609758b8d3",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/G0-to-splitter.png",
+      "canvas": [
+        40,
+        48
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {
+        "beam_center": [
+          20,
+          21
+        ]
+      },
+      "source": "sources/G0-states-original.png",
+      "source_sha256": "e537f6765223de20a3b7512bed25ec3b5d95685babd0c2c3c82c74d8b2aac0ac",
+      "source_crop_xyxy": [
+        0,
+        0,
+        1057,
+        496
+      ],
+      "visible_crop_xyxy": [
+        368,
+        95,
+        754,
+        496
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.095337,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "94e4328afc0a822c50f0007c2bd06fdec08aa10a6843bd63ed53b683b83c8b03",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/G0-to-A.png",
+      "canvas": [
+        40,
+        48
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {
+        "beam_center": [
+          20,
+          21
+        ]
+      },
+      "source": "sources/G0-states-original.png",
+      "source_sha256": "e537f6765223de20a3b7512bed25ec3b5d95685babd0c2c3c82c74d8b2aac0ac",
+      "source_crop_xyxy": [
+        0,
+        496,
+        1057,
+        992
+      ],
+      "visible_crop_xyxy": [
+        368,
+        66,
+        730,
+        466
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.101657,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "737dabfd2799bffa6a1e5da4dbe665eacadfa19b9519189481e0f55a28c72c54",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/G0-to-B.png",
+      "canvas": [
+        40,
+        48
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {
+        "beam_center": [
+          20,
+          21
+        ]
+      },
+      "source": "sources/G0-states-original.png",
+      "source_sha256": "e537f6765223de20a3b7512bed25ec3b5d95685babd0c2c3c82c74d8b2aac0ac",
+      "source_crop_xyxy": [
+        0,
+        992,
+        1057,
+        1488
+      ],
+      "visible_crop_xyxy": [
+        368,
+        18,
+        732,
+        419
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.101099,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "d40920fb8404e64f33d7b6790aa2d50d2260686547b25d86c5329be8d7702df1",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/prism-dark.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {
+        "input": [
+          24,
+          30
+        ],
+        "left_output": [
+          7,
+          30
+        ],
+        "right_output": [
+          39,
+          30
+        ]
+      },
+      "source": "sources/prism-states-original.png",
+      "source_sha256": "66bf3e2949c055979e84dbba4c3840302d9a55d609a7824e01abdbc46eb14777",
+      "source_crop_xyxy": [
+        0,
+        0,
+        887,
+        887
+      ],
+      "visible_crop_xyxy": [
+        121,
+        128,
+        775,
+        798
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.070209,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "a05bc691dea19415fdae0d657772f54169ad81cf573d39819684c01063be7cde",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/prism-receiving.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {
+        "input": [
+          24,
+          30
+        ],
+        "left_output": [
+          7,
+          30
+        ],
+        "right_output": [
+          39,
+          30
+        ]
+      },
+      "source": "sources/prism-states-original.png",
+      "source_sha256": "66bf3e2949c055979e84dbba4c3840302d9a55d609a7824e01abdbc46eb14777",
+      "source_crop_xyxy": [
+        0,
+        887,
+        887,
+        1774
+      ],
+      "visible_crop_xyxy": [
+        120,
+        68,
+        775,
+        737
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.070314,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "beda785129c942f6ce3a27aad8920d58f075da96342d72a47b77c3dbda8e18c7",
+      "edge_touch_allowed": [
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/ring-A-off.png",
+      "canvas": [
+        24,
+        24
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/rings-family-exact-original.png",
+      "source_sha256": "d960195bef856c80b145fdeb3b74f960a2027291b8e9a150122c57661b363993",
+      "source_crop_xyxy": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "visible_crop_xyxy": [
+        103,
+        83,
+        489,
+        474
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.058926,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "b6d3cea6908c26caba64d617e935fb34b7236374ceff079ae6103dc0fd0f0c25",
+      "edge_touch_allowed": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/ring-B-off.png",
+      "canvas": [
+        24,
+        24
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/rings-family-exact-original.png",
+      "source_sha256": "d960195bef856c80b145fdeb3b74f960a2027291b8e9a150122c57661b363993",
+      "source_crop_xyxy": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "visible_crop_xyxy": [
+        63,
+        84,
+        448,
+        474
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.059077,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "8afc365bf88b1274bf7ff1f1840fb1d2ff78e53f71403b0b08e3312b3746dd9d",
+      "edge_touch_allowed": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/ring-C-off.png",
+      "canvas": [
+        24,
+        24
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/rings-family-exact-original.png",
+      "source_sha256": "d960195bef856c80b145fdeb3b74f960a2027291b8e9a150122c57661b363993",
+      "source_crop_xyxy": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "visible_crop_xyxy": [
+        22,
+        83,
+        409,
+        474
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.058926,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "aaea66b6762780520186cd0f8f0afeda2a7c110de62fbdc922983c192abf7df9",
+      "edge_touch_allowed": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/ring-A-on.png",
+      "canvas": [
+        24,
+        24
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/rings-family-exact-original.png",
+      "source_sha256": "d960195bef856c80b145fdeb3b74f960a2027291b8e9a150122c57661b363993",
+      "source_crop_xyxy": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "visible_crop_xyxy": [
+        103,
+        39,
+        489,
+        427
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.059381,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "2f0cdbcc66734de15314036421c67f4a40073278a2f65b69788932e291da70b3",
+      "edge_touch_allowed": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/ring-B-on.png",
+      "canvas": [
+        24,
+        24
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/rings-family-exact-original.png",
+      "source_sha256": "d960195bef856c80b145fdeb3b74f960a2027291b8e9a150122c57661b363993",
+      "source_crop_xyxy": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "visible_crop_xyxy": [
+        63,
+        39,
+        448,
+        427
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.059381,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "5b329f79ea8b0f5014def7391f98ed6057029006fa77ddf780cce3312365870c",
+      "edge_touch_allowed": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/ring-C-on.png",
+      "canvas": [
+        24,
+        24
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/rings-family-exact-original.png",
+      "source_sha256": "d960195bef856c80b145fdeb3b74f960a2027291b8e9a150122c57661b363993",
+      "source_crop_xyxy": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "visible_crop_xyxy": [
+        22,
+        39,
+        409,
+        427
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.059381,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "f8af1db44c735c928c1b6fd139383ffbdb25a96e7a9ac1684964641796264809",
+      "edge_touch_allowed": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/tower-lamp-white.png",
+      "canvas": [
+        72,
+        72
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/tower-lamp-family-original.png",
+      "source_sha256": "6fe5c3ccdaaa312cceb8d1cc523b065879c48126dec0807cf766fe172fabb32f",
+      "source_crop_xyxy": [
+        0,
+        0,
+        887,
+        887
+      ],
+      "visible_crop_xyxy": [
+        293,
+        93,
+        713,
+        822
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.090864,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "5d7d0351a4dcad600f203db26ce2248e8fffe2881b15b24e1afb98bb89a4b7ee",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/tower-lamp-dim.png",
+      "canvas": [
+        72,
+        72
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/tower-lamp-family-original.png",
+      "source_sha256": "6fe5c3ccdaaa312cceb8d1cc523b065879c48126dec0807cf766fe172fabb32f",
+      "source_crop_xyxy": [
+        0,
+        887,
+        887,
+        1774
+      ],
+      "visible_crop_xyxy": [
+        293,
+        74,
+        713,
+        801
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.091114,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "7f80def1f01be97e733995cffb051aa885891ffafddbd289756193fa8f04ea8c",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/fountain-up.png",
+      "canvas": [
+        56,
+        112
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/fountain-family-original.png",
+      "source_sha256": "de606d77011d745dd649abb0464c698ed0479368b9cdfc5d264a2aa887da11e6",
+      "source_crop_xyxy": [
+        0,
+        0,
+        634,
+        1240
+      ],
+      "visible_crop_xyxy": [
+        201,
+        104,
+        553,
+        1154
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.1024,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "c7944e5ee33f4144fe02f20aae40cd2cad7e4207088eab4dc41e105c097fdc50",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/fountain-down.png",
+      "canvas": [
+        56,
+        112
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/fountain-family-original.png",
+      "source_sha256": "de606d77011d745dd649abb0464c698ed0479368b9cdfc5d264a2aa887da11e6",
+      "source_crop_xyxy": [
+        634,
+        0,
+        1269,
+        1240
+      ],
+      "visible_crop_xyxy": [
+        82,
+        104,
+        433,
+        1154
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.1024,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "9a448dfe0ae8d35289f8901e991f591c20d951d11a31cfbe9cc56780ba895341",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/return-flow-waiting.png",
+      "canvas": [
+        40,
+        48
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/return-flow-family-original.png",
+      "source_sha256": "774c1b4a766ac2370e9bb032692c62c1157e13a6709bd2854329360bf16ab483",
+      "source_crop_xyxy": [
+        0,
+        0,
+        1145,
+        687
+      ],
+      "visible_crop_xyxy": [
+        388,
+        133,
+        848,
+        687
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.081444,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "d48456c9bcd3d0b1bff98046f83ec32e88d8e0638363aaa3fba7f87c156f5209",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/return-flow-held.png",
+      "canvas": [
+        40,
+        48
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/return-flow-family-original.png",
+      "source_sha256": "774c1b4a766ac2370e9bb032692c62c1157e13a6709bd2854329360bf16ab483",
+      "source_crop_xyxy": [
+        0,
+        687,
+        1145,
+        1374
+      ],
+      "visible_crop_xyxy": [
+        387,
+        0,
+        862,
+        544
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.079158,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "66027c02540afb71336eba5e53f083210a1fb5b19a4ee0e4a5fbf21f2c4a6f4e",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/chamber-open.png",
+      "canvas": [
+        80,
+        104
+      ],
+      "anchor_normalized": [
+        0.5,
+        1
+      ],
+      "optical_ports": {},
+      "source": "sources/chamber-family-original.png",
+      "source_sha256": "259a20f96fb9c254492012ffa7ea3c33eeba30ade51ecef4f96be21bb0edd8a6",
+      "source_crop_xyxy": [
+        0,
+        0,
+        768,
+        1024
+      ],
+      "visible_crop_xyxy": [
+        43,
+        78,
+        749,
+        969
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.108782,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "14ec27c947dd85292f54ae558c5db197f6fdfb849f2eb22eebde931710f5b8c6",
+      "edge_touch_allowed": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/chamber-grille-overlay.png",
+      "canvas": [
+        80,
+        104
+      ],
+      "anchor_normalized": [
+        0.5,
+        1
+      ],
+      "optical_ports": {},
+      "source": "sources/chamber-family-original.png",
+      "source_sha256": "259a20f96fb9c254492012ffa7ea3c33eeba30ade51ecef4f96be21bb0edd8a6",
+      "source_crop_xyxy": [
+        768,
+        0,
+        1536,
+        1024
+      ],
+      "visible_crop_xyxy": [
+        115,
+        255,
+        690,
+        844
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.133565,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "e868b5f9459a2bcecc92db2aaaab70e9e94ebbaa65924f4fc5f064fd4c1ba8bf",
+      "edge_touch_allowed": [
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/record-compartment-closed.png",
+      "canvas": [
+        88,
+        32
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/record-compartment-family-reference-edit.png",
+      "source_sha256": "2150d524822c3163609e71b2316785a60172adf2a6b3b3d14b1fa5717d0f1ece",
+      "source_crop_xyxy": [
+        0,
+        0,
+        921,
+        854
+      ],
+      "visible_crop_xyxy": [
+        71,
+        289,
+        889,
+        555
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.105428,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "d089e5a8f6f1615df5ab5594d8a6ca8735fd9e7d5826e400d5e6acfca448231b",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/record-compartment-open.png",
+      "canvas": [
+        88,
+        32
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/record-compartment-family-reference-edit.png",
+      "source_sha256": "2150d524822c3163609e71b2316785a60172adf2a6b3b3d14b1fa5717d0f1ece",
+      "source_crop_xyxy": [
+        921,
+        0,
+        1842,
+        854
+      ],
+      "visible_crop_xyxy": [
+        33,
+        289,
+        850,
+        555
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.105557,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "be9210395d054b17657fa716989547836fd5cd15c00c9b112ef3c42f595251d3",
+      "edge_touch_allowed": []
+    },
+    {
+      "file": "sprites/tower-intake.png",
+      "canvas": [
+        112,
+        32
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/tower-flow-family-original.png",
+      "source_sha256": "6e0b1dd9b913093e9742507f10ec4c4af1cf31b93caa5241304f22df370b8d78",
+      "source_crop_xyxy": [
+        0,
+        0,
+        793,
+        992
+      ],
+      "visible_crop_xyxy": [
+        22,
+        680,
+        772,
+        967
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.107038,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "fb0b815e26ea99769874e45bb736c9d86c8769aff91ccbd50e2a4e0606b238a7",
+      "edge_touch_allowed": [
+        "top"
+      ]
+    },
+    {
+      "file": "sprites/tower-outflow.png",
+      "canvas": [
+        112,
+        32
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/tower-flow-family-original.png",
+      "source_sha256": "6e0b1dd9b913093e9742507f10ec4c4af1cf31b93caa5241304f22df370b8d78",
+      "source_crop_xyxy": [
+        0,
+        992,
+        793,
+        1983
+      ],
+      "visible_crop_xyxy": [
+        22,
+        19,
+        772,
+        306
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 0.107038,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "d203297705feb421a00388ab7b65a2e0719188fb108ba46183dd5abb754f7f27",
+      "edge_touch_allowed": [
+        "top"
+      ]
+    },
+    {
+      "file": "sprites/window-faded-red-scarf.png",
+      "canvas": [
+        112,
+        112
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/window-faded-red-scarf-reuse.png",
+      "source_sha256": "3ad3283b518749e32b8ffb5dcd682db019ccfd509cde5cb83302a7cb146d3f6c",
+      "source_crop_xyxy": [
+        0,
+        0,
+        112,
+        112
+      ],
+      "visible_crop_xyxy": [
+        29,
+        0,
+        86,
+        109
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 1.027523,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "e15e4e79642a70a72a9cb8c2aea5b94c82f01097c2954c48cc4561ef53d1ffad",
+      "edge_touch_allowed": [
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "file": "sprites/voice-record-panel.png",
+      "canvas": [
+        160,
+        72
+      ],
+      "anchor_normalized": [
+        0.5,
+        0.5
+      ],
+      "optical_ports": {},
+      "source": "sources/voice-record-panel-reuse.png",
+      "source_sha256": "15d6dec640219c9e31427724d099fc10c762fc346be644d3bb35028dad5d6a8e",
+      "source_crop_xyxy": [
+        0,
+        0,
+        160,
+        72
+      ],
+      "visible_crop_xyxy": [
+        2,
+        2,
+        158,
+        70
+      ],
+      "transform": {
+        "fit": "nearest proportional contain",
+        "scale": 1.025641,
+        "threshold_for_bounds": 20,
+        "alpha_preserved": true
+      },
+      "export_sha256": "f48521ad3e3c967dc98109f13d3142793083adfd33d7ba4cc5b3191d67bd0728",
+      "edge_touch_allowed": [
+        "left",
+        "right"
+      ]
+    }
+  ],
+  "notes": [
+    "Production source seed: sources/tower-scene-base-original.png, fitted to 640x360.",
+    "G0 ports are authored at [20,21]; prism ports at [24,30], [7,30], [39,30].",
+    "State family crops are deterministic proportional nearest-neighbor fits. Human visual inspection is still required.",
+    "No text or functional labels are baked into assets."
+  ]
+}

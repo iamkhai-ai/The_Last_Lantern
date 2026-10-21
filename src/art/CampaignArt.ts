@@ -62,6 +62,10 @@ const levelArtModules = import.meta.glob([
   import: 'default',
 }) as Record<string, string>;
 
+const towerV2Modules = import.meta.glob('../../assets/levels/06-the-sleepless-tower/redesign-v2/sprites/*.png', {
+  eager: true, query: '?url', import: 'default',
+}) as Record<string, string>;
+
 const characterModules = import.meta.glob([
   '../../assets/character/nhinh_*.png',
   '!../../assets/character/*contact_sheet*.png',
@@ -187,6 +191,10 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
     key: `forest_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
     url,
   })),
+  ...Object.entries(towerV2Modules).map(([path, url]) => ({
+    key: `tower_v2_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
+    url,
+  })),
 ];
 
 /** A registered Shadow pose, or null when the pack is absent. */
@@ -205,6 +213,14 @@ export function getLevelArtKey(levelIndex: number, filename: string): string | n
   if (!directory) return null;
   const key = `art_${normalize(directory)}_${normalize(filename.replace(/\.png$/i, ''))}`;
   return CAMPAIGN_ART_FILES.some((asset) => asset.key === key) ? key : null;
+}
+
+/** Level 06's production artwork stays opt-in; absent pack members fall back to legacy tower sprites only. */
+export function getTowerArtKey(filename: string): string | null {
+  const name = filename.replace(/\.png$/i, '');
+  const v2 = `tower_v2_${normalize(name)}`;
+  if (CAMPAIGN_ART_FILES.some((asset) => asset.key === v2)) return v2;
+  return getLevelArtKey(5, name);
 }
 
 export function getLevelBackgroundKey(levelIndex: number, roomId?: string): string | null {

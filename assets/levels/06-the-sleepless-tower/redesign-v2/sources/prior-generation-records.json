@@ -1,0 +1,34 @@
+{
+  "threadId": "01a15d2c-0be2-7343-a947-9b999a645556",
+  "source": "read_thread imageGeneration records; references not exposed in these records",
+  "generations": [
+    {
+      "type": "imageGeneration",
+      "id": "exec-94d84d46-880b-48b6-a36a-ae0627fbdba5",
+      "status": "completed",
+      "revisedPrompt": "Use case: stylized-concept. Edit the FIRST reference image (approved Level 06 entry mockup), using the SECOND reference only as an example of a clean circular-room background with open floor and stairs. Create a production STATIC BACKGROUND for a 640x360 Phaser pixel-art room, wide 16:9, same elevated three-quarter view and same architecture/material treatment as the approved mockup.\n\nPreserve the approved mockup's circular stone chamber, lower-left spiral stair, upper stone wall and pipes, restrained forest-facing window opening, and right-side empty stone alcove. Keep the walkable central floor broad, uncluttered, low-contrast and clear for separately composed gameplay art. Keep the exact established teal slate, sparse moss, selective weathered brass edges, clustered pixel texture, cool upper-right light; avoid photoreal noise and blur. Dampen the window/forest contrast slightly so characters, devices and HUD remain the focal points.\n\nREMOVE as separate gameplay props and state cues: Nhinh, Lumo, all characters/lanterns, all floor mechanisms, source bowls, every mirror and prism, receivers, beams, wall indicator rings, seal/call station, lever, chamber/grille/crystal, scarf cloth, recording panel, flowing water, directional arrows and all text/labels/HUD. Leave only architecture: clean window aperture without cloth, blank record-wall stone beneath it, an empty right alcove, neutral floor and staircase. No puzzle lines or symbols are embedded in stone. Keep the lower-left stairs open and visibly connected to the room. The final background contains NO objects which imply A/B/C power, Hope, or a state change.",
+      "savedPath": "C:\\Users\\Admin\\.codex\\generated_images\\01a15d2c-0be2-7343-a947-9b999a645556\\exec-94d84d46-880b-48b6-a36a-ae0627fbdba5.png"
+    },
+    {
+      "type": "imageGeneration",
+      "id": "exec-c8d275c7-a148-46f1-97d3-0b062315c68f",
+      "status": "completed",
+      "revisedPrompt": "Do not generate. This is an imagegen tool return check.",
+      "savedPath": "C:\\Users\\Admin\\.codex\\generated_images\\01a15d2c-0be2-7343-a947-9b999a645556\\exec-c8d275c7-a148-46f1-97d3-0b062315c68f.png"
+    },
+    {
+      "type": "imageGeneration",
+      "id": "exec-bcbf3ba2-675f-4a4e-84f3-4b01cc3c28b7",
+      "status": "completed",
+      "revisedPrompt": "Use case: stylized-concept, production sprite atlas for Level 06 The Sleepless Tower. Use reference 1 for the approved ancient teal-stone/brass pixel-art materials and three-quarter top view; reference 2 only for a proven mirror silhouette scale. Generate one transparent vertical sprite strip with exactly THREE isolated G0 common-input mirror states, equal-size and identically aligned on the same center and bottom contact.\n\nTOP cell: G0 aims into the splitter, a short brass pointer/reflector cue points horizontally right. MIDDLE cell: G0 aims toward receiver A, pointer angled up-right. BOTTOM cell: G0 aims toward receiver B, pointer angled down-right. All three are one compact round blue-glass mirror face in a tarnished brass bezel on the same chunky dark slate and brass base, moss only in a few tiny pixels. Do not include labels, beams, symbols, floor, shadows outside the sprite, or extra devices. Use crisp deliberate 1-pixel-like clusters, dark teal outlines, selected warm brass glints; no photoreal texture or blur. Each isolated asset is intended to be normalized to a 40x48 transparent PNG, with optical glass center at (20,21) from top-left. Make the three states unmistakably different only by the pointer angle; preserve exact face, base, proportions, light, palette and registration. Entire sprite silhouettes must fit inside their own thirds with generous transparent gaps. No grid lines or tile boundaries.",
+      "savedPath": "C:\\Users\\Admin\\.codex\\generated_images\\01a15d2c-0be2-7343-a947-9b999a645556\\exec-bcbf3ba2-675f-4a4e-84f3-4b01cc3c28b7.png"
+    },
+    {
+      "type": "imageGeneration",
+      "id": "exec-74164a28-8eaa-47ff-a6da-f1efe5e4f5dd",
+      "status": "completed",
+      "revisedPrompt": "Use case: stylized-concept sprite family for the approved Level 06 pixel-art room. Create a transparent vertical 1x2 strip with exactly TWO isolated, identically aligned triangular beam-splitter prism sprites. Match the detailed small-scale pixel-cluster treatment, dark teal slate, tarnished brass and blue glass from the references; this is a physical prop, not a flat diagram.\n\nTOP = prism-dark: same 48x48 three-quarter view stone/brass base with a triangular faceted glass element. Glass is dark blue teal, no beam or ambient glow. BOTTOM = prism-receiving: exact same form, base, silhouette, facet geometry and placement, but the triangular glass is lit from within with restrained cyan and warm amber facet accents. Keep input/output ports visually centered at local (24,30), (7,30), (39,30) when normalized to 48x48; make the lower-left and lower-right facet tips distinct. No character, text, runes, arrows, extra crystals, detached particles, shadow outside the sprite or background. Each sprite must fit entirely inside its half with transparent gutters, same size and registration. Crisp hard pixel clusters; no smooth vector bevels, gradients, blur, noise or photorealism.",
+      "savedPath": "C:\\Users\\Admin\\.codex\\generated_images\\01a15d2c-0be2-7343-a947-9b999a645556\\exec-74164a28-8eaa-47ff-a6da-f1efe5e4f5dd.png"
+    }
+  ]
+}

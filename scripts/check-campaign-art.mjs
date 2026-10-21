@@ -10,6 +10,7 @@ import {
 import { OBSERVATORY_ELEMENTS } from '../src/data/observatoryLayout.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
+const campaignArtSource = readFileSync(join(rootDir, 'src/art/CampaignArt.ts'), 'utf8');
 const LEVELS = [
   '01-forgotten-forest-edge', '02-whispering-woods', '03-library-beneath-the-roots', '04-shattered-moonlit-creek',
   '05-a-path-for-two', '06-the-sleepless-tower', '07-the-sleeping-garden', '08-ruins-of-two-halves',
@@ -118,6 +119,14 @@ for (const group of [['fixed-three-route-splitter-off', 'fixed-three-route-split
 }
 const prismSizes = new Set(['prism-dark', 'prism-receiving'].map((name) => { const png = readPng(join(SHARED, 'beam-splitter', `${name}.png`)); return `${png.width}x${png.height}`; }));
 assert.equal(prismSizes.size, 1, 'prism-dark and prism-receiving share one size');
+
+/* ---------------------------------------------------------- isolated Level 06 art family */
+assert.match(campaignArtSource, /import\.meta\.glob\('\.\.\/\.\.\/assets\/levels\/06-the-sleepless-tower\/redesign-v2\/sprites\/\*\.png'/,
+  'Level 06 v2 sprites use an explicit import glob');
+assert.match(campaignArtSource, /key:\s*`tower_v2_\$\{normalize\(/,
+  'Level 06 v2 art keys use their own namespace');
+assert.match(campaignArtSource, /export function getTowerArtKey\(filename: string\): string \| null[\s\S]*?return getLevelArtKey\(5, name\);/,
+  'tower lookup falls back only to the legacy Level 06 family');
 
 /* ------------------------------------------------------------------ *
  * 5. Full-canvas border/line art is not used for a localized effect

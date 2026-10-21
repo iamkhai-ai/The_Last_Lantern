@@ -1,0 +1,68 @@
+[
+  {
+    "source": "sources/01-entry.png",
+    "source_sha256": "e06bfcc5ae128920ccdc67c75f175d86dac6e3abec2bedc7d76c06e8a548d801",
+    "source_dimensions": [
+      1672,
+      941
+    ],
+    "fit_dimensions": [
+      640,
+      360
+    ],
+    "offset": [
+      0,
+      0
+    ],
+    "recipe": "EXIF transpose; RGB; proportional contain to 640x360 NEAREST; center; shared 128-color MEDIANCUT palette; no dithering; nearest 2x export",
+    "native": "previews/01-entry-640x360.png",
+    "native_sha256": "2480522b8ae4204960b300de474f57e2e63581e694ce42157d80766e9725f7ff",
+    "two_x": "previews/01-entry-1280x720.png",
+    "two_x_sha256": "94e36b12637f123184f72a6168366d2d0344d7be6405bd0c0465482099275bb6",
+    "color_count": 128
+  },
+  {
+    "source": "sources/02-powered.png",
+    "source_sha256": "bf4ef30746b19b5d6c71257f1b8b6859931e727f503f5ce2605408e580dfdaaf",
+    "source_dimensions": [
+      1672,
+      941
+    ],
+    "fit_dimensions": [
+      640,
+      360
+    ],
+    "offset": [
+      0,
+      0
+    ],
+    "recipe": "EXIF transpose; RGB; proportional contain to 640x360 NEAREST; center; shared 128-color MEDIANCUT palette; no dithering; nearest 2x export",
+    "native": "previews/02-powered-640x360.png",
+    "native_sha256": "74190ab0c0fcd6fe42b6f979f929a38b80347dfe998bc313608c645aff6fc3dd",
+    "two_x": "previews/02-powered-1280x720.png",
+    "two_x_sha256": "4390828666030959ff3c296a4549f6333583c3b13f659b33bd78d4c4b85e75a8",
+    "color_count": 128
+  },
+  {
+    "source": "sources/03-return-flow.png",
+    "source_sha256": "a8677fd0cc8b647abdfeab067a9c0dbd593e233a07ff7c2469d9482ca14c94c9",
+    "source_dimensions": [
+      1672,
+      941
+    ],
+    "fit_dimensions": [
+      640,
+      360
+    ],
+    "offset": [
+      0,
+      0
+    ],
+    "recipe": "EXIF transpose; RGB; proportional contain to 640x360 NEAREST; center; shared 128-color MEDIANCUT palette; no dithering; nearest 2x export",
+    "native": "previews/03-return-flow-640x360.png",
+    "native_sha256": "81688188eff85b78f512f6f59314c9974c16db74ab2c6e561bbb82a14ec81bf7",
+    "two_x": "previews/03-return-flow-1280x720.png",
+    "two_x_sha256": "5b5d3b3053782708874d609ceefc05d978da2cc683cd182ea11e7b7f6c750cc9",
+    "color_count": 128
+  }
+]

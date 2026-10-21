@@ -1,0 +1,6 @@
+Use case: stylized-concept.
+Asset type: production transparent two-state wall lamp sprite family for Level 06, The Sleepless Tower.
+Input images: Image 1 is the approved room mockup for the slim tower-lamp and conduit composition. Images 2 and 3 are approved G0 and prism pixels for stone/brass material and cool blue glass.
+Primary request: Create two vertically stacked, identical 72x72 tower-lamp sprites with exactly the same wall-mounted lantern housing, frame, glass, width, position and pixel registration. First = white lamp lit with restrained cool white glass. Second = dim lamp after Return Flow, same glass and housing but a clearly lowered low warm-gray glow. Keep glow contained within the sprite and low contrast; the lamp is a physical wall fixture, not an icon. Center at (36,36).
+Style: compact hard-clustered pixel art, dark teal/slate body, tarnished brass corners, controlled white highlight, no gradients, blur, photoreal noise or dithering.
+Constraints: real transparent background; equal-size cells and invariant silhouette. No water, arrows, text, labels, beams, scenery, extra lights, detached glow particles, borders or watermark.
