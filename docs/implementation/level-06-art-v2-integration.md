@@ -61,5 +61,5 @@ The earlier implementation report recorded that dispatch to `/root/level06_art_i
 - PASS: independent read-only review A (gpt-6-luna, high) on frozen implementation commit cfe57ecb6345e7f75cacfdcdc9b0d154576b599c; no findings.
 - PASS: independent read-only review B (gpt-6-luna, xhigh) on the same frozen implementation commit cfe57ecb6345e7f75cacfdcdc9b0d154576b599c; no findings.
 - PASS: uninterrupted Level 06 playthrough, optional practice, lantern pickup/retrieval, and Lumo call/arrival/recall used real inputs; browser page errors were empty.
-- NOT_RUN: final verification and both independent reviews on this rebased revision.
+- PASS: final build and all listed scripts passed on implementation commit 05857c020e0cf12ec1ec9563a9cce509a650b8a3; independent reviews passed on frozen code tree cfe57ecb6345e7f75cacfdcdc9b0d154576b599c.
 - PASS: reviewed slice and delivery records were pushed to origin/test-develop; remote tip was verified against local HEAD after each push.
