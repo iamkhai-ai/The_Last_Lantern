@@ -112,7 +112,7 @@ Do not change `PathForTwoLevel.ts`, Level 05 assets/scripts, global character fr
 - [x] Self-review the owned diff and report; stage only Level 06 files and make the local commit. Keep approved originals/prompts reproducible and exclude unrelated Level 05 changes from the slice. Rebase on the latest test-develop target and run final applicable checks on the frozen candidate.
 - [x] Obtain two separate independent read-only Luna reviews on frozen implementation commit cfe57ecb6345e7f75cacfdcdc9b0d154576b599c: reviewer A (gpt-6-luna, high) covers assets/state assembly/provenance; reviewer B (gpt-6-luna, xhigh) covers geometry/interactions/saves/HUD/cross-level regression.
 - [x] Preserve the two reviews separately until both completed, then reconcile: both returned no findings on cfe57ecb6345e7f75cacfdcdc9b0d154576b599c. No corrections or re-review were required.
-- [ ] Return to root: workspace and branch, final commit and changed files, generation/normalization records, exact checks, both review results, screenshots and live server URL, remaining blockers/limitations. Resolved model/effort remains unknown unless exposed by the runtime. Do not call technical readiness merge/deploy permission.
+- [x] Return delivery evidence: managed worktree on test-develop, reviewed implementation commit/hash, changed-file scope, export and runtime verification, both review results, preview URL, remaining limitations, and verified remote update are recorded in the integration report and Codex task.
 
 ## Root plan self-review
 
@@ -130,4 +130,4 @@ User request: “Hoàn thiện nốt đi”. Resume persisted sources; do not re
 
 - Tasks 1–3: PASS in the isolated local `test-develop` worktree; evidence is in `docs/implementation/level-06-art-v2-integration.md`.
 - Task 4: PASS. HUD, build, automated checks, native engine captures, focused fixture states, real-input practice, and uninterrupted Level 06 progression passed; preview remains available at http://127.0.0.1:5197.
-- Task 5: local commit, target rebase, final verification, and both independent reviews PASS; the user-authorized test-develop push is the remaining delivery step. Deployment remains out of scope.
+- Task 5: local commit, target rebase, final verification, both independent reviews, and user-authorized push to origin/test-develop PASS. Deployment remains out of scope.

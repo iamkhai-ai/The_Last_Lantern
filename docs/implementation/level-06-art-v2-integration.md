@@ -1,6 +1,6 @@
 # Level 06 art v2 — integration evidence
 
-Status: implementation, focused runtime verification, practice exercise, and uninterrupted Level 06 playthrough are complete on local test-develop; independent reviews and the requested remote branch update are pending.
+Status: implementation, verification, optional practice, uninterrupted Level 06 playthrough, and independent review are complete; the reviewed slice has been pushed to origin/test-develop.
 
 ## Revisions and scope
 
@@ -62,4 +62,4 @@ The earlier implementation report recorded that dispatch to `/root/level06_art_i
 - PASS: independent read-only review B (gpt-6-luna, xhigh) on the same frozen implementation commit cfe57ecb6345e7f75cacfdcdc9b0d154576b599c; no findings.
 - PASS: uninterrupted Level 06 playthrough, optional practice, lantern pickup/retrieval, and Lumo call/arrival/recall used real inputs; browser page errors were empty.
 - NOT_RUN: final verification and both independent reviews on this rebased revision.
-- Remote origin/test-develop update: user-authorized and pending push of the reviewed branch.
+- PASS: reviewed slice pushed to origin/test-develop; at delivery check local and remote HEAD matched 64b62097a1888c7866355d5546db15f30a55114f before this report-only closure update.
