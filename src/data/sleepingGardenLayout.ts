@@ -199,7 +199,7 @@ export const GARDEN_STATIC_SOLIDS: Array<{ id: string; rect: GardenRect }> = [
   { id: 'latch-west', rect: { x: 128, y: 96, width: 28, height: 32 } },
   { id: 'moon-main', rect: { x: 252, y: 186, width: 48, height: 44 } },
   { id: 'drain', rect: { x: 436, y: 224, width: 52, height: 48 } },
-  { id: 'latch-east', rect: { x: 400, y: 240, width: 28, height: 32 } },
+  { id: 'latch-east', rect: { x: 400, y: 248, width: 28, height: 32 } },
   { id: 'practice-sun-pot', rect: { x: 74, y: 294, width: 40, height: 44 } },
   { id: 'practice-moon-pot', rect: { x: 136, y: 290, width: 40, height: 38 } },
 ];
@@ -444,7 +444,8 @@ export const GARDEN_MODULES: GardenModuleSpec[] = [
   { id: 'water', rect: { x: 466, y: 262, width: 128, height: 24 }, origin: 'topleft', floorArt: true, variants: { open: { file: 'nursery-water-delivered' } } },
   { id: 'sprout', rect: { x: 484, y: 232, width: 32, height: 32 }, origin: 'bottom', variants: { before: { file: 'sprout-before', shared: true }, after: { file: 'sprout-after', shared: true } } },
   { id: 'side-path', rect: { x: 304, y: 284, width: 80, height: 32 }, origin: 'topleft', floorArt: true, variants: { closed: { file: 'side-stone-path-closed' }, open: { file: 'side-stone-path-open' } } },
-  { id: 'latch-east', rect: { x: 400, y: 240, width: 28, height: 32 }, origin: 'topleft', variants: { unlatched: { file: 'latch-east-unlatched', shared: true }, latched: { file: 'latch-east-latched', shared: true } } },
+  { id: 'sluice-crossing', rect: { x: 148, y: 218, width: 44, height: 48 }, origin: 'topleft', floorArt: true, variants: { crossing: { file: 'sluice-crossing' } } },
+  { id: 'latch-east', rect: { x: 400, y: 248, width: 28, height: 32 }, origin: 'topleft', variants: { unlatched: { file: 'latch-east-unlatched', shared: true }, latched: { file: 'latch-east-latched', shared: true } } },
   { id: 'practice-sun', rect: { x: 70, y: 266, width: 48, height: 72 }, origin: 'bottom', variants: { open: { file: 'sun-open', shared: true }, folded: { file: 'sun-folded', shared: true } }, icon: { x: 126, y: 275 } },
   { id: 'practice-moon', rect: { x: 132, y: 284, width: 48, height: 44 }, origin: 'bottom', variants: { coiled: { file: 'moon-coiled', shared: true }, extended: { file: 'moon-extended', shared: true } }, icon: { x: 160, y: 274 } },
   { id: 'teaching-bridge', rect: { x: 182, y: 288, width: 48, height: 32 }, origin: 'center', floorArt: true, variants: { on: { file: 'root-bridge-on', shared: true } } },
