@@ -1,0 +1,158 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "model": "not_exposed_by_tool",
+  "date": "2026-10-21",
+  "purpose": "Approved Level05 scenario-v2 clue art, completed after takeover; generation model ID is not exposed by the tool.",
+  "records": [
+    {
+      "key": "plaque3",
+      "selected": true,
+      "prompt": "Use case: stylized-concept. Production raster sprite for The Last Lantern, Level05 dry underground waterworks. Draw ONE small aged-brass identity plaque on a genuinely transparent background. This is a NEW isolated attachable overlay for an existing ornate slate/brass40x48 game call pedestal. Native design24x12 logical pixels; show at a large exact nearest-neighbor-style enlargement with hard square pixel clusters, no smooth antialiasing. Wide low rectangular brass frame with clipped one-pixel corners, dark desaturated slate inset, a thin muted gold upper bevel, restrained weathering. Exactly THREE solid round gold dot glyphs in ONE straight horizontal row at the middle, equally sized, generous gaps, perfectly countable at24x12. The three central dots are the only conspicuous circular shapes. No rivets resembling extra dots, no screws, no text, no numerals, no firefly, no arrows, no checkmarks, no glow, no ground, no cast shadow, no scenery or contact sheet. Palette: old olive bronze, warm pale gold dots, teal charcoal face. All objects fully inside canvas with transparent margins. Intended for nearest native downsampling; clear silhouette and simple limited colors are more important than tiny decoration.",
+      "reference_generation": null,
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-f525b073-b2fc-46f3-808b-903aaaf73538.png",
+      "local_source": "sources/plaque-3dots-master.png",
+      "local_sha256": "fe1695f292312434fce9cf8b519b96acf12c7541e71cb67a84e459f53d454755"
+    },
+    {
+      "key": "plaque1",
+      "selected": true,
+      "prompt": "Use case: precise-object-edit. Edit this game identity plaque. Preserve its exact outer silhouette, aged-brass border, slate face, transparent canvas, palette, pixel-art material and framing. Intended native24x12logicalpixels. Change ONLY the central glyph row. Replace the three dots with exactly ONE centered solid round pale-gold dot of the same size as one original dot. Remove the other two dots completely into matching slate surface. No extra glyphs, no letters, no numerals, no glow, no new objects, true transparent background.",
+      "reference_generation": "plaque3",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-fde8f874-9f5e-4743-8963-ee1331b77ea8.png",
+      "local_source": "sources/plaque-1dot-master.png",
+      "local_sha256": "0ee8d1e318010ab5c9be99f3bcf31fb5d00e71bbecef0ecbacd57be193d8ffc1"
+    },
+    {
+      "key": "plaque2",
+      "selected": true,
+      "prompt": "Use case: precise-object-edit. Edit this game identity plaque. Preserve its exact outer silhouette, aged-brass border, slate face, transparent canvas, palette, pixel-art material and framing. Intended native24x12logicalpixels. Change ONLY the central glyph row. Replace the three dots with exactly TWO solid round pale-gold dots, equal in size to the original dots, centered as a widely spaced horizontal pair. No middle third dot, no extra glyphs, no letters, no numerals, no glow, no new objects, true transparent background.",
+      "reference_generation": "plaque3",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-50876aa1-ff59-4904-9efc-2904c50b0fc4.png",
+      "local_source": "sources/plaque-2dots-master.png",
+      "local_sha256": "91203511254d37a3f79c5df6ae72a1cad27e1004fb4be3508f93ef331cb45001"
+    },
+    {
+      "key": "plaque0",
+      "selected": false,
+      "prompt": "Use case: precise-object-edit. Edit this game identity plaque. Preserve its exact outer silhouette, aged-brass border, slate face, transparent canvas, palette, pixel-art material and framing. Intended native24x12logicalpixels. Change ONLY the central glyph row. Replace all three solid dots with ONE small centered HOLLOW pale-gold circle, an empty ring, same visual weight and roughly the size of one original dot, with slate visible inside the hole. This is the optional practice symbol. No solid center, no extra dots, no letters, no numerals, no glow, no new objects, true transparent background.",
+      "reference_generation": "plaque3",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-32226168-681c-448a-8c25-f4754f286d72.png",
+      "local_source": "sources/iterations/plaque0-parent.png",
+      "local_sha256": "2146a4c5e681b24f2f97649861d8869e37aa23bef7ac4e11ca9044d6f2d599e2"
+    },
+    {
+      "key": "ink3",
+      "selected": true,
+      "prompt": "Use case: stylized-concept. ONE isolated flat luminous ink glyph for The Last Lantern pixel-art waterworks game. Genuinely transparent canvas, no backing plate. Exactly THREE small solid cyan-white circular ink dots in one horizontal row, equally spaced. Crisp square pixel clusters and slightly hand-painted ink edges. No starshapes, no numbers, no lettering, no firefly wings, no frame, no background, no castshadow. Identityglyph will occupy22x8logicalpixels inside44x28pressureseal sprite: each dot about4logicalpixels wide with5pixels separation, all three clearly countable. Show high-resolution exact-nearest-style enlarged view. Flat elevated-topdown floor decal, very slight flattened ellipse perspective. Pale mint-white center with restrained saturated turquoise edge, no bloom or glowcloud beyond ink pixels. The only visible objects are the THREE separate inkdots. Surround with generous transparent margin; centerrow and preserve fixed registration for subsequent1dot/2dot/ring variants.",
+      "reference_generation": null,
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-d224e4a6-e0ea-4188-865f-94187890f2b4.png",
+      "local_source": "sources/ink-3dots-master.png",
+      "local_sha256": "b35c80abe4a783a972f5b7cd6421fca32195dcafad2a7a8127a43df913d2a3ea"
+    },
+    {
+      "key": "chalk",
+      "selected": false,
+      "prompt": "Use case: stylized-concept. ONE transparent chalk doodle sprite for a quiet emotional discovery in The Last Lantern pixel-art waterworks. A child's simple drawing of a firefly: tiny short oval body, two large rounded loopwings slightly uneven, two crooked antennae, no smileyface, no eyes, no words. Drawn by a small child in worn offwhite chalk with a faint desaturated mint trace, imperfect dry brokenchalk strokes, sparse missingpixels. It will be a64x40logicalpixel wall decal on dark slate, subtle and intimate, NOT a glowing magicalmechanism. Show large crisp-nearest pixel-art enlargement, limitedcolors, no antialias blur, no halo, no shine, no brass, no ground/wall/background baked in, true transparency around and inside wingloops. ONE drawing only, centered, breathingroom, no labels or contactsheet.",
+      "reference_generation": null,
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-40f5daf5-0b9d-48fc-a5ee-3fe1031546ef.png",
+      "local_source": "sources/iterations/chalk-original.png",
+      "local_sha256": "4e59c12f964737e55366e756662380c4332f0d39292759c48ab992301526aef3"
+    },
+    {
+      "key": "route",
+      "selected": false,
+      "prompt": "Use case: stylized-concept. ONE continuous nonrepeating transparent luminous INK FLOOR CLUE overlay for The Last Lantern pixelart game. Intended footprint460x72logicalpixels, wide horizontal with a short downleft tail. Canvas genuinelytransparent; NOTHING except one fine irregular turquoise inkstroke and its THREE-dot eastern endpoint. Composition exact: horizontal stroke starts near the upper/right at92percentcanvaswidth and34percentheight, travels WEST(left) almost straight at34percentheight until24percentwidth, then bends diagonally DOWNLEFT to end at2percentwidth and86percentheight. At the EAST/right start put exactly THREE small distinct cyan-white dotmarks horizontally next to oneanother, forming the unmistakable3dot identitysign; the line extends west from these. This is a clue linking an eastern seal to a western pipe, so preserve the DOWNLEFT tail. Stroke1–2logicalpixels, three endpointdots4logicalpixels, at least3pixels gaps; narrow handdrawn ink, slight cracks/inkwear, pale cyan highlights, restrained turquoise edge. Keep most of72pixel height transparent, no arrows/arrowheads, no repeatedfireflies, no extra dots, no other branches, no glyphs, no text, no stones/floor/background/frames/shadows, no particles or broad bloom. Elevated-topdown 2D game decal, large crisp squarepixel enlargement, hardedges not smoothvector, no scenery.",
+      "reference_generation": null,
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-7260d105-d65b-4232-bd7a-79e32d248f1d.png",
+      "local_source": "sources/iterations/route-original.png",
+      "local_sha256": "ab2975dd500ce81a83ebf46fea55a04d84d23397f022b9674276081e256bb87a"
+    },
+    {
+      "key": "plaque0r2",
+      "selected": true,
+      "prompt": "Usecase precise-object-edit. Edit ONLY the small gold hollow circle in the center of this same pixelart brassplaque. Make the hollow RING approximately2.4times wider and2times taller than the original so that it will be5x5logicalpixels when thewhole plaque is28x10nativepixels. Give it a large absolutely EMPTY darkslate center; thin gold ringstroke around thathole. It must remain one hollowcircle, neveradot. This practiceglyph is intentionally larger than the solid dotglyphs so its hole remainsreadable. Preserve outerplaque geometry, frame, texture, colors and canvas framing exactly; no change except centralglyph enlargement. Transparent outsideplaque. Noletters/numerals/new objects.",
+      "reference_generation": "plaque0",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-f0e6a060-c41a-4b1b-ac7c-6397e98c1449.png",
+      "local_source": "sources/plaque-practice-ring-master.png",
+      "local_sha256": "f9451eff38bee812dcab92f3af86b6874225003c8a0aba416d59ed5014de83f2"
+    },
+    {
+      "key": "routeR2",
+      "selected": false,
+      "prompt": "Usecase precise-object-edit. Keep this inkpath's EXACT shape, position and THREE eastern endpointdots. Remove ALL diffuseglow, haze, mist and bloom surrounding thestroke anddots. ONLY the hard thin inkpixels themselves may remain visible, allsurrounding canvas fullytransparent. Make luminousmark look like crisp turquoisephosphorescent handdrawn INK ON STONE without drawingthestone. Onepixelthin core, sparse pale mint highlights, darker teal inkedge, no gradients/translucentclouds. Preserve the downlefttail andalmost horizontal upperroute exactly, retain onlythree distinct endpointdots nexttoeachother at right and noextradots. Crisp limitedcolor pixelart; transparentbackground. Do not widen/shorten/move path.",
+      "reference_generation": "route",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-5cd3e8cf-1747-43bf-bcd2-8664184bac59.png",
+      "local_source": "sources/iterations/routeR2-original.png",
+      "local_sha256": "91959e4df5d51c4a2516426656512a302a6e040e306026c51580e17194464d29"
+    },
+    {
+      "key": "chalkR2",
+      "selected": true,
+      "prompt": "Usecase precise-object-edit. Keep the simple child's chalk firefly sketch, the central shortovalbody and2 crookedantennae. Remove the TWO SMALL LOWER wingloops completely. Retain ONLY the TWO large round upperwingloops, oneleft andoneright, so this is a firefly withaPAIRofwings andNOTafourwingbutterfly. Preserve naive uneven broken offwhite/mint chalkline, crisp sparsepixel texture and fullytransparentbackground with hollowwinginteriors. Make bodystroke a little thinner so it feels likea child's outline doodle. No eyes/face/smile/text, no extra loops or symbols, no halo or glow. Single isolatedwalldecal.",
+      "reference_generation": "chalk",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-593a8ec9-b3f9-45f0-941d-f27c7636c793.png",
+      "local_source": "sources/chalk-firefly-master.png",
+      "local_sha256": "8dece72b51d2664c1da5a3e84cf84ed5e82f49495c01e63d5f0ba9aa4658dde5"
+    },
+    {
+      "key": "ink1",
+      "selected": true,
+      "prompt": "Use case: precise-object-edit. Edit the supplied transparent pixelart ink glyph, preserving EXACT canvas dimensions, dot size, palette, pixel edges, transparency and vertical registration of the existing3dotrow. Change only which identityglyph is drawn. No backgroundplate or scene. Remove the left and right dots completely to full transparency. Retain exactly ONE dot in thecenter at its original location and original size. No traces/shadows of the removeddots. One cyanwhite roundinkdotonly.",
+      "reference_generation": "ink3",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-34b6323b-19a4-4410-a196-de4fe65f15bc.png",
+      "local_source": "sources/ink-1dot-master.png",
+      "local_sha256": "111e0551b7d70bb19710bd4cb4c7526217582f485a6457668ead89e884e009c9"
+    },
+    {
+      "key": "ink2",
+      "selected": false,
+      "prompt": "Use case: precise-object-edit. Edit the supplied transparent pixelart ink glyph, preserving EXACT canvas dimensions, dot size, palette, pixel edges, transparency and vertical registration of the existing3dotrow. Change only which identityglyph is drawn. No backgroundplate or scene. Remove themiddle dot entirely, keep the left and right originaldots exactly in their originalpositions and sizes. Exactly TWO equal cyanwhite inkdots centered as a horizontalpair, not3. No traces/shadows where removeddotwas.",
+      "reference_generation": "ink3",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-53781937-0943-4ec8-9cb2-661e9ce25b27.png",
+      "local_source": "sources/iterations/ink2-first-dirty.png",
+      "local_sha256": "e44cc62d6a6bfb93e5572dc0d40470ddc7ef7a87b5ee10c04221e958f056529f"
+    },
+    {
+      "key": "ink0",
+      "selected": true,
+      "prompt": "Use case: precise-object-edit. Edit the supplied transparent pixelart ink glyph, preserving EXACT canvas dimensions, dot size, palette, pixel edges, transparency and vertical registration of the existing3dotrow. Change only which identityglyph is drawn. No backgroundplate or scene. Remove all3 solid dots and put ONE hollow cyanwhite circular ink RING centered on the original middledot. Ringdiameter1.6times anoriginaldot, large trulytransparenthole at least halfdiameter. Thincrispstroke withsameinkpalette, no fillinside. This optionalpracticeglyph must remain a readable emptycircle after reduction to~6logicalpixels. No extra dots/glyphs.",
+      "reference_generation": "ink3",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-0d8a0631-8632-484e-b85f-a690ca134095.png",
+      "local_source": "sources/ink-practice-ring-master.png",
+      "local_sha256": "dc52a0241ddf988ab60c3946bb5a0d83af6a3246b27781745442a5738c992836"
+    },
+    {
+      "key": "routeR3",
+      "selected": true,
+      "prompt": "Use case: stylized-concept. Raster GAME DECAL ONLY, flat mattepixelPAINT on absolutelyTRANSPARENT background. ONE verythin irregular desaturated TEAL PAINT LINE, no lighting or emission. Widehorizontal design intended460x72logicalpixels. Composition: line extends horizontally leftward from x90percent,y34percent to x24percent,y34percent; then bends diagonally downleft to x2percent,y86percent. Put exactly THREE separate small solid roundmattemint PAINTDOTS in horizontalrow at x93/96/99percent,y34percent next to the rightend. Native1–2pixelwideline with tinybreaks like wornink, dots3–4pixels across andwellseparated. Use ONLY three flat colors: darkteal#315b60, midteal#5aa4a9, palegraymint#a5d1cd. Crispsquarepixelclusters, planegraphic seen fromabove. NO LIGHT, NO GLOW, NO BLOOM, NO HAZE, NO GRADIENTS, NO LUMINOUS AURA, no neon, no smoke, no shadows, no particles, no arrows, no decorativeglyphs, no fireflies, no repeatingpattern, no extra branches, no scenery/floor/wall/plate/frame/UI/text. Thinpaintpixels and3dotsaretheonlyvisiblecontent, allsurroundings100percenttransparent. Keep margin around endpoints so nothingclipped.",
+      "reference_generation": null,
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15dc6-945d-7bc3-adc3-af49b9f90271\\exec-93caae7b-24dc-45c9-a2d7-628ab0b4b439.png",
+      "local_source": "sources/corridor-ink-route-master.png",
+      "local_sha256": "a746c00b881e1ceff6ea4d1d5a0344fbbe20195a9a2ceaea0e0f20811bfd6256"
+    },
+    {
+      "key": "ink2r2",
+      "selected": true,
+      "prompt": "Use case: precise-object-edit. Image 1 is the edit target, an existing transparent pixel-art game ink glyph. Remove every residual pixel between the two cyan-white dots: the ENTIRE gap from x=825 through x=1158 must be fully transparent. Keep the left dot at approximately (751,405) and the right dot at approximately (1233,405) exactly unchanged in size, palette, crisp edges and position. Preserve the original 1983x793 transparent canvas and registration. Exactly TWO separated dots must remain, with absolutely no third shape, haze, shadow or dark residue in the middle. Change only the residual pixels in the gap. No new elements, no background, no labels.",
+      "reference_generation": "ink2",
+      "transparent_background": true,
+      "generated_file": "C:\\Users\\Admin\\.codex\\generated_images\\01a15f35-49c1-72c3-94e1-ab38fd285458\\exec-e711addf-2520-4c8e-ab06-c01e44a6b8a6.png",
+      "local_source": "sources/ink-2dots-master-v2.png",
+      "local_sha256": "81810e7f81aabe6097a732f664e2194261726585211eb8a9158cf80447f60068"
+    }
+  ]
+}

@@ -1,0 +1,924 @@
+{
+  "schemaVersion": 1,
+  "scope": "asset-only source preservation and deterministic native exports; no runtime integration",
+  "finalSpriteTargetCount": 15,
+  "exportedSpriteCount": 15,
+  "assets": [
+    {
+      "name": "plaque-practice-ring",
+      "source": "sources/plaque-practice-ring-master.png",
+      "file": "sprites/plaque-practice-ring.png",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "sourceSha256": "f9451eff38bee812dcab92f3af86b6874225003c8a0aba416d59ed5014de83f2",
+      "nativeSize": [
+        40,
+        48
+      ],
+      "nativeSha256": "3326ed07fb3d4629df2f48c1d7450b028318ec11b51dfa95cbe35619dd98ebb7",
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "pivot": [
+        20,
+        24
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          86,
+          145,
+          1689,
+          748
+        ],
+        "resize": [
+          28,
+          10
+        ],
+        "resampling": "nearest",
+        "overlayCanvas": [
+          40,
+          48
+        ],
+        "overlayPosition": [
+          6,
+          17
+        ]
+      },
+      "promptRecord": "plaque0r2"
+    },
+    {
+      "name": "plaque-1dot",
+      "source": "sources/plaque-1dot-master.png",
+      "file": "sprites/plaque-1dot.png",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "sourceSha256": "0ee8d1e318010ab5c9be99f3bcf31fb5d00e71bbecef0ecbacd57be193d8ffc1",
+      "nativeSize": [
+        40,
+        48
+      ],
+      "nativeSha256": "9483c8ff5cb641d46b58d3760893686c9bdccad5c136adc71e380e3b41c0e5f9",
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "pivot": [
+        20,
+        24
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          86,
+          145,
+          1689,
+          748
+        ],
+        "resize": [
+          28,
+          10
+        ],
+        "resampling": "nearest",
+        "overlayCanvas": [
+          40,
+          48
+        ],
+        "overlayPosition": [
+          6,
+          17
+        ]
+      },
+      "promptRecord": "plaque1"
+    },
+    {
+      "name": "plaque-2dots",
+      "source": "sources/plaque-2dots-master.png",
+      "file": "sprites/plaque-2dots.png",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "sourceSha256": "91203511254d37a3f79c5df6ae72a1cad27e1004fb4be3508f93ef331cb45001",
+      "nativeSize": [
+        40,
+        48
+      ],
+      "nativeSha256": "66287b5226da94b466567e575580439a2d391e1497a091eac0d3043d0991b0ae",
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "pivot": [
+        20,
+        24
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          86,
+          145,
+          1689,
+          748
+        ],
+        "resize": [
+          28,
+          10
+        ],
+        "resampling": "nearest",
+        "overlayCanvas": [
+          40,
+          48
+        ],
+        "overlayPosition": [
+          6,
+          17
+        ]
+      },
+      "promptRecord": "plaque2"
+    },
+    {
+      "name": "plaque-3dots",
+      "source": "sources/plaque-3dots-master.png",
+      "file": "sprites/plaque-3dots.png",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "sourceSha256": "fe1695f292312434fce9cf8b519b96acf12c7541e71cb67a84e459f53d454755",
+      "nativeSize": [
+        40,
+        48
+      ],
+      "nativeSha256": "4ed24aa6395d77a68ccd8ba92f100ab1afb94473829acb801a3b9239b5a27753",
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "pivot": [
+        20,
+        24
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          86,
+          145,
+          1689,
+          748
+        ],
+        "resize": [
+          28,
+          10
+        ],
+        "resampling": "nearest",
+        "overlayCanvas": [
+          40,
+          48
+        ],
+        "overlayPosition": [
+          6,
+          17
+        ]
+      },
+      "promptRecord": "plaque3"
+    },
+    {
+      "name": "ink-1dot-dark",
+      "source": "sources/ink-1dot-master.png",
+      "file": "sprites/ink-1dot-dark.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "111e0551b7d70bb19710bd4cb4c7526217582f485a6457668ead89e884e009c9",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "6b5c3e98cf8f4abb38e41fe2e3627568db6f66516aa74cd0887b5729d8bd89e7",
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "vivid when lantern off or Lumo occupies seal"
+      },
+      "promptRecord": "ink1"
+    },
+    {
+      "name": "ink-1dot-bright",
+      "source": "sources/ink-1dot-master.png",
+      "file": "sprites/ink-1dot-bright.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "111e0551b7d70bb19710bd4cb4c7526217582f485a6457668ead89e884e009c9",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "6c57febc886e758c4ba5dba85297de819118cc611248aa508bd804a07aee7e71",
+      "alphaExtrema": [
+        0,
+        28
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "same silhouette with maximum alpha 28/255 when lantern on and seal empty"
+      },
+      "promptRecord": "ink1"
+    },
+    {
+      "name": "ink-3dots-dark",
+      "source": "sources/ink-3dots-master.png",
+      "file": "sprites/ink-3dots-dark.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "b35c80abe4a783a972f5b7cd6421fca32195dcafad2a7a8127a43df913d2a3ea",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "c8105cb61c934ef84e4867456b995e7f4ed4f798fe2c8c4c22081f5f935468f6",
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "vivid when lantern off or Lumo occupies seal"
+      },
+      "promptRecord": "ink3"
+    },
+    {
+      "name": "ink-3dots-bright",
+      "source": "sources/ink-3dots-master.png",
+      "file": "sprites/ink-3dots-bright.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "b35c80abe4a783a972f5b7cd6421fca32195dcafad2a7a8127a43df913d2a3ea",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "a148749fc918b46246516991885773cf9ea92f5267ecdfac80ec2658a001950f",
+      "alphaExtrema": [
+        0,
+        28
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "same silhouette with maximum alpha 28/255 when lantern on and seal empty"
+      },
+      "promptRecord": "ink3"
+    },
+    {
+      "name": "ink-practice-ring-dark",
+      "source": "sources/ink-practice-ring-master.png",
+      "file": "sprites/ink-practice-ring-dark.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "dc52a0241ddf988ab60c3946bb5a0d83af6a3246b27781745442a5738c992836",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "69d8ed31959f7a0571767c2cf45aa56b2b9bccae53a168f77f664b8b6e2a9be7",
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "vivid when lantern off or Lumo occupies seal"
+      },
+      "promptRecord": "ink0"
+    },
+    {
+      "name": "ink-practice-ring-bright",
+      "source": "sources/ink-practice-ring-master.png",
+      "file": "sprites/ink-practice-ring-bright.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "dc52a0241ddf988ab60c3946bb5a0d83af6a3246b27781745442a5738c992836",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "ab7ee3a1fde502f3992fde63599654003c19d2999fca90947cb4102a78c4a6be",
+      "alphaExtrema": [
+        0,
+        28
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "same silhouette with maximum alpha 28/255 when lantern on and seal empty"
+      },
+      "promptRecord": "ink0"
+    },
+    {
+      "name": "ink-route-dark",
+      "source": "sources/corridor-ink-route-master.png",
+      "file": "sprites/ink-route-dark.png",
+      "sourceSize": [
+        2079,
+        756
+      ],
+      "sourceSha256": "a746c00b881e1ceff6ea4d1d5a0344fbbe20195a9a2ceaea0e0f20811bfd6256",
+      "nativeSize": [
+        460,
+        72
+      ],
+      "nativeSha256": "01ddba1d7051a4bc55d9e7a86e932aeaf63c828f1d1e4b94c24f9d636540161d",
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "pivot": [
+        230,
+        36
+      ],
+      "recipe": {
+        "sourceCrop": [
+          27,
+          258,
+          2015,
+          626
+        ],
+        "resize": [
+          460,
+          40
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          460,
+          72
+        ],
+        "contentOffset": [
+          0,
+          22
+        ],
+        "worldRect": [
+          72,
+          218,
+          460,
+          72
+        ],
+        "rendering": "single non-tiled image; vivid at lantern off, dim at lantern on with max alpha 28/255",
+        "boundsNote": "left source crop includes transparent margin so the down-left tail lands at world x≈82; east dots land x≈500..530"
+      },
+      "promptRecord": "routeR3"
+    },
+    {
+      "name": "ink-route-bright",
+      "source": "sources/corridor-ink-route-master.png",
+      "file": "sprites/ink-route-bright.png",
+      "sourceSize": [
+        2079,
+        756
+      ],
+      "sourceSha256": "a746c00b881e1ceff6ea4d1d5a0344fbbe20195a9a2ceaea0e0f20811bfd6256",
+      "nativeSize": [
+        460,
+        72
+      ],
+      "nativeSha256": "9183a06f7a58b343682b9ff4c438db2e293420a645f6c19faa7a8d2980e8b9ff",
+      "alphaExtrema": [
+        0,
+        28
+      ],
+      "pivot": [
+        230,
+        36
+      ],
+      "recipe": {
+        "sourceCrop": [
+          27,
+          258,
+          2015,
+          626
+        ],
+        "resize": [
+          460,
+          40
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          460,
+          72
+        ],
+        "contentOffset": [
+          0,
+          22
+        ],
+        "worldRect": [
+          72,
+          218,
+          460,
+          72
+        ],
+        "rendering": "single non-tiled image; vivid at lantern off, dim at lantern on with max alpha 28/255",
+        "boundsNote": "left source crop includes transparent margin so the down-left tail lands at world x≈82; east dots land x≈500..530"
+      },
+      "promptRecord": "routeR3"
+    },
+    {
+      "name": "chalk-firefly",
+      "source": "sources/chalk-firefly-master.png",
+      "file": "sprites/chalk-firefly.png",
+      "sourceSize": [
+        1585,
+        992
+      ],
+      "sourceSha256": "8dece72b51d2664c1da5a3e84cf84ed5e82f49495c01e63d5f0ba9aa4658dde5",
+      "nativeSize": [
+        64,
+        40
+      ],
+      "nativeSha256": "35c49e839778a22cd7ea5fc448ee06f455ee475176bbf0e7f3f9b8011c2c3cc6",
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "pivot": [
+        32,
+        20
+      ],
+      "recipe": {
+        "cropAlphaThreshold": 16,
+        "sourceCrop": [
+          211,
+          53,
+          1407,
+          924
+        ],
+        "resizedVisibleMotif": [
+          38,
+          28
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          64,
+          40
+        ],
+        "motifOffset": [
+          13,
+          6
+        ],
+        "candidateWorldMount": {
+          "center": [
+            410,
+            195
+          ],
+          "worldRect": [
+            378,
+            175,
+            64,
+            40
+          ],
+          "visibleRect": [
+            391,
+            181,
+            38,
+            28
+          ],
+          "masonryPatch": [
+            24,
+            180,
+            424,
+            30
+          ]
+        }
+      },
+      "promptRecord": "chalkR2",
+      "state": "visible only with lantern off"
+    },
+    {
+      "name": "ink-2dots-dark",
+      "source": "sources/ink-2dots-master-v2.png",
+      "file": "sprites/ink-2dots-dark.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "81810e7f81aabe6097a732f664e2194261726585211eb8a9158cf80447f60068",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "16aa8e1c8aec39dcf78c1047af498f4b43801f8422e5dbd708308c031b26f5c0",
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "vivid when lantern off or Lumo occupies seal",
+        "discardAlphaBelow": 16
+      },
+      "promptRecord": "ink2r2"
+    },
+    {
+      "name": "ink-2dots-bright",
+      "source": "sources/ink-2dots-master-v2.png",
+      "file": "sprites/ink-2dots-bright.png",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "sourceSha256": "81810e7f81aabe6097a732f664e2194261726585211eb8a9158cf80447f60068",
+      "nativeSize": [
+        44,
+        28
+      ],
+      "nativeSha256": "5ed85d0f32a439c8d3c89025675f7372bf4e82deb2ccd8960b89423eca3bc200",
+      "alphaExtrema": [
+        0,
+        28
+      ],
+      "pivot": [
+        22,
+        14
+      ],
+      "recipe": {
+        "sharedSourceCrop": [
+          681,
+          337,
+          1304,
+          472
+        ],
+        "resize": [
+          20,
+          4
+        ],
+        "resampling": "nearest",
+        "canvas": [
+          44,
+          28
+        ],
+        "position": [
+          12,
+          12
+        ],
+        "state": "same silhouette with maximum alpha 28/255 when lantern on and seal empty",
+        "discardAlphaBelow": 16
+      },
+      "promptRecord": "ink2r2"
+    }
+  ],
+  "previews": [
+    "previews/plaque-family-call-idle-4x.png",
+    "previews/ink-seal-state-check.png",
+    "previews/chalk-relay-context-640x360.png",
+    "previews/route-corridor-context-640x360.png",
+    "previews/clue-art-contact-1x.png",
+    "previews/clue-art-contact-4x.png"
+  ],
+  "sourceIterations": "sources/iterations/ retains the original 14 generations; the repaired two-dot master is preserved separately as sources/ink-2dots-master-v2.png.",
+  "transcript": "prompt-transcript.json",
+  "statusNotes": [
+    "All four plaque variants now share expanded source crop [86,145,1689,748] and 28×10 native motif; the regenerated practice ring keeps a visible hollow center.",
+    "The repaired two-dot master has no alpha>=16 residue between the dots. Both native states use the shared registration and discard alpha below 16 before the visibility-state transform.",
+    "The corridor route is a single image at world rect [72,218,460,72]; it must not be tiled. The path is adapted into a 460×40 content region at y=22 so the line sits near world y242 and tail reaches near world (82,280).",
+    "Chalk uses the proposed center (410,195) in an offline relay-room context preview; no runtime integration or gameplay placement verification was performed."
+  ],
+  "qa": {
+    "ink2CenterResidual": "PASS: no source gap pixel has alpha>=16; native gap is fully transparent after the documented export floor.",
+    "assetCountStatus": "15 of 15 planned sprite files exported.",
+    "runtimeIntegration": "NOT_RUN: this deliverable is the approved art pack; gameplay integration is a separate step."
+  },
+  "generationIterations": [
+    {
+      "key": "plaque3",
+      "localSource": "sources/plaque-3dots-master.png",
+      "sourceSha256": "fe1695f292312434fce9cf8b519b96acf12c7541e71cb67a84e459f53d454755",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "selected": true,
+      "referenceGeneration": null
+    },
+    {
+      "key": "plaque1",
+      "localSource": "sources/plaque-1dot-master.png",
+      "sourceSha256": "0ee8d1e318010ab5c9be99f3bcf31fb5d00e71bbecef0ecbacd57be193d8ffc1",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "selected": true,
+      "referenceGeneration": "plaque3"
+    },
+    {
+      "key": "plaque2",
+      "localSource": "sources/plaque-2dots-master.png",
+      "sourceSha256": "91203511254d37a3f79c5df6ae72a1cad27e1004fb4be3508f93ef331cb45001",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "selected": true,
+      "referenceGeneration": "plaque3"
+    },
+    {
+      "key": "plaque0",
+      "localSource": "sources/iterations/plaque0-parent.png",
+      "sourceSha256": "2146a4c5e681b24f2f97649861d8869e37aa23bef7ac4e11ca9044d6f2d599e2",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "selected": false,
+      "referenceGeneration": "plaque3"
+    },
+    {
+      "key": "ink3",
+      "localSource": "sources/ink-3dots-master.png",
+      "sourceSha256": "b35c80abe4a783a972f5b7cd6421fca32195dcafad2a7a8127a43df913d2a3ea",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "selected": true,
+      "referenceGeneration": null
+    },
+    {
+      "key": "chalk",
+      "localSource": "sources/iterations/chalk-original.png",
+      "sourceSha256": "4e59c12f964737e55366e756662380c4332f0d39292759c48ab992301526aef3",
+      "sourceSize": [
+        1586,
+        992
+      ],
+      "selected": false,
+      "referenceGeneration": null
+    },
+    {
+      "key": "route",
+      "localSource": "sources/iterations/route-original.png",
+      "sourceSha256": "ab2975dd500ce81a83ebf46fea55a04d84d23397f022b9674276081e256bb87a",
+      "sourceSize": [
+        2048,
+        768
+      ],
+      "selected": false,
+      "referenceGeneration": null
+    },
+    {
+      "key": "plaque0r2",
+      "localSource": "sources/plaque-practice-ring-master.png",
+      "sourceSha256": "f9451eff38bee812dcab92f3af86b6874225003c8a0aba416d59ed5014de83f2",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "selected": true,
+      "referenceGeneration": "plaque0"
+    },
+    {
+      "key": "routeR2",
+      "localSource": "sources/iterations/routeR2-original.png",
+      "sourceSha256": "91959e4df5d51c4a2516426656512a302a6e040e306026c51580e17194464d29",
+      "sourceSize": [
+        2048,
+        768
+      ],
+      "selected": false,
+      "referenceGeneration": "route"
+    },
+    {
+      "key": "chalkR2",
+      "localSource": "sources/chalk-firefly-master.png",
+      "sourceSha256": "8dece72b51d2664c1da5a3e84cf84ed5e82f49495c01e63d5f0ba9aa4658dde5",
+      "sourceSize": [
+        1585,
+        992
+      ],
+      "selected": true,
+      "referenceGeneration": "chalk"
+    },
+    {
+      "key": "ink1",
+      "localSource": "sources/ink-1dot-master.png",
+      "sourceSha256": "111e0551b7d70bb19710bd4cb4c7526217582f485a6457668ead89e884e009c9",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "selected": true,
+      "referenceGeneration": "ink3"
+    },
+    {
+      "key": "ink2",
+      "localSource": "sources/iterations/ink2-first-dirty.png",
+      "sourceSha256": "e44cc62d6a6bfb93e5572dc0d40470ddc7ef7a87b5ee10c04221e958f056529f",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "selected": false,
+      "referenceGeneration": "ink3"
+    },
+    {
+      "key": "ink0",
+      "localSource": "sources/ink-practice-ring-master.png",
+      "sourceSha256": "dc52a0241ddf988ab60c3946bb5a0d83af6a3246b27781745442a5738c992836",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "selected": true,
+      "referenceGeneration": "ink3"
+    },
+    {
+      "key": "routeR3",
+      "localSource": "sources/corridor-ink-route-master.png",
+      "sourceSha256": "a746c00b881e1ceff6ea4d1d5a0344fbbe20195a9a2ceaea0e0f20811bfd6256",
+      "sourceSize": [
+        2079,
+        756
+      ],
+      "selected": true,
+      "referenceGeneration": null
+    },
+    {
+      "key": "ink2r2",
+      "localSource": "sources/ink-2dots-master-v2.png",
+      "sourceSha256": "81810e7f81aabe6097a732f664e2194261726585211eb8a9158cf80447f60068",
+      "sourceSize": [
+        1983,
+        793
+      ],
+      "selected": true,
+      "referenceGeneration": "ink2"
+    }
+  ],
+  "sourceHashStatus": "All 15 raw generated outputs have local relative copies and SHA-256 entries in prompt-transcript.json and this manifest."
+}
