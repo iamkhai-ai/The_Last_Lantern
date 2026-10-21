@@ -1,7 +1,7 @@
 {
   "room": {
     "id": "relay",
-    "title": "Buồng Chuyển Dòng",
+    "title": "Buá»“ng Chuyá»ƒn DÃ²ng",
     "spawn": {
       "x": 110,
       "y": 251
@@ -32,7 +32,19 @@
       {
         "x": 24,
         "y": 180,
-        "width": 424,
+        "width": 106,
+        "height": 30
+      },
+      {
+        "x": 130,
+        "y": 180,
+        "width": 44,
+        "height": 10
+      },
+      {
+        "x": 174,
+        "y": 180,
+        "width": 274,
         "height": 30
       },
       {

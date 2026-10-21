@@ -1,0 +1,84 @@
+{
+  "base_revision": "bf197311a33ca96157c0c13eef3bc037e1462f62",
+  "tool": "image_gen.imagegen (built-in)",
+  "model": "not_exposed_by_tool; user approved this substitution",
+  "reference_id": "exec-4bdcdd09-0428-412e-97ae-47caed47a9b1",
+  "input_references": [
+    "relay-before.png",
+    "../relay-geometry-guide.png",
+    "edit-target-guide-2x.png",
+    "../../sprites/entry-environment-base.png"
+  ],
+  "prompt": "Use case: precise-object-edit. Image 1 is the EDIT TARGET: full 640x360 pixel-art stone water-station hall, native coordinates. Image 2 is the updated room geometry guide, REFERENCE ONLY. Image 3 is a 2x target location guide, REFERENCE ONLY: cyan marks the precise recess to repaint, amber outlines the existing brass-faced wall fixture. Image 4 is MATERIAL REFERENCE ONLY, the entry hall. Edit the base image with a very small, restrained art correction. At x130 inclusive to174 exclusive, y190 inclusive to210 exclusive, replace the lower 20 pixels of the partition wall with grey-teal FLOOR FLAGSTONE matching the immediately adjoining lower hall floor in tone, wear, tile scale, pixel detail and brightness. This is a shallow rectangular floor recess below a surviving wall cap, NOT a doorway, tunnel, arch or dark opening. Keep ALL original pixels of the stone lintel x130..173,y180..189. Contract the existing brass fixture between x106..131,y178..209 so its right edge ends at x129; clean the vacated right edge naturally into the new floor recess. Every other pixel of the 640x360 base must remain unchanged. No bevel or shadow suggesting a door, no gate, arch, stairs, pipes, lights, glow, ink, symbols, text, props, border or runtime door frame. Remove ALL guide colors and outlines: cyan and amber are guides only. Opaque full frame, crisp nearest-neighbor pixel art, original cool slate/grey-teal palette, no dithering. Return the complete original composition with only this tiny recess and fixture correction.",
+  "hashes": {
+    "old_png_sha256": "e9000e3f4481056d91927c2ee498d97bcc734f7e76f8322bd87a2c21954344cb",
+    "new_png_sha256": "2a28838dc975da5bb88f86e1ac40e147bac6ca8cd0ba7799170427de70da8f69",
+    "raw_master_sha256": "3a7c6e874955ad2cb2b1f44b37aa3a8f675c6d6a8f47b7a604865d3f0230e9fc",
+    "geometry_sha256": "a4a6e5e8988038f251d8be89eb22c8dea117d8ed7aad6206f3299ac090b83ffe",
+    "geometry_guide_sha256": "c5892b67e5f19869d0b0848b969f79a3efde9a1c59c8696d296de25e74d1989c"
+  },
+  "registration": {
+    "raw_size": [
+      1672,
+      941
+    ],
+    "native_size": [
+      640,
+      360
+    ],
+    "resampling": "nearest",
+    "native_coordinates": "direct frame registration",
+    "recess_crop": [
+      130,
+      190,
+      174,
+      210
+    ],
+    "fixture_crop": [
+      106,
+      178,
+      130,
+      210
+    ],
+    "protected_lintel": [
+      130,
+      180,
+      174,
+      190
+    ]
+  },
+  "export": {
+    "palette": "original byte-identical 128-color palette",
+    "dither": false,
+    "opaque": true,
+    "preserve_original_indices_outside_mask": true,
+    "changed_pixel_count": 1586,
+    "changed_bbox_half_open": [
+      106,
+      178,
+      174,
+      210
+    ]
+  },
+  "checks": {
+    "outside_region_indices_identical": "PASS",
+    "outside_region_rgb_identical": "PASS",
+    "palette_byte_identical": "PASS",
+    "lintel_indices_identical": "PASS",
+    "opaque": "PASS",
+    "P_mode": "PASS",
+    "size_640_360": "PASS",
+    "palette_at_most_128": "PASS",
+    "raw_byte_identical_to_tool_output": "PASS"
+  },
+  "visual_review": {
+    "recess": "PASS: grey-teal floor material; no dark cavity or door furniture; reviewed at 1x and nearest 5x",
+    "fixture": "PASS: copied generated fixture limited to x106..129; recess begins at x130",
+    "uncertainty": "Runtime door-frame composition and traversal are not checked; collision changes are reserved for the user."
+  },
+  "repository_check": {
+    "command": "python scripts/check-level05-remaining-environments.py",
+    "status": "FAIL",
+    "reason": "Relay output differs from old pinned exporter output; three other tests PASS. Scripts are outside authorized art scope."
+  }
+}
