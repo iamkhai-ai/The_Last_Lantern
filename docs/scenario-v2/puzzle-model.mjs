@@ -11,10 +11,17 @@
  *      many extra actions it costs).
  *   2. Levels 06, 08, 09, 10: configuration space of the light puzzles (from the truth tables in
  *      docs/implementation/0X-layout.md) — how many configurations exist and how many solve.
+ *      Level 09 also compares all 512 modeled configurations with the current pure game function.
+ *      Counts assume a lit, placed lamp; they do not measure player difficulty or solve distance.
  *
  * Run: node docs/scenario-v2/puzzle-model.mjs
- * Exit code 1 if any v2 model has a soft-lock or is unsolvable.
+ * Uses Node's TypeScript support, as do the repository's existing .mjs checks.
+ * Exits nonzero if Level 05 v2 is unsolvable/soft-locked, a light table has no solution, or L09 drifts.
  */
+
+import assert from 'node:assert/strict';
+import { deriveObservatoryState } from '../../src/systems/ObservatoryPuzzle.ts';
+import { OBSERVATORY_LUMO_WAYPOINTS } from '../../src/data/observatoryRooms.ts';
 
 // ------------------------------------------------------------------------------------------------
 // Level 05 — abstract model
@@ -154,7 +161,7 @@ function reportL05(result) {
   console.log(`  trạng thái kẹt      : ${result.softLocks.length}${result.softLocks.length ? ' → ' + result.softLocks.join(', ') : ''}`);
   console.log(`  lời giải ngắn nhất  : ${result.optimal} hành động`);
   result.path.forEach((label, i) => console.log(`    ${String(i + 1).padStart(2)}. ${label}`));
-  console.log(`  bẫy có hệ quả (không đảo lại được bằng 1 bước): ${result.traps.length}, phạt lớn nhất +${maxPenalty}`);
+  console.log(`  bước sai không đảo lại được bằng 1 bước: ${result.traps.length}, phạt lớn nhất +${maxPenalty}`);
   for (const t of result.traps) console.log(`    - ${describe(t.from)}: ${t.label} → +${t.penalty}`);
   return result.softLocks.length === 0 && Number.isFinite(result.optimal);
 }
@@ -171,19 +178,24 @@ function* product(...ranges) {
 }
 const range = (n) => [...Array(n).keys()];
 
-function configSpace(name, ranges, conditions) {
-  let total = 0; let solved = 0; let nearMiss = 0;
+function configSpace(name, ranges, conditions, liveConditions) {
+  let total = 0; let solved = 0; let twoOfThree = 0;
   for (const values of product(...ranges)) {
     total += 1;
-    const met = conditions.filter((c) => c(...values)).length;
+    const modeled = conditions.map((c) => c(...values));
+    if (liveConditions) {
+      assert.deepEqual(modeled, liveConditions(...values), `${name}: model/live mismatch at ${JSON.stringify(values)}`);
+    }
+    const met = modeled.filter(Boolean).length;
     if (met === conditions.length) solved += 1;
-    else if (met === conditions.length - 1) nearMiss += 1;
+    else if (met === conditions.length - 1) twoOfThree += 1;
   }
-  console.log(`  ${name.padEnd(28)} ${String(total).padStart(4)} cấu hình · ${solved} đúng · ${String(nearMiss).padStart(3)} thiếu đúng 1 điều kiện · ${conditions.length} điều kiện đồng thời`);
+  assert.ok(solved > 0, `${name}: no solving configuration`);
+  console.log(`  ${name.padEnd(28)} ${String(total).padStart(4)} cấu hình · ${solved} đúng · ${String(twoOfThree).padStart(3)} thỏa đúng ${conditions.length - 1}/${conditions.length} điều kiện · ${conditions.length} điều kiện đồng thời`);
 }
 
 function reportLightPuzzles() {
-  console.log('\nKhông gian cấu hình các câu đố ánh sáng (Lumo tính là đang giữ ấn khi có ấn)');
+  console.log('\nKhông gian cấu hình ánh sáng (đèn đã đặt và đang bật; Lumo gồm cả giữ ấn và rời ấn)');
   // L06: G0 0 prism / 1 to A / 2 to B; G1 pose 2 aims A; G2 pose 1 aims B; C = Lumo on seal.
   configSpace('Màn 06 (G0,G1,G2,Lumo)', [range(3), range(3), range(3), range(2)], [
     (g0, g1) => g0 === 1 || (g0 === 0 && g1 === 2),
@@ -199,10 +211,24 @@ function reportLightPuzzles() {
   // L09 bridge: Sun lock lit, root bed shadowed (split + statue 2), Lumo at the seal. Door A needs G0=0
   // first and a latch before G0 can turn to 1 — an ordering constraint on top of this table.
   configSpace('Màn 09 (G0,G1,G2,tượng,Lumo)', [range(4), range(4), range(4), range(4), range(2)], [
-    (g0, g1, g2) => g0 === 1 && g1 === 2 && (g2 === 0 || g2 === 1),
-    (g0, g1, g2, st) => g0 === 1 && g1 === 2 && g2 === 1 && st === 2,
+    (g0, g1, g2, st, lumo) => lumo === 1 && g0 === 1 && g1 === 2 && (g2 === 0 || g2 === 1),
+    (g0, g1, g2, st, lumo) => lumo === 1 && g0 === 1 && g1 === 2 && g2 === 1 && st === 2,
     (g0, g1, g2, st, lumo) => lumo === 1,
-  ]);
+  ], (g0, g1, g2, st, lumo) => {
+    const live = deriveObservatoryState({
+      mirrorRotations: { g0, g1, g2 },
+      statueOrientation: st,
+      lanternOn: true,
+      lanternPlaced: true,
+      doorALatched: true,
+      lumoPosition: lumo === 1 ? OBSERVATORY_LUMO_WAYPOINTS['lumo-seal'] : null,
+      lumoRoute: {
+        destinationWaypointId: lumo === 1 ? 'lumo-seal' : null,
+        arrivedAtWaypointId: lumo === 1 ? 'lumo-seal' : null,
+      },
+    });
+    return [live.sunDoorUnlocked, live.rootBedShadowed, live.lumoAtSeal];
+  });
   // L10: memory, hope, balance must hold together.
   configSpace('Màn 10 (G0,Ký Ức,Cân Bằng,tượng,Lumo)', [range(2), range(4), range(4), range(4), range(2)], [
     (g0, mem, bal, st, lumo) => lumo === 1 && (g0 === 1 || (g0 === 0 && mem === 1)),

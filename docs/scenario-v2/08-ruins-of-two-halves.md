@@ -7,11 +7,11 @@
 **Mục tiêu:** Mở điện thờ Nhật–Nguyệt, tiếp cận The Shadow.\
 **Kỹ năng mới:** Bóng như một công cụ, đặt đúng chỗ. Màn 7 dạy tắt đèn; màn này dạy **không tắt hết**.
 
-**Trạng thái:** bản nháp v2 ngày 2026-10-21, chưa duyệt. Bản đang chạy là [docs/scenario/08-ruins-of-two-halves.md](../scenario/08-ruins-of-two-halves.md). Lời thoại có nhãn *(mới)* hoặc *(sửa)* cần duyệt; các dòng còn lại lấy nguyên văn bản hiện tại.
+**Trạng thái:** hướng sửa về nhịp trợ giúp đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/08-ruins-of-two-halves.md](../scenario/08-ruins-of-two-halves.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* hoặc *(sửa)* thuộc đề xuất v2.
 
 > **Thay đổi so với bản hiện tại**
 >
-> - **The Shadow làm mẫu.** Lần đầu hai khóa Nhật cùng sáng, hoặc lần đầu người chơi tắt đèn theo phản xạ của màn 7, The Shadow bước vào chắn luồng giữa bằng chính thân mình. Khóa Nguyệt lặng đi và ngân lên, rồi ông nói tay mình không giữ được nữa và lui về luống cây. Người chơi phải tìm thứ đứng thay ông.
+> - **The Shadow làm mẫu theo yêu cầu.** Người chơi có cơ hội thử tượng và các khóa trước. Chỉ khi họ chủ động xin gợi ý bằng E với The Shadow hoặc H đạt mức 2 trở lên, một lần duy nhất, ông mới minh họa việc che luồng giữa. Tắt đèn chỉ nhận phản hồi ngắn; nó không tự khởi chạy cảnh.
 > - **Bẫy của màn 7 được gọi tên:** tắt đèn làm Nguyệt đủ tối nhưng hai Nhật tắt theo. Lumo nói ra điều vừa xảy ra.
 > - **Âm thanh của ba khóa:** hai giọng sáng cho hai Nhật, một giọng trầm cho Nguyệt khi đủ tối. Ba giọng cùng lúc là hợp âm.
 > - **Mạch phụ “Những dấu nhỏ” (4/5):** một cái tên mòn dưới chân tượng, chỉ hiện bằng Pulse.
@@ -63,25 +63,17 @@ Bệ chính có bộ chia tia cố định đã hiện rõ đường nhánh. Hai
 
 Tắt đèn làm Nguyệt đạt điều kiện nhưng hai Nhật mất sáng; không giải được. Xoay tượng chắn nhánh trái hoặc phải cũng không giải được. Các khóa không ghi nhớ trạng thái sáng trước đó.
 
-### Người giữ bóng (nhịp mới)
+### Người giữ bóng (nhịp trợ giúp tùy chọn)
 
-Nhịp này phát **một lần**, ở lần đầu xảy ra một trong hai điều sau:
+Người chơi có thể thử câu đố mà không bị ngắt. Chỉ một yêu cầu trực tiếp bằng E với The Shadow hoặc H ở mức 2 trở lên mới xin phép xem minh họa. Cả hai yêu cầu dùng cùng điều kiện đủ: đèn đang bật và đặt trên bệ, cả hai Nhật đang sáng, còn Nguyệt chưa đủ tối. Nếu điều kiện chưa đạt, phản hồi bằng lời gợi ý hiện hành; không khóa điều khiển và không ghi cờ đã xem.
 
-- (a) hai khóa Nhật cùng sáng trong khi khóa Nguyệt còn sáng;
-- (b) người chơi tắt đèn khi đèn đang ở trên bệ chính.
+Khi đủ điều kiện, khóa điều khiển trong cảnh. The Shadow đi từ luống cây tới chắn luồng giữa bằng thân mình (tư thế `shielding` đã có). Cảnh không đổi tượng, gương, đèn hay tiến trình câu đố; không thực hiện tương tác xác nhận và không lưu một trạng thái giải. Khi ông lùi về luống cây, dựng lại bóng và âm thanh theo cấu hình thật hiện tại. Chỉ ghi `l7-shadow-demo` sau khi cảnh chạy hết. Nếu người chơi đã tự giải, không phát minh họa hồi tố.
 
-Trong lúc nhịp phát, điều khiển bị khóa như mọi đoạn thoại, nên bệ xác nhận không dùng được và nhịp này không thể thay cho lời giải. The Shadow đi từ luống cây tới đứng chắn luồng giữa, đoạn giữa bộ chia và tượng (dùng tư thế `shielding` đã có). Khóa Nguyệt tối và ngân lên giọng trầm; nếu hai Nhật đang sáng thì vòng xác nhận sáng đều trong chốc lát.
-
-*Với (a):*
+Khi người chơi chỉ tắt đèn, không có cảnh bóng che. Lumo nói ngắn gọn: **“Tối hết thì hai bên cũng ngủ.”** Tắt đèn không thể làm khóa Nguyệt sáng lên bởi The Shadow; khóa chỉ phản ánh cấu hình thực.
 
 **Lumo:** “Hai bên đã đáp lại. Khóa giữa vẫn im.”
 
-*Với (b):*
-
-**Lumo:** “Tối hết thì hai bên cũng ngủ.” *(mới)*\
-**The Shadow:** “Không phải tắt hết.” *(mới)*
-
-*Cả hai trường hợp, tiếp theo:*
+*Trong phần minh họa được yêu cầu:*
 
 *The Shadow bước vào luồng giữa. Khóa Nguyệt lặng đi.*
 
@@ -89,7 +81,7 @@ Trong lúc nhịp phát, điều khiển bị khóa như mọi đoạn thoại, 
 **Lumo:** “Ông ấy đang che luồng giữa bằng chính mình.” *(mới)*\
 **The Shadow:** “Ta đã đứng như thế này rất lâu. Tay ta không giữ được nữa.” *(mới)*
 
-*The Shadow lui về luống cây. Khóa Nguyệt sáng trở lại.*
+*The Shadow lui về luống cây. Khóa Nguyệt chỉ trở lại trạng thái do đèn, tượng và gương hiện tại tạo ra.*
 
 **Nhinh:** “Vậy mình tìm thứ có thể đứng đó thay ông.” *(sửa: thay “Ánh từ bệ vẫn rọi vào nó. Bức tượng có thể chắn luồng giữa.”)*\
 **Lumo:** “Giống chốt ở trạm nước. Có thứ giữ thay thì người giữ mới được nghỉ.” *(mới)*
@@ -114,7 +106,7 @@ Mỗi giọng tắt ngay khi khóa của nó mất điều kiện. Ký hiệu kh
 
 ### Độ khó
 
-Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 64 cấu hình (tượng, gương trái, gương phải, mỗi thứ 4 nấc), **1** cấu hình đúng, 7 cấu hình thiếu đúng một điều kiện. Ít "gần đúng" hơn màn 6, nhưng mỗi nấc tượng đổi cùng lúc cả bóng lẫn đường đi của hai nhánh. Cái khó nằm ở không gian, không ở số lượng.
+Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 64 cấu hình (tượng, gương trái, gương phải, mỗi thứ 4 nấc), **1** cấu hình đúng, 7 cấu hình thỏa đúng hai trong ba điều kiện. Đây là mô tả không gian cấu hình theo ý đồ, không chứng minh độ khó thực tế. Cái khó dự kiến nằm ở không gian, không ở số lượng; cần chơi thử để kiểm tra.
 
 Rubric (xem [README](README.md)): Thông tin 1 · Kế hoạch 1 · Đồng thời 3 · Không gian 3 · Đảo luật 1 = **9**. Thời gian giải mục tiêu: 10–15 phút.
 
@@ -154,7 +146,7 @@ Ghi vào trang sổ “Những dấu nhỏ” (4/5). Không đọc được tên
 - **Mức 2 — quan hệ:** “Hai khóa Nhật cần sáng cùng lúc. Khóa Nguyệt cần bóng của tượng, trong khi đèn vẫn bật.”
 - **Mức 3 — bước tiếp:** “Đặt đèn, hướng hai gương vào hai Nhật. Xoay mặt rộng của tượng chắn luồng giữa tới Nguyệt, rồi xác nhận ở bệ.”
 
-H nêu điều kiện đang thiếu nếu đã có một phần đúng. Sau khi điện thờ gài, H nhắc lấy lại đèn và nói chuyện với The Shadow.
+H nêu điều kiện đang thiếu nếu đã có một phần đúng. Nếu người chơi xin mức 2 hoặc 3 khi đèn đã bật và đặt, cả hai Nhật sáng, còn Nguyệt chưa đạt, họ đủ điều kiện xem minh họa tùy chọn. Sau khi điện thờ gài, H nhắc lấy lại đèn và nói chuyện với The Shadow.
 
 Đọc lại bia điện thờ: **Bia đá:** “Mặt trời giữ đường đi. Mặt trăng giữ giờ nghỉ. Đừng đặt một bên vào chỗ của cả hai.”
 
@@ -176,9 +168,9 @@ Hoàn thành sau khi gài điện thờ, thu hồi đèn và kết thúc cuộc 
 
 ## 8. Tác động triển khai
 
-- **Logic:** không đổi `deriveRuinsPuzzleState`. Thêm một trình kích hoạt một lần cho nhịp “Người giữ bóng” (điều kiện a hoặc b), cờ `l7-shadow-demo`.
+- **Logic:** không đổi `deriveRuinsPuzzleState`. Cảnh minh họa chỉ chạy theo yêu cầu E với The Shadow hoặc H>=2, khi đèn bật+đặt, hai Nhật sáng và Nguyệt chưa đạt. Cờ `l7-shadow-demo` chỉ ghi sau khi cảnh đủ thời lượng; điều kiện không hợp lệ không tiêu hao lượt xem.
 - **The Shadow:** thêm một điểm đứng tạm trên luồng giữa và đường đi tới đó, dùng tư thế đã đăng ký (`walk-right`, `shielding`, `turn`). Khối va chạm của ông theo cách hiện tại (theo vị trí sống, tắt khi sắp chạm người chơi). Cần kiểm lại rằng điểm đứng tạm không chặn điểm đứng nào và người chơi không bị kẹt, vì nhịp phát trong lúc khóa điều khiển.
-- **Bóng tạm thời:** trong nhịp, khóa Nguyệt được tính là có bóng nhờ thân The Shadow. Chỉ phần trình bày thấy điều này; `deriveRuinsPuzzleState` và bệ xác nhận không đọc nó, nên không có đường tắt.
+- **Bóng tạm thời:** cảnh có thể trình bày bóng do thân The Shadow tạo, nhưng không thay đổi trạng thái câu đố hay đáp ứng bệ xác nhận. Khi cảnh kết thúc, hình ảnh và âm thanh trở về cấu hình thật.
 - **Âm thanh:** ba giọng, điều khiển từ trạng thái sống của ba khóa.
 - **Mạch phụ:** một decal chữ khắc dưới đế tượng, hiện bằng Pulse; cờ mới `l7-name-seen`.
-- **Kiểm tra:** `scripts/check-ruins-of-two-halves.mjs` đọc thang H từ file kịch bản; thang giữ nguyên văn nên vẫn qua. Thêm ca: nhịp không thể làm bệ xác nhận gài.
+- **Kiểm tra ở đợt tích hợp:** cập nhật `scripts/check-ruins-of-two-halves.mjs` để đối chiếu thang H cuối và kiểm: cảnh không tự chạy khi tắt đèn hoặc khi người chơi tự giải; yêu cầu không hợp lệ không ghi cờ; yêu cầu hợp lệ khóa điều khiển nhưng không xác nhận và không đổi trạng thái; sau cảnh hình, âm và trạng thái câu đố khớp cấu hình thật. Những kiểm tra gameplay này chưa chạy.

@@ -1,13 +1,11 @@
 # Kịch bản v2 — Màn 05–10
 
-**Trạng thái:** bản nháp thiết kế ngày 2026-10-21, **chưa duyệt**.
-
-Bản gốc trong [docs/scenario/](../scenario/) giữ nguyên và vẫn là nguồn chuẩn của game. Các script `scripts/check-*.mjs` đọc thoại và thang gợi ý H trực tiếp từ đó, nên bản v2 đặt riêng ở thư mục này. Khi một màn v2 được duyệt, thay file gốc tương ứng, đồng thời sửa code và check của màn đó.
+**Trạng thái:** sáu hướng chỉnh sửa trong đợt góp ý đã được duyệt. Các kịch bản v2 trong thư mục này vẫn là bản nháp thiết kế; chưa có màn nào được duyệt thay thế hoặc triển khai vào game. Bản gốc trong [docs/scenario/](../scenario/) giữ nguyên và vẫn là nguồn chuẩn của gameplay hiện tại. Các script `scripts/check-*.mjs` đọc thoại và thang gợi ý H trực tiếp từ đó. Mỗi thay đổi v2 cần được triển khai và kiểm chứng riêng trước khi thay nguồn hiện hành.
 
 | Màn | File | Mức thay đổi |
 | --- | --- | --- |
 | 05 | [05-a-path-for-two.md](05-a-path-for-two.md) | **Câu đố mới** trên cùng bố cục |
-| 06 | [06-the-sleepless-tower.md](06-the-sleepless-tower.md) | Âm thanh, một luật được nói rõ; không đổi câu đố (art v2 đang làm) |
+| 06 | [06-the-sleepless-tower.md](06-the-sleepless-tower.md) | Âm thanh, một luật được nói rõ; không đổi câu đố (tranh v2 đang làm) |
 | 07 | [07-the-sleeping-garden.md](07-the-sleeping-garden.md) | Bỏ một yêu cầu bằng lời; âm thanh; Lumo dẫn đường |
 | 08 | [08-ruins-of-two-halves.md](08-ruins-of-two-halves.md) | Nhịp mới: The Shadow làm mẫu; âm thanh ba khóa |
 | 09 | [09-dark-moon-observatory.md](09-dark-moon-observatory.md) | Bản ghi chờ Lumo rời ấn; nhịp ấn nhớ ra Lumo |
@@ -17,11 +15,11 @@ Mô hình kiểm chứng: [puzzle-model.mjs](puzzle-model.mjs) (`node docs/scena
 
 ## 1. Vì sao viết lại
 
-1. **Màn 5 nhiều bước nhưng không có quyết định.** Theo mô hình: 11 hành động, 0 bẫy có hệ quả. Hai chốt chỉ bắt buộc vì câu từ chối. Bỏ các câu từ chối đi thì vẫn giải được mà không cần gài chốt nào, vì Lumo đi bằng ống và cửa đóng sau lưng không chặn thứ gì cần dùng tiếp.
-2. **Màn 7 có cùng lỗi ở quy mô nhỏ.** Chốt lối đá phụ là điều kiện hoàn thành, nhưng cổng điện thờ nằm cùng phía với vườn ươm nên không cần lối ấy để đi tiếp.
-3. **Độc canh cơ chế.** 4 trong 6 màn từ 5 tới 10 là định tuyến tia sáng. Độ khó chủ yếu tăng bằng số gương và số điều kiện đồng thời.
-4. **HUD nói hộ thao tác** (ví dụ “Nhấn E ở tay gọi C…”). Điều này trái với chính quy tắc của dự án: *“Do not expose spoilers in opening dialogue/HUD”* ([campaign-layout-design.md](../implementation/campaign-layout-design.md)).
-5. **Bước hụt 5 → 6.** Màn 6 đòi Lumo giữ ấn trong khi người chơi lo việc khác, nhưng màn 5 chưa từng để việc Lumo rời ấn gây ra hệ quả nào.
+1. **Màn 5 nhiều bước nhưng chưa buộc người chơi quản lý đường về.** Mốc gọi được dời để chốt cửa có lý do vật lý. Biển ba chấm cần dễ nhận diện lần đầu; đường về ngắn, cửa đã gài dễ đọc, và các lần gọi quen dùng chú thích ngắn cùng tiếng vọng, trong khi các lần khám phá đầu và chuyển động bay thật vẫn được giữ.
+2. **Màn 7 cần phân biệt lối phụ hữu ích với lối bắt buộc.** Người chơi có thể qua cầu rễ khi tối, bật đèn ở bờ Tây rồi dùng Pulse để thấy dấu tay. Lối đá phụ vẫn là đường về ổn định khi đèn bật.
+3. **Các màn tổng hợp cần nối cơ chế với câu chuyện và phản hồi rõ ràng.** Các bảng cấu hình mô tả ý đồ và phạm vi tìm kiếm, không tự chứng minh độ khó thực tế.
+4. **HUD nói hộ thao tác** (ví dụ “Nhấn E ở tay gọi C…”). Bản v2 đề xuất giữ hướng dẫn phím trong phần dạy và để HUD nêu mục tiêu, theo nguyên tắc dự án *“Do not expose spoilers in opening dialogue/HUD”* ([campaign-layout-design.md](../implementation/campaign-layout-design.md)).
+5. **Bước chuyển 5 → 6.** Màn 5 v2 làm rõ hệ quả cửa đóng khi Lumo rời ấn; màn 6 tiếp tục bằng ấn không có chốt.
 
 ## 2. Nguyên tắc
 
@@ -44,12 +42,12 @@ Năm trục, mỗi trục 0–3: **Thông tin** (đọc, ghép manh mối), **K�
 | 04 | 1 | 2 | 0 | 2 | 0 | 5 | tia + gài chốt trước khi đổi | — |
 | **05** | 2 | 3 | 1 | 0 | 0 | **6** | ủy thác, giữ đường về | 10–14 phút |
 | **06** | 1 | 1 | 3 | 2 | 0 | **7** | **đỉnh 1**: đồng thời | 10–15 phút |
-| **07** | 1 | 2 | 0 | 1 | 2 | **6** | **chỗ thở**: tắt đèn là lời giải | 7–10 phút |
+| **07** | 1 | 2 | 0 | 1 | 2 | **6** | **chỗ thở**: bóng tối nuôi cây và mở lối | 7–10 phút |
 | **08** | 1 | 1 | 3 | 3 | 1 | **9** | **đỉnh 2**: bóng đặt đúng chỗ | 10–15 phút |
 | **09** | 1 | 3 | 3 | 3 | 1 | **11** | **đỉnh 3**: tổng hợp ba phòng | 18–25 phút |
 | **10** | 1 | 1 | 3 | 2 | 3 | **10** | kết: buông | 10–15 phút + kết |
 
-Hình dạng là **răng cưa với đỉnh tăng dần** (7 → 9 → 11), không phải một đường dốc đều. Màn 7 cố ý thấp hơn hai màn kề nó. Màn 10 cố ý nhẹ hơn màn 9 về cơ khí, để sức chú ý dồn vào khoảnh khắc cuối. Điểm số và thời gian là ước lượng thiết kế, phải hiệu chỉnh bằng playtest (§7). Màn 1–4 ngoài phạm vi; điểm của chúng chỉ để so.
+Tổng rubric và thời gian là giả thuyết thiết kế, không phải thước đo đã xác nhận. Ý đồ là các đỉnh tăng dần 7 → 9 → 11, với màn 7 làm chỗ thở và màn 10 nhẹ hơn về cơ khí để dành chú ý cho kết thúc. Chơi thử cần xác nhận trải nghiệm thực tế (§7). Màn 1–4 ngoài phạm vi; điểm của chúng chỉ để so.
 
 ### Số đo từ mô hình
 
@@ -58,20 +56,20 @@ Hình dạng là **răng cưa với đỉnh tăng dần** (7 → 9 → 11), khô
 | Hành động tối thiểu | 11 | 14 |
 | Trạng thái tới được | 43 | 32 |
 | Trạng thái kẹt | 0 | 0 |
-| Bẫy có hệ quả (một bước không gỡ lại được) | 0 | 2, phạt lớn nhất +4 |
+| Nước sai không đảo ngược được bằng một hành động mô hình | 0 | 2, phạt lớn nhất +4 |
 | Chốt A bắt buộc vì | câu từ chối | cửa đóng thật |
 | Chốt B bắt buộc vì | câu từ chối | cửa đóng thật |
 
-Ba hành động thêm là cái giá. Đổi lại, màn có hai bẫy có hệ quả, hai chốt có lý do vật lý và một tầng đọc dấu trong bóng tối.
+Con số 14 là số hành động trừu tượng trong mô hình; nó không dự đoán tổng thời gian người chơi. Chơi thử sẽ ghi riêng thời gian hiểu ra ý chính với thời gian đi bộ, bay/chờ, thoại và đoàn tụ. Hai chốt cần thiết vì cửa sẽ đóng nếu Lumo rời ấn trước khi chốt được gài. Số 2 trong mô hình là các nước sai không đảo lại bằng một hành động: bẫy A được phục hồi bằng một lần gọi và bị loại khỏi số này; nước sai còn lại là gọi C sớm khi A đã gài (+1); bẫy B là rời ấn `··` trước khi gài B (+4). Vì vậy số đo không khớp một-một với hai cảnh bẫy.
 
-| Câu đố ánh sáng | Cấu hình | Đúng | Thiếu đúng 1 điều kiện | Điều kiện đồng thời |
+| Câu đố ánh sáng | Cấu hình | Đúng | Thỏa đúng 2/3 điều kiện | Điều kiện đồng thời |
 | --- | --- | --- | --- | --- |
 | Màn 06 | 54 | 1 | 23 | 3 |
 | Màn 08 | 64 | 1 | 7 | 3 |
-| Màn 09 | 512 | 1 | 8 | 3, cộng ràng buộc thứ tự ở cửa A |
+| Màn 09 | 512 | 1 | 7 | 3, cộng ràng buộc thứ tự ở cửa A |
 | Màn 10 | 256 | 1 | 82 | 3 |
 
-Số "thiếu đúng một điều kiện" cao nghĩa là người chơi thường xuyên ở trạng thái gần đúng. Vì thế mỗi điều kiện cần phản hồi riêng biệt (vòng, màu, giọng âm), để biết đang thiếu cái nào.
+Tổng điểm rubric, số cấu hình và số trạng thái thỏa đúng hai trong ba điều kiện mô tả ý đồ cùng không gian tìm kiếm. Chúng không đo độ khó, xác suất gặp trạng thái đó, tần suất người chơi mắc lỗi hay khoảng cách một hành động tới lời giải; các điều kiện phụ thuộc nhau. Phản hồi riêng cho mỗi điều kiện (vòng, màu, giọng âm) vẫn giúp người chơi hiểu trạng thái hiện tại.
 
 ## 4. Những mạch xuyên suốt
 
@@ -88,11 +86,11 @@ Số "thiếu đúng một điều kiện" cao nghĩa là người chơi thườ
 
 ### Giữ và buông
 
-Lumo giữ ấn, và chốt của Nhinh giải phóng cậu (5). Ấn không có chốt thì phải có người giữ tới cùng (6). The Shadow giữ bóng bằng chính tay mình, và bức tượng đứng thay ông (8). Người Bảo Vệ giữ ngọn đèn vì nỗi chờ (9). Nhinh buông chiếc đèn (10). Mỗi màn là một cách khác nhau để thôi giữ một thứ.
+Lumo giữ ấn, và chốt của Nhinh giải phóng cậu (5). Ấn không có chốt thì phải có người giữ tới cùng (6). The Shadow tự che luồng sáng; khi người chơi chủ động xin minh họa phù hợp, cảnh cho thấy ông làm mẫu, rồi người chơi có thể dùng tượng thay ông (8). Người Bảo Vệ giữ ngọn đèn vì nỗi chờ (9). Nhinh buông chiếc đèn (10). Mỗi màn là một cách khác nhau để thôi giữ một thứ.
 
 ### Ý nghĩa của chiếc đèn
 
-Công cụ mở mọi thứ (1–6), rồi thứ phải tắt (7), rồi thứ phải giữ sáng mà đặt bóng đúng chỗ (8), rồi một nguồn dùng chung giữa ba phòng (9), và cuối cùng là phần dư (10).
+Đèn mở nhiều lối (1–6); màn 3 và 5 cũng dùng bóng tối để đọc thông tin; màn 7 mở rộng vai trò của bóng tối sang sự sống và đường đi; màn 8 giữ nguồn sáng trong khi đặt bóng đúng chỗ; màn 9 dùng chung một nguồn qua ba phòng; màn 10 nhấn vào đủ năng lượng, rễ tự giữ và lời hứa cho Lumo rời ấn.
 
 ### Ngôn ngữ hình ảnh tái sử dụng
 
@@ -128,7 +126,7 @@ Tìm đủ năm dấu thì cảnh ngồi cạnh rễ cây ở màn 10 thêm hai 
 - **HUD, dòng mục tiêu:** chỉ nêu mục tiêu. Riêng phần dạy được nêu phím.
 - **HUD, dòng trạng thái:** chỉ sự thật hiện tại, như Lumo đang giữ ấn nào, đang bay hay đi cùng, và chốt nào đã gài. Không bao giờ khẳng định một điều kiện chỉ vì nó từng đúng.
 - **Khi còn khóa:** mô tả trạng thái đang thiếu, không nói bước giải, không biến mất khỏi tương tác.
-- **H:** ba mức (quan sát, quan hệ, bước tiếp). Giữ định dạng `- **Mức N — …:** “…”` để các check hiện có còn đọc được thang khi bản v2 thay bản gốc. Màn 6–10 giữ nguyên văn thang hiện tại.
+- **H:** ba mức (quan sát, quan hệ, bước tiếp). Giữ định dạng `- **Mức N — …:** “…”` để các check hiện có còn đọc được thang khi bản v2 thay bản gốc. Màn 6 giữ nguyên thang; các màn 7–10 chỉ đổi mức H đã được duyệt trong đợt góp ý.
 - **J:** ghi luật đã học; ghi các dấu nhỏ đã thấy.
 
 ## 6. Ràng buộc kỹ thuật và tác động triển khai
@@ -136,46 +134,31 @@ Tìm đủ năm dấu thì cảnh ngồi cạnh rễ cây ở màn 10 thêm hai 
 | Màn | Ràng buộc đang có | Logic | Art mới | Âm thanh | Thoại mới | Lưu |
 | --- | --- | --- | --- | --- | --- | --- |
 | 05 | Art môi trường v3 đã vẽ khớp tường; không đổi tường, cửa, hốc | Dời hai mốc, bỏ cổng từ chối, luật hiện dấu | Biển dấu cho mốc, dấu mực cho ấn, mực hành lang, hình phấn | Vọng qua ống | Nhiều; một số câu đã chốt được thay hoặc bỏ | Tương thích; cờ `l4-chalk-seen` |
-| 06 | Kế hoạch art v2 giữ bảng chân trị, khóa lưu, thoại, thang H | Không đổi | Vạch đếm | Ba lớp máy | 3 + 2 dòng | `l5-tally-seen` |
-| 07 | Bố cục và va chạm phức tạp, đã kiểm kỹ | Bỏ `side` khỏi điều kiện hoàn thành | Bàn tay trên đá | Bốn tiếng đêm | 3 dòng | `l6-handprint-seen` |
-| 08 | Bảng chân trị và đường đi của The Shadow đã kiểm | Trình kích hoạt một lần | Chữ khắc dưới tượng | Ba giọng khóa | 7 dòng | `l7-shadow-demo`, `l7-name-seen` |
-| 09 | Mạng ba phòng và quy tắc khôi phục đã kiểm | Bàn ghi chờ đoàn tụ | Dòng mực bản đồ sao | Tiếng mưa ngắn | 5 dòng | `l8-seal-remembered`, `l8-margin-seen` |
-| 10 | D6 (F là hành động cuối duy nhất), D7 (`EndingScene` sở hữu timeline) | Không đổi | Không | Ba lớp + lớp quá tải | 5 dòng | `l9-lumo-chose` |
+| 06 | Kế hoạch tranh v2 giữ bảng chân trị, khóa lưu, thoại, thang H | Không đổi | Vạch đếm | Ba lớp máy | 3 + 2 dòng | `l5-tally-seen` |
+| 07 | Bố cục, lối qua cầu và Pulse bờ Tây đã kiểm thiết kế | Bỏ `side` khỏi điều kiện hoàn thành | Bàn tay trên đá | Bốn tiếng đêm | 3 dòng | `l6-handprint-seen` |
+| 08 | Giữ nguyên bảng chân trị; chỉ minh họa theo yêu cầu đủ điều kiện | Cảnh trợ giúp một lần | Chữ khắc dưới tượng | Ba giọng khóa | 7 dòng | `l7-shadow-demo`, `l7-name-seen` |
+| 09 | Mạng ba phòng; mạch đèn còn nối qua cửa Lumo giữ và bóng rễ cùng cần thiết | Bàn ghi chờ đoàn tụ | Dòng mực bản đồ sao | Tiếng mưa ngắn | 5 dòng | `l8-seal-remembered`, `l8-margin-seen` |
+| 10 | D6/D7; F sớm dùng chung chuyển tiếp kết trong `EndingScene` | F tự nguyện; không cần đoàn tụ | Không | Ba lớp; lớp quá tải chỉ trên đường lấy đèn | 5 dòng | `l9-lumo-chose` |
 
-**Thứ tự triển khai đề xuất:** 05 → 08 → 09 → 10 → 07 → 06.
-
-- Màn 5 thay đổi nhiều nhất và đứng độc lập. Theo `git status` lúc đầu phiên, cây làm việc còn việc L05 chưa commit (plaque sơ đồ, art môi trường v3), nên cần commit trước.
-- Màn 6 làm sau cùng, khi art v2 của nó đã gộp, để không chạm cùng file với kế hoạch đang chạy.
-- Phần âm thanh có thể làm một lần cho cả 6, 8, 10, vì chúng dùng chung một bộ lớp.
+**Thứ tự triển khai gợi ý:** 05 → 08 → 09 → 10 → 07 → 06. Đây là thứ tự thiết kế, không phải phê duyệt triển khai. Màn 5 giữ nguyên tranh nền, tường và các chốt cần thiết về mặt vật lý; không thêm lối tắt ngoài phần hình ảnh. Màn 6 giữ bảng chân trị, dữ liệu lưu, thoại và H theo kế hoạch tranh v2; chỉ làm sau khi phần tranh v2 đang thực hiện được tích hợp.
 
 ## 7. Kiểm chứng
 
-**Đã làm:** mô hình trạng thái trừu tượng ([puzzle-model.mjs](puzzle-model.mjs)).
+**Đã làm:** mô hình trạng thái trừu tượng ([puzzle-model.mjs](puzzle-model.mjs)); kết quả của nó mô tả phạm vi mô hình được mã hóa, không xác nhận gameplay hay độ khó thực tế.
 
 - Màn 5 v2 giải được từ đầu; không có trạng thái kẹt trong cả 32 trạng thái tới được.
 - Hai chốt bắt buộc về vật lý.
-- Có hai bẫy có hệ quả. Mỗi bẫy phục hồi được trong cùng buồng hoặc buồng kế bên.
-- Đã đo không gian cấu hình của màn 6, 8, 9, 10 từ bảng chân trị trong `docs/implementation/0X-layout.md`.
+- Mô hình L05 ghi 2 nước sai không đảo bằng một hành động; đây không phải số cảnh bẫy. Bẫy 1 phục hồi bằng một lần gọi và bị loại khỏi số; +1 là gọi C sớm khi A đã gài; bẫy 2 là rời ấn `··` trước khi gài B (+4).
+- Đã đếm cấu hình màn 6, 8, 9, 10 theo bảng chân trị; L09 còn so sánh đủ 512 cấu hình với hàm thuần của game để bắt sai lệch mô hình.
 
 **Mô hình không chứng minh:** vị trí, va chạm, tầm với E, góc nhìn hay độ dễ đọc của dấu. Những thứ ấy chỉ có thể kiểm sau khi viết code, bằng các check hiện có và chơi thử thật.
 
-**Chưa chạy (NOT_RUN):** code, build, check của game, playtest.
+**Trạng thái kiểm chứng:** mô hình trừu tượng PASS sau các sửa đổi tài liệu này: L05 có 32 trạng thái tới được, 0 trạng thái kẹt, lời giải 14 hành động; các bảng L06/L08/L09/L10 lần lượt có 54/64/512/256 cấu hình, và đối chiếu L09 đủ 512 cấu hình PASS. Kiểm tra cú pháp JavaScript và khoảng trắng diff PASS. Kiểm tra tham chiếu cục bộ FAIL (38/39): thiếu `../superpowers/plans/2026-10-21-level06-art-v2-production.md`, là kế hoạch có trong workspace gốc nhưng không được chép vào worktree chỉ phục vụ sửa tài liệu này. Build game, check gameplay và chơi thử: NOT_RUN vì phạm vi chỉ gồm tài liệu thiết kế.
 
-**Quy trình playtest đề xuất:** 3–5 người chưa chơi bản này, mỗi người chơi liền một màn. Đo:
+**Quy trình chơi thử đề xuất:** dùng 3–5 người chơi lần đầu để bổ sung lượt chơi nối tiếp các màn 05–10 theo đúng thứ tự. Có thể chia thành nhiều buổi nhưng giữ dữ liệu lưu và không giới thiệu trước lời giải ở đoạn chuyển màn. Ghi riêng thời gian tìm ra ý chính với thời gian đi bộ, bay/chờ và thoại; số lần H theo từng mức ở mỗi giai đoạn; thời gian dừng quá 60 giây, điểm bối rối và cách người chơi giải thích lời giải. Quan sát chuyển giao kỹ năng 05→06, 07→08, 08→09 và 09→10; ở màn 10 xác nhận cả đường F sớm lẫn đường sau khi lấy đèn đều giữ được nhịp cảm xúc. Các lượt chơi từng màn riêng vẫn hữu ích bổ sung, cần ghi kỹ năng người chơi đã có. Mục tiêu tạm thời: trung bình không quá một lần H mức 3 mỗi màn và thời gian trong khoảng ở bảng §3. Nếu người chơi giải nhanh nhưng hiểu ngay thì không tự tăng độ khó. Mọi mục tiêu vẫn cần dữ liệu chơi thử xác nhận.
 
-- thời gian giải;
-- số lần dùng H theo từng mức;
-- số lần rơi vào mỗi bẫy;
-- chỗ đứng yên quá 60 giây;
-- sau màn, hỏi: “Bạn hiểu vì sao lời giải đúng không?”
+## 8. Quyết định và phạm vi
 
-Mục tiêu: trung bình không quá 1 lần H mức 3 mỗi màn, và thời gian nằm trong khoảng ở bảng §3. Vượt nhiều thì giảm độ khó (thêm phản hồi, chứ không thêm chỉ dẫn); quá nhanh mà không ai dùng H thì có thể giảm giàn giáo thêm.
+Đã duyệt sáu hướng sửa trong đợt góp ý: L08 minh họa bóng theo yêu cầu; L09 cầu cần mạch đèn còn nối và rễ trong bóng, với thoại chính xác; L05 dấu/mốc rõ và giảm lặp lại di chuyển, cùng cách đọc số đo; L07 lối phụ không bắt buộc và mô tả đúng vai trò bóng tối; L10 giữ F sớm và lời hứa với Lumo trong một chuyển tiếp của `EndingScene`, không thêm đi tự do; chơi thử 05–10 theo chuỗi cùng các giới hạn của số đo.
 
-## 8. Việc cần bạn quyết
-
-1. **Câu đố mới của màn 5.** Bản thoại đã chốt ghi “Giữ nguyên câu đố”. Bản v2 đổi câu đố, nên cần bạn đồng ý thay quyết định ấy.
-2. **Thoại mới:** các dòng có nhãn *(mới)* hoặc *(sửa)* ở mỗi file. Màn 5 cũng **bỏ** hai câu đã chốt có cổng chặn không còn tồn tại.
-3. **HUD rút gọn** từ buồng 2 màn 5 trở đi. Việc này đảo ngược một phần các lần sửa hướng dẫn trước đây sau playtest.
-4. **Màn 7: bỏ chốt lối đá phụ khỏi điều kiện hoàn thành.**
-5. **Mạch phụ “Những dấu nhỏ”:** cần năm decal nhỏ và hai dòng có điều kiện trong `EndingScene`.
-6. **Màn 10: vài bước tự đi trong bóng tối sau F.** Ý này chạm vào D7; mặc định là không làm.
+Các thoại mới/sửa, art decal, âm thanh và mọi nội dung khác trong sáu bản v2 vẫn là đề xuất thiết kế. Chưa có quyết định đưa toàn bộ các màn này vào game; các nguồn `docs/scenario/` tiếp tục là chuẩn hiện hành.

@@ -7,13 +7,15 @@
 **Mục tiêu:** Đưa cả hai người qua trạm dẫn nước tới chân tháp.\
 **Kỹ năng mới:** Ủy thác. Lumo chỉ ở được một nơi; mốc gọi không luôn nằm cạnh ấn của nó; phải giữ đường về trước khi để bạn đi.
 
-**Trạng thái:** bản nháp v2 ngày 2026-10-21, chưa duyệt. Bản đang chạy trong game là [docs/scenario/05-a-path-for-two.md](../scenario/05-a-path-for-two.md) cùng [bản thoại đã chốt](../scenario/05-a-path-for-two-dialogue-approved.md). Lời thoại có nhãn *(mới)* hoặc *(sửa)* cần duyệt; các dòng còn lại lấy nguyên văn từ bản thoại đã chốt.
+**Trạng thái:** hướng sửa về nhận diện dấu và nhịp di chuyển đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy trong game là [docs/scenario/05-a-path-for-two.md](../scenario/05-a-path-for-two.md) cùng [bản thoại đã chốt](../scenario/05-a-path-for-two-dialogue-approved.md), vẫn là nguồn chuẩn hiện tại. Các dòng *(mới)* hoặc *(sửa)* thuộc đề xuất v2.
 
 > **Thay đổi so với bản hiện tại**
 >
 > - Mỗi mốc gọi nằm ở buồng **trước** buồng có ấn của nó: mốc hai chấm ở sảnh, mốc ba chấm ở buồng chuyển. Hành lang mực không còn mốc gọi tới ấn cuối.
 > - Bỏ hai cổng chặn bằng lời: câu "Khoan đã. Tôi chưa gài chốt cửa này…" và lời từ chối ở tay chốt cửa ra. Cửa chưa gài sẽ đóng thật khi Lumo rời ấn, và đó là bài học. Mô hình ([puzzle-model.mjs](puzzle-model.mjs)) cho thấy ở bản hiện tại, bỏ các cổng chặn bằng lời thì giải được mà không cần gài chốt nào. Ở bản này cả hai chốt đều bắt buộc về mặt vật lý.
 > - Mốc gọi và ấn được nối bằng **dấu chấm**. Chấm trên mốc khắc bằng đồng nên luôn nhìn thấy. Chấm trên ấn vẽ bằng mực nên chỉ hiện khi tắt đèn hoặc khi Lumo đang đậu trên ấn.
+> - Biển dấu ba chấm cần dễ nhận ra ngay lần đầu người chơi tới mỗi mốc; các dấu mực trên ấn vẫn tuân theo luật hiện mực khi đèn tắt hoặc Lumo đang ở ấn.
+> - Giảm việc đi lại lặp lại bằng đường về ngắn, thông thoáng và cửa đã gài dễ đọc. Lumo vẫn thực sự rời ấn, bay tới rồi tới đích; lần gặp và khám phá đầu tiên giữ nguyên. Những lần gọi quen dùng chú thích ngắn kèm âm thanh vọng qua ống, không phát lại hội thoại đầy đủ và khóa điều khiển.
 > - Mực trong hành lang trở thành **thông tin** (dấu ba chấm, nét chạy ngược về ống), không còn là nghi thức bắt buộc trước khi gài chốt.
 > - HUD ở buồng 2 và 3 chỉ nêu mục tiêu, không nêu tay điều khiển.
 > - Giữ nguyên: ba buồng, toàn bộ tường, cửa và va chạm (art môi trường v3 đã vẽ khớp với chúng), khu thử tùy chọn (D1), cảnh ký ức tại chốt cửa ra (D2), điều kiện Lumo thực sự trở về trước khi lên tháp, và cảnh kết.
@@ -31,7 +33,7 @@ Nhịp màn: buồng 1 dịu và rõ ràng; buồng 2 có một thoáng bối r�
 1. Lumo đậu trên ấn thì cửa của ấn mở. Cậu rời ấn thì cửa đóng, trừ khi Nhinh đã gài chốt.
 2. Lumo đi bằng ống, không đi qua cửa. Cửa đóng không chặn được Lumo, chỉ chặn Nhinh.
 3. Khi được gọi, Lumo bay tới bên Nhinh trước rồi mới theo ống tới ấn.
-4. Mốc và ấn cùng số chấm thì nối với nhau. Chấm trên mốc khắc đồng nên luôn thấy. Chấm trên ấn là mực, chỉ hiện khi tắt đèn hoặc dưới ánh của Lumo.
+4. Mốc và ấn cùng số chấm thì nối với nhau. Biển ba chấm đủ rõ để nhận diện ngay lần đầu; chấm trên ấn là mực, chỉ hiện khi tắt đèn hoặc dưới ánh của Lumo.
 5. Chốt chỉ gài được khi cửa đang mở, và đã gài thì giữ cửa mãi.
 6. Gọi tới ấn của một cửa đã gài thì Lumo trả lời rằng cửa ấy đã được giữ.
 
@@ -197,7 +199,7 @@ Người chơi đã thử `···` ở buồng 2 sẽ vỡ lẽ trước cả kh
 
 #### Bẫy 2 — để cửa B đóng sau lưng
 
-Nếu Nhinh quay về buồng chuyển và nhấn `···` khi chưa gài chốt B, Lumo rời ấn `··` và cửa B đóng. Buồng chuyển không có mốc `··`, nên Nhinh phải về tận sảnh (cửa A đã gài) nhấn `··` để mở lại cửa B, rồi quay vào gài chốt. Mô hình tính bẫy này tốn thêm 4 hành động, nặng nhất màn. Nó dạy lại bài của buồng 2 mà không cần ai nhắc.
+Nếu Nhinh quay về buồng chuyển và nhấn `···` khi chưa gài chốt B, Lumo rời ấn `··` và cửa B đóng. Buồng chuyển không có mốc `··`, nên Nhinh phải về sảnh nhấn `··` để mở lại cửa B, rồi quay vào gài chốt. Mô hình tính bẫy cửa B này tốn thêm 4 hành động. Con số hai nước sai không đảo lại trong một hành động không khớp một-một với hai cảnh bẫy: bẫy A được phục hồi bằng một lần gọi; nước sai +1 là gọi C sớm khi A đã gài.
 
 ### Lời giải đầy đủ — 14 hành động (mô hình)
 
@@ -210,7 +212,7 @@ Tắt đèn không nằm trong lời giải tối thiểu, vì người đoán �
 | | Bản hiện tại | Bản v2 |
 | --- | --- | --- |
 | Hành động tối thiểu | 11 | 14 |
-| Bẫy có hệ quả (một bước không gỡ lại được) | 0 | 2, phạt lớn nhất +4 |
+| Nước sai không thể đảo ngược bằng một hành động mô hình | 0 | 2, phạt lớn nhất +4 |
 | Chốt A bắt buộc vì | câu từ chối | cửa đóng thật |
 | Chốt B bắt buộc vì | câu từ chối | cửa đóng thật |
 | Trạng thái kẹt | 0 | 0 |
@@ -221,7 +223,7 @@ Ba điều người chơi phải tự hiểu ra:
 2. Phải gài chốt trước khi để Lumo rời ấn, vì mình còn phải đi qua cánh cửa ấy lần nữa.
 3. Mốc của ấn tiếp theo nằm ở buồng trước. Mốc ba chấm thấy ở buồng 2 chính là chìa khóa của buồng 3.
 
-Thời gian giải mục tiêu: 10–14 phút với người chơi lần đầu. Không có đồng hồ, không có rơi hoặc đưa về đầu màn. Mọi bẫy đều phục hồi được trong cùng buồng hoặc buồng kế bên.
+Thời gian giải mục tiêu tạm thời: 10–14 phút cho trải nghiệm của người chơi lần đầu. Mô hình 14 hành động trừu tượng không dự đoán tổng thời gian; chơi thử sẽ ghi riêng thời gian đi bộ, bay/chờ, thoại và đoàn tụ. Không có đồng hồ, không có rơi hoặc đưa về đầu màn. Mọi bẫy đều phục hồi được trong cùng buồng hoặc buồng kế bên. Đường về cần ngắn, dễ nhìn; các lần gọi đã quen dùng chú thích ngắn và tiếng vọng thay cho hội thoại khóa điều khiển, nhưng vẫn giữ các lần phát hiện đầu tiên và chuyển động bay thật.
 
 ### Mạch phụ — hình vẽ trên tường (tùy chọn, “Những dấu nhỏ” 1/5)
 

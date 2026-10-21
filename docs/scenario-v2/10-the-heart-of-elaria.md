@@ -7,23 +7,23 @@
 **Mục tiêu:** Khôi phục ba nhánh rễ và để chu kỳ ngày đêm tiếp tục.\
 **Kỹ năng mới:** Buông. Hành động cuối của trò chơi là bớt đi, không phải làm thêm.
 
-**Trạng thái:** bản nháp v2 ngày 2026-10-21, chưa duyệt. Bản đang chạy là [docs/scenario/10-the-heart-of-elaria.md](../scenario/10-the-heart-of-elaria.md). Lời thoại có nhãn *(mới)* cần duyệt; các dòng còn lại lấy nguyên văn bản hiện tại.
+**Trạng thái:** hướng sửa về kết thúc và điều kiện F đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/10-the-heart-of-elaria.md](../scenario/10-the-heart-of-elaria.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* thuộc đề xuất v2.
 
 > **Thay đổi so với bản hiện tại**
 >
-> - **Lumo tự chọn giữ ấn.** Khi đậu lên ấn Hy Vọng, Lumo nhớ lại đêm bão. Nhinh hứa sẽ gọi cậu về, và Lumo giữ ấn vì cậu chọn thế, không vì được nhờ. Lời gọi về sau khi khóa rễ trở thành lời giữ hứa.
+> - **Lumo tự chọn giữ ấn.** Khi đậu lên ấn Hy Vọng, Lumo nhớ lại đêm bão. Nhinh hứa sẽ gọi cậu về, và Lumo giữ ấn vì cậu chọn thế, không vì được nhờ. Sau khi rễ tự giữ, F có hiệu lực ngay, kể cả khi Nhinh vẫn ở bệ; cùng một cảnh kết do `EndingScene` sở hữu cho thấy Lumo được giải phóng an toàn và lời hứa được giữ.
 > - **Âm thanh kể phần kết:** ba nhánh là ba lớp nhạc đã quen từ màn 6 và màn 8. Khi quá tải, một lớp thứ tư chói và hơi lệch tông dâng lên từ chiếc đèn: người chơi *nghe* thấy ánh sáng thừa. F tắt mọi lớp. Sau khoảng lặng, tiếng dế, tiếng nước và tiếng dế đáp lại của màn 7 trở về trước hợp âm bình minh.
 > - **HUD im lặng lúc quá tải:** dòng mục tiêu để trống, chỉ còn trạng thái đèn. Thang H riêng cho quá tải giữ nguyên.
 > - **Mạch phụ “Những dấu nhỏ”:** ai tìm đủ năm dấu ở màn 5–9 sẽ nghe thêm hai dòng trong cảnh ngồi cạnh rễ cây. Hai dòng ấy không trả lời số phận cô bé.
-> - Giữ nguyên: bố cục, ba hốc tinh thể, mạng tia, ba điều kiện, nút rễ, quá tải không đồng hồ, F là hành động cuối duy nhất (D6), `EndingScene` là chủ duy nhất của timeline sau F (D7).
+> - Giữ nguyên: bố cục, ba hốc tinh thể, mạng tia, ba điều kiện, nút rễ, F là hành động cuối duy nhất (D6), `EndingScene` là chủ duy nhất của timeline sau F (D7), và khoảng lặng bắt buộc 1,4 giây.
 
 ## 1. Không gian và nhịp cảm xúc
 
 Cây Mẹ chiếm trung tâm một khoảng rừng rộng. Ba hốc tinh thể nằm quanh thân; các mạch sáng cũ vẫn bơm ánh trắng vào lõi. Bên ngoài, dòng suối đã chảy nhưng lá cây vẫn đứng im. Những con đường từ rừng, tháp và điện thờ hội tụ tại đây.
 
-Màn cuối cần đủ thời gian để suy nghĩ và cảm nhận. Quá tải không có đồng hồ đếm ngược, sát thương hay tiếng báo động dồn dập. Ánh sáng căng lên là một lời nhắc về lựa chọn; người chơi có thể tắt đèn ngay khi nhận ra.
+Màn cuối cần đủ thời gian để suy nghĩ và cảm nhận. Người chơi cần khôi phục đủ năng lượng, để rễ tự giữ cấu hình, rồi tự nguyện cho Lumo rời ấn theo lời hứa. Quá tải là một nhịp tùy theo đường đi sau khi lấy đèn, không phải điều kiện để F hợp lệ. Không có đồng hồ đếm ngược, sát thương hay tiếng báo động dồn dập.
 
-Câu đố ba nhánh là bài ôn: mọi mảnh đã học ở màn 6, 8 và 9. Nó cố ý dễ hơn màn 9, để sức chú ý của người chơi còn lại cho khoảnh khắc sau đó. Từ màn 1, chiếc đèn là thứ mở mọi cánh cửa. Ở đây, giữ nó sáng là sai lầm cuối cùng còn có thể mắc, và màn này chỉ đáng nhớ nếu người chơi tự nhận ra điều đó.
+Câu đố ba nhánh là bài ôn: mọi mảnh đã học ở màn 6, 8 và 9. Nó được thiết kế nhẹ hơn màn 9 để sức chú ý còn lại cho khoảnh khắc sau đó. Điểm cảm xúc không nằm ở việc tắt đèn lần nữa: người chơi đã đủ năng lượng, rễ đã tự giữ, và Lumo có thể rời ấn an toàn vì Nhinh giữ lời hứa.
 
 ## 2. Mở cảnh — trở về với một kế hoạch khác
 
@@ -85,7 +85,7 @@ Lần đầu Lumo thực sự đậu lên ấn Hy Vọng:
 
 ### Độ khó
 
-Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 256 cấu hình (G0 hai nấc; gương Ký Ức, gương Cân Bằng và tượng mỗi thứ 4 nấc; Lumo có hoặc không ở ấn), **1** cấu hình đúng, 82 cấu hình thiếu đúng một điều kiện. Số "gần đúng" cao nhất chiến dịch, vì hai nhánh dùng chung Lumo và lăng kính. Bù lại, mỗi nhánh có phản hồi riêng bằng màu và âm, và mọi mảnh đều đã học.
+Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 256 cấu hình (G0 hai nấc; gương Ký Ức, gương Cân Bằng và tượng mỗi thứ 4 nấc; Lumo có hoặc không ở ấn), **1** cấu hình đúng, 82 cấu hình thỏa đúng hai trong ba điều kiện. Đây là số đo không gian cấu hình theo ý đồ, không chứng minh độ khó, tần suất gặp trạng thái này hay khoảng cách một hành động tới lời giải. Các điều kiện phụ thuộc nhau; mỗi nhánh có phản hồi riêng bằng màu và âm để người chơi đọc cấu hình hiện tại.
 
 Rubric (xem [README](README.md)): Thông tin 1 · Kế hoạch 1 · Đồng thời 3 · Không gian 2 · Đảo luật 3 = **10**, thấp hơn màn 9 (11) về cơ khí nhưng là màn duy nhất trục Đảo luật đạt mức 3. Thời gian giải mục tiêu: 10–15 phút, cộng phần kết.
 
@@ -96,16 +96,16 @@ Rubric (xem [README](README.md)): Thông tin 1 · Kế hoạch 1 · Đồng th�
 **Nhinh:** “Rễ đã tự giữ rồi. Lumo, về đây.”\
 **Lumo:** “Cậu nghe không? Nó đang thở.”
 
-*Đây là lời gọi về Nhinh đã hứa ở §4. Lumo rời ấn đúng lúc, và không có gì vỡ ra.*
+*Đây là lời gọi về Nhinh đã hứa ở §4. Lumo rời ấn an toàn, và không có gì vỡ ra. Khi rễ khóa, lời gọi này có thể hoàn tất trước F. Nếu F được nhấn sớm, `EndingScene` nhận quyền, hủy các thoại và bộ đếm thời gian còn chờ của cảnh Campaign, rồi thực hiện đúng một lần phần lời hứa/lời gọi còn thiếu. Nếu Lumo đã về bên Nhinh, cảnh ghi nhận điều đó và không đưa cậu trở lại ấn hay lặp lại cảnh rời ấn. F không chờ E, đoàn tụ hoặc thoại kết thúc mới có hiệu lực.*
 
 *Bệ hiệu chỉnh nhả đèn. Người chơi dùng E lấy lại đèn; trạng thái bật được giữ. Trong lúc mạch cũ chưa đóng hoàn toàn, ánh đèn gần thân cây vẫn bị bộ thu hút thêm vào lõi. Vòng sáng phồng lên; rễ vàng và xanh quá sáng, viền tím bắt đầu nhòe. Đây là bước chuyển nguồn một lần, không đặt lại cấu hình vừa giải.*
 
-*Ba lớp nhạc vẫn còn, nhưng một lớp thứ tư dâng lên từ chiếc đèn: sáng, cao và hơi lệch tông, mỗi lúc một to hơn cho tới một mức trần, không bao giờ thành tiếng báo động. Dòng mục tiêu trên HUD để trống.*
+*Trên đường lấy đèn và để nó tiếp tục cấp sáng, ba lớp nhạc vẫn còn, nhưng một lớp thứ tư dâng lên từ chiếc đèn: sáng, cao và hơi lệch tông, mỗi lúc một to hơn cho tới một mức trần, không bao giờ thành tiếng báo động. Dòng mục tiêu trên HUD để trống.*
 
 **Nhinh:** “Đèn trên tay vẫn đang cấp thêm ánh sáng.”\
 **Lumo:** “Giống đêm ấy…”
 
-*Lumo nhìn từ đèn tới khoảng tối đã giữ dưới rễ. Nhinh hạ đèn ngang người. Trả quyền điều khiển; F hoạt động ngay khi quá tải bắt đầu, không phải đợi hết đoạn thoại.*
+*Lumo nhìn từ đèn tới khoảng tối đã giữ dưới rễ. Nhinh hạ đèn ngang người. Trả quyền điều khiển; F hoạt động ngay khi đèn đang sáng và rễ đã khóa, không đợi thoại kết thúc. Nếu F được nhấn tại bệ trước khi lấy đèn hoặc trước khi quá tải bắt đầu, `EndingScene` tiếp tục cùng mốc kết mà không phát lớp âm thứ tư.*
 
 **Nhinh:** “Cây Mẹ đã có đủ rồi.”
 
@@ -113,11 +113,11 @@ Không tự tắt đèn thay người chơi. Không buộc người chơi đợi
 
 ## 6. Hành động cuối — để đêm đi hết
 
-*Người chơi nhấn F. Ngọn đèn tắt, và cả bốn lớp nhạc tắt cùng lúc. Những tia trắng từ mạch cũ rút về, đường ngày đêm bắt đầu chuyển động. Khu rừng tối lại. Ánh của Lumo cũng mờ đi trong vài giây.*
+*Người chơi nhấn F. Ngọn đèn tắt. Nếu quá tải đã bắt đầu, cả bốn lớp nhạc tắt cùng lúc; trên đường F sớm, lớp thứ tư chưa từng phát. Những tia trắng từ mạch cũ rút về, đường ngày đêm bắt đầu chuyển động. Khu rừng tối lại. Ánh của Lumo cũng mờ đi trong vài giây.*
 
 **Nhinh:** “Lumo?”
 
-*Một khoảng lặng ngắn. Không hiện mục tiêu mới. Rồi một tiếng dế vang lên, tiếp đến tiếng nước và những tiếng đáp nhỏ trong tán lá. Đây là đúng những âm đã trở lại khu vườn ở màn 7. Đom đóm xuất hiện từng đốm. Ánh Lumo trở lại, dịu hơn.*
+*Trước khoảng lặng, nếu Lumo chưa rời ấn, cậu trở về bên Nhinh an toàn một lần; nếu cậu đã ở bên Nhinh từ nhịp khóa rễ trước F, cảnh chỉ ghi nhận điều đó. Không dịch chuyển cậu về ấn và không lặp lại lời gọi. Sau đó bắt đầu khoảng lặng bắt buộc 1,4 giây, không thể bỏ qua; khoảng này chạy liền mạch. Không hiện mục tiêu mới. Khi khoảng lặng kết thúc, một tiếng dế vang lên, tiếp đến tiếng nước và những tiếng đáp nhỏ trong tán lá. Đây là đúng những âm đã trở lại khu vườn ở màn 7. Đom đóm xuất hiện từng đốm. Ánh Lumo trở lại, dịu hơn.*
 
 **Lumo:** “Tôi đây.”\
 **Nhinh:** “Tôi vẫn thấy cậu.”
@@ -156,11 +156,11 @@ Không tự tắt đèn thay người chơi. Không buộc người chơi đợi
 
 *Câu cuối “Đó là lối đi cho hai người mà” giờ vang lại một màn mà người chơi đã thật sự phải chơi cho hai người: màn 5.*
 
-> **Ghi chú triển khai (đợt sửa 05–10), giữ nguyên:** hành động cuối chỉ còn một đường: F với đèn sáng sau khi rễ đã chốt, từ tay ở bất kỳ đâu, hoặc tại bệ khi đứng đúng chỗ (quyết định D6). Toàn bộ phần sau F (§6–§7) do `EndingScene` dựng và là chủ duy nhất của timeline (D7). Đoạn lặng 1,4 giây không thể bỏ qua. Nếu đèn còn nằm tắt trên bệ, Nhinh lấy nó trước cảnh ngồi.
+> **Ghi chú triển khai (đợt sửa 05–10), giữ nguyên:** hành động cuối chỉ còn một đường: F để tắt đèn đang sáng khi rễ đã khóa, từ tay ở bất kỳ đâu hoặc tại bệ khi đứng trong tầm tương tác (quyết định D6). Toàn bộ phần sau F (§6–§7) do `EndingScene` dựng và là chủ duy nhất của timeline (D7). Khi F nhận hiệu lực, nó hủy thoại và bộ đếm thời gian còn chờ của cảnh Campaign; bảo đảm Lumo rời ấn an toàn đúng một lần nếu chưa về, hoặc ghi nhận cậu đã ở bên Nhinh. Không dịch chuyển cậu về ấn và không phát lại nhịp rời ấn. Sau đó phát liền mạch khoảng lặng bắt buộc 1,4 giây. Nếu đèn còn nằm trên bệ, `EndingScene` tự lấy đèn trước cảnh ngồi.
 
-### Tùy chọn chưa quyết — vài bước trong bóng tối
+### Quyết định nhịp kết
 
-Có thể trả quyền điều khiển trong khoảng 20–40 giây ngay sau “Tôi vẫn thấy cậu.”. Nhinh tự đi vài bước trong rừng tối, chỉ với ánh Lumo, về phía những tiếng đáp, trước khi máy quay bắt đầu. Không có mục tiêu, không có gì để giải; đi về hướng nào cũng dẫn tới đoạn phim. Ý này chạm vào D7, nên mặc định là **không làm** cho tới khi bạn quyết.
+Không thêm 20–40 giây đi tự do sau F. Timeline tiếp tục thuộc `EndingScene` theo D7. F có hiệu lực khi rễ đã khóa, đèn đang sáng và Nhinh cầm đèn hoặc đứng trong tầm tương tác với bệ. Khi nhận F, `EndingScene` hủy thoại/bộ đếm thời gian Campaign còn chờ. Trước khoảng lặng, cảnh chỉ thực hiện đúng một lần phần lời hứa còn thiếu: nếu Lumo chưa rời ấn thì cho cậu về bên Nhinh an toàn; nếu cậu đã về trước F thì ghi nhận cậu bên Nhinh. Không đưa cậu trở lại ấn và không phát lại việc rời ấn. Sau đó phát liền mạch khoảng lặng 1,4 giây rồi mới có âm đêm. Không cần E hoặc chờ thêm; F sớm không phát lớp âm quá tải.
 
 ## 8. Gợi ý H, thử lại và trạng thái cuối
 
@@ -176,7 +176,7 @@ Trong quá tải, dùng bộ gợi ý riêng:
 - **Mức 2:** “Tinh thể đã tự nuôi mạch rễ. Ánh đèn đang làm nó nhận quá nhiều.”
 - **Mức 3:** “Nhấn F để tự tay tắt đèn.”
 
-Nếu đèn đã tắt trước khi lấy khỏi bệ, việc tắt ở bệ sau khi vòng rễ đã khóa cũng tính là hành động cuối hợp lệ; chuyển thẳng sang cảnh đêm và bình minh. Không ép bật lại để tạo quá tải giả. Trong nhánh này, lớp âm thứ tư không bao giờ xuất hiện.
+F hợp lệ ngay khi rễ đã tự giữ, đèn đang sáng và Nhinh cầm đèn hoặc đứng trong tầm tương tác với bệ; không cần Lumo đứng gần Nhinh. Nhấn F ngay tại bệ sau khi rễ đã khóa để tắt đèn bắt đầu cảnh kết dù đèn chưa được lấy khỏi bệ. Trong nhánh F sớm, `EndingScene` hủy thoại/bộ đếm thời gian Campaign còn chờ; trước khoảng lặng, cho Lumo rời ấn an toàn đúng một lần nếu cậu chưa về, hoặc ghi nhận cậu đã ở bên Nhinh. Không đưa cậu về lại ấn, không lặp nhịp rời ấn và không phát lớp âm thứ tư. Nếu đèn còn nằm trên bệ, `EndingScene` tự lấy đèn trước cảnh ngồi. Cả nhánh sớm lẫn nhánh sau khi lấy đèn giữ thứ tự này rồi cùng phát khoảng lặng 1,4 giây và cảnh kết.
 
 **HUD:** “Đặt ba tinh thể.” → “Nối ba mạch rễ thành một vòng.” → “Lấy lại đèn.” *(mới)* → *(trống trong quá tải)*. Dòng trạng thái lúc quá tải chỉ hiện trạng thái đèn.
 
@@ -186,8 +186,8 @@ Giữ riêng mốc đã khóa vòng rễ. Tải lại trong quá tải đưa Nhi
 
 ## 9. Tác động triển khai
 
-- **Logic:** không đổi bảng `memory/hope/balance`, nút rễ, ma trận trạng thái đèn hay luật F.
+- **Logic:** không đổi bảng `memory/hope/balance`, nút rễ hay thời điểm F hợp lệ sau khi khóa rễ. F chỉ hợp lệ khi đèn sáng và Nhinh cầm đèn hoặc ở trong tầm bệ. `EndingScene` nhận F, hủy thoại/bộ đếm thời gian Campaign còn chờ, bảo đảm nhịp Lumo rời ấn an toàn chỉ diễn ra một lần (hoặc ghi nhận cậu đã về), rồi phát liền mạch khoảng lặng 1,4 giây. Kiểm tra tích hợp gồm F sớm trước các dòng đang chờ và F sau khi Lumo đã đoàn tụ/quá tải. Trên cả hai đường, việc Lumo rời ấn hoặc ghi nhận cậu đã về xảy ra trước khoảng lặng; nhánh sớm không phát âm quá tải.
 - **Nhịp Lumo chọn giữ:** cờ `l9-lumo-chose`, phát khi Lumo tới ấn lần đầu.
-- **Âm thanh:** ba lớp theo ba nhánh sống; lớp thứ tư chỉ khi `l9-overload`, tăng tới một mức trần cố định; F tắt cả bốn lớp trước khoảng lặng 1,4 giây. Dùng lại `endingCue('cricket' | 'water' | 'answer')` và `dawnChord` đã có trong `src/audio/effects.ts`.
+- **Âm thanh:** ba lớp theo ba nhánh sống; lớp thứ tư chỉ khi `l9-overload`, tăng tới một mức trần cố định. Khi F có hiệu lực, tắt các lớp đang phát; sau khi hoàn tất/ghi nhận nhịp Lumo rời ấn, giữ khoảng lặng 1,4 giây liền mạch rồi mới phát âm đêm. F sớm không phát lớp thứ tư. Dùng lại `endingCue('cricket' | 'water' | 'answer')` và `dawnChord` đã có trong `src/audio/effects.ts`.
 - **Đoạn kết:** hai dòng có điều kiện trong cảnh ngồi của `EndingScene`, đọc năm cờ `l4-chalk-seen`, `l5-tally-seen`, `l6-handprint-seen`, `l7-name-seen`, `l8-margin-seen`. Phần này nằm trong `EndingScene`, đúng D7.
-- **Kiểm tra:** `scripts/check-heart-of-elaria.mjs` đọc thang H từ file kịch bản; cả hai thang giữ nguyên văn nên vẫn qua. Thêm ca cho dòng có điều kiện: không có đủ năm cờ thì không phát.
+- **Kiểm tra ở đợt tích hợp:** cập nhật `scripts/check-heart-of-elaria.mjs` để đối chiếu thang H cuối, điều kiện F (rễ khóa, đèn sáng, cầm hoặc tầm bệ), và cảnh có điều kiện khi đủ/thiếu năm cờ. Kiểm tra F sớm trước thoại còn chờ và F sau đoàn tụ/quá tải: các bộ đếm/thời điểm Campaign bị hủy, Lumo rời ấn an toàn đúng một lần hoặc được ghi nhận đã về, không có dịch chuyển ngược hay lời gọi lặp, khoảng lặng 1,4 giây liền mạch, và không có âm quá tải trên nhánh sớm. Các kiểm tra gameplay này chưa chạy.

@@ -5,15 +5,15 @@
 **Nhân vật:** Nhinh, Lumo.\
 **Đầu vào:** Có Tinh thể Ký Ức và Tinh thể Hy Vọng; tháp đã trả nước.\
 **Mục tiêu:** Đưa nước tới vườn ươm và mở đường vào điện thờ.\
-**Kỹ năng mới:** Đảo luật. Sáu màn trước, ánh sáng là lời giải; ở đây phải biết khi nào tắt nó.
+**Kỹ năng mới:** Đảo luật. Trọng tâm là bóng tối cho sự sống và đường đi vật lý; màn 3 và 5 đã cần tắt đèn để đọc thông tin, nên đây không phải lần đầu bóng tối có ích.
 
-**Trạng thái:** bản nháp v2 ngày 2026-10-21, chưa duyệt. Bản đang chạy là [docs/scenario/07-the-sleeping-garden.md](../scenario/07-the-sleeping-garden.md). Lời thoại có nhãn *(mới)* cần duyệt; các dòng còn lại lấy nguyên văn bản hiện tại.
+**Trạng thái:** hướng sửa về lối phụ và cách mô tả luật đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/07-the-sleeping-garden.md](../scenario/07-the-sleeping-garden.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* thuộc đề xuất v2.
 
 > **Thay đổi so với bản hiện tại**
 >
 > - **Màn này cố ý dễ hơn màn 6.** Chỉ một điều phải hiểu: gài chốt thanh chắn trước khi tắt đèn. Sau đỉnh đồng thời của màn 6, người chơi được nghỉ, và phần thưởng là âm thanh của đêm trở lại.
 > - **Âm thanh là tiến trình:** mỗi bước đúng trả lại một tiếng đêm (dế, nước, tiếng dế đáp). Đây cũng là những âm sẽ trở lại ở cảnh bình minh màn 10.
-> - **Lối đá phụ hết là yêu cầu bằng lời.** Bản hiện tại bắt gài chốt lối phụ mới cho qua cổng, dù cổng điện thờ nằm cùng phía với vườn ươm nên không cần lối ấy để đi tiếp. Ở v2, lối phụ là đường về cho ai muốn quay lại bờ Tây khi đèn bật. Nó có mục đích thật: mảnh “Những dấu nhỏ” (3/5) nằm ở bờ Tây và chỉ hiện sau khi nước chảy.
+> - **Lối đá phụ không bắt buộc để thấy dấu tay.** Bản hiện tại bắt gài chốt lối phụ mới cho qua cổng, dù cổng điện thờ nằm cùng phía với vườn ươm. Ở v2, người chơi có thể đi qua rễ khi tối, bật đèn ở bờ Tây rồi dùng Pulse để thấy dấu tay; lối phụ hữu ích làm đường về ổn định khi đèn bật, nhưng không bắt buộc.
 > - Khi tắt đèn trên cầu rễ, Lumo bay trước dẫn đường. Đây là nhịp tin cậy, không phải một cơ chế mới.
 > - HUD chỉ nêu mục tiêu.
 > - Giữ nguyên: bố cục, cây, cầu rễ, luật “ánh Lumo không làm cây đổi trạng thái”, cảnh vườn ươm, cảnh bóng người ở cổng.
@@ -24,7 +24,7 @@ Hoa Nhật nở trắng dọc hàng rào, nhưng dưới chúng là những cây
 
 Màn tạo một khoảng nghỉ sau tiếng máy trên tháp. Khi bóng tối trở lại, âm thanh côn trùng xuất hiện từng chút. Thành công được thể hiện bằng sự sống nhỏ bé, không bằng một vụ nổ ánh sáng.
 
-Câu đố dễ hơn màn 6 nhưng lạ hơn: phản xạ "bật đèn để mở" mà người chơi đã luyện suốt sáu màn giờ phải dừng lại đúng lúc. Màn này dạy ngồi yên trong bóng tối, không dạy làm nhiều hơn.
+Màn được thiết kế nhẹ hơn màn 6. Ý mới là bóng tối nuôi sự sống và tạo đường đi vật lý; người chơi giữ thanh chắn bằng chốt rồi đi qua cầu rễ trong tối, sau đó có thể bật đèn ở bờ Tây để dùng Pulse.
 
 ### Tiếng đêm trở lại
 
@@ -75,7 +75,7 @@ Lối đá phụ cạnh cống vẫn có chốt. Gài nó thì có đường v�
 
 ### Điều phải hiểu ra
 
-Đây là bài màn 4 trong hình dạng mới: một thay đổi cần ánh sáng (thanh chắn), một thay đổi cần bóng tối (cầu rễ), và chốt giữ cái thứ nhất để làm được cái thứ hai. Khác biệt là lần này **tắt đèn** mới là bước mở đường.
+Đây là bài màn 4 trong hình dạng mới: một thay đổi cần ánh sáng (thanh chắn), một thay đổi cần bóng tối (cầu rễ), và chốt giữ cái thứ nhất để làm được cái thứ hai. Trọng tâm mới là bóng tối tạo sự sống và đường đi; màn 3 và 5 đã dùng bóng tối để đọc thông tin.
 
 ### Bẫy và phục hồi
 
@@ -119,7 +119,7 @@ Rubric (xem [README](README.md)): Thông tin 1 · Kế hoạch 2 · Đồng th�
 
 ### Mạch phụ — bàn tay trên đá (tùy chọn, “Những dấu nhỏ” 3/5)
 
-Sau khi cống mở, nước tràn ngược theo kênh ngang về bờ Tây và làm ướt một phiến đá cạnh bãi cỏ thử. Dùng Pulse gần phiến đá, dấu một bàn tay nhỏ ánh lên trên mặt đá ướt. Pulse cần đèn bật, mà đèn bật thì cầu rễ co, nên muốn về bờ Tây lúc này phải đi bằng lối đá phụ đã gài. Lối phụ được việc mà không thành bắt buộc.
+Sau khi cống mở, nước tràn ngược theo kênh ngang về bờ Tây và làm ướt một phiến đá cạnh bãi cỏ thử. Đi qua cầu rễ khi đèn tắt; sau đó bật đèn ở bờ Tây và dùng Pulse gần phiến đá để dấu bàn tay nhỏ ánh lên. Pulse cần đèn bật, nhưng không cần gài lối phụ. Khi đèn bật, chốt lối phụ vẫn tạo một đường về ổn định nếu người chơi muốn quay lại bờ Đông.
 
 **Nhinh:** “Có một bàn tay nhỏ in trên đá. Nước vừa làm nó hiện lên.” *(mới)*\
 **Lumo:** “Ai đó từng chơi ở đây, lúc đá còn ướt.” *(mới)*
@@ -130,9 +130,7 @@ Ghi vào trang sổ “Những dấu nhỏ” (3/5). Không trả lời bàn tay
 
 - **Mức 1 — quan sát:** “Hai chậu thử phản ứng trái ngược. Sau thanh chắn có một tay chốt.”
 - **Mức 2 — quan hệ:** “Giữ thanh chắn bằng chốt, rồi tắt đèn để rễ làm cầu. Một phần đường phải tự giữ trước khi phần kia xuất hiện.”
-- **Mức 3 — bước tiếp:** “Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi gài lối đá phụ.”
-
-*Mức 3 ở bản hiện tại nhắc “gài lối đá phụ”. Ở v2 câu này vẫn đúng như một lời khuyên an toàn, nên giữ nguyên văn để thang gợi ý không phải duyệt lại. Nếu muốn bỏ hẳn, đổi đuôi thành “…mở cống rồi tới cổng điện thờ.”*
+- **Mức 3 — bước tiếp:** “Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi tới điện thờ.”
 
 Nếu bể tích quang chưa che, H chỉ hướng tay kéo trước khi nói tới đèn cá nhân. Sau khi mở cống, H hướng tới cổng điện thờ; lối đá phụ chỉ được nhắc nếu người chơi đang ở bờ Đông với đèn bật và cầu đã co.
 
@@ -165,4 +163,4 @@ Hoàn thành khi màn chắn bể đã che, chốt thanh chắn đã gài, cốn
 - **Âm thanh:** bốn nhịp ở bảng §1, dùng lại các công thức `endingCue('cricket' | 'water' | 'answer')` đã có trong `src/audio/effects.ts`, để màn 10 vang lại đúng những âm này.
 - **Lumo dẫn đường trên cầu:** chỉ đổi điểm bay của Lumo khi cầu đang có và đèn tắt; không chạm vào luật cây.
 - **Mạch phụ:** một decal bàn tay trên phiến đá bờ Tây, hiện khi `l6-water-flowing` và Pulse; cờ mới `l6-handprint-seen`.
-- **Kiểm tra:** cập nhật ca hoàn thành trong `scripts/check-sleeping-garden.mjs` (không còn đòi `l6-return-latched`); thang H giữ nguyên văn nên ca đọc thang gợi ý từ file kịch bản vẫn qua.
+- **Kiểm tra:** cập nhật ca hoàn thành trong `scripts/check-sleeping-garden.mjs` (không còn đòi `l6-return-latched`); cập nhật mức 3 để đi thẳng tới điện thờ, không yêu cầu chốt lối phụ.

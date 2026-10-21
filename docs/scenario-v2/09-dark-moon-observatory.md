@@ -7,12 +7,12 @@
 **Mục tiêu:** Mở phòng thiên văn, hiểu tai họa và nhận Tinh thể Cân Bằng.\
 **Kỹ năng mới:** Không có. Đây là bài kiểm tra tổng hợp: một nguồn sáng dùng chung cho ba phòng, giữ đường bằng chốt trước khi đổi cấu hình, và giữ một đường về cho cả hai người.
 
-**Trạng thái:** bản nháp v2 ngày 2026-10-21, chưa duyệt. Bản đang chạy là [docs/scenario/09-dark-moon-observatory.md](../scenario/09-dark-moon-observatory.md). Lời thoại có nhãn *(mới)* cần duyệt; các dòng còn lại lấy nguyên văn bản hiện tại.
+**Trạng thái:** hướng sửa về mạch cầu đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/09-dark-moon-observatory.md](../scenario/09-dark-moon-observatory.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* thuộc đề xuất v2.
 
 > **Thay đổi so với bản hiện tại**
 >
 > - **Ấn trong hành lang nhớ ra Lumo.** Lần đầu Lumo đậu ở ấn sau ống có dấu xoắn, vết xoắn sáng lên và tiếng mưa vọng lại một thoáng. Đây là lời báo trước cho bản ghi, không phải một cơ chế mới.
-> - **Bản ghi chỉ mở khi Lumo ở bên Nhinh.** Muốn nghe, phải gọi Lumo rời ấn, tức chiếc ấn cậu đã giữ đêm bão. Cầu rễ co lại khi cậu rời đi, nên lối vòng đã mở trở thành đường về thật. Lumo rời ấn trước, rồi mới biết việc giữ ấn ấy đã gây ra điều gì.
+> - **Bản ghi chỉ mở khi Lumo ở bên Nhinh.** Muốn nghe, phải gọi Lumo rời ấn, tức chiếc ấn cậu đã giữ đêm bão. Cầu rễ cần mạch đèn còn nối qua cửa giữ bởi ấn Lumo, đồng thời luống rễ phải nằm trong bóng. Khi Lumo rời ấn, vạch báo năng lượng của mạch đèn tắt và rễ co lại, dù luống vẫn được che bóng. Lối vòng đã mở trở thành đường về thật. Lumo rời ấn trước, rồi mới biết việc giữ ấn ấy đã gây ra điều gì.
 > - **Mạch phụ “Những dấu nhỏ” (5/5):** dòng chữ bên lề bản đồ sao, chỉ hiện khi tắt đèn.
 > - HUD chỉ nêu mục tiêu.
 > - Giữ nguyên: ba phòng, toàn bộ mạng tia, tượng, cầu rễ, chốt, lối vòng, bản ghi mười sáu dòng, tinh thể, các quy tắc khôi phục.
@@ -21,7 +21,7 @@
 
 Đài có ba phòng: tiền sảnh, phòng bản đồ sao và phòng thiên văn. Trên trần, bánh xe mô phỏng ngày đêm dừng ở vị trí mặt trời nằm giữa những vì sao. Đường ống có dấu vòng xoắn nối tới một ấn dành cho Lumo. The Shadow chờ cạnh bản ghi cuối trong phòng thiên văn.
 
-Đây là câu đố tổng hợp khó nhất trước kết thúc. Mọi thao tác đã được học; cái khó đến từ việc dùng chung nguồn và đổi cấu hình sau khi đã giữ đường. Nhịp kể chỉ mở hết khi người chơi tới được phòng cuối, để không ngắt một câu đố dài bằng nhiều đoạn thoại.
+Được thiết kế làm câu đố tổng hợp khó nhất trước kết thúc. Mọi thao tác đã được học; thử thách dự kiến đến từ việc dùng chung nguồn và đổi cấu hình sau khi đã giữ đường, nhưng độ khó thực tế cần chơi thử xác nhận. Nhịp kể chỉ mở hết khi người chơi tới được phòng cuối, để không ngắt một câu đố dài bằng nhiều đoạn thoại.
 
 Câu đố và câu chuyện cùng nói một điều. Người chơi đã quen nhờ Lumo giữ ấn từ màn 5. Ở đây, việc giữ ấn hóa ra là điều Lumo đã làm đêm bão, và nó đã góp phần làm Cây Mẹ vỡ. Lời thú nhận chỉ có sức nặng khi người chơi vừa tự tay nhờ cậu làm đúng việc ấy, và vừa tự tay gọi cậu thôi.
 
@@ -64,7 +64,7 @@ Mô hình cho thấy chốt có thể giữ cửa nhưng cảm biến và ấn k
 
 **Cấu hình mở đường:** Đặt đèn bật lên bệ, hướng G0 vào mắt cửa A. Nhinh qua cửa và gài chốt phía trong. Từ đây cửa A giữ mở, cho phép quay về bệ và G0 bất cứ lúc nào.
 
-**Cấu hình đi tiếp:** Dùng mốc gọi đưa Lumo qua ống tới ấn, mở màn dẫn tia. Đổi G0 sang G1; xoay G1 tới G2. G2 có hai đường: chiếu thẳng vào khóa Nhật, hoặc dẫn vào bộ chia tia trong khung sáng cạnh tượng. Đường thẳng mở cửa cuối nhưng rọi vào rễ, nên cầu không mọc. Bộ chia trong khung tách tia tới thành hai nhánh cố định: nhánh trên tới khóa Nhật, nhánh giữa đi qua vị trí tượng tới luống rễ. Xoay mặt rộng của tượng chắn nhánh giữa sẽ tạo bóng phủ rễ mà vẫn để nhánh trên chiếu khóa Nhật. Khung không tự sinh thêm ánh sáng; cả hai nhánh chỉ hoạt động khi nhận tia từ G2.
+**Cấu hình đi tiếp:** Dùng mốc gọi đưa Lumo qua ống tới ấn, mở màn dẫn tia. Đổi G0 sang G1; xoay G1 tới G2. G2 có hai đường: chiếu thẳng vào khóa Nhật, hoặc dẫn vào bộ chia tia trong khung sáng cạnh tượng. Đường thẳng mở cửa cuối nhưng rọi vào rễ, nên cầu không mọc. Bộ chia trong khung tách tia tới thành hai nhánh cố định: nhánh trên tới khóa Nhật, nhánh giữa đi qua vị trí tượng tới luống rễ. Xoay mặt rộng của tượng chắn nhánh giữa sẽ tạo bóng phủ rễ mà vẫn để nhánh trên chiếu khóa Nhật. Khung không tự sinh thêm ánh sáng; cả hai nhánh chỉ hoạt động khi nhận tia từ G2. Cầu mọc khi nguồn từ đèn còn nối qua cửa mà Lumo giữ, đồng thời vùng rễ nằm trong bóng. Khi Lumo rời ấn, vạch báo năng lượng trên mạch đèn tắt rõ ràng và rễ co lại; luống vẫn tối nhưng không được chiếu trực tiếp.
 
 Xoay G2 qua khung, rồi xoay tượng che trọn luống rễ. Khi khóa Nhật sáng, Lumo còn giữ ấn và rễ đủ tối, Nhinh qua cầu tới phòng cuối. Gài chốt cửa cuối và mở lối đá vòng bằng E. Lối vòng cho phép thu hồi đèn, gọi Lumo về và trở lại phòng cuối an toàn.
 
@@ -92,7 +92,7 @@ Bàn ghi ở phòng thiên văn chỉ mở khi Lumo đứng cạnh Nhinh. Trư�
 
 **Nhinh:** “Lumo nên nghe cùng mình.” *(mới)*
 
-Gọi Lumo về thì cậu rời ấn, màn dẫn tia khép, cầu rễ co lại. Nhinh đã ở bờ xa với cửa cuối đã gài, nên lối vòng là đường về thật. Khi Lumo vừa rời ấn:
+Gọi Lumo về thì cậu rời ấn; vạch báo năng lượng của mạch đèn hiện rõ dọc đường cấp tới luống rễ rồi tắt, màn dẫn tia khép và cầu rễ co lại. Luống rễ vẫn nằm trong bóng nhưng mất nguồn đèn được nối qua cửa. Nhinh đã ở bờ xa với cửa cuối đã gài, nên lối vòng là đường về thật. Khi Lumo vừa rời ấn:
 
 **Lumo:** “Rời chỗ này… nhẹ hơn tôi tưởng.” *(mới)*
 
@@ -100,7 +100,7 @@ Câu này báo trước cho lúc buông tay ở màn 10.
 
 ### Độ khó
 
-Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 512 cấu hình (G0, G1, G2, tượng mỗi thứ 4 nấc, Lumo có hoặc không ở ấn), **1** cấu hình mở được cầu, 8 cấu hình thiếu đúng một điều kiện. Trên bảng ấy còn một ràng buộc thứ tự: cửa A cần G0 ở nấc 0 và phải được gài trước khi G0 quay sang nấc 1. Đây là không gian lớn nhất chiến dịch, và là màn duy nhất buộc người chơi giữ một cấu hình cũ trong khi dựng cấu hình mới.
+Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 512 cấu hình (G0, G1, G2, tượng mỗi thứ 4 nấc, Lumo có hoặc không ở ấn), **1** cấu hình mở được cầu, 7 cấu hình thỏa đúng hai trong ba điều kiện. Ba điều kiện thực tế phụ thuộc nhau: cần nguồn cấp sống, rễ được bóng bảo vệ và Lumo ở ấn; số này không phải xác suất, tần suất hay số bước người chơi còn cách lời giải. Trên bảng ấy còn một ràng buộc thứ tự: cửa A cần G0 ở nấc 0 và phải được gài trước khi G0 quay sang nấc 1. Đây là không gian cấu hình lớn nhất được mô hình hóa, không phải bằng chứng đây là màn khó nhất. Màn vẫn được thiết kế làm đỉnh tổng hợp cao nhất; độ khó thực tế cần chơi thử xác nhận.
 
 Rubric (xem [README](README.md)): Thông tin 1 · Kế hoạch 3 · Đồng thời 3 · Không gian 3 · Đảo luật 1 = **11**. Thời gian giải mục tiêu: 18–25 phút.
 
@@ -125,7 +125,7 @@ Rubric (xem [README](README.md)): Thông tin 1 · Kế hoạch 3 · Đồng th�
 **Nhinh:** “Ông là Người Bảo Vệ.”\
 **The Shadow:** “Ta là phần ký ức còn mắc lại trong đêm ấy. Ta đã đợi lâu đến mức quên cả việc cho khu rừng nghỉ.”\
 **Lumo:** “Và tôi đã giúp ông. Nếu tôi làm sai lần nữa thì sao?”\
-**Nhinh:** “Ở khu vườn, cậu đã giúp tôi tắt đèn. Ở điện thờ, cậu đã giữ bóng cho những mầm cây.”\
+**Nhinh:** “Ở khu vườn, cậu đã giúp tôi tắt đèn. Ở điện thờ, cậu đã giúp tôi hiểu cách bảo vệ những mầm cây.”\
 **Nhinh:** “Lần này mình biết nhiều hơn. Mình cũng có thể dừng lại khi thấy điều gì không đúng.”\
 **The Shadow:** “Ta muốn dẫn một người về nhà. Rồi giữ cả khu rừng ở lại cùng nỗi chờ của mình.”\
 **Nhinh:** “Con gái ông đã trở về chưa?”\
@@ -158,7 +158,7 @@ The Shadow ở lại bên cửa sổ. Ông không biến mất ngay khi trao tin
 
 - **Mức 1 — quan sát:** “Xem các đường nối trên tường. G0 dùng cho cả cửa vào lẫn đường tia tới phòng sao.”
 - **Mức 2 — quan hệ:** “Giữ cửa vào bằng chốt rồi đổi nguồn sang phòng sao. Cửa cuối cần sáng, nhưng rễ cần bóng của tượng.”
-- **Mức 3 — bước tiếp:** “Gài cửa A, gọi tôi tới ấn, hướng G0 qua G1 tới G2. Chọn đường G2 qua khung tượng, che luống rễ rồi qua cầu và mở lối vòng.”
+- **Mức 3 — bước tiếp:** “Gài cửa A, gọi tôi tới ấn, hướng G0 qua G1 tới G2. Chọn đường G2 qua khung tượng, giữ luống rễ trong bóng tượng khi mạch đèn vẫn nối qua cửa, rồi qua cầu và mở lối vòng.”
 
 Gợi ý chỉ nêu phần đang kẹt. Sau khi mạng đã giải, H hướng về việc gọi Lumo về, bản ghi hoặc tinh thể chưa nhận, theo đúng thứ tự mới: gọi Lumo về trước, rồi bản ghi.
 
@@ -181,7 +181,7 @@ Giữ nguyên toàn bộ quy tắc của bản hiện tại (vị trí và trạ
 
 ## 8. Tác động triển khai
 
-- **Logic:** bàn ghi chỉ mở khi có đoàn tụ thật (cùng phép kiểm khoảng cách như màn 5 và màn 6). Thứ tự hoàn thành không đổi; chỉ bản ghi thêm điều kiện.
+- **Logic:** bàn ghi chỉ mở khi có đoàn tụ thật (cùng phép kiểm khoảng cách như màn 5 và màn 6). Thứ tự hoàn thành không đổi; chỉ bản ghi thêm điều kiện. Cầu rễ cần nguồn đèn còn nối qua cửa do Lumo giữ và bóng tượng bảo vệ luống. Khi Lumo rời ấn, vạch báo năng lượng trên đường đèn tắt, màn khép và rễ co dù luống vẫn tối.
 - **Nhịp ấn:** cờ `l8-seal-remembered`, ghi khi Lumo tới ấn lần đầu. Trình bày bằng hiệu ứng sáng trên vết xoắn và một tiếng mưa ngắn.
 - **Mạch phụ:** một dòng mực trên bản đồ sao, hiện khi đèn tắt và đang cầm trên tay; cờ mới `l8-margin-seen`.
-- **Kiểm tra:** `scripts/check-observatory.mjs` đọc thang H từ file kịch bản; thang giữ nguyên văn nên vẫn qua. Thêm ca: bàn ghi từ chối khi Lumo còn ở ấn hoặc đang bay; bàn ghi mở khi Lumo đứng gần.
+- **Kiểm tra ở đợt tích hợp:** cập nhật `scripts/check-observatory.mjs` và xác nhận thang H khớp văn bản cuối. Kiểm tra bàn ghi từ chối khi Lumo còn ở ấn hoặc đang bay, rồi mở khi cậu đứng gần; kiểm tra vạch báo nguồn tắt khi cậu rời ấn dù luống vẫn trong bóng. Các kiểm tra này chưa chạy trong phạm vi tài liệu hiện tại.

@@ -7,7 +7,7 @@
 **Mục tiêu:** Giải phóng dòng nước, nhận Tinh thể Hy Vọng.\
 **Kỹ năng mới:** Đồng thời. Ba điều kiện phải đúng cùng một lúc, và lần này **không có chốt nào giữ thay Lumo**.
 
-**Trạng thái:** bản nháp v2 ngày 2026-10-21, chưa duyệt. Bản đang chạy là [docs/scenario/06-the-sleepless-tower.md](../scenario/06-the-sleepless-tower.md). Màn này đang làm art v2 ([kế hoạch](../superpowers/plans/2026-10-21-level06-art-v2-production.md)), và kế hoạch đó yêu cầu giữ bảng chân trị A/B/C, khóa lưu, lời thoại và thang gợi ý. Bản v2 tuân theo: **không đổi bố cục, câu đố hay thoại đã có**. Lời thoại có nhãn *(mới)* cần duyệt.
+**Trạng thái:** hướng diễn giải số đo và chơi thử đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/06-the-sleepless-tower.md](../scenario/06-the-sleepless-tower.md), vẫn là nguồn chuẩn hiện tại. Màn này đang làm tranh v2 ([kế hoạch](../superpowers/plans/2026-10-21-level06-art-v2-production.md)), và kế hoạch đó yêu cầu giữ bảng chân trị A/B/C, khóa lưu, lời thoại và thang gợi ý. Bản v2 không đổi bố cục, câu đố hay thoại đã có; các dòng *(mới)* là đề xuất.
 
 > **Thay đổi so với bản hiện tại**
 >
@@ -15,7 +15,7 @@
 > - **Luật mới được nói ra:** ấn C không có chốt. Ở màn 5, chốt giải phóng Lumo; ở đây Lumo phải đứng giữ tới khi cần Trả dòng được chuyển. Cần Trả dòng chính là "chốt" của màn này.
 > - Thêm một câu báo trạng thái khi Lumo rời ấn C trước lúc chuyển cần.
 > - **Mạch phụ tùy chọn "Những dấu nhỏ" (2/5):** những vạch đếm đêm trên khung cửa sổ, chỉ hiện khi dùng Pulse.
-> - HUD chỉ nêu mục tiêu và ba vòng A/B/C (theo kế hoạch art v2).
+> - HUD chỉ nêu mục tiêu và ba vòng A/B/C (theo kế hoạch tranh v2).
 
 ## 1. Không gian và nhịp cảm xúc
 
@@ -74,7 +74,7 @@ Mạng chính gồm bệ đèn, gương chung G0, lăng kính, hai gương nhán
 
 Hướng G0 vào lăng kính, G1 vào A, G2 vào B, gọi Lumo tới C. Khi cả ba vòng sáng, chuyển cần Trả dòng.
 
-Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 54 cấu hình (G0, G1, G2 mỗi gương 3 nấc, Lumo có hoặc không ở ấn), **1** cấu hình đúng, 23 cấu hình thiếu đúng một điều kiện. Nhiều cấu hình "gần đúng" chính là cảm giác của câu đố đồng thời. Vì vậy mỗi mạch cần phản hồi riêng (vòng và lớp nhạc), để người chơi biết mạch nào còn thiếu.
+Mô hình ([puzzle-model.mjs](puzzle-model.mjs)): 54 cấu hình (G0, G1, G2 mỗi gương 3 nấc, Lumo có hoặc không ở ấn), **1** cấu hình đúng, 23 cấu hình thỏa đúng hai trong ba điều kiện. Đây là số đo không gian cấu hình theo ý đồ, không phải bằng chứng người chơi thường xuyên ở trạng thái gần lời giải. Các điều kiện có thể phụ thuộc nhau; vòng và lớp nhạc riêng giúp người chơi nhận ra trạng thái mỗi mạch. Độ khó và thời gian cần chơi thử xác nhận.
 
 ### Bẫy và phục hồi
 
@@ -152,7 +152,7 @@ Ghi vào trang sổ “Những dấu nhỏ” (2/5). Không ảnh hưởng tiế
 
 Sau khi chuyển cần, H hướng dẫn lấy lại đèn, nhận tinh thể và nghe bản ghi còn chưa xem. Bàn thử là phần học tùy chọn: mục tiêu và H nói rõ có thể đặt đèn thẳng lên bệ chính. Cuộc đoàn tụ với Lumo (gọi về ở mốc gọi, rồi đứng gần) là mốc hoàn thành được nêu trong HUD, H và lời từ chối ở bậc thang (quyết định D3). Tương tác lại cửa sổ: **Nhinh:** “Ông đã đứng ở đây qua bao nhiêu đêm?”
 
-**HUD:** dòng mục tiêu theo bước (“Tìm cách đổi chế độ của máy.”, “Lấy lại đèn và nhận tinh thể.”, “Đi cùng Lumo xuống khu vườn.”) *(mới)*. Dòng trạng thái theo kế hoạch art v2: `A ○ · B ○ · C ○ · Nước ↑/↓`. Không dòng nào khẳng định một mạch đang sống chỉ vì nó từng sống.
+**HUD:** dòng mục tiêu theo bước (“Tìm cách đổi chế độ của máy.”, “Lấy lại đèn và nhận tinh thể.”, “Đi cùng Lumo xuống khu vườn.”) *(mới)*. Dòng trạng thái theo kế hoạch tranh v2: `A ○ · B ○ · C ○ · Nước ↑/↓`. Không dòng nào khẳng định một mạch đang sống chỉ vì nó từng sống.
 
 ## 7. Kết màn và trạng thái giữ lại
 
@@ -168,8 +168,8 @@ Hoàn thành khi đã chuyển máy, thu hồi đèn, nhận Tinh thể Hy Vọn
 
 ## 8. Tác động triển khai
 
-- **Không đổi:** `towerLayout.ts`, bảng chân trị, khóa lưu `l5-*`, thoại và thang H đã có. Toàn bộ phần này nằm ngoài phạm vi của kế hoạch art v2.
+- **Không đổi:** `towerLayout.ts`, bảng chân trị, khóa lưu `l5-*`, thoại và thang H đã có. Toàn bộ phần này nằm ngoài phạm vi của kế hoạch tranh v2.
 - **Âm thanh:** thêm các lớp vào hệ âm thanh Web Audio hiện có (`src/audio/`), điều khiển từ `deriveTowerLive` mỗi khung hình. Lớp chỉ đổi khi trạng thái sống đổi; không phát tiếng báo lỗi.
 - **Thoại:** ba dòng mới ở §4 và hai dòng của mạch phụ.
 - **Mạch phụ:** một decal vạch đếm trên khung cửa sổ, hiện bằng Pulse; cờ mới `l5-tally-seen`.
-- **Thứ tự:** làm sau khi art v2 của màn này đã gộp, để không chạm vào cùng file với kế hoạch đang chạy.
+- **Thứ tự:** làm sau khi tranh v2 của màn này đã gộp, để không chạm vào cùng file với kế hoạch đang chạy.
