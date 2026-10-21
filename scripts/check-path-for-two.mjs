@@ -81,12 +81,52 @@ assert.equal(actor('relay',{x:150,y:296},{a:true,b:false,c:false,practice:false}
 assert.deepEqual(getPathDoorFace('a','entry'),{id:'a',room:'entry',x:480,base:210,approach:'south'});
 assert.deepEqual(getPathDoorFace('a','relay'),{id:'a',room:'relay',x:110,base:318,approach:'north'});
 assert.deepEqual(getPathDoorFace('b','ink'),{id:'b',room:'ink',x:82,base:318,approach:'north'});
-assert.deepEqual(getPathBackArrival('a'),{x:480,y:250},'returning through A lands beside its entry face, not the far room spawn');
-assert.deepEqual(getPathBackArrival('b'),{x:480,y:250},'returning through B lands beside its relay face, not the far room spawn');
+assert.deepEqual(getPathBackArrival('a'),{x:480,y:254},'returning through A lands beside its entry face, not the far room spawn');
+assert.deepEqual(getPathBackArrival('b'),{x:480,y:254},'returning through B lands beside its relay face, not the far room spawn');
 assert.equal(actor('entry',getPathBackArrival('a'),{a:false,b:false,c:false,practice:false}),true,'A return arrival is walkable entry floor while the door is closed');
 assert.equal(actor('relay',getPathBackArrival('b'),{a:true,b:false,c:false,practice:false}),true,'B return arrival is walkable relay floor while the door is closed');
 assert.equal(reach('entry',PATH_ROOMS.entry.spawn,getPathBackArrival('a'),{a:false,b:false,c:false,practice:false}),true,'A return arrival stays connected to the entry hall');
 assert.equal(reach('relay',PATH_ROOMS.relay.spawn,getPathBackArrival('b'),{a:true,b:false,c:false,practice:false}),true,'B return arrival stays connected to the relay hall');
+
+// Landing must not open a control: the engine answers within radius + INTERACTION_RADIUS_PADDING, and the
+// padding lives only in the engine source, so it is read from there rather than copied.
+{
+  const interactionSource = readFileSync(new URL('../src/systems/InteractionSystem.ts', import.meta.url), 'utf8');
+  const padding = Number(interactionSource.match(/INTERACTION_RADIUS_PADDING\s*=\s*(\d+)/)?.[1]);
+  assert.ok(Number.isFinite(padding), 'the engine interaction padding is declared in InteractionSystem.ts');
+  const arrivals = [
+    ['relay', PATH_ROOMS.relay.entrySpawn, 'entry -> relay'],
+    ['ink', PATH_ROOMS.ink.entrySpawn, 'relay -> ink'],
+    ['entry', getPathBackArrival('a'), 'relay -> entry'],
+    ['relay', getPathBackArrival('b'), 'ink -> relay'],
+  ];
+  for (const [room, point, label] of arrivals) {
+    for (const stand of PATH_CONTROL_STANDS.filter((item) => item.room === room)) {
+      const distance = Math.hypot(point.x - stand.x, point.y - stand.y);
+      assert.ok(distance > stand.radius + padding,
+        `${label} lands ${distance.toFixed(1)}px from the ${stand.id} door stand, outside ${stand.radius}+${padding}`);
+    }
+    for (const element of PATH_ROOMS[room].elements.filter((item) => !isPathSeal(item))) {
+      const distance = Math.hypot(point.x - element.stand.x, point.y - element.stand.y);
+      assert.ok(distance > PATH_ELEMENT_RADIUS + padding || !isPathApproachAllowed(room, element, point),
+        `${label} landing does not open the ${element.id} prompt`);
+    }
+  }
+}
+
+// Every control stays reachable from its room's entry while all doors are closed, so no recall can strand
+// the player: this is the state in which a recall from the B call closes door A. The practice alcove is
+// optional and sealed until its door opens, so its inner call is exempt.
+{
+  const closed = { a: false, b: false, c: false, practice: false };
+  for (const room of ['entry', 'relay', 'ink']) {
+    const from = PATH_ROOMS[room].entrySpawn;
+    for (const element of PATH_ROOMS[room].elements.filter((item) => !isPathSeal(item) && item.id !== 'inner-call' && item.id !== 'spiral')) {
+      assert.equal(reach(room, from, element.stand, closed), true,
+        `${room} control ${element.id} is reachable from the room's entry with every door closed`);
+    }
+  }
+}
 assert.equal(isInsidePracticeAlcove('entry',{x:244,y:150}),true,'the practice stand sits inside the lesson alcove');
 assert.equal(isInsidePracticeAlcove('entry',{x:544,y:150}),false,'the A alcove is not treated as the practice lesson area');
 assert.equal(isInsidePracticeAlcove('relay',{x:100,y:150}),false,'other rooms never report the entry practice alcove');
@@ -1000,9 +1040,9 @@ controllerCase('every_door_swap_lands_on_walkable_floor_that_leads_back', () => 
   // swaps no rooms; its own approach is asserted by
   // `a_held_E_cannot_ping_pong_through_the_door_just_used`.
   const crossings = [
-    { from: 'entry', door: 'a', to: 'relay', spawn: { x: 110, y: 251 } },
+    { from: 'entry', door: 'a', to: 'relay', spawn: PATH_ROOMS.relay.entrySpawn },
     { from: 'relay', door: 'a', to: 'entry', spawn: getPathBackArrival('a') },
-    { from: 'relay', door: 'b', to: 'ink', spawn: { x: 82, y: 251 } },
+    { from: 'relay', door: 'b', to: 'ink', spawn: PATH_ROOMS.ink.entrySpawn },
     { from: 'ink', door: 'b', to: 'relay', spawn: getPathBackArrival('b') },
   ];
   const answeringStands = (room, stand, door) => legalDisc(room, stand, stand.radius)

@@ -804,9 +804,9 @@ export class PathForTwoLevel {
       return;
     }
     const mark=id as 'a'|'b';if(!this.isDoorOpen(mark)){this.say(this.assignment===mark&&this.isTravelling()?STILL_TRAVELLING:MARK_NOT_CALLED);return;}
-    if(mark==='a'&&this.room==='entry'){this.transition('relay',{x:110,y:251},'l4-visited-relay');return;}
+    if(mark==='a'&&this.room==='entry'){this.transition('relay',PATH_ROOMS.relay.entrySpawn,'l4-visited-relay');return;}
     if(mark==='a'&&this.room==='relay'){this.transition('entry',getPathBackArrival('a'),'l4-room');return;}
-    if(mark==='b'&&this.room==='relay'){this.transition('ink',{x:82,y:251},'l4-visited-ink');return;}
+    if(mark==='b'&&this.room==='relay'){this.transition('ink',PATH_ROOMS.ink.entrySpawn,'l4-visited-ink');return;}
     if(mark==='b'&&this.room==='ink'){this.transition('relay',getPathBackArrival('b'),'l4-room');return;}
   }
   private transition(to:PathRoomId,spawn:PathPoint,visitFlag:string):void{

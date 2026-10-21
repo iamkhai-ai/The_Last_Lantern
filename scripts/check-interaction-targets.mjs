@@ -27,7 +27,7 @@ import { layoutInteractionPrompt } from '../src/systems/interactionPromptLayout.
 import { isFootInReach } from '../src/systems/interactionReach.ts';
 import {
   choosePathCallAction, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe,
-  isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_ROOMS,
+  isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_ROOMS, PATH_SCHEMATIC, pathActorBody,
 } from '../src/data/pathForTwoLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
 import {
@@ -271,8 +271,14 @@ function makePathForTwoInkRoom(flags) {
   scene.interactionEnabled = compile(PATH_SOURCE, 'interactionEnabled', 'PathForTwoLevel', ['id'], {});
   scene.callMark = compile(PATH_SOURCE, 'callMark', 'PathForTwoLevel', ['id'], {});
   scene.callEligible = compile(PATH_SOURCE, 'callEligible', 'PathForTwoLevel', ['mark'], {});
+  // The station plaque reads the same dialogue-free state the shipped scene does; no story is pending here.
+  scene.canStartStory = () => true;
+  scene.stationPlaqueBounds = compile(PATH_SOURCE, 'stationPlaqueBounds', 'PathForTwoLevel', [], { PATH_SCHEMATIC });
+  scene.atStationPlaque = compile(PATH_SOURCE, 'atStationPlaque', 'PathForTwoLevel', ['x', 'y'], { isFootInReach, pathActorBody });
+  scene.stationMapEnabled = compile(PATH_SOURCE, 'stationMapEnabled', 'PathForTwoLevel', [], {});
+  scene.stationMapPrompt = compile(PATH_SOURCE, 'stationMapPrompt', 'PathForTwoLevel', [], {});
   compile(PATH_SOURCE, 'registerRoomInteractions', 'PathForTwoLevel', [],
-    { PATH_ROOMS, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, isPathSeal, isPathApproachAllowed }).call(scene);
+    { PATH_ROOMS, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_SCHEMATIC, isPathSeal, isPathApproachAllowed }).call(scene);
   assert.ok(registered.length >= 6, `the ink room still registers its controls (got ${registered.length})`);
   return scene;
 }

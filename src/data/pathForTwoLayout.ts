@@ -64,12 +64,14 @@ export function getPathControlStand(id:string,room:PathRoomId):PathControlStand|
   return PATH_CONTROL_STANDS.find((stand)=>stand.id===id&&stand.room===room);
 }
 /**
- * Reverse arrivals land this far below the door's own floor line. Measured with the real 14×6 foot
- * body: `+20` (the old value) is 9px from the door stand at (480,221) r24, i.e. inside the prompt
- * radius the instant the player lands, so a second E sends them straight back. `+40` is 29px clear —
- * outside the radius — while (480,250) stays walkable and connected to the hall in both rooms.
+ * Reverse arrivals land this far below the door's own floor line. The door control answers within its
+ * radius plus the engine's interaction padding (systems/InteractionSystem.ts `INTERACTION_RADIUS_PADDING`
+ * = 8), so 24 + 8 = 32px is the real trigger edge. `+40` put the arrival 29px from the stand (480,221):
+ * inside that edge, so the prompt showed on landing and a second E sent the player straight back.
+ * `+44` is 33px clear and stays walkable and connected to the hall. `scripts/check-path-for-two.mjs`
+ * reads the padding from the engine source, so this cannot drift again.
  */
-export const PATH_BACK_ARRIVAL_OFFSET = 40;
+export const PATH_BACK_ARRIVAL_OFFSET = 44;
 export function getPathBackArrival(id:'a'|'b'):PathPoint{
   const face=id==='a'?getPathDoorFace('a','entry'):getPathDoorFace('b','relay');
   return face?{x:face.x,y:face.base+PATH_BACK_ARRIVAL_OFFSET}:{x:480,y:250};
@@ -180,18 +182,20 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
     elements: [element('practice-call','call-idle',76,254,40,48,76,268), element('practice-plate','pressure-empty',212,114,44,28,212,146), element('inner-call','call-idle',244,140,40,48,244,150), element('call-a','call-idle',384,232,40,48,384,256), element('plate-a','pressure-empty',546,114,44,28,546,146)],
   },
   relay: {
-    id: 'relay', title: 'Buồng Chuyển Dòng', spawn: { x: 110, y: 251 }, entrySpawn: { x: 110, y: 251 },
+    id: 'relay', title: 'Buồng Chuyển Dòng', spawn: { x: 152, y: 251 }, entrySpawn: { x: 152, y: 251 },
     walls: [
       { x: 0, y: 0, width: 640, height: 80 }, { x: 0, y: 80, width: 24, height: 230 }, { x: 616, y: 80, width: 24, height: 230 },
       { x: 24, y: 180, width: 424, height: 30 }, { x: 512, y: 180, width: 104, height: 30 },
       ...reversePortalWalls(110), { x: 24, y: 300, width: 54, height: 10 }, { x: 142, y: 300, width: 474, height: 10 },
       ...doorWalls(110,318), ...doorWalls(480,210),
     ],
-    solids: [standingSolid('call-a-far',56,228,40,48),standingSolid('latch-a',180,240,28,32),standingSolid('call-b',360,232,40,48), ...doorPosts(110,318), ...doorPosts(480,210)],
-    elements: [element('call-a-far','call-idle',56,228,40,48,56,252),element('latch-a','latch-unlatched',180,240,28,32,180,264),element('call-b','call-idle',360,232,40,48,360,256),element('plate-b','pressure-empty',546,114,44,28,546,146)],
+    // The far-side call A stands in the hall, not in the reverse pocket: the pocket's threshold closes
+    // with door A, so a call placed behind it could never be reached again once Lumo had been recalled.
+    solids: [standingSolid('call-a-far',224,232,40,48),standingSolid('latch-a',180,240,28,32),standingSolid('call-b',360,232,40,48), ...doorPosts(110,318), ...doorPosts(480,210)],
+    elements: [element('call-a-far','call-idle',224,232,40,48,224,256),element('latch-a','latch-unlatched',180,240,28,32,180,264),element('call-b','call-idle',360,232,40,48,360,256),element('plate-b','pressure-empty',546,114,44,28,546,146)],
   },
   ink: {
-    id: 'ink', title: 'Hành Lang Mực', spawn: { x: 82, y: 251 }, entrySpawn: { x: 82, y: 251 },
+    id: 'ink', title: 'Hành Lang Mực', spawn: { x: 82, y: 246 }, entrySpawn: { x: 82, y: 246 },
     walls: [
       {x:0,y:0,width:640,height:80},{x:0,y:80,width:24,height:230},{x:616,y:80,width:24,height:230},
       ...reversePortalWalls(82),
@@ -277,8 +281,8 @@ export function isPathInteractHeld(releasePending: boolean, interactKeyDown: boo
 export interface PathCheckpoint { name: string; point: PathPoint; }
 export const PATH_CHECKPOINTS: Record<PathRoomId, PathCheckpoint> = {
   entry: { name: 'entry-hall', point: { x: 180, y: 280 } },
-  relay: { name: 'relay-hall', point: { x: 110, y: 251 } },
-  ink: { name: 'ink-foyer', point: { x: 82, y: 251 } },
+  relay: { name: 'relay-hall', point: { x: 152, y: 251 } },
+  ink: { name: 'ink-foyer', point: { x: 82, y: 246 } },
 };
 
 /**
