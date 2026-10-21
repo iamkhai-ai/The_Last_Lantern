@@ -24,7 +24,10 @@ the wet handprint or Lumo leading across the bridge.
 
 - **PASS** — native export/PNG decoding: 22 canvases, nonempty sprite alpha,
   transparent prop backgrounds and clear raised-gate doorway below row 29.
-- **PASS** — `npm run build`, TypeScript and full Vite build; 726 transformed modules.
+- **PASS** — `npm run build`, then a repeat on the frozen revision with
+  `npm run build -- --outDir artifacts/level07-art-build`; TypeScript and full
+  Vite build, 726 transformed modules. The repeated build uses an ignored output
+  directory and leaves the tracked distribution unchanged.
 - **PASS** — `node scripts/check-sleeping-garden.mjs`: 90 restore cases, 31 existing
   art boxes, 133 four-direction block cells, reach grid, lesson timing, gate post
   crops, gap art, Shadow path/pause/destroy and the canonical H ladder.
@@ -48,6 +51,28 @@ the separate art presentation shows the full reservoir.
 
 ## Independent review
 
-The source revision is frozen after the checks above for two separate read-only
-GPT reviewer tasks, as required by the personal orchestration policy. Review
-results and the exact frozen commit are recorded after both tasks complete.
+Frozen code/art revision: `f9166b4fc2cb25465b0c0cf286f21b3c2b24384b`.
+Both independent native review tasks checked that same revision against baseline
+`9f792416d926475e6dc44924de5068aa8dca8daf`, with no current-round findings shared
+between them. Both requested `gpt-6-luna` / `high`; native dispatch accepted both
+calls. Resolved model/effort were not exposed and remain unknown.
+
+- **Reviewer A** (`review_level07_a`): no actionable findings in the checked
+  scope. Reviewed runtime fallback/registration, crops, native assets, screenshots,
+  provenance and scenario constraints. **PASS** — Sleeping Garden checks,
+  campaign-art checks, and source/export/browser-input hash comparisons.
+  **NOT_RUN** — build and browser inspection by that reviewer.
+- **Reviewer B** (`review_level07_b`): no actionable findings in the checked
+  scope. Confirmed frozen revision and reviewed runtime/authoring code, manifests,
+  entry/dark/restored renders and sprite contact. **PASS** — revision match and
+  static review; visual previews inspected. **NOT_RUN** — build, gameplay checks,
+  exporter, browser inspection, and optional pixel-difference check (sharp was
+  not on that review command's module path).
+
+The tasks were instructed to review read-only; no enforced read-only runtime is
+claimed. Both requested the same model family, so correlated blind spots remain.
+
+Root verification on the frozen worktree also confirmed every source, export,
+reused-input and generation-reference hash, plus the browser inspection's source
+bindings. The final follow-up commit records this evidence only; runtime, art,
+authoring scripts and gameplay requirements remain at the reviewed revision.
