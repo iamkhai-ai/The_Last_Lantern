@@ -1,0 +1,1389 @@
+{
+  "result": "PASS",
+  "method": "Isolated save fixtures rendered by real Phaser/Chromium; actual F input on occupied root span; not a full walk-through.",
+  "checked_source_sha256": {
+    "src/art/CampaignArt.ts": "7de050793142a04cc26af37b653e1bce9aa69832a21f81d00f42520a349ae4eb",
+    "src/levels/SleepingGardenLevel.ts": "6cbd3b9a59b1bc6598323b1a9522e8408b9daea3b312ff88925bd1e68ec37ac5",
+    "src/data/sleepingGardenLayout.ts": "2f39efe553c2e57f7018c4daba82076fb42303b3003e7a4290429ab8e5d88607",
+    "docs/scenario/07-the-sleeping-garden.md": "2ae87ddb88cf905c4552a861c940323e48101e6567caf9c354764bbe1009a7d1",
+    "assets/levels/07-the-sleeping-garden/redesign-v2/production-manifest.json": "4aae7c802d5214c9971e457822d574412100dcb06695935573b22199d79ef835"
+  },
+  "studies": [
+    {
+      "id": "01-entry",
+      "fixture": {
+        "id": "01-entry",
+        "lanternOn": true,
+        "flags": {
+          "intro-6": true,
+          "l6-practice-observed": true,
+          "l6-retract-cue": true
+        },
+        "x": 238,
+        "y": 298
+      },
+      "player": {
+        "x": 238,
+        "y": 298
+      },
+      "lanternOn": true,
+      "dawnMode": true,
+      "held": {
+        "s1": false,
+        "s2": false
+      },
+      "state": {
+        "canopyShut": false,
+        "sunLatched": false,
+        "waterFlowing": false,
+        "returnLatched": false,
+        "lumoRealized": false,
+        "bridgeCrossed": false,
+        "crossingSide": null
+      },
+      "dialogue": false,
+      "registered": [
+        "garden_v2_garden_scene_base",
+        "garden_v2_gate_bar_held",
+        "garden_v2_gate_bar_lowered",
+        "garden_v2_gate_bar_raised",
+        "garden_v2_latch_east_latched",
+        "garden_v2_latch_east_unlatched",
+        "garden_v2_latch_west_latched",
+        "garden_v2_latch_west_unlatched",
+        "garden_v2_moon_extended",
+        "garden_v2_nursery_drain_closed",
+        "garden_v2_nursery_drain_open",
+        "garden_v2_nursery_water_delivered",
+        "garden_v2_reservoir_closed",
+        "garden_v2_reservoir_open",
+        "garden_v2_reservoir_shutter_closed_overlay",
+        "garden_v2_root_bridge_held",
+        "garden_v2_root_bridge_off",
+        "garden_v2_root_bridge_on",
+        "garden_v2_shutter_handle_closed",
+        "garden_v2_shutter_handle_open",
+        "garden_v2_side_stone_path_closed",
+        "garden_v2_side_stone_path_open"
+      ],
+      "modules": {
+        "reservoir": {
+          "key": "garden_v2_reservoir_open",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "reservoir-overlay": {
+          "key": "garden_v2_reservoir_shutter_closed_overlay",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": false,
+          "left": 36,
+          "top": 58
+        },
+        "handle": {
+          "key": "garden_v2_shutter_handle_open",
+          "canvas": [
+            24,
+            40
+          ],
+          "visible": true,
+          "left": 120,
+          "top": 86
+        },
+        "sun-main": {
+          "key": "shared_sun_open",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 196,
+          "top": 124
+        },
+        "gate-bar": {
+          "key": "garden_v2_gate_bar_raised",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "latch-west": {
+          "key": "garden_v2_latch_west_unlatched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 128,
+          "top": 96
+        },
+        "moon-main": {
+          "key": "shared_moon_coiled",
+          "canvas": [
+            48,
+            44
+          ],
+          "visible": true,
+          "left": 252,
+          "top": 186
+        },
+        "drain": {
+          "key": "garden_v2_nursery_drain_closed",
+          "canvas": [
+            52,
+            48
+          ],
+          "visible": true,
+          "left": 436,
+          "top": 224
+        },
+        "water": {
+          "key": "garden_v2_nursery_water_delivered",
+          "canvas": [
+            128,
+            24
+          ],
+          "visible": false,
+          "left": 466,
+          "top": 262
+        },
+        "sprout": {
+          "key": "shared_sprout_before",
+          "canvas": [
+            32,
+            32
+          ],
+          "visible": true,
+          "left": 484,
+          "top": 232
+        },
+        "side-path": {
+          "key": "garden_v2_side_stone_path_closed",
+          "canvas": [
+            80,
+            32
+          ],
+          "visible": true,
+          "left": 304,
+          "top": 284
+        },
+        "latch-east": {
+          "key": "garden_v2_latch_east_unlatched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 400,
+          "top": 240
+        },
+        "practice-sun": {
+          "key": "shared_sun_open",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 70,
+          "top": 266
+        },
+        "practice-moon": {
+          "key": "shared_moon_coiled",
+          "canvas": [
+            48,
+            44
+          ],
+          "visible": true,
+          "left": 132,
+          "top": 284
+        },
+        "teaching-bridge": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 182,
+          "top": 288
+        },
+        "bridge-s1": {
+          "key": "garden_v2_root_bridge_off",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-s2": {
+          "key": "garden_v2_root_bridge_off",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "bridge-missing-s1": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-missing-s2": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "gate-post-w": {
+          "key": "garden_v2_gate_bar_raised",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "gate-post-e": {
+          "key": "garden_v2_gate_bar_raised",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        }
+      },
+      "background": 1,
+      "browser_errors": [],
+      "screenshot_sha256": "cab49d7d20d3ed50c4ec472b94a3a35cae614875fc7e6851c6ceab921c077ba4"
+    },
+    {
+      "id": "02-lantern-gate-raised",
+      "fixture": {
+        "id": "02-lantern-gate-raised",
+        "lanternOn": true,
+        "flags": {
+          "intro-6": true,
+          "l6-practice-observed": true,
+          "l6-retract-cue": true,
+          "l6-canopy-shut": true
+        },
+        "x": 142,
+        "y": 132
+      },
+      "player": {
+        "x": 142,
+        "y": 132
+      },
+      "lanternOn": true,
+      "dawnMode": false,
+      "held": {
+        "s1": false,
+        "s2": false
+      },
+      "state": {
+        "canopyShut": true,
+        "sunLatched": false,
+        "waterFlowing": false,
+        "returnLatched": false,
+        "lumoRealized": false,
+        "bridgeCrossed": false,
+        "crossingSide": null
+      },
+      "dialogue": false,
+      "registered": [
+        "garden_v2_garden_scene_base",
+        "garden_v2_gate_bar_held",
+        "garden_v2_gate_bar_lowered",
+        "garden_v2_gate_bar_raised",
+        "garden_v2_latch_east_latched",
+        "garden_v2_latch_east_unlatched",
+        "garden_v2_latch_west_latched",
+        "garden_v2_latch_west_unlatched",
+        "garden_v2_moon_extended",
+        "garden_v2_nursery_drain_closed",
+        "garden_v2_nursery_drain_open",
+        "garden_v2_nursery_water_delivered",
+        "garden_v2_reservoir_closed",
+        "garden_v2_reservoir_open",
+        "garden_v2_reservoir_shutter_closed_overlay",
+        "garden_v2_root_bridge_held",
+        "garden_v2_root_bridge_off",
+        "garden_v2_root_bridge_on",
+        "garden_v2_shutter_handle_closed",
+        "garden_v2_shutter_handle_open",
+        "garden_v2_side_stone_path_closed",
+        "garden_v2_side_stone_path_open"
+      ],
+      "modules": {
+        "reservoir": {
+          "key": "garden_v2_reservoir_closed",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "reservoir-overlay": {
+          "key": "garden_v2_reservoir_shutter_closed_overlay",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "handle": {
+          "key": "garden_v2_shutter_handle_closed",
+          "canvas": [
+            24,
+            40
+          ],
+          "visible": true,
+          "left": 120,
+          "top": 86
+        },
+        "sun-main": {
+          "key": "shared_sun_open",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 196,
+          "top": 124
+        },
+        "gate-bar": {
+          "key": "garden_v2_gate_bar_raised",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "latch-west": {
+          "key": "garden_v2_latch_west_unlatched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 128,
+          "top": 96
+        },
+        "moon-main": {
+          "key": "shared_moon_coiled",
+          "canvas": [
+            48,
+            44
+          ],
+          "visible": true,
+          "left": 252,
+          "top": 186
+        },
+        "drain": {
+          "key": "garden_v2_nursery_drain_closed",
+          "canvas": [
+            52,
+            48
+          ],
+          "visible": true,
+          "left": 436,
+          "top": 224
+        },
+        "water": {
+          "key": "garden_v2_nursery_water_delivered",
+          "canvas": [
+            128,
+            24
+          ],
+          "visible": false,
+          "left": 466,
+          "top": 262
+        },
+        "sprout": {
+          "key": "shared_sprout_before",
+          "canvas": [
+            32,
+            32
+          ],
+          "visible": true,
+          "left": 484,
+          "top": 232
+        },
+        "side-path": {
+          "key": "garden_v2_side_stone_path_closed",
+          "canvas": [
+            80,
+            32
+          ],
+          "visible": true,
+          "left": 304,
+          "top": 284
+        },
+        "latch-east": {
+          "key": "garden_v2_latch_east_unlatched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 400,
+          "top": 240
+        },
+        "practice-sun": {
+          "key": "shared_sun_open",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 70,
+          "top": 266
+        },
+        "practice-moon": {
+          "key": "shared_moon_coiled",
+          "canvas": [
+            48,
+            44
+          ],
+          "visible": true,
+          "left": 132,
+          "top": 284
+        },
+        "teaching-bridge": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 182,
+          "top": 288
+        },
+        "bridge-s1": {
+          "key": "garden_v2_root_bridge_off",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-s2": {
+          "key": "garden_v2_root_bridge_off",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "bridge-missing-s1": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-missing-s2": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "gate-post-w": {
+          "key": "garden_v2_gate_bar_raised",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "gate-post-e": {
+          "key": "garden_v2_gate_bar_raised",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        }
+      },
+      "background": 1,
+      "browser_errors": [],
+      "screenshot_sha256": "e9f050ab08580bf0a19d56f5accc1944379b1140bf2de5b51ffeee013b3f0778"
+    },
+    {
+      "id": "03-dark-root-bridge",
+      "fixture": {
+        "id": "03-dark-root-bridge",
+        "lanternOn": false,
+        "flags": {
+          "intro-6": true,
+          "l6-practice-observed": true,
+          "l6-retract-cue": true,
+          "l6-canopy-shut": true,
+          "l6-sun-latched": true
+        },
+        "x": 294,
+        "y": 216
+      },
+      "player": {
+        "x": 294,
+        "y": 216
+      },
+      "lanternOn": false,
+      "dawnMode": false,
+      "held": {
+        "s1": false,
+        "s2": false
+      },
+      "state": {
+        "canopyShut": true,
+        "sunLatched": true,
+        "waterFlowing": false,
+        "returnLatched": false,
+        "lumoRealized": false,
+        "bridgeCrossed": false,
+        "crossingSide": null
+      },
+      "dialogue": false,
+      "registered": [
+        "garden_v2_garden_scene_base",
+        "garden_v2_gate_bar_held",
+        "garden_v2_gate_bar_lowered",
+        "garden_v2_latch_east_latched",
+        "garden_v2_gate_bar_raised",
+        "garden_v2_latch_east_unlatched",
+        "garden_v2_latch_west_latched",
+        "garden_v2_latch_west_unlatched",
+        "garden_v2_moon_extended",
+        "garden_v2_nursery_drain_closed",
+        "garden_v2_nursery_drain_open",
+        "garden_v2_nursery_water_delivered",
+        "garden_v2_reservoir_closed",
+        "garden_v2_reservoir_open",
+        "garden_v2_reservoir_shutter_closed_overlay",
+        "garden_v2_root_bridge_held",
+        "garden_v2_root_bridge_off",
+        "garden_v2_root_bridge_on",
+        "garden_v2_shutter_handle_closed",
+        "garden_v2_shutter_handle_open",
+        "garden_v2_side_stone_path_open",
+        "garden_v2_side_stone_path_closed"
+      ],
+      "modules": {
+        "reservoir": {
+          "key": "garden_v2_reservoir_closed",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "reservoir-overlay": {
+          "key": "garden_v2_reservoir_shutter_closed_overlay",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "handle": {
+          "key": "garden_v2_shutter_handle_closed",
+          "canvas": [
+            24,
+            40
+          ],
+          "visible": true,
+          "left": 120,
+          "top": 86
+        },
+        "sun-main": {
+          "key": "shared_sun_folded",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 196,
+          "top": 124
+        },
+        "gate-bar": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "latch-west": {
+          "key": "garden_v2_latch_west_latched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 128,
+          "top": 96
+        },
+        "moon-main": {
+          "key": "garden_v2_moon_extended",
+          "canvas": [
+            112,
+            44
+          ],
+          "visible": true,
+          "left": 200,
+          "top": 186
+        },
+        "drain": {
+          "key": "garden_v2_nursery_drain_closed",
+          "canvas": [
+            52,
+            48
+          ],
+          "visible": true,
+          "left": 436,
+          "top": 224
+        },
+        "water": {
+          "key": "garden_v2_nursery_water_delivered",
+          "canvas": [
+            128,
+            24
+          ],
+          "visible": false,
+          "left": 466,
+          "top": 262
+        },
+        "sprout": {
+          "key": "shared_sprout_before",
+          "canvas": [
+            32,
+            32
+          ],
+          "visible": true,
+          "left": 484,
+          "top": 232
+        },
+        "side-path": {
+          "key": "garden_v2_side_stone_path_closed",
+          "canvas": [
+            80,
+            32
+          ],
+          "visible": true,
+          "left": 304,
+          "top": 284
+        },
+        "latch-east": {
+          "key": "garden_v2_latch_east_unlatched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 400,
+          "top": 240
+        },
+        "practice-sun": {
+          "key": "shared_sun_folded",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 70,
+          "top": 266
+        },
+        "practice-moon": {
+          "key": "garden_v2_moon_extended",
+          "canvas": [
+            112,
+            44
+          ],
+          "visible": true,
+          "left": 80,
+          "top": 284
+        },
+        "teaching-bridge": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 182,
+          "top": 288
+        },
+        "bridge-s1": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-s2": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "bridge-missing-s1": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-missing-s2": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 347.5,
+          "top": 222
+        },
+        "gate-post-w": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "gate-post-e": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        }
+      },
+      "background": 1,
+      "browser_errors": [],
+      "screenshot_sha256": "f30d532e5d538156f6a320312d5a312be99bd1def5d43fd29c8a387101ba4873"
+    },
+    {
+      "id": "04-occupied-root-held",
+      "fixture": {
+        "id": "04-occupied-root-held",
+        "lanternOn": false,
+        "flags": {
+          "intro-6": true,
+          "l6-practice-observed": true,
+          "l6-retract-cue": true,
+          "l6-canopy-shut": true,
+          "l6-sun-latched": true
+        },
+        "x": 327,
+        "y": 216,
+        "toggle": true
+      },
+      "player": {
+        "x": 327,
+        "y": 216
+      },
+      "lanternOn": true,
+      "dawnMode": false,
+      "held": {
+        "s1": true,
+        "s2": false
+      },
+      "state": {
+        "canopyShut": true,
+        "sunLatched": true,
+        "waterFlowing": false,
+        "returnLatched": false,
+        "lumoRealized": false,
+        "bridgeCrossed": false,
+        "crossingSide": null
+      },
+      "dialogue": false,
+      "registered": [
+        "garden_v2_garden_scene_base",
+        "garden_v2_gate_bar_held",
+        "garden_v2_gate_bar_lowered",
+        "garden_v2_gate_bar_raised",
+        "garden_v2_latch_east_latched",
+        "garden_v2_latch_east_unlatched",
+        "garden_v2_latch_west_latched",
+        "garden_v2_latch_west_unlatched",
+        "garden_v2_moon_extended",
+        "garden_v2_nursery_drain_closed",
+        "garden_v2_nursery_drain_open",
+        "garden_v2_nursery_water_delivered",
+        "garden_v2_reservoir_closed",
+        "garden_v2_reservoir_open",
+        "garden_v2_reservoir_shutter_closed_overlay",
+        "garden_v2_root_bridge_held",
+        "garden_v2_root_bridge_off",
+        "garden_v2_root_bridge_on",
+        "garden_v2_shutter_handle_closed",
+        "garden_v2_shutter_handle_open",
+        "garden_v2_side_stone_path_closed",
+        "garden_v2_side_stone_path_open"
+      ],
+      "modules": {
+        "reservoir": {
+          "key": "garden_v2_reservoir_closed",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "reservoir-overlay": {
+          "key": "garden_v2_reservoir_shutter_closed_overlay",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "handle": {
+          "key": "garden_v2_shutter_handle_closed",
+          "canvas": [
+            24,
+            40
+          ],
+          "visible": true,
+          "left": 120,
+          "top": 86
+        },
+        "sun-main": {
+          "key": "shared_sun_open",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 196,
+          "top": 124
+        },
+        "gate-bar": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "latch-west": {
+          "key": "garden_v2_latch_west_latched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 128,
+          "top": 96
+        },
+        "moon-main": {
+          "key": "shared_moon_coiled",
+          "canvas": [
+            48,
+            44
+          ],
+          "visible": true,
+          "left": 252,
+          "top": 186
+        },
+        "drain": {
+          "key": "garden_v2_nursery_drain_closed",
+          "canvas": [
+            52,
+            48
+          ],
+          "visible": true,
+          "left": 436,
+          "top": 224
+        },
+        "water": {
+          "key": "garden_v2_nursery_water_delivered",
+          "canvas": [
+            128,
+            24
+          ],
+          "visible": false,
+          "left": 466,
+          "top": 262
+        },
+        "sprout": {
+          "key": "shared_sprout_before",
+          "canvas": [
+            32,
+            32
+          ],
+          "visible": true,
+          "left": 484,
+          "top": 232
+        },
+        "side-path": {
+          "key": "garden_v2_side_stone_path_closed",
+          "canvas": [
+            80,
+            32
+          ],
+          "visible": true,
+          "left": 304,
+          "top": 284
+        },
+        "latch-east": {
+          "key": "garden_v2_latch_east_unlatched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 400,
+          "top": 240
+        },
+        "practice-sun": {
+          "key": "shared_sun_open",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 70,
+          "top": 266
+        },
+        "practice-moon": {
+          "key": "shared_moon_coiled",
+          "canvas": [
+            48,
+            44
+          ],
+          "visible": true,
+          "left": 132,
+          "top": 284
+        },
+        "teaching-bridge": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 182,
+          "top": 288
+        },
+        "bridge-s1": {
+          "key": "garden_v2_root_bridge_held",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-s2": {
+          "key": "garden_v2_root_bridge_off",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "bridge-missing-s1": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-missing-s2": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "gate-post-w": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "gate-post-e": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        }
+      },
+      "background": 1,
+      "browser_errors": [],
+      "screenshot_sha256": "0fc547a2d1c5436528470ecb62c7c54e6c860f8382333d00afb276892c9a522c"
+    },
+    {
+      "id": "05-nursery-restored",
+      "fixture": {
+        "id": "05-nursery-restored",
+        "lanternOn": false,
+        "flags": {
+          "intro-6": true,
+          "l6-practice-observed": true,
+          "l6-retract-cue": true,
+          "l6-canopy-shut": true,
+          "l6-sun-latched": true,
+          "l6-water-flowing": true,
+          "l6-return-latched": true,
+          "l6-lumo-realized": true
+        },
+        "x": 462,
+        "y": 282
+      },
+      "player": {
+        "x": 462,
+        "y": 282
+      },
+      "lanternOn": false,
+      "dawnMode": false,
+      "held": {
+        "s1": false,
+        "s2": false
+      },
+      "state": {
+        "canopyShut": true,
+        "sunLatched": true,
+        "waterFlowing": true,
+        "returnLatched": true,
+        "lumoRealized": true,
+        "bridgeCrossed": true,
+        "crossingSide": null
+      },
+      "dialogue": false,
+      "registered": [
+        "garden_v2_garden_scene_base",
+        "garden_v2_gate_bar_held",
+        "garden_v2_gate_bar_lowered",
+        "garden_v2_gate_bar_raised",
+        "garden_v2_latch_east_latched",
+        "garden_v2_latch_east_unlatched",
+        "garden_v2_latch_west_latched",
+        "garden_v2_latch_west_unlatched",
+        "garden_v2_moon_extended",
+        "garden_v2_nursery_drain_open",
+        "garden_v2_nursery_water_delivered",
+        "garden_v2_nursery_drain_closed",
+        "garden_v2_reservoir_closed",
+        "garden_v2_reservoir_open",
+        "garden_v2_reservoir_shutter_closed_overlay",
+        "garden_v2_root_bridge_held",
+        "garden_v2_root_bridge_off",
+        "garden_v2_root_bridge_on",
+        "garden_v2_shutter_handle_closed",
+        "garden_v2_shutter_handle_open",
+        "garden_v2_side_stone_path_closed",
+        "garden_v2_side_stone_path_open"
+      ],
+      "modules": {
+        "reservoir": {
+          "key": "garden_v2_reservoir_closed",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "reservoir-overlay": {
+          "key": "garden_v2_reservoir_shutter_closed_overlay",
+          "canvas": [
+            80,
+            72
+          ],
+          "visible": true,
+          "left": 36,
+          "top": 58
+        },
+        "handle": {
+          "key": "garden_v2_shutter_handle_closed",
+          "canvas": [
+            24,
+            40
+          ],
+          "visible": true,
+          "left": 120,
+          "top": 86
+        },
+        "sun-main": {
+          "key": "shared_sun_folded",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 196,
+          "top": 124
+        },
+        "gate-bar": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "latch-west": {
+          "key": "garden_v2_latch_west_latched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 128,
+          "top": 96
+        },
+        "moon-main": {
+          "key": "garden_v2_moon_extended",
+          "canvas": [
+            112,
+            44
+          ],
+          "visible": true,
+          "left": 200,
+          "top": 186
+        },
+        "drain": {
+          "key": "garden_v2_nursery_drain_open",
+          "canvas": [
+            52,
+            48
+          ],
+          "visible": true,
+          "left": 436,
+          "top": 224
+        },
+        "water": {
+          "key": "garden_v2_nursery_water_delivered",
+          "canvas": [
+            128,
+            24
+          ],
+          "visible": true,
+          "left": 466,
+          "top": 262
+        },
+        "sprout": {
+          "key": "shared_sprout_after",
+          "canvas": [
+            32,
+            32
+          ],
+          "visible": true,
+          "left": 484,
+          "top": 232
+        },
+        "side-path": {
+          "key": "garden_v2_side_stone_path_open",
+          "canvas": [
+            80,
+            32
+          ],
+          "visible": true,
+          "left": 304,
+          "top": 284
+        },
+        "latch-east": {
+          "key": "garden_v2_latch_east_latched",
+          "canvas": [
+            28,
+            32
+          ],
+          "visible": true,
+          "left": 400,
+          "top": 240
+        },
+        "practice-sun": {
+          "key": "shared_sun_folded",
+          "canvas": [
+            48,
+            72
+          ],
+          "visible": true,
+          "left": 70,
+          "top": 266
+        },
+        "practice-moon": {
+          "key": "garden_v2_moon_extended",
+          "canvas": [
+            112,
+            44
+          ],
+          "visible": true,
+          "left": 80,
+          "top": 284
+        },
+        "teaching-bridge": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 182,
+          "top": 288
+        },
+        "bridge-s1": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-s2": {
+          "key": "garden_v2_root_bridge_on",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": true,
+          "left": 347.5,
+          "top": 222
+        },
+        "bridge-missing-s1": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 303,
+          "top": 222
+        },
+        "bridge-missing-s2": {
+          "key": "shared_root_bridge_missing",
+          "canvas": [
+            48,
+            32
+          ],
+          "visible": false,
+          "left": 347.5,
+          "top": 222
+        },
+        "gate-post-w": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        },
+        "gate-post-e": {
+          "key": "garden_v2_gate_bar_held",
+          "canvas": [
+            112,
+            72
+          ],
+          "visible": true,
+          "left": 94,
+          "top": 104
+        }
+      },
+      "background": 1,
+      "browser_errors": [],
+      "screenshot_sha256": "e610bf82d9ddfed7eb5f1bd65fa4c45209b731acf52610d9ab942273578b96eb"
+    }
+  ]
+}

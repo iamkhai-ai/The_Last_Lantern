@@ -1,0 +1,8 @@
+Use case: stylized-concept.
+Asset type: ONE transparent pixel-art Moon Root bridge animation atlas, three equal horizontal rows, 1024x1536 RGBA.
+Reference 1 shows the night garden. Reference 2 is the existing art contact: match the natural blue-gray living wood of moon-coiled and moon-extended. Upgrade the schematic root-bridge tiles to organic living roots.
+Create three STATE FRAMES of the same short horizontal bridge deck; each final native tile is 48x32, with walkable roots centered in a 48x20 horizontal band and transparency above/below. Elevated three-quarter top/south view; left-to-right axis is exactly horizontal.
+TOP frame DEPLOYED: several intertwined pale gray-blue roots weave a broad flat solid deck, irregular tendrils and tiny muted green leaves along edges. Ends run flush to the same left/right positions so two identical tiles can join seamlessly.
+MIDDLE frame TEMPORARILY HELD: the same deck and position, but with a small warm amber knot/edge mark near its center to show roots waiting safely under a person. No metal brace, no bright neon, no lock icon.
+BOTTOM frame RETRACTED: the same coordinate frame, but almost all bridge is gone. A small tightly curled root stump occupies ONLY the far left 15 percent of the shared deck width. The rest of that frame stays fully transparent, revealing canal water. Do not enlarge or center the stump.
+Keep all three rows on identical scale and horizontal registration. No posts, no soil, no river, no stepping stones, no backdrop, no shadows or glow outside roots, no symbols, no characters, no text, no labels, no checkerboard. Deliberate crisp pixel clusters; sparse details readable at 48x32.

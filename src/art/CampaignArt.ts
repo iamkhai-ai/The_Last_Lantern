@@ -66,6 +66,10 @@ const towerV2Modules = import.meta.glob('../../assets/levels/06-the-sleepless-to
   eager: true, query: '?url', import: 'default',
 }) as Record<string, string>;
 
+const gardenV2Modules = import.meta.glob('../../assets/levels/07-the-sleeping-garden/redesign-v2/sprites/*.png', {
+  eager: true, query: '?url', import: 'default',
+}) as Record<string, string>;
+
 const characterModules = import.meta.glob([
   '../../assets/character/nhinh_*.png',
   '!../../assets/character/*contact_sheet*.png',
@@ -195,6 +199,10 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
     key: `tower_v2_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
     url,
   })),
+  ...Object.entries(gardenV2Modules).map(([path, url]) => ({
+    key: `garden_v2_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
+    url,
+  })),
 ];
 
 /** A registered Shadow pose, or null when the pack is absent. */
@@ -223,7 +231,16 @@ export function getTowerArtKey(filename: string): string | null {
   return getLevelArtKey(5, name);
 }
 
+/** Garden-local art overrides preserve shared plants/icons and every legacy fallback. */
+export function getGardenArtKey(filename: string, shared = false): string | null {
+  const name = filename.replace(/\.png$/i, '');
+  const v2 = `garden_v2_${normalize(name)}`;
+  if (CAMPAIGN_ART_FILES.some((asset) => asset.key === v2)) return v2;
+  return shared ? getSharedMechanismKey(name) : getLevelArtKey(6, name);
+}
+
 export function getLevelBackgroundKey(levelIndex: number, roomId?: string): string | null {
+  if (levelIndex === 6) return getGardenArtKey('garden-scene-base');
   const backgrounds: Record<number, string> = {
     3: 'creek-scene-base',
     4: 'station-scene-base',

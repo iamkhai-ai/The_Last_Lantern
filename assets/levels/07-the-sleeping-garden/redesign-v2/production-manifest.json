@@ -1,0 +1,939 @@
+{
+  "baseline": "9f792416d926475e6dc44924de5068aa8dca8daf",
+  "date": "2026-10-22",
+  "backend": "built-in image_gen",
+  "backend_model": "unknown; not exposed by tool",
+  "scenario": {
+    "file": "docs/scenario/07-the-sleeping-garden.md",
+    "sha256": "2ae87ddb88cf905c4552a861c940323e48101e6567caf9c354764bbe1009a7d1"
+  },
+  "exporter_sha256": "b946d444eae28fde3c28bd73fe020ba93d60266a5966a68997f582c31afa0acd",
+  "sources": [
+    {
+      "file": "sources/drain-family-original.png",
+      "sha256": "59be0c6cd8f0eef1d088a692cabcbb5d9f1e567d67c632387a7e870a03b9fe54",
+      "canvas": [
+        1024,
+        1536
+      ],
+      "alpha": true
+    },
+    {
+      "file": "sources/drain-family-prompt.txt",
+      "sha256": "fe319760ea28b3b52da4f180aaf661394225595c66e9cf9fa02e76a201f767fc"
+    },
+    {
+      "file": "sources/garden-scene-base-original.png",
+      "sha256": "2fe0ac7b6cb268b45adab9617a96308d0ae8efbcbd5c67b86d62151a34a21480",
+      "canvas": [
+        1672,
+        941
+      ],
+      "alpha": false
+    },
+    {
+      "file": "sources/garden-scene-base-prompt.txt",
+      "sha256": "37900cf7e020da0b47dd54af1480a0bc419d2665f9809711eb692556a5affb81"
+    },
+    {
+      "file": "sources/gate-family-original.png",
+      "sha256": "7ed6187fb9c1da1ee5ce1c947d9207bfe21a59c3816740a8dd9f3d834cc2ea3d",
+      "canvas": [
+        1024,
+        1536
+      ],
+      "alpha": true
+    },
+    {
+      "file": "sources/gate-family-prompt.txt",
+      "sha256": "d565ad05d47f962a9b70fc8f3c0f97944951922f2c75209cdac0a23b1777578d"
+    },
+    {
+      "file": "sources/lever-family-original.png",
+      "sha256": "aa6cad5b52cc5756007c4cf3a92e9b7a06a75a0ab272f6d524855bee6887ac51",
+      "canvas": [
+        1024,
+        1536
+      ],
+      "alpha": true
+    },
+    {
+      "file": "sources/lever-family-prompt.txt",
+      "sha256": "9ce18b61e4e2f39addfc8eb2a525b3bb0923684a637effc6bb964ca7c0daa9c2"
+    },
+    {
+      "file": "sources/nursery-water-original.png",
+      "sha256": "32d6584cf3c5bd4090a0bfe36483dcbca5c5adfd3fe45b4721a099f1e5efa954",
+      "canvas": [
+        1536,
+        1024
+      ],
+      "alpha": true
+    },
+    {
+      "file": "sources/nursery-water-prompt.txt",
+      "sha256": "c57d4b6870a5cecee51e544582a92af296746b0ff0f743fca74b66b5df6b30ce"
+    },
+    {
+      "file": "sources/reservoir-family-original.png",
+      "sha256": "83faf0f6f85a8f8f3fdca538ff557448df1310a090dbdc9f0c51e794fe56dad6",
+      "canvas": [
+        1024,
+        1536
+      ],
+      "alpha": true
+    },
+    {
+      "file": "sources/reservoir-family-prompt.txt",
+      "sha256": "04fc4015afe3e1da251a481b7e8c1505da59ed5a4d0da451f9b5819fb3ae2c16"
+    },
+    {
+      "file": "sources/root-bridge-family-original.png",
+      "sha256": "cf8834adb453aac6d16a20dd2bf46dc31bd0a3b8a9c456ad523e5027d4552843",
+      "canvas": [
+        1024,
+        1536
+      ],
+      "alpha": true
+    },
+    {
+      "file": "sources/root-bridge-family-prompt.txt",
+      "sha256": "d44e5c8b634604a11d523e6c7ebfd86e3a2d69626df95feb68d2bd2408e3bb8c"
+    },
+    {
+      "file": "sources/side-path-family-original.png",
+      "sha256": "fb4accee5dee862b5cbd9537485c32249c13928263cd44d3d173f44efd4ec2dd",
+      "canvas": [
+        1536,
+        1024
+      ],
+      "alpha": true
+    },
+    {
+      "file": "sources/side-path-family-prompt.txt",
+      "sha256": "65628f6436547b8d39bfada2071a88dd765a16a8873ae4d9913dd81df856f112"
+    }
+  ],
+  "generations": [
+    {
+      "source": "sources/garden-scene-base-original.png",
+      "prompt": "sources/garden-scene-base-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": false,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png",
+          "sha256": "f5b6b2aadae9bef4a070b3badb8b25df7be03b7f34a87c1d0390c746bb7a03dc"
+        },
+        {
+          "file": "assets/levels/06-the-sleepless-tower/redesign-v2/previews/01-entry-640x360.png",
+          "sha256": "2480522b8ae4204960b300de474f57e2e63581e694ce42157d80766e9725f7ff"
+        }
+      ]
+    },
+    {
+      "source": "sources/reservoir-family-original.png",
+      "prompt": "sources/reservoir-family-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": true,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/garden-scene-base-original.png",
+          "sha256": "2fe0ac7b6cb268b45adab9617a96308d0ae8efbcbd5c67b86d62151a34a21480"
+        },
+        {
+          "file": "assets/levels/06-the-sleepless-tower/redesign-v2/previews/01-entry-640x360.png",
+          "sha256": "2480522b8ae4204960b300de474f57e2e63581e694ce42157d80766e9725f7ff"
+        },
+        {
+          "file": "assets/levels/07-the-sleeping-garden/previews/states-native-1x.png",
+          "sha256": "a432d9f1c7ca189bee357f3e6e1ae85005754c30f4f7a5c84263d5e9cdd4191f"
+        }
+      ]
+    },
+    {
+      "source": "sources/gate-family-original.png",
+      "prompt": "sources/gate-family-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": true,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/previews/states-native-1x.png",
+          "sha256": "a432d9f1c7ca189bee357f3e6e1ae85005754c30f4f7a5c84263d5e9cdd4191f"
+        },
+        {
+          "file": "assets/levels/06-the-sleepless-tower/redesign-v2/previews/01-entry-640x360.png",
+          "sha256": "2480522b8ae4204960b300de474f57e2e63581e694ce42157d80766e9725f7ff"
+        }
+      ]
+    },
+    {
+      "source": "sources/root-bridge-family-original.png",
+      "prompt": "sources/root-bridge-family-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": true,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/garden-scene-base-original.png",
+          "sha256": "2fe0ac7b6cb268b45adab9617a96308d0ae8efbcbd5c67b86d62151a34a21480"
+        },
+        {
+          "file": "assets/levels/07-the-sleeping-garden/previews/states-native-1x.png",
+          "sha256": "a432d9f1c7ca189bee357f3e6e1ae85005754c30f4f7a5c84263d5e9cdd4191f"
+        }
+      ]
+    },
+    {
+      "source": "sources/drain-family-original.png",
+      "prompt": "sources/drain-family-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": true,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/garden-scene-base-original.png",
+          "sha256": "2fe0ac7b6cb268b45adab9617a96308d0ae8efbcbd5c67b86d62151a34a21480"
+        },
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/reservoir-family-original.png",
+          "sha256": "83faf0f6f85a8f8f3fdca538ff557448df1310a090dbdc9f0c51e794fe56dad6"
+        }
+      ]
+    },
+    {
+      "source": "sources/lever-family-original.png",
+      "prompt": "sources/lever-family-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": true,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/garden-scene-base-original.png",
+          "sha256": "2fe0ac7b6cb268b45adab9617a96308d0ae8efbcbd5c67b86d62151a34a21480"
+        },
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/drain-family-original.png",
+          "sha256": "59be0c6cd8f0eef1d088a692cabcbb5d9f1e567d67c632387a7e870a03b9fe54"
+        }
+      ]
+    },
+    {
+      "source": "sources/side-path-family-original.png",
+      "prompt": "sources/side-path-family-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": true,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/garden-scene-base-original.png",
+          "sha256": "2fe0ac7b6cb268b45adab9617a96308d0ae8efbcbd5c67b86d62151a34a21480"
+        },
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/gate-family-original.png",
+          "sha256": "7ed6187fb9c1da1ee5ce1c947d9207bfe21a59c3816740a8dd9f3d834cc2ea3d"
+        }
+      ]
+    },
+    {
+      "source": "sources/nursery-water-original.png",
+      "prompt": "sources/nursery-water-prompt.txt",
+      "tool": "built-in image_gen",
+      "transparent_background": true,
+      "references": [
+        {
+          "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sources/garden-scene-base-original.png",
+          "sha256": "2fe0ac7b6cb268b45adab9617a96308d0ae8efbcbd5c67b86d62151a34a21480"
+        }
+      ]
+    }
+  ],
+  "exports": [
+    {
+      "file": "sprites/garden-scene-base.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "anchor": "full-frame",
+      "sources": [
+        {
+          "file": "sources/garden-scene-base-original.png"
+        },
+        {
+          "repository_file": "assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png",
+          "crop_xywh": [
+            294,
+            276,
+            83,
+            33
+          ],
+          "purpose": "existing canal repair"
+        }
+      ],
+      "transform": "Full-frame nearest normalization, then exact reuse of the legacy canal repair.",
+      "sha256": "27e6f9e669b664feed03d41f18bee2fa96e6e98df8fe0abbdd684509888c771e",
+      "opaque_pixels": 230400,
+      "transparent_pixels": 0
+    },
+    {
+      "file": "sprites/reservoir-open.png",
+      "canvas": [
+        80,
+        72
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/reservoir-family-original.png",
+          "crop_xywh": [
+            210,
+            190,
+            610,
+            550
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "92fc5a20bf056c23a4b211dae96d8d76b8a142a028122112f46c60868d3e62d6",
+      "opaque_pixels": 4096,
+      "transparent_pixels": 1664
+    },
+    {
+      "file": "sprites/reservoir-closed.png",
+      "canvas": [
+        80,
+        72
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/reservoir-family-original.png",
+          "crop_xywh": [
+            210,
+            815,
+            610,
+            550
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "115a89c28237211b6fb38e9f61fd8af9076202fb2068f5d42dbf800ca2dd88eb",
+      "opaque_pixels": 4105,
+      "transparent_pixels": 1655
+    },
+    {
+      "file": "sprites/reservoir-shutter-closed-overlay.png",
+      "canvas": [
+        80,
+        72
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sprites/reservoir-closed.png",
+          "crop_xywh": [
+            20,
+            31,
+            43,
+            34
+          ]
+        }
+      ],
+      "transform": "Registered opaque closed-aperture layer.",
+      "sha256": "8397f70a9749bace25e36dd5656dbfa1b650c8b9afff0aa295a4c90e5046ed99",
+      "opaque_pixels": 1462,
+      "transparent_pixels": 4298
+    },
+    {
+      "file": "sprites/shutter-handle-open.png",
+      "canvas": [
+        24,
+        40
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/lever-family-original.png",
+          "crop_xywh": [
+            220,
+            150,
+            680,
+            600
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "549aff05046530ed803e0ce12e7ca24ce187d1407dbb35a048221efe44ef0ff8",
+      "opaque_pixels": 360,
+      "transparent_pixels": 600
+    },
+    {
+      "file": "sprites/shutter-handle-closed.png",
+      "canvas": [
+        24,
+        40
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/lever-family-original.png",
+          "crop_xywh": [
+            220,
+            740,
+            680,
+            600
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "4c509c815d069e6ccf3f26af4406261ecf545d041db7bfe00c12cc267d1e245a",
+      "opaque_pixels": 351,
+      "transparent_pixels": 609
+    },
+    {
+      "file": "sprites/latch-west-unlatched.png",
+      "canvas": [
+        28,
+        32
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/lever-family-original.png",
+          "crop_xywh": [
+            220,
+            150,
+            680,
+            600
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "d402bc3837a86585bdd6c87c6159a6edae7c4525dbb93bf1978c51241dcbd002",
+      "opaque_pixels": 325,
+      "transparent_pixels": 571
+    },
+    {
+      "file": "sprites/latch-west-latched.png",
+      "canvas": [
+        28,
+        32
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/lever-family-original.png",
+          "crop_xywh": [
+            220,
+            740,
+            680,
+            600
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "09476f8635e34cbcb6f1406743da6cf841df66d739698f3b8283727a87cf6fa9",
+      "opaque_pixels": 314,
+      "transparent_pixels": 582
+    },
+    {
+      "file": "sprites/latch-east-unlatched.png",
+      "canvas": [
+        28,
+        32
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/lever-family-original.png",
+          "crop_xywh": [
+            220,
+            150,
+            680,
+            600
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "d402bc3837a86585bdd6c87c6159a6edae7c4525dbb93bf1978c51241dcbd002",
+      "opaque_pixels": 325,
+      "transparent_pixels": 571
+    },
+    {
+      "file": "sprites/latch-east-latched.png",
+      "canvas": [
+        28,
+        32
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/lever-family-original.png",
+          "crop_xywh": [
+            220,
+            740,
+            680,
+            600
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "09476f8635e34cbcb6f1406743da6cf841df66d739698f3b8283727a87cf6fa9",
+      "opaque_pixels": 314,
+      "transparent_pixels": 582
+    },
+    {
+      "file": "sprites/gate-bar-lowered.png",
+      "canvas": [
+        112,
+        72
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/gate-family-original.png",
+          "post_crops_xywh": [
+            [
+              100,
+              56,
+              110,
+              420
+            ],
+            [
+              825,
+              56,
+              110,
+              420
+            ]
+          ],
+          "beam_crop_xywh": [
+            183,
+            252,
+            640,
+            81
+          ]
+        }
+      ],
+      "transform": "Authored component registration: post strips x0..15 and x96..111; beam x13..99 at y32..57; raised doorway clear below row 29.",
+      "sha256": "160865d51cc7eb6d6342c1adf9d0cd6a4b344502ae9ea8bd34a1ed95cd1ca8a3",
+      "opaque_pixels": 3767,
+      "transparent_pixels": 4297
+    },
+    {
+      "file": "sprites/gate-bar-raised.png",
+      "canvas": [
+        112,
+        72
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/gate-family-original.png",
+          "post_crops_xywh": [
+            [
+              100,
+              56,
+              110,
+              420
+            ],
+            [
+              825,
+              56,
+              110,
+              420
+            ]
+          ],
+          "beam_crop_xywh": [
+            183,
+            252,
+            640,
+            81
+          ]
+        }
+      ],
+      "transform": "Authored component registration: post strips x0..15 and x96..111; beam x13..99 at y2..21; raised doorway clear below row 29.",
+      "sha256": "ffcd454e4b7efdecf4b9c06297ab4f64c8291f8a9dfefe0d48dd95057bb08efe",
+      "opaque_pixels": 3340,
+      "transparent_pixels": 4724
+    },
+    {
+      "file": "sprites/gate-bar-held.png",
+      "canvas": [
+        112,
+        72
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/gate-family-original.png",
+          "post_crops_xywh": [
+            [
+              100,
+              56,
+              110,
+              420
+            ],
+            [
+              825,
+              56,
+              110,
+              420
+            ]
+          ],
+          "beam_crop_xywh": [
+            183,
+            252,
+            640,
+            81
+          ],
+          "brace_crop_xywh": [
+            779,
+            1144,
+            100,
+            116
+          ]
+        }
+      ],
+      "transform": "Authored component registration: post strips x0..15 and x96..111; beam x13..99 at y2..21; raised doorway clear below row 29.",
+      "sha256": "5505adfe394265f8904477420c29d4c9f404c78d82135701bc6b21dab5ccd77c",
+      "opaque_pixels": 3373,
+      "transparent_pixels": 4691
+    },
+    {
+      "file": "sprites/root-bridge-on.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "sources": [
+        {
+          "file": "sources/root-bridge-family-original.png",
+          "crop_xywh": [
+            0,
+            250,
+            1024,
+            300
+          ]
+        }
+      ],
+      "transform": "Shared registered 48x20 root deck inside a 48x32 canvas; nearest sampling and explicit alpha normalization.",
+      "sha256": "10858be8143ae546b1719b02a39810657c0c02817a0b65bcfa12660b34aa2d95",
+      "opaque_pixels": 524,
+      "transparent_pixels": 1012
+    },
+    {
+      "file": "sprites/root-bridge-held.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "sources": [
+        {
+          "file": "sources/root-bridge-family-original.png",
+          "crop_xywh": [
+            0,
+            670,
+            1024,
+            300
+          ]
+        }
+      ],
+      "transform": "Shared registered 48x20 root deck inside a 48x32 canvas; nearest sampling and explicit alpha normalization.",
+      "sha256": "8cb0848b48b6cc14db105c86b9f2b9faa51e68f3cf7799576d8b4ddf2f69ec25",
+      "opaque_pixels": 527,
+      "transparent_pixels": 1009
+    },
+    {
+      "file": "sprites/root-bridge-off.png",
+      "canvas": [
+        48,
+        32
+      ],
+      "anchor": [
+        0.5,
+        0.5
+      ],
+      "sources": [
+        {
+          "file": "sources/root-bridge-family-original.png",
+          "crop_xywh": [
+            0,
+            1070,
+            1024,
+            300
+          ]
+        }
+      ],
+      "transform": "Shared registered 48x20 root deck inside a 48x32 canvas; nearest sampling and explicit alpha normalization.",
+      "sha256": "79ef74f3a7047a7a97fc4b132ebee187089b415df75ca97cd3ae41f9252aa8fe",
+      "opaque_pixels": 113,
+      "transparent_pixels": 1423
+    },
+    {
+      "file": "sprites/moon-extended.png",
+      "canvas": [
+        112,
+        44
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "sources": [
+        {
+          "repository_file": "assets/levels/shared/garden-mechanisms/moon-coiled.png",
+          "destination_xy": [
+            52,
+            0
+          ]
+        },
+        {
+          "repository_file": "assets/levels/shared/garden-mechanisms/moon-extended.png",
+          "crop_xywh": [
+            100,
+            0,
+            12,
+            44
+          ],
+          "destination_xy": [
+            100,
+            0
+          ]
+        }
+      ],
+      "transform": "Exact reuse at native scale, no resampling; registered pot plus extended tendril tip.",
+      "sha256": "d105b0ab4e0bb21b22fecfa89931917757f04c5b01d5a3c2f9c52ddabde9258d",
+      "opaque_pixels": 1467,
+      "transparent_pixels": 3461
+    },
+    {
+      "file": "sprites/nursery-drain-closed.png",
+      "canvas": [
+        52,
+        48
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/drain-family-original.png",
+          "crop_xywh": [
+            200,
+            200,
+            624,
+            520
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "65f7546dbdd8c815ea19d9e32084cdda76816ac96cb65dc0d30464c9d8ce5035",
+      "opaque_pixels": 1889,
+      "transparent_pixels": 607
+    },
+    {
+      "file": "sprites/nursery-drain-open.png",
+      "canvas": [
+        52,
+        48
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/drain-family-original.png",
+          "crop_xywh": [
+            200,
+            825,
+            624,
+            520
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "98f0b7c84ad82c58f96876411ab7421500b22b3e8bb30c51e899a370f4fba8bb",
+      "opaque_pixels": 1856,
+      "transparent_pixels": 640
+    },
+    {
+      "file": "sprites/side-stone-path-closed.png",
+      "canvas": [
+        80,
+        32
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/side-path-family-original.png",
+          "crop_xywh": [
+            110,
+            120,
+            1320,
+            360
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "3d3a65a6c1d875a319a78cc3a7bb97fd5519d46e717e9c57471c71279812667a",
+      "opaque_pixels": 1721,
+      "transparent_pixels": 839
+    },
+    {
+      "file": "sprites/side-stone-path-open.png",
+      "canvas": [
+        80,
+        32
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/side-path-family-original.png",
+          "crop_xywh": [
+            110,
+            564,
+            1320,
+            360
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "276b2f59939677aa9a122e1570142570d6466b74ee98c68f20fec1665f8d77ce",
+      "opaque_pixels": 1714,
+      "transparent_pixels": 846
+    },
+    {
+      "file": "sprites/nursery-water-delivered.png",
+      "canvas": [
+        128,
+        24
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sources": [
+        {
+          "file": "sources/nursery-water-original.png",
+          "crop_xywh": [
+            45,
+            450,
+            1445,
+            165
+          ]
+        }
+      ],
+      "transform": "Authored native canvas fit with nearest sampling; source alpha >=192 becomes opaque, lower alpha becomes clear.",
+      "sha256": "95d55cd4e0c803678aebc94082a6d7d559a6a15f299fd7e54284332189c4f41d",
+      "opaque_pixels": 2152,
+      "transparent_pixels": 920
+    }
+  ],
+  "reused": [
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sun-open.png",
+      "sha256": "1a684fd078f11dde595a0efa457a62cccc8f440fc750a6e155bd1d0f9b70ac30"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sun-folded.png",
+      "sha256": "e7495e4c419a767f851e22da8a8e7991ac71818f7bac424a23807ff886211ccf"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-coiled.png",
+      "sha256": "6594414ac911a629e16d43598f59a0caaff7fe888ca0ee0933decefeb879918b"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/moon-extended.png",
+      "sha256": "f03dd02be05d1b25e2e9fc95a741c144220acaf5d3b1f290f71f1879972fd78b"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-before.png",
+      "sha256": "3113280e678d011447b6d3f8f26413ee4a9cb3c8392682ff25285cf2d4f82414"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/sprout-after.png",
+      "sha256": "03bf0cf5dfabc6a3c4b9a649dbbdd27f348da175e4e917bf2b3fe718ef7005a1"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-sun-bloom.png",
+      "sha256": "136f0e7a9f38b5b20c103fd55142b2b76e629865d37eb2fd4173b07258434c5f"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-sun-folded.png",
+      "sha256": "806dd1d2abce5457f7020c3e56fd755b058109d6b321c7f56cc9761472f5483c"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-moon-open.png",
+      "sha256": "43f02cad9585b429334e9367fa2d1fafb558b37d25ab1725d23208367aace3d0"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/icon-moon-closed.png",
+      "sha256": "03cef9844424382606e3ca5478f42be58787e23822db6864122e03d950f6693f"
+    },
+    {
+      "file": "assets/levels/shared/garden-mechanisms/root-bridge-missing.png",
+      "sha256": "db86e3ea1872f89a87cd77a85bb253de4b64794e6497405f24bbb526785c3ece"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png",
+      "sha256": "f5b6b2aadae9bef4a070b3badb8b25df7be03b7f34a87c1d0390c746bb7a03dc"
+    }
+  ],
+  "raster_checks": {
+    "result": "PASS",
+    "decoded_exports": 22,
+    "dimensions": "PASS",
+    "nonempty_alpha": "PASS",
+    "transparent_prop_backgrounds": "PASS",
+    "raised_gate_doorway": "PASS"
+  }
+}

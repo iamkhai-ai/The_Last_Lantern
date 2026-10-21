@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { SoundSystem } from '../systems/SoundSystem';
-import { getLevelArtKey, getSharedMechanismKey, getShadowArtKey } from '../art/CampaignArt';
+import { getGardenArtKey, getSharedMechanismKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -414,12 +414,19 @@ export class SleepingGardenLevel {
   }
 
   private artKey(variant: GardenArtVariant): string | null {
-    return variant.shared ? getSharedMechanismKey(variant.file) : getLevelArtKey(6, variant.file);
+    return getGardenArtKey(variant.file, variant.shared);
   }
 
-  private placeFor(spec: GardenModuleSpec, rect: { x: number; y: number; width: number; height: number }): { x: number; y: number; origin: [number, number] } {
+  private placeFor(spec: GardenModuleSpec, rect: { x: number; y: number; width: number; height: number }, variantKey?: string): { x: number; y: number; origin: [number, number] } {
     if (spec.origin === 'topleft') return { x: rect.x, y: rect.y, origin: [0, 0] };
-    if (spec.origin === 'bottom') return { x: rect.x + rect.width / 2, y: rect.y + rect.height, origin: [0.5, 1] };
+    if (spec.origin === 'bottom') {
+      // V2's 112px extended frame keeps its original 48px pot at local x52.
+      // The practice module has no extendedRect: offset only the new art so its
+      // pot stays at world x132. Legacy fallback retains its previous placement.
+      const practiceOffset = spec.id === 'practice-moon' && variantKey === 'extended'
+        && this.artKey(spec.variants.extended)?.startsWith('garden_v2_') ? -20 : 0;
+      return { x: rect.x + rect.width / 2 + practiceOffset, y: rect.y + rect.height, origin: [0.5, 1] };
+    }
     return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, origin: [0.5, 0.5] };
   }
 
@@ -429,7 +436,7 @@ export class SleepingGardenLevel {
     const key = this.artKey(variant);
     if (!key) return null;
     const rect = variantKey === 'extended' && spec.extendedRect ? spec.extendedRect : spec.rect;
-    const place = this.placeFor(spec, rect);
+    const place = this.placeFor(spec, rect, variantKey);
     const depth = spec.floorArt ? 4 : spec.overhead ? 70 : gardenPropDepth(spec.rect.y + spec.rect.height);
     const image = this.scene.add.image(place.x, place.y, key).setOrigin(place.origin[0], place.origin[1]).setDepth(depth);
     image.setData('garden-id', spec.id);
@@ -446,7 +453,7 @@ export class SleepingGardenLevel {
     if (!key) return;
     if (image.texture.key !== key) image.setTexture(key);
     const rect = variantKey === 'extended' && spec.extendedRect ? spec.extendedRect : spec.rect;
-    const place = this.placeFor(spec, rect);
+    const place = this.placeFor(spec, rect, variantKey);
     image.setPosition(place.x, place.y);
     image.setVisible(true);
   }

@@ -1,0 +1,7 @@
+Use case: stylized-concept.
+Asset type: ONE transparent pixel-art nursery sluice state atlas, exactly TWO equal rows, 1024x1536 RGBA. Same object and exact outer silhouette in both frames.
+Create a compact low square garden WATER SLUICE made from chipped cool slate, a dark iron sliding grate, restrained tarnished brass brackets, damp moss at the bottom corners. Elevated three-quarter front/south view; visible narrow top plane, aligned horizontally. It should look like an old physical culvert, not an icon or control panel. Native intended canvas 52x48.
+TOP frame CLOSED: five sturdy vertical iron bars close the square front aperture; dry dark channel bottom; the slim lifting handle at upper right is lowered.
+BOTTOM frame OPEN: same housing, camera, size and position. The grate has risen into the top housing, leaving a dark open square water aperture with a few cool blue horizontal water pixels at the very bottom. The lifting handle is raised. NO arrow symbol, NO glow, no water stream outside the housing; the game adds water separately.
+Reference 1 is the night garden palette/view. Reference 2 is the light reservoir we just designed; use matching slate/brass craftsmanship but make the sluice lower and square, with no arched light reservoir chamber and no jewel.
+Stable footprints and clear silhouettes at small scale. Leave 15 percent transparent padding around both frames and a clean gap between them. No ground plane, no floating lighting effects, no extra objects, no labels, no text, no checkerboard.
