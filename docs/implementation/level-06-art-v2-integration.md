@@ -5,6 +5,7 @@ Status: implementation, focused runtime verification, practice exercise, and uni
 ## Revisions and scope
 
 - Target baseline: origin/test-develop at bf197311a33ca96157c0c13eef3bc037e1462f62; the Level 06 slice is integrated on top of that latest target.
+- Tested implementation commit: 05857c020e0cf12ec1ec9563a9cce509a650b8a3; the following evidence-only documentation commit records these results.
 - Source snapshot: `c94bf0c41582598b44e3b46afb93b0fbcdd7f2fc`, parent `8bf1bb0241868f9908be360d6c17e3e14c14d953`.
 - The snapshot is a worktree archive commit, not a named art branch. Its Level 06 changes were applied selectively with a three-way patch on `test-develop`; the generated `dist/index.html` and temporary `level06-fixture.html` were excluded. No Level 05 source or asset changes were carried over.
 - Scope includes the Level 06 v2 source/export pack, isolated texture lookup and runtime composition, local geometry changes, focused checks, reproducible exporter/raster checker, and this report.
@@ -15,7 +16,7 @@ The pack contains 26 runtime PNG canvases, retained image sources and prompts, e
 
 The first raster-check run exposed two checker defects: manifest source paths were relative to the art pack but resolved from repo root, and edge permissions were read from the previous loop entry. The checker now resolves sources from the art directory and checks declared edge contacts per asset. The exporter declares the visually reviewed frame/anchor contacts; other unexpected edge contacts still fail. The 1x and 2x sheets were inspected after export.
 
-## Verification — rebased target tree before independent review
+## Verification — tested implementation commit 05857c020e0cf12ec1ec9563a9cce509a650b8a3
 
 - PASS `python scripts/export-level06-art.py` — exported 26 assets.
 - PASS `python scripts/check-level06-art.py` — 26 canvases, source/export hashes, alpha, optical ports, paired registration, and previews.
