@@ -15,7 +15,8 @@ import {
   ruinsShadowFootprintAt, ruinsShadowSolidEnabled, ruinsShadowWalkResume,
   RUINS_SHADOW_SOLID_EPS, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
   RUINS_NAME, RUINS_SHADOW_DEMO, ruinsIsInsideFloor, ruinsPulseReachesName, ruinsShadowDemoEligible,
-  ruinsShadowNearStatue,
+  ruinsShadowNearStatue, ruinsMoonShadowed, ruinsNormalizeNotch, ruinsTurnPrompt, RUINS_LATCHED_TURN_PROMPT,
+  RUINS_STATUE_NOTCHES,
 } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import { LOCK_TONE_HZ, lockMoonVoice } from '../src/audio/effects.ts';
 
@@ -863,9 +864,9 @@ console.log('Level 08 Shadow state, spots, walk and exit-guidance checks passed.
 
   const ALL_MET = { lightActive: true, leftAimed: true, rightAimed: true, moonCovered: true };
   // The fake level answers the two hooks showHint now calls: the shared demonstration eligibility and its start.
-  const runHints = (stages, puzzle = ALL_MET, eligible = false) => {
+  const runHints = (stages, puzzle = ALL_MET, eligible = false, lanternPlaced = true) => {
     const level = {
-      stage: '', puzzle, hintStage: '', hintIndex: 0, spoken: [], demos: 0,
+      stage: '', puzzle, hintStage: '', hintIndex: 0, spoken: [], demos: 0, lantern: { lanternPlaced },
       getStage() { return this.stage; }, getPuzzleState() { return this.puzzle; },
       isShadowDemoEligible() { return eligible; }, startShadowDemo() { this.demos += 1; },
       say(lines, done) { this.spoken.push(lines[0].text); if (done) done(); },
@@ -894,6 +895,20 @@ console.log('Level 08 Shadow state, spots, walk and exit-guidance checks passed.
   const ineligibleRun = ladderOf(['suns', 'suns', 'moon'], false);
   assert.equal(ineligibleRun.demos, 0, 'an ineligible Mức 2 or 3 request starts nothing');
   assert.equal(ineligibleRun.spoken.length, 3, 'an ineligible request keeps the existing hint line');
+
+  // Playtest fix 3: every open condition on the suns step is named, not only the first one that fails.
+  const bothMirrorsOpen = runHints(['suns', 'suns'], { ...ALL_MET, leftAimed: false, rightAimed: false });
+  assert.equal(bothMirrorsOpen.spoken[1],
+    `${MUC[1]} Còn thiếu: gương trái chưa hướng tia lên khóa Nhật trái, gương phải chưa hướng tia lên khóa Nhật phải.`,
+    'with both mirrors open the suns hint names both');
+  const everythingOpen = runHints(['suns', 'suns'], { ...ALL_MET, leftAimed: false, rightAimed: false, lightActive: false }, false, false);
+  assert.equal(everythingOpen.spoken[1],
+    `${MUC[1]} Còn thiếu: đèn chưa nằm trên bệ, gương trái chưa hướng tia lên khóa Nhật trái, gương phải chưa hướng tia lên khóa Nhật phải.`,
+    'with the lamp off the altar and both mirrors open the suns hint names all three');
+  const onlyLamp = runHints(['suns', 'suns'], { ...ALL_MET }, false, false);
+  assert.equal(onlyLamp.spoken[1], `${MUC[1]} Còn thiếu: đèn chưa nằm trên bệ.`, 'a lamp off the altar is named on its own');
+  const moonStep = runHints(['moon', 'moon'], { ...ALL_MET, moonCovered: false });
+  assert.equal(moonStep.spoken[1], `${MUC[1]} Còn thiếu: bóng tượng chưa phủ khóa Nguyệt.`, 'the moon step keeps its own single check');
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1018,7 +1033,9 @@ const levelText = readFileSync(new URL('../src/levels/RuinsOfTwoHalvesLevel.ts',
 const levelSourceFile = ts.createSourceFile('RuinsOfTwoHalvesLevel.ts', levelText, ts.ScriptTarget.Latest, true);
 /** Compiles one shipped method into a callable; `injected` supplies the layout functions the body names. */
 const shippedMethod = (name, injected = {}) => {
-  const js = ts.transpileModule(`const __unit = function () ${methodNode(name).body.getText(levelSourceFile)};`,
+  const node = methodNode(name);
+  const params = node.parameters.map((parameter) => parameter.name.getText(levelSourceFile)).join(', ');
+  const js = ts.transpileModule(`const __unit = function (${params}) ${node.body.getText(levelSourceFile)};`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
   return new Function(...Object.keys(injected), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(injected));
 };
@@ -1099,3 +1116,92 @@ assert.ok(!methodNode('startShadowDemo').body.getText(levelSourceFile).includes(
   'starting the demonstration never writes or reads the flag');
 
 console.log('Level 08 optional demonstration, carved name, HUD and lock-tone checks passed.');
+
+/* -------------------------------------------------------------------------- */
+/* 22. playtest fixes: Moon display, statue turn message, turn prompts,        */
+/*     and the path a Pulse takes to the name                                  */
+/* -------------------------------------------------------------------------- */
+
+// 22a. The Moon reads shadowed only where the statue's shadow covers it. The dark flag is a puzzle input, not a display rule.
+assert.equal(ruinsMoonShadowed({ moonCovered: false }, false), false, 'the Moon reads lit when no shadow covers it');
+assert.equal(ruinsMoonShadowed({ moonCovered: true }, false), true, 'the Moon reads shadowed under the statue shadow');
+assert.equal(ruinsMoonShadowed({ moonCovered: false }, true), true, 'the demonstration holds the Moon covered while it runs');
+const lampNotPlaced = deriveRuinsPuzzleState({ lanternPlaced: false, lanternOn: true, statue: 1, leftMirror: 1, rightMirror: 0 });
+assert.equal(lampNotPlaced.moonDark, true, 'the puzzle still reads the Moon as dark with the lamp off the altar');
+assert.equal(ruinsMoonShadowed(lampNotPlaced, false), false, 'with no shadow on the Moon the display does not read tối');
+assert.equal(ruinsMoonShadowed(deriveRuinsPuzzleState({ ...solved, lanternOn: false }), false), true,
+  'the solving statue shadow still reads on the Moon with the lamp off (the shadow overlay is drawn regardless of light)');
+assert.ok(!levelText.includes('moonDark'), 'the Level 08 controller never reads the dark flag for display');
+assert.ok(methodNode('refreshArt').body.getText(levelSourceFile).includes('ruinsMoonShadowed'), 'the Moon lock art and label use the shadow rule');
+{
+  const statusFor = (puzzle) => shippedMethod('getStatusText', { getRuinsExitBlock, ruinsMoonShadowed }).call({
+    getPuzzleState: () => puzzle, progress: { flags: {} }, shadowDemo: null,
+    getExitInput: () => ({ latched: false, lanternRetrieved: false, metShadow: false }),
+  });
+  assert.ok(statusFor(lampNotPlaced).includes('Nguyệt sáng'), `the status row reads sáng with no shadow on the Moon (${statusFor(lampNotPlaced)})`);
+  assert.ok(statusFor(deriveRuinsPuzzleState({ ...solved, statue: 0 })).includes('Nguyệt tối'),
+    `the status row reads tối under the statue shadow (${statusFor(deriveRuinsPuzzleState({ ...solved, statue: 0 }))})`);
+}
+// The latch still requires the Moon in the statue's shadow (no display change reaches the latch rule).
+assert.equal(deriveRuinsPuzzleState({ ...solved, statue: 1 }).confirmReady, false, 'the latch still needs the Moon covered by the statue shadow');
+assert.equal(canLatchRuinsSanctuary(lampNotPlaced, false), false, 'no latch while the Moon is lit');
+
+// 22b. A turn that shadows a Sun's ray names the Sun that went out; every other turn keeps its line.
+{
+  const rotate = (counters, placed = true) => {
+    const said = [];
+    const fake = {
+      progress: { counters: { ...counters }, flags: {} },
+      save() {}, refresh() {}, say(lines) { said.push(lines[0]); },
+      getPuzzleState() {
+        const c = this.progress.counters;
+        return deriveRuinsPuzzleState({ lanternPlaced: placed, lanternOn: true, statue: c.statue, leftMirror: c['ruins-left'], rightMirror: c['ruins-right'] });
+      },
+    };
+    shippedMethod('rotateStatue', { SoundSystem: { playMirrorRotate() {} }, ruinsNormalizeNotch, RUINS_STATUE_NOTCHES }).call(fake);
+    return said[0];
+  };
+  assert.deepEqual(rotate({ statue: 1, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nhật trái đã tắt.' }, 'a turn that shadows the left branch names the left Sun');
+  assert.deepEqual(rotate({ statue: 2, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nhật phải đã tắt.' }, 'a turn that shadows the right branch names the right Sun');
+  assert.deepEqual(rotate({ statue: 0, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nguyệt vẫn nằm ngoài vùng tối.' }, 'a turn that loses only the Moon keeps the existing line');
+  assert.deepEqual(rotate({ statue: 3, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Nhinh', text: 'Bóng của tượng phủ trọn khóa Nguyệt.' }, 'a turn that covers the Moon keeps its existing line');
+  assert.deepEqual(rotate({ statue: 1, 'ruins-left': 1, 'ruins-right': 0 }, false),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nguyệt vẫn nằm ngoài vùng tối.' }, 'with the lamp off the altar no Sun is lit, so none is named');
+}
+
+// 22c. Statue and mirror prompts read the latched rule; the helper is the only source of the finished text.
+assert.equal(ruinsTurnPrompt('E · Xoay tượng', false), 'E · Xoay tượng', 'an open ring keeps the statue prompt');
+assert.equal(ruinsTurnPrompt('E · Xoay gương trái', true), 'E · Đã gài, không xoay nữa', 'a latched ring reads as finished');
+assert.equal(RUINS_LATCHED_TURN_PROMPT, 'E · Đã gài, không xoay nữa');
+{
+  const turn = shippedMethod('turnPrompt', { ruinsTurnPrompt });
+  assert.equal(turn.call({ progress: { flags: { 'l7-route-latched': true } } }, 'E · Xoay tượng'), 'E · Đã gài, không xoay nữa',
+    'the statue prompt reads Đã gài once latched');
+  assert.equal(turn.call({ progress: { flags: {} } }, 'E · Xoay gương phải'), 'E · Xoay gương phải', 'a mirror prompt is unchanged while open');
+}
+// One statue call plus one mirror call inside the loop over both sides: the two prompts it registers cover all three controls.
+assert.equal((levelText.match(/this\.turnPrompt\(/g) ?? []).length, 2, 'the statue and mirror prompts go through the latched rule');
+assert.ok(!levelText.includes("getPrompt: () => 'E · Xoay tượng'"), 'no literal statue prompt bypasses the latched rule');
+
+// 22d. A Pulse reaches the name only through the lantern's own Pulse, which runs after the lamp-in-hand guard.
+const lanternSource = readFileSync(new URL('../src/systems/LanternSystem.ts', import.meta.url), 'utf8');
+const campaignSource = readFileSync(new URL('../src/scenes/CampaignScene.ts', import.meta.url), 'utf8');
+{
+  const guardAt = lanternSource.indexOf('if (!this.lanternInHand || this.lanternPlaced || !this.lanternOn) return false;');
+  const notifyAt = lanternSource.indexOf('for (const cb of this.pulseListeners)');
+  assert.ok(guardAt > 0 && notifyAt > guardAt, 'the lantern notifies Pulse listeners only after the lamp-in-hand guard');
+  assert.equal((campaignSource.match(/ruinsLevel\?\.onPulse\(/g) ?? []).length, 1, 'the name reveal is called from one place');
+  assert.ok(campaignSource.indexOf('this.lantern.onPulse(') < campaignSource.indexOf('ruinsLevel?.onPulse('),
+    'the name reveal is called from inside the Pulse listener');
+  assert.ok(campaignSource.includes('if (this.lantern.triggerPulse(this.player.x, this.player.y))'),
+    'the Pulse key asks the lantern first, and the listener runs only when that returns true');
+}
+
+// 22e. The unused legacy beam helper is gone from the scene.
+assert.ok(!campaignSource.includes('isRuinsOuterBeamReady'), 'the unused legacy beam helper is removed from the scene');
+
+console.log('Level 08 playtest fixes (Moon display, Sun-off turn message, suns hint, turn prompts, Pulse path) checks passed.');

@@ -276,6 +276,23 @@ export function ruinsShadowNearStatue(ground: RuinsPoint): boolean {
   return Math.hypot(ground.x - base.x, ground.y - base.y) <= RUINS_NAME.stillRadius;
 }
 
+/**
+ * Display only: whether the Moon lock and its labels read as shadowed. The statue's shadow is what covers the Moon, so this is
+ * `moonCovered`, plus the optional demonstration, which holds the Moon covered while it runs. It deliberately does not use
+ * `moonDark` (which also turns true when the lamp is off or not placed) and feeds no puzzle or latch rule.
+ */
+export function ruinsMoonShadowed(puzzle: { moonCovered: boolean }, demonstrating: boolean): boolean {
+  return puzzle.moonCovered || demonstrating;
+}
+
+/** The prompt of every control that turns a piece (statue, mirrors) once the ring is committed. */
+export const RUINS_LATCHED_TURN_PROMPT = 'E · Đã gài, không xoay nữa';
+
+/** A turn prompt names the turn while the ring is open and reads as finished once it is latched. */
+export function ruinsTurnPrompt(base: string, latched: boolean): string {
+  return latched ? RUINS_LATCHED_TURN_PROMPT : base;
+}
+
 /** Wall-mounted fixtures with interaction stand points but no extra collider. */
 export const RUINS_WALL_FIXTURES: readonly {
   id: string; art: string; artWidth: number; artHeight: number; artCenter: RuinsPoint; stand: RuinsStand;

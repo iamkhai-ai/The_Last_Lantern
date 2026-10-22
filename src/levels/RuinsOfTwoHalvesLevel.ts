@@ -15,7 +15,7 @@ import {
   RUINS_DEPTH, RUINS_FOOT_PLACEMENT,
   RUINS_MIRROR_STATES, RUINS_NAME, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
   RUINS_SHADOW, RUINS_SHADOW_DEMO, RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
-  ruinsNextStep, ruinsPulseReachesName, ruinsShadowDemoEligible, ruinsShadowFootprintAt, ruinsShadowNearStatue,
+  ruinsMoonShadowed, ruinsNextStep, ruinsPulseReachesName, ruinsShadowDemoEligible, ruinsShadowFootprintAt, ruinsShadowNearStatue, ruinsTurnPrompt,
   ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSolidEnabled,
   ruinsShadowSpotFor, ruinsShadowWalkResume, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
   RUINS_WALLS, ruinsActorBody, ruinsDepthAt, ruinsNormalizeCounters,
@@ -643,7 +643,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-statue',
       x: prop('statue').stand.x, y: prop('statue').stand.y, radius: prop('statue').stand.radius,
-      getPrompt: () => 'E · Xoay tượng',
+      getPrompt: () => this.turnPrompt('E · Xoay tượng'),
       getPromptBounds: () => this.artById.get('statue')?.getBounds() ?? null,
       isEnabled: () => true,
       onInteract: () => this.rotateStatue(),
@@ -653,7 +653,7 @@ export class RuinsOfTwoHalvesLevel {
       register({
         id: `l7-mirror-${side}`,
         x: prop(`mirror-${side}`).stand.x, y: prop(`mirror-${side}`).stand.y, radius: prop(`mirror-${side}`).stand.radius,
-        getPrompt: () => `E · Xoay gương ${side === 'left' ? 'trái' : 'phải'}`,
+        getPrompt: () => this.turnPrompt(`E · Xoay gương ${side === 'left' ? 'trái' : 'phải'}`),
         getPromptBounds: () => this.artById.get(`mirror-${side}`)?.getBounds() ?? null,
         isEnabled: () => true,
         onInteract: () => this.rotateMirror(side),
@@ -706,6 +706,11 @@ export class RuinsOfTwoHalvesLevel {
     fixture('north-door', () => this.exitPrompt(), () => this.useExit());
   }
 
+  /** Statue and mirror prompts: once the ring is latched the turn is over, and the prompt says so. */
+  private turnPrompt(base: string): string {
+    return ruinsTurnPrompt(base, this.progress.flags['l7-route-latched'] === true);
+  }
+
   private pedestalPrompt(): string {
     const latched = this.progress.flags['l7-route-latched'] === true;
     if (latched) return this.lantern.lanternPlaced ? 'E · Nhận lại đèn' : 'E · Bệ chính (đèn đã thu hồi)';
@@ -748,11 +753,21 @@ export class RuinsOfTwoHalvesLevel {
       this.say([{ speaker: 'Nhinh', text: 'Vòng trên bệ đã giữ. Mình không cần xoay tượng nữa.' }]);
       return;
     }
+    const before = this.getPuzzleState();
     this.progress.counters['statue'] = (ruinsNormalizeNotch(this.progress.counters['statue'] ?? 0) + 1) % RUINS_STATUE_NOTCHES;
     this.save();
     SoundSystem.playMirrorRotate();
     const state = this.getPuzzleState();
     this.refresh();
+    // A turn can shadow a Sun's ray; name the Sun that went out, so the player knows which branch the statue cut.
+    const lostLeft = before.leftLit && !state.leftLit;
+    const lostRight = before.rightLit && !state.rightLit;
+    if (lostLeft || lostRight) {
+      const which = lostLeft && lostRight ? 'Khóa Nhật trái và khóa Nhật phải'
+        : lostLeft ? 'Khóa Nhật trái' : 'Khóa Nhật phải';
+      this.say([{ speaker: 'Lumo', text: `Bóng nghiêng đi. ${which} đã tắt.` }]);
+      return;
+    }
     if (state.moonCovered) {
       this.say([{ speaker: 'Nhinh', text: 'Bóng của tượng phủ trọn khóa Nguyệt.' }]);
       return;
@@ -1263,9 +1278,9 @@ export class RuinsOfTwoHalvesLevel {
     this.setArt('practice-column-spin', `test-column-notch-${ruinsNormalizeNotch(this.progress.counters['practice'] ?? 0)}`);
     this.setArt('lock-left', state.leftLit ? 'lock-sun-on' : 'lock-sun-off');
     this.setArt('lock-right', state.rightLit ? 'lock-sun-on' : 'lock-sun-off');
-    // The Moon renders as covered during the optional demonstration; the puzzle state itself is unchanged.
-    const moonShownDark = state.moonDark || this.shadowDemo !== null;
-    this.setArt('lock-moon', moonShownDark ? 'lock-moon-covered' : 'lock-moon-lit');
+    // The Moon reads as shadowed only where the statue's shadow covers it (plus the demonstration), never for a dark lamp.
+    const moonShadowed = ruinsMoonShadowed(state, this.shadowDemo !== null);
+    this.setArt('lock-moon', moonShadowed ? 'lock-moon-covered' : 'lock-moon-lit');
     this.setArt('splitter', state.lightActive ? 'fixed-three-route-splitter-on' : 'fixed-three-route-splitter-off');
     this.setArt('practice-slab', practice.slabShadowed ? 'test-moon-covered' : 'test-moon-lit');
     this.setArt('confirmation', `confirmation-${this.confirmationArt()}`);
@@ -1278,7 +1293,7 @@ export class RuinsOfTwoHalvesLevel {
 
     this.lockLabels.get('left')?.setText(`NHẬT TRÁI · ${state.leftLit ? 'SÁNG' : 'TẮT'}`);
     this.lockLabels.get('right')?.setText(`NHẬT PHẢI · ${state.rightLit ? 'SÁNG' : 'TẮT'}`);
-    this.lockLabels.get('moon')?.setText(`NGUYỆT · ${moonShownDark ? 'TỐI' : 'SÁNG'}`);
+    this.lockLabels.get('moon')?.setText(`NGUYỆT · ${moonShadowed ? 'TỐI' : 'SÁNG'}`);
 
     if (this.lastLanternOn !== this.lantern.lanternOn) {
       this.lastLanternOn = this.lantern.lanternOn;
@@ -1351,7 +1366,8 @@ export class RuinsOfTwoHalvesLevel {
       : block === 'lamp' ? 'mở · cần đèn'
         : block === 'shadow' ? 'mở · chờ The Shadow'
           : 'khóa';
-    return `Nhật ${state.sunsLit}/2 · Nguyệt ${state.moonDark ? 'tối' : 'sáng'} · Bệ ${ring} · Cửa Bắc ${north}`;
+    const moon = ruinsMoonShadowed(state, this.shadowDemo !== null) ? 'tối' : 'sáng';
+    return `Nhật ${state.sunsLit}/2 · Nguyệt ${moon} · Bệ ${ring} · Cửa Bắc ${north}`;
   }
 
   public showHint(): void {
@@ -1366,9 +1382,10 @@ export class RuinsOfTwoHalvesLevel {
     const state = this.getPuzzleState();
     const missing: string[] = [];
     if (stage === 'suns') {
-      if (!state.lightActive) missing.push('đèn chưa nằm trên bệ');
-      else if (!state.leftAimed) missing.push('gương trái chưa hướng tia lên khóa Nhật trái');
-      else if (!state.rightAimed) missing.push('gương phải chưa hướng tia lên khóa Nhật phải');
+      // Each condition is checked on its own, so "Còn thiếu" names every item still open.
+      if (!this.lantern.lanternPlaced) missing.push('đèn chưa nằm trên bệ');
+      if (!state.leftAimed) missing.push('gương trái chưa hướng tia lên khóa Nhật trái');
+      if (!state.rightAimed) missing.push('gương phải chưa hướng tia lên khóa Nhật phải');
     }
     if (stage === 'moon' && !state.moonCovered) missing.push('bóng tượng chưa phủ khóa Nguyệt');
     const index = Math.min(this.hintIndex, ladder.length - 1);

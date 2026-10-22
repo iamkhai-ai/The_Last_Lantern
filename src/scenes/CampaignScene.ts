@@ -2620,10 +2620,6 @@ export class CampaignScene extends Phaser.Scene {
     }
   }
 
-  private isRuinsOuterBeamReady(side: 'left' | 'right'): boolean {
-    const mirrorReady = side === 'left' ? this.value('ruins-left') === 2 : this.value('ruins-right') === 1;
-    return this.lantern.lanternPlaced && this.lantern.lanternOn && mirrorReady;
-  }
   private value(key: string): number { return this.progress.counters[key] ?? 0; }
   private save(): void { CampaignSaveSystem.save(this.progress); }
   private getRunePositions(): Record<string, { x: number; y: number }> { return { moon: { x: 180, y: 204 }, leaf: { x: 320, y: 125 }, star: { x: 460, y: 204 } }; }
