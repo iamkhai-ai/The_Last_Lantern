@@ -20,11 +20,29 @@ class RemainingEnvironmentTest(unittest.TestCase):
         cls.prepare = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.prepare)
 
+    def test_relay_shipped_asset_is_the_recorded_art_delivery(self):
+        # Relay is now artist-owned (environment-v3/relay-passage-art-v2). The pinned master can no longer
+        # reproduce it, so the shipped sprite is checked against the hash its export report recorded.
+        p = self.prepare
+        report = json.loads((p.ENV / 'relay-passage-art-v2' / 'export-report.json').read_text(encoding='utf-8'))
+        shipped = p.SPRITES / 'relay-environment-base.png'
+        self.assertEqual(hashlib.sha256(shipped.read_bytes()).hexdigest(), report['hashes']['after_sha256'])
+        self.assertEqual(report['export']['changed_bbox_half_open'], [94, 178, 174, 210])
+        self.assertEqual(report['export']['changed_indices_outside_mask'], 0)
+        with Image.open(shipped) as image:
+            self.assertEqual(image.size, (640, 360))
+            self.assertEqual(image.mode, 'P')
+            self.assertFalse(image.has_transparency_data)
+            self.assertLessEqual(len(image.getcolors()), 128)
+        geometry = json.loads((p.ENV / 'relay-geometry.json').read_text())
+        cap = {'x': 0, 'y': 318, 'width': 640, 'height': 42}
+        self.assertIn(cap, geometry['room']['walls'])
+
     def test_registered_exports_reproduce_shipped_assets_without_changing_entry(self):
         p = self.prepare
         entry = p.SPRITES / 'entry-environment-base.png'
         before = entry.read_bytes()
-        for room in ('relay', 'ink'):
+        for room in ('ink',):
             with self.subTest(room=room), tempfile.TemporaryDirectory() as temp:
                 output = Path(temp) / 'base.png'
                 report = p.normalize(room, p.ENV / f'{room}-sunburst-master.png', output)
