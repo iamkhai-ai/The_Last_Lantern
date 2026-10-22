@@ -7,6 +7,7 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
+import { SoundSystem } from '../systems/SoundSystem';
 import {
   auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
   getHeartStage, heartArtCandidates, heartArtNativeSize, heartFinalActionAlreadyDone, heartFinalActionSource, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
@@ -445,6 +446,8 @@ export class HeartOfElariaLevel {
     const source = heartFinalActionSource(state, lamp, nearPedestal);
     if (source) {
       this.lanternKeyTime = now;
+      // The final F is the only commit that turns a lit lamp off, so it owns the click; restore never plays it.
+      SoundSystem.playLanternToggle(false);
       this.commitFinalExtinguish(source);
       return;
     }
@@ -508,6 +511,7 @@ export class HeartOfElariaLevel {
     // the seal powers exactly when the mode flips to holding, and never while he is still travelling.
     if (this.lumoMode === 'travelling' && distance <= HEART_SEAL_RADIUS) {
       this.lumoMode = 'holding';
+      SoundSystem.playLightPulse();
       this.progress.flags['l9-at-heart'] = true;
       this.save();
       this.say([
@@ -529,6 +533,7 @@ export class HeartOfElariaLevel {
       return;
     }
     this.lumoMode = 'travelling';
+    SoundSystem.playUiClick();
     this.progress.flags['l9-called-heart'] = true;
     this.save();
     this.say([
@@ -546,6 +551,7 @@ export class HeartOfElariaLevel {
     if (allLive && this.progress.flags['l9-branch-stable'] !== true) {
       this.progress.flags['l9-branch-stable'] = true;
       this.save();
+      SoundSystem.playPuzzleSolved();
       this.say(STABLE_LINES);
       return;
     }
@@ -775,6 +781,7 @@ export class HeartOfElariaLevel {
         }
         this.progress.flags[`l9-${branch}`] = true;
         this.save();
+        SoundSystem.playRuneActivate(['memory', 'hope', 'balance'].indexOf(branch) + 1);
         const remaining = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] !== true);
         this.refresh();
         if (remaining.length === 0) this.say(PLACED_LINES);
@@ -841,10 +848,12 @@ export class HeartOfElariaLevel {
           this.progress.flags['l9-at-heart'] = false;
           this.save();
           this.refresh();
+          SoundSystem.playMechanismLatch();
           this.say(LATCHED_LINES);
           return;
         }
         const missing = getHeartPrerequisiteFeedback(state);
+        SoundSystem.playPuzzleError();
         this.say([{
           speaker: 'Nhinh',
           text: missing.length ? `Còn thiếu: ${missing.join('; ')}.` : 'Ba nhánh chưa cùng giữ được cấu hình.',
@@ -897,6 +906,7 @@ export class HeartOfElariaLevel {
           return;
         }
         this.progress.counters['heart-g0'] = (this.value('heart-g0') + 1) % 2;
+        SoundSystem.playMirrorRotate();
         this.save();
         this.refresh();
         this.say([{ speaker: 'Hệ thống', text: this.value('heart-g0') === 0
@@ -914,6 +924,7 @@ export class HeartOfElariaLevel {
         const counter = element.id === 'heart-memory-mirror' ? 'heart-memory'
           : element.id === 'heart-balance-mirror' ? 'heart-balance' : 'heart-statue';
         this.progress.counters[counter] = (this.value(counter) + 1) % 4;
+        SoundSystem.playMirrorRotate();
         this.save();
         this.refresh();
         if (element.id === 'heart-statue') {
