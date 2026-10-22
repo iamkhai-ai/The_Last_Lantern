@@ -143,4 +143,3 @@ for name in ['01-door-a-powered-entrance','02-shadowed-bed-grown-bridge-observat
 (P/'contact-index-v3.json').write_text(json.dumps(contact,indent=2)+'\n',encoding='utf-8')
 (PKG/'review-manifest-v3.json').write_text(json.dumps(dict(scope='offline composites; dynamic beams omitted and left to the runtime; state cues use separate art layers',display_fit='Native exports are unchanged. Reviews use only the existing authored display dimensions from 09-layout, nearest sampling. Half-pixel origins are rounded once, ties toward positive, for the raster preview only.',memory_sequence=memory_names,states=STATES,reviews=REVIEWS,placements=PLACES),indent=2)+'\n',encoding='utf-8')
 print(json.dumps({'reviews':len(REVIEWS),'registered_placements':len(PLACES),'engine':'NOT_RUN'}))
-
