@@ -90,3 +90,13 @@ Decisions recorded: the coming-soon gate is removed for index >= 4 (mirrors `cod
 - The `Hệ thống` speaker line for the switch narration was removed.
 - Gaps of 18/23px between decorative bases (for example between the call base and neighbouring art) are decoration only and are not required routes; required routes keep >= 36px thresholds and >= 48px corridors.
 - Not changed: the tower lamp/fountain wall art sits behind the HUD title band (depth 8 vs HUD 86); their alpha was not measured here. NOT_RUN: browser/visual check of the lifted G2 cluster and the stairs landing at the lower-left spiral staircase of `tower-scene-base.png`.
+
+## Repair — call after Return Flow and record access (base 9f79241)
+
+Option **(b)** is selected: retain the lever/chamber geometry and move only `TOWER.objects.record.stand` west from (533,192) to (520,192). The old 14px slit between the lever and chamber exactly matches the 14px foot-body width; it offers no lateral clearance. The new stand is 13px west of the old prompt center, within its 24px range, above the lever and west of the chamber. It is reached around the **west** side of the lever; the slit is not a required route to the record. No art, anchor, footprint, window solidity, or lever art height changes are included.
+
+All runtime registrations and geometry checks consume `TOWER` and `towerBodyRect`; the check derives bounds, the slit center and the west approach from those values. A 1px-grid flood-fill from the chamber stand uses the actual body against solids expanded by 1px on every side. It must reach the record stand and every clear cell in its prompt region. The west approach and the record stand are also checked at x offsets -3, 0, +3. This replaces the old hand-picked route that only succeeded at the exact slit center.
+
+After Return Flow, `useCall()` is idempotent while Lumo is already following: it does not send him back to C, clear reunion, alter his route, or replay dialogue. If he is still travelling to C or holding C, the same call still recalls him. Before Return Flow the send/recall behavior and approved dialogue remain unchanged. The call pedestal retains the south-face rule.
+
+**New UI labels for user review (not spoken dialogue):** `Lumo đang ở bên Nhinh` when the following Lumo has reunited; `Lumo đang bay về` while following but not yet reunited. These labels omit the E action marker because pressing E in either state has no effect. The existing `E · Gọi Lumo về` remains while Lumo can actually be recalled. No approved dialogue line is changed.

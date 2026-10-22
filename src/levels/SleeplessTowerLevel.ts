@@ -358,7 +358,7 @@ export class SleeplessTowerLevel {
     add('g0', o.g0.stand, () => tr('E · Xoay gương chung G0'), () => this.rotateG0(), 'g0', undefined, o.g0.base);
     add('g1', o.g1.stand, () => tr('E · Xoay gương nhánh G1'), () => this.rotateBranch('g1'), 'g1', undefined, o.g1.base);
     add('g2', o.g2.stand, () => tr('E · Xoay gương nhánh G2'), () => this.rotateBranch('g2'), 'g2', undefined, o.g2.base);
-    add('call', o.call.stand, () => (this.state.lumoAssign === 'follow' ? tr('E · Gọi Lumo tới ấn C') : tr('E · Gọi Lumo về')), () => this.useCall(), 'call', () => canUseCallMark(this.state), o.call.base);
+    add('call', o.call.stand, () => this.callPrompt(), () => this.useCall(), 'call', () => canUseCallMark(this.state), o.call.base);
     add('lever', o.lever.stand, () => (this.state.waterReturned ? tr('E · Cần đang giữ chế độ Trả dòng') : tr('E · Gạt cần Trả dòng')), () => this.useLever(), 'lever', undefined, o.lever.base);
     add('chamber', o.chamber.stand, () => (!this.state.waterReturned ? tr('E · Buồng tinh thể còn khóa') : !this.state.crystal ? tr('E · Nhận Tinh thể Hy Vọng') : tr('E · Ngăn chứa đã trống')), () => this.useChamber(), 'chamber', undefined, o.chamber.solid);
     add('record', o.record.stand, () => (this.state.recordRead ? tr('E · Nghe lại bản ghi') : tr('E · Nghe bản ghi bên cửa sổ')), () => this.useRecord(), 'record', () => this.state.crystal);
@@ -416,6 +416,14 @@ export class SleeplessTowerLevel {
     this.state[id] = ((this.state[id] + 1) % 3) as MirrorPose;
     this.saveState();
     SoundSystem.playMirrorRotate();
+  }
+
+  /** After the switch and Lumo's return the mark only reports where he is; sending him to C would undo the reunion. */
+  private callPrompt(): string {
+    if (this.state.waterReturned && this.state.lumoAssign === 'follow') {
+      return this.state.reunited ? tr('Lumo đang ở bên Nhinh') : tr('Lumo đang bay về');
+    }
+    return this.state.lumoAssign === 'follow' ? tr('E · Gọi Lumo tới ấn C') : tr('E · Gọi Lumo về');
   }
 
   private useCall(): void {

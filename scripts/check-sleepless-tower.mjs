@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { tr } from '../src/i18n/catalog.ts';
 import { canCompleteTower, canUseCallMark, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCanApproachFront, towerCenterWalkable, TOWER, TOWER_SOLIDS } from '../src/data/towerLayout.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -95,6 +96,47 @@ const sampled = (waypoints, obstacles = TOWER_SOLIDS) => waypoints.slice(1).ever
   const from = waypoints[i]; const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 4);
   return Array.from({ length: steps + 1 }, (_, n) => ({ x: from.x + (to.x - from.x) * n / steps, y: from.y + (to.y - from.y) * n / steps })).every((center) => towerCenterWalkable(center, obstacles));
 });
+// Flood-fill the actual foot body against solids expanded by 1px. A route that only
+// threads an exact centre line through a body-width gap is deliberately rejected.
+const clearance = 1;
+const clearSolids = TOWER_SOLIDS.map((solid) => ({
+  x: solid.x - clearance, y: solid.y - clearance,
+  width: solid.width + clearance * 2, height: solid.height + clearance * 2,
+}));
+const stride = TOWER.bounds.x + TOWER.bounds.width + 1;
+const keyOf = ({ x, y }) => y * stride + x;
+const reachable = new Uint8Array(stride * (TOWER.bounds.y + TOWER.bounds.height + 1));
+const queue = [keyOf(TOWER.objects.chamber.stand)];
+reachable[queue[0]] = 1;
+for (let head = 0; head < queue.length; head++) {
+  const key = queue[head];
+  const center = { x: key % stride, y: Math.floor(key / stride) };
+  for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+    const next = { x: center.x + dx, y: center.y + dy };
+    if (!towerCenterWalkable(next, clearSolids)) continue;
+    const nextKey = keyOf(next);
+    if (!reachable[nextKey]) { reachable[nextKey] = 1; queue.push(nextKey); }
+  }
+}
+const recordStand = TOWER.objects.record.stand;
+assert.equal(reachable[keyOf(recordStand)], 1, 'record stand is flood-fill reachable from chamber with 1px clearance');
+const slitCenter = (TOWER.objects.lever.base.x + TOWER.objects.lever.base.width + TOWER.objects.chamber.solid.x) / 2;
+assert.ok(Math.abs(recordStand.x - slitCenter) <= TOWER.interactionRange, 'relocated stand stays inside the previous record prompt region');
+let clearPromptCells = 0;
+for (let x = recordStand.x - TOWER.interactionRange; x <= recordStand.x + TOWER.interactionRange; x++) {
+  for (let y = recordStand.y - TOWER.interactionRange; y <= recordStand.y + TOWER.interactionRange; y++) {
+    const point = { x, y };
+    if (!towerCanApproach(point, recordStand, clearSolids)) continue;
+    assert.equal(reachable[keyOf(point)], 1, 'every clear record prompt cell connects to the chamber stand');
+    clearPromptCells++;
+  }
+}
+for (const offset of [-3, 0, 3]) {
+  const point = { x: recordStand.x + offset, y: recordStand.y };
+  assert.equal(reachable[keyOf(point)], 1, `record stand tolerates x offset ${offset}`);
+  assert.equal(towerCanApproach(point, recordStand), true, 'clear approach stays within the record prompt');
+}
+console.log(`Sleepless Tower record clearance passed (${queue.length} reachable cells; ${clearPromptCells} clear prompt cells; record stand tolerates +/-3px).`);
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, TOWER.objects.benchSource.stand]), true, 'spawn reaches the bench source');
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, TOWER.objects.benchMirror.stand]), true, 'bench mirror is approachable along the west lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.source.stand, TOWER.objects.g0.stand]), true, 'main lamp and G0 stands connect');
@@ -240,6 +282,50 @@ console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn
     const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
     return new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(symbols));
   };
+  // Exercise the actual registered call action and prompt, not a copy of its rule.
+  const CALL_C = constantOf('CALL_C');
+  const useCall = methodOf('useCall', { TOWER, CALL_C, canUseCallMark });
+  const registerActions = methodOf('registerActions', { TOWER, towerCanApproach, towerCanApproachFront, canCompleteTower });
+  const callPrompt = methodOf('callPrompt', { tr });
+  const callFixture = (waterReturned, lumoAssign, reunited = false) => {
+    const configs = new Map(); const spoken = [];
+    const level = {
+      state: { ...base, waterReturned, lumoAssign, reunited },
+      route: [], routeIndex: 0, visuals: new Map(),
+      point: () => TOWER.objects.call.stand,
+      saveState() {}, useCall, callPrompt,
+      ctx: { lumo: { sprite: { ...TOWER.lumo.seal } }, progress: { flags: {} },
+        say: (lines) => spoken.push(lines), interactions: { register: (config) => configs.set(config.id, config) } },
+    };
+    registerActions.call(level);
+    return { level, call: configs.get('tower-call'), spoken };
+  };
+  for (const reunited of [false, true]) {
+    const { level, call, spoken } = callFixture(true, 'follow', reunited);
+    assert.doesNotMatch(call.getPrompt(), /Gọi Lumo tới ấn C/, 'after Return Flow the call prompt cannot offer C');
+    assert.match(call.getPrompt(), reunited ? /Lumo đang ở bên Nhinh/ : /Lumo đang bay về/, 'prompt reflects the real reunion state');
+    const before = structuredClone(level.state);
+    for (let press = 0; press < 3; press++) call.onInteract();
+    assert.deepEqual(level.state, before, 'post-switch repeated calls never send Lumo or clear reunion');
+    assert.equal(spoken.length, 0, 'post-switch call adds no dialogue');
+  }
+  for (const waterReturned of [false, true]) {
+    for (const assignment of ['to-c', 'at-c']) {
+      const { level, call } = callFixture(waterReturned, assignment);
+      assert.equal(call.getPrompt(), 'E · Gọi Lumo về');
+      call.onInteract();
+      assert.equal(level.state.lumoAssign, 'follow', 'a sent or holding Lumo can still be recalled');
+      assert.equal(level.ctx.progress.flags['l5-return-called'], true);
+      assert.deepEqual(level.route, []);
+    }
+  }
+  const beforeSwitch = callFixture(false, 'follow');
+  assert.equal(beforeSwitch.call.getPrompt(), 'E · Gọi Lumo tới ấn C');
+  beforeSwitch.call.onInteract();
+  assert.equal(beforeSwitch.level.state.lumoAssign, 'to-c', 'pre-switch send is preserved');
+  assert.equal(beforeSwitch.level.route.length, TOWER.lumo.route.length + 1);
+  assert.deepEqual(beforeSwitch.spoken, [CALL_C], 'pre-switch approved dialogue is unchanged');
+  console.log('Sleepless Tower call regression passed (pre-switch send/recall; post-switch recall/follow/reunion).');
   const PUZZLE_HINTS = constantOf('PUZZLE_HINTS');
   const PUZZLE_STEPS = constantOf('PUZZLE_STEPS');
   const hintLadderOf = constantOf('hintLadderOf', { PUZZLE_STEPS });
