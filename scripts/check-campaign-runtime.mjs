@@ -41,6 +41,7 @@ import {
   observatoryStandingReach,
   OBSERVATORY_ALCOVES,
   OBSERVATORY_BODY,
+  OBSERVATORY_BRIDGE_LANE,
   OBSERVATORY_RETURN_LOOP_VISUAL_ID,
   OBSERVATORY_ROOT_BED,
   isObservatoryApproachAllowed,
@@ -54,9 +55,12 @@ import {
   observatoryPrompt,
   observatoryReturnLoopLane,
   observatorySolidRects,
+  rectsOverlap,
 } from '../src/data/observatoryLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
-import { observatoryPlacedLightVisible } from '../src/data/observatoryLayout.ts';
+import {
+  observatoryPlacedLightVisible, observatoryLumoBeside, observatoryRecordMissing, OBSERVATORY_RECORD_NEEDS_LUMO, OBSERVATORY_MARGIN_TRIGGER,
+} from '../src/data/observatoryLayout.ts';
 import { CAMPAIGN_LEVELS } from '../src/data/campaignLevels.ts';
 import { isRuinsPositionSafe } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import {
@@ -65,7 +69,7 @@ import {
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
 import {
   OBSERVATORY_BEAT_NO_BEAM, OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
-  OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_OPENING_ENTRANCE,
+  OBSERVATORY_MARGIN_INK, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_OPENING_ENTRANCE, OBSERVATORY_SEAL_REMEMBERED,
 } from '../src/data/observatoryStory.ts';
 
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -169,8 +173,21 @@ function bind(source, symbols, label) {
 
 const NO_SYMBOLS = {};
 /** Layout symbols the extracted snippets close over. */
-const CALLBACK_SYMBOLS = { observatoryDoorOpen, observatoryDoorBlockReason, observatoryFinalDoorBlockReason, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES };
+const CALLBACK_SYMBOLS = {
+  observatoryDoorOpen, observatoryDoorBlockReason, observatoryFinalDoorBlockReason, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
+  observatoryRecordMissing, OBSERVATORY_RECORD_NEEDS_LUMO,
+  // Audio is a scene port; callbacks retain their state and dialogue assertions without playback.
+  SoundSystem: {
+    playObservatoryCue() {}, playPuzzleError() {}, playCrystalPickup() {}, playDawnChord() {},
+    playUiItemGet() {}, playMechanismLatch() {}, playMirrorRotate() {},
+  },
+};
 const STATE_SYMBOLS = { deriveObservatoryState };
+const LUMO_BESIDE_SYMBOLS = { observatoryLumoBeside };
+const BEAT_SYMBOLS = {
+  OBSERVATORY_MARGIN_TRIGGER, OBSERVATORY_SEAL_REMEMBERED, OBSERVATORY_MARGIN_INK,
+  SoundSystem: { playObservatoryCue() {} },
+};
 const READY_SYMBOLS = { observatoryCompletionReady };
 const STRIP_SYMBOLS = { observatoryDoorOpen, observatoryReturnLoopLane, OBSERVATORY_RETURN_LOOP_VISUAL_ID };
 
@@ -183,6 +200,9 @@ function sources() {
       state: bind(methodSource('getObservatoryState'), STATE_SYMBOLS, 'getObservatoryState()'),
       world: bind(methodSource('getObservatoryWorldState'), NO_SYMBOLS, 'getObservatoryWorldState()'),
       ready: bind(methodSource('isObservatoryCompletionReady'), READY_SYMBOLS, 'isObservatoryCompletionReady()'),
+      lumoFree: bind(methodSource('isObservatoryLumoFree'), NO_SYMBOLS, 'isObservatoryLumoFree()'),
+      lumoSteps: bind(methodSource('getObservatoryLumoSteps'), NO_SYMBOLS, 'getObservatoryLumoSteps()'),
+      lumoBeside: bind(methodSource('isObservatoryLumoBesideNhinh'), LUMO_BESIDE_SYMBOLS, 'isObservatoryLumoBesideNhinh()'),
       callbacks: new Map(),
     };
   }
@@ -335,6 +355,7 @@ function makeScene(seed = {}, ports = {}) {
     },
     lumo: { sprite: { x: SEAL_AT.x, y: SEAL_AT.y, setPosition(x, y) { this.x = x; this.y = y; } } },
     activeObservatoryRoom: seed.roomId === null ? null : seed.roomId ?? 'observatory',
+    player: { x: seed.playerX ?? 0, y: seed.playerY ?? 0 },
     roomObjects: [],
     observatoryReturnLoopVisual: undefined,
     observatoryElementVisuals: new Map([['balance-crystal', { destroyed: false, destroy() { this.destroyed = true; } }]]),
@@ -370,6 +391,9 @@ function makeScene(seed = {}, ports = {}) {
   scene.getObservatoryState = () => sources().state(scene);
   scene.getObservatoryWorldState = () => sources().world(scene);
   scene.isObservatoryCompletionReady = () => sources().ready(scene);
+  scene.isObservatoryLumoFree = () => sources().lumoFree(scene);
+  scene.getObservatoryLumoSteps = () => sources().lumoSteps(scene);
+  scene.isObservatoryLumoBesideNhinh = () => sources().lumoBeside(scene);
   return scene;
 }
 
@@ -462,7 +486,7 @@ const STUBBED_BUILD_PORTS = [
   'clearActiveRoom', 'drawObservatoryBackground', 'drawObservatoryWalls', 'drawObservatoryWallArt',
   'buildObservatoryStamps', 'buildObservatoryElements', 'buildObservatoryRootBed', 'buildObservatoryDoors',
   'buildObservatorySolids', 'buildObservatoryBeams', 'addObservatoryExit', 'restoreObservatoryLanternPlacement',
-  'playObservatoryOpening',
+  'playObservatoryOpening', 'cancelObservatoryMemory',
 ];
 
 const roomBuilds = new Map();
@@ -633,7 +657,10 @@ let frameStep = null;
  */
 function stepFrame(scene, delta = 16) {
   if (!frameStep || frameStep.delta !== delta) {
-    frameStep = { delta, run: bind(methodSource('update'), { Phaser: PHASER_PORTS, isRuinsPositionSafe, observatoryPlacedLightVisible, delta }, 'update()') };
+    frameStep = { delta, run: bind(methodSource('update'), {
+      Phaser: PHASER_PORTS, isRuinsPositionSafe, observatoryPlacedLightVisible, delta,
+      OBSERVATORY_BRIDGE_LANE, rectsOverlap, SoundSystem: { setFootstepSurface() {} },
+    }, 'update()') };
   }
   frameStep.run(scene);
 }
@@ -648,6 +675,7 @@ function makeFrameScene(level, { controllers = [] } = {}) {
   const calls = {
     player: 0, lumo: [], lantern: 0, interactions: 0, dialogue: 0, hud: 0, observatoryLumo: 0,
     observatoryRefresh: 0, forestEdgeProgress: 0, forestEdgeGuide: 0, woodsFirefly: 0, legacy: [], controller: [], placedLight: [], beatFlushes: 0,
+    beatTriggers: 0,
   };
   const bounds = { x: 0, y: 0, width: 36, height: 42 };
   const scene = {
@@ -661,7 +689,7 @@ function makeFrameScene(level, { controllers = [] } = {}) {
     dialogue: { isInputLocked: () => false, isActive: () => false, update: () => { calls.dialogue += 1; } },
     pauseMenu: { isOpen: () => false, open: () => undefined },
     // The frame hands the foot body to interactions.update() (reach-opted controls); a 14x6 stand-in suffices here.
-    player: { x: 320, y: 290, update: () => { calls.player += 1; }, getFootBody: () => ({ x: 313, y: 306, width: 14, height: 6 }), sprite: { visible: true, getBounds: () => bounds } },
+    player: { x: 320, y: 290, update: () => { calls.player += 1; }, getFootBody: () => ({ x: 313, y: 306, width: 14, height: 6 }), sprite: { visible: true, body: { x: 313, y: 306, width: 14, height: 6 }, getBounds: () => bounds } },
     lumo: {
       update: (_dt, x, y) => calls.lumo.push({ x, y }),
       sprite: { x: 300, y: 270, visible: true, getBounds: () => bounds },
@@ -683,11 +711,13 @@ function makeFrameScene(level, { controllers = [] } = {}) {
     updateForestEdgeProgress: () => { calls.forestEdgeProgress += 1; },
     updateForestEdgeGuide: () => { calls.forestEdgeGuide += 1; },
     updateObservatoryLumo: () => { calls.observatoryLumo += 1; },
+    getObservatoryState: () => ({ bridgeEligible: false }),
     resolveSafeObservatoryCheckpoint: () => undefined,
     updateObservatoryCrossingState: () => { calls.observatoryRefresh += 1; },
     refreshObservatoryDoors: () => { calls.observatoryRefresh += 1; },
     refreshObservatoryPuzzle: () => { calls.observatoryRefresh += 1; },
     flushObservatoryBeats: () => { calls.beatFlushes += 1; },
+    updateObservatoryBeatTriggers: () => { calls.beatTriggers += 1; },
   };
   for (const name of LEGACY_PASS) scene[name] = () => calls.legacy.push(name);
   for (const field of controllers) {
@@ -802,6 +832,8 @@ let buildLevelRun = null;
 /** The shipped buildLevel() body. Level 8 returns through buildObservatoryRoom(), which the stand-in records. */
 function runBuildLevel(scene) {
   if (!buildLevelRun) buildLevelRun = bind(methodSource('buildLevel'), BUILD_LEVEL_SYMBOLS, 'CampaignScene.buildLevel()');
+  // Level teardown owns this audio-timeline cancellation port; it is outside the level-release assertion.
+  scene.cancelObservatoryMemory ??= () => undefined;
   return buildLevelRun(scene);
 }
 
@@ -816,7 +848,7 @@ function missionPlateBottom() {
 
 /** The shipped showObservatoryCaption() body. Its `text` parameter is part of the signature, so it comes in as a symbol. */
 function runObservatoryCaption(scene, text) {
-  return bind(methodSource('showObservatoryCaption'), { text, HUD_LAYOUT: { topBottom: missionPlateBottom() } }, 'CampaignScene.showObservatoryCaption()')(scene);
+  return bind(methodSource('showObservatoryCaption'), { text, holdMs: 3600, HUD_LAYOUT: { topBottom: missionPlateBottom() } }, 'CampaignScene.showObservatoryCaption()')(scene);
 }
 
 /** A recording stand-in for the display-list and tween ports the caption touches. */
@@ -928,7 +960,7 @@ const CASES = [
     name: 'observatory_opening_plays_in_two_beats_once',
     run: () => {
       const source = methodSource('playObservatoryOpening');
-      const symbols = { OBSERVATORY_OPENING_ENTRANCE, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_ROOMS, roomId: undefined };
+      const symbols = { OBSERVATORY_OPENING_ENTRANCE, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_ROOMS, roomId: undefined, SoundSystem: { playObservatoryCue() {} } };
       const play = (scene, roomId) => bind(source, { ...symbols, roomId }, 'playObservatoryOpening()')(scene);
       const make = (flags = {}) => {
         const scene = makeScene({ flags });
@@ -1192,17 +1224,24 @@ const CASES = [
         `the record names the two remaining steps ("${gate}")`);
       assert.equal(gate.includes('mở lối đá vòng'), false, 'opening the loop removed it from the record gate');
 
+      const puzzleRefreshesBeforeRetrieval = scene.calls.refreshedPuzzle;
       runRegistered('lantern-pedestal', scene, { item: PEDESTAL_ITEM });
       assert.equal(scene.lantern.lanternInHand, true, 'the lamp comes back to hand');
       assert.equal(scene.progress.flags['l8-lantern-retrieved'], true, 'the retrieval is saved as a flag');
-      assert.equal(scene.calls.refreshedPuzzle, 1, 'the retrieval repaints the puzzle');
+      assert.equal(scene.calls.refreshedPuzzle, puzzleRefreshesBeforeRetrieval + 1, 'the retrieval repaints the puzzle once');
       runRegistered('lumo-tube', scene, { id: 'lumo-tube' });
       assert.deepEqual(scene.calls.lumoRoute, ['recall'], 'the tube calls Lumo home');
       scene.arriveLumo(SOURCE_AT.roomId, SOURCE_AT.x, SOURCE_AT.y);
       assert.equal(scene.getObservatoryWorldState().lumoRecalled, true, 'Lumo is back beside the lamp');
 
+      // Scenario v2 §5: Lumo back at the lamp is not enough; the record opens only with him beside Nhinh.
       runRegistered('final-record', scene);
-      assert.equal(scene.progress.flags['l8-record-read'], true, 'the record opens once its real prerequisites hold');
+      assert.notEqual(scene.progress.flags['l8-record-read'], true, 'the record stays shut while Lumo is not beside Nhinh');
+      assert.equal(scene.calls.say.at(-1)[0].text, OBSERVATORY_RECORD_NEEDS_LUMO, 'the record answers "Lumo nên nghe cùng mình."');
+      scene.player = { x: 452, y: 276 };
+      scene.arriveLumo('observatory', 432, 262);
+      runRegistered('final-record', scene);
+      assert.equal(scene.progress.flags['l8-record-read'], true, 'the record opens once its real prerequisites hold and Lumo is beside Nhinh');
       assert.equal(scene.calls.memory, 1, 'reading the record plays its memory');
       runRegistered('balance-crystal', scene);
       assert.equal(scene.progress.flags['l8-balance-crystal'], true, 'the crystal becomes collectible');
@@ -1461,6 +1500,51 @@ const CASES = [
     },
   },
   {
+    name: 'observatory_seal_beat_and_margin_ink_play_once',
+    run: () => {
+      // Scenario v2 §2 and the margin side path: each passive beat plays once, in the corridor only.
+      const sceneAt = (over) => {
+        const scene = makeScene({ roomId: 'corridor', lanternPlaced: false, lanternInHand: true, lanternOn: false, ...over });
+        scene.dialogue = { isActive: () => false };
+        scene.observatoryBeats = [];
+        scene.queueObservatoryBeat = (lines) => { scene.observatoryBeats.push([...lines]); };
+        return scene;
+      };
+      const tick = bind(methodSource('updateObservatoryBeatTriggers'), BEAT_SYMBOLS, 'updateObservatoryBeatTriggers()');
+      const queuedTexts = (scene) => scene.observatoryBeats.map((lines) => lines.map((line) => line.text).join(' | '));
+
+      const quiet = sceneAt({ playerX: 100, playerY: 200 });
+      tick(quiet);
+      assert.deepEqual(queuedTexts(quiet), [], 'nothing is remembered yet, and the table is far away: no beat');
+
+      const seal = sceneAt({ playerX: 100, playerY: 200, flags: { 'l8-seal-remembered': true } });
+      tick(seal);
+      tick(seal);
+      assert.deepEqual(queuedTexts(seal), [OBSERVATORY_SEAL_REMEMBERED.map((line) => line.text).join(' | ')],
+        'the seal beat is queued once, however many frames pass');
+      assert.equal(seal.progress.flags['l8-seal-said'], true, 'the seal beat is spent');
+
+      const ink = sceneAt({ playerX: 320, playerY: 270 });
+      tick(ink);
+      tick(ink);
+      assert.deepEqual(queuedTexts(ink), [OBSERVATORY_MARGIN_INK.map((line) => line.text).join(' | ')],
+        'the margin ink shows once, with the lamp carried unlit, beside the star chart table');
+      assert.equal(ink.progress.flags['l8-margin-seen'], true, 'the margin ink is recorded as seen');
+
+      const litLamp = sceneAt({ playerX: 320, playerY: 270, lanternOn: true });
+      tick(litLamp);
+      assert.deepEqual(queuedTexts(litLamp), [], 'a lit lamp shows no margin ink');
+
+      const placed = sceneAt({ playerX: 320, playerY: 270, lanternInHand: false, lanternPlaced: true });
+      tick(placed);
+      assert.deepEqual(queuedTexts(placed), [], 'a lamp standing on the pedestal shows no margin ink');
+
+      const elsewhere = sceneAt({ playerX: 320, playerY: 270, roomId: 'observatory', flags: { 'l8-seal-remembered': true } });
+      tick(elsewhere);
+      assert.deepEqual(queuedTexts(elsewhere), [], 'the beats wait for the corridor');
+    },
+  },
+  {
     name: 'observatory_hint_index_follows_the_ladder_not_the_objective',
     run: () => {
       // Two sub-objectives (door A unlatched, then latched) share the network ladder: the index must carry on, not restart.
@@ -1475,8 +1559,9 @@ const CASES = [
       const unlatched = { ...base, doorALatched: false };
       const latched = { ...base, doorALatched: true };
       const ladder = observatoryGuidance('entrance', base).hints;
-      assert.notEqual(observatoryGuidance('entrance', unlatched).objective, observatoryGuidance('entrance', latched).objective,
-        'the two fixtures must show different objective rows');
+      // Scenario v2 HUD: the objective is the goal only, so both sub-steps show the same goal row; the ladder carries the detail.
+      assert.equal(observatoryGuidance('entrance', unlatched).objective, observatoryGuidance('entrance', latched).objective,
+        'the HUD goal is the same across these sub-steps');
       assert.deepEqual(observatoryGuidance('entrance', latched).hints, ladder, 'the two fixtures must share one ladder');
       current = unlatched;
       runShowHint(scene);

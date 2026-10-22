@@ -20,6 +20,7 @@ export class SoundSystem {
   private static ambience: AmbienceHandle | null = null;
   /** Held voices by key (a lock tone, a practice slab tone). Each one sounds until its condition is released. */
   private static held = new Map<string, effects.HeldVoice>();
+  private static memoryWeatherStop: (() => void) | null = null;
 
   /**
    * The audio context, built on first use. Unlike `getContext`, it exists while muted so the ambience keeps running
@@ -134,6 +135,7 @@ export class SoundSystem {
   }
 
   public static stopAmbient(fadeSeconds = 0.8): void {
+    this.memoryWeatherStop?.();
     const handle = this.ambience;
     this.ambience = null;
     this.ambienceTheme = null;
@@ -260,4 +262,43 @@ export class SoundSystem {
     }
     this.held.clear();
   }
+
+  public static setMusicLevel(level: number, fadeSeconds = 0.2): void {
+    this.ambience?.setMusicLevel(level, fadeSeconds);
+  }
+
+  /** Finite cues on the ordinary effects bus; no timers or recordings survive a cue's envelope. */
+  public static playObservatoryCue(cue: ObservatoryCue): void {
+    this.play(effects[cue]);
+  }
+
+  /** The recording's distant weather owns a stoppable bus, including voices already scheduled. */
+  public static startObservatoryMemoryWeather(): () => void {
+    this.memoryWeatherStop?.();
+    const ctx = this.ensureContext();
+    if (!ctx || !this.buses) return () => {};
+    const bus = ctx.createGain();
+    bus.connect(this.buses.sfx);
+    const play = (): void => { effects.memoryWeather(ctx, bus, ctx.currentTime + 0.005); };
+    play();
+    const timer = setInterval(play, 7500);
+    let stopped = false;
+    const stop = (): void => {
+      if (stopped) return;
+      stopped = true;
+      clearInterval(timer);
+      const t = ctx.currentTime;
+      bus.gain.cancelScheduledValues(t);
+      bus.gain.setValueAtTime(bus.gain.value, t);
+      bus.gain.linearRampToValueAtTime(0, t + 0.08);
+      setTimeout(() => bus.disconnect(), 120);
+      if (this.memoryWeatherStop === stop) this.memoryWeatherStop = null;
+    };
+    this.memoryWeatherStop = stop;
+    return stop;
+  }
 }
+
+export type ObservatoryCue = 'observatoryRain' | 'wheelMemory' | 'statueRotate' | 'tubeOn' | 'tubeOff'
+  | 'lumoFly' | 'lumoLeave' | 'stoneRing' | 'rootsWarm' | 'rootBridgeGrow' | 'rootBridgeRetract'
+  | 'memoryImpact' | 'memoryWaterFade' | 'memoryCracks' | 'memoryFlash' | 'memoryMerge' | 'marginInk';

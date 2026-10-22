@@ -50,7 +50,6 @@ export const COMPOSED_AND_TABLE_ENTRIES: readonly CatalogEntry[] = [
   // Observatory composed copy.
   entry('compose.observatory.leave', 'Chưa thể rời đài. Còn cần: {missing}.', 'You cannot leave the observatory yet. Still needed: {missing}.'),
   entry('compose.observatory.sunShut', 'Cửa Mặt Trời còn khép. {reason}', 'The Sun Door is still shut. {reason}'),
-  entry('compose.observatory.status', 'Phòng: {room} · Đèn: {lamp} ({lit}) · G0 {g0} / G1 {g1} / G2 {g2} · Tượng {statue} · Cửa A {doorA} · Cửa Mặt Trời {sun} · {bed} · Lối vòng {loop}', 'Room: {room} · Lantern: {lamp} ({lit}) · G0 {g0} / G1 {g1} / G2 {g2} · Statue {statue} · Door A {doorA} · Sun Door {sun} · {bed} · Loop {loop}'),
   entry('compose.observatory.turnG0', 'E · Xoay G0 (nấc {step}/3)', 'E · Turn G0 (setting {step}/3)'),
   entry('compose.observatory.turnG1', 'E · Xoay G1 (nấc {step}/3)', 'E · Turn G1 (setting {step}/3)'),
   entry('compose.observatory.turnG2', 'E · Xoay G2 (nấc {step}/3)', 'E · Turn G2 (setting {step}/3)'),

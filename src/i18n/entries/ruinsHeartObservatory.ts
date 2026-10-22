@@ -508,8 +508,6 @@ export const RUINS_HEART_OBSERVATORY_ENTRIES: readonly CatalogEntry[] = [
     'I am the part of the memory still caught in that night. I have waited so long that I forgot to let the forest rest.'),
   entry('l8obs.memoryShadow.3', 'Và tôi đã giúp ông. Nếu tôi làm sai lần nữa thì sao?',
     'And I helped you. What if I get it wrong again?'),
-  entry('l8obs.memoryShadow.4', 'Ở khu vườn, cậu đã giúp tôi tắt đèn. Ở điện thờ, cậu đã giữ bóng cho những mầm cây.',
-    'In the garden, you helped me put the lantern out. At the sanctuary, you kept the shadow over the seedlings.'),
   entry('l8obs.memoryShadow.5', 'Lần này mình biết nhiều hơn. Mình cũng có thể dừng lại khi thấy điều gì không đúng.',
     'This time I know more. I can also stop when something is wrong.'),
   entry('l8obs.memoryShadow.6', 'Ta muốn dẫn một người về nhà. Rồi giữ cả khu rừng ở lại cùng nỗi chờ của mình.',

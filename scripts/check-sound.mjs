@@ -99,6 +99,9 @@ const CUES = [
   ['playUiClick', []], ['playUiCancel', []], ['playUiSuccess', []], ['playUiLevelUp', []], ['playUiItemGet', []],
   ['playUiItemGet2', []], ['playDoorOpen', []], ['playDoorClose', []], ['playGateOpen', []],
   ['playMechanismLatch', []], ['playWaterRelease', []],
+  ...['observatoryRain', 'wheelMemory', 'statueRotate', 'tubeOn', 'tubeOff', 'lumoFly', 'lumoLeave',
+    'stoneRing', 'rootsWarm', 'rootBridgeGrow', 'rootBridgeRetract', 'memoryImpact', 'memoryWaterFade',
+    'memoryCracks', 'memoryFlash', 'memoryMerge', 'marginInk'].map(cue => ['playObservatoryCue', [cue]]),
 ];
 
 await test('every cue schedules sound on the audio clock', async () => {
@@ -193,6 +196,41 @@ await test('footsteps follow the level surface and shutdown is harmless', async 
   assert.ok(FakeAudioContext.last.sources.every((s) => s.stopped), 'all three steps end, including after shutdown');
 });
 
+await test('stone and root footsteps have distinct unpitched, finite contacts', async () => {
+  const textures = [];
+  for (const surface of ['stone', 'root']) {
+    const Sound = await loadSoundSystem();
+    Sound.setFootstepSurface(surface);
+    Sound.playFootstep(false);
+    const ctx = FakeAudioContext.last;
+    assert.equal(ctx.oscillators.length, 0);
+    assert.ok(ctx.sources.length >= 2);
+    assert.ok(ctx.sources.every(source => source.stoppedAt < 0.18));
+    textures.push(ctx.filters.map(filter => filter.frequency.sets[0][0]));
+  }
+  assert.notDeepEqual(textures[0], textures[1]);
+});
+
+await test('calibrated footsteps and effects release their output trim when their audio-clock sentinel ends', async () => {
+  for (const cue of [null, 'rootBridgeGrow', 'memoryWeather']) {
+    const Sound = await loadSoundSystem();
+    if (cue === null) { Sound.setFootstepSurface('root'); Sound.playFootstep(); }
+    else if (cue === 'memoryWeather') {
+      Sound.playUiClick();
+      const { memoryWeather } = await import('../src/audio/effects.ts');
+      memoryWeather(FakeAudioContext.last, FakeAudioContext.last.destination, 0);
+    }
+    else Sound.playObservatoryCue(cue);
+    const ctx = FakeAudioContext.last;
+    const sentinel = ctx.sources.find(source => typeof source.onended === 'function');
+    assert.ok(sentinel?.stopped, 'a finite source owns cleanup on the audio clock');
+    const trim = ctx.gains.find(gain => gain.gain.value > 1 && gain.gain.ramps.length === 0);
+    assert.ok(trim && !trim.disconnected);
+    sentinel.onended();
+    assert.ok(trim.disconnected && sentinel.disconnected, 'no trim connection remains after the source ends');
+  }
+});
+
 // --- ambience --------------------------------------------------------------------------------------------------------
 
 await test('music stays on the audio clock through suspension and a loop boundary, without replaying a backlog', async () => {
@@ -278,6 +316,49 @@ await test('muted ambience keeps running silently and returns with the sound', a
   await wait(200);
 });
 
+await test('observatory music ducks to zero without muting environmental layers, and restores', async () => {
+  const { startAmbience } = await import('../src/audio/ambience.ts');
+  const ctx = new FakeAudioContext();
+  const handle = startAmbience(ctx, ctx.destination, 'observatory');
+  const before = ctx.gains.map(g => g.gain.ramps.length);
+  handle.setMusicLevel(0, 0.2);
+  const changed = ctx.gains.filter((g, index) => g.gain.ramps.length !== before[index]);
+  assert.equal(changed.length, 1, 'only the separate music bus ramps');
+  assert.deepEqual(changed[0].gain.ramps.at(-1), [0, 0.2], 'even scheduled musical tails become silent');
+  assert.ok(ctx.sources.length > 0, 'the quiet wind is present');
+  assert.ok(ctx.oscillators.some(osc => osc.frequency.value === 55), 'the room drone is present');
+  ctx.currentTime = 3.2;
+  handle.setMusicLevel(1, 0.6);
+  assert.equal(changed[0].gain.ramps.at(-1)[0], 1);
+  assert.ok(Math.abs(changed[0].gain.ramps.at(-1)[1] - 3.8) < 1e-6);
+  handle.stop(0);
+  await wait(200);
+  assert.ok(ctx.sources.every(source => source.stopped));
+  assert.ok(ctx.oscillators.every(osc => osc.stopped));
+});
+
+await test('recording weather is stoppable while muted and its scheduler cannot survive ambient teardown', async () => {
+  const Sound = await loadSoundSystem();
+  const set = globalThis.setInterval, clear = globalThis.clearInterval;
+  const timers = new Set();
+  globalThis.setInterval = () => { const token = {}; timers.add(token); return token; };
+  globalThis.clearInterval = token => timers.delete(token);
+  try {
+    Sound.toggleMute();
+    const stop = Sound.startObservatoryMemoryWeather();
+    assert.equal(timers.size, 1);
+    assert.ok(FakeAudioContext.last.sources.length > 0, 'a muted start keeps the weather ready for unmute');
+    stop(); stop();
+    assert.equal(timers.size, 0);
+    Sound.startObservatoryMemoryWeather();
+    Sound.startObservatoryMemoryWeather();
+    assert.equal(timers.size, 1, 'replacing weather releases the old scheduler');
+    Sound.stopAmbient(0);
+    assert.equal(timers.size, 0, 'shutdown clears weather even with no ambience handle');
+    await wait(200);
+  } finally { globalThis.setInterval = set; globalThis.clearInterval = clear; }
+});
+
 await test('garden insects return only after watering, and all story themes stop their timers', async () => {
   const originalSet = globalThis.setInterval;
   const originalClear = globalThis.clearInterval;
@@ -326,12 +407,13 @@ await test('every level has an ambience theme and the scene owns ambience and th
   assert.ok(table, 'a level -> theme table exists');
   const themes = [...table[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
   assert.equal(themes.length, 10, 'one theme per level');
-  const known = ['forest', 'library', 'creek', 'wind', 'drone', 'heart', 'tower', 'garden'];
+  const known = ['forest', 'library', 'creek', 'wind', 'drone', 'heart', 'tower', 'garden', 'observatory'];
   assert.ok(themes.every((t) => known.includes(t)), 'every theme exists');
   assert.equal(themes[2], 'library');
   assert.equal(themes[3], 'creek');
   assert.equal(themes[5], 'tower');
   assert.equal(themes[6], 'garden');
+  assert.equal(themes[8], 'observatory');
   assert.ok(/SoundSystem\.startAmbient\(AMBIENCE_BY_LEVEL\[this\.progress\.level\]/.test(scene), 'the level theme starts on build');
   assert.ok(/setFootstepSurface/.test(scene), 'surface chosen per level');
   assert.ok(/Phaser\.Scenes\.Events\.SHUTDOWN[\s\S]{0,300}stopFootsteps/.test(scene), 'shutdown releases footsteps');

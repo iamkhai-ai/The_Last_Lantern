@@ -80,6 +80,7 @@ function derived(input) {
   return deriveObservatoryState({
     mirrorRotations: input.mirrors ?? { g0: 0, g1: 0, g2: 0 },
     statueOrientation: input.statue ?? 0,
+    sealRemembered: input.sealRemembered ?? false,
     lanternOn: input.lanternOn ?? false,
     lanternPlaced: input.lanternPlaced ?? false,
     doorALatched: input.doorALatched ?? false,
@@ -98,6 +99,13 @@ function state(overrides = {}) {
     rootBedShadowed: puzzle.rootBedShadowed,
     bridgeEligible: puzzle.bridgeEligible,
     lumoAtSeal: puzzle.lumoAtSeal,
+    supplyLive: puzzle.supplyLive,
+    rootState: puzzle.rootState,
+    sealRemembered: overrides.sealRemembered ?? false,
+    observatoryReached: overrides.observatoryReached ?? false,
+    marginSeen: overrides.marginSeen ?? false,
+    lumoBeside: overrides.lumoBeside ?? false,
+    marksSeen: overrides.marksSeen ?? 0,
     activeBeamRoute: puzzle.activeBeamPath.routeId,
     doorALatched: overrides.doorALatched ?? false,
     sunDoorLatched: overrides.sunDoorLatched ?? false,
@@ -129,17 +137,17 @@ const STAGES = {
     mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2,
   }),
   crossed: state({
-    lanternPlaced: true, lanternOn: true, doorALatched: true, sunDoorLatched: true, lumoAtSeal: true,
-    mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2, bridgeCrossed: true, finalDoorLatched: true,
+    lanternPlaced: true, lanternOn: true, doorALatched: true, sunDoorLatched: true, lumoAtSeal: true, sealRemembered: true,
+    mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2, bridgeCrossed: true, finalDoorLatched: true, observatoryReached: true,
   }),
   loopOpen: state({
     lanternPlaced: true, lanternOn: true, doorALatched: true, sunDoorLatched: true, lumoAtSeal: true,
-    mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2,
+    mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2, sealRemembered: true, observatoryReached: true,
     bridgeCrossed: true, finalDoorLatched: true, returnLoopOpen: true,
   }),
   finished: state({
     lanternPlaced: false, lanternOn: true, doorALatched: true, sunDoorLatched: true, lumoRecalled: true,
-    mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2, bridgeCrossed: true,
+    mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2, bridgeCrossed: true, sealRemembered: true, observatoryReached: true, lumoBeside: true,
     finalDoorLatched: true, returnLoopOpen: true, lanternRetrieved: true,
     recordRead: true, crystalTaken: true,
   }),
@@ -570,7 +578,10 @@ for (const roomId of ROOMS) {
   for (const stage of Object.values(STAGES)) {
     const guidance = observatoryGuidance(roomId, stage);
     assert.ok(guidance.objective.length > 5, `${roomId} objective row is never empty`);
-    assert.ok(guidance.status.includes('G0'), `${roomId} status row reports live G0/G1/G2`);
+    // Scenario v2 HUD: the objective is one of the three goals (or the closing line), and no row prints mirror notches.
+    assert.ok(/^(Mở đường tới phòng thiên văn\.|Đi cùng Lumo tới bản ghi\.|Nhận tinh thể và lấy lại đèn\.|Nhấn E ở chốt cửa cuối|Quay lại chốt cửa cuối)/u.test(guidance.objective),
+      `${roomId} objective names a goal only: "${guidance.objective}"`);
+    assert.ok(!/G[012]|Tượng|nấc/u.test(guidance.status), `${roomId} status row never prints mirror notches: "${guidance.status}"`);
     assert.ok(guidance.hints.length >= 2 && guidance.hints.length <= 3, `${roomId} hint ladder has 2-3 levels`);
     assert.ok(guidance.hints.every((hint) => hint.length > 8), `${roomId} every hint is a readable sentence`);
   }
@@ -978,34 +989,27 @@ console.log('  save         : v1 observatory validations intact');
     miniatureViewed: false, mirrors: { g0: 0, g1: 0, g2: 0 }, statue: 0,
   };
   const obj = (room, over) => layout.observatoryObjective(room, { ...base, ...over });
-  // never send the player to the room they are standing in
-  assert.match(obj('entrance', { lanternPlaced: true, doorAUnlocked: true }), /cửa A.*đông/, 'entrance, lamp placed, door A open: go to the east door');
-  assert.match(obj('entrance', { lanternPlaced: true }), /G0 về nấc 0/, 'entrance, door A shut: aim G0 at the door eye');
-  const inCorridor = obj('corridor', { lanternPlaced: true, doorAUnlocked: true });
-  assert.match(inCorridor, /Gài chốt cửa A/, 'corridor, door A not latched: latch it from inside');
-  assert.equal(/Đi tới cửa A/.test(inCorridor), false, 'the corridor never says to walk to door A');
-  assert.match(obj('corridor', { lanternPlaced: true, doorALatched: true }), /ống dẫn/, 'corridor, no seal: use the tube');
-  assert.match(obj('entrance', { lanternPlaced: true, doorALatched: true }), /Sang hành lang/, 'entrance, no seal: go to the corridor first');
-  const seated = { lanternPlaced: true, doorALatched: true, lumoAtSeal: true };
-  assert.match(obj('entrance', { ...seated, mirrors: { g0: 0, g1: 0, g2: 0 } }), /Xoay G0 sang nấc 1/);
-  assert.match(obj('corridor', { ...seated, mirrors: { g0: 1, g1: 0, g2: 0 } }), /Xoay G1 sang nấc 2/);
-  const inObservatory = (over) => obj('observatory', { ...seated, doorALatched: true, mirrors: { g0: 1, g1: 2, g2: 0 }, ...over });
-  assert.equal(/cửa Mặt Trời/.test(inObservatory({ sunDoorUnlocked: true, sunDoorLatched: true, activeBeamRoute: 'g2-direct-sun' })), false, 'the observatory never says to go to the Sun door');
-  assert.match(inObservatory({ sunDoorUnlocked: true, activeBeamRoute: 'g2-direct-sun' }), /G2 sang nấc 1/, 'direct route: aim G2 through the splitter');
-  assert.match(inObservatory({ sunDoorUnlocked: true, activeBeamRoute: 'g2-split' }), /tượng/, 'split route: turn the statue');
-  assert.match(inObservatory({ sunDoorUnlocked: true, rootBedShadowed: true, bridgeEligible: true }), /cầu rễ/, 'bridge up: cross it');
-  assert.match(obj('corridor', { bridgeCrossed: true, lanternPlaced: true }), /Quay lại phòng thiên văn/, 'crossed but not finished and not in the room: go back');
-  assert.match(obj('observatory', { bridgeCrossed: true }), /chốt cửa cuối/);
-  assert.match(obj('observatory', { bridgeCrossed: true, finalDoorLatched: true }), /lối đá vòng/);
-  assert.match(obj('entrance', { bridgeCrossed: true, finalDoorLatched: true, returnLoopOpen: true, lanternPlaced: true }), /Thu hồi đèn/, 'in the entrance with the loop open: take the lamp');
-  assert.match(obj('corridor', { bridgeCrossed: true, finalDoorLatched: true, returnLoopOpen: true, lanternPlaced: true }), /tiền sảnh/, 'elsewhere: go to the entrance');
+  // HUD goal phases (scenario v2): the objective names only the goal, never a notch, a door or a room to walk to
+  assert.equal(obj('entrance', {}), 'Mở đường tới phòng thiên văn.', 'phase one: reach the observatory');
+  assert.equal(obj('corridor', { lanternPlaced: true, doorAUnlocked: true, observatoryReached: false }), 'Mở đường tới phòng thiên văn.', 'phase one holds until the observatory is reached');
+  assert.equal(obj('observatory', { observatoryReached: true, bridgeEligible: true, sunDoorUnlocked: true }), 'Đi cùng Lumo tới bản ghi.', 'phase two: bring Lumo to the record');
+  assert.equal(obj('entrance', { observatoryReached: true, recordRead: true }), 'Nhận tinh thể và lấy lại đèn.', 'phase three: crystal and lamp');
+  assert.match(obj('observatory', { observatoryReached: true, recordRead: true, crystalTaken: true }), /chốt cửa cuối/, 'closing: the final latch returns Nhinh home');
+  for (const room of ROOMS) {
+    for (const over of [{}, { lanternPlaced: true }, { doorALatched: true, lumoAtSeal: true }, { bridgeCrossed: true, observatoryReached: true }]) {
+      assert.equal(/G[012]|Tượng|nấc|cửa A|chốt/u.test(obj(room, over)), false, `${room}: the objective never names a notch, a door or a latch: "${obj(room, over)}"`);
+    }
+  }
 
-  // status uses the shared door predicate: a latched Sun door stays open with the beam off
-  const latchedSun = layout.observatoryStatus('corridor', { ...base, sunDoorLatched: true });
-  assert.match(latchedSun, /Cửa Mặt Trời đã gài \(giữ mở\)/, 'latched Sun door reads as held open');
-  assert.match(layout.observatoryStatus('corridor', { ...base, sunDoorUnlocked: true }), /Cửa Mặt Trời đang mở/);
-  assert.match(layout.observatoryStatus('corridor', base), /Cửa Mặt Trời đang khóa/);
-  assert.equal(layout.observatoryDoorOpen('sun-door', { ...base, sunDoorLatched: true }), true, 'status and door share one predicate');
+  // Scenario v2 HUD: the status row names the room and the lamp only (no mirror notches, no door states).
+  assert.equal(layout.observatoryStatus('corridor', { ...base, lanternPlaced: true, lanternOn: true }), 'Phòng: hành lang phòng sao · Đèn: trên bệ (bật)');
+  assert.equal(layout.observatoryStatus('observatory', { ...base, lanternPlaced: false, lanternOn: false }), 'Phòng: phòng thiên văn · Đèn: trong tay (tắt)');
+  assert.equal(layout.observatoryDoorOpen('sun-door', { ...base, sunDoorLatched: true }), true, 'a latched Sun door stays open with the beam off');
+  assert.equal(layout.observatoryDoorOpen('sun-door', { ...base, sunDoorUnlocked: true }), true);
+  assert.equal(layout.observatoryDoorOpen('sun-door', base), false);
+
+
+
 
   // final door control: return prompt only when everything is done; otherwise the first missing step
   const done = { ...base, bridgeCrossed: true, finalDoorLatched: true, returnLoopOpen: true, recordRead: true, crystalTaken: true, lumoRecalled: true };
@@ -1057,7 +1061,7 @@ console.log('  save         : v1 observatory validations intact');
 // ---------------------------------------------------------------- H ladder is the scenario text (scenario 09 §7)
 // Every network-solve state (lamp placed, bridge not yet crossed) shows the scenario Mức 1-3 verbatim, in order.
 {
-  const hits = [...readFileSync(join(rootDir, 'docs/scenario/09-dark-moon-observatory.md'), 'utf8')
+  const hits = [...readFileSync(join(rootDir, 'docs/scenario-v2/09-dark-moon-observatory.md'), 'utf8')
     .matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
   assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], 'scenario 09 lists Mức 1, 2, 3 in order');
   const MUC = hits.map((m) => m[2].normalize('NFC'));
@@ -1069,3 +1073,57 @@ console.log('  save         : v1 observatory validations intact');
 }
 
 console.log('Observatory H ladder checks passed (network solve is the scenario Mức 1-3 verbatim, in order).');
+
+/* ------------------------------------------------------------------ *
+ * 13. Scenario v2 logic: the record waits for Lumo, the root and supply states,
+ *     the remembered seal, the margin ink, and the v2 dialogue text
+ * ------------------------------------------------------------------ */
+{
+  const layout = await import('../src/data/observatoryLayout.ts');
+  const story = await import('../src/data/observatoryStory.ts');
+  const rec = (over) => layout.observatoryRecordBlockReason({ ...STAGES.finished, recordRead: false, ...over });
+
+  // The record opens only with Lumo beside Nhinh (v2 §5); the refusal is Nhinh's line.
+  assert.equal(rec({ lumoBeside: true }), '', 'the record opens when Lumo is beside Nhinh');
+  assert.equal(rec({ lumoBeside: false }), layout.OBSERVATORY_RECORD_NEEDS_LUMO, 'the record refuses while Lumo is away');
+  assert.equal(layout.OBSERVATORY_RECORD_NEEDS_LUMO, 'Lumo nên nghe cùng mình.');
+  assert.match(rec({ lumoBeside: true, lumoRecalled: false }), /gọi Lumo về bên đèn/, 'a recall still comes first');
+  assert.match(rec({ lumoBeside: true, lumoAtSeal: true, lumoRecalled: true }), /gọi Lumo về bên đèn/, 'Lumo holding the seal is not recalled');
+  assert.equal(rec({ lumoBeside: true, recordRead: true }), '', 'a read record stays read');
+
+  // Lumo is beside Nhinh only when he is in her room and within reach.
+  const here = { roomId: 'observatory', x: 200, y: 200 };
+  assert.equal(layout.observatoryLumoBeside({ roomId: 'observatory', x: 230, y: 220 }, here), true, 'a close follower is beside her');
+  assert.equal(layout.observatoryLumoBeside({ roomId: 'observatory', x: 300, y: 200 }, here), false, 'out of reach is not beside her');
+  assert.equal(layout.observatoryLumoBeside({ roomId: 'entrance', x: 200, y: 200 }, here), false, 'another room is not beside her');
+  assert.equal(layout.observatoryLumoBeside(null, here), false, 'no Lumo is not beside her');
+
+  // Root bed states and the supply strip (v2 §4): the four art states come from one derivation.
+  const rootOf = (over) => derived(over).rootState;
+  assert.equal(rootOf({ lanternPlaced: true, lanternOn: true, lumoAtSeal: true, mirrors: { g0: 1, g1: 2, g2: 0 } }), 'lit', 'direct Sun route: roots lit, no bridge');
+  assert.equal(rootOf({ lanternPlaced: true, lanternOn: true, lumoAtSeal: true, mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 0 }), 'lit', 'split with the statue open: roots lit');
+  assert.equal(rootOf({ lanternPlaced: true, lanternOn: true, lumoAtSeal: true, mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2 }), 'bridge', 'split with the statue shadowing: bridge');
+  assert.equal(rootOf({ lanternPlaced: true, lanternOn: true, lumoAtSeal: false, sealRemembered: true }), 'retracted-dark', 'Lumo left the seal: roots draw back dark');
+  assert.equal(rootOf({ lanternPlaced: true, lanternOn: true, lumoAtSeal: false, sealRemembered: false }), 'dormant', 'never sealed: dormant');
+  assert.equal(rootOf({ lanternPlaced: true, lanternOn: false, lumoAtSeal: true, mirrors: { g0: 1, g1: 2, g2: 1 }, statue: 2 }), 'dormant', 'lamp off: no bridge and no light');
+  assert.equal(derived({ lanternPlaced: true, lanternOn: true, lumoAtSeal: true }).supplyLive, true, 'lit lamp and Lumo at the seal: supply live');
+  assert.equal(derived({ lanternPlaced: true, lanternOn: false, lumoAtSeal: true }).supplyLive, false, 'lamp off: supply dark');
+  assert.equal(derived({ lanternPlaced: false, lanternOn: true, lumoAtSeal: true }).supplyLive, false, 'lamp carried: supply dark');
+  assert.equal(derived({ lanternPlaced: true, lanternOn: true, lumoAtSeal: false, sealRemembered: true }).supplyLive, false, 'Lumo leaves the seal: supply dark');
+
+  // Dialogue, verbatim from scenario v2.
+  assert.deepEqual(story.OBSERVATORY_SEAL_REMEMBERED.map((line) => line.text),
+    ['Ở đây lạnh quá… Nhưng tôi giữ được.', 'Cần thì cứ nói. Tôi gọi cậu về ngay.'], 'section 2 seal beat');
+  assert.deepEqual(story.OBSERVATORY_LUMO_LEAVES_SEAL.map((line) => line.text), ['Rời chỗ này… nhẹ hơn tôi tưởng.'], 'Lumo leaves the seal');
+  assert.deepEqual(story.OBSERVATORY_MARGIN_INK.map((line) => line.text),
+    ['Có chữ bên lề bản đồ: ‘Đêm nay con sẽ thấy đèn.’', 'Chữ của ông ấy.'], 'margin ink beat');
+  assert.ok(story.OBSERVATORY_MEMORY_SHADOW.some((line) => line.text === 'Ở khu vườn, cậu đã giúp tôi tắt đèn. Ở điện thờ, cậu đã giúp tôi hiểu cách bảo vệ những mầm cây.'),
+    'the Shadow recalls the temple in v2 wording');
+
+  // The margin trigger stands on the corridor floor, within reach of a body that is legal there.
+  const margin = layout.OBSERVATORY_MARGIN_TRIGGER;
+  assert.equal(layout.isObservatoryPositionSafe('corridor', { x: margin.x, y: margin.y + 8 }, STAGES.arrival), true,
+    'a legal foot position sits inside the margin trigger');
+  assert.ok(8 <= margin.radius, 'the foot position is inside the trigger radius');
+  console.log('  scenario v2  : record waits for Lumo, root and supply states, remembered seal, margin ink, v2 dialogue');
+}

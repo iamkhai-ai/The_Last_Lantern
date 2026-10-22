@@ -38,6 +38,10 @@ import {
   observatoryDoorBlockReason,
   observatoryDoorOpen,
   observatoryElement,
+  observatoryLumoBeside,
+  observatoryRecordMissing,
+  OBSERVATORY_MARGIN_TRIGGER,
+  OBSERVATORY_RECORD_NEEDS_LUMO,
   observatoryElements,
   observatoryFinalDoorBlockReason,
   observatoryGuidance,
@@ -64,9 +68,11 @@ import { deriveObservatoryState, type ObservatoryDerivedState } from '../systems
 import {
   OBSERVATORY_BEAT_NO_BEAM, OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
   OBSERVATORY_MEMORY_CAPTION, OBSERVATORY_MEMORY_LUMO, OBSERVATORY_MEMORY_MERGE_CAPTION, OBSERVATORY_MEMORY_RECORDING,
-  OBSERVATORY_MEMORY_SHADOW, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_OPENING_ENTRANCE, type ObservatoryLine,
+  OBSERVATORY_LUMO_LEAVES_SEAL, OBSERVATORY_MARGIN_INK, OBSERVATORY_MEMORY_SHADOW, OBSERVATORY_OPENING_CORRIDOR,
+  OBSERVATORY_OPENING_ENTRANCE, OBSERVATORY_SEAL_REMEMBERED, type ObservatoryLine,
 } from '../data/observatoryStory';
 import { SoundSystem, type AmbienceTheme } from '../systems/SoundSystem';
+import { observatoryAudioState, observatoryAudioChanges, type ObservatoryAudioState } from '../systems/ObservatoryAudio';
 import { DialogueLine } from '../types/gameTypes';
 import { PauseMenu } from '../ui/PauseMenu';
 import { CampaignHud, HUD_LAYOUT, PULSE_LEVELS } from '../ui/CampaignHud';
@@ -98,10 +104,10 @@ const FOREST_EDGE_RING_GLOW = { x: 410, y: 210 };
 /** Path depth: Level 01 keeps its original 0.6; Level 02 keeps 0.55. */
 const FOREST_EDGE_PATH_DEPTH = 0.6;
 const WOODS_PATH_DEPTH = 0.55;
-/** Indoor / stone floors use the soil footstep bed; every outdoor level uses grass. */
+/** Legacy indoor floors retain soil; Level 09 chooses stone/root from the live crossing lane. */
 const SOIL_FOOTSTEP_LEVELS = new Set<number>([2, 5, 7, 8, 9]);
 /** Level index -> ambience theme (see audio/ambience.ts): the forest levels, the library, the creek, the tower's wind, ruins and observatory drones, and the heart tree's pad. */
-const AMBIENCE_BY_LEVEL: readonly AmbienceTheme[] = ['forest', 'forest', 'library', 'creek', 'forest', 'tower', 'garden', 'drone', 'drone', 'heart'];
+const AMBIENCE_BY_LEVEL: readonly AmbienceTheme[] = ['forest', 'forest', 'library', 'creek', 'forest', 'tower', 'garden', 'drone', 'observatory', 'heart'];
 
 const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Trời vẫn chưa sáng sao?' }, { speaker: 'Nhinh', text: 'Sương vẫn dày quá… Không biết con đường về làng nằm ở phía nào.' }],
@@ -122,6 +128,14 @@ const OPENING: DialogueLine[][] = [
   [...OBSERVATORY_OPENING_ENTRANCE],
   [{ speaker: 'Nhinh', text: 'Ba tinh thể đã tìm được đường về đây.' }, { speaker: 'Lumo', text: 'Trái tim Cây Mẹ cần chúng ta cùng giữ ánh sáng và bóng tối cân bằng.' }],
 ];
+
+/** Root bed colours per art state (scenario v2 §4): dormant, lit amber, bridge (grown), retracted and dark. */
+const OBSERVATORY_ROOT_PALETTE: Record<ObsWorldState['rootState'], { fill: number; line: number; alpha: number }> = {
+  dormant: { fill: 0x385044, line: 0x83a65f, alpha: 0.85 },
+  lit: { fill: 0x8a6a2e, line: 0xf0b463, alpha: 1 },
+  bridge: { fill: 0x385044, line: 0x83a65f, alpha: 1 },
+  'retracted-dark': { fill: 0x1d2a2b, line: 0x2f4a3f, alpha: 0.45 },
+};
 
 export class CampaignScene extends Phaser.Scene {
   private progress!: CampaignProgress;
@@ -157,6 +171,7 @@ export class CampaignScene extends Phaser.Scene {
   /** The opened return loop's floor strip: exactly one per room, never a collider. */
   private observatoryReturnLoopVisual?: Phaser.GameObjects.TileSprite;
   private observatoryBridgeStones: Phaser.GameObjects.Image[] = [];
+  private observatoryPipeSupply: Phaser.GameObjects.Graphics[] = [];
   private footprintTrail?: Phaser.GameObjects.Graphics;
   private forestEdgeGuide?: Phaser.GameObjects.Graphics;
   /** Level 01 accent glows. Each is rebuilt by buildLevel(); visibility follows progress or the live eye/tablet art. */
@@ -174,6 +189,11 @@ export class CampaignScene extends Phaser.Scene {
   private observatoryLumoHold: { x: number; y: number } | null = null;
   private observatoryBeats: ObservatoryLine[][] = [];
   private observatoryWasThroughSeal = false;
+  private observatoryAudio: ObservatoryAudioState | null = null;
+  private observatoryMemoryPlaying = false;
+  private observatoryMemoryTimers: Phaser.Time.TimerEvent[] = [];
+  private stopObservatoryWeather?: () => void;
+  private observatoryMemoryGeneration = 0;
   /** Hint ladder (joined text) the observatory hint index belongs to; the objective row is not part of it. */
   private observatoryHintLadderKey = '';
   private hintIndex = 0;
@@ -270,6 +290,7 @@ export class CampaignScene extends Phaser.Scene {
     keyboard.on('keydown-E', () => {
       if (this.pauseMenu.isOpen()) this.pauseMenu.triggerSelected();
       else if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
+      else if (this.observatoryMemoryPlaying) return;
       else this.interactions.tryInteract(performance.now());
     });
     keyboard.on('keydown-SPACE', () => {
@@ -281,7 +302,7 @@ export class CampaignScene extends Phaser.Scene {
         this.dialogue.handleAdvanceInput(performance.now());
         return;
       }
-      if (this.pauseMenu.isOpen() || !PULSE_LEVELS.includes(this.progress.level)) return;
+      if (this.pauseMenu.isOpen() || this.observatoryMemoryPlaying || !PULSE_LEVELS.includes(this.progress.level)) return;
       if (this.ruinsLevel?.isControlLocked()) return;
       if (this.progress.level === 0 && !canUseForestEdgePulse(this.progress.flags['l0-tablet-read'] === true)) return;
       if (this.lantern.triggerPulse(this.player.x, this.player.y)) {
@@ -292,6 +313,7 @@ export class CampaignScene extends Phaser.Scene {
       if (remaining > 0) this.hud.notePulseBlocked(remaining);
     });
     keyboard.on('keydown-F', () => {
+      if (this.observatoryMemoryPlaying) return;
       if (this.progress.level === 3) {
         if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen() && this.shatteredCreek?.toggleLantern()) this.player.playLanternAction(this.lantern.lanternOn);
         return;
@@ -316,9 +338,9 @@ export class CampaignScene extends Phaser.Scene {
         }
       }
     });
-    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen() && !this.ruinsLevel?.isControlLocked()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.progress.level === 6 ? this.gardenLevel?.showHint() : this.progress.level === 7 ? this.ruinsLevel?.showHint() : this.showHint(); });
+    keyboard.on('keydown-H', () => { if (!this.observatoryMemoryPlaying && !this.dialogue.isActive() && !this.pauseMenu.isOpen() && !this.ruinsLevel?.isControlLocked()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.progress.level === 6 ? this.gardenLevel?.showHint() : this.progress.level === 7 ? this.ruinsLevel?.showHint() : this.showHint(); });
     keyboard.on('keydown-J', () => {
-      if (this.dialogue.isActive() || this.pauseMenu.isOpen() || this.ruinsLevel?.isControlLocked()) return;
+      if (this.observatoryMemoryPlaying || this.dialogue.isActive() || this.pauseMenu.isOpen() || this.ruinsLevel?.isControlLocked()) return;
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
       else if (this.progress.level === 5) this.sleeplessTower?.showJournal();
       else if (this.progress.level === 6) this.gardenLevel?.showJournal();
@@ -332,6 +354,7 @@ export class CampaignScene extends Phaser.Scene {
     });
     keyboard.on('keydown-ESC', () => {
       if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
+      else if (this.observatoryMemoryPlaying) return;
       else if (!this.pauseMenu.isOpen()) this.pauseMenu.open();
       else this.pauseMenu.close();
     });
@@ -389,6 +412,7 @@ export class CampaignScene extends Phaser.Scene {
       this.ruinsLevel?.destroy();
       SoundSystem.stopFootsteps();
       SoundSystem.stopAmbient();
+      this.cancelObservatoryMemory();
     });
   }
 
@@ -397,7 +421,14 @@ export class CampaignScene extends Phaser.Scene {
     const dt = Math.min(delta, 50);
     // The Level 08 Shadow demonstration owns the controls while it runs (scenario 08 §4); this is the same gate movement and prompts use.
     const locked = this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen() || this.heartEnd
-      || this.ruinsLevel?.isControlLocked() === true;
+      || this.ruinsLevel?.isControlLocked() === true || this.observatoryMemoryPlaying;
+    if (this.progress.level === 8) {
+      const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
+      const onRoot = this.activeObservatoryRoom === 'observatory'
+        && (this.getObservatoryState().bridgeEligible || this.observatoryBridgePendingRemoval)
+        && rectsOverlap(body, OBSERVATORY_BRIDGE_LANE);
+      SoundSystem.setFootstepSurface(onRoot ? 'root' : 'stone');
+    }
     this.player.update(dt, !locked, this.lantern.lanternInHand, this.lantern.lanternOn);
     if (this.progress.level === 0 && this.progress.flags['l0-lumo-met']) {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 58, 305) };
@@ -412,7 +443,10 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
     if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 300) };
     if (this.progress.level === 7) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 30, 610), y: Phaser.Math.Clamp(this.player.y - 22, 84, 302) };
-    if (this.progress.level === 8) this.updateObservatoryLumo(dt);
+    if (this.progress.level === 8) {
+      this.updateObservatoryLumo(dt);
+      if (this.activeObservatoryRoom) this.updateObservatoryBeatTriggers();
+    }
     else if (this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 9) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.progress.level !== 4 && this.progress.level !== 9 && this.time.now - this.lastLumoSave >= 600) {
       this.lastLumoSave = this.time.now;
@@ -609,6 +643,8 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private buildLevel(): void {
+    this.cancelObservatoryMemory();
+    this.observatoryAudio = null;
     // Ambience and footstep surface belong to the level being built, so drop any
     // loop left over from the previous one before the room is torn down.
     // The ambience belongs to the level being built: crossfade to its theme (asking for the one already playing is a no-op).
@@ -616,7 +652,7 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level !== 5 && this.progress.level !== 6) {
       SoundSystem.startAmbient(AMBIENCE_BY_LEVEL[this.progress.level] ?? 'forest');
     }
-    SoundSystem.setFootstepSurface(SOIL_FOOTSTEP_LEVELS.has(this.progress.level) ? 'soil' : 'grass');
+    SoundSystem.setFootstepSurface(this.progress.level === 8 ? 'stone' : SOIL_FOOTSTEP_LEVELS.has(this.progress.level) ? 'soil' : 'grass');
     // Level 8 returns before the teardown further down, so the level-7 ruins controller is released first.
     this.ruinsLevel?.destroy();
     this.ruinsLevel = undefined;
@@ -835,7 +871,7 @@ export class CampaignScene extends Phaser.Scene {
     if (flags['intro-8'] !== true) {
       flags['intro-8'] = true;
       this.save();
-      if (roomId === 'entrance') { this.say([...OBSERVATORY_OPENING_ENTRANCE]); return; }
+      if (roomId === 'entrance') { SoundSystem.playObservatoryCue('wheelMemory'); this.say([...OBSERVATORY_OPENING_ENTRANCE]); return; }
     }
     if (roomId === 'corridor' && flags['intro-8-corridor'] !== true) {
       flags['intro-8-corridor'] = true;
@@ -847,12 +883,12 @@ export class CampaignScene extends Phaser.Scene {
     }
   }
 
-  private showObservatoryCaption(text: string): void {
+  private showObservatoryCaption(text: string, holdMs = 3600): void {
     // Below the mission plate's tallest extent, so a two-line objective never sits under the caption.
     const label = this.add.text(320, HUD_LAYOUT.topBottom + 4, text, { fontFamily: 'Segoe UI, sans-serif', fontSize: '10px', fontStyle: 'italic', color: '#f2e6c4', stroke: '#07151c', strokeThickness: 3, padding: { x: 8, y: 4 }, align: 'center', wordWrap: { width: 480 } })
       .setOrigin(0.5, 0).setDepth(85);
     this.roomObjects.push(label);
-    this.tweens.add({ targets: label, alpha: 0, delay: 3600, duration: 600, onComplete: () => { if (label.active) label.destroy(); } });
+    this.tweens.add({ targets: label, alpha: 0, delay: holdMs, duration: 600, onComplete: () => { if (label.active) label.destroy(); } });
   }
 
   private queueObservatoryBeat(lines: readonly ObservatoryLine[]): void {
@@ -860,7 +896,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private flushObservatoryBeats(): void {
-    if (!this.observatoryBeats.length || this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
+    if (!this.observatoryBeats.length || this.dialogue.isActive() || this.pauseMenu.isOpen() || this.observatoryMemoryPlaying) return;
     const next = this.observatoryBeats.shift();
     if (next) this.say(next);
   }
@@ -926,6 +962,14 @@ export class CampaignScene extends Phaser.Scene {
       graphic.fillStyle(stamp.id.startsWith('pipe') ? 0x7a6a49 : 0x8fa8b5, 1);
       graphic.fillRoundedRect(stamp.x, stamp.y, stamp.width, stamp.height, 4);
       this.roomObjects.push(graphic);
+      if (stamp.id.startsWith('pipe')) {
+        // The live supply strip is painted over the pipe only while the lamp is lit and Lumo holds the seal.
+        const supply = this.add.graphics().setDepth((stamp.depth ?? 2) + 0.1).setVisible(false);
+        supply.fillStyle(0x9fe7ff, 0.85);
+        supply.fillRoundedRect(stamp.x, stamp.y, stamp.width, stamp.height, 4);
+        this.roomObjects.push(supply);
+        this.observatoryPipeSupply.push(supply);
+      }
     }
   }
 
@@ -940,7 +984,7 @@ export class CampaignScene extends Phaser.Scene {
         .setDepth(element.mount === 'ground' ? 3 : 10 + element.anchor.y / 10);
       this.roomObjects.push(image);
       this.observatoryElementVisuals.set(element.id, image);
-      if (['g0', 'g1', 'g2', 'sun-lock', 'lantern-pedestal', 'statue', 'splitter', 'lumo-seal', 'final-door'].includes(element.id)) {
+      if (['g0', 'g1', 'g2', 'sun-lock', 'lantern-pedestal', 'statue', 'splitter', 'lumo-tube', 'lumo-seal', 'final-door'].includes(element.id)) {
         this.observatoryPuzzleVisuals.set(element.id, image);
       }
     }
@@ -1062,6 +1106,7 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   public clearActiveRoom(): void {
+    this.cancelObservatoryMemory();
     for (const collider of this.roomColliders) collider.destroy();
     this.roomColliders = [];
     this.observatoryRootBody = null;
@@ -1099,14 +1144,7 @@ export class CampaignScene extends Phaser.Scene {
       { ...OBSERVATORY_ROOT_BED, y: laneBottom, height: bedBottom - laneBottom },
     ];
     const visual = this.add.graphics();
-    for (const mass of masses) {
-      visual.fillStyle(0x385044, 1);
-      visual.fillRoundedRect(mass.x, mass.y, mass.width, mass.height, 6);
-      visual.lineStyle(2, 0x83a65f, 0.85);
-      for (let y = mass.y + 10; y < mass.y + mass.height; y += 18) {
-        visual.lineBetween(mass.x + 3, y, mass.x + mass.width - 3, y + 7);
-      }
-    }
+    this.paintObservatoryRoots(visual, masses, this.getObservatoryWorldState().rootState);
     visual.setDepth(10 + bedBottom / 10);
     this.roomObjects.push(visual);
     this.observatoryPuzzleVisuals.set('root-bed', visual);
@@ -1188,7 +1226,7 @@ export class CampaignScene extends Phaser.Scene {
     } else if (id === 'statue') {
       const counter = 'l8-statue';
       register(
-        () => { this.progress.counters[counter] = (this.value(counter) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playMirrorRotate(); },
+        () => { this.progress.counters[counter] = (this.value(counter) + 1) % 4; this.save(); this.refreshObservatoryPuzzle(); SoundSystem.playObservatoryCue('statueRotate'); },
       );
     } else if (id === 'splitter') {
       register(
@@ -1207,6 +1245,7 @@ export class CampaignScene extends Phaser.Scene {
       register(
         () => {
           const lines = captions[this.observatoryMiniatureIndex % captions.length];
+          this.progress.flags[`l8-mark-${this.observatoryMiniatureIndex % captions.length}`] = true;
           this.observatoryMiniatureIndex = (this.observatoryMiniatureIndex + 1) % captions.length;
           if (this.progress.flags['l8-miniature-viewed'] !== true && this.observatoryMiniatureIndex === 0) {
             this.progress.flags['l8-miniature-viewed'] = true;
@@ -1225,6 +1264,7 @@ export class CampaignScene extends Phaser.Scene {
         () => {
           if (this.lantern.lanternPlaced) {
             this.lantern.retrieveLantern();
+            SoundSystem.playUiItemGet();
             this.progress.flags['l8-lantern-placed'] = false;
             this.progress.flags['l8-lantern-retrieved'] = true;
           } else if (this.lantern.lanternInHand) {
@@ -1253,12 +1293,14 @@ export class CampaignScene extends Phaser.Scene {
         () => {
           const state = this.getObservatoryWorldState();
           if (observatoryDoorOpen('door-a', state)) {
+            if (!state.doorALatched) SoundSystem.playMechanismLatch();
             this.progress.flags['l8-door-a-latched'] = true;
             this.save();
             this.refreshObservatoryDoors();
             this.say([{ speaker: 'Nhinh', text: tr('Chốt đã gài. Cửa A giữ mở dù tia sáng đi hướng khác.') }]);
             return;
           }
+          SoundSystem.playPuzzleError();
           this.say([{ speaker: 'Nhinh', text: tr('Chốt chưa gài được. {reason}', { reason: tr(observatoryDoorBlockReason('door-a', state)) }) }]);
         },
       );
@@ -1266,6 +1308,7 @@ export class CampaignScene extends Phaser.Scene {
       register(
         () => {
           const state = this.getObservatoryWorldState();
+          if (!observatoryDoorOpen('sun-door', state)) SoundSystem.playPuzzleError();
           this.say([{ speaker: 'Nhinh', text: observatoryDoorOpen('sun-door', state)
             ? tr('Cửa Mặt Trời đã nhận ánh sáng và đang mở.')
             : tr('Cửa Mặt Trời còn khép. {reason}', { reason: observatoryDoorBlockReason('sun-door', state) }) }]);
@@ -1289,10 +1332,12 @@ export class CampaignScene extends Phaser.Scene {
           const state = this.getObservatoryWorldState();
           if (!this.progress.flags['l8-final-door-latched']) {
             if (!state.bridgeCrossed) {
+              SoundSystem.playPuzzleError();
               this.say([{ speaker: 'Nhinh', text: observatoryFinalDoorBlockReason(state) }]);
               return;
             }
             this.progress.flags['l8-final-door-latched'] = true;
+            SoundSystem.playMechanismLatch();
             this.save();
             this.refreshObservatoryDoors();
             this.say([{ speaker: 'Nhinh', text: tr('Chốt đá đã gài. Lối đá vòng có thể mở ngay từ bệ này.') }]);
@@ -1302,8 +1347,10 @@ export class CampaignScene extends Phaser.Scene {
             // Companion handoff: Level 10 places Lumo from its own authored entry. Room-local Level 09 coordinates and
             // the stale generic Lumo counters mean nothing there, so they are cleared instead of carried across.
             for (const key of ['lumo-x', 'lumo-y', 'lumo-target-x', 'lumo-target-y']) delete this.progress.counters[key];
+            SoundSystem.playDawnChord();
             this.nextLevel([...OBSERVATORY_EXIT_LINES]);
           } else {
+            SoundSystem.playPuzzleError();
             this.say([{ speaker: 'Nhinh', text: observatoryFinalDoorBlockReason(state) }]);
           }
         },
@@ -1319,6 +1366,7 @@ export class CampaignScene extends Phaser.Scene {
           // The loop is purely a floor route: it needs the crossing and the far
           // latch, never the lantern's current place or Lumo's current position.
           if (!state.bridgeCrossed || !state.finalDoorLatched) {
+            SoundSystem.playPuzzleError();
             this.say([{ speaker: 'Nhinh', text: tr('Lối đá vòng chưa mở được. {reason}', { reason: tr(observatoryDoorBlockReason('return-loop', state)) }) }]);
             return;
           }
@@ -1326,6 +1374,7 @@ export class CampaignScene extends Phaser.Scene {
           this.save();
           this.refreshObservatoryDoors();
           this.refreshObservatoryReturnLoop();
+          this.refreshObservatoryPuzzle();
           this.say([{ speaker: 'Nhinh', text: tr('Lối đá đã khớp vào vòng. Đường về bệ đèn thông suốt ngay cả khi ánh sáng tắt.') }]);
         },
       );
@@ -1337,13 +1386,14 @@ export class CampaignScene extends Phaser.Scene {
             return;
           }
           const state = this.getObservatoryWorldState();
-          const missing: string[] = [];
-          if (this.lantern.lanternPlaced || !this.lantern.lanternInHand) missing.push(tr('thu hồi đèn về tay'));
-          if (!state.lumoRecalled || state.lumoAtSeal) missing.push(tr('gọi Lumo về bên đèn'));
-          if (!state.returnLoopOpen) missing.push(tr('mở lối đá vòng'));
+          const missing = observatoryRecordMissing(state);
           if (missing.length) {
             this.say([{ speaker: 'Nhinh', text: tr('Bản ghi chưa mở. Còn cần: {missing}.', { missing: missing.join(tr(' và ')) }) },
               { speaker: 'Lumo', text: tr('Tôi sẽ ở cạnh cậu khi mọi thứ đã sẵn sàng.') }]);
+            return;
+          }
+          if (!state.lumoBeside) {
+            this.say([{ speaker: 'Nhinh', text: OBSERVATORY_RECORD_NEEDS_LUMO }]);
             return;
           }
           this.progress.flags['l8-record-read'] = true;
@@ -1364,6 +1414,7 @@ export class CampaignScene extends Phaser.Scene {
             return;
           }
           this.progress.flags['l8-balance-crystal'] = true;
+          SoundSystem.playCrystalPickup();
           this.save();
           this.observatoryElementVisuals.get('balance-crystal')?.destroy();
           this.observatoryElementVisuals.delete('balance-crystal');
@@ -1382,6 +1433,16 @@ export class CampaignScene extends Phaser.Scene {
    * on his last line. Nothing is added about the girl.
    */
   private playObservatoryMemory(): void {
+    this.cancelObservatoryMemory();
+    this.observatoryMemoryPlaying = true;
+    const generation = this.observatoryMemoryGeneration;
+    const current = (): boolean => this.observatoryMemoryPlaying
+      && this.observatoryMemoryGeneration === generation && this.activeObservatoryRoom === 'observatory';
+    const after = (delay: number, callback: () => void): void => {
+      this.observatoryMemoryTimers.push(this.time.delayedCall(delay, () => { if (current()) callback(); }));
+    };
+    SoundSystem.setMusicLevel(0.2);
+    this.stopObservatoryWeather = SoundSystem.startObservatoryMemoryWeather();
     const shadow = this.observatoryShadowVisual;
     const overlay = this.observatoryMemoryOverlay;
     const memoryKey = getShadowArtKey('memory-overlay');
@@ -1403,16 +1464,28 @@ export class CampaignScene extends Phaser.Scene {
       if (guardian?.active) guardian.destroy();
     };
     this.say([...OBSERVATORY_MEMORY_RECORDING], () => {
-      this.showObservatoryCaption(OBSERVATORY_MEMORY_CAPTION);
-      this.cameras.main.flash(500, 255, 245, 220, true);
-      if (guardian?.active) this.tweens.add({ targets: guardian, alpha: 0.35, duration: 600 });
-      this.say([...OBSERVATORY_MEMORY_LUMO], () => {
+      if (!current()) return;
+      this.showObservatoryCaption(OBSERVATORY_MEMORY_CAPTION, 4800);
+      SoundSystem.playObservatoryCue('memoryImpact');
+      after(650, () => SoundSystem.playObservatoryCue('memoryWaterFade'));
+      after(2500, () => SoundSystem.playObservatoryCue('memoryCracks'));
+      after(3700, () => {
+        this.stopObservatoryWeather?.();
+        this.stopObservatoryWeather = undefined;
+        SoundSystem.playObservatoryCue('memoryFlash');
+        this.cameras.main.flash(500, 255, 245, 220, true);
+        if (guardian?.active) this.tweens.add({ targets: guardian, alpha: 0.35, duration: 600 });
+      });
+      after(5200, () => this.say([...OBSERVATORY_MEMORY_LUMO], () => {
+        if (!current()) return;
         this.showObservatoryCaption(OBSERVATORY_MEMORY_MERGE_CAPTION);
         const home = OBSERVATORY_SHADOW.ground.x;
         if (shadow?.active) {
           this.tweens.add({
             targets: shadow, x: OBSERVATORY_SHADOW.guardianGround.x, duration: 900,
             onComplete: () => {
+              if (!current()) return;
+              SoundSystem.playObservatoryCue('memoryMerge');
               if (guardian?.active) this.tweens.add({ targets: guardian, alpha: 0, duration: 800 });
               this.tweens.add({
                 targets: overlay ?? [], alpha: 0, duration: 800, delay: 400,
@@ -1421,14 +1494,34 @@ export class CampaignScene extends Phaser.Scene {
               this.tweens.add({ targets: shadow, x: home, duration: 700, delay: 1000 });
             },
           });
-        } else finish();
-        this.time.delayedCall(2200, () => this.say([...OBSERVATORY_MEMORY_SHADOW]));
-      });
+        } else { SoundSystem.playObservatoryCue('memoryMerge'); finish(); }
+        after(2200, () => this.say([...OBSERVATORY_MEMORY_SHADOW], () => {
+          if (!current()) return;
+          // A real rest after the last answer: already scheduled music tails also pass through this bus.
+          SoundSystem.setMusicLevel(0);
+          after(3200, () => {
+            finish();
+            this.cancelObservatoryMemory();
+          });
+        }));
+      }));
     });
+  }
+
+  private cancelObservatoryMemory(): void {
+    this.observatoryMemoryGeneration += 1;
+    for (const timer of this.observatoryMemoryTimers) timer.remove(false);
+    this.observatoryMemoryTimers = [];
+    this.stopObservatoryWeather?.();
+    this.stopObservatoryWeather = undefined;
+    if (this.observatoryMemoryPlaying) SoundSystem.setMusicLevel(1, 0.6);
+    this.observatoryMemoryPlaying = false;
   }
 
   public callObservatoryLumo(destination: 'seal' | 'recall'): void {
     if (this.progress.level !== 8 || !this.activeObservatoryRoom) return;
+    const leavingSeal = destination === 'recall' && this.getObservatoryState().lumoAtSeal;
+    SoundSystem.playObservatoryCue(leavingSeal ? 'lumoLeave' : 'lumoFly');
     const lumoRoom = this.getObservatoryLumoRoom();
     const steps: ObservatoryRoomPoint[] = [];
     const add = (roomId: ObservatoryRoomId, x: number, y: number): void => { steps.push({ roomId, x, y }); };
@@ -1463,7 +1556,8 @@ export class CampaignScene extends Phaser.Scene {
     this.progress.counters['l8-lumo-route-index'] = 0;
     this.progress.flags['l8-lumo-recalled'] = false;
     this.save();
-    this.say([{ speaker: 'Nhinh', text: destination === 'seal' ? tr('Lumo, đi theo ống sáng tới ấn giúp mình nhé.') : tr('Lumo, trở về bên bệ đèn nhé.') }, { speaker: 'Lumo', text: tr('Tôi sẽ đi theo đường đã mở.') }]);
+    if (destination === 'seal') this.say([{ speaker: 'Nhinh', text: tr('Lumo, đi theo ống sáng tới ấn giúp mình nhé.') }, { speaker: 'Lumo', text: tr('Tôi sẽ đi theo đường đã mở.') }]);
+    else this.say([{ speaker: 'Nhinh', text: tr('Lumo, trở về bên bệ đèn nhé.') }, ...OBSERVATORY_LUMO_LEAVES_SEAL]);
   }
 
   public transitionObservatory(exitId: string): void {
@@ -1472,6 +1566,7 @@ export class CampaignScene extends Phaser.Scene {
     if (!exit) return;
     const state = this.getObservatoryWorldState();
     if (!observatoryDoorOpen(exit.doorId, state)) {
+      SoundSystem.playPuzzleError();
       this.say([{ speaker: 'Nhinh', text: observatoryDoorBlockReason(exit.doorId, state) }]);
       return;
     }
@@ -1484,6 +1579,7 @@ export class CampaignScene extends Phaser.Scene {
       this.progress.counters['l8-lumo-y'] = destination.position.y - 18;
     }
     this.progress.roomId = exit.toRoom;
+    if (exit.toRoom === 'observatory') this.progress.flags['l8-observatory-reached'] = true;
     this.progress.roomSpawn = { ...destination.position };
     this.progress.counters['player-level'] = 8;
     this.progress.counters['player-x'] = destination.position.x;
@@ -1586,9 +1682,12 @@ export class CampaignScene extends Phaser.Scene {
       getPrompt: () => (this.isObservatoryExitOpen(exit)
         ? tr('E · {door} đang mở', { door: tr(alcove.label) })
         : tr('E · Kiểm tra {door} — {reason}', { door: tr(alcove.label), reason: observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState()) })),
-      onInteract: () => this.say([{ speaker: 'Nhinh', text: this.isObservatoryExitOpen(exit)
-        ? tr('{door} đã mở. Nhấn E để đi sang {title}.', { door: tr(alcove.label), title: tr(title) })
-        : tr('{door} còn đóng. {reason}', { door: tr(alcove.label), reason: observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState()) }) }]),
+      onInteract: () => {
+        if (!this.isObservatoryExitOpen(exit)) SoundSystem.playPuzzleError();
+        this.say([{ speaker: 'Nhinh', text: this.isObservatoryExitOpen(exit)
+          ? tr('{door} đã mở. Nhấn E để đi sang {title}.', { door: tr(alcove.label), title: tr(title) })
+          : tr('{door} còn đóng. {reason}', { door: tr(alcove.label), reason: observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState()) }) }]);
+      },
     });
   }
 
@@ -1691,6 +1790,14 @@ export class CampaignScene extends Phaser.Scene {
       miniatureViewed: flags['l8-miniature-viewed'] === true,
       mirrors: { g0: this.value('l8-g0'), g1: this.value('l8-g1'), g2: this.value('l8-g2') },
       statue: this.value('l8-statue'),
+      supplyLive: puzzle.supplyLive,
+      rootState: puzzle.rootState,
+      sealRemembered: flags['l8-seal-remembered'] === true,
+      // A save taken inside the observatory counts as reached even before the flag existed.
+      observatoryReached: flags['l8-observatory-reached'] === true || this.activeObservatoryRoom === 'observatory' || flags['l8-bridge-crossed'] === true,
+      marginSeen: flags['l8-margin-seen'] === true,
+      lumoBeside: this.isObservatoryLumoBesideNhinh(),
+      marksSeen: [0, 1, 2, 3, 4].filter((index) => flags[`l8-mark-${index}`] === true).length,
     };
   }
 
@@ -1702,6 +1809,7 @@ export class CampaignScene extends Phaser.Scene {
       mirrorRotations: { g0: this.value('l8-g0'), g1: this.value('l8-g1'), g2: this.value('l8-g2') },
       statueOrientation: this.value('l8-statue'), lanternOn: this.lantern.lanternOn, lanternPlaced: this.lantern.lanternPlaced,
       doorALatched: this.progress.flags['l8-door-a-latched'] === true,
+      sealRemembered: this.progress.flags['l8-seal-remembered'] === true,
       lumoPosition: this.getObservatoryLumoRoom() ? { roomId: this.getObservatoryLumoRoom()!, x: this.lumo.sprite.x, y: this.lumo.sprite.y } : null,
       lumoRoute: {
         destinationWaypointId: typeof routeTarget === 'string' && waypointIds.includes(routeTarget as ObservatoryWaypointId) ? routeTarget as ObservatoryWaypointId : null,
@@ -1757,6 +1865,10 @@ export class CampaignScene extends Phaser.Scene {
         if (routeIndex + 1 >= steps.length) {
           const destination = this.progress.flags['l8-lumo-destination'];
           this.progress.flags['l8-lumo-arrived'] = destination === 'lumo-seal' ? 'lumo-seal' : 'lantern-source';
+          if (destination === 'lumo-seal') {
+            if (this.progress.flags['l8-seal-remembered'] !== true) SoundSystem.playObservatoryCue('observatoryRain');
+            this.progress.flags['l8-seal-remembered'] = true;
+          }
           this.progress.flags['l8-lumo-recalled'] = destination === 'lantern-source';
           this.progress.flags['l8-lumo-route-json'] = '';
           this.progress.counters['l8-lumo-route-index'] = 0;
@@ -1808,11 +1920,69 @@ export class CampaignScene extends Phaser.Scene {
     return observatoryCompletionReady(this.getObservatoryWorldState());
   }
 
+  /** The root bed's two authored masses: the full-depth divider cut by the bridge lane. */
+  private observatoryRootMasses(): ObsRect[] {
+    const laneTop = OBSERVATORY_BRIDGE_LANE.y;
+    const laneBottom = OBSERVATORY_BRIDGE_LANE.y + OBSERVATORY_BRIDGE_LANE.height;
+    const bedBottom = OBSERVATORY_ROOT_BED.y + OBSERVATORY_ROOT_BED.height;
+    return [
+      { ...OBSERVATORY_ROOT_BED, height: laneTop - OBSERVATORY_ROOT_BED.y },
+      { ...OBSERVATORY_ROOT_BED, y: laneBottom, height: bedBottom - laneBottom },
+    ];
+  }
+
+  /** Paints the root bed in its state: amber when lit, dark and drawn back when retracted (scenario v2 §4). */
+  private paintObservatoryRoots(visual: Phaser.GameObjects.Graphics, masses: readonly ObsRect[], rootState: ObsWorldState['rootState']): void {
+    const palette = OBSERVATORY_ROOT_PALETTE[rootState];
+    visual.clear();
+    visual.setAlpha(palette.alpha);
+    for (const mass of masses) {
+      visual.fillStyle(palette.fill, 1);
+      visual.fillRoundedRect(mass.x, mass.y, mass.width, mass.height, 6);
+      visual.lineStyle(2, palette.line, 0.85);
+      for (let y = mass.y + 10; y < mass.y + mass.height; y += 18) {
+        visual.lineBetween(mass.x + 3, y, mass.x + mass.width - 3, y + 7);
+      }
+    }
+  }
+
+  /** Lumo counts as beside Nhinh only when his route is finished, he is free, and he stands in her room within reach. */
+  private isObservatoryLumoBesideNhinh(): boolean {
+    if (!this.activeObservatoryRoom || !this.isObservatoryLumoFree()) return false;
+    return observatoryLumoBeside(
+      { roomId: this.getObservatoryLumoRoom(), x: this.lumo.sprite.x, y: this.lumo.sprite.y },
+      { roomId: this.activeObservatoryRoom, x: this.player.x, y: this.player.y },
+    );
+  }
+
+  /**
+   * Passive beats in the corridor: Lumo's first arrival at the seal (scenario v2 §2), and the margin ink on the star
+   * chart when the lamp is carried unlit (scenario v2 side path). Each plays once and waits for a free dialogue.
+   */
+  private updateObservatoryBeatTriggers(): void {
+    if (this.activeObservatoryRoom !== 'corridor' || this.dialogue.isActive()) return;
+    const flags = this.progress.flags;
+    if (flags['l8-seal-remembered'] === true && flags['l8-seal-said'] !== true) {
+      flags['l8-seal-said'] = true;
+      this.save();
+      this.queueObservatoryBeat(OBSERVATORY_SEAL_REMEMBERED);
+    }
+    const nearTable = Math.hypot(this.player.x - OBSERVATORY_MARGIN_TRIGGER.x, this.player.y - OBSERVATORY_MARGIN_TRIGGER.y) <= OBSERVATORY_MARGIN_TRIGGER.radius;
+    if (nearTable && flags['l8-margin-seen'] !== true && this.lantern.lanternInHand && !this.lantern.lanternOn) {
+      flags['l8-margin-seen'] = true;
+      SoundSystem.playObservatoryCue('marginInk');
+      this.save();
+      this.queueObservatoryBeat(OBSERVATORY_MARGIN_INK);
+    }
+  }
+
   private showObservatoryJournal(): void {
     const state = this.getObservatoryWorldState();
     const room = this.activeObservatoryRoom ? tr(OBSERVATORY_ROOMS[this.activeObservatoryRoom].title) : tr('tiền sảnh');
     const facts: string[] = [tr('Nơi đang đứng: {room}.', { room }), tr('Một nguồn sáng ở tiền sảnh chạy qua cả ba phòng nhờ các gương.')];
     if (state.miniatureViewed) facts.push(tr('Mô hình ở tiền sảnh: gương đổi hướng tia, chốt giữ cửa, ấn cần Lumo đứng thật, tượng che được nhánh giữa, rễ cần bóng.'));
+    facts.push(tr('Những dấu nhỏ: {marks}/5.', { marks: state.marksSeen }));
+    if (state.marginSeen) facts.push(tr('Mép bản đồ sao: ‘Đêm nay con sẽ thấy đèn.’'));
     facts.push(state.lumoAtSeal ? tr('Lumo đang giữ ấn ở hành lang phòng sao.') : tr('Ấn chỉ hoạt động khi Lumo thật sự đứng ở đó.'));
     if (state.doorALatched) facts.push(tr('Cửa A đã gài chốt từ bên trong nên giữ mở dù G0 đổi hướng.'));
     facts.push(state.rootBedShadowed
@@ -1904,7 +2074,10 @@ export class CampaignScene extends Phaser.Scene {
     }
 
     const roots = this.observatoryPuzzleVisuals.get('root-bed');
-    if (roots instanceof Phaser.GameObjects.Graphics) roots.setAlpha(state.rootBedShadowed ? 0.5 : 1);
+    if (roots instanceof Phaser.GameObjects.Graphics) this.paintObservatoryRoots(roots, this.observatoryRootMasses(), world.rootState);
+    for (const supply of this.observatoryPipeSupply) supply.setVisible(world.supplyLive);
+    const tube = this.observatoryPuzzleVisuals.get('lumo-tube');
+    if (tube instanceof Phaser.GameObjects.Image) tube.setTint(world.sealRemembered ? 0xbfe6ff : 0xffffff);
     const bridge = this.observatoryPuzzleVisuals.get('root-bridge');
     if (bridge instanceof Phaser.GameObjects.Graphics) {
       const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
@@ -1926,6 +2099,15 @@ export class CampaignScene extends Phaser.Scene {
         if (this.observatoryRootBody) this.observatoryRootBody.enable = true;
       }
     }
+
+    const nextAudio = observatoryAudioState(world, state, this.observatoryBridgePendingRemoval);
+    for (const cue of observatoryAudioChanges(this.observatoryAudio, nextAudio)) {
+      if (cue === 'doorOpen') SoundSystem.playDoorOpen();
+      else if (cue === 'doorClose') SoundSystem.playDoorClose();
+      else if (cue === 'lightPulse') SoundSystem.playLightPulse();
+      else SoundSystem.playObservatoryCue(cue);
+    }
+    this.observatoryAudio = nextAudio;
 
     const beams = this.observatoryPuzzleVisuals.get('beams');
     if (beams instanceof Phaser.GameObjects.Graphics) {

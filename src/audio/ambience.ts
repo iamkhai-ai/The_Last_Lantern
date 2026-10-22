@@ -8,10 +8,11 @@ import { noiseBuffer, tone } from './synth.ts';
 import { startMusic } from './music.ts';
 
 export type AmbienceTheme = 'forest' | 'library' | 'creek' | 'wind' | 'drone' | 'heart'
-  | 'tower' | 'tower-restored' | 'garden' | 'garden-restored';
+  | 'tower' | 'tower-restored' | 'garden' | 'garden-restored' | 'observatory';
 
 export interface AmbienceHandle {
   stop(fadeSeconds: number): void;
+  setMusicLevel(level: number, fadeSeconds: number): void;
 }
 
 type Release = () => void;
@@ -206,6 +207,7 @@ const THEMES: Record<AmbienceTheme, ReadonlyArray<readonly [Layer, number]>> = {
   creek: [[water, 1], [wind(350), 0.2], [music, 0.65]],
   wind: [[wind(380), 0.9], [music, 0.5]],
   drone: [[drone, 1], [music, 0.45]],
+  observatory: [[wind(240), 0.22], [drone, 0.65], [music, 0.4]],
   heart: [[pad, 1], [wind(320), 0.15], [music, 0.85]],
   tower: [[wind(380), 0.25], [machine, 1], [music, 0.5]],
   'tower-restored': [[wind(380), 0.25], [water, 0.35], [music, 0.5]],
@@ -215,7 +217,7 @@ const THEMES: Record<AmbienceTheme, ReadonlyArray<readonly [Layer, number]>> = {
 
 /** Environmental bed trims. Story water layers sit lower to leave room for dialogue and the first insects. */
 const BED_TRIM: Record<AmbienceTheme, number> = {
-  forest: 0.2, library: 0.25, creek: 0.17, wind: 0.12, drone: 0.25, heart: 0.6,
+  forest: 0.2, library: 0.25, creek: 0.17, wind: 0.12, drone: 0.25, observatory: 0.22, heart: 0.6,
   tower: 0.5, 'tower-restored': 0.17, garden: 0.2, 'garden-restored': 0.17,
 };
 
@@ -230,11 +232,21 @@ export function startAmbience(ctx: BaseAudioContext, out: AudioNode, theme: Ambi
   bed.connect(master);
   const events = ctx.createGain();
   events.connect(master);
+  // Music has its own bus so long scheduled pad tails can be silenced without muting the room or dialogue.
+  const musicBus = ctx.createGain();
+  musicBus.connect(master);
   const release: Release[] = [];
   const timers: Array<() => void> = [];
-  for (const [layer, level] of THEMES[theme]) layer(ctx, bed, events, level, release, timers);
+  for (const [layer, level] of THEMES[theme]) layer(ctx, bed, layer === music ? musicBus : events, level, release, timers);
   let stopped = false;
   return {
+    setMusicLevel(level: number, fadeSeconds: number): void {
+      if (stopped) return;
+      const t = ctx.currentTime;
+      musicBus.gain.cancelScheduledValues(t);
+      musicBus.gain.setValueAtTime(musicBus.gain.value, t);
+      musicBus.gain.linearRampToValueAtTime(Math.max(0, Math.min(1, level)), t + Math.max(0, fadeSeconds));
+    },
     stop(fadeSeconds: number): void {
       if (stopped) return;
       stopped = true;
