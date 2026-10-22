@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { speakerLabel, tr } from '../i18n/catalog.ts';
 import { DialogueLine } from '../types/gameTypes';
 import { SoundSystem } from './SoundSystem';
 
@@ -45,7 +46,7 @@ export class DialogueSystem {
       lineSpacing: 4,
     });
 
-    this.hintText = scene.add.text(584, 330, '[E / Space] Tiếp →', {
+    this.hintText = scene.add.text(584, 330, tr('[E / Space] Tiếp →'), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '10px',
       color: '#9ec4bd',
@@ -88,7 +89,8 @@ export class DialogueSystem {
 
   private showLine(index: number): void {
     const line = this.queue[index];
-    this.fullLineText = line.text;
+    // Localized at the render boundary: authored copy stays Vietnamese, the id above stays identity.
+    this.fullLineText = tr(line.text);
     this.visibleChars = 0;
     this.charTimer = 0;
 
@@ -101,7 +103,7 @@ export class DialogueSystem {
       'Hệ thống': '#8cc3da',
     };
 
-    this.speakerText.setText(line.speaker.toUpperCase());
+    this.speakerText.setText(speakerLabel(line.speaker).toUpperCase());
     this.speakerText.setColor(speakerColors[line.speaker] ?? '#f7dfaa');
     this.bodyText.setText('');
 

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { DIALOGUE_DATA } from '../data/dialogue';
+import { getLocale, otherLocale, setLocale } from '../i18n/locale.ts';
 import { getLumoHint, getObjectiveText, ZONE_SUBTITLES_VI, ZONE_TITLES } from '../data/quests';
 import { CreekMirrorPuzzle } from '../puzzles/CreekMirrorPuzzle';
 import { RuinsBalancePuzzle } from '../puzzles/RuinsBalancePuzzle';
@@ -117,6 +118,10 @@ export class WorldScene extends Phaser.Scene {
       },
       onMainMenu: () => {
         this.scene.start('MenuScene');
+      },
+      onLanguageChange: () => {
+        setLocale(otherLocale(getLocale()));
+        this.scene.restart();
       },
     });
 

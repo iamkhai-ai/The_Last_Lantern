@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
 
 export type HudKeyId = 'move' | 'run' | 'interact' | 'lantern' | 'pulse' | 'journal' | 'hint' | 'pause';
 
@@ -182,18 +183,18 @@ export class CampaignHud {
     this.chipLayer.add(this.chipGraphics);
     for (const id of KEY_ORDER) {
       const keyText = this.makeText(0, 0, KEY_DEFS[id].key, 9, KEY_TEXT, true).setOrigin(0, 0.5).setVisible(false);
-      const labelText = this.makeText(0, 0, KEY_DEFS[id].label, 9, KEY_TEXT).setOrigin(0, 0.5).setVisible(false);
+      const labelText = this.makeText(0, 0, tr(KEY_DEFS[id].label), 9, KEY_TEXT).setOrigin(0, 0.5).setVisible(false);
       this.chipLayer.add([keyText, labelText]);
       this.keyTexts.set(id, keyText);
       this.labelTexts.set(id, labelText);
     }
     this.pulseChip = scene.add.container(0, KEYS_Y).setVisible(false);
     this.pulseGraphics = scene.add.graphics();
-    this.pulseLabel = this.makeText(PULSE_LABEL_X, 0, KEY_DEFS.pulse.label, 9, PULSE_READY_CSS, true).setOrigin(0, 0.5);
+    this.pulseLabel = this.makeText(PULSE_LABEL_X, 0, tr(KEY_DEFS.pulse.label), 9, PULSE_READY_CSS, true).setOrigin(0, 0.5);
     this.pulseChip.add([this.pulseGraphics, this.pulseLabel]);
     this.chipLayer.add(this.pulseChip);
     // Pause stays discoverable without a chip: a quiet corner label instead of a keycap in the row.
-    this.escText = this.makeText(ESC_X, KEYS_Y, `${KEY_DEFS.pause.key} · ${KEY_DEFS.pause.label}`, ESC_SIZE, KEY_TEXT)
+    this.escText = this.makeText(ESC_X, KEYS_Y, `${KEY_DEFS.pause.key} · ${tr(KEY_DEFS.pause.label)}`, ESC_SIZE, KEY_TEXT)
       .setOrigin(1, 0.5).setAlpha(0.6);
     this.chipLayer.add(this.escText);
 
@@ -455,18 +456,18 @@ export class CampaignHud {
     const labelText = this.labelTexts.get(id);
     if (!keyText || !labelText) return 0;
     keyText.setText(KEY_DEFS[id].key);
-    labelText.setText(KEY_DEFS[id].label);
+    labelText.setText(tr(KEY_DEFS[id].label));
     return Math.ceil(keyText.width) + CHIP_KEY_PAD * 2 + CHIP_KEY_GAP + Math.ceil(labelText.width);
   }
 
   private measurePulseLabel(): number {
-    this.pulseLabel.setText(KEY_DEFS.pulse.label);
+    this.pulseLabel.setText(tr(KEY_DEFS.pulse.label));
     return Math.ceil(this.pulseLabel.width);
   }
 
   private updatePulseLabel(): void {
     const cooling = this.pulseCooldown > 0;
-    this.pulseLabel.setText(cooling ? `${(this.pulseCooldown * (PULSE_COOLDOWN_MS / 1000)).toFixed(1)}s` : KEY_DEFS.pulse.label);
+    this.pulseLabel.setText(cooling ? `${(this.pulseCooldown * (PULSE_COOLDOWN_MS / 1000)).toFixed(1)}s` : tr(KEY_DEFS.pulse.label));
     this.pulseLabel.setColor(cooling ? PULSE_COOLING_CSS : PULSE_READY_CSS);
   }
 

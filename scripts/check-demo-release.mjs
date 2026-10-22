@@ -358,6 +358,11 @@ function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStag
     RELEASE_POLICY: policy,
     NEW_GAME_CONFIRM_TEXT: CONFIRM_SENTENCE,
     CONFIRM_LABELS: ['Quay lại', 'Bắt đầu lại'],
+    // Identity i18n: this harness asserts the Vietnamese copy, which is the catalogue key.
+    tr: (text) => text,
+    getLocale: () => 'vi',
+    otherLocale: () => 'en',
+    setLocale: () => {},
     CampaignSaveSystem: {
       load: (...args) => CampaignSaveSystem.load(...args),
       hasSave: () => CampaignSaveSystem.hasSave(),

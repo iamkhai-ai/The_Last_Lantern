@@ -50,6 +50,7 @@ import {
   type ObsWorldState,
 } from '../data/observatoryLayout';
 import { DialogueSystem } from '../systems/DialogueSystem';
+import { getLocale, otherLocale, setLocale } from '../i18n/locale.ts';
 import { InteractionSystem } from '../systems/InteractionSystem';
 import type { ReachFootprint } from '../systems/interactionReach';
 import { LanternSystem, LIBRARY_LIGHTING } from '../systems/LanternSystem';
@@ -244,6 +245,8 @@ export class CampaignScene extends Phaser.Scene {
       onResume: () => undefined,
       onRestart: () => { CampaignSaveSystem.clear(); this.scene.start('PrologueScene'); },
       onMainMenu: () => this.scene.start('MenuScene'),
+      // A locale change rebuilds the scene so every drawn string re-renders; progress resumes from the save.
+      onLanguageChange: () => { setLocale(otherLocale(getLocale())); this.scene.restart(); },
     }, {
       // The demo build lists only its own slice of level titles; the reach is capped at the same index.
       names: CAMPAIGN_LEVELS.slice(0, RELEASE_POLICY.lastPlayableLevelIndex + 1).map((level) => level.title),

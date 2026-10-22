@@ -132,6 +132,8 @@ const loadedScene = (() => {
     required.push(id);
     if (id === 'phaser') return FAKE_PHASER;
     if (id === '../data/prologue' || id === '../data/prologue.ts') return { PROLOGUE_PANELS };
+    // Identity i18n: these checks assert the authored Vietnamese copy, which is the catalogue key.
+    if (id === '../i18n/catalog' || id === '../i18n/catalog.ts') return { tr: (text) => text, speakerLabel: (speaker) => speaker };
     if (/\.png$/.test(id)) return `asset://${id}`;
     throw new Error(`PrologueScene imports an unexpected module: ${id}`);
   };

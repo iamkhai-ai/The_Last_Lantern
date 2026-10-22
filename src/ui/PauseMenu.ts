@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
 import { SoundSystem } from '../systems/SoundSystem';
 
-type PauseAction = 'resume' | 'levels' | 'restart' | 'sound' | 'menu';
+type PauseAction = 'resume' | 'levels' | 'language' | 'restart' | 'sound' | 'menu';
 
 /**
  * The level selector row, offered by CampaignScene only. `names` holds every level title; the row shows the level
@@ -34,6 +35,8 @@ export class PauseMenu {
   private onResume: () => void;
   private onRestart: () => void;
   private onMainMenu: () => void;
+  /** Applies a locale change: the owner persists it and restarts the scene so every label redraws. */
+  private onLanguageChange: () => void;
 
   constructor(
     scene: Phaser.Scene,
@@ -41,6 +44,7 @@ export class PauseMenu {
       onResume: () => void;
       onRestart: () => void;
       onMainMenu: () => void;
+      onLanguageChange: () => void;
     },
     levels?: PauseLevelSelector
   ) {
@@ -48,10 +52,11 @@ export class PauseMenu {
     this.onResume = callbacks.onResume;
     this.onRestart = callbacks.onRestart;
     this.onMainMenu = callbacks.onMainMenu;
+    this.onLanguageChange = callbacks.onLanguageChange;
     this.levels = levels;
     this.actions = levels
-      ? ['resume', 'levels', 'restart', 'sound', 'menu']
-      : ['resume', 'restart', 'sound', 'menu'];
+      ? ['resume', 'levels', 'language', 'restart', 'sound', 'menu']
+      : ['resume', 'language', 'restart', 'sound', 'menu'];
 
     this.bg = scene.add.graphics();
     this.bg.fillStyle(0x051014, 0.88);
@@ -64,7 +69,7 @@ export class PauseMenu {
     this.bg.lineStyle(1, 0x3b5c63, 0.7);
     this.bg.lineBetween(196, 254, 444, 254);
 
-    const title = scene.add.text(320, 102, 'TẠM DỪNG (PAUSED)', {
+    const title = scene.add.text(320, 102, tr('TẠM DỪNG (PAUSED)'), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '16px',
       fontStyle: 'bold',
@@ -72,9 +77,9 @@ export class PauseMenu {
     });
     title.setOrigin(0.5, 0.5);
 
-    // With the selector the rows tighten to 26 px so five rows fit the frame; without it the layout is unchanged.
-    const rowStep = levels ? 26 : 32;
-    const rowTop = levels ? 134 : 145;
+    // Six rows (with the language row) need a tighter step so they still clear the control legend.
+    const rowStep = this.actions.length >= 6 ? 22 : levels ? 26 : 32;
+    const rowTop = this.actions.length >= 6 ? 128 : levels ? 134 : 145;
 
     this.items = this.actions.map((action, idx) => {
       const txt = scene.add.text(320, rowTop + idx * rowStep, this.labelFor(action), {
@@ -96,8 +101,8 @@ export class PauseMenu {
     });
 
     const controls = [
-      'WASD/↑↓←→ Đi · ⇧ Chạy · E Tương tác · F Đèn',
-      'SPACE Xung sáng · J Sổ tay · H Gợi ý · ESC Tạm dừng',
+      tr('WASD/↑↓←→ Đi · ⇧ Chạy · E Tương tác · F Đèn'),
+      tr('SPACE Xung sáng · J Sổ tay · H Gợi ý · ESC Tạm dừng'),
     ].map((line, idx) => {
       const txt = scene.add.text(320, 264 + idx * 13, line, {
         fontFamily: 'Segoe UI, sans-serif',
@@ -170,6 +175,9 @@ export class PauseMenu {
       this.onResume();
     } else if (action === 'levels') {
       this.activateLevels();
+    } else if (action === 'language') {
+      this.close();
+      this.onLanguageChange();
     } else if (action === 'restart') {
       if (!this.confirmRestart) {
         this.confirmRestart = true;
@@ -213,22 +221,25 @@ export class PauseMenu {
   }
 
   private labelFor(action: PauseAction): string {
-    if (action === 'resume') return 'TIẾP TỤC (RESUME)';
+    if (action === 'resume') return tr('TIẾP TỤC (RESUME)');
     if (action === 'levels') return this.levelLabel();
+    if (action === 'language') return tr('Ngôn ngữ: Tiếng Việt');
     if (action === 'restart') {
-      return this.confirmRestart ? 'XÁC NHẬN CHƠI LẠI? (NHẤN LẦN NỮA)' : 'CHƠI LẠI TỪ ĐẦU (RESTART)';
+      return tr(this.confirmRestart ? 'XÁC NHẬN CHƠI LẠI? (NHẤN LẦN NỮA)' : 'CHƠI LẠI TỪ ĐẦU (RESTART)');
     }
-    if (action === 'sound') return SoundSystem.isMuted() ? 'ÂM THANH: TẮT' : 'ÂM THANH: BẬT';
-    return 'MÀN HÌNH CHÍNH (MAIN MENU)';
+    if (action === 'sound') return tr(SoundSystem.isMuted() ? 'ÂM THANH: TẮT' : 'ÂM THANH: BẬT');
+    return tr('MÀN HÌNH CHÍNH (MAIN MENU)');
   }
 
   private levelLabel(): string {
     if (!this.levels) return '';
     const number = pad2(this.levelChoice + 1);
-    if (this.confirmLevel) return `VÀO MÀN ${number}? NHẤN LẦN NỮA`;
+    if (this.confirmLevel) return tr('VÀO MÀN {number}? NHẤN LẦN NỮA', { number });
     const name = this.levels.names[this.levelChoice] ?? '';
     // With nothing else reachable there is nothing to step through, so the arrows are left off.
-    return this.levels.getReached() > 0 ? `MÀN: ◂ ${number} · ${name} ▸` : `MÀN: ${number} · ${name}`;
+    return this.levels.getReached() > 0
+      ? tr('MÀN: ◂ {number} · {name} ▸', { number, name })
+      : tr('MÀN: {number} · {name}', { number, name });
   }
 
   private refreshHighlight(): void {
