@@ -665,7 +665,7 @@ export class HeartOfElariaLevel {
       if (standing || element.id === HEART_CONFIRM_ID || element.id === HEART_MAT_ID || element.id === HEART_SEAL_ID) this.protected.push(image);
     }
     // The prism is authored inside G0's mount: aiming G0 into it is the scenario's split route.
-    const prismKey = getSharedMechanismKey('prism-dark');
+    const prismKey = this.artKey('prism-dark') ?? getSharedMechanismKey('prism-dark');
     const prism = prismKey && this.scene.textures.exists(prismKey)
       ? this.track(this.scene.add.image(HEART_BEAM_NODES.prism.x, HEART_BEAM_NODES.prism.y, prismKey).setDepth(this.depthAt(260) + 0.2))
       : null;
@@ -951,8 +951,8 @@ export class HeartOfElariaLevel {
 
   /**
    * The core's art for a state, from the live state (also used for the first frame, so a restored save never flashes
-   * another state). `core-dawn` is byte-identical to `core-night`, so the dawn is read from the dawn lighting overlay
-   * (shown from the dawn transition on), not from a second picture.
+   * another state). The local dawn sprite has warm bark and a new leaf; the dawn lighting overlay provides the
+   * scene-wide transition without changing the core's authored size or anchor.
    */
   private coreArtName(state: HeartPuzzleState): string {
     return this.completed || this.progress.flags['l9-complete'] === true ? 'core-dawn'
@@ -1001,7 +1001,8 @@ export class HeartOfElariaLevel {
     if (g0Element) this.swapArt(HEART_G0_ID, `mirror_${state.g0Split ? 0 : 1}`, g0Element);
     const prism = this.images.get('heart-prism');
     if (prism) {
-      const prismKey = getSharedMechanismKey(state.light && state.g0Split ? 'prism-receiving' : 'prism-dark');
+      const prismName = state.light && state.g0Split ? 'prism-receiving' : 'prism-dark';
+      const prismKey = this.artKey(prismName) ?? getSharedMechanismKey(prismName);
       if (prismKey && this.scene.textures.exists(prismKey) && prism.texture.key !== prismKey) prism.setTexture(prismKey);
     }
     const memoryMirrorElement = getHeartElement('heart-memory-mirror');

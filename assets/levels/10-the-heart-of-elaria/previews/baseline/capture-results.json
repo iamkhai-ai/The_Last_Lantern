@@ -1,0 +1,239 @@
+[
+  {
+    "name": "01-empty",
+    "seed": {
+      "version": 1,
+      "level": 9,
+      "furthestLevel": 9,
+      "flags": {
+        "intro-9": true,
+        "l9-rules-read": true
+      },
+      "counters": {
+        "player-level": 9,
+        "player-x": 277,
+        "player-y": 280
+      },
+      "lanternPickedUp": true,
+      "lanternOn": true
+    },
+    "audit": {
+      "renderer": 2,
+      "canvas": [
+        640,
+        360
+      ],
+      "scene": "CampaignScene",
+      "stage": "crystals",
+      "state": {
+        "light": false,
+        "g0Split": true,
+        "g0Direct": false,
+        "memoryRoute": false,
+        "balanceRoute": false,
+        "lumoAtSeal": false,
+        "eyeLeft": false,
+        "eyeRight": false,
+        "moonShadow": false,
+        "memory": false,
+        "hope": false,
+        "balance": false,
+        "crystals": false,
+        "ready": false,
+        "latched": false
+      },
+      "textures": {
+        "core": {
+          "key": "art_10_the_heart_of_elaria_core_night",
+          "size": [
+            58,
+            68
+          ],
+          "position": [
+            320,
+            115
+          ]
+        },
+        "wheel": {
+          "key": "art_10_the_heart_of_elaria_day_night_wheel_resuming",
+          "size": [
+            96,
+            80
+          ],
+          "position": [
+            320,
+            119
+          ]
+        },
+        "heart-memory": {
+          "key": "art_10_the_heart_of_elaria_memory_alcove_empty",
+          "size": [
+            58,
+            64
+          ],
+          "position": [
+            158,
+            192
+          ]
+        },
+        "heart-hope": {
+          "key": "art_10_the_heart_of_elaria_hope_alcove_empty",
+          "size": [
+            58,
+            64
+          ],
+          "position": [
+            320,
+            200
+          ]
+        },
+        "heart-balance": {
+          "key": "art_10_the_heart_of_elaria_balance_alcove_empty",
+          "size": [
+            58,
+            64
+          ],
+          "position": [
+            480,
+            192
+          ]
+        },
+        "heart-seal": {
+          "key": "art_05_a_path_for_two_pressure_empty",
+          "size": [
+            44,
+            28
+          ],
+          "position": [
+            320,
+            244
+          ]
+        },
+        "heart-eye-left": {
+          "key": "lock_sun_off",
+          "size": [
+            40,
+            33
+          ],
+          "position": [
+            368,
+            282
+          ]
+        },
+        "heart-moon": {
+          "key": "lock_moon_off",
+          "size": [
+            40,
+            34
+          ],
+          "position": [
+            416,
+            282
+          ]
+        },
+        "heart-eye-right": {
+          "key": "lock_sun_off",
+          "size": [
+            40,
+            33
+          ],
+          "position": [
+            464,
+            282
+          ]
+        },
+        "heart-confirm": {
+          "key": "art_10_the_heart_of_elaria_confirmation_root_waiting",
+          "size": [
+            48,
+            32
+          ],
+          "position": [
+            320,
+            278
+          ]
+        },
+        "heart-rule-table": {
+          "key": "art_10_the_heart_of_elaria_root_rule_reminder_table",
+          "size": [
+            124,
+            48
+          ],
+          "position": [
+            150,
+            284
+          ]
+        },
+        "heart-pedestal": {
+          "key": "pedestal_empty",
+          "size": [
+            36,
+            39
+          ],
+          "position": [
+            85,
+            260
+          ]
+        },
+        "heart-g0": {
+          "key": "mirror_0",
+          "size": [
+            36,
+            48
+          ],
+          "position": [
+            207,
+            260
+          ]
+        },
+        "heart-memory-mirror": {
+          "key": "mirror_0",
+          "size": [
+            36,
+            48
+          ],
+          "position": [
+            245,
+            260
+          ]
+        },
+        "heart-statue": {
+          "key": "art_08_ruins_of_two_halves_statue_notch_0",
+          "size": [
+            64,
+            88
+          ],
+          "position": [
+            416,
+            260
+          ]
+        },
+        "heart-balance-mirror": {
+          "key": "mirror_0",
+          "size": [
+            36,
+            48
+          ],
+          "position": [
+            530,
+            260
+          ]
+        },
+        "heart-prism": {
+          "key": "shared_prism_dark",
+          "size": [
+            48,
+            48
+          ],
+          "position": [
+            207,
+            214
+          ]
+        }
+      },
+      "beat": null
+    },
+    "errors": [],
+    "file": "previews/baseline/01-empty.png"
+  }
+]
