@@ -10,7 +10,7 @@
  *  - the locale choice persists under its own storage key and never touches the campaign save.
  */
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -107,6 +107,32 @@ check('storage failure still yields a usable locale', () => {
   assert.equal(locale.getLocale(), 'en');
   globalThis.window.localStorage = original;
   locale.resetLocaleCacheForTests();
+});
+
+check('every catalogue entry module is spread into CATALOG, so the runtime can see it', () => {
+  const entriesDir = join(rootDir, 'src/i18n/entries');
+  const declared = new Set();
+  for (const file of readdirSync(entriesDir)) {
+    const sf = ts.createSourceFile(file, readFileSync(join(entriesDir, file), 'utf8'), ts.ScriptTarget.Latest, true);
+    const visit = (node) => {
+      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'entry') {
+        declared.add(node.arguments[0].text);
+      }
+      node.forEachChild(visit);
+    };
+    visit(sf);
+  }
+  const loaded = new Set(i18n.CATALOG.map((item) => item.id));
+  const unreachable = [...declared].filter((id) => !loaded.has(id));
+  assert.deepEqual(unreachable, [], 'entries declared in src/i18n/entries but missing from CATALOG');
+  assert.equal(i18n.CATALOG.length, declared.size);
+});
+
+check('a build tag and a composed HUD line localize from the catalogue', () => {
+  locale.setLocale('en');
+  assert.equal(i18n.tr('PLAYTEST BUILD · MÀN 01–10'), 'PLAYTEST BUILD · LEVELS 01–10');
+  assert.equal(i18n.tr('Tinh thể đã đặt: {crystals}.', { crystals: 'x' }), 'Crystals placed: x.');
+  locale.setLocale('vi');
 });
 
 console.log(`\n${count - failures.length}/${count} localization checks passed`);

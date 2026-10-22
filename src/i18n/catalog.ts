@@ -37,6 +37,10 @@ export const CATALOG: readonly CatalogEntry[] = [
   ...CAMPAIGN_LEVEL_ENTRIES,
   ...FRAGMENT_ENTRIES,
   ...CHROME_ENTRIES,
+  ...OBSERVATORY_TEXT_ENTRIES,
+  ...HEART_AND_STATE_ENTRIES,
+  ...PUZZLE_AND_QUEST_ENTRIES,
+  ...COMPOSED_AND_TABLE_ENTRIES,
 ];
 
 const byVi = new Map<string, CatalogEntry>();
