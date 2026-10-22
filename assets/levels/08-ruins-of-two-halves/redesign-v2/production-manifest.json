@@ -1,0 +1,1268 @@
+{
+  "version": 1,
+  "date": "2026-10-22",
+  "scope": "Level 08 art redraw only; fixed gameplay, geometry and state orientations.",
+  "base_revision": "e7824c4a54d88bf7f158bf8914e498f66b086bac",
+  "tool": "Built-in image_gen; model/version not exposed by tool",
+  "approval": "User approved the in-chat art direction in Level08 and instructed this chat to implement.",
+  "provenance": "Project-owned source sprites and style references restyled with built-in image_gen. Original tool outputs retained with metadata; technical nearest sampling, exact source-mask projection and family-wide palette quantization performed by this script.",
+  "pipeline": {
+    "filter": "nearest",
+    "alpha": "binary 0/255",
+    "max_family_colours": 128,
+    "dither": false,
+    "pivot": "bottom-centre; runtime placement unchanged",
+    "decal": {
+      "center": [
+        320,
+        222
+      ],
+      "depth": 4,
+      "status": "Asset and authoring composite only. Pulse gameplay hook is outside this art-only scope."
+    }
+  },
+  "authoring_sha256": {
+    "scripts/prepare-level08-art.cjs": "c1433dcf49a2b8aa1f270a097fde041c2cc97786e53ea4481abd374444a6ff99",
+    "scripts/export-level08-art.cjs": "e27ce641075a41d1895e1849e0ae38dbe356a2b8c6bd4d22814e460b3bed3f7c",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/art-redesign-brief.txt": "28777afc8b6928e2ec9957a868730afb01d694955c806e385419dfe8847460b3"
+  },
+  "sources": [
+    {
+      "file": "sources/baseline-catalog.json",
+      "sha256": "e3ca9c3f14d932ffd75fce29fe9643fa9ca208a794f11dbbb2f31fa5b15ed83d"
+    },
+    {
+      "file": "sources/beacon_stone-baseline.png",
+      "sha256": "bb86ae20cfff2b54184b35da598b29ee5a75e90bf1ab47b18efe9cabd11ea268"
+    },
+    {
+      "file": "sources/beacon_stone-original.png",
+      "sha256": "f2ef49f62d73475347d2b5d57316c4ef7416f2a670ce966e0ec569669c7a2bed"
+    },
+    {
+      "file": "sources/confirmation-latched-original.png",
+      "sha256": "d25770f7986915e6cacb4f88344e1a26236661bfee4fddd79fd2247dc22dd3b7"
+    },
+    {
+      "file": "sources/confirmation-ready-original.png",
+      "sha256": "3cac14ead76bda398b0007c02414f306f34163de9b3d40d8fb123fba5b849c71"
+    },
+    {
+      "file": "sources/confirmation-waiting-original.png",
+      "sha256": "7c37e829c1f57b2f8c84087d8e2f807f4b28dd86901fe0a2f3d2bb24ae951763"
+    },
+    {
+      "file": "sources/fixed-three-route-splitter-off-original.png",
+      "sha256": "753bd7e4166472393e37a5830e83d9187a241f0616198b8c85fe234e99d57afb"
+    },
+    {
+      "file": "sources/fixed-three-route-splitter-on-original.png",
+      "sha256": "bcea471e22103247961474177cf7886ddf6fc61c04bbd803b12e4c6065ea22c6"
+    },
+    {
+      "file": "sources/generation-prompts.json",
+      "sha256": "beaba44212ccec94d189fb18e99f047227e6c66845c7fd9cd706b6a71a1a3c09"
+    },
+    {
+      "file": "sources/inscription-under-statue-original.png",
+      "sha256": "53db33d8126c0473322346d7d3d90e6d3faf624eabd4dd56f50c8a007e89a791"
+    },
+    {
+      "file": "sources/lock-moon-covered-original.png",
+      "sha256": "d644a14e02b656bbe19c4c01ac21012a477af09cf3b0f3f1d19b6e6ff38eb834"
+    },
+    {
+      "file": "sources/lock-moon-lit-original.png",
+      "sha256": "b043e32fd7b182ea4195d07e73e5f8424995d217f4b0b73456018cfd2168a74e"
+    },
+    {
+      "file": "sources/lock-sun-off-original.png",
+      "sha256": "9ccdee14edde6656de36e205767cfcb86d2295f17ab83494618b64f8477b62b1"
+    },
+    {
+      "file": "sources/lock-sun-on-original.png",
+      "sha256": "c93e6a005a3bc80c2ce58638d757e2a0f6a5f4d778f492d45287aca75d26a591"
+    },
+    {
+      "file": "sources/mirror_0-baseline.png",
+      "sha256": "becc8586c9ed9b65bdee0dc9d69cccb08ee99bd2a47ecbb20d6a2466adaeef4a"
+    },
+    {
+      "file": "sources/mirror_0-original.png",
+      "sha256": "ef21fb72d1f87b0490fcf57aabbc5242669b748a91450cdcb9aee2470ebd60b2"
+    },
+    {
+      "file": "sources/mirror_1-baseline.png",
+      "sha256": "fe8d9b1e2753d2f73b02681e55080d4b45249c412b264f170e830ff7deec2581"
+    },
+    {
+      "file": "sources/mirror_1-original.png",
+      "sha256": "eee4821b7c1dcc0b1fab8cf819b9af3c9dbbc266767fa6e68249f65e203b1af0"
+    },
+    {
+      "file": "sources/mirror_2-baseline.png",
+      "sha256": "0674a7c3afc81770bf8a9d9bf27873cc929b8e66a53d9c99ce1941c20e1f059a"
+    },
+    {
+      "file": "sources/mirror_2-original.png",
+      "sha256": "2122e2e24399de2d229e0bfa69163211f79bb41cd968bfb2cbcd639edd902d62"
+    },
+    {
+      "file": "sources/mirror_3-baseline.png",
+      "sha256": "c50bfc37666a63c3abdab8ffac91ed2c890fd8a48b2e4624286198802830130a"
+    },
+    {
+      "file": "sources/mirror_3-original.png",
+      "sha256": "5babb736ab46857ab73cfeae20280e2dde912be5f9a66e93752f174377e98966"
+    },
+    {
+      "file": "sources/orientation-prompts.json",
+      "sha256": "dfae0943ccb207d588a4c13233d74b4bb5310ba3c3eec53679163d27cfda95e9"
+    },
+    {
+      "file": "sources/prop-prompts.json",
+      "sha256": "118f3e1678896d2b612124baaa198088d1e261fc3a756a7ce70d1267dc36c84f"
+    },
+    {
+      "file": "sources/ruins_altar-baseline.png",
+      "sha256": "8e0d28cf2db4f2202cfae9ce4e2bddc9557228b5ce8f5e437fc92ba77c338f71"
+    },
+    {
+      "file": "sources/ruins_altar-original.png",
+      "sha256": "d0d008e0b1618f20849b3d727f4ed6d2fd429828242b61197a856a30245a18ea"
+    },
+    {
+      "file": "sources/sanctuary-door-closed-original.png",
+      "sha256": "937e45cda7e03d8be48f77fabda1e298cfc98ff6a211405cdc8aee984a89a1e7"
+    },
+    {
+      "file": "sources/sanctuary-door-open-original.png",
+      "sha256": "6f2ad406891f3897f8be9ae582e4ef56c1ac2746259dd43874e3cad8833500aa"
+    },
+    {
+      "file": "sources/seedling-curtain-closed-original.png",
+      "sha256": "6d2610c0df83b2ba2b86f763cff1fb0a74a68ef6393d5cdcedab7b5ed406600e"
+    },
+    {
+      "file": "sources/seedling-curtain-open-original.png",
+      "sha256": "fa124072e1a7de7307d5a443bc4cae7103e869d35d8d8be5b7b295c0c9f06c21"
+    },
+    {
+      "file": "sources/statue-notch-0-original.png",
+      "sha256": "11ae52285fc5573204b3cd6bd8642cb39ee94e28f127c55d16196c5d919ebcc9"
+    },
+    {
+      "file": "sources/statue-notch-1-original.png",
+      "sha256": "6f6b2e2316458c8d8e26c712f129d5fc7461a90069abdc07035750356d4804a4"
+    },
+    {
+      "file": "sources/statue-notch-2-original.png",
+      "sha256": "e42a8e834792833e2d853992e54efaa1dd1d2479a3e48952c0ea9a6e35de084b"
+    },
+    {
+      "file": "sources/statue-notch-3-original.png",
+      "sha256": "45850e0bf405887d7fbe48b05d82ee71bab4de7d8c3d97dadbf9c1ffee429e3a"
+    },
+    {
+      "file": "sources/temple-scene-base-original.png",
+      "sha256": "a9831352e53db509254ac0149124fc78c5faebf7c9811216229ac560a571b892"
+    },
+    {
+      "file": "sources/test-pedestal-original.png",
+      "sha256": "d78e1e24f29792531b5a3fbc5e05178a080e57a5e53f52fef0381cf5f79177d5"
+    }
+  ],
+  "references": [
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-latched.png",
+      "sha256": "7670443c53e31493db44716900e2b4baea5c365032dfe63591c6f4e05267a0e5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-ready.png",
+      "sha256": "b356e663f2cdff5cf72d36d5172d10f58101ec04efa1c20c119f07f186201a5e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-waiting.png",
+      "sha256": "b05ff90199e6a2b5eff8a439cb6dc19a142d7221f169c440bc51ec9f07b01e9a"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-off.png",
+      "sha256": "5a6e2ff75d41101e776fa31fc959cad489c3a43c1e8ee4a1611ea31120822128"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-on.png",
+      "sha256": "ad9ab6816768a3fb2b79905edc22cc94f955cb768afd72a383917e4b97bd71e5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-covered.png",
+      "sha256": "09864457987a08ebdd8b9469d9b4661bc444760155da7dd05a6ea21b4c8b95bf"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-lit.png",
+      "sha256": "865a8e3cd5a80b05c41733337f418e7fd1243a4e486b6e798da16221c8fba9d1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+      "sha256": "3214a56e79aafe58eb9d2dbfed61fb68abb186e940101ceab10afdd78a16e481"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+      "sha256": "e6ceda2917d23b4890b02188f1a36f93c243486b63a971de57cfb7bc284f844d"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-closed.png",
+      "sha256": "6b19186008d7d42358b72238058562afe17fc286861365e2fb08cb319f73e6ad"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-open.png",
+      "sha256": "b81b4b9e992b1ea7bbfc8219ef4f3ddcef2b458d48477f81b466f431f45a7402"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-closed.png",
+      "sha256": "ecf2dfbaeb3960c53e163b378c6cd688dab754b5b1a54a4dd56652675748a876"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-open.png",
+      "sha256": "51aae6373aefd1c64770cdab713e3e18335c4cb4b1aad283e2833ab9b90750a1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+      "sha256": "229be9a551a4e94c4832a58731aa6596b335fdc938135637aadfe538ca9be1d8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+      "sha256": "ad001a31d4cad40d41b8d48c010eefd8b5e1cd1b038abf61df0287de5c61f992"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-2.png",
+      "sha256": "3c479b27ab1236a551449507041e8f593446012150bf80aee358b1b3bc544926"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-3.png",
+      "sha256": "836152dfbbc29c7e8f641703751d7bad4447e106000d1aba4fd946add9cdcd1e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-0.png",
+      "sha256": "c8685271b93b9ef448ad661d3caa3f8b26ba7b7e714d049e7586117cde3c09ce"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-1.png",
+      "sha256": "18bde51c199abc6df8ad7f2e5e43b1eba05916312ba7d21a7045209052c411d9"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-2.png",
+      "sha256": "462e2806fdb1d4bb5f2803c92c3615165c4aba86f3ad3cd215c7b7445431dd19"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-3.png",
+      "sha256": "6d0aa4f057d66aed3b8c8e31e98a97c1962f1a6251e955a46301b2f616a0109f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-covered.png",
+      "sha256": "fa19a86fb1993b499299c0ceb494660b74ab6b8f303d443d8d922c33ae6fed7f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-lit.png",
+      "sha256": "880955807e450f67d9645facf5786ffc7e95c65d94af4aea1ac4f82e401f4cfb"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-pedestal.png",
+      "sha256": "35307f6e285871fde31db885f27c8aeb91c887e4387861e07955a6811f9022f2"
+    },
+    {
+      "file": "src/assets/mirror_0.png",
+      "sha256": "1d4f33118d247a909f937b5147c37037f721a09649a98a6776533fb5d71bd0e6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_0-baseline.png",
+      "sha256": "becc8586c9ed9b65bdee0dc9d69cccb08ee99bd2a47ecbb20d6a2466adaeef4a"
+    },
+    {
+      "file": "src/assets/mirror_1.png",
+      "sha256": "5297eefc7a127ce11af9845185aed6dfabcd27d4d3ffcb418b590d785470f29f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_1-baseline.png",
+      "sha256": "fe8d9b1e2753d2f73b02681e55080d4b45249c412b264f170e830ff7deec2581"
+    },
+    {
+      "file": "src/assets/mirror_2.png",
+      "sha256": "91662f3642c291761a668d95101e844839bc6a91a6c41da8b35aaa645dd532b3"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_2-baseline.png",
+      "sha256": "0674a7c3afc81770bf8a9d9bf27873cc929b8e66a53d9c99ce1941c20e1f059a"
+    },
+    {
+      "file": "src/assets/mirror_3.png",
+      "sha256": "f17fab0c9fe5998179bf53a17f0318e61db413de77d7db5d0488331245304416"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_3-baseline.png",
+      "sha256": "c50bfc37666a63c3abdab8ffac91ed2c890fd8a48b2e4624286198802830130a"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/ruins_altar-baseline.png",
+      "sha256": "8e0d28cf2db4f2202cfae9ce4e2bddc9557228b5ce8f5e437fc92ba77c338f71"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/beacon_stone-baseline.png",
+      "sha256": "bb86ae20cfff2b54184b35da598b29ee5a75e90bf1ab47b18efe9cabd11ea268"
+    },
+    {
+      "file": "assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png",
+      "sha256": "27e6f9e669b664feed03d41f18bee2fa96e6e98df8fe0abbdd684509888c771e"
+    }
+  ],
+  "protected": [
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/08-shadow-640x360.png",
+      "sha256": "f7269f8dac9d2abf86290415e21329a5dcf327115286aea2293a06d5c7dcf859"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-after-memory-640x360.png",
+      "sha256": "adab4f21409c62c6b6cdf9d03064792173fd40a05fad478cb5de052a4355b8b6"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-memory-640x360.png",
+      "sha256": "7d7da0841fafcb98e18d25085220d2634caf188ecdc58bb92882f1b627764e54"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-present-640x360.png",
+      "sha256": "edabafcd95f919a7a853831a7f2b5bf5a87a6d614260e81173b3147090b6b860"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-reveal-overlap-640x360.png",
+      "sha256": "011a4fbc3f40cf3586d010445d25c0afa128f6cee06c5738bf1cd8f85479ec66"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-0-640x360.png",
+      "sha256": "c05260c78f3ecf6dfb7b291cbed1dfff103f67a560ab6e4c6ffbc6a481df0d49"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-1-640x360.png",
+      "sha256": "1c2a247f456e548f448d50cb238285bfb45793fa4aadd1d0d58541822fab155f"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-2-640x360.png",
+      "sha256": "63e2b6793259cc48119c183fa2a596b2426d283a68d6807edcd9b2d70b4911e4"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-3-640x360.png",
+      "sha256": "05a9140b6f35e48786539e3c0726e0d7f6eb79cd97683a9de89cd161712aabf4"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-4-640x360.png",
+      "sha256": "a5d77895e7950096eb19a6d89a5f08fef6abe7f8ca5d6d14a9482ed8bac1c639"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-1x.png",
+      "sha256": "bd3d9c258a49c1bd5eeee6c482db4551343d41e09963507c6b4450a8d7b9898b"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-2x.png",
+      "sha256": "91e6e24507761606d8eb8dc518c2bb8f1b88e0bbcd3b94a4248819a534116ac6"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/observatory-dawn-original.png",
+      "sha256": "0d7b13a8089a13cfb0bd2b6b6e6c9ffacc0bae4a6384d6668b6c18854f93bccc"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/observatory-original.png",
+      "sha256": "2ec2a9b86024481ae8c67a983329890d38501f364d305f20959b2f38d24eecf8"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/shadow-guardian-original.png",
+      "sha256": "3e29010bacc9c9240a2e2945a27a0025e8dcce25d822b6d65c3a46f63c599672"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png",
+      "sha256": "99223b9fdbaff1e4a8636d8334fd57e7f10859b5b77cd0576c7905c2f588aaea"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png",
+      "sha256": "259a365f6705ca9868e42b2aefde9a9985ef0c1d86aacf7da723fc781b865649"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png",
+      "sha256": "307c7d33a2a506e196da8b54277c5277f2fedf6537c84ecdc3db3c02fa2050d5"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png",
+      "sha256": "e9bd74696f45da069b0ff079b0be177e0052fbb546bad1f11145ef240f3547e1"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/faded-red-scarf-reuse.png",
+      "sha256": "4d376c5c57df9f9aee651a71bce7eca5b95ae062bfac0e4c6ee288367fb0f863"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png",
+      "sha256": "8de5cfae38cf3e842c58671a9fef8575c152b97769d629f9dfb03e7b6de734cc"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png",
+      "sha256": "36d9c6caa12f24ae804f5e61d5ca39f8d4672be61f1d99efd3da30d6a024b350"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-dawn-scene-base.png",
+      "sha256": "70679eaf38280540d3104475f7a97ac80aae109adb3ea7b1db46181bd29f2f96"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-memory-scene-base.png",
+      "sha256": "6e97f5716f1cde98f3fd7223ac633084d0ae4e1a183b44e95a923b3d55733533"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/shielding.png",
+      "sha256": "a585e485dd8e5e8ff0ac9ecd14242259acab707d5ce4a0d9a32e438e49477c68"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/stillness.png",
+      "sha256": "6411f867cb7435d3e3c8cd70c770006a552a26fbec2beaf583ea16d58bf22eda"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/turn.png",
+      "sha256": "cfd55acdef1eace74bc243687aa4cd7932eaa3ead91dea388e537d982aa71169"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/waiting.png",
+      "sha256": "e2204188559ce123791ad0520076dc42866523f4ad4fb9c350b259af2e6a0e75"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/walk-right.png",
+      "sha256": "0b37b3505135e9721382cdd9f8f41f5b0ff0e7324a4eb9afcd33b0871ed968c6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-0.png",
+      "sha256": "6d139933c5593cfc82b7d5985e22241e37b9bcb71acf49042fcb0e2d63f31456"
+    },
+    {
+      "file": "src/assets/mirror_0.png",
+      "sha256": "1d4f33118d247a909f937b5147c37037f721a09649a98a6776533fb5d71bd0e6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-1.png",
+      "sha256": "d98d47335ec75467c9be683ce0cbc454ddf2ea793c473c4f4f1aa44498651b37"
+    },
+    {
+      "file": "src/assets/mirror_1.png",
+      "sha256": "5297eefc7a127ce11af9845185aed6dfabcd27d4d3ffcb418b590d785470f29f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-2.png",
+      "sha256": "dba6b1d3bcc27366a81473fe13a02c00fea50e8bca607d2326fb5d0aca27b5ea"
+    },
+    {
+      "file": "src/assets/mirror_2.png",
+      "sha256": "91662f3642c291761a668d95101e844839bc6a91a6c41da8b35aaa645dd532b3"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-3.png",
+      "sha256": "89045e43815e5d7922516d28eba31e1b0f54d3379ba826eac2068ae600e37ed9"
+    },
+    {
+      "file": "src/assets/mirror_3.png",
+      "sha256": "f17fab0c9fe5998179bf53a17f0318e61db413de77d7db5d0488331245304416"
+    }
+  ],
+  "exports": [
+    {
+      "file": "sprites/confirmation-latched.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "png_colour_type": 6,
+      "family": "confirmation",
+      "family_colours": 128,
+      "colours": 117,
+      "opaque_box": {
+        "left": 3,
+        "top": 7,
+        "width": 43,
+        "height": 27
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/confirmation-latched-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-latched.png",
+      "sha256": "f2f1fbfe1ae7f554e5e2425bb09e498d7abe638de9f8142b003db8ae07681c67"
+    },
+    {
+      "file": "sprites/confirmation-ready.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "png_colour_type": 6,
+      "family": "confirmation",
+      "family_colours": 128,
+      "colours": 110,
+      "opaque_box": {
+        "left": 3,
+        "top": 7,
+        "width": 43,
+        "height": 27
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/confirmation-ready-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-ready.png",
+      "sha256": "c2240fb7916b19c9bd1ca6b32766df984dfea6306c809e500f699dd1402d4b8c"
+    },
+    {
+      "file": "sprites/confirmation-waiting.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "png_colour_type": 6,
+      "family": "confirmation",
+      "family_colours": 128,
+      "colours": 106,
+      "opaque_box": {
+        "left": 3,
+        "top": 7,
+        "width": 43,
+        "height": 27
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/confirmation-waiting-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-waiting.png",
+      "sha256": "3b6829fe34d882a6b5f1cce3c02f260e23f335a5d695b004bab66846869fbad6"
+    },
+    {
+      "file": "sprites/fixed-three-route-splitter-off.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "fixed-three-route-splitter",
+      "family_colours": 128,
+      "colours": 92,
+      "opaque_box": {
+        "left": 5,
+        "top": 1,
+        "width": 38,
+        "height": 44
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/fixed-three-route-splitter-off-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-off.png",
+      "sha256": "d22b17c8cd526dcadd0137e7a4145d67d4ff4fba6fce5b6d4d4496641215fd43"
+    },
+    {
+      "file": "sprites/fixed-three-route-splitter-on.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "fixed-three-route-splitter",
+      "family_colours": 128,
+      "colours": 103,
+      "opaque_box": {
+        "left": 5,
+        "top": 1,
+        "width": 38,
+        "height": 44
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/fixed-three-route-splitter-on-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-on.png",
+      "sha256": "813468a126c29b319720f67ce0b03168e6af0c7b9c1474d2e6827ca0e9f4d17f"
+    },
+    {
+      "file": "sprites/lock-moon-covered.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "png_colour_type": 6,
+      "family": "lock-moon",
+      "family_colours": 128,
+      "colours": 105,
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/lock-moon-covered-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-covered.png",
+      "sha256": "7ba0306fda953dfd34b39d18d012490ffe3e4588989d4bff52027ff73923cc0a"
+    },
+    {
+      "file": "sprites/lock-moon-lit.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "png_colour_type": 6,
+      "family": "lock-moon",
+      "family_colours": 128,
+      "colours": 105,
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/lock-moon-lit-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-lit.png",
+      "sha256": "541c3e91f7980963cc67c70fc296e94a701170feff1aec90418d07fce8bbeac1"
+    },
+    {
+      "file": "sprites/test-moon-covered.png",
+      "canvas": [
+        16,
+        20
+      ],
+      "png_colour_type": 6,
+      "family": "lock-moon",
+      "family_colours": 128,
+      "colours": 61,
+      "opaque_box": {
+        "left": 1,
+        "top": 2,
+        "width": 14,
+        "height": 17
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/lock-moon-covered-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-covered.png",
+      "sha256": "0a608a9d4fa29a99144bb316fed2ac52897ec0ea91a38baa2ecd9cb9dc13eedc"
+    },
+    {
+      "file": "sprites/test-moon-lit.png",
+      "canvas": [
+        16,
+        20
+      ],
+      "png_colour_type": 6,
+      "family": "lock-moon",
+      "family_colours": 128,
+      "colours": 66,
+      "opaque_box": {
+        "left": 1,
+        "top": 2,
+        "width": 14,
+        "height": 17
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/lock-moon-lit-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-lit.png",
+      "sha256": "425220c313f7eefb1f1dfd4bd74f3677102ae2939ec6e746e8281a472c20b288"
+    },
+    {
+      "file": "sprites/lock-sun-off.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "png_colour_type": 6,
+      "family": "lock-sun",
+      "family_colours": 128,
+      "colours": 102,
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/lock-sun-off-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+      "sha256": "05c03a048f3cff5d4e648ae8736912a95467968bb9388a357c10de13593da047"
+    },
+    {
+      "file": "sprites/lock-sun-on.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "png_colour_type": 6,
+      "family": "lock-sun",
+      "family_colours": 128,
+      "colours": 109,
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/lock-sun-on-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+      "sha256": "0e0264059e28652bea17be4c51782f5559cb68d5f34cd78ccb0c7960d2b3d84f"
+    },
+    {
+      "file": "sprites/sanctuary-door-closed.png",
+      "canvas": [
+        104,
+        76
+      ],
+      "png_colour_type": 6,
+      "family": "sanctuary-door",
+      "family_colours": 128,
+      "colours": 122,
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 102,
+        "height": 74
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/sanctuary-door-closed-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-closed.png",
+      "sha256": "9c3fcb13ad85180126d21be207ccac11b42e16ed1c442600bfc3fa07e08eddb6"
+    },
+    {
+      "file": "sprites/sanctuary-door-open.png",
+      "canvas": [
+        104,
+        76
+      ],
+      "png_colour_type": 6,
+      "family": "sanctuary-door",
+      "family_colours": 128,
+      "colours": 125,
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 102,
+        "height": 74
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/sanctuary-door-open-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-open.png",
+      "sha256": "a858a65d9c35acd1a0b7c9743307fb0ce2dc54c12013467c06d127980a8fd49e"
+    },
+    {
+      "file": "sprites/seedling-curtain-closed.png",
+      "canvas": [
+        88,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "seedling-curtain",
+      "family_colours": 128,
+      "colours": 111,
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 86,
+        "height": 46
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/seedling-curtain-closed-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-closed.png",
+      "sha256": "f8cc627c6fbf29adfb0c2d8c32497b1dec0e77d9f305b24713996194396c2cf7"
+    },
+    {
+      "file": "sprites/seedling-curtain-open.png",
+      "canvas": [
+        88,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "seedling-curtain",
+      "family_colours": 128,
+      "colours": 123,
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 86,
+        "height": 46
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/seedling-curtain-open-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-open.png",
+      "sha256": "7fca240028d7bf0a4f53d8b1e7352cdbc49eb890dc2a42cec2c28ce02896e102"
+    },
+    {
+      "file": "sprites/statue-notch-0.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 126,
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-0-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+      "sha256": "33d3aa018db9043f3e8df9e9c132770b30c47f2f96cf327a1ffc6d58e482ab4c"
+    },
+    {
+      "file": "sprites/statue-notch-1.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 116,
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-1-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+      "sha256": "567772286b150a5aa6ab3c0e0ac96b110ca4d532d29f2b092c88d65257b4438f"
+    },
+    {
+      "file": "sprites/statue-notch-2.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 124,
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-2-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-2.png",
+      "sha256": "8cf8d9f7aad69b3b7bb2f22609c8608f42145f5337b69c66770cd8cb28b03f2b"
+    },
+    {
+      "file": "sprites/statue-notch-3.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 122,
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-3-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-3.png",
+      "sha256": "e93072743423c3779a100906ed5399eb48c5501246a2b9a8aaf52099d555eedc"
+    },
+    {
+      "file": "sprites/test-column-notch-0.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 109,
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-0-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-0.png",
+      "sha256": "3960366d6e5264142ccba0a5dc7d460f18611fca45630bd247fdd535c401567f"
+    },
+    {
+      "file": "sprites/test-column-notch-1.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 95,
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-1-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-1.png",
+      "sha256": "87142e388b1a467fcc82ebb9ac4dc187881db83fe47e0f8fec4a3e6c81cf8ac0"
+    },
+    {
+      "file": "sprites/test-column-notch-2.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 109,
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-2-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-2.png",
+      "sha256": "5ef5b2d3760be41da4e18b35e7b9bb614cd0a7ea0cc8fb85958bc3814c9a14b6"
+    },
+    {
+      "file": "sprites/test-column-notch-3.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "png_colour_type": 6,
+      "family": "statue-notch",
+      "family_colours": 128,
+      "colours": 97,
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/statue-notch-3-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-3.png",
+      "sha256": "2d6e88d45c1a11a99df8d60799a7e18cacaf746e7d18ac0733d48bb00f559ae2"
+    },
+    {
+      "file": "sprites/test-pedestal.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "png_colour_type": 6,
+      "family": "test-pedestal",
+      "family_colours": 128,
+      "colours": 128,
+      "opaque_box": {
+        "left": 3,
+        "top": 6,
+        "width": 43,
+        "height": 27
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/test-pedestal-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-pedestal.png",
+      "sha256": "6147c1d1ce118b70612b3d4828df07fdf1ac715466e67fc3e578f50c3414be48"
+    },
+    {
+      "file": "sprites/mirror_0.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "mirror",
+      "family_colours": 128,
+      "colours": 113,
+      "opaque_box": {
+        "left": 0,
+        "top": 0,
+        "width": 36,
+        "height": 48
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/mirror_0-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_0-baseline.png",
+      "sha256": "778e613a8427f02086acfaf5c47e155299fc3cb743a571d4eb22da7489c897a6"
+    },
+    {
+      "file": "sprites/mirror_1.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "mirror",
+      "family_colours": 128,
+      "colours": 108,
+      "opaque_box": {
+        "left": 0,
+        "top": 0,
+        "width": 36,
+        "height": 48
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/mirror_1-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_1-baseline.png",
+      "sha256": "64a2659a1ce57ecdb2b23773e3896232f5365950b69fa7a4568c72cd088bd8f9"
+    },
+    {
+      "file": "sprites/mirror_2.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "mirror",
+      "family_colours": 128,
+      "colours": 116,
+      "opaque_box": {
+        "left": 0,
+        "top": 0,
+        "width": 36,
+        "height": 48
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/mirror_2-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_2-baseline.png",
+      "sha256": "68d0646aa206348a700474bf7262476758d192e1d49a8a47012b10990df5bcb1"
+    },
+    {
+      "file": "sprites/mirror_3.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "png_colour_type": 6,
+      "family": "mirror",
+      "family_colours": 128,
+      "colours": 115,
+      "opaque_box": {
+        "left": 0,
+        "top": 0,
+        "width": 36,
+        "height": 48
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/mirror_3-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_3-baseline.png",
+      "sha256": "fbd003dd4570875adba84a0fe2fe2b58f1f37a1a50fe26cd457a5f5f8e876cda"
+    },
+    {
+      "file": "sprites/ruins_altar.png",
+      "canvas": [
+        104,
+        52
+      ],
+      "png_colour_type": 6,
+      "family": "ruins_altar",
+      "family_colours": 128,
+      "colours": 128,
+      "opaque_box": {
+        "left": 8,
+        "top": 6,
+        "width": 88,
+        "height": 42
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/ruins_altar-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/ruins_altar-baseline.png",
+      "sha256": "e50e5b0a38c083fc526337c359e7683d97b5f68a664a4d747d4034f72d45eda7"
+    },
+    {
+      "file": "sprites/beacon_stone.png",
+      "canvas": [
+        34,
+        46
+      ],
+      "png_colour_type": 6,
+      "family": "beacon_stone",
+      "family_colours": 127,
+      "colours": 127,
+      "opaque_box": {
+        "left": 6,
+        "top": 4,
+        "width": 18,
+        "height": 38
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/beacon_stone-original.png",
+      "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/beacon_stone-baseline.png",
+      "sha256": "e38846bd98af4163d9f3d2887125506d8cdb3d049bf22a93af151252bb7db17c"
+    },
+    {
+      "file": "sprites/temple-scene-base.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "png_colour_type": 6,
+      "family": "temple",
+      "family_colours": 128,
+      "colours": 128,
+      "opaque_box": {
+        "left": 0,
+        "top": 0,
+        "width": 640,
+        "height": 360
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        255
+      ],
+      "source": "sources/temple-scene-base-original.png",
+      "baseline": null,
+      "sha256": "a1fa7c721ca4e7c9a2f1556169d1edc27c5dbb5426ee9cbb6439312605c7598c"
+    },
+    {
+      "file": "sprites/inscription-under-statue.png",
+      "canvas": [
+        48,
+        12
+      ],
+      "png_colour_type": 6,
+      "family": "inscription",
+      "family_colours": 1,
+      "colours": 1,
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 44,
+        "height": 4
+      },
+      "opaque_inside_canvas": true,
+      "alpha": [
+        0,
+        255
+      ],
+      "source": "sources/inscription-under-statue-original.png",
+      "baseline": null,
+      "sha256": "0e21e732f0d29278d46936359875402d49e21842b92d1d41f27a674b732c06e9"
+    }
+  ]
+}

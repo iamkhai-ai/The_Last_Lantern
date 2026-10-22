@@ -1,0 +1,74 @@
+LEVEL 08 — RUINS OF TWO HALVES — ART REDESIGN BRIEF
+
+Scenario: docs/scenario-v2/08-ruins-of-two-halves.md (the v2 draft). Gameplay and layout are FIXED. Redraw the look only.
+
+Story frame: a moonlit temple courtyard, quiet and ruined. A stone statue with four notches stands in the centre. Two mirrors sit south-west and south-east. A Sun lock is on each side and a Moon lock is in the middle. A practice column and a test moon sit in the south-west forecourt. A seedling bed with a stone curtain sits north-west of the statue. A sanctuary door sits in the north wall. A beacon stone with a worn inscription sits in the north wall. The Shadow is a guardian figure who stands in the light.
+
+Palette: the garden art of Level 07 is the reference family (cool slate-grey stone, worn brass, dark timber, moss in joints, muted, moonlit). Sun elements are warm brass. Moon elements are cool blue-violet. Keep the base dark and neutral so beams and light read at runtime.
+
+HARD RULES (every asset)
+1. Pixel art, nearest-neighbour, no anti-aliasing, no dithering. Transparent background for every sprite. Each family uses at most 128 colours.
+2. Keep the exact canvas size and bottom-centre pivot below. Do not change the silhouette or orientation of any state. Each state must read the same way as the current file of the same name, only restyled.
+3. Do NOT bake any light, beam, glow, lamp, lock glyph, shadow, text, character or UI. The runtime draws all of these.
+4. Do NOT regenerate shadow-notch-0..3.png. They are measured overlays tied to the statue geometry. Keep the current four files unchanged.
+5. Do NOT change the shared Shadow sprites under assets/levels/shared/characters/the-shadow/. They are also used by Levels 07, 09, the ending and the observatory. The Shadow is a separate decision (see section D).
+
+REFERENCE FILES (attach them)
+- Current sprites: D:\Z_PROJECT\The_Last_Lantern\the-last-lantern-level07-fix\assets\levels\08-ruins-of-two-halves\sprites\
+- Current preview states: ...\assets\levels\08-ruins-of-two-halves\previews\states-native-1x.png
+- Current source temple: ...\assets\levels\08-ruins-of-two-halves\sources\temple-original.png
+- Level 07 garden family (style): ...\assets\levels\07-the-sleeping-garden\redesign-v2\sprites\garden-scene-base.png
+
+A. BACKDROP (floor and architecture only)
+- temple-scene-base.png: 640 x 360, full frame, opaque.
+- Walkable floor: x 24..616, y 80..310. Ground stone tiles, low contrast, quiet.
+- North wall band: x 0..640, y 0..80. Masonry with a plain niche at x ~396..464, y 34..80 (the beacon stone goes there) and an empty recess at x ~496..600, y 4..80 (the sanctuary door goes there). The HUD sits over the top 58px, so keep the top band simple.
+- South wall band: x 0..640, y 310..360. Plain masonry under the status row.
+- West wall: x 0..24, y 80..310. East wall: x 616..640, y 80..310.
+- West buttress: x 24..88, y 80..176, masonry pier.
+- Draw NOTHING on the floor inside the walkable band except faint ground texture. No statue, no altar, no mirror, no lock, no curtain, no shadow, no beam groove.
+- The conduit groove and shadow quads are runtime. Do not draw them.
+
+B. STATE SPRITES (native size, bottom-centre pivot; box shown is where the runtime places the sprite)
+Each state is a separate PNG. The same silhouette family must be used for all states of one prop.
+
+1. statue-notch-0.png, -1.png, -2.png, -3.png — 64 x 88. Box x 288..352, y 132..220. Foot contact at y 212. Opaque pixels should sit roughly x 293..347, y 140..215.
+   Four states of one four-faced stone statue, turned in quarter steps. Notch 0 shows a broad face turned across the centre flow (the solving state). Notch 1 shows a narrow edge-on face. Notch 2 shows a broad face angled left. Notch 3 shows a narrow face angled right. Match the current files exactly in which faces are broad and narrow.
+
+2. mirror_0.png, mirror_1.png, mirror_2.png, mirror_3.png — 36 x 48. Box shown at the mirror pedestal, bottom centre at the ground anchor. Keep the same orientation as the current files. The start state is mirror_2 (flat plank) and mirror_3 (upright plank). Mirror_0 and mirror_1 are the two aimed diagonals.
+
+3. ruins_altar.png — 104 x 52. Box x 428..532, y 210..262. The altar the lamp is placed on. Keep its top face clear and readable for the lamp.
+
+4. seedling-curtain-open.png, seedling-curtain-closed.png — 88 x 48. Box x 136..224, y 104..152. Open shows the seedling bed behind it. Closed shows a stone curtain that hides it.
+
+5. lock-sun-off.png, lock-sun-on.png — 32 x 40. Sun lock, centred at (240,112) and (400,112). Off is dull brass. On is warm brass with spokes lit. Keep the spoke marks, because they carry the state without colour.
+
+6. lock-moon-covered.png, lock-moon-lit.png — 32 x 40. Moon lock, centred at (320,112). Lit has an open bracket and a pale centre. Covered has the bracket shut and a dark centre. Keep the bracket marks.
+
+7. fixed-three-route-splitter-off.png, fixed-three-route-splitter-on.png — 48 x 48. Centred at (320,238). A fixed three-way prism. It has no rotation. The on state is the prism alight.
+
+8. confirmation-waiting.png, confirmation-ready.png, confirmation-latched.png — 48 x 36. Centred at (480,236), on the altar face. Waiting is a dim ring. Ready is an even bright ring. Latched is a locked ring with a brass pin.
+
+9. test-column-notch-0.png, -1.png, -2.png, -3.png — 32 x 44. The practice column. Box x 134..166, y 201..245. Same broad/narrow rule as the statue. Notch 0 and 2 broad. Notch 1 and 3 narrow.
+   test-pedestal.png — 48 x 36. Box x 126..174, y 216..252. The practice pedestal under the column.
+   test-moon-lit.png, test-moon-covered.png — 16 x 20. Centred at (206,224). Lit and covered slab states.
+
+10. beacon_stone.png — 34 x 46. Box x 413..447, y 34..80. A worn stone stele set into the north wall. Carved marks only, no readable text.
+
+11. sanctuary-door-closed.png, sanctuary-door-open.png — 104 x 76. Box x 496..600, y 4..80. A stone door flat on the north wall. Closed is solid. Open is an arch with the dark interior.
+
+C. NEW DECAL (Scenario v2 — Mạch phụ "cái tên dưới chân tượng")
+- inscription-under-statue.png — 48 x 12. A faint carved name under the statue plinth. It is worn beyond reading. The rest of the canvas is transparent. It only shows under Pulse, so keep it low contrast.
+- Placement: ground stamp under the statue base at centre (320,222), depth below the statue. Coordinates are provisional and need layout confirmation.
+
+D. THE SHADOW (optional, separate decision)
+- The Shadow poses are SHARED with Levels 07, 09, the ending and the observatory. Do not replace the shared files for this level alone.
+- If a level 08 Shadow look is wanted, create level-local variants only. Use 48 x 64 native, bottom-centre pivot, same pose names: shielding.png, turn.png, waiting.png, walk-right.png, stillness.png.
+- Pose meaning: shielding = a hand raised against the light. turn = the hand lowered. waiting = standing at the north stair. walk-right = a walking stride. stillness = a relaxed standing pose.
+- The Shadow must read as a silhouette of a guardian, not a monster. No glow on the figure.
+
+E. DELIVERY
+- File names exactly as above, PNG, RGBA.
+- Also deliver one 640 x 360 composite preview with the backdrop and all states placed at their boxes, at native size and at 2x nearest.
+- Report, for each file: width, height, number of colours, and whether the opaque area sits inside its box.
+- Do not add text to any sprite except the carved marks described above.
