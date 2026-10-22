@@ -134,7 +134,7 @@ Trong quá tải, dùng bộ gợi ý riêng:
 - **Mức 2:** “Tinh thể đã tự nuôi mạch rễ. Ánh đèn đang làm nó nhận quá nhiều.”
 - **Mức 3:** “Nhấn F để tự tay tắt đèn.”
 
-Nếu đèn đã tắt trước khi lấy khỏi bệ, việc tắt ở bệ sau khi vòng rễ đã khóa cũng tính là hành động cuối hợp lệ; chuyển thẳng sang cảnh đêm và bình minh. Không ép bật lại để tạo quá tải giả.
+Hành động cuối duy nhất là F. Nếu nhấn F tại bệ sau khi vòng rễ đã khóa (đèn tắt ngay trên bệ), đó cũng là hành động cuối hợp lệ; chuyển thẳng sang cảnh đêm và bình minh. Không ép bật lại để tạo quá tải giả.
 
 Giữ riêng mốc đã khóa vòng rễ. Tải lại trong quá tải đưa Nhinh về nền an toàn cạnh bệ, Lumo ở bên, các nhánh vẫn giữ và chiếc đèn còn bật; cho phép tiếp tục bằng F. Sau hành động cuối, lưu hoàn thành ngay. Mở lại tiến trình đã hoàn thành tới màn kết thúc, không phát lại câu đố.
 
