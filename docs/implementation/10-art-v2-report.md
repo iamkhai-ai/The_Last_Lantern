@@ -55,8 +55,19 @@ Runtime JSON: [capture-results.json](../../assets/levels/10-the-heart-of-elaria/
 
 Visual inspection confirms the live G0 face remains visible below the prism, the three branch colors read, core states differ, foreground/background lighting stays restrained and the seated character/title render in the actual ending. Legacy offline previews are identified as staging and are not presented as engine evidence.
 
-## Independent review
+The distinct dawn-core result is an on-disk asset check. The existing `EndingScene`/`CampaignEndingSequence` still draws the bare sanctuary and dawn overlay, without the puzzle-core sprite; no ending capture demonstrates `core-dawn` on screen. Those renderer files are unchanged from the base. This art delivery does not add the core to the seated/trail compositions.
 
-Pending on the frozen implementation commit. The current native Codex tool metadata advertises `gpt-6-luna` with `high` effort; both read-only reviewers must use that pair. Resolved execution identity will be recorded only if the runtime exposes it. Final review evidence will be added in a documentation-only follow-up commit.
+## Frozen revision and independent review
+
+Implementation and engine evidence are frozen at `321e70208fb6f3f86bc17619be9689300e63e137`, against `11a40ebd31506e62dd9edd0ded2ece3c7861dd58`. Checks above ran on the exact source/assets subsequently committed there. Both reviewers checked that same commit, with a clean worktree. The native Codex metadata advertised `gpt-6-luna`/`high` before dispatch; each task requested exactly that pair. Neither runtime exposed resolved model/effort, so both are recorded as unknown. Reviewers were instructed to remain read-only; this is not a claim of technical sandbox enforcement. Current-round reports stayed separate until both completed. Reviewers share a model family and can have correlated blind spots.
+
+| Reviewer | Result and checked scope | Actual independent checks |
+| --- | --- | --- |
+| `/root/level10_review_a` | No actionable findings in source integration, native images, readability, scope and manifest/provenance/capture binding | PASS: all four Node checks, read-only hash audit, `git diff --check`. NOT_RUN: build, assembly/capture and full human playthrough. |
+| `/root/level10_review_b` | No remaining in-scope findings after the requirement/baseline adjudication below | PASS: all four Node checks, screenshot/hash/native-size audit, `git diff --check`; 12 captures, zero browser errors, 33 distinct local keys. NOT_RUN: build, assembly/capture and full human playthrough. |
+
+Finding history: reviewer B initially reported P2 because the new dawn-core sprite is not drawn by the ending. After both independent reviews finished, the exact user criterion (a separate `core-dawn.png`, or disclosure that it remains identical) and the unchanged base renderer were supplied for adjudication. Reviewer B withdrew the P2 as an acceptance defect: the distinct-file criterion passes and no requirement asks to draw puzzle art in the ending. The observation is retained above as a pre-existing renderer limitation. No severity waiver or renderer change was applied.
+
+The follow-up commit changes only this report and the package README to record reviews and clarify that limitation. No source, assembly code, PNG, manifest, requirements or capture data changes follow the frozen revision; the final diff is checked for that equivalence. The existing verification and independent review evidence therefore remains applicable to the delivered source/artwork.
 
 Technical readiness does not grant merge or deployment permission. No merge, push or deployment is included.

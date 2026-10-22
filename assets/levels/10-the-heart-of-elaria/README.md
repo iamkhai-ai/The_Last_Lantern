@@ -14,6 +14,8 @@ The user explicitly authorized art loading changes in `heartOfElariaLayout.ts` a
 
 The overload layer adds core-local concentric tension rings and light flecks. The existing live beam points to the carried lamp; its position remains owned by code. The global overload lighting is an existing LanternSystem effect. Dawn uses a quiet peach-gold light overlay. THE LAST DAWN is the exact title, with centered serif lettering and the existing small leaf. No other text is baked into gameplay art; the girl's fate is not depicted.
 
+`core-dawn.png` is distinct from `core-night.png` on disk. The unchanged ending renderer uses the bare sanctuary plus dawn overlay and does not draw the puzzle-core sprite; the ending screenshots therefore do not demonstrate that variant on screen.
+
 Runtime evidence: `python assets/levels/10-the-heart-of-elaria/capture_runtime.py --url http://127.0.0.1:5188/`. A Vite server must serve this worktree; capture uses Playwright Chromium WebGL, isolated seeded saves and real E/F input. Twelve captures cover required states plus remaining mirror/statue variants. Native display sizes, local keys, seeded state and final F are asserted. Relevant source/provenance, sprite and screenshot hashes must match before `validation.json` reports runtime PASS. Inputs changing during capture invalidate the run. These captures do not establish a full player playthrough.
 
 The original contact-scenes-native.png, inspection-overview.png and task15 staging images are historical offline studies. Use v2-assets-native.png and runtime-v2 for this revision. Final checks, caveats, file inventory and review evidence are recorded in docs/implementation/10-art-v2-report.md.
