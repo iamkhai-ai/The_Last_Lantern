@@ -348,31 +348,34 @@ export class HeartOfElariaLevel {
 
   /* ---------------------------------------------------------------- HUD text */
 
+  /**
+   * Goal only (scenario v2 10 §8): "Đặt ba tinh thể." → "Nối ba mạch rễ thành một vòng." → "Lấy lại đèn." →
+   * empty during the overload, so the final F stays the player's own choice. The lamp source, the call, the
+   * mirrors and the confirm live in the H ladder; this row only adds facts (counts, ready).
+   */
   public getObjectiveText(): string {
     const state = this.state();
     const stage = this.stage();
     switch (stage) {
       case 'crystals': {
         const placed = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] === true).length;
-        return `Đặt ba tinh thể vào ba hốc quanh Cây Mẹ (${placed}/3).`;
+        return `Đặt ba tinh thể (${placed}/3).`;
       }
-      case 'teach': return 'Đọc bàn rễ cạnh bệ đèn để nhắc lại ba quy tắc.';
-      case 'source': return 'Đặt chiếc đèn đang bật lên bệ dẫn sáng ở phía tây.';
+      case 'teach':
+      case 'source':
       case 'seal':
-        return this.lumoMode === 'travelling'
-          ? 'Chờ Lumo tới ấn Hy Vọng và đứng giữ.'
-          : 'Gọi Lumo tới ấn Hy Vọng rồi để cậu ấy giữ.';
+        return 'Nối ba mạch rễ thành một vòng.';
       case 'route': {
         // Never claim the branches are ready while any prerequisite is still unmet (including Lumo's
         // live position and the lantern state, which the old filter ignored).
         const missing = getHeartPrerequisiteFeedback(state);
         return missing.length
-          ? `Chỉnh đường sáng và giữ Lumo ở ấn: còn ${missing.length} điều kiện chưa đúng.`
-          : 'Ba nhánh đã sẵn sàng. Tới nút rễ trung tâm ở giữa nền đất.';
+          ? `Nối ba mạch rễ thành một vòng (còn ${missing.length} điều kiện).`
+          : 'Ba nhánh đã sẵn sàng.';
       }
-      case 'confirm': return 'Nhấn E ở nút rễ trung tâm để khóa cấu hình ba nhánh.';
-      case 'retrieve': return 'Lấy lại chiếc đèn ở bệ dẫn sáng.';
-      case 'overload': return 'Nhấn F để tắt đèn — nguồn sáng đang quá tải.';
+      case 'confirm': return 'Ba nhánh đã sẵn sàng.';
+      case 'retrieve': return 'Lấy lại đèn.';
+      case 'overload': return '';
       default: return 'Đêm đã đi hết. Nhấn E để đi tiếp đoạn kết.';
     }
   }
@@ -380,6 +383,8 @@ export class HeartOfElariaLevel {
   public getStatusText(): string {
     const state = this.state();
     const lantern = this.lantern.lanternPlaced ? (this.lantern.lanternOn ? 'trên bệ' : 'trên bệ (đã tắt)') : this.lantern.lanternOn ? 'trên tay' : 'trên tay (đã tắt)';
+    // Scenario v2 10 §8: during the overload the status row shows the lamp only.
+    if (this.stage() === 'overload') return `Đèn: ${lantern}`;
     const roots = ['memory', 'hope', 'balance'].map((id) => (state[id as HeartBranchId] ? '●' : '○')).join('');
     return `Đèn: ${lantern} · Tinh thể: ${['memory', 'hope', 'balance'].filter((id) => this.progress.flags[`l9-${id}`] === true).length}/3`
       + ` · Rễ K/H/C: ${roots} · G0 ${state.g0Split ? 'vào lăng kính' : 'thẳng tới Ký Ức'}`
@@ -387,6 +392,8 @@ export class HeartOfElariaLevel {
   }
 
   public getLumoStatusText(): string {
+    // The overload keeps the HUD to the lamp alone: no call prompt beside the final choice.
+    if (this.stage() === 'overload') return '';
     return this.lumoMode === 'holding' ? 'LUMO · đang giữ ấn Hy Vọng'
       : this.lumoMode === 'travelling' ? 'LUMO · đang tới ấn'
         : 'LUMO · E gọi tới ấn';
