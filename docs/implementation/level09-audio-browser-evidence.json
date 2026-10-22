@@ -1,0 +1,301 @@
+{
+  "measurements": [
+    {
+      "name": "observatoryRain",
+      "peakDbfs": -24,
+      "rmsDbfs": -42.96,
+      "lastSampleSeconds": 2.57,
+      "durationSeconds": 2.55,
+      "targetPeakDbfs": -24
+    },
+    {
+      "name": "wheelMemory",
+      "peakDbfs": -24,
+      "rmsDbfs": -39.07,
+      "lastSampleSeconds": 1.875,
+      "durationSeconds": 1.85,
+      "targetPeakDbfs": -24
+    },
+    {
+      "name": "statueRotate",
+      "peakDbfs": -14.01,
+      "rmsDbfs": -30.51,
+      "lastSampleSeconds": 1.371,
+      "durationSeconds": 1.35,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "tubeOn",
+      "peakDbfs": -14,
+      "rmsDbfs": -29.34,
+      "lastSampleSeconds": 0.93,
+      "durationSeconds": 0.91,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "tubeOff",
+      "peakDbfs": -16,
+      "rmsDbfs": -31.81,
+      "lastSampleSeconds": 0.69,
+      "durationSeconds": 0.67,
+      "targetPeakDbfs": -16
+    },
+    {
+      "name": "lumoFly",
+      "peakDbfs": -16,
+      "rmsDbfs": -31.35,
+      "lastSampleSeconds": 0.66,
+      "durationSeconds": 0.64,
+      "targetPeakDbfs": -16
+    },
+    {
+      "name": "lumoLeave",
+      "peakDbfs": -20,
+      "rmsDbfs": -35.98,
+      "lastSampleSeconds": 1.12,
+      "durationSeconds": 1.1,
+      "targetPeakDbfs": -20
+    },
+    {
+      "name": "stoneRing",
+      "peakDbfs": -14,
+      "rmsDbfs": -34.39,
+      "lastSampleSeconds": 0.79,
+      "durationSeconds": 0.77,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "rootsWarm",
+      "peakDbfs": -17.99,
+      "rmsDbfs": -31.31,
+      "lastSampleSeconds": 1.62,
+      "durationSeconds": 1.6,
+      "targetPeakDbfs": -18
+    },
+    {
+      "name": "rootBridgeGrow",
+      "peakDbfs": -14,
+      "rmsDbfs": -30.39,
+      "lastSampleSeconds": 2.52,
+      "durationSeconds": 2.5,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "rootBridgeRetract",
+      "peakDbfs": -14,
+      "rmsDbfs": -30.93,
+      "lastSampleSeconds": 2.52,
+      "durationSeconds": 2.5,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "memoryImpact",
+      "peakDbfs": -14,
+      "rmsDbfs": -32.56,
+      "lastSampleSeconds": 1.15,
+      "durationSeconds": 1.13,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "memoryWaterFade",
+      "peakDbfs": -22,
+      "rmsDbfs": -42.77,
+      "lastSampleSeconds": 3.07,
+      "durationSeconds": 3.05,
+      "targetPeakDbfs": -22
+    },
+    {
+      "name": "memoryCracks",
+      "peakDbfs": -14,
+      "rmsDbfs": -37.13,
+      "lastSampleSeconds": 0.72,
+      "durationSeconds": 0.7,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "memoryFlash",
+      "peakDbfs": -14,
+      "rmsDbfs": -33.17,
+      "lastSampleSeconds": 1.37,
+      "durationSeconds": 1.35,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "memoryMerge",
+      "peakDbfs": -13.99,
+      "rmsDbfs": -31.46,
+      "lastSampleSeconds": 1.85,
+      "durationSeconds": 1.83,
+      "targetPeakDbfs": -14
+    },
+    {
+      "name": "memoryWeather",
+      "peakDbfs": -22,
+      "rmsDbfs": -38.09,
+      "lastSampleSeconds": 8.076,
+      "durationSeconds": 8.05,
+      "targetPeakDbfs": -22
+    },
+    {
+      "name": "marginInk",
+      "peakDbfs": -26,
+      "rmsDbfs": -44.18,
+      "lastSampleSeconds": 0.961,
+      "durationSeconds": 0.94,
+      "targetPeakDbfs": -26
+    },
+    {
+      "name": "stone-walk",
+      "peakDbfs": -24.88,
+      "rmsDbfs": -50.29,
+      "lastSampleSeconds": 0.148,
+      "durationSeconds": 0.3,
+      "targetPeakDbfs": -24
+    },
+    {
+      "name": "stone-run",
+      "peakDbfs": -23.77,
+      "rmsDbfs": -49.5,
+      "lastSampleSeconds": 0.148,
+      "durationSeconds": 0.3,
+      "targetPeakDbfs": -24
+    },
+    {
+      "name": "root-walk",
+      "peakDbfs": -25.18,
+      "rmsDbfs": -46.33,
+      "lastSampleSeconds": 0.158,
+      "durationSeconds": 0.3,
+      "targetPeakDbfs": -24
+    },
+    {
+      "name": "root-run",
+      "peakDbfs": -23.65,
+      "rmsDbfs": -44.73,
+      "lastSampleSeconds": 0.158,
+      "durationSeconds": 0.3,
+      "targetPeakDbfs": -24
+    }
+  ],
+  "pageErrors": [],
+  "runtime": {
+    "status": "PASS",
+    "checkpoints": 47,
+    "stateAndStoryCalls": [
+      [
+        "playPuzzleError"
+      ],
+      [
+        "playDoorOpen"
+      ],
+      [
+        "playMechanismLatch"
+      ],
+      [
+        "playObservatoryCue",
+        "lumoFly"
+      ],
+      [
+        "playObservatoryCue",
+        "observatoryRain"
+      ],
+      [
+        "playObservatoryCue",
+        "tubeOn"
+      ],
+      [
+        "playLightPulse"
+      ],
+      [
+        "playObservatoryCue",
+        "rootsWarm"
+      ],
+      [
+        "playDoorOpen"
+      ],
+      [
+        "playObservatoryCue",
+        "rootBridgeGrow"
+      ],
+      [
+        "playObservatoryCue",
+        "lumoLeave"
+      ],
+      [
+        "playObservatoryCue",
+        "tubeOff"
+      ],
+      [
+        "playObservatoryCue",
+        "rootBridgeRetract"
+      ],
+      [
+        "playMechanismLatch"
+      ],
+      [
+        "playDoorOpen"
+      ],
+      [
+        "playObservatoryCue",
+        "stoneRing"
+      ],
+      [
+        "playUiItemGet"
+      ],
+      [
+        "setMusicLevel",
+        0.2
+      ],
+      [
+        "playObservatoryCue",
+        "memoryImpact"
+      ],
+      [
+        "playObservatoryCue",
+        "memoryWaterFade"
+      ],
+      [
+        "playObservatoryCue",
+        "memoryCracks"
+      ],
+      [
+        "playObservatoryCue",
+        "memoryFlash"
+      ],
+      [
+        "playObservatoryCue",
+        "memoryMerge"
+      ],
+      [
+        "setMusicLevel",
+        0
+      ],
+      [
+        "setMusicLevel",
+        1,
+        0.6
+      ],
+      [
+        "playCrystalPickup"
+      ],
+      [
+        "playObservatoryCue",
+        "statueRotate"
+      ],
+      [
+        "playDawnChord"
+      ]
+    ]
+  },
+  "codeRevision": "195f212aa4c227b71f30c0fe5e902e28fc939a78",
+  "sourceWorkingTreeClean": true,
+  "sourceSha256": {
+    "src/audio/effects.ts": "62d43dc2863615e2a51b098d3bf2c1bc4fb969259067d722912540e404398411",
+    "src/audio/ambience.ts": "498f1a68b33e31dc107b623127dd3382efd2ee5c8d15ac8637e4204907a19267",
+    "src/audio/music.ts": "3ec45491dbd02743c004f2734a96ff13e0a41808f629e87b9c256276218b7145",
+    "src/audio/synth.ts": "02a927e83ac869d7d3fd1c72c6f1d98a6e61452b8a197d038e758b1c15491a95",
+    "src/systems/SoundSystem.ts": "84a0d3dea23d2eaaf56466d36fc4e4858e4459b3e26ad751956bc9530c719288",
+    "src/systems/ObservatoryAudio.ts": "b8a8e28004a95bf6f522f3f80d68589ee9fc1ffd14d2dc47fbc75ac580edb7b9",
+    "src/scenes/CampaignScene.ts": "507fb2c1dc8ea9b5719b730d034e4cdbda139b1eed5ffca0b8d79b5564e55fcb"
+  }
+}
