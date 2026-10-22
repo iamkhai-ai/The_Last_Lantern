@@ -9,6 +9,7 @@ export interface ObservatoryAudioState {
   bridge: boolean;
   doorA: boolean;
   sunDoor: boolean;
+  finalDoor: boolean;
   returnLoop: boolean;
 }
 
@@ -21,6 +22,7 @@ export function observatoryAudioState(world: ObsWorldState, puzzle: ObservatoryD
     bridge: world.bridgeEligible || bridgeHeld,
     doorA: observatoryDoorOpen('door-a', world),
     sunDoor: observatoryDoorOpen('sun-door', world),
+    finalDoor: world.finalDoorLatched,
     returnLoop: observatoryDoorOpen('return-loop', world),
   };
 }
@@ -36,7 +38,7 @@ export function observatoryAudioChanges(previous: ObservatoryAudioState | null, 
   if (previous.roots !== 'lit' && next.roots === 'lit') cues.push('rootsWarm');
   if (previous.bridge !== next.bridge) cues.push(next.bridge ? 'rootBridgeGrow' : 'rootBridgeRetract');
   // A Sun door and Door A can change together; one stone sound is clearer than two identical overlaps.
-  if ((!previous.doorA && next.doorA) || (!previous.sunDoor && next.sunDoor)) cues.push('doorOpen');
+  if ((!previous.doorA && next.doorA) || (!previous.sunDoor && next.sunDoor) || (!previous.finalDoor && next.finalDoor)) cues.push('doorOpen');
   if ((previous.doorA && !next.doorA) || (previous.sunDoor && !next.sunDoor)) cues.push('doorClose');
   if (!previous.returnLoop && next.returnLoop) cues.push('stoneRing');
   return cues;

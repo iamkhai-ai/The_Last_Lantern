@@ -56,7 +56,10 @@ with sync_playwright() as p:
             assert abs(item['peakDbfs'] - item['targetPeakDbfs']) <= 4, item
             assert item['lastSampleSeconds'] <= item['durationSeconds'] + 0.04, item
         report['runtime'] = page.evaluate('''async () => {
-          const {SoundSystem: Sound} = await import('/src/systems/SoundSystem.ts');
+          // Reuse the exact dependency URL (including a Vite HMR timestamp) used by the running scene.
+          const sceneSource = await (await fetch('/src/scenes/CampaignScene.ts')).text();
+          const soundImport = sceneSource.split(String.fromCharCode(10)).find(line => line.startsWith('import') && line.includes('{ SoundSystem }'));
+          const {SoundSystem: Sound} = await import(soundImport.split('"')[1]);
           const {CampaignSaveSystem: Save} = await import('/src/systems/CampaignSaveSystem.ts');
           const {OBSERVATORY_ROOMS: rooms} = await import('/src/data/observatoryRooms.ts');
           const calls = [];
@@ -94,8 +97,10 @@ with sync_playwright() as p:
           };
           const refresh = () => { s.refreshObservatoryDoors(); s.refreshObservatoryPuzzle(); };
           assert(count('playObservatoryCue') === 0 && count('playDoorOpen') === 0, 'restoring a scene is silent');
+          s.transitionObservatory(rooms.entrance.exits[0].id);
+          assert(count('playPuzzleError') === 1, 'a locked door answers with a denial cue');
           use('lantern-pedestal'); refresh();
-          assert(count('playDoorOpen') === 1, 'the first beam opens Door A once');
+          assert(count('playDoorOpen') === 1, `the first beam opens Door A once: ${JSON.stringify({calls, world: s.getObservatoryWorldState(), snapshot: s.observatoryAudio})}`);
           s.buildObservatoryRoom('corridor');
           use('door-a-control'); use('door-a-control');
           assert(count('playMechanismLatch') === 1, 'Door A latch sounds only once');
@@ -106,7 +111,10 @@ with sync_playwright() as p:
           assert(s.getObservatoryState().lumoAtSeal, 'the real Lumo route reaches the seal');
           assert(count('playObservatoryCue', 'observatoryRain') === 1, 'first seal arrival plays short rain');
           assert(count('playObservatoryCue', 'tubeOn') === 1, 'the supply sounds when Lumo really arrives');
-          Object.assign(s.progress.counters, {'l8-g0': 1, 'l8-g1': 2, 'l8-g2': 1, 'l8-statue': 2});
+          Object.assign(s.progress.counters, {'l8-g0': 1, 'l8-g1': 2, 'l8-g2': 1, 'l8-statue': 0});
+          refresh();
+          assert(count('playObservatoryCue', 'rootsWarm') === 1, 'the illuminated amber root bed sounds warm');
+          s.progress.counters['l8-statue'] = 2;
           refresh();
           assert(count('playObservatoryCue', 'rootBridgeGrow') === 1, 'the bridge grows once');
           assert(count('playLightPulse') === 1, 'the splitter receives its cue');
@@ -128,6 +136,7 @@ with sync_playwright() as p:
           s.progress.flags['l8-bridge-crossed'] = true;
           use('final-door-control'); use('stone-return-loop'); use('stone-return-loop');
           assert(count('playMechanismLatch') === 2, 'the final latch has a mechanical cue');
+          assert(count('playDoorOpen') === 3, 'Door A, Sun door and final door each opened with a cue');
           assert(count('playObservatoryCue', 'stoneRing') === 1, 'the return loop locks into place once');
           s.buildObservatoryRoom('entrance'); use('lantern-pedestal');
           assert(count('playUiItemGet') === 1, 'retrieving the lamp uses item pickup');
@@ -156,6 +165,8 @@ with sync_playwright() as p:
           assert(calls.at(-1)[0] === 'setMusicLevel' && calls.at(-1)[1] === 1, 'music returns after the rest');
           use('balance-crystal'); use('balance-crystal');
           assert(count('playCrystalPickup') === 1, 'the actual crystal pickup sounds once');
+          use('statue');
+          assert(count('playObservatoryCue', 'statueRotate') === 1, 'the statue uses its heavy stone cue');
           use('final-door-control');
           assert(count('playDawnChord') === 1, 'departure has its dawn chord');
           game.scene.stop('CampaignScene');
@@ -165,6 +176,8 @@ with sync_playwright() as p:
         assert not errors, errors
     root = Path(__file__).resolve().parent.parent
     report['codeRevision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
+    report['sourceWorkingTreeClean'] = not subprocess.check_output(
+        ['git', 'status', '--short', '--', 'src', 'scripts'], cwd=root, text=True).strip()
     report['sourceSha256'] = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in [
         'src/audio/effects.ts', 'src/audio/ambience.ts', 'src/audio/music.ts', 'src/audio/synth.ts',
         'src/systems/SoundSystem.ts', 'src/systems/ObservatoryAudio.ts', 'src/scenes/CampaignScene.ts',

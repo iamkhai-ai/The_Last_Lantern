@@ -202,7 +202,7 @@ test('garden save restore chooses dry or living ambience without replaying story
 });
 
 const quietObservatory = {
-  supply: false, split: false, roots: 'dormant', bridge: false, doorA: false, sunDoor: false, returnLoop: false,
+  supply: false, split: false, roots: 'dormant', bridge: false, doorA: false, sunDoor: false, finalDoor: false, returnLoop: false,
 };
 test('observatory restore and identical frame/room refreshes cannot replay transition sounds', () => {
   const restored = { ...quietObservatory, supply: true, split: true, bridge: true, roots: 'bridge', sunDoor: true };
@@ -221,6 +221,9 @@ test('observatory supply, split, roots and doors sound only on their actual stat
   const off = { ...loop, supply: false, split: false, bridge: false, roots: 'retracted-dark', doorA: false };
   assert.deepEqual(observatoryAudioChanges(loop, off), ['tubeOff', 'rootBridgeRetract', 'doorClose']);
   assert.deepEqual(observatoryAudioChanges(off, off), []);
+  const final = { ...off, finalDoor: true };
+  assert.deepEqual(observatoryAudioChanges(off, final), ['doorOpen']);
+  assert.deepEqual(observatoryAudioChanges(final, { ...final }), []);
 });
 
 test('root retraction waits for the same safety hold as the visible bridge, while the supply stops immediately', () => {

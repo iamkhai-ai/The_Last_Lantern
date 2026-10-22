@@ -211,6 +211,26 @@ await test('stone and root footsteps have distinct unpitched, finite contacts', 
   assert.notDeepEqual(textures[0], textures[1]);
 });
 
+await test('calibrated footsteps and effects release their output trim when their audio-clock sentinel ends', async () => {
+  for (const cue of [null, 'rootBridgeGrow', 'memoryWeather']) {
+    const Sound = await loadSoundSystem();
+    if (cue === null) { Sound.setFootstepSurface('root'); Sound.playFootstep(); }
+    else if (cue === 'memoryWeather') {
+      Sound.playUiClick();
+      const { memoryWeather } = await import('../src/audio/effects.ts');
+      memoryWeather(FakeAudioContext.last, FakeAudioContext.last.destination, 0);
+    }
+    else Sound.playObservatoryCue(cue);
+    const ctx = FakeAudioContext.last;
+    const sentinel = ctx.sources.find(source => typeof source.onended === 'function');
+    assert.ok(sentinel?.stopped, 'a finite source owns cleanup on the audio clock');
+    const trim = ctx.gains.find(gain => gain.gain.value > 1 && gain.gain.ramps.length === 0);
+    assert.ok(trim && !trim.disconnected);
+    sentinel.onended();
+    assert.ok(trim.disconnected && sentinel.disconnected, 'no trim connection remains after the source ends');
+  }
+});
+
 // --- ambience --------------------------------------------------------------------------------------------------------
 
 await test('music stays on the audio clock through suspension and a loop boundary, without replaying a backlog', async () => {
