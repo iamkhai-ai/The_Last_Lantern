@@ -358,6 +358,11 @@ function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStag
     RELEASE_POLICY: policy,
     NEW_GAME_CONFIRM_TEXT: CONFIRM_SENTENCE,
     CONFIRM_LABELS: ['Quay lại', 'Bắt đầu lại'],
+    // Identity i18n: this harness asserts the Vietnamese copy, which is the catalogue key.
+    tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text),
+    getLocale: () => 'vi',
+    otherLocale: () => 'en',
+    setLocale: () => {},
     CampaignSaveSystem: {
       load: (...args) => CampaignSaveSystem.load(...args),
       hasSave: () => CampaignSaveSystem.hasSave(),
@@ -469,6 +474,7 @@ const loadedComingSoon = (() => {
     if (id === '../systems/SoundSystem') {
       return { SoundSystem: { playLanternToggle() {} } };
     }
+    if (id === '../i18n/catalog' || id === '../i18n/catalog.ts') return { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text) };
     throw new Error(`ComingSoonScene imports an unexpected module: ${id}`);
   };
   new Function('module', 'exports', 'require', js)(module, module.exports, require);

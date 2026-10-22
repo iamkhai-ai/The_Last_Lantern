@@ -1,0 +1,12 @@
+Use case: precise-object-edit. This is a controlled correction of the attached Level 06 ENTRY mockup, not a new scene. Preserve the room silhouette, framing, camera, stone/brass pixel-art family, stairwell, window/scarf/closed recording drawer, back-wall water tube and three dark rings, character identity and entry lantern light. Change ONLY the main floor machine so the actual puzzle roles are present and distinguishable.
+At logical 640x360 coordinates (scale to the input image), reconstruct exactly this floor arrangement with the same coherent ornate stone/brass family:
+1 EMPTY lamp cradle near (205,215).
+Exactly THREE full-height round blue-glass MIRRORS on stone pedestals: common G0 at (260,215), branch G1 at (300,155), branch G2 at (320,265). Keep optical center around the upper third of each. Mirror identity is a small brass inset, NO text.
+1 small triangular glass PRISM on low stone base near (315,205).
+Exactly TWO smaller eye-like RECEIVERS at (435,155) and (435,260), about half a mirror's height, a dark round iris recessed in a low stone/brass body. These must read as receivers, not additional mirrors.
+1 slender CALL STATION near (390,220), a small upright circular brass firefly sigil on stone footing.
+1 flat circular PRESSURE SEAL C at (390,285), with an unlit firefly outline engraved in its inset face. Connect this to the call station with a short shallow pipe. Keep it separate from the glass optics.
+Keep 1 lever near (485,245) and 1 fully framed CLOSED chamber near (555,210), containing the existing single blue Hope crystal.
+Reposition the existing shallow brass floor conduits to visually belong to these devices; they must be non-glowing and low enough to step over. Preserve broad walkable gaps and no raised central platform.
+The small practice bench upper left stays independent and unpowered; show its tiny empty lantern cradle, one small mirror, one prism and two tiny receiving eyes without adding another bench. Do not connect it to the main machine.
+ENTRY STATE: no active beams or bright receiver cores, all three wall rings dark; main lantern cradle EMPTY; Nhinh holds the only portable lantern at the lower-left stairs, Lumo beside Nhinh; no Lumo on the empty pressure seal. Tower lamp white, grille closed, crystal visible, record drawer closed. No labels, HUD, words, letters, numbers, border, ghost or new story event. Preserve exact scene framing and pixel style; correct the machine roles only.

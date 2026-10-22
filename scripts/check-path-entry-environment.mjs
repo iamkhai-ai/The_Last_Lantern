@@ -41,6 +41,7 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
     return object;
   };
   const symbols = {
+    tr: (text) => text,
     PATH_ROOMS, PATH_INK_CORRIDOR, PATH_TUBE_MOUTHS, getPathElementArtRect, pathCallLabel,
     getLevelArtKey(level, filename) {
       assert.equal(level, 4, 'Level 05 uses its existing zero-based art index');

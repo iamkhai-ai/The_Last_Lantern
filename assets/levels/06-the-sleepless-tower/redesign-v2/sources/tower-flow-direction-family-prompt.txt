@@ -1,0 +1,6 @@
+Use case: stylized-concept.
+Asset type: production transparent two-state low-profile floor-conduit overlay for Level 06, The Sleepless Tower.
+Input images: Image 1 is the approved entry mockup for floor material and conduits. Images 2 and 3 are approved G0 and prism sprites for stone/brass pixel cluster quality.
+Primary request: Create a vertical two-cell strip of exactly two 112x32 shallow brass-and-slate water-direction conduit ornaments. Top = intake, three small cyan chevrons point upward along the channel. Bottom = outflow, the same channel, spacing and chevron shapes point downward. Keep both low and translucent enough to read as decorative floor inlay, never a wall or barrier. All features stay within each sprite; centered at (56,16).
+Style: compact hard pixel clusters, dark teal slate, thin tarnished brass edge and very restrained cyan directional glints. No gradients, blur, antialiasing, photoreal noise or dithering.
+Constraints: true transparent background; equal 112x32 cells and stable positions. No lettering, symbols other than simple chevrons, backgrounds, characters, standalone pipes, frame lines, watermark or detached shadows.

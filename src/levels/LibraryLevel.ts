@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getLevelArtKey } from '../art/CampaignArt';
+import { tr } from '../i18n/catalog.ts';
 import type { Player } from '../actors/Player';
 import { LIBRARY_DAIS, LIBRARY_EXIT_THRESHOLD, LIBRARY_LAYOUT, LIBRARY_MURAL_SOLID, LIBRARY_RACK_SOLIDS, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -210,14 +211,14 @@ export class LibraryLevel {
   }
 
   public getObjectiveText(): string {
-    if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return 'Nhấn E ở mép nam bệ giữa để nhận Tinh thể Ký Ức.';
+    if (this.progress.flags['l2-memory'] && !this.progress.flags['l2-crystal']) return tr('Nhấn E ở mép nam bệ giữa để nhận Tinh thể Ký Ức.');
     // The gate opens the moment the crystal is taken; the fifth painting is optional story.
-    if (this.isExitOpen()) return 'Tới cổng đá phía Đông Bắc và nhấn E. (Tranh thứ năm: tùy chọn)';
-    if (!this.progress.flags['l2-memory'] && this.allSeatsFilled()) return 'Đủ bốn phiến. Nhấn E ở bệ giữa để kiểm tra.';
-    if (this.isBookStage()) return 'Đọc cuốn sách trên bàn, nhấn F đổi đèn rồi đọc lại.';
-    if (!this.progress.flags['l2-memory'] && !this.allTabletLayersSeen() && !this.anyTabletPlaced()) return 'Đọc cả hai lớp (đèn bật/tắt) của bốn phiến trên giá.';
-    if (!this.progress.flags['l2-memory']) return 'Đặt bốn phiến vào bốn hốc theo vòng một ngày.';
-    return 'Khám phá thư viện.';
+    if (this.isExitOpen()) return tr('Tới cổng đá phía Đông Bắc và nhấn E. (Tranh thứ năm: tùy chọn)');
+    if (!this.progress.flags['l2-memory'] && this.allSeatsFilled()) return tr('Đủ bốn phiến. Nhấn E ở bệ giữa để kiểm tra.');
+    if (this.isBookStage()) return tr('Đọc cuốn sách trên bàn, nhấn F đổi đèn rồi đọc lại.');
+    if (!this.progress.flags['l2-memory'] && !this.allTabletLayersSeen() && !this.anyTabletPlaced()) return tr('Đọc cả hai lớp (đèn bật/tắt) của bốn phiến trên giá.');
+    if (!this.progress.flags['l2-memory']) return tr('Đặt bốn phiến vào bốn hốc theo vòng một ngày.');
+    return tr('Khám phá thư viện.');
   }
 
   public getStatusText(): string {
@@ -226,9 +227,13 @@ export class LibraryLevel {
     const observed = STONES.reduce((count, stone) => count
       + Number(this.progress.flags[`l2-${stone}-lit`] === true)
       + Number(this.progress.flags[`l2-${stone}-dark`] === true), 0);
-    if (this.progress.flags['l2-memory']) return `Vòng: đã phục hồi · Tinh thể: ${this.progress.flags['l2-crystal'] ? 'đã nhận' : 'chưa nhận'} · Cổng: ${this.isExitOpen() ? 'mở' : 'đóng'} · Tranh thứ năm: ${this.progress.flags['l2-fifth-viewed'] ? 'đã đọc' : 'chưa đọc'}`;
-    const selected = this.selectedStone === null ? '' : ` · Đang chọn: ${LABELS[STONES[this.selectedStone]]}`;
-    return `Phiến trong hốc ${placed}/4 · Lớp đã đọc ${observed}/8${selected}`;
+    if (this.progress.flags['l2-memory']) return tr('Vòng: đã phục hồi · Tinh thể: {crystal} · Cổng: {gate} · Tranh thứ năm: {fifth}', {
+      crystal: this.progress.flags['l2-crystal'] ? tr('đã nhận') : tr('chưa nhận'),
+      gate: this.isExitOpen() ? tr('mở') : tr('đóng'),
+      fifth: this.progress.flags['l2-fifth-viewed'] ? tr('đã đọc') : tr('chưa đọc'),
+    });
+    const selected = this.selectedStone === null ? '' : tr(' · Đang chọn: {stone}', { stone: tr(LABELS[STONES[this.selectedStone]]) });
+    return tr('Phiến trong hốc {placed}/4 · Lớp đã đọc {observed}/8{selected}', { placed, observed, selected });
   }
 
   public showHint(): void {
@@ -239,32 +244,32 @@ export class LibraryLevel {
     const finalHint = this.isAnswerUnlocked() ? ANSWER_HINT : RULE_HINT;
     const clueHints = observedLayers === 0
       ? [
-        'Đi tới từng giá đá và nhấn E để xem phiến dưới lớp đèn hiện tại; nhấn F rồi E lần nữa để so sánh lớp kia.',
-        'Bật đèn để thấy thiên thể và vị trí; tắt đèn để thấy đường chuyển động. Ghép hai lớp của cùng một phiến.',
+        tr('Đi tới từng giá đá và nhấn E để xem phiến dưới lớp đèn hiện tại; nhấn F rồi E lần nữa để so sánh lớp kia.'),
+        tr('Bật đèn để thấy thiên thể và vị trí; tắt đèn để thấy đường chuyển động. Ghép hai lớp của cùng một phiến.'),
         finalHint,
       ]
       : [
-        `Đã đọc ${observedLayers}/8 lớp. Nhấn F đổi đèn, rồi E đọc các phiến còn thiếu ở giá đá; vẫn có thể thử xếp bất cứ lúc nào.`,
+        tr('Đã đọc {layers}/8 lớp. Nhấn F đổi đèn, rồi E đọc các phiến còn thiếu ở giá đá; vẫn có thể thử xếp bất cứ lúc nào.', { layers: observedLayers }),
         this.getObservedPairHint(),
         finalHint,
       ];
     const hints: Record<string, string[]> = {
       book: [
-        'Đứng cạnh bàn rồi nhấn E để đọc trang dưới lớp đèn đang hiện. Nhấn F đổi đèn, sau đó E đọc lại.',
-        'Bật đèn bằng F để thấy thiên thể và vị trí; tắt đèn để thấy đường chuyển động. Nhấn E trên trang hoặc phiến để ghi lớp đang thấy.',
-        'Bắt đầu ở hốc có dấu mặt trời phía Bắc. E ở giá đá để chọn phiến; E lần nữa trên phiến đó để bỏ chọn. E ở hốc để đặt hoặc đổi chỗ; E ở bệ giữa để kiểm tra.',
+        tr('Đứng cạnh bàn rồi nhấn E để đọc trang dưới lớp đèn đang hiện. Nhấn F đổi đèn, sau đó E đọc lại.'),
+        tr('Bật đèn bằng F để thấy thiên thể và vị trí; tắt đèn để thấy đường chuyển động. Nhấn E trên trang hoặc phiến để ghi lớp đang thấy.'),
+        tr('Bắt đầu ở hốc có dấu mặt trời phía Bắc. E ở giá đá để chọn phiến; E lần nữa trên phiến đó để bỏ chọn. E ở hốc để đặt hoặc đổi chỗ; E ở bệ giữa để kiểm tra.'),
       ],
       clues: clueHints,
       arrange: [
-        'Bắt đầu ở hốc có dấu mặt trời phía Bắc, rồi đi theo chiều kim đồng hồ.',
-        'So từng phiến với lớp đã đọc. Hốc theo chiều kim đồng hồ là Bắc, Đông, Nam, Tây.',
+        tr('Bắt đầu ở hốc có dấu mặt trời phía Bắc, rồi đi theo chiều kim đồng hồ.'),
+        tr('So từng phiến với lớp đã đọc. Hốc theo chiều kim đồng hồ là Bắc, Đông, Nam, Tây.'),
         finalHint,
       ],
-      crystal: ['Đứng ở mép nam của bệ giữa để tới tinh thể.', 'Nhấn E ở bệ giữa để nhận Tinh thể Ký Ức.'],
+      crystal: [tr('Đứng ở mép nam của bệ giữa để tới tinh thể.'), tr('Nhấn E ở bệ giữa để nhận Tinh thể Ký Ức.')],
       exit: [
-        'Đi lên phía đông bắc, tới vòm cổng đá trên vách bắc.',
-        'Tới cổng đá phía Đông Bắc và nhấn E để đi tiếp.',
-        'Bức tranh thứ năm sau vách rễ là tùy chọn; cổng đã mở từ khi nhận tinh thể.',
+        tr('Đi lên phía đông bắc, tới vòm cổng đá trên vách bắc.'),
+        tr('Tới cổng đá phía Đông Bắc và nhấn E để đi tiếp.'),
+        tr('Bức tranh thứ năm sau vách rễ là tùy chọn; cổng đã mở từ khi nhận tinh thể.'),
       ],
     };
     const choices = hints[stage];
@@ -275,21 +280,21 @@ export class LibraryLevel {
 
   public showJournal(): void {
     const entries: DialogueLine[] = [];
-    if (this.progress.flags['l2-inscription-read']) entries.push({ speaker: 'Nhinh', text: `Dòng khắc: ${INSCRIPTION}` });
-    if (this.progress.flags['l2-book-lit']) entries.push({ speaker: 'Nhinh', text: `Trang sách · Đèn bật: ${BOOK_OBSERVATION.lit}` });
-    if (this.progress.flags['l2-book-dark']) entries.push({ speaker: 'Nhinh', text: `Trang sách · Đèn tắt: ${BOOK_OBSERVATION.dark}` });
+    if (this.progress.flags['l2-inscription-read']) entries.push({ speaker: 'Nhinh', text: tr('Dòng khắc: {inscription}', { inscription: tr(INSCRIPTION) }) });
+    if (this.progress.flags['l2-book-lit']) entries.push({ speaker: 'Nhinh', text: tr('Trang sách · Đèn bật: {text}', { text: tr(BOOK_OBSERVATION.lit) }) });
+    if (this.progress.flags['l2-book-dark']) entries.push({ speaker: 'Nhinh', text: tr('Trang sách · Đèn tắt: {text}', { text: tr(BOOK_OBSERVATION.dark) }) });
     for (const stone of STONES) {
-      for (const [state, label] of [['lit', 'Đèn bật'], ['dark', 'Đèn tắt']] as const) {
+      for (const [state, label] of [['lit', tr('Đèn bật')], ['dark', tr('Đèn tắt')]] as const) {
         if (!this.progress.flags[`l2-${stone}-${state}`]) continue;
-        const answer = this.progress.flags['l2-memory'] ? ` · ${TIME_LABELS[stone]}` : '';
-        entries.push({ speaker: 'Nhinh', text: `${LABELS[stone]} · ${label}${answer}: ${CLUES[stone][state]}` });
+        const answer = this.progress.flags['l2-memory'] ? ` · ${tr(TIME_LABELS[stone])}` : '';
+        entries.push({ speaker: 'Nhinh', text: `${tr(LABELS[stone])} · ${tr(label)}${answer}: ${tr(CLUES[stone][state])}` });
       }
     }
-    if (this.progress.flags['l2-memory']) entries.push({ speaker: 'Nhinh', text: 'Vòng ngày đêm: Chim — bình minh; Lá — ban ngày; Thuyền — hoàng hôn; Hạt — ban đêm.' });
-    if (this.progress.flags['l2-plan-recorded']) entries.push({ speaker: 'Lumo', text: 'Tìm đủ ba tinh thể để thắp sáng trái tim Cây Mẹ. Rừng sẽ hồi sinh.' });
-    if (this.progress.flags['l2-fifth-viewed']) entries.push({ speaker: 'Nhinh', text: 'Những đường nứt chạy từ bánh xe về phía Cây Mẹ.' });
-    const lines = entries.length ? entries : [{ speaker: 'Nhinh' as const, text: 'Sổ tay chưa ghi trang sách hay phiến nào.' }];
-    this.say([{ speaker: 'Nhinh', text: 'Sổ tay thư viện. Mỗi trang giữ một manh mối đã quan sát.' }, ...lines]);
+    if (this.progress.flags['l2-memory']) entries.push({ speaker: 'Nhinh', text: tr('Vòng ngày đêm: Chim — bình minh; Lá — ban ngày; Thuyền — hoàng hôn; Hạt — ban đêm.') });
+    if (this.progress.flags['l2-plan-recorded']) entries.push({ speaker: 'Lumo', text: tr('Tìm đủ ba tinh thể để thắp sáng trái tim Cây Mẹ. Rừng sẽ hồi sinh.') });
+    if (this.progress.flags['l2-fifth-viewed']) entries.push({ speaker: 'Nhinh', text: tr('Những đường nứt chạy từ bánh xe về phía Cây Mẹ.') });
+    const lines = entries.length ? entries : [{ speaker: 'Nhinh' as const, text: tr('Sổ tay chưa ghi trang sách hay phiến nào.') }];
+    this.say([{ speaker: 'Nhinh', text: tr('Sổ tay thư viện. Mỗi trang giữ một manh mối đã quan sát.') }, ...lines]);
   }
 
   private drawFloorAndRoom(): void {
@@ -530,7 +535,7 @@ export class LibraryLevel {
   private registerInteractions(): void {
     const inscription = LIBRARY_LAYOUT.inscription;
     this.register({ id: 'library-inscription', x: inscription.x, y: inscription.y, radius: inscription.radius,
-      getPrompt: () => 'E · Đọc dòng khắc',
+      getPrompt: () => tr('E · Đọc dòng khắc'),
       // Rule 1: the stand sits on the tablet's south edge; the label anchors to the stone's own bounds.
       getPromptBounds: () => this.inscriptionImage?.getBounds() ?? null,
       onInteract: () => {
@@ -539,7 +544,7 @@ export class LibraryLevel {
         this.say([{ speaker: 'Hệ thống', text: INSCRIPTION }]);
       } });
     this.register({ id: 'library-book', x: LIBRARY_LAYOUT.book.x, y: 278, radius: 22,
-      getPrompt: () => 'E · Xem lớp mực (F đổi đèn)', getPromptBounds: () => this.bookLayers[0]?.getBounds() ?? null,
+      getPrompt: () => tr('E · Xem lớp mực (F đổi đèn)'), getPromptBounds: () => this.bookLayers[0]?.getBounds() ?? null,
       onInteract: () => this.readBook() });
     LIBRARY_LAYOUT.racks.forEach((point, rackIndex) => this.register({
       id: `library-rack-${rackIndex}`, x: point.x, y: point.y + LIBRARY_LAYOUT.rackStandOffset, radius: 22,
@@ -547,7 +552,7 @@ export class LibraryLevel {
       reach: { rect: LIBRARY_RACK_SOLIDS[rackIndex] },
       getPrompt: () => {
         const stone = this.rackStone(rackIndex);
-        return stone ? `E · Xem và chọn phiến ${LABELS[stone]}` : '';
+        return stone ? tr('E · Xem và chọn phiến {stone}', { stone: tr(LABELS[stone]) }) : '';
       },
       getPromptBounds: () => this.tabletStacks.get(this.rackKey(rackIndex))?.getBounds()
         ?? this.rackEmptyStands[rackIndex]?.getBounds() ?? null,
@@ -563,24 +568,24 @@ export class LibraryLevel {
       isEnabled: () => true,
     }));
     this.register({ id: 'library-confirm', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: LIBRARY_LAYOUT.confirm.radius,
-      getPrompt: () => this.progress.flags['l2-memory'] ? 'Vòng ngày đêm đã phục hồi' : 'E · Kiểm tra vòng ở bệ giữa',
+      getPrompt: () => this.progress.flags['l2-memory'] ? tr('Vòng ngày đêm đã phục hồi') : tr('E · Kiểm tra vòng ở bệ giữa'),
       getPromptBounds: () => ({ ...LIBRARY_DAIS }),
       onInteract: () => this.checkMemory(), isEnabled: () => this.progress.flags['l2-memory'] !== true });
     this.register({ id: 'library-crystal', x: LIBRARY_LAYOUT.confirm.x, y: LIBRARY_LAYOUT.confirm.y, radius: LIBRARY_LAYOUT.confirm.radius,
-      getPrompt: () => 'E · Nhận Tinh thể Ký Ức',
+      getPrompt: () => tr('E · Nhận Tinh thể Ký Ức'),
       getPromptBounds: () => this.objects.find((object) => object.getData('library-crystal') === true) instanceof Phaser.GameObjects.Image
         ? (this.objects.find((object) => object.getData('library-crystal') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.collectCrystal(), isEnabled: () => this.progress.flags['l2-memory'] === true && this.progress.flags['l2-crystal'] !== true });
     this.register({ id: 'library-mural', x: LIBRARY_LAYOUT.muralStand.x, y: LIBRARY_LAYOUT.muralStand.y, radius: 22,
       reach: { rect: LIBRARY_MURAL_SOLID },
-      getPrompt: () => this.progress.flags['l2-fifth-viewed'] ? 'E · Đọc lại bức tranh thứ năm' : 'E · Đọc bức tranh thứ năm sau vách rễ',
+      getPrompt: () => this.progress.flags['l2-fifth-viewed'] ? tr('E · Đọc lại bức tranh thứ năm') : tr('E · Đọc bức tranh thứ năm sau vách rễ'),
       getPromptBounds: () => this.objects.find((object) => object.getData('library-mural') === true) instanceof Phaser.GameObjects.Image
         ? (this.objects.find((object) => object.getData('library-mural') === true) as Phaser.GameObjects.Image).getBounds() : null,
       onInteract: () => this.readMural(), isEnabled: () => this.progress.flags['l2-crystal'] === true });
     this.register({ id: 'library-exit', x: LIBRARY_LAYOUT.exit.x, y: LIBRARY_LAYOUT.exit.y, radius: LIBRARY_LAYOUT.exit.radius,
       // RULE_GAMES §3 (arch exception): E shows just south of the doorway slot between the two posts only.
       reach: { rect: LIBRARY_EXIT_THRESHOLD, face: 'south', sideMargin: 0 },
-      getPrompt: () => this.isExitOpen() ? 'E · Qua cổng đá' : 'E · Kiểm tra cổng đá phía Đông Bắc',
+      getPrompt: () => this.isExitOpen() ? tr('E · Qua cổng đá') : tr('E · Kiểm tra cổng đá phía Đông Bắc'),
       getPromptBounds: () => this.exitImages[0]?.getBounds() ?? null,
       onInteract: () => this.useExit(), isEnabled: () => true });
   }
@@ -613,7 +618,7 @@ export class LibraryLevel {
     if (this.selectedStone === STONES.indexOf(stone) && this.lastInspected === `${stone}-${state}`) {
       this.selectedStone = null;
       this.redrawTabletStacks();
-      this.showToast(`Bỏ chọn phiến ${LABELS[stone]}`);
+      this.showToast(tr('Bỏ chọn phiến {stone}', { stone: tr(LABELS[stone]) }));
       return;
     }
     this.inspectAndSelect(stone);
@@ -664,12 +669,12 @@ export class LibraryLevel {
     // After the check the ring is fixed: a seat only reads its tablet and never selects one.
     if (this.progress.flags['l2-memory']) {
       if (occupying >= 0) this.say(this.readTablet(STONES[occupying]));
-      else this.showToast('Hốc này đang trống.');
+      else this.showToast(tr('Hốc này đang trống.'));
       return;
     }
     if (this.selectedStone === null) {
       if (occupying >= 0) this.inspectAndSelect(STONES[occupying]);
-      else this.showToast('Hãy chọn một phiến ở giá đá trước.');
+      else this.showToast(tr('Hãy chọn một phiến ở giá đá trước.'));
       return;
     }
     // The selected tablet already sits in this seat: reading it is all E does here.
@@ -683,16 +688,16 @@ export class LibraryLevel {
     this.selectedStone = null;
     this.writeSlots(slots);
     SoundSystem.playRuneActivate(seatIndex + 1);
-    this.showToast(`Đã đặt phiến vào hốc ${SEAT_NAMES[seatIndex]}`);
+    this.showToast(tr('Đã đặt phiến vào hốc {seat}', { seat: tr(SEAT_NAMES[seatIndex]) }));
   }
 
   private seatPrompt(seatIndex: number): string {
     const occupant = this.readSlots()[seatIndex];
-    if (this.progress.flags['l2-memory']) return occupant >= 0 ? `E · Đọc phiến ${LABELS[STONES[occupant]]}` : 'Hốc trống';
-    if (occupant >= 0 && occupant === this.selectedStone) return `E · Đọc phiến ${LABELS[STONES[occupant]]}`;
-    if (occupant >= 0) return this.selectedStone === null ? `E · Chọn phiến ${LABELS[STONES[occupant]]}` : 'E · Đặt hoặc đổi phiến';
-    if (this.selectedStone === null) return 'Hốc trống · Chọn phiến ở giá đá trước';
-    return seatIndex === 0 ? 'E · Đặt phiến ở hốc có dấu mặt trời' : 'E · Đặt phiến đã chọn';
+    if (this.progress.flags['l2-memory']) return occupant >= 0 ? tr('E · Đọc phiến {stone}', { stone: tr(LABELS[STONES[occupant]]) }) : tr('Hốc trống');
+    if (occupant >= 0 && occupant === this.selectedStone) return tr('E · Đọc phiến {stone}', { stone: tr(LABELS[STONES[occupant]]) });
+    if (occupant >= 0) return this.selectedStone === null ? tr('E · Chọn phiến {stone}', { stone: tr(LABELS[STONES[occupant]]) }) : tr('E · Đặt hoặc đổi phiến');
+    if (this.selectedStone === null) return tr('Hốc trống · Chọn phiến ở giá đá trước');
+    return seatIndex === 0 ? tr('E · Đặt phiến ở hốc có dấu mặt trời') : tr('E · Đặt phiến đã chọn');
   }
 
   /** Short non-blocking confirmation near the top centre; a new toast replaces the one on screen. */
@@ -713,7 +718,7 @@ export class LibraryLevel {
     const slots = this.readSlots();
     if (slots.join(',') !== '0,1,2,3') {
       if (slots.includes(-1)) {
-        this.showToast('Vẫn còn hốc trống. Hãy đặt đủ bốn phiến trước khi kiểm tra.');
+        this.showToast(tr('Vẫn còn hốc trống. Hãy đặt đủ bốn phiến trước khi kiểm tra.'));
         return;
       }
       this.progress.flags['l2-check-failed'] = true;
@@ -722,18 +727,18 @@ export class LibraryLevel {
       const isRotationOf = (base: readonly number[]) => base.some((_, shift) => base.every((value, index) => slots[(index + shift) % base.length] === value));
       if (isRotationOf([0, 1, 2, 3])) {
         this.say([
-          { speaker: 'Nhinh', text: 'Các thời khắc đã nối đúng nhau, nhưng mình bắt đầu nhầm chỗ rồi.' },
-          { speaker: 'Lumo', text: 'Hốc có dấu mặt trời phải là lúc một ngày vừa bắt đầu.' },
+          { speaker: 'Nhinh', text: tr('Các thời khắc đã nối đúng nhau, nhưng mình bắt đầu nhầm chỗ rồi.') },
+          { speaker: 'Lumo', text: tr('Hốc có dấu mặt trời phải là lúc một ngày vừa bắt đầu.') },
         ]);
         return;
       }
       if (isRotationOf([0, 3, 2, 1])) {
-        this.say([{ speaker: 'Nhinh', text: 'Mình đang đi ngược những mũi tên quanh giếng. Thử đổi chiều xem.' }]);
+        this.say([{ speaker: 'Nhinh', text: tr('Mình đang đi ngược những mũi tên quanh giếng. Thử đổi chiều xem.') }]);
         return;
       }
       this.say([
-        { speaker: 'Nhinh', text: 'Chưa được rồi. Có chỗ nào đó không khớp.' },
-        { speaker: 'Lumo', text: 'Mình xem lại từng phiến nhé. Nhớ cả hình dưới ánh đèn lẫn những nét hiện trong bóng tối.' },
+        { speaker: 'Nhinh', text: tr('Chưa được rồi. Có chỗ nào đó không khớp.') },
+        { speaker: 'Lumo', text: tr('Mình xem lại từng phiến nhé. Nhớ cả hình dưới ánh đèn lẫn những nét hiện trong bóng tối.') },
       ]);
       return;
     }
@@ -744,7 +749,7 @@ export class LibraryLevel {
     SoundSystem.playPuzzleSolved();
     this.celebrateSolve();
     this.updateVisualState(true);
-    this.say([{ speaker: 'Nhinh', text: 'Bình minh, ban ngày, hoàng hôn… rồi đêm.' }, { speaker: 'Lumo', text: 'Tôi đã quên khu rừng từng đổi màu đẹp thế nào.' }]);
+    this.say([{ speaker: 'Nhinh', text: tr('Bình minh, ban ngày, hoàng hôn… rồi đêm.') }, { speaker: 'Lumo', text: tr('Tôi đã quên khu rừng từng đổi màu đẹp thế nào.') }]);
   }
 
   /** Correct arrangement: warm glows run clockwise through the four seats (N, E, S, W) as the well opens. */
@@ -776,34 +781,34 @@ export class LibraryLevel {
     // The mural's sun and the gate both brighten once as the crystal opens the wall.
     this.flashGlow(LIBRARY_MURAL_SUN.x, LIBRARY_MURAL_SUN.y, 0, 0.5, 0.9);
     this.flashGlow(LIBRARY_EXIT_GLOW.x, LIBRARY_EXIT_GLOW.y, 0, 0.7, 0.9);
-    this.showToast('Lối ra đã mở');
+    this.showToast(tr('Lối ra đã mở'));
     this.say([
-      { speaker: 'Nhinh', text: 'Viên tinh thể này vẫn còn sáng.' },
-      { speaker: 'Lumo', text: 'Ký Ức… Tôi nhớ ra rồi! Đây là một mảnh trái tim Cây Mẹ.' },
-      { speaker: 'Nhinh', text: 'Trái tim của cây đã vỡ sao?' },
-      { speaker: 'Lumo', text: 'Ừ. Có ba mảnh: Ký Ức, Hy Vọng và Cân Bằng. Những cái tên ấy được khắc trên rễ cây.' },
-      { speaker: 'Nhinh', text: 'Nếu mang đủ ba mảnh về, Cây Mẹ có hồi phục được không?' },
-      { speaker: 'Lumo', text: 'Tôi tin là được. Chúng ta sẽ thắp sáng lại trái tim nó. Khu rừng sẽ hồi sinh.' },
-      { speaker: 'Nhinh', text: 'Vậy mình thử nhé. Tôi cũng muốn thấy nơi này lúc trời sáng.' },
-      { speaker: 'Nhinh', text: 'Mảnh này để tôi giữ. Mình cùng tìm hai mảnh còn lại.' },
+      { speaker: 'Nhinh', text: tr('Viên tinh thể này vẫn còn sáng.') },
+      { speaker: 'Lumo', text: tr('Ký Ức… Tôi nhớ ra rồi! Đây là một mảnh trái tim Cây Mẹ.') },
+      { speaker: 'Nhinh', text: tr('Trái tim của cây đã vỡ sao?') },
+      { speaker: 'Lumo', text: tr('Ừ. Có ba mảnh: Ký Ức, Hy Vọng và Cân Bằng. Những cái tên ấy được khắc trên rễ cây.') },
+      { speaker: 'Nhinh', text: tr('Nếu mang đủ ba mảnh về, Cây Mẹ có hồi phục được không?') },
+      { speaker: 'Lumo', text: tr('Tôi tin là được. Chúng ta sẽ thắp sáng lại trái tim nó. Khu rừng sẽ hồi sinh.') },
+      { speaker: 'Nhinh', text: tr('Vậy mình thử nhé. Tôi cũng muốn thấy nơi này lúc trời sáng.') },
+      { speaker: 'Nhinh', text: tr('Mảnh này để tôi giữ. Mình cùng tìm hai mảnh còn lại.') },
     ]);
   }
 
   private readMural(): void {
     if (!this.progress.flags['l2-crystal']) return;
     if (this.progress.flags['l2-fifth-viewed']) {
-      this.say([{ speaker: 'Nhinh', text: 'Những đường nứt chạy từ bánh xe về phía Cây Mẹ.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Những đường nứt chạy từ bánh xe về phía Cây Mẹ.') }]);
       return;
     }
     this.say([
-      { speaker: 'Nhinh', text: 'Người này đang giữ một bánh xe có hình mặt trời.' },
-      { speaker: 'Nhinh', text: 'Trời đã đầy sao mà mặt trời vẫn chưa lặn…' },
+      { speaker: 'Nhinh', text: tr('Người này đang giữ một bánh xe có hình mặt trời.') },
+      { speaker: 'Nhinh', text: tr('Trời đã đầy sao mà mặt trời vẫn chưa lặn…') },
       { speaker: 'Lumo', text: '…' },
-      { speaker: 'Nhinh', text: 'Cậu sao thế, Lumo?' },
-      { speaker: 'Lumo', text: 'Tôi chợt nhớ tiếng mưa. Và có ai đó nói… đừng để đèn tắt.' },
-      { speaker: 'Nhinh', text: 'Chiếc đèn này cũng có lời nhắn phải giữ ánh sáng.' },
-      { speaker: 'Lumo', text: 'Có thể có liên quan. Nhưng tôi không nhớ người nói là ai.' },
-      { speaker: 'Nhinh', text: 'Mình ghi lại đã. Cậu không cần cố nhớ ngay đâu.' },
+      { speaker: 'Nhinh', text: tr('Cậu sao thế, Lumo?') },
+      { speaker: 'Lumo', text: tr('Tôi chợt nhớ tiếng mưa. Và có ai đó nói… đừng để đèn tắt.') },
+      { speaker: 'Nhinh', text: tr('Chiếc đèn này cũng có lời nhắn phải giữ ánh sáng.') },
+      { speaker: 'Lumo', text: tr('Có thể có liên quan. Nhưng tôi không nhớ người nói là ai.') },
+      { speaker: 'Nhinh', text: tr('Mình ghi lại đã. Cậu không cần cố nhớ ngay đâu.') },
     ], () => {
       // Optional story only: the gate already opened when the crystal was taken.
       this.progress.flags['l2-fifth-viewed'] = true;
@@ -818,10 +823,10 @@ export class LibraryLevel {
       return;
     }
     this.nextLevel([
-      { speaker: 'Lumo', text: 'Lối này dẫn ra suối. Dòng nước từng chảy tới tận rễ Cây Mẹ.' },
-      { speaker: 'Nhinh', text: 'Còn hai mảnh tinh thể thì sao?' },
-      { speaker: 'Lumo', text: 'Tôi nhớ có một ngọn tháp ở cuối dòng. Có lẽ mình nên tới đó tìm.' },
-      { speaker: 'Nhinh', text: 'Vậy trước hết mình phải tìm đường qua suối.' },
+      { speaker: 'Lumo', text: tr('Lối này dẫn ra suối. Dòng nước từng chảy tới tận rễ Cây Mẹ.') },
+      { speaker: 'Nhinh', text: tr('Còn hai mảnh tinh thể thì sao?') },
+      { speaker: 'Lumo', text: tr('Tôi nhớ có một ngọn tháp ở cuối dòng. Có lẽ mình nên tới đó tìm.') },
+      { speaker: 'Nhinh', text: tr('Vậy trước hết mình phải tìm đường qua suối.') },
     ]);
   }
 
@@ -1146,10 +1151,10 @@ export class LibraryLevel {
   private allSeatsFilled(): boolean { return this.readSlots().every((slot) => slot >= 0); }
   /** The locked-exit line names the next missing step for the player's current stage. */
   private exitBlockedMessage(): string {
-    if (!this.progress.flags['l2-memory']) return 'Cổng đá vẫn đóng. Có lẽ phải khôi phục vòng ngày đêm ở giữa phòng trước.';
+    if (!this.progress.flags['l2-memory']) return tr('Cổng đá vẫn đóng. Có lẽ phải khôi phục vòng ngày đêm ở giữa phòng trước.');
     // Approved side copy: the crystal still rests on the well. The gate opens with the crystal alone,
     // so "crystal taken, painting unread" is no longer a closed-gate state and has no line here.
-    return 'Viên tinh thể vẫn còn trên bệ. Mình mang theo đã.';
+    return tr('Viên tinh thể vẫn còn trên bệ. Mình mang theo đã.');
   }
   /** The gate opens the moment the crystal is taken; the fifth painting is optional story, never a key. */
   private isExitOpen(): boolean { return this.progress.flags['l2-crystal'] === true; }
@@ -1192,15 +1197,15 @@ export class LibraryLevel {
     const birdBoatBrightSeen = this.progress.flags['l2-bird-lit'] === true && this.progress.flags['l2-boat-lit'] === true;
     const leafSeedDarkSeen = this.progress.flags['l2-leaf-dark'] === true && this.progress.flags['l2-seed-dark'] === true;
     if (birdBoatBrightSeen && leafSeedDarkSeen) {
-      return 'Xem lớp tối của Chim và Thuyền, rồi lớp sáng của Lá và Hạt để phân biệt từng cặp.';
+      return tr('Xem lớp tối của Chim và Thuyền, rồi lớp sáng của Lá và Hạt để phân biệt từng cặp.');
     }
     if (birdBoatBrightSeen) {
-      return 'Xem mũi tên của Chim và Thuyền khi tắt đèn. Xem cả hai lớp của Lá và Hạt.';
+      return tr('Xem mũi tên của Chim và Thuyền khi tắt đèn. Xem cả hai lớp của Lá và Hạt.');
     }
     if (leafSeedDarkSeen) {
-      return 'Bật đèn để xem Lá và Hạt là mặt trời hay mặt trăng. Xem cả hai lớp của Chim và Thuyền.';
+      return tr('Bật đèn để xem Lá và Hạt là mặt trời hay mặt trăng. Xem cả hai lớp của Chim và Thuyền.');
     }
-    return 'So Chim với Thuyền ở cả hai lớp, vì chúng giống nhau khi đèn bật. Với Lá và Hạt, xem lớp sáng: chúng giống nhau khi tắt đèn.';
+    return tr('So Chim với Thuyền ở cả hai lớp, vì chúng giống nhau khi đèn bật. Với Lá và Hạt, xem lớp sáng: chúng giống nhau khi tắt đèn.');
   }
 
   private sanitizeSavedSlots(): void {

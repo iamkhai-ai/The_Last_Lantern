@@ -220,6 +220,85 @@ export function ruinsShadowWalkResume(counter: number | undefined): { start: Rui
   return { start: { x: at.x, y: at.y }, next: counter + 1 };
 }
 
+/**
+ * Optional demonstration (scenario 08 §4 "Người giữ bóng"). The Shadow leaves his guard spot, steps onto the centre light
+ * flow and holds `shielding` there, so his footprint breaks the flow at x 320. The spot is the flow's own segment between
+ * the statue's north edge (footprint top y 148) and the Moon lock. Footprint x 306..334, y 104..140: 8px clear of the statue
+ * footprint, and the passage north of the statue stays open for the foot body (y 80..104). Both legs pass the statue's
+ * north-west corner, so the footprint never overlaps the statue, the mirrors, the pedestal or any control stand (checked).
+ */
+export const RUINS_SHADOW_DEMO = {
+  /** ground anchor of the demonstration spot, on the centre flow (`RUINS_BEAMS.centreVisible[1]`) */
+  ground: { x: 320, y: 140 },
+  /** walk from the guard spot to the demonstration spot */
+  outRoute: [{ x: 270, y: 124 }, { x: 320, y: 140 }] as readonly RuinsPoint[],
+  /** walk back to the guard spot (the same corner as the way out) */
+  backRoute: [{ x: 270, y: 124 }, { x: 238, y: 164 }] as readonly RuinsPoint[],
+} as const;
+
+export interface RuinsShadowDemoInput {
+  lanternPlaced: boolean;
+  lanternOn: boolean;
+  sunsLit: number;
+  moonCovered: boolean;
+  latched: boolean;
+  demoSeen: boolean;
+}
+
+/**
+ * Whether the optional demonstration may run: the lamp is lit on the altar, both Suns are lit, the Moon is not yet covered,
+ * the temple is not latched, and the demonstration has not been seen in this save. Pure: it never reads or writes puzzle state.
+ */
+export function ruinsShadowDemoEligible(input: RuinsShadowDemoInput): boolean {
+  return input.lanternPlaced && input.lanternOn && input.sunsLit === 2 && !input.moonCovered && !input.latched && !input.demoSeen;
+}
+
+/**
+ * How close The Shadow's ground anchor must be to the statue's base (`RUINS_PROPS.statue.groundAnchor`, y 212) for the name
+ * reveal to hold him still. His guard spot is 95px from that base ((238,164) to (320,212)) and his wait spot is 181px away
+ * ((470,110)). 110px takes in the guard spot and leaves the wait spot outside.
+ */
+export const RUINS_SHADOW_NEAR_STATUE_PX = 110;
+
+/**
+ * Scenario 08 §5 "Mạch phụ": a worn name carved under the statue. It is a ground decal (`RUINS_DEPTH.groundStamp`) that a
+ * Pulse within `pulseRadius` of its centre reveals. When The Shadow is near the statue's base (see
+ * `RUINS_SHADOW_NEAR_STATUE_PX`) he holds `stillness` for the reveal.
+ */
+export const RUINS_NAME = {
+  art: 'inscription-under-statue',
+  centre: { x: 320, y: 222 },
+  pulseRadius: 56,
+} as const;
+
+/** True when a Pulse originating at `origin` reaches the carved name. */
+export function ruinsPulseReachesName(origin: RuinsPoint): boolean {
+  return Math.hypot(origin.x - RUINS_NAME.centre.x, origin.y - RUINS_NAME.centre.y) <= RUINS_NAME.pulseRadius;
+}
+
+/** True when The Shadow's ground anchor is close enough to the statue's base for the reveal to hold him still. */
+export function ruinsShadowNearStatue(ground: RuinsPoint): boolean {
+  const base = RUINS_PROPS.statue.groundAnchor;
+  return Math.hypot(ground.x - base.x, ground.y - base.y) <= RUINS_SHADOW_NEAR_STATUE_PX;
+}
+
+/**
+ * Display only: whether the Moon lock and its labels read as shadowed. The statue's shadow covers the Moon only while the lamp
+ * is lit (`lightActive`), so the Moon reads SÁNG with the lamp off, whatever the statue is set to. The optional demonstration
+ * holds it covered while it runs. It deliberately does not use `moonDark` and feeds no puzzle or latch rule.
+ */
+export function ruinsMoonShadowed(puzzle: { moonCovered: boolean; lightActive: boolean }, demonstrating: boolean): boolean {
+  return (puzzle.moonCovered && puzzle.lightActive) || demonstrating;
+}
+
+/** The prompt of every control that turns a piece (statue, mirrors) once the ring is committed. */
+export const RUINS_LATCHED_TURN_PROMPT = 'E · Đã gài, không xoay nữa';
+
+/** A turn prompt names the turn while the ring is open and reads as finished once it is latched. */
+export function ruinsTurnPrompt(base: string, latched: boolean): string {
+  return latched ? RUINS_LATCHED_TURN_PROMPT : base;
+}
+
 /** Wall-mounted fixtures with interaction stand points but no extra collider. */
 export const RUINS_WALL_FIXTURES: readonly {
   id: string; art: string; artWidth: number; artHeight: number; artCenter: RuinsPoint; stand: RuinsStand;

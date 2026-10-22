@@ -1,0 +1,133 @@
+{
+  "scope": "offline three-state visual study only",
+  "baseline_revision": "8bf1bb0241868f9908be360d6c17e3e14c14d953",
+  "evidence_binding": "file SHA256 in generation-manifest.json, normalization.json and asset-manifest.json",
+  "checks": {
+    "native_dimensions_and_128_colors": "PASS",
+    "two_x_dimensions_and_128_colors": "PASS",
+    "six_original_source_hashes": "PASS",
+    "twenty_two_reuse_hashes": "PASS",
+    "reuse_decode_and_alpha_channel": "PASS",
+    "native_visual_inspection": "PASS",
+    "strict_fully_opaque_pixel_probe": "FAIL",
+    "reuse_real_transparent_background_and_visible_content": "PASS"
+  },
+  "visual_observations": [
+    "Three full-size main mirrors and two smaller receiving eyes are present and distinguishable.",
+    "Pressure seal, call station and miniature independent practice bench are present.",
+    "Powered mockup has two visibly continuous prism/branch-mirror/receiver routes and Lumo on C.",
+    "Return Flow shows dark rings/receivers, a dim tower lamp, down lever, open chamber with Hope still inside, retrieved handheld lantern and Lumo following.",
+    "Chamber is inside the frame and the main character remains visible at 640x360.",
+    "All three normalized images share one 128-color palette without dithering."
+  ],
+  "limitations": [
+    "Generated mockups use illustrative reinterpretations of existing props and character references; they are not exact sprite assembly or final runtime captures.",
+    "No physics, optical solver, interaction reach, save/restore or puzzle behavior is proved by a composed image.",
+    "The concept relocates devices; production coordinates, south-side stands and colliders require a joint layout pass.",
+    "External window is still brighter than ideal and can be reduced during background production.",
+    "Minor material/jewel details drift between generated states; production requires one fixed structural sprite family.",
+    "HUD, animation, dynamic lighting and source/sprite layer separation are not implemented.",
+    "12 existing reuse candidates have max alpha 253-254; the strict fully opaque pixel probe failed. Their transparency/nonempty-content check passes; retain the observation for production export."
+  ],
+  "not_run": {
+    "engine_integration": "NOT_RUN",
+    "runtime_playthrough": "NOT_RUN",
+    "build": "NOT_RUN - no runtime code changed in this delivery",
+    "full_sprite_pack": "NOT_RUN",
+    "animation": "NOT_RUN",
+    "independent_code_reviews": "NOT_RUN - no code changes in this delivery"
+  },
+  "user_visual_target_approval": "pending; direction approval does not approve each generated frame",
+  "exploratory_alpha_probe": {
+    "status": "FAIL",
+    "condition": "At least one pixel must be exactly alpha 255 in every candidate; stricter than the existing source contract",
+    "affected_count": 12,
+    "findings": [
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-lit.png",
+        "alpha_min": 0,
+        "alpha_max": 254,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-off-source.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/receiver-off.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/receiver-on.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-slash.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-backslash.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-horizontal.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-slash.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-backslash.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-horizontal.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/src/assets/crystal_hope.png",
+        "alpha_min": 0,
+        "alpha_max": 253,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      },
+      {
+        "path": "D:/Z_PROJECT/The_Last_Lantern/the-last-lantern/assets/character/nhinh_downright_lantern_off_0.png",
+        "alpha_min": 0,
+        "alpha_max": 254,
+        "status": "OPEN - record for production export",
+        "source_modified": false
+      }
+    ],
+    "disposition": "Observation retained for production normalization; no waiver or source modification. Candidates remain unintegrated."
+  }
+}

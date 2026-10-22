@@ -13,7 +13,10 @@ function methodSource(name) {
   assert.ok(method?.body, `the shipped ${name}() exists`);
   return method.body.getText(ast);
 }
+const IDENTITY_TR = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text);
+
 function compile(name, symbols = {}) {
+  symbols = { tr: IDENTITY_TR, ...symbols };
   const method = controller?.members.find(node => ts.isMethodDeclaration(node) && node.name.getText(ast) === name);
   const js = ts.transpileModule(`const unit = function(${method.parameters.map(p => p.getText(ast)).join(',')}) ${method.body.getText(ast)};`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;

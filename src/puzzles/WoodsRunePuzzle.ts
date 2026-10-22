@@ -1,3 +1,4 @@
+import { tr } from '../i18n/catalog.ts';
 import Phaser from 'phaser';
 import { DIALOGUE_DATA } from '../data/dialogue';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -81,7 +82,7 @@ export class WoodsRunePuzzle {
       y: 164,
       getPromptBounds: () => this.archSprite.getBounds(),
       radius: 44,
-      getPrompt: () => '[E] Đọc bia gợi ý cổng cổ',
+      getPrompt: () => tr('[E] Đọc bia gợi ý cổng cổ'),
       onInteract: () => {
         this.dialogueSystem.startDialogue(DIALOGUE_DATA.woods_gate_inscription);
       },
@@ -89,9 +90,9 @@ export class WoodsRunePuzzle {
 
     // Three Mossy Runestones matching 03_Whispering_Woods.png
     const defs: Array<{ id: RuneId; labelVi: string; x: number; y: number }> = [
-      { id: 'moon', labelVi: 'Cổ tự Mặt Trăng', x: 162, y: 196 },
-      { id: 'leaf', labelVi: 'Cổ tự Chiếc Lá', x: 265, y: 120 },
-      { id: 'star', labelVi: 'Cổ tự Ngôi Sao', x: 520, y: 196 },
+      { id: 'moon', labelVi: tr('Cổ tự Mặt Trăng'), x: 162, y: 196 },
+      { id: 'leaf', labelVi: tr('Cổ tự Chiếc Lá'), x: 265, y: 120 },
+      { id: 'star', labelVi: tr('Cổ tự Ngôi Sao'), x: 520, y: 196 },
     ];
 
     const currentProgress = this.questSystem.progress.woodsRuneSequence;
@@ -136,9 +137,9 @@ export class WoodsRunePuzzle {
           !this.questSystem.progress.crystals.memory &&
           this.questSystem.progress.woodsRuneSequence < 3,
         getPrompt: () => {
-          if (node.activated) return `${d.labelVi} (Đã thắp sáng)`;
-          if (this.revealRemainingMs > 0) return `[E] Kích hoạt ${d.labelVi}`;
-          return 'Bia đá ẩn — Nhấn [SPACE] phát Light Pulse để soi ký hiệu';
+          if (node.activated) return tr('{label} (Đã thắp sáng)', { label: tr(d.labelVi) });
+          if (this.revealRemainingMs > 0) return tr('[E] Kích hoạt {label}', { label: tr(d.labelVi) });
+          return tr('Bia đá ẩn — Nhấn [SPACE] phát Light Pulse để soi ký hiệu');
         },
         onInteract: () => this.handleRuneInteract(node),
       });
@@ -148,7 +149,7 @@ export class WoodsRunePuzzle {
       if (this.questSystem.progress.woodsRuneSequence >= 3) return;
       this.revealRemainingMs = WoodsRunePuzzle.REVEAL_DURATION_MS;
       this.refreshNodeTextures();
-      this.hud.showToast('Các cổ tự ẩn trên bia đá đã lộ diện trong 5 giây!', 2200);
+      this.hud.showToast(tr('Các cổ tự ẩn trên bia đá đã lộ diện trong 5 giây!'), 2200);
     });
 
     this.refreshNodeTextures();
@@ -162,13 +163,13 @@ export class WoodsRunePuzzle {
     if (this.questSystem.progress.woodsRuneSequence >= 3) return;
 
     if (this.revealRemainingMs <= 0 && !node.activated) {
-      this.hud.showToast('Ký hiệu đang ẩn! Hãy bật đèn và nhấn [SPACE] phát Light Pulse trước.');
+      this.hud.showToast(tr('Ký hiệu đang ẩn! Hãy bật đèn và nhấn [SPACE] phát Light Pulse trước.'));
       SoundSystem.playPuzzleError();
       return;
     }
 
     if (node.activated) {
-      this.hud.showToast(`${node.labelVi} đã được kích hoạt.`);
+      this.hud.showToast(tr('{label} đã được kích hoạt.', { label: tr(node.labelVi) }));
       return;
     }
 
@@ -186,7 +187,7 @@ export class WoodsRunePuzzle {
         this.unlockGate();
       } else {
         this.hud.showToast(
-          `Đã thắp sáng ${node.labelVi} (${this.questSystem.progress.woodsRuneSequence}/3)!`
+          tr('Đã thắp sáng {label} ({count}/3)!', { label: tr(node.labelVi), count: this.questSystem.progress.woodsRuneSequence })
         );
       }
     } else {
@@ -196,7 +197,7 @@ export class WoodsRunePuzzle {
       }
       SoundSystem.playPuzzleError();
       this.refreshNodeTextures();
-      this.hud.showToast('Thứ tự chưa đúng... Gợi ý: “Trăng soi lá, lá dẫn sao.”');
+      this.hud.showToast(tr('Thứ tự chưa đúng... Gợi ý: “Trăng soi lá, lá dẫn sao.”'));
     }
   }
 
@@ -205,7 +206,7 @@ export class WoodsRunePuzzle {
     this.archSprite.setTexture('woods_arch_open');
     SoundSystem.playPuzzleSolved();
     this.effectsSystem.spawnBurst(370, 120, 0xffe680, 24);
-    this.hud.showToast('Cổng đá cổ đã mở! Tinh thể Ký Ức xuất hiện!');
+    this.hud.showToast(tr('Cổng đá cổ đã mở! Tinh thể Ký Ức xuất hiện!'));
     this.spawnMemoryCrystal();
   }
 
@@ -230,14 +231,14 @@ export class WoodsRunePuzzle {
       getPromptBounds: () => this.crystalSprite?.getBounds() ?? null,
       radius: 46,
       isEnabled: () => !this.questSystem.progress.crystals.memory,
-      getPrompt: () => '[E] Thu nhận Tinh thể Ký Ức (Vàng)',
+      getPrompt: () => tr('[E] Thu nhận Tinh thể Ký Ức (Vàng)'),
       onInteract: () => {
         if (!this.questSystem.collectCrystal('memory')) return;
         SoundSystem.playCrystalPickup();
         this.effectsSystem.spawnBurst(370, 174, 0xffe680, 24);
         this.crystalSprite?.destroy();
         this.crystalSprite = undefined;
-        this.hud.showToast('Đã nhận Tinh thể Ký Ức (1/3)!');
+        this.hud.showToast(tr('Đã nhận Tinh thể Ký Ức (1/3)!'));
         this.dialogueSystem.startDialogue(DIALOGUE_DATA.woods_crystal_memory);
       },
     });

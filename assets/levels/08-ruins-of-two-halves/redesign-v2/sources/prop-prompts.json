@@ -1,0 +1,185 @@
+[
+  {
+    "tag": "ruins_altar",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/ruins_altar-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. A low wide stone altar. Preserve the simple88x36 block body and76x8 top lip from target, same low front-facing silhouette. Smooth cool slate-grey stone with worn brass joining plates; keep the central top face completely clear for a separate runtime lamp. Blank altar face; no emblem, no built-in ring."
+    }
+  },
+  {
+    "tag": "seedling-curtain-open",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/seedling-curtain-open-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. An OPEN rectangular stone sliding-curtain frame, with shutter parked across the top header exactly as target. In the dark lower opening show a small seedling bed with 3 tiny muted green seedlings and dark soil behind the same frame. Worn slate stone header and side uprights. Opening stays open and visible; no foreground shutter."
+    }
+  },
+  {
+    "tag": "seedling-curtain-closed",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/seedling-curtain-closed-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. The same rectangular stone sliding-curtain frame, CLOSED. Solid vertical slate stone shutter panels completely hide the seedling bed, as target. Same frame/header/side sizes as open state. No visible seedlings."
+    }
+  },
+  {
+    "tag": "lock-sun-off",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/lock-sun-off-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. Dull warm brass Sun receiver face on a small stone plaque. Retain the target's 8 structural radial spoke marks around a hollow dim central socket, muted brass, mechanical engraved details. OFF state dull dark socket and recessed spokes. No glowing marks."
+    }
+  },
+  {
+    "tag": "lock-sun-on",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/lock-sun-on-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. Warm brass Sun receiver face on a small stone plaque. Retain the target's 8 radial spokes around a solid pale warm-brass central socket, ON state all spokes raised and clearly connected/readable in grayscale. Matte physical brass, no emitted light and no outer glow."
+    }
+  },
+  {
+    "tag": "lock-moon-covered",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/lock-moon-covered-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. Cool blue-violet Moon receiver plaque. Crescent-shaped central bracket pale and CLOSED lower U-bracket around a DARK recessed centre, exactly covered state of target. Mechanical bracket marks and shade difference should carry state without colour. Material only, no emitted light."
+    }
+  },
+  {
+    "tag": "lock-moon-lit",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/lock-moon-lit-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. Cool blue-violet Moon receiver plaque. Crescent-shaped central bracket subdued and OPEN lower straight bracket, PALE centre area, the lit state specified by brief. Mechanical bracket marks and value difference carry state without colour. Material only, no emitted light."
+    }
+  },
+  {
+    "tag": "fixed-three-route-splitter-off",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/fixed-three-route-splitter-off-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. One fixed triangular three-way prism resting on a wide low stone base. Target's triangular crystal and thin central vertical physical metal spine keep exact orientation. OFF state dark translucent neutral blue-violet crystal with three quiet faces, worn brass sockets. No rotation, no ray or halo."
+    }
+  },
+  {
+    "tag": "fixed-three-route-splitter-on",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/fixed-three-route-splitter-on-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. One fixed triangular three-way prism resting on the same wide low stone base. Exact target orientation, three pale desaturated material crystal planes with warm brass centre spine make ON state readable. Crisp physical facets with brighter matte faces, absolutely no emitted light, halo or rays."
+    }
+  },
+  {
+    "tag": "confirmation-waiting",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/confirmation-waiting-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. A flat elliptical mechanical confirmation ring on dark slate inset. Exactly target ellipse with evenly spaced 8 dark recessed studs and dim physical brass rim, hollow centre. WAITING unlatched, no pin engaged. No writing or checkmark."
+    }
+  },
+  {
+    "tag": "confirmation-ready",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/confirmation-ready-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. A flat elliptical mechanical confirmation ring on dark slate inset. Exactly target ellipse, 8 evenly spaced pale warm brass studs and even complete pale brass rim, hollow centre. READY unlatched, no pin engaged. Matte bright brass only, no emitted light, halo, writing or checkmark."
+    }
+  },
+  {
+    "tag": "confirmation-latched",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/confirmation-latched-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. A flat elliptical mechanical confirmation ring on dark slate inset. Exactly target ellipse, 8 brass studs and a brass physical locking pin visibly slides diagonally across a small square centre bracket. LATCHED. The square central bracket is hardware, no checkmark/letter/lock glyph."
+    }
+  },
+  {
+    "tag": "test-pedestal",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/test-pedestal-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. A low flat elliptical stone practice pedestal exactly matching target outline and top view, with a thin worn brass horizontal guide inlay as physical metal across the centre. Cool slate stone, clean small base, nothing standing on top."
+    }
+  },
+  {
+    "tag": "beacon_stone",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/beacon_stone-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. A narrow worn stone stele set in the wall, exact target slim silhouette, native34x46. Cool slate-grey block with small moss cap, a few shallow eroded illegible scratched marks. No readable letters, no banner, no lantern, no arm, no glow."
+    }
+  },
+  {
+    "tag": "sanctuary-door-closed",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/sanctuary-door-closed-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. A flat rectangular north-wall stone door and rectangular stone frame matching target dimensions. CLOSED: solid vertical slate stone panels, worn brass hinge details, plain wide lintel. Entire opening closed, no glowing seams, no symbol or text."
+    }
+  },
+  {
+    "tag": "sanctuary-door-open",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/sanctuary-door-open-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the current game prop enlarged exactly8x. Image2 is palette/material reference ONLY. Preserve image1's exact full canvas, occupied silhouette, proportions, pivot, view, registration and state orientation. Restyle as moonlit temple family: cool slate-grey worn stone, desaturated aged brass, dark timber if present, very restrained moss in joints. True crisp pixel art planned for original tiny game resolution, clean grouped pixels, max64 colours, no anti-aliasing, no dithering, no speckled noise, no gradient. Genuine transparent background outside physical prop. Do NOT add light, beams, glow, lamps, cast shadows, text, characters, UI, or standalone lock glyphs. State detail described is physical engraved/hardware structure, not light emission. The same rectangular north-wall stone door frame as target. OPEN: a dark arched passage cut into the rectangular slate stone surround under the plain wide lintel. Flat on wall, no stairs or perspective tunnel protruding outside frame. Dark open interior, no door panels blocking it."
+    }
+  },
+  {
+    "tag": "inscription-under-statue",
+    "args": {
+      "transparent_background": true,
+      "prompt": "Use case: stylized-concept. A production pixel art decal of a faint worn ancient name carved into stone, so eroded it is completely illegible. Only a single thin horizontal row of short interrupted shallow dark slate-grey scratches, several missing sections. No stone slab or background: the carved scratch fragments themselves float on genuine transparency. Intended native canvas48x12, scratches fit44x5 near centre. Very low contrast cool dark grey, under8colours, clean square clusters, no dithering or antialiasing. No legible letters, words, numbers, symbols, glyph icons, glow, light, shadow, object, character, UI, frame. No mockup, labels or presentation board. The engine will briefly reveal it under Pulse; draw no pulse effect."
+    }
+  }
+]

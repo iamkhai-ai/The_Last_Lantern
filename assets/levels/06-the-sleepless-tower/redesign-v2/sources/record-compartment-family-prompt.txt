@@ -1,0 +1,6 @@
+Use case: stylized-concept.
+Asset type: production transparent two-state wall fixture sprite family for Level 06, The Sleepless Tower.
+Input images: Image 1 is the approved entry mockup for the wall window and compact recording drawer placement. Images 2 and 3 are approved G0 and prism sprites for the dark teal stone/brass pixel cluster style.
+Primary request: Make a vertical two-cell strip of identical 88x32 recording-compartment fixtures in a stone wall inset, bottom-center aligned at (44,31). Top = closed: a small brass-edged compartment panel with a clear shut seam. Bottom = open: the same frame and canvas, drawer pulled open by a few pixels with a dark empty slot; no object inside. The two forms, frame, size, lighting and anchor must match; only the drawer state changes. It reads as a physical wall recording compartment, not an icon or text panel.
+Style: hard deliberate pixel clusters; dark teal/slate blocks, selective tarnished brass highlights; restrained, legible at 88x32, no blur, gradients, photoreal noise or dithering.
+Constraints: genuine transparent background, two equal cells, no lettering, waveform, text, labels, characters, extra objects, wall background, detached shadow, frame lines or watermark.

@@ -64,14 +64,15 @@ function fixture({ campaign = false, legacy = false, completed = false, victory 
       this.events = new EventEmitter();
       this.textures = { exists: () => true };
       this.tweens = { add: config => tweens.push(config) };
-      this.scene = { start: (...args) => starts.push(args) };
+      this.scene = { start: (...args) => starts.push(args), restart: (...args) => starts.push(['restart', ...args]) };
     }
   }
   const CampaignSaveSystem = { load: () => ({ level }), hasSave: () => campaign, isCompleted: () => completed, clear: () => { campaign = false; clears++; } };
   const SaveSystem = { hasSave: () => legacy, load: () => ({ stage: victory ? 'victory' : 'woods' }), clear: () => { legacy = false; clears++; } };
   const SoundSystem = { isMuted: () => muted, toggleMute: () => { muted = !muted; }, playLanternToggle() {}, playMirrorRotate() {}, playUiClick() {}, playUiCancel() {} };
-  const MenuScene = new Function('Phaser', 'getLevelArtKey', 'getNhinhTexture', 'EffectsSystem', 'SaveSystem', 'SoundSystem', 'WorldFactory', 'CampaignSaveSystem', 'RELEASE_POLICY', `${js}\nreturn MenuScene;`)(
+  const MenuScene = new Function('Phaser', 'getLevelArtKey', 'getNhinhTexture', 'EffectsSystem', 'SaveSystem', 'SoundSystem', 'WorldFactory', 'CampaignSaveSystem', 'RELEASE_POLICY', 'tr', 'getLocale', 'otherLocale', 'setLocale', `${js}\nreturn MenuScene;`)(
     { Scene }, () => 'backdrop', () => 'nhinh', class { setupZoneEffects() {} update() {} }, SaveSystem, SoundSystem, {}, CampaignSaveSystem, createReleasePolicy(flavor),
+    (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text), () => 'vi', () => 'en', () => {},
   );
   const scene = new MenuScene(); scene.create();
   return { scene, objects, starts, tweens, clears: () => clears, muted: () => muted,

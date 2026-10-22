@@ -1,0 +1,6 @@
+Use case: stylized-concept.
+Asset type: production transparent two-state sprite strip for Level 06, The Sleepless Tower, in Phaser 3.
+Input images: Image 1 is the approved G0 mirror strip; use it only as a stone/brass pixel-cluster reference. Image 2 is the approved prism pair; use it only for the same dark-teal outline and restrained cyan/warm highlights. Image 3 is the approved entry mockup for era and palette.
+Primary request: Create one vertical strip of exactly two isolated copies of the same compact ancient return-flow lever. Each cell is a 40x48 sprite, aligned to the same bottom-center contact anchor (20,47), with identical base, proportions, silhouette, materials and lighting. Top cell = waiting: lever rod upright and unlocked. Bottom cell = held: same handle pulled down and visibly latched into its stop. State difference is only rod position and a tiny brass latch cue. Small, weighty, game-readable stone/brass object, with no oversized glow.
+Style: hard pixel clusters, dark colored edge, weathered slate, selective tarnished brass highlights, sparse moss, no gradients, blur, antialiasing, photoreal noise or dithering.
+Constraints: genuine transparent background; two equal cells with transparent gutter. Keep all pixels inside their cells. No characters, text, labels, beams, scenery, extra levers, detached shadows or frame lines.

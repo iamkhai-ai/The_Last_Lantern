@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
+import { tr } from '../i18n/catalog.ts';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -7,6 +8,7 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
+import { SoundSystem } from '../systems/SoundSystem';
 import {
   auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
   getHeartStage, heartArtCandidates, heartArtNativeSize, heartFinalActionAlreadyDone, heartFinalActionSource, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
@@ -347,48 +349,59 @@ export class HeartOfElariaLevel {
 
   /* ---------------------------------------------------------------- HUD text */
 
+  /**
+   * Goal only (scenario v2 10 §8): "Đặt ba tinh thể." → "Nối ba mạch rễ thành một vòng." → "Lấy lại đèn." →
+   * empty during the overload, so the final F stays the player's own choice. The lamp source, the call, the
+   * mirrors and the confirm live in the H ladder; this row only adds facts (counts, ready).
+   */
   public getObjectiveText(): string {
     const state = this.state();
     const stage = this.stage();
     switch (stage) {
       case 'crystals': {
         const placed = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] === true).length;
-        return `Đặt ba tinh thể vào ba hốc quanh Cây Mẹ (${placed}/3).`;
+        return tr('Đặt ba tinh thể ({placed}/3).', { placed });
       }
-      case 'teach': return 'Đọc bàn rễ cạnh bệ đèn để nhắc lại ba quy tắc.';
-      case 'source': return 'Đặt chiếc đèn đang bật lên bệ dẫn sáng ở phía tây.';
+      case 'teach':
+      case 'source':
       case 'seal':
-        return this.lumoMode === 'travelling'
-          ? 'Chờ Lumo tới ấn Hy Vọng và đứng giữ.'
-          : 'Gọi Lumo tới ấn Hy Vọng rồi để cậu ấy giữ.';
+        return tr('Nối ba mạch rễ thành một vòng.');
       case 'route': {
         // Never claim the branches are ready while any prerequisite is still unmet (including Lumo's
         // live position and the lantern state, which the old filter ignored).
         const missing = getHeartPrerequisiteFeedback(state);
         return missing.length
-          ? `Chỉnh đường sáng và giữ Lumo ở ấn: còn ${missing.length} điều kiện chưa đúng.`
-          : 'Ba nhánh đã sẵn sàng. Tới nút rễ trung tâm ở giữa nền đất.';
+          ? tr('Nối ba mạch rễ thành một vòng (còn {count} điều kiện).', { count: missing.length })
+          : tr('Ba nhánh đã sẵn sàng.');
       }
-      case 'confirm': return 'Nhấn E ở nút rễ trung tâm để khóa cấu hình ba nhánh.';
-      case 'retrieve': return 'Lấy lại chiếc đèn ở bệ dẫn sáng.';
-      case 'overload': return 'Nhấn F để tắt đèn — nguồn sáng đang quá tải.';
-      default: return 'Đêm đã đi hết. Nhấn E để đi tiếp đoạn kết.';
+      case 'confirm': return tr('Ba nhánh đã sẵn sàng.');
+      case 'retrieve': return tr('Lấy lại đèn.');
+      case 'overload': return '';
+      default: return tr('Đêm đã đi hết. Nhấn E để đi tiếp đoạn kết.');
     }
   }
 
   public getStatusText(): string {
     const state = this.state();
-    const lantern = this.lantern.lanternPlaced ? (this.lantern.lanternOn ? 'trên bệ' : 'trên bệ (đã tắt)') : this.lantern.lanternOn ? 'trên tay' : 'trên tay (đã tắt)';
+    const lantern = this.lantern.lanternPlaced ? (this.lantern.lanternOn ? tr('trên bệ') : tr('trên bệ (đã tắt)')) : this.lantern.lanternOn ? tr('trên tay') : tr('trên tay (đã tắt)');
+    // Scenario v2 10 §8: during the overload the status row shows the lamp only.
+    if (this.stage() === 'overload') return tr('Đèn: {lantern}', { lantern });
     const roots = ['memory', 'hope', 'balance'].map((id) => (state[id as HeartBranchId] ? '●' : '○')).join('');
-    return `Đèn: ${lantern} · Tinh thể: ${['memory', 'hope', 'balance'].filter((id) => this.progress.flags[`l9-${id}`] === true).length}/3`
-      + ` · Rễ K/H/C: ${roots} · G0 ${state.g0Split ? 'vào lăng kính' : 'thẳng tới Ký Ức'}`
-      + ` · Lumo: ${this.lumoMode === 'holding' ? 'đang giữ ấn' : this.lumoMode === 'travelling' ? 'đang tới ấn' : 'theo Nhinh'}`;
+    return tr('Đèn: {lantern} · Tinh thể: {crystals}/3 · Rễ K/H/C: {roots} · G0 {g0} · Lumo: {lumo}', {
+      lantern,
+      crystals: ['memory', 'hope', 'balance'].filter((id) => this.progress.flags[`l9-${id}`] === true).length,
+      roots,
+      g0: state.g0Split ? tr('vào lăng kính') : tr('thẳng tới Ký Ức'),
+      lumo: this.lumoMode === 'holding' ? tr('đang giữ ấn') : this.lumoMode === 'travelling' ? tr('đang tới ấn') : tr('theo Nhinh'),
+    });
   }
 
   public getLumoStatusText(): string {
-    return this.lumoMode === 'holding' ? 'LUMO · đang giữ ấn Hy Vọng'
-      : this.lumoMode === 'travelling' ? 'LUMO · đang tới ấn'
-        : 'LUMO · E gọi tới ấn';
+    // The overload keeps the HUD to the lamp alone: no call prompt beside the final choice.
+    if (this.stage() === 'overload') return '';
+    return this.lumoMode === 'holding' ? tr('LUMO · đang giữ ấn Hy Vọng')
+      : this.lumoMode === 'travelling' ? tr('LUMO · đang tới ấn')
+        : tr('LUMO · E gọi tới ấn');
   }
 
   public showHint(): void {
@@ -407,12 +420,12 @@ export class HeartOfElariaLevel {
   public showJournal(): void {
     const notes: string[] = [];
     const placed = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] === true);
-    if (placed.length) notes.push(`Tinh thể đã đặt: ${placed.map((id) => (id === 'memory' ? 'Ký Ức' : id === 'hope' ? 'Hy Vọng' : 'Cân Bằng')).join(', ')}.`);
-    if (this.progress.flags['l9-rules-read'] === true) notes.push('Bàn rễ nhắc lại: một mạch nhận ánh sáng, một ấn do Lumo giữ, hai mắt Nhật quanh một lõi Nguyệt cần bóng.');
-    if (this.progress.flags['l9-lanes-revealed'] === true) notes.push('Pulse soi được các đường nối bị rêu che giữa ba hốc và tâm rễ.');
-    if (this.progress.flags['l9-roots'] === true) notes.push('Chốt rễ đang tự giữ cấu hình, nên Lumo không cần đứng ở ấn nữa.');
-    if (this.progress.flags['l9-lantern-retrieved'] === true) notes.push('Đèn đã trở về tay Nhinh và vẫn đang cấp thêm ánh sáng.');
-    this.say([{ speaker: 'Nhinh', text: notes.length ? `Sổ tay của mình.\n${notes.join('\n')}` : 'Sổ tay còn trống. Ba hốc quanh Cây Mẹ vẫn đang chờ tinh thể.' }]);
+    if (placed.length) notes.push(tr('Tinh thể đã đặt: {crystals}.', { crystals: placed.map((id) => (id === 'memory' ? tr('Ký Ức') : id === 'hope' ? tr('Hy Vọng') : tr('Cân Bằng'))).join(', ') }));
+    if (this.progress.flags['l9-rules-read'] === true) notes.push(tr('Bàn rễ nhắc lại: một mạch nhận ánh sáng, một ấn do Lumo giữ, hai mắt Nhật quanh một lõi Nguyệt cần bóng.'));
+    if (this.progress.flags['l9-lanes-revealed'] === true) notes.push(tr('Pulse soi được các đường nối bị rêu che giữa ba hốc và tâm rễ.'));
+    if (this.progress.flags['l9-roots'] === true) notes.push(tr('Chốt rễ đang tự giữ cấu hình, nên Lumo không cần đứng ở ấn nữa.'));
+    if (this.progress.flags['l9-lantern-retrieved'] === true) notes.push(tr('Đèn đã trở về tay Nhinh và vẫn đang cấp thêm ánh sáng.'));
+    this.say([{ speaker: 'Nhinh', text: notes.length ? tr('Sổ tay của mình.\n{notes}', { notes: notes.join('\n') }) : tr('Sổ tay còn trống. Ba hốc quanh Cây Mẹ vẫn đang chờ tinh thể.') }]);
   }
 
   /* ---------------------------------------------------------------- pulse + F */
@@ -445,17 +458,19 @@ export class HeartOfElariaLevel {
     const source = heartFinalActionSource(state, lamp, nearPedestal);
     if (source) {
       this.lanternKeyTime = now;
+      // The final F is the only commit that turns a lit lamp off, so it owns the click; restore never plays it.
+      SoundSystem.playLanternToggle(false);
       this.commitFinalExtinguish(source);
       return;
     }
     if (latched && lamp.placed && lamp.on) {
       this.lanternKeyTime = now;
-      this.say([{ speaker: 'Nhinh', text: 'Đứng ở mép nam bệ đèn rồi nhấn F để tắt đèn.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Đứng ở mép nam bệ đèn rồi nhấn F để tắt đèn.') }]);
       return;
     }
     if (!latched && this.lantern.lanternPlaced) {
       this.lanternKeyTime = now;
-      this.say([{ speaker: 'Nhinh', text: 'Đèn phải ở lại bệ cho tới khi ba nhánh giữ được cấu hình. Cậu giữ Lumo ở ấn nhé.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Đèn phải ở lại bệ cho tới khi ba nhánh giữ được cấu hình. Cậu giữ Lumo ở ấn nhé.') }]);
       return;
     }
     if (this.isDialogueLocked() || this.isPaused()) return;
@@ -508,11 +523,12 @@ export class HeartOfElariaLevel {
     // the seal powers exactly when the mode flips to holding, and never while he is still travelling.
     if (this.lumoMode === 'travelling' && distance <= HEART_SEAL_RADIUS) {
       this.lumoMode = 'holding';
+      SoundSystem.playLightPulse();
       this.progress.flags['l9-at-heart'] = true;
       this.save();
       this.say([
-        { speaker: 'Lumo', text: 'Tôi tới rồi. Ấn này giữ được.' },
-        { speaker: 'Nhinh', text: 'Cậu đứng yên ở đó nhé. Mình sẽ điều chỉnh đường sáng.' },
+        { speaker: 'Lumo', text: tr('Tôi tới rồi. Ấn này giữ được.') },
+        { speaker: 'Nhinh', text: tr('Cậu đứng yên ở đó nhé. Mình sẽ điều chỉnh đường sáng.') },
       ]);
     }
   }
@@ -525,15 +541,16 @@ export class HeartOfElariaLevel {
       this.progress.flags['l9-called-heart'] = false;
       this.progress.flags['l9-at-heart'] = false;
       this.save();
-      this.say([{ speaker: 'Nhinh', text: 'Lumo, về đây với mình một chút.' }, { speaker: 'Lumo', text: 'Tôi về ngay.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Lumo, về đây với mình một chút.') }, { speaker: 'Lumo', text: tr('Tôi về ngay.') }]);
       return;
     }
     this.lumoMode = 'travelling';
+    SoundSystem.playUiClick();
     this.progress.flags['l9-called-heart'] = true;
     this.save();
     this.say([
-      { speaker: 'Nhinh', text: 'Lumo, tới ấn Hy Vọng giữ giúp mình nhé.' },
-      { speaker: 'Lumo', text: 'Tôi thấy ấn của mình ở đây. Cậu chỉnh đường sáng, tôi giữ phần này.' },
+      { speaker: 'Nhinh', text: tr('Lumo, tới ấn Hy Vọng giữ giúp mình nhé.') },
+      { speaker: 'Lumo', text: tr('Tôi thấy ấn của mình ở đây. Cậu chỉnh đường sáng, tôi giữ phần này.') },
     ]);
   }
 
@@ -546,6 +563,7 @@ export class HeartOfElariaLevel {
     if (allLive && this.progress.flags['l9-branch-stable'] !== true) {
       this.progress.flags['l9-branch-stable'] = true;
       this.save();
+      SoundSystem.playPuzzleSolved();
       this.say(STABLE_LINES);
       return;
     }
@@ -665,7 +683,7 @@ export class HeartOfElariaLevel {
       if (standing || element.id === HEART_CONFIRM_ID || element.id === HEART_MAT_ID || element.id === HEART_SEAL_ID) this.protected.push(image);
     }
     // The prism is authored inside G0's mount: aiming G0 into it is the scenario's split route.
-    const prismKey = getSharedMechanismKey('prism-dark');
+    const prismKey = this.artKey('prism-dark') ?? getSharedMechanismKey('prism-dark');
     const prism = prismKey && this.scene.textures.exists(prismKey)
       ? this.track(this.scene.add.image(HEART_BEAM_NODES.prism.x, HEART_BEAM_NODES.prism.y, prismKey).setDepth(this.depthAt(260) + 0.2))
       : null;
@@ -734,27 +752,27 @@ export class HeartOfElariaLevel {
       case 'heart-hope':
       case 'heart-balance': {
         const branch = element.id.slice('heart-'.length) as HeartBranchId;
-        const label = branch === 'memory' ? 'Ký Ức' : branch === 'hope' ? 'Hy Vọng' : 'Cân Bằng';
-        return this.progress.flags[`l9-${branch}`] === true ? `E · Xem lại hốc ${label}` : `E · Đặt tinh thể ${label}`;
+        const label = branch === 'memory' ? tr('Ký Ức') : branch === 'hope' ? tr('Hy Vọng') : tr('Cân Bằng');
+        return this.progress.flags[`l9-${branch}`] === true ? tr('E · Xem lại hốc {label}', { label }) : tr('E · Đặt tinh thể {label}', { label });
       }
-      case HEART_MAT_ID: return `E · Xem mô hình nhắc quy tắc (${(this.value('l9-mat') % MAT_MODELS.length) + 1}/${MAT_MODELS.length})`;
+      case HEART_MAT_ID: return tr('E · Xem mô hình nhắc quy tắc ({index}/{total})', { index: (this.value('l9-mat') % MAT_MODELS.length) + 1, total: MAT_MODELS.length });
       case HEART_SEAL_ID:
-        if (latched) return 'Ấn Hy Vọng đã được chốt rễ giữ';
-        return this.lumoMode === 'follow' ? 'E · Gọi Lumo tới ấn Hy Vọng' : 'E · Gọi Lumo về bên cạnh';
-      case 'heart-eye-left': return 'E · Kiểm tra mắt nắng trái';
-      case 'heart-eye-right': return 'E · Kiểm tra mắt nắng phải';
-      case 'heart-moon': return 'E · Kiểm tra lõi Nguyệt';
+        if (latched) return tr('Ấn Hy Vọng đã được chốt rễ giữ');
+        return this.lumoMode === 'follow' ? tr('E · Gọi Lumo tới ấn Hy Vọng') : tr('E · Gọi Lumo về bên cạnh');
+      case 'heart-eye-left': return tr('E · Kiểm tra mắt nắng trái');
+      case 'heart-eye-right': return tr('E · Kiểm tra mắt nắng phải');
+      case 'heart-moon': return tr('E · Kiểm tra lõi Nguyệt');
       case HEART_CONFIRM_ID:
-        if (latched) return 'Rễ đã giữ cấu hình';
-        return state.ready ? 'E · Khóa vòng rễ' : 'E · Kiểm tra vòng rễ';
+        if (latched) return tr('Rễ đã giữ cấu hình');
+        return state.ready ? tr('E · Khóa vòng rễ') : tr('E · Kiểm tra vòng rễ');
       case 'heart-pedestal':
-        if (this.lantern.lanternPlaced) return latched ? 'E · Lấy đèn về tay' : 'Đèn đang ở trên bệ';
-        return this.lantern.lanternInHand ? 'E · Đặt đèn lên bệ dẫn sáng' : null;
+        if (this.lantern.lanternPlaced) return latched ? tr('E · Lấy đèn về tay') : tr('Đèn đang ở trên bệ');
+        return this.lantern.lanternInHand ? tr('E · Đặt đèn lên bệ dẫn sáng') : null;
       case HEART_G0_ID:
-        return latched ? 'E · Xem G0 (đã chốt rễ)' : `E · Xoay G0 (${state.g0Split ? 'vào lăng kính' : 'thẳng tới Ký Ức'})`;
-      case 'heart-memory-mirror': return latched ? 'E · Xem gương Ký Ức (đã chốt rễ)' : `E · Xoay gương Ký Ức (${this.value('heart-memory')}/4 · 0 đông, 1 nam, 2 tây, 3 bắc)`;
-      case 'heart-balance-mirror': return latched ? 'E · Xem gương Cân Bằng (đã chốt rễ)' : `E · Xoay gương Cân Bằng (${this.value('heart-balance')}/4 · 0 đông, 1 nam, 2 tây, 3 bắc)`;
-      case 'heart-statue': return latched ? 'E · Xem tượng (đã chốt rễ)' : `E · Xoay tượng (${this.value('heart-statue')}/4 · 0 đông, 1 nam, 2 tây, 3 bắc)`;
+        return latched ? tr('E · Xem G0 (đã chốt rễ)') : `E · Xoay G0 (${state.g0Split ? tr('vào lăng kính') : tr('thẳng tới Ký Ức')})`;
+      case 'heart-memory-mirror': return latched ? tr('E · Xem gương Ký Ức (đã chốt rễ)') : tr('E · Xoay gương Ký Ức ({turns}/4 · 0 đông, 1 nam, 2 tây, 3 bắc)', { turns: this.value('heart-memory') });
+      case 'heart-balance-mirror': return latched ? tr('E · Xem gương Cân Bằng (đã chốt rễ)') : tr('E · Xoay gương Cân Bằng ({turns}/4 · 0 đông, 1 nam, 2 tây, 3 bắc)', { turns: this.value('heart-balance') });
+      case 'heart-statue': return latched ? tr('E · Xem tượng (đã chốt rễ)') : tr('E · Xoay tượng ({turns}/4 · 0 đông, 1 nam, 2 tây, 3 bắc)', { turns: this.value('heart-statue') });
       default: return null;
     }
   }
@@ -768,17 +786,18 @@ export class HeartOfElariaLevel {
         const branch = element.id.slice('heart-'.length) as HeartBranchId;
         if (this.progress.flags[`l9-${branch}`] === true) {
           this.say([{ speaker: 'Nhinh', text: branch === 'memory'
-            ? 'Hốc Ký Ức đã khớp. Màu vàng đang chảy dọc theo rễ.'
-            : branch === 'hope' ? 'Hốc Hy Vọng đã khớp. Nhánh xanh đang giữ nhịp đều.'
-              : 'Hốc Cân Bằng đã khớp. Nhánh tím vẫn chờ bóng tượng.' }]);
+            ? tr('Hốc Ký Ức đã khớp. Màu vàng đang chảy dọc theo rễ.')
+            : branch === 'hope' ? tr('Hốc Hy Vọng đã khớp. Nhánh xanh đang giữ nhịp đều.')
+              : tr('Hốc Cân Bằng đã khớp. Nhánh tím vẫn chờ bóng tượng.') }]);
           return;
         }
         this.progress.flags[`l9-${branch}`] = true;
         this.save();
+        SoundSystem.playRuneActivate(['memory', 'hope', 'balance'].indexOf(branch) + 1);
         const remaining = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] !== true);
         this.refresh();
         if (remaining.length === 0) this.say(PLACED_LINES);
-        else this.say([{ speaker: 'Nhinh', text: 'Tinh thể đã vào hốc. Màu chạy dọc rễ rồi dừng trước đoạn đứt.' }]);
+        else this.say([{ speaker: 'Nhinh', text: tr('Tinh thể đã vào hốc. Màu chạy dọc rễ rồi dừng trước đoạn đứt.') }]);
         return;
       }
       case HEART_MAT_ID: {
@@ -793,42 +812,42 @@ export class HeartOfElariaLevel {
       }
       case HEART_SEAL_ID:
         if (state.latched) {
-          this.say([{ speaker: 'Nhinh', text: 'Ấn Hy Vọng đã nằm trong cấu hình được chốt rễ giữ.' }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Ấn Hy Vọng đã nằm trong cấu hình được chốt rễ giữ.') }]);
           return;
         }
         this.callLumoToSeal();
         return;
       case 'heart-eye-left':
       case 'heart-eye-right': {
-        const side = element.id === 'heart-eye-left' ? 'trái' : 'phải';
+        const side = element.id === 'heart-eye-left' ? tr('trái') : tr('phải');
         const lit = element.id === 'heart-eye-left' ? state.eyeLeft : state.eyeRight;
         if (lit) {
-          this.say([{ speaker: 'Nhinh', text: `Mắt nắng ${side} đang nhận tia sáng.` }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Mắt nắng {side} đang nhận tia sáng.', { side }) }]);
           return;
         }
         const reasons: string[] = [];
-        if (!state.light) reasons.push('đèn chưa ở trên bệ hoặc đang tắt');
-        if (!state.balanceRoute) reasons.push('bộ chia chưa nhận được tia từ G0 và gương Cân Bằng');
+        if (!state.light) reasons.push(tr('đèn chưa ở trên bệ hoặc đang tắt'));
+        if (!state.balanceRoute) reasons.push(tr('bộ chia chưa nhận được tia từ G0 và gương Cân Bằng'));
         if (state.balanceRoute && ((element.id === 'heart-eye-left' && this.value('heart-statue') === HEART_STATUE_BLOCKS_LEFT_EYE)
-          || (element.id === 'heart-eye-right' && this.value('heart-statue') === HEART_STATUE_BLOCKS_RIGHT_EYE))) reasons.push('tượng đang chắn ngay trước mắt này');
-        this.say([{ speaker: 'Nhinh', text: `Mắt nắng ${side} vẫn tối: còn ${reasons.join('; ')}.` }]);
+          || (element.id === 'heart-eye-right' && this.value('heart-statue') === HEART_STATUE_BLOCKS_RIGHT_EYE))) reasons.push(tr('tượng đang chắn ngay trước mắt này'));
+        this.say([{ speaker: 'Nhinh', text: tr('Mắt nắng {side} vẫn tối: còn {reasons}.', { side, reasons: reasons.join('; ') }) }]);
         return;
       }
       case 'heart-moon': {
         if (state.moonShadow) {
-          this.say([{ speaker: 'Nhinh', text: 'Lõi Nguyệt đang nằm trong bóng tượng.' }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Lõi Nguyệt đang nằm trong bóng tượng.') }]);
           return;
         }
         const reasons: string[] = [];
-        if (!state.light) reasons.push('đèn chưa ở trên bệ hoặc đang tắt');
-        if (!state.balanceRoute) reasons.push('nhánh Cân Bằng chưa nhận được tia từ bộ chia');
-        if (this.value('heart-statue') !== HEART_STATUE_SHADOW) reasons.push('tượng chưa xoay cho bóng phủ lên hốc');
-        this.say([{ speaker: 'Nhinh', text: `Lõi Nguyệt vẫn còn sáng: còn ${reasons.join('; ')}.` }]);
+        if (!state.light) reasons.push(tr('đèn chưa ở trên bệ hoặc đang tắt'));
+        if (!state.balanceRoute) reasons.push(tr('nhánh Cân Bằng chưa nhận được tia từ bộ chia'));
+        if (this.value('heart-statue') !== HEART_STATUE_SHADOW) reasons.push(tr('tượng chưa xoay cho bóng phủ lên hốc'));
+        this.say([{ speaker: 'Nhinh', text: tr('Lõi Nguyệt vẫn còn sáng: còn {reasons}.', { reasons: reasons.join('; ') }) }]);
         return;
       }
       case HEART_CONFIRM_ID: {
         if (state.latched) {
-          this.say([{ speaker: 'Nhinh', text: 'Chốt rễ đã giữ cấu hình. Cây Mẹ đang tự nuôi mạch.' }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Chốt rễ đã giữ cấu hình. Cây Mẹ đang tự nuôi mạch.') }]);
           return;
         }
         if (state.ready) {
@@ -841,20 +860,22 @@ export class HeartOfElariaLevel {
           this.progress.flags['l9-at-heart'] = false;
           this.save();
           this.refresh();
+          SoundSystem.playMechanismLatch();
           this.say(LATCHED_LINES);
           return;
         }
         const missing = getHeartPrerequisiteFeedback(state);
+        SoundSystem.playPuzzleError();
         this.say([{
           speaker: 'Nhinh',
-          text: missing.length ? `Còn thiếu: ${missing.join('; ')}.` : 'Ba nhánh chưa cùng giữ được cấu hình.',
+          text: missing.length ? tr('Còn thiếu: {missing}.', { missing: missing.join('; ') }) : tr('Ba nhánh chưa cùng giữ được cấu hình.'),
         }]);
         return;
       }
       case 'heart-pedestal': {
         if (this.lantern.lanternPlaced) {
           if (!state.latched) {
-            this.say([{ speaker: 'Nhinh', text: 'Đèn phải ở lại bệ cho tới khi ba nhánh giữ được cấu hình.' }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Đèn phải ở lại bệ cho tới khi ba nhánh giữ được cấu hình.') }]);
             return;
           }
           const lampWasOff = !this.lantern.lanternOn;
@@ -888,47 +909,49 @@ export class HeartOfElariaLevel {
         this.progress.lanternOn = true;
         this.save();
         this.refresh();
-        this.say([{ speaker: 'Nhinh', text: 'Ánh sáng đã được đặt ở tâm dẫn.' }]);
+        this.say([{ speaker: 'Nhinh', text: tr('Ánh sáng đã được đặt ở tâm dẫn.') }]);
         return;
       }
       case HEART_G0_ID: {
         if (state.latched) {
-          this.say([{ speaker: 'Nhinh', text: 'G0 đang bị chốt rễ giữ. Cấu hình không đổi nữa.' }]);
+          this.say([{ speaker: 'Nhinh', text: tr('G0 đang bị chốt rễ giữ. Cấu hình không đổi nữa.') }]);
           return;
         }
         this.progress.counters['heart-g0'] = (this.value('heart-g0') + 1) % 2;
+        SoundSystem.playMirrorRotate();
         this.save();
         this.refresh();
         this.say([{ speaker: 'Hệ thống', text: this.value('heart-g0') === 0
-          ? 'G0 hướng vào lăng kính: tia được chia sang cả hai nhánh.'
-          : 'G0 chiếu thẳng tới Ký Ức: chỉ nhánh vàng nhận được tia.' }]);
+          ? tr('G0 hướng vào lăng kính: tia được chia sang cả hai nhánh.')
+          : tr('G0 chiếu thẳng tới Ký Ức: chỉ nhánh vàng nhận được tia.') }]);
         return;
       }
       case 'heart-memory-mirror':
       case 'heart-balance-mirror':
       case 'heart-statue': {
         if (state.latched) {
-          this.say([{ speaker: 'Nhinh', text: 'Cấu hình đã được chốt rễ giữ.' }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Cấu hình đã được chốt rễ giữ.') }]);
           return;
         }
         const counter = element.id === 'heart-memory-mirror' ? 'heart-memory'
           : element.id === 'heart-balance-mirror' ? 'heart-balance' : 'heart-statue';
         this.progress.counters[counter] = (this.value(counter) + 1) % 4;
+        SoundSystem.playMirrorRotate();
         this.save();
         this.refresh();
         if (element.id === 'heart-statue') {
           const value = this.value('heart-statue');
-          const note = value === HEART_STATUE_SHADOW ? 'Bóng tượng đang phủ lên hốc Nguyệt.'
-            : value === HEART_STATUE_BLOCKS_LEFT_EYE ? 'Tượng đang chắn mắt nắng trái.'
-              : value === HEART_STATUE_BLOCKS_RIGHT_EYE ? 'Tượng đang chắn mắt nắng phải.'
-                : 'Bóng tượng đã rời khỏi hốc Nguyệt.';
+          const note = value === HEART_STATUE_SHADOW ? tr('Bóng tượng đang phủ lên hốc Nguyệt.')
+            : value === HEART_STATUE_BLOCKS_LEFT_EYE ? tr('Tượng đang chắn mắt nắng trái.')
+              : value === HEART_STATUE_BLOCKS_RIGHT_EYE ? tr('Tượng đang chắn mắt nắng phải.')
+                : tr('Bóng tượng đã rời khỏi hốc Nguyệt.');
           this.say([{ speaker: 'Nhinh', text: note }]);
           return;
         }
         const after = this.state();
-        const mirror = element.id === 'heart-memory-mirror' ? 'Ký Ức' : 'Cân Bằng';
+        const mirror = element.id === 'heart-memory-mirror' ? tr('Ký Ức') : tr('Cân Bằng');
         const aimed = element.id === 'heart-memory-mirror' ? after.memoryRoute : after.balanceRoute;
-        this.say([{ speaker: 'Nhinh', text: aimed ? `Gương ${mirror} đang hướng đúng vào tinh thể.` : `Gương ${mirror} chưa hướng đúng.` }]);
+        this.say([{ speaker: 'Nhinh', text: aimed ? tr('Gương {mirror} đang hướng đúng vào tinh thể.', { mirror }) : tr('Gương {mirror} chưa hướng đúng.', { mirror }) }]);
         return;
       }
       default: return;
@@ -951,8 +974,8 @@ export class HeartOfElariaLevel {
 
   /**
    * The core's art for a state, from the live state (also used for the first frame, so a restored save never flashes
-   * another state). `core-dawn` is byte-identical to `core-night`, so the dawn is read from the dawn lighting overlay
-   * (shown from the dawn transition on), not from a second picture.
+   * another state). The local dawn sprite has warm bark and a new leaf; the dawn lighting overlay provides the
+   * scene-wide transition without changing the core's authored size or anchor.
    */
   private coreArtName(state: HeartPuzzleState): string {
     return this.completed || this.progress.flags['l9-complete'] === true ? 'core-dawn'
@@ -1001,7 +1024,8 @@ export class HeartOfElariaLevel {
     if (g0Element) this.swapArt(HEART_G0_ID, `mirror_${state.g0Split ? 0 : 1}`, g0Element);
     const prism = this.images.get('heart-prism');
     if (prism) {
-      const prismKey = getSharedMechanismKey(state.light && state.g0Split ? 'prism-receiving' : 'prism-dark');
+      const prismName = state.light && state.g0Split ? 'prism-receiving' : 'prism-dark';
+      const prismKey = this.artKey(prismName) ?? getSharedMechanismKey(prismName);
       if (prismKey && this.scene.textures.exists(prismKey) && prism.texture.key !== prismKey) prism.setTexture(prismKey);
     }
     const memoryMirrorElement = getHeartElement('heart-memory-mirror');

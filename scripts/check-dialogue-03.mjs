@@ -27,6 +27,8 @@ const requireStub = (specifier) => {
   if (specifier === '../data/forestDecor') return forestDecor;
   if (specifier === './libraryInkFade') return libraryInkFade;
   if (specifier === '../systems/SoundSystem') return soundSystem;
+  // Identity i18n: this check asserts the authored Vietnamese copy.
+  if (specifier === '../i18n/catalog' || specifier === '../i18n/catalog.ts') return { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text) };
   throw new Error(`unexpected runtime import in LibraryLevel.ts: ${specifier}`);
 };
 new Function('exports', 'require', 'module', output.outputText)(moduleRecord.exports, requireStub, moduleRecord);

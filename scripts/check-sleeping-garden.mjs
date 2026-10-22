@@ -1,3 +1,4 @@
+const IDENTITY_TR = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text);
 // Pure checks for Level 07 (The Sleeping Garden, campaign index 6).
 // Covers: state derive/sanitize, body math, light model, held spans, crossings, per-stage
 // collision-aware reachability from the entry, prompt-side rules, safe restore (safe AND
@@ -9,7 +10,7 @@ import path from 'node:path';
 import ts from 'typescript';
 import {
   GARDEN_BAR_BEAM, GARDEN_BOUNDS, GARDEN_BRIDGE, GARDEN_ICONS, GARDEN_MODULES, GARDEN_REACH_ORIGIN, GARDEN_REACH_STEP,
-  GARDEN_SIDE_PATH, GARDEN_SIDE_STRIP, GARDEN_SPANS, GARDEN_SPAWN, GARDEN_STAGE_ANCHORS, GARDEN_STANDS,
+  GARDEN_SIDE_PATH, GARDEN_SIDE_STRIP, GARDEN_SPANS, GARDEN_SPAWN, GARDEN_STAGE_ANCHORS, GARDEN_STANDS, GARDEN_ZONES,
   GARDEN_STATIC_SOLIDS, GARDEN_WATER, NO_HELD_SPANS, barRaised, bridgeWalkable, crossingSideFor, crossedToFarBank,
   effectiveLight, gardenActorBody, gardenActorDepth, gardenCellCenter, gardenCellOf, gardenCompletionBlock,
   gardenDrainEnabled, gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled,
@@ -146,6 +147,24 @@ for (let x = 312; x <= 356; x += GARDEN_REACH_STEP) {
   assert.equal(isGardenPositionSafe(shut, true, NO_HELD_SPANS, { x, y: 220 }), false, `retracted spans seal the crossing at x=${x}`);
 }
 assert.equal(isGardenPositionSafe(shut, false, NO_HELD_SPANS, { x: 334, y: 260 }), false, 'canal water stays lethal below the bridge');
+// East bridge mouth: the latch top sits at the bridge's bottom edge, so the mouth keeps its full 20px height open.
+// With the roots deployed the spans are not solid; a 14x6 foot body centred on y=220 (body y 236..242) walks east through the mouth.
+// The nursery drain (x 436) is the next static solid on this row: the body first touches it at x=430 (body x 423..437),
+// so the free sweep runs 290..429 and x=430 is asserted to be blocked by the drain alone.
+{
+  const eastLatch = GARDEN_STATIC_SOLIDS.find((s) => s.id === 'latch-east').rect;
+  const eastLane = eastLatch.y - GARDEN_BRIDGE.y;
+  assert.ok(eastLane >= 18, `the east bridge mouth keeps an open lane of at least 18px (latch top ${eastLatch.y} - bridge top ${GARDEN_BRIDGE.y} = ${eastLane})`);
+  assert.deepEqual(GARDEN_MODULES.find((m) => m.id === 'latch-east').rect, eastLatch, 'the latch art box and its solid share one rect');
+  assert.equal(rootsDeployed(shut, false), true, 'the east mouth walk runs with the roots deployed');
+  for (let x = 290; x <= 429; x += 1) {
+    const body = gardenActorBody({ x, y: 220 });
+    const blockers = GARDEN_STATIC_SOLIDS.filter((s) => rectsOverlap(body, s.rect)).map((s) => s.id);
+    assert.deepEqual(blockers, [], `walking east along y=220: the foot body at x=${x} overlaps no static solid`);
+  }
+  const drainBlockers = GARDEN_STATIC_SOLIDS.filter((s) => rectsOverlap(gardenActorBody({ x: 430, y: 220 }), s.rect)).map((s) => s.id);
+  assert.deepEqual(drainBlockers, ['drain'], 'x=430 on the same row is stopped only by the nursery drain, not by the latch');
+}
 
 const latchedRegion = region(latched, false);
 assert.equal(near(latchedRegion, GARDEN_STANDS.latchWest, GARDEN_STANDS.latchWest.radius, inGateCorridor), true, 'held bar keeps the gap walkable in the dark');
@@ -347,13 +366,18 @@ assert.equal(near(region(stateOf({ canopyShut: true, sunLatched: true }), true),
 // Every module art is drawn at native size: the placement rect IS the art box, so nothing is
 // squeezed. Also asserts the layout table is truthful for the shipped initial variant and that
 // a state change (moon extended) never shifts the pot sideways.
-function pngSize(file) {
+// redesign-v2/sprites is the folder CampaignArt globs first (garden_v2_*), so it is searched first: the file measured is the file drawn.
+function artPathOf(file) {
   const candidates = [
+    path.join(ROOT, 'assets/levels/07-the-sleeping-garden/redesign-v2/sprites', `${file}.png`),
     path.join(ROOT, 'assets/levels/07-the-sleeping-garden/sprites', `${file}.png`),
     path.join(ROOT, 'assets/levels/shared/garden-mechanisms', `${file}.png`),
     path.join(ROOT, 'assets/levels/shared/mechanisms', `${file}.png`),
   ];
-  const found = candidates.find((c) => fs.existsSync(c));
+  return candidates.find((c) => fs.existsSync(c));
+}
+function pngSize(file) {
+  const found = artPathOf(file);
   assert.ok(found, `art file for "${file}" exists`);
   const buf = fs.readFileSync(found);
   assert.equal(buf.readUInt32BE(0), 0x89504e47, `${file}: real PNG header`);
@@ -366,9 +390,14 @@ function artBox(spec, variantKey, png) {
   return { x: rect.x + rect.width / 2 - png.width / 2, y: rect.y + rect.height / 2 - png.height / 2, width: png.width, height: png.height };
 }
 let artChecks = 0;
+// Art the user delivers later. A module may be declared before its PNG exists; ONLY the files named here may be absent,
+// so any other missing art still fails in pngSize(). Once the PNG is dropped in, it is measured like every other file.
+const PENDING_ART = new Set(['sluice-crossing']);
+const pendingArt = [];
 for (const spec of GARDEN_MODULES) {
   const entries = Object.entries(spec.variants);
   for (const [variantKey, variant] of entries) {
+    if (!artPathOf(variant.file) && PENDING_ART.has(variant.file)) { pendingArt.push(`${spec.id}/${variantKey}`); continue; }
     const png = pngSize(variant.file);
     const box = artBox(spec, variantKey, png);
     const declared = variantKey === 'extended' && spec.extendedRect ? spec.extendedRect : spec.rect;
@@ -388,6 +417,29 @@ for (const icon of Object.values(GARDEN_ICONS)) assert.deepEqual(pngSize(icon.fi
 assert.ok(artChecks >= 24, `art/native-size checks ran ${artChecks} times`);
 assert.deepEqual(pngSize('root-bridge-off'), { width: 48, height: 32 }, 'the retracted bridge stub art is 48x32');
 assert.deepEqual(pngSize('side-stone-path-closed'), { width: 80, height: 32 }, 'the closed plank art is 80x32, matching GARDEN_SIDE_PATH');
+// Sluice crossing art hook: the canal crosses the walkable crossing and its water is painted in the background, but the
+// crossing has no collider. The module only hosts the art file the user will deliver (no solid, water, zone or stand here).
+{
+  const sluice = GARDEN_MODULES.find((m) => m.id === 'sluice-crossing');
+  assert.ok(sluice, 'the sluice crossing art module is declared');
+  assert.deepEqual(sluice.rect, { x: 148, y: 218, width: 44, height: 48 }, 'the sluice module covers the walkable crossing footprint');
+  assert.equal(sluice.origin, 'topleft', 'the sluice art is placed at its top-left corner, at native size');
+  assert.equal(sluice.floorArt, true, 'the sluice art is floor art');
+  assert.deepEqual(Object.keys(sluice.variants), ['crossing'], 'the sluice has one variant');
+  assert.deepEqual(sluice.variants.crossing, { file: 'sluice-crossing' }, 'the sluice variant is garden-local (not shared), so it resolves garden_v2_sluice_crossing');
+  const zone = GARDEN_ZONES.find((z) => z.id === 'sluice-crossing')?.rect;
+  assert.ok(zone, 'GARDEN_ZONES names the sluice-crossing walkable zone');
+  assert.ok(sluice.rect.x >= zone.x && sluice.rect.x + sluice.rect.width <= zone.x + zone.width
+    && sluice.rect.y >= zone.y && sluice.rect.y + sluice.rect.height <= zone.y + zone.height,
+  `the sluice art lies inside the walkable crossing (zone x ${zone.x}..${zone.x + zone.width}, y ${zone.y}..${zone.y + zone.height})`);
+  // Reported, not asserted: any overlap with canal water would be a deliberate choice for the user to review.
+  const waterOverlaps = GARDEN_WATER.filter((w) => rectsOverlap(w, sluice.rect));
+  console.log(`sluice-crossing vs GARDEN_WATER (reported, not asserted): ${waterOverlaps.length} overlapping rect(s) ${JSON.stringify(waterOverlaps)}`);
+  // Only the pending PNG may be absent, and only while it is absent: once dropped in it is measured by the art loop above.
+  assert.deepEqual(pendingArt, artPathOf('sluice-crossing') ? [] : ['sluice-crossing/crossing'],
+    'the only art allowed to be missing is the pending sluice PNG, and only while that file does not exist');
+  console.log(`sluice-crossing art: ${artPathOf('sluice-crossing') ? 'present and measured by the art loop' : 'pending (no PNG yet; the module draws nothing)'}`);
+}
 
 // state stickers must be visible in the dark: inside their pot's clear floor, off the pot art
 const iconHosts = [
@@ -571,6 +623,7 @@ const levelMethod = (name) => {
 };
 /** Compile one shipped method body into a function; `this` is the fake level it is called on. */
 function compileLevelMethod(name, symbols = {}) {
+  symbols = { tr: IDENTITY_TR, ...symbols };
   const method = levelMethod(name);
   const params = method.parameters.map((p) => p.name.getText(levelAst));
   const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
@@ -820,7 +873,7 @@ function makeBeatHarness({ gateOpen = true, paused = false, art = true } = {}) {
   };
   const evaluate = (text, context) => {
     const js = ts.transpileModule(`const __unit = function () { return (${text}); };`, COMPILER).outputText;
-    return new Function(`"use strict";\n${js}\nreturn __unit;`)().call(context)();
+    return new Function('tr', `"use strict";\n${js}\nreturn __unit;`)(IDENTITY_TR).call(context)();
   };
   const sceneContext = (dialogueActive, pauseOpen) => ({ dialogue: { isActive: () => dialogueActive }, pauseMenu: { isOpen: () => pauseOpen } });
   assert.equal(evaluate(option('canStartStory'), sceneContext(false, false)), true, 'the garden starts a beat when idle');

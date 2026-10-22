@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getNhinhTexture } from '../art/CampaignArt';
+import { tr } from '../i18n/catalog.ts';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SaveSystem } from '../systems/SaveSystem';
 import { CampaignSaveSystem, readEndingBeat, type CampaignEndingBeat, type CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -95,7 +96,7 @@ export class EndingScene extends Phaser.Scene {
     card.fillRoundedRect(90, 42, 460, 276, 10);
     card.strokeRoundedRect(90, 42, 460, 276, 10);
 
-    const header = this.add.text(320, 74, 'THE LAST DAWN — BÌNH MINH TRỞ LẠI', {
+    const header = this.add.text(320, 74, tr('THE LAST DAWN — BÌNH MINH TRỞ LẠI'), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '18px',
       fontStyle: 'bold',
@@ -122,7 +123,7 @@ export class EndingScene extends Phaser.Scene {
     const body = this.add.text(
       320,
       168,
-      'Ba mảnh trái tim Ký Ức • Hy Vọng • Cân Bằng đã hợp nhất.\nKhi Nhinh tự tay tắt ngọn đèn lồng, bóng tối và ánh sáng\nđã tìm lại nhịp thở hài hòa trên khắp khu rừng Elaria.\n\nCảm ơn bạn đã hoàn thành The Last Lantern — Khu Rừng Ánh Sáng!',
+      tr('Ba mảnh trái tim Ký Ức • Hy Vọng • Cân Bằng đã hợp nhất.\nKhi Nhinh tự tay tắt ngọn đèn lồng, bóng tối và ánh sáng\nđã tìm lại nhịp thở hài hòa trên khắp khu rừng Elaria.\n\nCảm ơn bạn đã hoàn thành The Last Lantern — Khu Rừng Ánh Sáng!'),
       {
         fontFamily: 'Segoe UI, sans-serif',
         fontSize: '11.5px',
@@ -136,7 +137,7 @@ export class EndingScene extends Phaser.Scene {
     this.bodyText = body;
 
     // Confirmation sentence, hidden until Play Again is chosen.
-    const confirmText = this.add.text(320, 304, 'Chơi lại từ đầu sẽ xóa tiến trình hiện tại.', {
+    const confirmText = this.add.text(320, 304, tr('Chơi lại từ đầu sẽ xóa tiến trình hiện tại.'), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '10.5px',
       fontStyle: 'bold',
@@ -149,7 +150,7 @@ export class EndingScene extends Phaser.Scene {
     this.confirmText = confirmText;
 
     this.inputOptions().forEach((opt, idx) => {
-      const btn = this.add.text(320, 248 + idx * 32, opt.label, {
+      const btn = this.add.text(320, 248 + idx * 32, tr(opt.label), {
         fontFamily: 'Segoe UI, sans-serif',
         fontSize: '13px',
         fontStyle: 'bold',
@@ -178,13 +179,13 @@ export class EndingScene extends Phaser.Scene {
   private inputOptions(): Array<{ label: string; action: () => void }> {
     if (this.menuMode === 'confirm') {
       return [
-        { label: 'Hủy', action: () => this.cancelPlayAgain() },
-        { label: 'Chơi lại', action: () => this.confirmPlayAgain() },
+        { label: tr('Hủy'), action: () => this.cancelPlayAgain() },
+        { label: tr('Chơi lại'), action: () => this.confirmPlayAgain() },
       ];
     }
     return [
-      { label: 'PLAY AGAIN (CHƠI LẠI TỪ ĐẦU)', action: () => this.requestPlayAgain() },
-      { label: 'MAIN MENU (MÀN HÌNH CHÍNH)', action: () => this.goToMainMenu() },
+      { label: tr('PLAY AGAIN (CHƠI LẠI TỪ ĐẦU)'), action: () => this.requestPlayAgain() },
+      { label: tr('MAIN MENU (MÀN HÌNH CHÍNH)'), action: () => this.goToMainMenu() },
     ];
   }
 
@@ -203,7 +204,7 @@ export class EndingScene extends Phaser.Scene {
     if (this.menuMode === 'confirm') return;
     this.menuMode = 'confirm';
     this.selectedIndex = 0;
-    this.confirmText?.setText('Chơi lại từ đầu sẽ xóa tiến trình hiện tại.');
+    this.confirmText?.setText(tr('Chơi lại từ đầu sẽ xóa tiến trình hiện tại.'));
     this.confirmText?.setVisible(true);
     SoundSystem.playMirrorRotate();
     this.refreshHighlight();
@@ -235,7 +236,7 @@ export class EndingScene extends Phaser.Scene {
     const labels = this.inputOptions().map((option) => option.label);
     this.buttons.forEach((btn, idx) => {
       const sel = idx === this.selectedIndex;
-      btn.setText(sel ? `▸ ${labels[idx]} ◂` : labels[idx]);
+      btn.setText(sel ? `▸ ${tr(labels[idx])} ◂` : tr(labels[idx]));
       btn.setColor(sel ? '#ffe680' : '#cddbd8');
     });
   }
@@ -321,7 +322,7 @@ export class EndingScene extends Phaser.Scene {
     this.promptText = this.add.text(628, 352, '', style).setOrigin(1, 1).setDepth(96).setVisible(false);
     this.promptText.setInteractive({ useHandCursor: true });
     this.promptText.on('pointerdown', click);
-    this.pauseText = this.add.text(320, 24, 'Tạm dừng · ESC để tiếp tục', style).setOrigin(0.5, 0).setDepth(97).setVisible(false);
+    this.pauseText = this.add.text(320, 24, tr('Tạm dừng · ESC để tiếp tục'), style).setOrigin(0.5, 0).setDepth(97).setVisible(false);
     this.wireInput(false);
     this.sequence.start(beat);
   }
@@ -409,6 +410,6 @@ export class EndingScene extends Phaser.Scene {
     if (!this.paused) this.dialogue?.update(dt);
     this.sequence.update(dt, this.paused);
     const prompt = this.paused ? null : this.sequence.getPrompt();
-    this.promptText?.setText(prompt ?? '').setVisible(prompt !== null);
+    this.promptText?.setText(prompt ? tr(prompt) : '').setVisible(prompt !== null);
   }
 }

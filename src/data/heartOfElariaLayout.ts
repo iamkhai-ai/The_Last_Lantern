@@ -1,3 +1,4 @@
+import { tr } from '../i18n/catalog.ts';
 /**
  * Authored spatial layout and live puzzle state for Level 10 — The Heart of Elaria.
  *
@@ -93,9 +94,8 @@ export interface HeartArtCandidate {
  */
 export function heartArtCandidates(name: string): HeartArtCandidate[] {
   const reused = HEART_REUSED_ART[name];
-  const candidates: HeartArtCandidate[] = reused
-    ? [{ kind: 'level', level: reused.level, file: reused.file }]
-    : [{ kind: 'level', level: 9, file: name }];
+  const candidates: HeartArtCandidate[] = [{ kind: 'level', level: 9, file: name }];
+  if (reused) candidates.push({ kind: 'level', level: reused.level, file: reused.file });
   if (HEART_TEXTURE_NATIVE[name]) candidates.push({ kind: 'texture', level: -1, file: name });
   return candidates;
 }
@@ -543,16 +543,16 @@ export function deriveHeartPuzzle(input: HeartPuzzleInput): HeartPuzzleState {
 export function getHeartPrerequisiteFeedback(state: HeartPuzzleState): string[] {
   if (state.latched) return [];
   const missing: string[] = [];
-  if (!state.crystals) missing.push('đặt đủ ba tinh thể vào ba hốc quanh Cây Mẹ');
-  if (!state.light) missing.push('đặt đèn đang bật lên bệ dẫn sáng');
-  if (!state.lumoAtSeal) missing.push('gọi Lumo tới ấn Hy Vọng và để cậu ấy đứng giữ');
-  if (state.g0Direct) missing.push('hướng G0 vào lăng kính, đừng chiếu thẳng tới Ký Ức');
-  if (!state.memoryRoute && state.g0Split && state.light && state.lumoAtSeal) missing.push('chỉnh gương Ký Ức cho tia tới tinh thể vàng');
-  if (!state.balanceRoute && state.light) missing.push('chỉnh gương Cân Bằng tới bộ chia trước tượng');
+  if (!state.crystals) missing.push(tr('đặt đủ ba tinh thể vào ba hốc quanh Cây Mẹ'));
+  if (!state.light) missing.push(tr('đặt đèn đang bật lên bệ dẫn sáng'));
+  if (!state.lumoAtSeal) missing.push(tr('gọi Lumo tới ấn Hy Vọng và để cậu ấy đứng giữ'));
+  if (state.g0Direct) missing.push(tr('hướng G0 vào lăng kính, đừng chiếu thẳng tới Ký Ức'));
+  if (!state.memoryRoute && state.g0Split && state.light && state.lumoAtSeal) missing.push(tr('chỉnh gương Ký Ức cho tia tới tinh thể vàng'));
+  if (!state.balanceRoute && state.light) missing.push(tr('chỉnh gương Cân Bằng tới bộ chia trước tượng'));
   if (state.balanceRoute && state.light && (!state.eyeLeft || !state.eyeRight)) {
-    missing.push(state.eyeLeft ? 'mở lại mắt nắng phải' : state.eyeRight ? 'mở lại mắt nắng trái' : 'giữ cả hai mắt nắng nhận sáng');
+    missing.push(state.eyeLeft ? tr('mở lại mắt nắng phải') : state.eyeRight ? tr('mở lại mắt nắng trái') : tr('giữ cả hai mắt nắng nhận sáng'));
   }
-  if (state.balanceRoute && state.light && !state.moonShadow) missing.push('xoay tượng để bóng phủ lõi Nguyệt');
+  if (state.balanceRoute && state.light && !state.moonShadow) missing.push(tr('xoay tượng để bóng phủ lõi Nguyệt'));
   return missing;
 }
 

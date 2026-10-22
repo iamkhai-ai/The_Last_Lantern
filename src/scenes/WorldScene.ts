@@ -1,7 +1,9 @@
+import { tr } from '../i18n/catalog.ts';
 import Phaser from 'phaser';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
 import { DIALOGUE_DATA } from '../data/dialogue';
+import { getLocale, otherLocale, setLocale } from '../i18n/locale.ts';
 import { getLumoHint, getObjectiveText, ZONE_SUBTITLES_VI, ZONE_TITLES } from '../data/quests';
 import { CreekMirrorPuzzle } from '../puzzles/CreekMirrorPuzzle';
 import { RuinsBalancePuzzle } from '../puzzles/RuinsBalancePuzzle';
@@ -118,6 +120,10 @@ export class WorldScene extends Phaser.Scene {
       onMainMenu: () => {
         this.scene.start('MenuScene');
       },
+      onLanguageChange: () => {
+        setLocale(otherLocale(getLocale()));
+        this.scene.restart();
+      },
     });
 
     this.setupZoneContent(zoneId, built.bridgeBlocker);
@@ -208,8 +214,8 @@ export class WorldScene extends Phaser.Scene {
       getPrompt: () =>
         this.questSystem.progress.stage === 'intro' &&
         !this.questSystem.progress.lanternPickedUp
-          ? '[E] Kiểm tra bia đá cổ & nhặt đèn lồng'
-          : '[E] Xem bia đá dẫn đường của Lumo',
+          ? tr('[E] Kiểm tra bia đá cổ & nhặt đèn lồng')
+          : tr('[E] Xem bia đá dẫn đường của Lumo'),
       onInteract: () => {
         if (
           this.questSystem.progress.stage === 'intro' &&
@@ -221,7 +227,7 @@ export class WorldScene extends Phaser.Scene {
           this.effectsSystem.spawnBurst(235, 256, 0xffe680, 14);
           this.questSystem.save();
           this.dialogueSystem.startDialogue(DIALOGUE_DATA.intro_meet_lumo, () => {
-            this.hud.showToast('Nhấn phím [F] để thắp sáng chiếc đèn lồng!');
+            this.hud.showToast(tr('Nhấn phím [F] để thắp sáng chiếc đèn lồng!'));
           });
         } else {
           this.hud.showToast(
@@ -250,7 +256,7 @@ export class WorldScene extends Phaser.Scene {
         this.questSystem.progress.tutorialPulseDone = true;
         this.questSystem.save();
         this.hud.showToast(
-          'Dấu chân cổ xưa đã hiện lên! Hãy đi theo lối mòn tới gốc Cây Mẹ và nhấn [E].',
+          tr('Dấu chân cổ xưa đã hiện lên! Hãy đi theo lối mòn tới gốc Cây Mẹ và nhấn [E].'),
           3200
         );
       }
@@ -266,9 +272,9 @@ export class WorldScene extends Phaser.Scene {
       getPrompt: () => {
         const count = this.questSystem.getCrystalCount();
         if (this.questSystem.isReadyForFinale()) {
-          return '[E] Đặt đủ 3 Tinh thể vào Cây Mẹ (Khôi phục Bình Minh)';
+          return tr('[E] Đặt đủ 3 Tinh thể vào Cây Mẹ (Khôi phục Bình Minh)');
         }
-        return `[E] Tương tác với Cây Mẹ (${count}/3 Tinh thể)`;
+        return tr('[E] Tương tác với Cây Mẹ ({count}/3 Tinh thể)', { count });
       },
       onInteract: () => this.handleHeartTreeInteract(),
     });
@@ -297,7 +303,7 @@ export class WorldScene extends Phaser.Scene {
       prog.tutorialPulseDone = true;
       this.questSystem.setStage('hub_initial', true);
       this.dialogueSystem.startDialogue(DIALOGUE_DATA.hub_first_inspect, () => {
-        this.hud.showToast('Đã mở lối Bắc dẫn vào Rừng Đom Đóm (Whispering Woods)!');
+        this.hud.showToast(tr('Đã mở lối Bắc dẫn vào Rừng Đom Đóm (Whispering Woods)!'));
       });
       return;
     }
@@ -332,7 +338,7 @@ export class WorldScene extends Phaser.Scene {
       this.overloadBanner = this.add.text(
         320,
         215,
-        '⚡ ÁNH SÁNG QUÁ TẢI! Nhấn [F] để tắt đèn, trả lại sự cân bằng ⚡',
+        tr('⚡ ÁNH SÁNG QUÁ TẢI! Nhấn [F] để tắt đèn, trả lại sự cân bằng ⚡'),
         {
           fontFamily: 'Segoe UI, sans-serif',
           fontSize: '12.5px',
@@ -376,7 +382,7 @@ export class WorldScene extends Phaser.Scene {
     dawnGlow.fillStyle(0x45735c, 0.72);
     dawnGlow.fillRect(0, 0, 640, 360);
 
-    this.hud.showToast('Bình minh đã trở lại với khu rừng Elaria!', 3500);
+    this.hud.showToast(tr('Bình minh đã trở lại với khu rừng Elaria!'), 3500);
 
     this.dialogueSystem.startDialogue(DIALOGUE_DATA.finale_dawn_dialogue, () => {
       this.time.delayedCall(600, () => {
@@ -389,7 +395,7 @@ export class WorldScene extends Phaser.Scene {
     const check = this.questSystem.canEnterZone(targetZone);
     if (!check.allowed) {
       SoundSystem.playPuzzleError();
-      this.hud.showToast(check.reason ?? 'Lối đi này hiện chưa mở.', 3200);
+      this.hud.showToast(check.reason ?? tr('Lối đi này hiện chưa mở.'), 3200);
       return;
     }
 
@@ -484,7 +490,7 @@ export class WorldScene extends Phaser.Scene {
         return;
       }
       if (this.questSystem.progress.stage === 'finale_overload') {
-        this.hud.showToast('Nhấn phím [F] để tắt đèn lồng, trả lại sự cân bằng!');
+        this.hud.showToast(tr('Nhấn phím [F] để tắt đèn lồng, trả lại sự cân bằng!'));
         return;
       }
       this.interactionSystem.tryInteract(now);
@@ -508,17 +514,17 @@ export class WorldScene extends Phaser.Scene {
       }
 
       if (!this.lanternSystem.lanternInHand || this.lanternSystem.lanternPlaced) {
-        this.hud.showToast('Bạn cần cầm chiếc đèn lồng trên tay để phát Light Pulse!');
+        this.hud.showToast(tr('Bạn cần cầm chiếc đèn lồng trên tay để phát Light Pulse!'));
         return;
       }
       if (!this.lanternSystem.lanternOn) {
-        this.hud.showToast('Hãy nhấn [F] thắp sáng đèn lồng trước khi phát Light Pulse [SPACE]!');
+        this.hud.showToast(tr('Hãy nhấn [F] thắp sáng đèn lồng trước khi phát Light Pulse [SPACE]!'));
         return;
       }
 
       const fired = this.lanternSystem.triggerPulse(this.player.x, this.player.y);
       if (!fired) {
-        this.hud.showToast('Light Pulse đang hồi năng lượng (3 giây)...', 1200);
+        this.hud.showToast(tr('Light Pulse đang hồi năng lượng (3 giây)...'), 1200);
       }
     });
 
@@ -539,11 +545,11 @@ export class WorldScene extends Phaser.Scene {
       if (this.questSystem.progress.stage === 'victory') return;
 
       if (!this.lanternSystem.lanternInHand) {
-        this.hud.showToast('Hãy đến bia đá [E] để nhận chiếc đèn lồng trước!');
+        this.hud.showToast(tr('Hãy đến bia đá [E] để nhận chiếc đèn lồng trước!'));
         return;
       }
       if (this.lanternSystem.lanternPlaced) {
-        this.hud.showToast('Đèn đang đặt trên bệ đá! Thu hồi đèn [E] nếu muốn bật/tắt trên tay.');
+        this.hud.showToast(tr('Đèn đang đặt trên bệ đá! Thu hồi đèn [E] nếu muốn bật/tắt trên tay.'));
         return;
       }
 

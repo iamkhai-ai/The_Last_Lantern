@@ -1,0 +1,10 @@
+Use case: stylized-concept.
+Asset type: ONE transparent pixel-art gate-bar animation atlas, exactly THREE equal rows, same object in three states, 1024x1536 RGBA.
+Create the small WOODEN BAR GATE of a peaceful ancient night garden. Reference 1 is the existing states sheet: use the gate-bar-lowered/raised/held geometry. Reference 2 supplies handcrafted slate/brass/wood pixel-art material and camera style, not its architecture.
+The gate consists of two slim dark weathered wooden posts with small tarnished brass collars and a broad horizontal pale timber bar. Slight elevated three-quarter view, almost frontal horizontal span. Rich but restrained texture, colored dark edges, visible wood grain clusters and tiny moss on the outer post bases.
+THREE frames from TOP to BOTTOM:
+1 LOWERED: the bar blocks the opening at mid/lower height.
+2 RAISED: the same bar has slid up to the TOP of the posts, leaving the entire lower doorway empty.
+3 HELD: identical to raised, with a small visible angled wooden/brass retaining brace at the upper right corner that holds the bar mechanically.
+Strict native geometry for each final 112x72 frame: left post is entirely inside x0..15, right post entirely inside x96..111. Both end at y71. Raised/held beam plus brace are entirely above y30. Below y30, raised/held contain ONLY the two slim outer posts and a transparent doorway. In lowered frame the beam spans x13..100 and y32..58. No ground platform across the doorway. Stable size, pillar position and silhouette in every row.
+One stable camera, no isometric sideways skew, no ropes across the path, no flowers. Equal-sized cells with clear transparent gutters. True transparency, no background glow or shadows, no checkerboard, no labels, no text, no numbers, no UI or extra objects.

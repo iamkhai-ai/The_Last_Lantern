@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PROLOGUE_PANELS } from '../data/prologue';
+import { speakerLabel, tr } from '../i18n/catalog.ts';
 import roadHomeUrl from '../../assets/prologue/runtime/01-road-home.png';
 import voiceInTreesUrl from '../../assets/prologue/runtime/02-voice-in-trees.png';
 import pathDisappearsUrl from '../../assets/prologue/runtime/03-path-disappears.png';
@@ -111,10 +112,10 @@ export class PrologueScene extends Phaser.Scene {
     const panel = PROLOGUE_PANELS[this.panelIndex];
     this.lineIndex = Math.max(0, Math.min(panel.lines.length - 1, Math.floor(index)));
     const line = panel.lines[this.lineIndex];
-    this.fullLine = line.text;
+    this.fullLine = tr(line.text);
     this.revealedChars = 0;
     this.charAccumulator = 0;
-    this.speakerText?.setText(line.speaker);
+    this.speakerText?.setText(speakerLabel(line.speaker));
     this.bodyText?.setText('');
   }
 
@@ -230,7 +231,7 @@ export class PrologueScene extends Phaser.Scene {
       .setDepth(11);
 
     this.add
-      .text(TEXT_LEFT, HINT_Y, 'Nhấn [E / Enter / Space] hoặc click để tiếp tục', {
+      .text(TEXT_LEFT, HINT_Y, tr('Nhấn [E / Enter / Space] hoặc click để tiếp tục'), {
         fontFamily: 'Segoe UI, sans-serif',
         fontSize: '9px',
         color: '#9eb8b2',
@@ -238,7 +239,7 @@ export class PrologueScene extends Phaser.Scene {
       .setDepth(11);
 
     this.skipText = this.add
-      .text(620, 12, '[Esc] Bỏ qua', {
+      .text(620, 12, tr('[Esc] Bỏ qua'), {
         fontFamily: 'Segoe UI, sans-serif',
         fontSize: '11px',
         fontStyle: 'bold',

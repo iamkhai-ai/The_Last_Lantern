@@ -1,23 +1,26 @@
-import Phaser from 'phaser';
-import { getLevelArtKey, getShadowArtKey } from '../art/CampaignArt';
+﻿import Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
+import { getRuinsArtKey, getRuinsV2ArtKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import { SoundSystem } from '../systems/SoundSystem';
+import { lockMoonVoice, lockSunLeftVoice, lockSunRightVoice } from '../audio/effects';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
   canLatchRuinsSanctuary, deriveRuinsPracticeState, deriveRuinsPuzzleState, getRuinsExitBlock, getRuinsSolid,
   getRuinsStage, isRuinsExitReady, isRuinsMainPuzzleEngaged, resolveRuinsSpawn, RUINS_BEAMS, RUINS_CONDUIT,
   RUINS_DEPTH, RUINS_FOOT_PLACEMENT,
-  RUINS_MIRROR_STATES, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
-  RUINS_SHADOW, RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
-  ruinsNextStep, ruinsShadowFootprintAt, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSolidEnabled,
+  RUINS_MIRROR_STATES, RUINS_NAME, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
+  RUINS_SHADOW, RUINS_SHADOW_DEMO, RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
+  ruinsMoonShadowed, ruinsNextStep, ruinsPulseReachesName, ruinsShadowDemoEligible, ruinsShadowFootprintAt, ruinsShadowNearStatue, ruinsTurnPrompt,
+  ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSolidEnabled,
   ruinsShadowSpotFor, ruinsShadowWalkResume, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
   RUINS_WALLS, ruinsActorBody, ruinsDepthAt, ruinsNormalizeCounters,
-  ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsRect, type RuinsStage,
+  ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsRect, type RuinsShadowPoseId, type RuinsStage,
 } from '../data/ruinsOfTwoHalvesLayout';
 
 export interface RuinsOfTwoHalvesLevelOptions {
@@ -78,6 +81,28 @@ const ENDING: DialogueLine[] = [
   { speaker: 'Lumo', text: 'Tôi sợ điều mình sắp nhớ ra.' },
   { speaker: 'Nhinh', text: 'Mình sẽ đọc cùng nhau.' },
 ];
+
+/** Scenario 08 §4: the optional demonstration, spoken once The Shadow stands on the centre flow. */
+const SHADOW_DEMO_TALK: DialogueLine[] = [
+  { speaker: 'The Shadow', text: 'Chỉ cần chỗ này tối.' },
+  { speaker: 'Lumo', text: 'Ông ấy đang che luồng giữa bằng chính mình.' },
+  { speaker: 'The Shadow', text: 'Ta đã đứng như thế này rất lâu. Tay ta không giữ được nữa.' },
+];
+
+/** Scenario 08 §4: F while the lamp sits lit on the altar switches nothing; Lumo says why. */
+const LAMP_ON_ALTAR_LINE: DialogueLine = { speaker: 'Lumo', text: 'Tối hết thì hai bên cũng ngủ.' };
+
+/** Scenario 08 §5 "Mạch phụ": the worn name, once a Pulse reveals it. */
+const NAME_LINE: DialogueLine = { speaker: 'Nhinh', text: 'Có ai đó khắc một cái tên ở đây. Mòn hết rồi.' };
+const NAME_JOURNAL_LINE: DialogueLine = { speaker: 'Nhinh', text: 'Một cái tên mòn dưới chân tượng. Không đọc được, và không ai nói đó là tên ai.' };
+
+/** The Shadow's demonstration walk: in-memory only, never saved, so a reload always shows his normal spot. */
+interface ShadowDemo {
+  /** `in`: walking to the spot; `talk`: the lines are playing; `out`: walking back to the guard spot */
+  stage: 'in' | 'talk' | 'out';
+  route: readonly RuinsPoint[];
+  index: number;
+}
 
 const INSCRIPTION = 'Mặt trời giữ đường đi. Mặt trăng giữ giờ nghỉ. Đừng đặt một bên vào chỗ của cả hai.';
 
@@ -158,6 +183,12 @@ export class RuinsOfTwoHalvesLevel {
   private shadowSolidAt?: { ground: RuinsPoint; footprint: RuinsRect };
   /** The player's largest step this frame in px (max speed x dt), used by the Shadow's solid. */
   private playerStepPx = 0;
+  /** The optional demonstration while it runs; while set, it owns the controls (see isControlLocked). */
+  private shadowDemo: ShadowDemo | null = null;
+  /** Holds him on `stillness` while the carved name's reveal line plays (scenario 08 §5). */
+  private shadowStill = false;
+  /** Lock tones, held by key in SoundSystem; released in destroy(). */
+  private static readonly LOCK_TONE_KEYS = { sunLeft: 'ruins-sun-left', sunRight: 'ruins-sun-right', moon: 'ruins-moon', practice: 'ruins-practice-slab' } as const;
 
   constructor(options: RuinsOfTwoHalvesLevelOptions) {
     this.scene = options.scene;
@@ -210,6 +241,9 @@ export class RuinsOfTwoHalvesLevel {
   public destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    // An interrupted demonstration writes nothing: `l7-shadow-demo` is only set when its walk back has finished.
+    this.shadowDemo = null;
+    SoundSystem.releaseHeldTones();
     this.clearVisuals();
     this.interactions.clear();
   }
@@ -219,8 +253,15 @@ export class RuinsOfTwoHalvesLevel {
     this.updateStoryBeats();
     this.playerStepPx = (this.player.maxSpeed * dt) / 1000;
     this.advanceShadowWalk(dt);
+    this.advanceShadowDemo(dt);
+    this.syncLockTones();
     this.refreshArt();
     this.flushPendingBeats();
+  }
+
+  /** True while the optional Shadow demonstration owns the controls. The scene folds this into its input lock. */
+  public isControlLocked(): boolean {
+    return this.shadowDemo !== null;
   }
 
   /* ---------------------------------------------------------------------- */
@@ -314,9 +355,11 @@ export class RuinsOfTwoHalvesLevel {
 
   private artKey(name: string): string | undefined {
     if (name.startsWith('mirror_') || BASE_TEXTURES.has(name)) {
+      const localKey = getRuinsV2ArtKey(name);
+      if (localKey) return localKey;
       return this.scene.textures.exists(name) ? name : undefined;
     }
-    return getLevelArtKey(7, name) ?? undefined;
+    return getRuinsArtKey(name) ?? undefined;
   }
 
   private addImage(id: string, name: string, x: number, y: number, depth: number): Phaser.GameObjects.Image | undefined {
@@ -333,22 +376,26 @@ export class RuinsOfTwoHalvesLevel {
     this.clearVisuals();
     this.interactions.clear();
 
-    this.addImage('backdrop', 'temple-scene-base', 320, 180, RUINS_DEPTH.backdrop)?.setAlpha(0.72);
+    const backdrop = this.addImage('backdrop', 'temple-scene-base', 320, 180, RUINS_DEPTH.backdrop);
+    const hasLocalBackdrop = backdrop?.texture.key.startsWith('ruins_v2_') === true;
+    if (!hasLocalBackdrop) {
+      backdrop?.setAlpha(0.72);
 
-    const floor = this.scene.add.tileSprite(0, 0, 640, 360, 'ground_stone')
-      .setOrigin(0).setTint(0x9a8f79).setAlpha(0.72).setDepth(RUINS_DEPTH.floor);
-    this.track(floor);
+      const floor = this.scene.add.tileSprite(0, 0, 640, 360, 'ground_stone')
+        .setOrigin(0).setTint(0x9a8f79).setAlpha(0.72).setDepth(RUINS_DEPTH.floor);
+      this.track(floor);
 
-    const masonry = this.scene.add.graphics().setDepth(RUINS_DEPTH.masonry);
-    masonry.fillStyle(0x261f1c, 0.94);
-    for (const wall of RUINS_WALLS) masonry.fillRect(wall.x, wall.y, wall.width, wall.height);
-    masonry.lineStyle(2, 0x746352, 0.55);
-    for (const wall of RUINS_WALLS) masonry.strokeRect(wall.x, wall.y, wall.width, wall.height);
-    masonry.lineStyle(1, 0x8a7a63, 0.24);
-    for (let y = 92; y < 304; y += 22) masonry.lineBetween(26, y, 126, y);
-    for (let y = 92; y < 304; y += 22) masonry.lineBetween(534, y, 614, y);
-    for (let y = 60; y < 80; y += 10) masonry.lineBetween(0, y, 640, y);
-    this.track(masonry);
+      const masonry = this.scene.add.graphics().setDepth(RUINS_DEPTH.masonry);
+      masonry.fillStyle(0x261f1c, 0.94);
+      for (const wall of RUINS_WALLS) masonry.fillRect(wall.x, wall.y, wall.width, wall.height);
+      masonry.lineStyle(2, 0x746352, 0.55);
+      for (const wall of RUINS_WALLS) masonry.strokeRect(wall.x, wall.y, wall.width, wall.height);
+      masonry.lineStyle(1, 0x8a7a63, 0.24);
+      for (let y = 92; y < 304; y += 22) masonry.lineBetween(26, y, 126, y);
+      for (let y = 92; y < 304; y += 22) masonry.lineBetween(534, y, 614, y);
+      for (let y = 60; y < 80; y += 10) masonry.lineBetween(0, y, 640, y);
+      this.track(masonry);
+    }
 
     this.conduitGraphics = this.scene.add.graphics().setDepth(RUINS_DEPTH.conduit);
     this.track(this.conduitGraphics);
@@ -367,6 +414,16 @@ export class RuinsOfTwoHalvesLevel {
     const statueNotch = ruinsNormalizeNotch(this.progress.counters['statue'] ?? 0);
     this.addImage('shadow', `shadow-notch-${statueNotch}`,
       RUINS_SHADOW_OVERLAY.center.x, RUINS_SHADOW_OVERLAY.center.y, RUINS_SHADOW_OVERLAY.depth);
+
+    // Scenario 08 §5: the worn name under the statue. Hidden until a Pulse reveals it; the saved flag drives visibility.
+    const nameKey = getRuinsV2ArtKey(RUINS_NAME.art);
+    if (nameKey) {
+      const decal = this.scene.add.image(RUINS_NAME.centre.x, RUINS_NAME.centre.y, nameKey).setDepth(RUINS_DEPTH.groundStamp);
+      decal.setData('ruins-id', 'statue-name');
+      decal.setVisible(this.progress.flags['l7-name-seen'] === true);
+      this.artById.set('statue-name', decal);
+      this.track(decal);
+    }
 
     this.drawProps();
     this.drawShadow();
@@ -433,9 +490,9 @@ export class RuinsOfTwoHalvesLevel {
    */
   private drawLockLabels(): void {
     const entries: Array<[string, number, string]> = [
-      ['left', RUINS_RECEIVERS.left.x + 16, 'NHẬT TRÁI · TẮT'],
-      ['moon', RUINS_RECEIVERS.moon.x + 16, 'NGUYỆT · SÁNG'],
-      ['right', RUINS_RECEIVERS.right.x + 16, 'NHẬT PHẢI · TẮT'],
+      ['left', RUINS_RECEIVERS.left.x + 16, tr('NHẬT TRÁI · TẮT')],
+      ['moon', RUINS_RECEIVERS.moon.x + 16, tr('NGUYỆT · SÁNG')],
+      ['right', RUINS_RECEIVERS.right.x + 16, tr('NHẬT PHẢI · TẮT')],
     ];
     for (const [id, x, base] of entries) {
       const label = this.scene.add.text(x, 80, base, {
@@ -505,7 +562,8 @@ export class RuinsOfTwoHalvesLevel {
       graphics.strokePath();
     };
 
-    if (state.moonCovered) {
+    // During the optional demonstration the centre flow reads as broken by The Shadow (rendering only; the state is unchanged).
+    if (state.moonCovered || this.shadowDemo !== null) {
       // the centre flow dies where the statue's shadow begins
       segment(RUINS_BEAMS.centreVisible[0].from, RUINS_BEAMS.centreVisible[0].to, 0x8b7a52, 0.55);
     } else {
@@ -577,7 +635,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-practice-column',
       x: prop('practice-column').stand.x, y: prop('practice-column').stand.y, radius: prop('practice-column').stand.radius,
-      getPrompt: () => 'E · Xoay cột đá thử',
+      getPrompt: () => tr('E · Xoay cột đá thử'),
       getPromptBounds: () => this.artById.get('practice-column-spin')?.getBounds() ?? null,
       isEnabled: () => true,
       onInteract: () => this.rotatePracticeColumn(),
@@ -586,7 +644,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-statue',
       x: prop('statue').stand.x, y: prop('statue').stand.y, radius: prop('statue').stand.radius,
-      getPrompt: () => 'E · Xoay tượng',
+      getPrompt: () => this.turnPrompt(tr('E · Xoay tượng')),
       getPromptBounds: () => this.artById.get('statue')?.getBounds() ?? null,
       isEnabled: () => true,
       onInteract: () => this.rotateStatue(),
@@ -596,7 +654,7 @@ export class RuinsOfTwoHalvesLevel {
       register({
         id: `l7-mirror-${side}`,
         x: prop(`mirror-${side}`).stand.x, y: prop(`mirror-${side}`).stand.y, radius: prop(`mirror-${side}`).stand.radius,
-        getPrompt: () => `E · Xoay gương ${side === 'left' ? 'trái' : 'phải'}`,
+        getPrompt: () => this.turnPrompt(tr('E · Xoay gương {side}', { side: side === 'left' ? tr('trái') : tr('phải') })),
         getPromptBounds: () => this.artById.get(`mirror-${side}`)?.getBounds() ?? null,
         isEnabled: () => true,
         onInteract: () => this.rotateMirror(side),
@@ -615,7 +673,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-seedling-bed',
       x: prop('seedling-bed').stand.x, y: prop('seedling-bed').stand.y, radius: prop('seedling-bed').stand.radius,
-      getPrompt: () => 'E · Xem luống mầm',
+      getPrompt: () => tr('E · Xem luống mầm'),
       getPromptBounds: () => this.artById.get('seedling-bed')?.getBounds() ?? null,
       isEnabled: () => true,
       onInteract: () => this.inspectBed(),
@@ -626,9 +684,9 @@ export class RuinsOfTwoHalvesLevel {
     this.shadowTalk = {
       id: 'l7-shadow-npc',
       x: talkSpot.stand.x, y: talkSpot.stand.y, radius: talkSpot.stand.radius,
-      getPrompt: () => (this.shadowWalk ? null : 'E · Nói chuyện với The Shadow'),
+      getPrompt: () => (this.shadowWalk || this.shadowDemo ? null : tr('E · Nói chuyện với The Shadow')),
       getPromptBounds: () => this.artById.get('shadow-npc')?.getBounds() ?? null,
-      isEnabled: () => !this.shadowWalk,
+      isEnabled: () => !this.shadowWalk && !this.shadowDemo,
       onInteract: () => this.talkToShadow(),
     };
     register(this.shadowTalk);
@@ -645,25 +703,35 @@ export class RuinsOfTwoHalvesLevel {
         onInteract: handler,
       });
     };
-    fixture('inscription', () => 'E · Đọc bia điện thờ', () => this.readInscription());
+    fixture('inscription', () => tr('E · Đọc bia điện thờ'), () => this.readInscription());
     fixture('north-door', () => this.exitPrompt(), () => this.useExit());
+  }
+
+  /** The Moon's lock label: TỐI only where the lit lamp's shadow covers it (or during the demonstration). */
+  private moonLabel(state: RuinsPuzzleState): string {
+    return tr('NGUYỆT · {state}', { state: ruinsMoonShadowed(state, this.shadowDemo !== null) ? tr('TỐI') : tr('SÁNG') });
+  }
+
+  /** Statue and mirror prompts: once the ring is latched the turn is over, and the prompt says so. */
+  private turnPrompt(base: string): string {
+    return ruinsTurnPrompt(base, this.progress.flags['l7-route-latched'] === true);
   }
 
   private pedestalPrompt(): string {
     const latched = this.progress.flags['l7-route-latched'] === true;
-    if (latched) return this.lantern.lanternPlaced ? 'E · Nhận lại đèn' : 'E · Bệ chính (đèn đã thu hồi)';
+    if (latched) return this.lantern.lanternPlaced ? tr('E · Nhận lại đèn') : tr('E · Bệ chính (đèn đã thu hồi)');
     if (!this.lantern.lanternPlaced) {
-      return this.lantern.lanternInHand ? 'E · Đặt đèn lên bệ' : 'E · Bệ chính (cần đèn trong tay)';
+      return this.lantern.lanternInHand ? tr('E · Đặt đèn lên bệ') : tr('E · Bệ chính (cần đèn trong tay)');
     }
-    return this.getPuzzleState().confirmReady ? 'E · Gài điện thờ' : 'E · Kiểm tra bàn xác nhận';
+    return this.getPuzzleState().confirmReady ? tr('E · Gài điện thờ') : tr('E · Kiểm tra bàn xác nhận');
   }
 
   private exitPrompt(): string {
     const block = getRuinsExitBlock(this.getExitInput());
-    if (!block) return 'E · Qua cửa Bắc';
-    if (block === 'latch') return 'E · Cửa Bắc (cần gài điện thờ)';
-    if (block === 'lamp') return 'E · Cửa Bắc (cần thu hồi đèn)';
-    return 'E · Cửa Bắc (cần gặp The Shadow)';
+    if (!block) return tr('E · Qua cửa Bắc');
+    if (block === 'latch') return tr('E · Cửa Bắc (cần gài điện thờ)');
+    if (block === 'lamp') return tr('E · Cửa Bắc (cần thu hồi đèn)');
+    return tr('E · Cửa Bắc (cần gặp The Shadow)');
   }
 
   /* ---------------------------------------------------------------------- */
@@ -676,38 +744,48 @@ export class RuinsOfTwoHalvesLevel {
     SoundSystem.playMirrorRotate();
     const practice = this.getPracticeState();
     if (!practice.portLit) {
-      this.say([{ speaker: 'Nhinh', text: 'Cột đã xoay, nhưng chưa có ánh sáng nào đi qua đây. Bật đèn bằng F.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Cột đã xoay, nhưng chưa có ánh sáng nào đi qua đây. Bật đèn bằng F.') }]);
       return;
     }
     if (practice.slabShadowed) {
-      this.say([{ speaker: 'Nhinh', text: 'Bóng đã phủ phiến Nguyệt. Ánh sáng không tới được nữa.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Bóng đã phủ phiến Nguyệt. Ánh sáng không tới được nữa.') }]);
       return;
     }
-    this.say([{ speaker: 'Lumo', text: 'Mặt hẹp của cột để ánh sáng lọt qua. Phiến Nguyệt lại sáng.' }]);
+    this.say([{ speaker: 'Lumo', text: tr('Mặt hẹp của cột để ánh sáng lọt qua. Phiến Nguyệt lại sáng.') }]);
   }
 
   private rotateStatue(): void {
     if (this.progress.flags['l7-route-latched'] === true) {
-      this.say([{ speaker: 'Nhinh', text: 'Vòng trên bệ đã giữ. Mình không cần xoay tượng nữa.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Vòng trên bệ đã giữ. Mình không cần xoay tượng nữa.') }]);
       return;
     }
+    const before = this.getPuzzleState();
     this.progress.counters['statue'] = (ruinsNormalizeNotch(this.progress.counters['statue'] ?? 0) + 1) % RUINS_STATUE_NOTCHES;
     this.save();
     SoundSystem.playMirrorRotate();
     const state = this.getPuzzleState();
     this.refresh();
-    if (state.moonCovered) {
-      this.say([{ speaker: 'Nhinh', text: 'Bóng của tượng phủ trọn khóa Nguyệt.' }]);
+    // A turn can shadow a Sun's ray; name the Sun that went out, so the player knows which branch the statue cut.
+    const lostLeft = before.leftLit && !state.leftLit;
+    const lostRight = before.rightLit && !state.rightLit;
+    if (lostLeft || lostRight) {
+      const which = lostLeft && lostRight ? tr('Khóa Nhật trái và khóa Nhật phải')
+        : lostLeft ? tr('Khóa Nhật trái') : tr('Khóa Nhật phải');
+      this.say([{ speaker: 'Lumo', text: tr('Bóng nghiêng đi. {which} đã tắt.', { which }) }]);
       return;
     }
-    this.say([{ speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nguyệt vẫn nằm ngoài vùng tối.' }]);
+    if (state.moonCovered) {
+      this.say([{ speaker: 'Nhinh', text: tr('Bóng của tượng phủ trọn khóa Nguyệt.') }]);
+      return;
+    }
+    this.say([{ speaker: 'Lumo', text: tr('Bóng nghiêng đi. Khóa Nguyệt vẫn nằm ngoài vùng tối.') }]);
   }
 
   private rotateMirror(side: 'left' | 'right'): void {
     if (this.progress.flags['l7-route-latched'] === true) {
       // Scenario §7 keeps the configuration that solved the temple. Turning a mirror now would
       // drop a Sun receiver that the latched ring already accounts for.
-      this.say([{ speaker: 'Nhinh', text: 'Vòng trên bệ đã giữ. Hai gương đang đúng hướng, mình để nguyên vậy.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Vòng trên bệ đã giữ. Hai gương đang đúng hướng, mình để nguyên vậy.') }]);
       return;
     }
     const key = side === 'left' ? 'ruins-left' : 'ruins-right';
@@ -718,20 +796,20 @@ export class RuinsOfTwoHalvesLevel {
     this.refresh();
     const aimed = side === 'left' ? state.leftAimed : state.rightAimed;
     const lit = side === 'left' ? state.leftLit : state.rightLit;
-    const label = side === 'left' ? 'Gương trái' : 'Gương phải';
+    const label = side === 'left' ? tr('Gương trái') : tr('Gương phải');
     if (!this.lantern.lanternPlaced) {
-      this.say([{ speaker: 'Nhinh', text: `${label} đã xoay, nhưng bệ chính chưa có đèn.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('{mirror} đã xoay, nhưng bệ chính chưa có đèn.', { mirror: label }) }]);
       return;
     }
     if (!aimed) {
-      this.say([{ speaker: 'Nhinh', text: `${label} chưa hướng tia lên khóa Nhật.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('{mirror} chưa hướng tia lên khóa Nhật.', { mirror: label }) }]);
       return;
     }
     if (!lit) {
-      this.say([{ speaker: 'Nhinh', text: `${label} đã hướng đúng, nhưng bóng của tượng chắn mất tia.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('{mirror} đã hướng đúng, nhưng bóng của tượng chắn mất tia.', { mirror: label }) }]);
       return;
     }
-    this.say([{ speaker: 'Nhinh', text: `${label} đã bật tia tới khóa Nhật.` }]);
+    this.say([{ speaker: 'Nhinh', text: tr('{mirror} đã bật tia tới khóa Nhật.', { mirror: label }) }]);
   }
 
   private usePedestal(): void {
@@ -743,17 +821,17 @@ export class RuinsOfTwoHalvesLevel {
         this.progress.flags['l7-lantern-retrieved'] = true;
         this.save();
         this.refresh();
-        this.say([{ speaker: 'Nhinh', text: 'Đèn đã về tay. Tới The Shadow thôi.' }]);
+        this.say([{ speaker: 'Nhinh', text: tr('Đèn đã về tay. Tới The Shadow thôi.') }]);
         return;
       }
       // The temple is already latched, so the lamp stays in hand: re-placing it would undo the
       // scenario's retrieval step and re-lock the north door the player has already opened.
-      this.say([{ speaker: 'Nhinh', text: 'Điện thờ đã gài. Đèn ở trong tay rồi, mình tới The Shadow.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Điện thờ đã gài. Đèn ở trong tay rồi, mình tới The Shadow.') }]);
       return;
     }
     if (!this.lantern.lanternPlaced) {
       if (!this.lantern.lanternInHand) {
-        this.say([{ speaker: 'Nhinh', text: 'Đèn không nằm trong tay. Mình cần tìm lại nó.' }]);
+        this.say([{ speaker: 'Nhinh', text: tr('Đèn không nằm trong tay. Mình cần tìm lại nó.') }]);
         return;
       }
       this.lantern.placeLanternAt(RUINS_PEDESTAL_LAMP.x, RUINS_PEDESTAL_LAMP.y);
@@ -762,17 +840,17 @@ export class RuinsOfTwoHalvesLevel {
       this.progress.flags['l7-lantern-retrieved'] = false;
       this.save();
       this.refresh();
-      this.say([{ speaker: 'Lumo', text: 'Bộ chia tia đã hiện đường nhánh. Hai nhánh bên đi qua hai gương.' }]);
+      this.say([{ speaker: 'Lumo', text: tr('Bộ chia tia đã hiện đường nhánh. Hai nhánh bên đi qua hai gương.') }]);
       return;
     }
     const state = this.getPuzzleState();
     if (!canLatchRuinsSanctuary(state, false)) {
       const missing: string[] = [];
-      if (!state.lightActive) missing.push('đặt đèn đang bật lên bệ');
-      if (state.sunsLit < 2) missing.push('cho hai khóa Nhật sáng cùng lúc');
-      if (!state.moonCovered) missing.push('cho bóng tượng phủ khóa Nguyệt');
+      if (!state.lightActive) missing.push(tr('đặt đèn đang bật lên bệ'));
+      if (state.sunsLit < 2) missing.push(tr('cho hai khóa Nhật sáng cùng lúc'));
+      if (!state.moonCovered) missing.push(tr('cho bóng tượng phủ khóa Nguyệt'));
       SoundSystem.playPuzzleError();
-      this.say([{ speaker: 'Nhinh', text: `Bàn xác nhận chưa sáng đều. Mình còn phải ${missing.join(', ')}.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Bàn xác nhận chưa sáng đều. Mình còn phải {missing}.', { missing: missing.join(', ') }) }]);
       return;
     }
     this.progress.flags['l7-route-latched'] = true;
@@ -786,23 +864,28 @@ export class RuinsOfTwoHalvesLevel {
 
   private inspectBed(): void {
     if (this.progress.flags['l7-curtain-shut'] === true) {
-      this.say([{ speaker: 'Nhinh', text: 'Màn đá đã che kín luống mầm. Bên trong chỉ còn một khoảng tối dịu.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Màn đá đã che kín luống mầm. Bên trong chỉ còn một khoảng tối dịu.') }]);
       return;
     }
-    this.say([{ speaker: 'Nhinh', text: 'Cây non. Giống trong khu vườn.' }, { speaker: 'Lumo', text: 'Chúng ta sẽ giữ đèn cách xa.' }]);
+    this.say([{ speaker: 'Nhinh', text: tr('Cây non. Giống trong khu vườn.') }, { speaker: 'Lumo', text: tr('Chúng ta sẽ giữ đèn cách xa.') }]);
   }
 
   private talkToShadow(): void {
     if (this.progress.flags['l7-met-shadow'] === true) {
-      this.say([{ speaker: 'The Shadow', text: 'Đừng chỉ nghe điều ta còn có thể nói. Hãy đọc bản ghi trên đài nhìn trăng.' }]);
+      this.say([{ speaker: 'The Shadow', text: tr('Đừng chỉ nghe điều ta còn có thể nói. Hãy đọc bản ghi trên đài nhìn trăng.') }]);
       return;
     }
     if (this.progress.flags['l7-route-latched'] !== true) {
-      this.say([{ speaker: 'The Shadow', text: 'Hạ ánh sáng xuống. Điện thờ còn khóa, và luống mầm vẫn chờ một khoảng tối.' }]);
+      // Scenario 08 §4: E at his stand asks for the optional demonstration when the same eligibility holds as for H.
+      if (this.isShadowDemoEligible()) {
+        this.startShadowDemo();
+        return;
+      }
+      this.say([{ speaker: 'The Shadow', text: tr('Hạ ánh sáng xuống. Điện thờ còn khóa, và luống mầm vẫn chờ một khoảng tối.') }]);
       return;
     }
     if (this.lantern.lanternPlaced) {
-      this.say([{ speaker: 'Nhinh', text: 'Mình phải thu hồi đèn ở bệ chính trước đã.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Mình phải thu hồi đèn ở bệ chính trước đã.') }]);
       return;
     }
     this.say(SHADOW_TALK, () => {
@@ -822,26 +905,26 @@ export class RuinsOfTwoHalvesLevel {
     this.progress.flags['l7-inscription-read'] = true;
     this.save();
     this.hintIndex = 0;
-    this.say([{ speaker: 'Hệ thống', text: `Bia đá: ${INSCRIPTION}` }]);
+    this.say([{ speaker: 'Hệ thống', text: tr('Bia đá: {text}', { text: tr(INSCRIPTION) }) }]);
   }
 
   private useExit(): void {
     const block = getRuinsExitBlock(this.getExitInput());
     if (block === 'latch') {
       const next = ruinsNextStep(this.getPuzzleState());
-      const text = next === 'place' ? 'Cửa Bắc còn khóa. Bệ chính đang trống: đứng ở mép nam bệ và nhấn E để đặt đèn lên.'
-        : next === 'suns' ? 'Cửa Bắc còn khóa. Hai khóa Nhật chưa cùng sáng: xoay các gương (E ở mép nam từng gương).'
-          : next === 'moon' ? 'Cửa Bắc còn khóa. Khóa Nguyệt chưa nằm trong bóng: xoay tượng giữa sân (E ở mép nam tượng).'
-            : 'Mọi khóa đã đúng. Nhấn E ở mép nam bệ chính để gài điện thờ.';
+      const text = next === 'place' ? tr('Cửa Bắc còn khóa. Bệ chính đang trống: đứng ở mép nam bệ và nhấn E để đặt đèn lên.')
+        : next === 'suns' ? tr('Cửa Bắc còn khóa. Hai khóa Nhật chưa cùng sáng: xoay các gương (E ở mép nam từng gương).')
+          : next === 'moon' ? tr('Cửa Bắc còn khóa. Khóa Nguyệt chưa nằm trong bóng: xoay tượng giữa sân (E ở mép nam tượng).')
+            : tr('Mọi khóa đã đúng. Nhấn E ở mép nam bệ chính để gài điện thờ.');
       this.say([{ speaker: 'Nhinh', text }]);
       return;
     }
     if (block === 'lamp') {
-      this.say([{ speaker: 'Nhinh', text: 'Đèn vẫn nằm trên bệ chính. Đứng ở mép nam bệ và nhấn E để thu hồi trước khi lên cầu thang.' }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Đèn vẫn nằm trên bệ chính. Đứng ở mép nam bệ và nhấn E để thu hồi trước khi lên cầu thang.') }]);
       return;
     }
     if (block === 'shadow') {
-      this.say([{ speaker: 'Lumo', text: 'The Shadow đang đứng cạnh luống mầm, phía tây bắc sân. Mình nhấn E để nói chuyện với ông trước.' }]);
+      this.say([{ speaker: 'Lumo', text: tr('The Shadow đang đứng cạnh luống mầm, phía tây bắc sân. Mình nhấn E để nói chuyện với ông trước.') }]);
       return;
     }
     this.progress.counters['lumo-x'] = Math.round(this.lumo.sprite.x);
@@ -864,8 +947,8 @@ export class RuinsOfTwoHalvesLevel {
       this.progress.flags['l7-practice-seen'] = true;
       this.save();
       this.queueBeat([
-        { speaker: 'Nhinh', text: 'Không cần tắt cả chiếc đèn. Chỉ cần che đúng chỗ.' },
-        { speaker: 'Lumo', text: 'Phía ngoài vẫn sáng, còn sau cột thì tối.' },
+        { speaker: 'Nhinh', text: tr('Không cần tắt cả chiếc đèn. Chỉ cần che đúng chỗ.') },
+        { speaker: 'Lumo', text: tr('Phía ngoài vẫn sáng, còn sau cột thì tối.') },
       ]);
     }
 
@@ -873,8 +956,8 @@ export class RuinsOfTwoHalvesLevel {
       this.progress.flags['l7-two-suns'] = true;
       this.save();
       this.queueBeat([
-        { speaker: 'Lumo', text: 'Hai bên đã đáp lại. Khóa giữa vẫn im.' },
-        { speaker: 'Nhinh', text: 'Ánh từ bệ vẫn rọi vào nó. Bức tượng có thể chắn luồng giữa.' },
+        { speaker: 'Lumo', text: tr('Hai bên đã đáp lại. Khóa giữa vẫn im.') },
+        { speaker: 'Nhinh', text: tr('Ánh từ bệ vẫn rọi vào nó. Bức tượng có thể chắn luồng giữa.') },
       ]);
     }
 
@@ -882,8 +965,8 @@ export class RuinsOfTwoHalvesLevel {
       this.progress.flags['l7-shadow-covers'] = true;
       this.save();
       this.queueBeat([
-        { speaker: 'The Shadow', text: 'Giữ khoảng tối ấy.' },
-        { speaker: 'Nhinh', text: 'Tôi thấy rồi. Hai nửa có thể cùng tồn tại.' },
+        { speaker: 'The Shadow', text: tr('Giữ khoảng tối ấy.') },
+        { speaker: 'Nhinh', text: tr('Tôi thấy rồi. Hai nửa có thể cùng tồn tại.') },
       ]);
     }
   }
@@ -967,10 +1050,10 @@ export class RuinsOfTwoHalvesLevel {
   /** Puts the sprite, solid and stand where the story says he is, unless he is mid-walk. */
   private syncShadow(): void {
     const image = this.shadowImage;
-    if (!image || !image.active || this.shadowWalk) return;
+    if (!image || !image.active || this.shadowWalk || this.shadowDemo) return;
     const phase = this.shadowPhase();
     const spot = ruinsShadowSpotFor(phase);
-    const key = this.shadowKey(ruinsShadowPoseFor(phase));
+    const key = this.shadowKey(this.shadowStill ? 'stillness' : ruinsShadowPoseFor(phase));
     if (key && image.texture.key !== key) image.setTexture(key);
     image.setFlipX(false);
     if (image.x !== spot.ground.x || image.y !== spot.ground.y) {
@@ -1012,6 +1095,14 @@ export class RuinsOfTwoHalvesLevel {
     if (!walk || !image || !image.active) return;
     const path = RUINS_SHADOW.path;
     if (walk.index >= path.length) { this.persistShadowWalk(); return; }
+    // The carved-name hold (scenario 08 §5) stops him where he is, on `stillness`, until its line ends. The walk index is not
+    // touched, so the walk then resumes from the same waypoint.
+    if (this.shadowStill) {
+      const stillKey = this.shadowKey('stillness');
+      if (stillKey && image.texture.key !== stillKey) image.setTexture(stillKey);
+      this.placeShadowSolid();
+      return;
+    }
     const near = Math.hypot(this.player.x - image.x, this.player.y - (image.y - 20)) <= RUINS_SHADOW.followRange;
     const walking = this.shadowKey('walk-right');
     const waiting = this.shadowKey('stillness');
@@ -1037,6 +1128,136 @@ export class RuinsOfTwoHalvesLevel {
     }
     image.setDepth(ruinsDepthAt(image.y));
     this.placeShadowSolid(true);
+  }
+
+  /* ---------------------------------------------------------------------- */
+  /* optional Shadow demonstration, carved name, lamp feedback, lock tones   */
+  /* ---------------------------------------------------------------------- */
+
+  /** Scenario 08 §4: the one eligibility shared by E at his stand and H on the Sun/Moon ladder. Reads live state only. */
+  private isShadowDemoEligible(): boolean {
+    const puzzle = this.getPuzzleState();
+    return ruinsShadowDemoEligible({
+      lanternPlaced: this.lantern.lanternPlaced,
+      lanternOn: this.lantern.lanternOn,
+      sunsLit: puzzle.sunsLit,
+      moonCovered: puzzle.moonCovered,
+      latched: this.progress.flags['l7-route-latched'] === true,
+      demoSeen: this.progress.flags['l7-shadow-demo'] === true,
+    });
+  }
+
+  /**
+   * Starts the demonstration: The Shadow leaves his guard spot for the centre flow and the controls lock. Nothing is
+   * written here; `l7-shadow-demo` is set only once the walk back has ended (finishShadowDemo).
+   */
+  private startShadowDemo(): void {
+    if (this.destroyed || this.shadowDemo || this.shadowWalk) return;
+    if (!this.shadowImage || !this.shadowImage.active) return;
+    if (!this.isShadowDemoEligible()) return;
+    this.shadowDemo = { stage: 'in', route: RUINS_SHADOW_DEMO.outRoute, index: 0 };
+    this.setShadowTexture('walk-right');
+    // The Moon lock and the centre flow render as covered for the demonstration; the puzzle state is untouched.
+    this.refresh();
+  }
+
+  /** Walks The Shadow along the demonstration route, holds him for the lines, then walks him back. */
+  private advanceShadowDemo(dt: number): void {
+    const demo = this.shadowDemo;
+    const image = this.shadowImage;
+    if (!demo || !image || !image.active || demo.stage === 'talk') return;
+    if (demo.index >= demo.route.length) {
+      if (demo.stage === 'out') {
+        this.finishShadowDemo();
+        return;
+      }
+      // Arrived on the centre flow. The lines wait for any beat still on screen, so two dialogues never overlap.
+      this.setShadowTexture('shielding');
+      if (this.canStartStory()) this.beginShadowDemoTalk(demo);
+      return;
+    }
+    const target = demo.route[demo.index];
+    const dx = target.x - image.x;
+    const dy = target.y - image.y;
+    const distance = Math.hypot(dx, dy);
+    const step = (RUINS_SHADOW.speed * Math.min(dt, 50)) / 1000;
+    this.setShadowTexture('walk-right');
+    if (Math.abs(dx) > 0.5) image.setFlipX(dx < 0);
+    if (distance <= step) {
+      image.setPosition(target.x, target.y);
+      demo.index += 1;
+    } else {
+      image.setPosition(image.x + (dx / distance) * step, image.y + (dy / distance) * step);
+    }
+    image.setDepth(ruinsDepthAt(image.y));
+    // Same solid rule as the story walk: it yields to a player within one step, so the walk never traps them.
+    this.placeShadowSolid(true);
+  }
+
+  private beginShadowDemoTalk(demo: ShadowDemo): void {
+    demo.stage = 'talk';
+    this.setShadowTexture('shielding');
+    this.placeShadowSolid();
+    this.say(SHADOW_DEMO_TALK, () => this.beginShadowDemoReturn(demo));
+  }
+
+  private beginShadowDemoReturn(demo: ShadowDemo): void {
+    if (this.destroyed || this.shadowDemo !== demo) return;
+    demo.stage = 'out';
+    demo.route = RUINS_SHADOW_DEMO.backRoute;
+    demo.index = 0;
+  }
+
+  /** The walk back has ended and he is on his guard spot again. Only now is the demonstration recorded. */
+  private finishShadowDemo(): void {
+    this.shadowDemo = null;
+    this.progress.flags['l7-shadow-demo'] = true;
+    this.save();
+    this.syncShadow();
+    this.refresh();
+  }
+
+  private setShadowTexture(pose: RuinsShadowPoseId): void {
+    const image = this.shadowImage;
+    const key = this.shadowKey(pose);
+    if (image && key && image.texture.key !== key) image.setTexture(key);
+  }
+
+  /**
+   * Scenario 08 §5 "Mạch phụ": a Pulse near the statue's base reveals the worn name, once. The Pulse rule already requires the
+   * lamp in hand (LanternSystem.triggerPulse), so this is only reached with the lamp in hand.
+   */
+  public onPulse(x: number, y: number): void {
+    if (this.destroyed || this.progress.flags['l7-name-seen'] === true) return;
+    if (!ruinsPulseReachesName({ x, y })) return;
+    this.progress.flags['l7-name-seen'] = true;
+    this.save();
+    // If The Shadow stands near the statue's base, he holds still while the reveal is said, and says nothing.
+    if (this.shadowImage?.active && ruinsShadowNearStatue(this.shadowGround())) this.shadowStill = true;
+    this.refreshArt();
+    this.queueBeat([NAME_LINE], () => { this.shadowStill = false; });
+  }
+
+  /** F while the lamp sits lit on the altar switches nothing (the lamp stays lit); Lumo says why (scenario 08 §4). */
+  public handleLanternKey(): void {
+    if (this.destroyed || this.shadowDemo) return;
+    if (!this.lantern.lanternPlaced || !this.lantern.lanternOn) return;
+    this.say([LAMP_ON_ALTAR_LINE]);
+  }
+
+  /**
+   * Scenario 08 §4: the lock tones follow the rendered locks. A Sun tone sounds while its Sun is lit. The Moon tone sounds
+   * while the shadow covers the Moon with the lamp lit (so a lamp not yet placed never hums), and during the demonstration.
+   * Each tone fades out the moment its condition is lost.
+   */
+  private syncLockTones(): void {
+    const state = this.getPuzzleState();
+    const practice = this.getPracticeState();
+    const keys = RuinsOfTwoHalvesLevel.LOCK_TONE_KEYS;
+    SoundSystem.setHeldTone(keys.sunLeft, state.leftLit, lockSunLeftVoice);
+    SoundSystem.setHeldTone(keys.sunRight, state.rightLit, lockSunRightVoice);
+    SoundSystem.setHeldTone(keys.moon, (state.lightActive && state.moonCovered) || this.shadowDemo !== null, lockMoonVoice);
+    SoundSystem.setHeldTone(keys.practice, practice.slabShadowed, lockMoonVoice);
   }
 
   private queueBeat(lines: DialogueLine[], onComplete?: () => void): void {
@@ -1071,7 +1292,9 @@ export class RuinsOfTwoHalvesLevel {
     this.setArt('practice-column-spin', `test-column-notch-${ruinsNormalizeNotch(this.progress.counters['practice'] ?? 0)}`);
     this.setArt('lock-left', state.leftLit ? 'lock-sun-on' : 'lock-sun-off');
     this.setArt('lock-right', state.rightLit ? 'lock-sun-on' : 'lock-sun-off');
-    this.setArt('lock-moon', state.moonDark ? 'lock-moon-covered' : 'lock-moon-lit');
+    // The Moon reads as shadowed only where the statue's shadow covers it (plus the demonstration), never for a dark lamp.
+    const moonShadowed = ruinsMoonShadowed(state, this.shadowDemo !== null);
+    this.setArt('lock-moon', moonShadowed ? 'lock-moon-covered' : 'lock-moon-lit');
     this.setArt('splitter', state.lightActive ? 'fixed-three-route-splitter-on' : 'fixed-three-route-splitter-off');
     this.setArt('practice-slab', practice.slabShadowed ? 'test-moon-covered' : 'test-moon-lit');
     this.setArt('confirmation', `confirmation-${this.confirmationArt()}`);
@@ -1079,11 +1302,12 @@ export class RuinsOfTwoHalvesLevel {
     this.setArt('north-door', `sanctuary-door-${latched ? 'open' : 'closed'}`);
     this.setArt('shadow', `shadow-notch-${state.statue}`);
     this.artById.get('placed-lamp')?.setVisible(this.lantern.lanternPlaced);
+    this.artById.get('statue-name')?.setVisible(this.progress.flags['l7-name-seen'] === true);
     this.syncShadow();
 
-    this.lockLabels.get('left')?.setText(`NHẬT TRÁI · ${state.leftLit ? 'SÁNG' : 'TẮT'}`);
-    this.lockLabels.get('right')?.setText(`NHẬT PHẢI · ${state.rightLit ? 'SÁNG' : 'TẮT'}`);
-    this.lockLabels.get('moon')?.setText(`NGUYỆT · ${state.moonDark ? 'TỐI' : 'SÁNG'}`);
+    this.lockLabels.get('left')?.setText(tr('NHẬT TRÁI · {state}', { state: state.leftLit ? tr('SÁNG') : tr('TẮT') }));
+    this.lockLabels.get('right')?.setText(tr('NHẬT PHẢI · {state}', { state: state.rightLit ? tr('SÁNG') : tr('TẮT') }));
+    this.lockLabels.get('moon')?.setText(this.moonLabel(state));
 
     if (this.lastLanternOn !== this.lantern.lanternOn) {
       this.lastLanternOn = this.lantern.lanternOn;
@@ -1119,6 +1343,8 @@ export class RuinsOfTwoHalvesLevel {
     this.shadowSolidAt = undefined;
     this.shadowTalk = undefined;
     this.shadowWalk = null;
+    this.shadowDemo = null;
+    this.shadowStill = false;
   }
 
   /* ---------------------------------------------------------------------- */
@@ -1129,32 +1355,33 @@ export class RuinsOfTwoHalvesLevel {
     const stage = this.getStage();
     const state = this.getPuzzleState();
     switch (stage) {
-      case 'practice': return 'Thử ở tiền sảnh: bật đèn, xoay cột đá cho bóng phủ phiến Nguyệt.';
-      case 'place': return 'Đặt đèn lên bệ chính ở phía đông nam sân.';
+      case 'practice': return tr('Thử ở tiền sảnh: bật đèn, xoay cột đá cho bóng phủ phiến Nguyệt.');
+      case 'place': return tr('Đặt đèn lên bệ chính ở phía đông nam sân.');
       case 'suns':
-        return !state.lightActive ? 'Đặt đèn đang bật lên bệ chính.'
-          : state.sunsLit === 0 ? 'Xoay hai gương bên để tia sáng chiếu vào hai khóa Nhật.'
-            : 'Một khóa Nhật đã sáng. Xoay gương còn lại cho tia bật lên khóa kia.';
-      case 'moon': return 'Xoay tượng giữa sân cho bóng phủ khóa Nguyệt.';
-      case 'confirm': return 'Điều kiện đã đủ. Nhấn E ở bệ chính để gài điện thờ.';
-      case 'retrieve': return 'Thu hồi đèn ở bệ chính.';
-      case 'shadow': return 'Tới The Shadow ở phía đông bắc và nhấn E.';
-      default: return 'Tới cửa Bắc và nhấn E để đi tiếp.';
+        return !state.lightActive ? tr('Đặt đèn đang bật lên bệ chính.')
+          : state.sunsLit === 0 ? tr('Xoay hai gương bên để tia sáng chiếu vào hai khóa Nhật.')
+            : tr('Một khóa Nhật đã sáng. Xoay gương còn lại cho tia bật lên khóa kia.');
+      case 'moon': return tr('Xoay tượng giữa sân cho bóng phủ khóa Nguyệt.');
+      case 'confirm': return tr('Điều kiện đã đủ. Nhấn E ở bệ chính để gài điện thờ.');
+      case 'retrieve': return tr('Thu hồi đèn ở bệ chính.');
+      case 'shadow': return tr('Tới The Shadow ở phía tây bắc và nhấn E.');
+      default: return tr('Tới cửa Bắc và nhấn E để đi tiếp.');
     }
   }
 
   public getStatusText(): string {
     const state = this.getPuzzleState();
     const latched = this.progress.flags['l7-route-latched'] === true;
-    const ring = latched ? 'đã gài' : state.confirmReady ? 'sáng đều' : 'đang chờ';
+    const ring = latched ? tr('đã gài') : state.confirmReady ? tr('sáng đều') : tr('đang chờ');
     // The door leaf is drawn open as soon as the ring latches, but leaving also needs the lamp back
     // in hand and the Shadow conversation, so the row names whichever step is still outstanding.
     const block = getRuinsExitBlock(this.getExitInput());
-    const north = block === undefined ? 'mở'
-      : block === 'lamp' ? 'mở · cần đèn'
-        : block === 'shadow' ? 'mở · chờ The Shadow'
-          : 'khóa';
-    return `Nhật ${state.sunsLit}/2 · Nguyệt ${state.moonDark ? 'tối' : 'sáng'} · Bệ ${ring} · Cửa Bắc ${north}`;
+    const north = block === undefined ? tr('mở')
+      : block === 'lamp' ? tr('mở · cần đèn')
+        : block === 'shadow' ? tr('mở · chờ The Shadow')
+          : tr('khóa');
+    const moon = ruinsMoonShadowed(state, this.shadowDemo !== null) ? tr('tối') : tr('sáng');
+    return tr('Nhật {suns}/2 · Nguyệt {moon} · Bệ {ring} · Cửa Bắc {north}', { suns: state.sunsLit, moon, ring, north });
   }
 
   public showHint(): void {
@@ -1169,30 +1396,38 @@ export class RuinsOfTwoHalvesLevel {
     const state = this.getPuzzleState();
     const missing: string[] = [];
     if (stage === 'suns') {
-      if (!state.lightActive) missing.push('đèn chưa nằm trên bệ');
-      else if (!state.leftAimed) missing.push('gương trái chưa hướng tia lên khóa Nhật trái');
-      else if (!state.rightAimed) missing.push('gương phải chưa hướng tia lên khóa Nhật phải');
+      // Each condition is checked on its own, so "Còn thiếu" names every item still open.
+      if (!this.lantern.lanternPlaced) missing.push(tr('đèn chưa nằm trên bệ'));
+      if (!state.leftAimed) missing.push(tr('gương trái chưa hướng tia lên khóa Nhật trái'));
+      if (!state.rightAimed) missing.push(tr('gương phải chưa hướng tia lên khóa Nhật phải'));
     }
-    if (stage === 'moon' && !state.moonCovered) missing.push('bóng tượng chưa phủ khóa Nguyệt');
+    if (stage === 'moon' && !state.moonCovered) missing.push(tr('bóng tượng chưa phủ khóa Nguyệt'));
     const index = Math.min(this.hintIndex, ladder.length - 1);
     this.hintIndex = Math.min(this.hintIndex + 1, ladder.length - 1);
-    const suffix = index > 0 && missing.length ? ` Còn thiếu: ${missing.join(', ')}.` : '';
-    this.say([{ speaker: 'Hệ thống', text: ladder[index] + suffix }]);
+    const suffix = index > 0 && missing.length ? tr(' Còn thiếu: {missing}.', { missing: missing.join(', ') }) : '';
+    const line: DialogueLine = { speaker: 'Hệ thống', text: ladder[index] + suffix };
+    // Scenario 08 §4/§6: asking for Mức 2 or 3 on the Sun/Moon ladder offers the optional demonstration once it is eligible.
+    if (index >= 1 && (stage === 'suns' || stage === 'moon') && this.isShadowDemoEligible()) {
+      this.say([line], () => this.startShadowDemo());
+      return;
+    }
+    this.say([line]);
   }
 
   public showJournal(): void {
     const lines: DialogueLine[] = [];
     if (this.progress.flags['l7-practice-seen'] === true) {
-      lines.push({ speaker: 'Nhinh', text: 'Một vật chắn sáng tạo ra một vùng tối. Mặt rộng của cột chắn, mặt hẹp thì không.' });
+      lines.push({ speaker: 'Nhinh', text: tr('Một vật chắn sáng tạo ra một vùng tối. Mặt rộng của cột chắn, mặt hẹp thì không.') });
     }
-    if (this.progress.flags['l7-inscription-read'] === true) lines.push({ speaker: 'Nhinh', text: `Bia đá: ${INSCRIPTION}` });
-    if (this.progress.flags['l7-two-suns'] === true) lines.push({ speaker: 'Lumo', text: 'Hai khóa Nhật sáng cùng lúc vẫn chưa đủ. Khóa Nguyệt cần ở trong bóng.' });
-    if (this.progress.flags['l7-shadow-covers'] === true) lines.push({ speaker: 'Nhinh', text: 'Bóng đổ có thể bảo vệ một vùng. Ba khóa phải đúng cùng một lúc.' });
-    if (this.progress.flags['l7-shadow-spiral'] === true) lines.push({ speaker: 'Lumo', text: 'Dấu vòng xoắn trên cửa Bắc giống dấu ở đường hầm dẫn nước.' });
-    if (this.progress.flags['l7-met-shadow'] === true) lines.push({ speaker: 'The Shadow', text: 'Trên đài nhìn trăng. Nơi ta đã dừng vòng trời.' });
+    if (this.progress.flags['l7-inscription-read'] === true) lines.push({ speaker: 'Nhinh', text: tr('Bia đá: {text}', { text: tr(INSCRIPTION) }) });
+    if (this.progress.flags['l7-two-suns'] === true) lines.push({ speaker: 'Lumo', text: tr('Hai khóa Nhật sáng cùng lúc vẫn chưa đủ. Khóa Nguyệt cần ở trong bóng.') });
+    if (this.progress.flags['l7-shadow-covers'] === true) lines.push({ speaker: 'Nhinh', text: tr('Bóng đổ có thể bảo vệ một vùng. Ba khóa phải đúng cùng một lúc.') });
+    if (this.progress.flags['l7-shadow-spiral'] === true) lines.push({ speaker: 'Lumo', text: tr('Dấu vòng xoắn trên cửa Bắc giống dấu ở đường hầm dẫn nước.') });
+    if (this.progress.flags['l7-name-seen'] === true) lines.push(NAME_JOURNAL_LINE);
+    if (this.progress.flags['l7-met-shadow'] === true) lines.push({ speaker: 'The Shadow', text: tr('Trên đài nhìn trăng. Nơi ta đã dừng vòng trời.') });
     this.say([
-      { speaker: 'Nhinh', text: 'Sổ tay giữ những điều hai đứa đã học.' },
-      ...(lines.length ? lines : [{ speaker: 'Nhinh' as const, text: 'Chưa ghi thêm manh mối nào.' }]),
+      { speaker: 'Nhinh', text: tr('Sổ tay giữ những điều hai đứa đã học.') },
+      ...(lines.length ? lines : [{ speaker: 'Nhinh' as const, text: tr('Chưa ghi thêm manh mối nào.') }]),
     ]);
   }
 

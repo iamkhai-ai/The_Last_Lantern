@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import menuDawnUrl from '../../Art_References/07_The_Last_Dawn.png?url';
+import { tr } from '../i18n/catalog.ts';
+import { getLocale, otherLocale, setLocale } from '../i18n/locale.ts';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
 import { WorldFactory } from '../world/WorldFactory';
@@ -19,6 +21,8 @@ const MENU_TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
 export class MenuScene extends Phaser.Scene {
   private selectionDot!: Phaser.GameObjects.Arc;
   private menuButtons: Phaser.GameObjects.Text[] = [];
+  /** Label getters, one per menu row, so a toggle redraws every label from its live state. */
+  private itemLabels: Array<() => string> = [];
   private selectedIndex = 0;
   private hasSavedGame = false;
   private actions: Array<() => void> = [];
@@ -57,6 +61,7 @@ export class MenuScene extends Phaser.Scene {
     this.selectedIndex = 0;
     this.starting = false;
     this.menuButtons = [];
+    this.itemLabels = [];
     this.actions = [];
     this.confirmButtons = [];
     this.menuMode = 'menu';
@@ -95,20 +100,21 @@ export class MenuScene extends Phaser.Scene {
       fontFamily: 'Georgia, serif', fontSize: '29px', fontStyle: 'bold',
       color: '#f4dfad', lineSpacing: -2,
     }).setDepth(81);
-    this.add.text(40, 124, 'Khu rừng ánh sáng', {
+    this.add.text(40, 124, tr('Khu rừng ánh sáng'), {
       ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf',
     }).setDepth(81);
 
-    const items: Array<{ label: string; action: () => void }> = [];
-    if (this.hasSavedGame) items.push({ label: 'Tiếp tục', action: () => this.continueGame() });
-    items.push({ label: 'Hành trình mới', action: () => this.startNewGame() });
+    const items: Array<{ label: () => string; action: () => void }> = [];
+    if (this.hasSavedGame) items.push({ label: () => tr('Tiếp tục'), action: () => this.continueGame() });
+    items.push({ label: () => tr('Hành trình mới'), action: () => this.startNewGame() });
     items.push({
-      label: this.soundLabel(),
+      label: () => this.soundLabel(),
       action: () => { SoundSystem.toggleMute(); this.refreshMenuHighlight(); },
     });
+    items.push({ label: () => this.languageLabel(), action: () => this.toggleLanguage() });
     this.selectionDot = this.add.circle(42, 198, 2.5, 0xe8c777).setDepth(82);
     items.forEach((item, idx) => {
-      const btn = this.add.text(56, 198 + idx * 33, item.label, {
+      const btn = this.add.text(56, 198 + idx * 33, item.label(), {
         ...MENU_TEXT_STYLE, fontSize: idx === items.length - 1 ? '12px' : '15px',
         color: '#efe6cf',
       }).setOrigin(0, 0.5).setDepth(82).setInteractive({ useHandCursor: true });
@@ -123,14 +129,15 @@ export class MenuScene extends Phaser.Scene {
         this.triggerSelected();
       });
       this.menuButtons.push(btn);
+      this.itemLabels.push(item.label);
       this.actions.push(item.action);
     });
     this.refreshMenuHighlight();
 
-    this.add.text(38, 337, '↑↓ Chọn · Enter Xác nhận', {
+    this.add.text(38, 337, tr('↑↓ Chọn · Enter Xác nhận'), {
       ...MENU_TEXT_STYLE, fontSize: '10px', color: '#efe6cf',
     }).setDepth(82);
-    this.add.text(620, 347, RELEASE_POLICY.buildTag, {
+    this.add.text(620, 347, tr(RELEASE_POLICY.buildTag), {
       ...MENU_TEXT_STYLE, fontSize: '9px', color: '#d2c4a6',
     }).setOrigin(1, 1).setDepth(82);
 
@@ -144,19 +151,19 @@ export class MenuScene extends Phaser.Scene {
     // Bitter is wider than the previous face: size the panel so the approved
     // warning sentence stays on one line instead of splitting "tiếp tục".
     const panel = this.add.rectangle(320, 180, 376, 170, 0x0b2027).setDepth(101);
-    const title = this.add.text(168, 112, 'Bắt đầu hành trình mới?', {
+    const title = this.add.text(168, 112, tr('Bắt đầu hành trình mới?'), {
       ...MENU_TEXT_STYLE, fontSize: '17px', color: '#f4dfad',
     }).setDepth(102);
-    this.confirmText = this.add.text(168, 147, NEW_GAME_CONFIRM_TEXT, {
+    this.confirmText = this.add.text(168, 147, tr(NEW_GAME_CONFIRM_TEXT), {
       ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf',
       wordWrap: { width: 328 }, lineSpacing: 6,
     }).setDepth(102);
-    const hint = this.add.text(168, 242, '←→ Chọn · Enter Xác nhận · Esc Quay lại', {
+    const hint = this.add.text(168, 242, tr('←→ Chọn · Enter Xác nhận · Esc Quay lại'), {
       ...MENU_TEXT_STYLE, fontSize: '10px', color: '#d2c4a6',
     }).setDepth(102);
     this.confirmDecorations = [panel, title, hint];
     CONFIRM_LABELS.forEach((label, idx) => {
-      const btn = this.add.text(168 + idx * 174, 212, label, {
+      const btn = this.add.text(168 + idx * 174, 212, tr(label), {
         ...MENU_TEXT_STYLE, fontSize: '14px', color: '#efe6cf',
       }).setOrigin(0, 0.5).setDepth(102);
       // Hover must not turn the safe default into a destructive keyboard action.
@@ -186,7 +193,18 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private soundLabel(): string {
-    return SoundSystem.isMuted() ? 'Âm thanh: Tắt' : 'Âm thanh: Bật';
+    return tr(SoundSystem.isMuted() ? tr('Âm thanh: Tắt') : tr('Âm thanh: Bật'));
+  }
+
+  private languageLabel(): string {
+    return tr('Ngôn ngữ: Tiếng Việt');
+  }
+
+  /** Flips the locale and rebuilds the menu, so every label is drawn in the new language. */
+  private toggleLanguage(): void {
+    setLocale(otherLocale(getLocale()));
+    SoundSystem.playUiClick();
+    this.scene.restart();
   }
 
   private moveSelection(delta: number): void {
@@ -237,13 +255,15 @@ export class MenuScene extends Phaser.Scene {
   private refreshMenuHighlight(): void {
     if (this.menuMode === 'confirm-new-game') {
       this.confirmButtons.forEach((btn, idx) => {
-        btn.setText(CONFIRM_LABELS[idx]);
+        btn.setText(tr(CONFIRM_LABELS[idx]));
         btn.setColor(idx === this.confirmSelectedIndex ? '#e8c777' : '#efe6cf');
       });
       return;
     }
     this.menuButtons.forEach((btn, idx) => {
-      if (idx === this.menuButtons.length - 1) btn.setText(this.soundLabel());
+      // Label getters are absent only in the source-level harness that binds these methods directly.
+      const label = this.itemLabels?.[idx]?.();
+      if (label !== undefined) btn.setText(label);
       btn.setColor(idx === this.selectedIndex ? '#e8c777' : '#efe6cf');
     });
     const selected = this.menuButtons[this.selectedIndex];
@@ -286,7 +306,7 @@ export class MenuScene extends Phaser.Scene {
     // Opened by keyboard: the activating key must be released first. Opened by
     // a click: the next click is already a distinct target and may confirm.
     this.confirmArmed = !this.activationViaKey;
-    this.confirmText?.setText(NEW_GAME_CONFIRM_TEXT);
+    this.confirmText?.setText(tr(NEW_GAME_CONFIRM_TEXT));
     this.setConfirmVisible(true);
     SoundSystem.playUiClick();
   }

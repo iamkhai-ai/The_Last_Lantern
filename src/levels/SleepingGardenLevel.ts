@@ -1,6 +1,7 @@
+import { tr } from '../i18n/catalog.ts';
 import Phaser from 'phaser';
 import { SoundSystem } from '../systems/SoundSystem';
-import { getLevelArtKey, getSharedMechanismKey, getShadowArtKey } from '../art/CampaignArt';
+import { getGardenArtKey, getSharedMechanismKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -197,30 +198,29 @@ export class SleepingGardenLevel {
       .map((object) => object.getBounds());
   }
 
+  /**
+   * Goal only (scenario v2 07 §6): the row never names a control, the F key or the dark-feeds-the-roots
+   * rule. The concrete steps live in the H ladder of the same stage (see showHint).
+   */
   public getObjectiveText(): string {
     const state = this.state;
-    if (!state.canopyShut) return 'Tới tay màn che trong khe tường phía tây bắc và nhấn E để đóng màn che bể tích quang.';
-    if (!state.sunLatched) {
-      if (this.progress.flags['l6-practice-observed'] !== true) return 'Hai chậu thử ở bãi cỏ phía nam cho thấy cây phản ứng thế nào với đèn. Bật hoặc tắt đèn (F) khi đứng gần chúng.';
-      return this.lanternOn
-        ? 'Thanh chắn đang nâng. Vào khe tường phía tây và nhấn E ở tay chốt để giữ nó.'
-        : 'Bật đèn (F) cho Hoa Nhật mở, nâng thanh chắn, rồi gài chốt trong khe tường.';
-    }
-    if (!state.waterFlowing) {
-      if (this.lanternOn) return 'Tắt đèn (F) cho Rễ Nguyệt bắc cầu qua mương, rồi sang vườn ươm.';
-      return this.player.x > 300
-        ? 'Nhấn E ở cống vườn ươm để mở đường nước.'
-        : 'Bóng tối đang giữ. Qua cầu rễ giữa vườn tới vườn ươm và mở cống.';
-    }
-    if (!state.returnLatched) return 'Gài chốt lối đá phụ cạnh cống để mở lối về không cần ánh sáng.';
-    if (!state.lumoRealized) return 'Nói chuyện với Lumo bên mầm cây trong vườn ươm (nhấn E ở mầm cây).';
-    return 'Tới cổng điện thờ ở góc đông bắc và nhấn E.';
+    if (!state.waterFlowing) return tr('Đưa nước tới vườn ươm.');
+    if (!state.returnLatched) return tr('Giữ lối về từ vườn ươm.');
+    if (!state.lumoRealized) return tr('Lumo có điều muốn nói.');
+    return tr('Tới cổng điện thờ.');
   }
 
   public getStatusText(): string {
     const state = this.state;
     const light = effectiveLight(state, this.lanternOn);
-    return `Màn che: ${state.canopyShut ? 'đóng' : 'mở'} · Hoa Nhật: ${sunOpen(state, this.lanternOn) ? 'nở' : 'gập'} · Chốt: ${state.sunLatched ? 'giữ' : 'chưa'} · Nước: ${state.waterFlowing ? 'chảy' : 'chưa'} · Lối phụ: ${state.returnLatched ? 'mở' : 'kín'} · ${state.canopyShut ? (light ? 'có sáng' : 'trong tối') : 'bể còn sáng'}`;
+    return tr('Màn che: {canopy} · Hoa Nhật: {sun} · Chốt: {latch} · Nước: {water} · Lối phụ: {side} · {light}', {
+      canopy: state.canopyShut ? tr('đóng') : tr('mở'),
+      sun: sunOpen(state, this.lanternOn) ? tr('nở') : tr('gập'),
+      latch: state.sunLatched ? tr('giữ') : tr('chưa'),
+      water: state.waterFlowing ? tr('chảy') : tr('chưa'),
+      side: state.returnLatched ? tr('mở') : tr('kín'),
+      light: state.canopyShut ? (light ? tr('có sáng') : tr('trong tối')) : tr('bể còn sáng'),
+    });
   }
 
   public showHint(): void {
@@ -235,29 +235,29 @@ export class SleepingGardenLevel {
     // so lantern toggles do not restart it. Canopy and post-drain stages keep stage-specific guidance.
     const hints: Record<string, string[]> = {
       canopy: [
-        'Cả khu vườn đang được bể tích quang nuôi sáng.',
-        'Có một tay màn che ở khe tường phía tây bắc, cạnh bể.',
-        'Đi vòng lên phía bắc, vào khe tường và nhấn E ở tay màn che.',
+        tr('Cả khu vườn đang được bể tích quang nuôi sáng.'),
+        tr('Có một tay màn che ở khe tường phía tây bắc, cạnh bể.'),
+        tr('Đi vòng lên phía bắc, vào khe tường và nhấn E ở tay màn che.'),
       ],
       main: [
-        'Hai chậu thử phản ứng trái ngược. Sau thanh chắn có một tay chốt.',
-        'Giữ thanh chắn bằng chốt, rồi tắt đèn để rễ làm cầu. Một phần đường phải tự giữ trước khi phần kia xuất hiện.',
-        'Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi gài lối đá phụ.',
+        tr('Hai chậu thử phản ứng trái ngược. Sau thanh chắn có một tay chốt.'),
+        tr('Giữ thanh chắn bằng chốt, rồi tắt đèn để rễ làm cầu. Một phần đường phải tự giữ trước khi phần kia xuất hiện.'),
+        tr('Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi gài lối đá phụ.'),
       ],
       side: [
-        'Nước đã chảy tới vườn ươm. Cổng điện thờ nằm ở góc đông bắc.',
-        'Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm.',
-        'Nhấn E ở chốt để mở lối về không cần ánh sáng.',
+        tr('Nước đã chảy tới vườn ươm. Cổng điện thờ nằm ở góc đông bắc.'),
+        tr('Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm.'),
+        tr('Nhấn E ở chốt để mở lối về không cần ánh sáng.'),
       ],
       story: [
-        'Lối về đã được giữ. Lumo có điều muốn nói.',
-        'Lumo đang ở gần mầm cây trong vườn ươm.',
-        'Nhấn E ở mầm cây để nghe Lumo.',
+        tr('Lối về đã được giữ. Lumo có điều muốn nói.'),
+        tr('Lumo đang ở gần mầm cây trong vườn ươm.'),
+        tr('Nhấn E ở mầm cây để nghe Lumo.'),
       ],
       exit: [
-        'Cả vườn đã được chăm lại. Cổng điện thờ nằm ở góc đông bắc.',
-        'Đi theo vườn ươm lên bậc đá phía đông rồi rẽ lên walkway.',
-        'Tới cổng và nhấn E.',
+        tr('Cả vườn đã được chăm lại. Cổng điện thờ nằm ở góc đông bắc.'),
+        tr('Đi theo vườn ươm lên bậc đá phía đông rồi rẽ lên walkway.'),
+        tr('Tới cổng và nhấn E.'),
       ],
     };
     const choices = hints[stage];
@@ -268,13 +268,13 @@ export class SleepingGardenLevel {
 
   public showJournal(): void {
     const state = this.state;
-    const notes: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Khu vườn ngủ dưới ánh của bể tích quang.' }];
-    if (state.canopyShut) notes.push({ speaker: 'Nhinh', text: 'Khi màn che đóng, chỉ còn đèn của mình đánh thức được cây cối.' });
-    if (state.sunLatched) notes.push({ speaker: 'Lumo', text: 'Hoa Nhật nở khi có sáng và nâng thanh chắn. Chốt đá giữ được nó cả khi tắt đèn.' });
-    if (state.waterFlowing) notes.push({ speaker: 'Nhinh', text: 'Rễ Nguyệt vươn khi tối và bắc thành cầu qua mương.' });
-    if (state.returnLatched) notes.push({ speaker: 'Nhinh', text: 'Vườn ươm cần nước rồi cần một khoảng tối để nghỉ. Lối đá phụ là lối về không cần sáng.' });
-    if (state.lumoRealized) notes.push({ speaker: 'Lumo', text: 'Không phải chỗ nào cũng cần sáng hơn. Có nơi cần được ngủ.' });
-    if (notes.length === 1) notes.push({ speaker: 'Nhinh', text: 'Chưa ghi thêm manh mối nào.' });
+    const notes: DialogueLine[] = [{ speaker: 'Nhinh', text: tr('Khu vườn ngủ dưới ánh của bể tích quang.') }];
+    if (state.canopyShut) notes.push({ speaker: 'Nhinh', text: tr('Khi màn che đóng, chỉ còn đèn của mình đánh thức được cây cối.') });
+    if (state.sunLatched) notes.push({ speaker: 'Lumo', text: tr('Hoa Nhật nở khi có sáng và nâng thanh chắn. Chốt đá giữ được nó cả khi tắt đèn.') });
+    if (state.waterFlowing) notes.push({ speaker: 'Nhinh', text: tr('Rễ Nguyệt vươn khi tối và bắc thành cầu qua mương.') });
+    if (state.returnLatched) notes.push({ speaker: 'Nhinh', text: tr('Vườn ươm cần nước rồi cần một khoảng tối để nghỉ. Lối đá phụ là lối về không cần sáng.') });
+    if (state.lumoRealized) notes.push({ speaker: 'Lumo', text: tr('Không phải chỗ nào cũng cần sáng hơn. Có nơi cần được ngủ.') });
+    if (notes.length === 1) notes.push({ speaker: 'Nhinh', text: tr('Chưa ghi thêm manh mối nào.') });
     this.say(notes);
   }
 
@@ -414,12 +414,19 @@ export class SleepingGardenLevel {
   }
 
   private artKey(variant: GardenArtVariant): string | null {
-    return variant.shared ? getSharedMechanismKey(variant.file) : getLevelArtKey(6, variant.file);
+    return getGardenArtKey(variant.file, variant.shared);
   }
 
-  private placeFor(spec: GardenModuleSpec, rect: { x: number; y: number; width: number; height: number }): { x: number; y: number; origin: [number, number] } {
+  private placeFor(spec: GardenModuleSpec, rect: { x: number; y: number; width: number; height: number }, variantKey?: string): { x: number; y: number; origin: [number, number] } {
     if (spec.origin === 'topleft') return { x: rect.x, y: rect.y, origin: [0, 0] };
-    if (spec.origin === 'bottom') return { x: rect.x + rect.width / 2, y: rect.y + rect.height, origin: [0.5, 1] };
+    if (spec.origin === 'bottom') {
+      // V2's 112px extended frame keeps its original 48px pot at local x52.
+      // The practice module has no extendedRect: offset only the new art so its
+      // pot stays at world x132. Legacy fallback retains its previous placement.
+      const practiceOffset = spec.id === 'practice-moon' && variantKey === 'extended'
+        && this.artKey(spec.variants.extended)?.startsWith('garden_v2_') ? -20 : 0;
+      return { x: rect.x + rect.width / 2 + practiceOffset, y: rect.y + rect.height, origin: [0.5, 1] };
+    }
     return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, origin: [0.5, 0.5] };
   }
 
@@ -429,7 +436,7 @@ export class SleepingGardenLevel {
     const key = this.artKey(variant);
     if (!key) return null;
     const rect = variantKey === 'extended' && spec.extendedRect ? spec.extendedRect : spec.rect;
-    const place = this.placeFor(spec, rect);
+    const place = this.placeFor(spec, rect, variantKey);
     const depth = spec.floorArt ? 4 : spec.overhead ? 70 : gardenPropDepth(spec.rect.y + spec.rect.height);
     const image = this.scene.add.image(place.x, place.y, key).setOrigin(place.origin[0], place.origin[1]).setDepth(depth);
     image.setData('garden-id', spec.id);
@@ -446,7 +453,7 @@ export class SleepingGardenLevel {
     if (!key) return;
     if (image.texture.key !== key) image.setTexture(key);
     const rect = variantKey === 'extended' && spec.extendedRect ? spec.extendedRect : spec.rect;
-    const place = this.placeFor(spec, rect);
+    const place = this.placeFor(spec, rect, variantKey);
     image.setPosition(place.x, place.y);
     image.setVisible(true);
   }
@@ -537,42 +544,42 @@ export class SleepingGardenLevel {
     reg({
       id: 'l6-handle', x: GARDEN_STANDS.handle.x, y: GARDEN_STANDS.handle.y, radius: GARDEN_STANDS.handle.radius,
       getPromptBounds: () => this.images.get('handle')?.getBounds() ?? null,
-      getPrompt: () => this.canPullHandle() ? 'E · Kéo màn che bể tích quang' : null,
+      getPrompt: () => this.canPullHandle() ? tr('E · Kéo màn che bể tích quang') : null,
       isEnabled: () => this.canPullHandle(),
       onInteract: () => this.pullHandle(),
     });
     reg({
       id: 'l6-latch-west', x: GARDEN_STANDS.latchWest.x, y: GARDEN_STANDS.latchWest.y, radius: GARDEN_STANDS.latchWest.radius,
       getPromptBounds: () => this.images.get('latch-west')?.getBounds() ?? null,
-      getPrompt: () => this.canLatchWest() ? 'E · Gài chốt thanh chắn' : this.canInspectLatchWest() ? 'E · Xem chốt đá (chưa gài được)' : null,
+      getPrompt: () => this.canLatchWest() ? tr('E · Gài chốt thanh chắn') : this.canInspectLatchWest() ? tr('E · Xem chốt đá (chưa gài được)') : null,
       isEnabled: () => this.canLatchWest() || this.canInspectLatchWest(),
-      onInteract: () => { if (this.canLatchWest()) this.latchWest(); else this.say([{ speaker: 'Nhinh', text: 'Thanh chắn đang hạ nên chốt chưa khớp. Bật đèn (F) cho Hoa Nhật nâng nó lên, rồi gài chốt.' }]); },
+      onInteract: () => { if (this.canLatchWest()) this.latchWest(); else this.say([{ speaker: 'Nhinh', text: tr('Thanh chắn đang hạ nên chốt chưa khớp. Bật đèn (F) cho Hoa Nhật nâng nó lên, rồi gài chốt.') }]); },
     });
     reg({
       id: 'l6-drain', x: GARDEN_STANDS.drain.x, y: GARDEN_STANDS.drain.y, radius: GARDEN_STANDS.drain.radius,
       getPromptBounds: () => this.images.get('drain')?.getBounds() ?? null,
-      getPrompt: () => this.canOpenDrain() ? 'E · Mở cống vườn ươm' : null,
+      getPrompt: () => this.canOpenDrain() ? tr('E · Mở cống vườn ươm') : null,
       isEnabled: () => this.canOpenDrain(),
       onInteract: () => this.openDrain(),
     });
     reg({
       id: 'l6-latch-east', x: GARDEN_STANDS.latchEast.x, y: GARDEN_STANDS.latchEast.y, radius: GARDEN_STANDS.latchEast.radius,
       getPromptBounds: () => this.images.get('latch-east')?.getBounds() ?? null,
-      getPrompt: () => this.canLatchEast() ? 'E · Gài chốt lối đá phụ' : this.canInspectLatchEast() ? 'E · Xem chốt lối đá phụ (chưa gài được)' : null,
+      getPrompt: () => this.canLatchEast() ? tr('E · Gài chốt lối đá phụ') : this.canInspectLatchEast() ? tr('E · Xem chốt lối đá phụ (chưa gài được)') : null,
       isEnabled: () => this.canLatchEast() || this.canInspectLatchEast(),
-      onInteract: () => { if (this.canLatchEast()) this.latchEast(); else this.say([{ speaker: 'Nhinh', text: 'Chốt này chỉ khớp khi nước đã chảy tới vườn ươm. Mở cống trước đã.' }]); },
+      onInteract: () => { if (this.canLatchEast()) this.latchEast(); else this.say([{ speaker: 'Nhinh', text: tr('Chốt này chỉ khớp khi nước đã chảy tới vườn ươm. Mở cống trước đã.') }]); },
     });
     reg({
       id: 'l6-sprout', x: GARDEN_STANDS.sprout.x, y: GARDEN_STANDS.sprout.y, radius: GARDEN_STANDS.sprout.radius,
       getPromptBounds: () => this.images.get('sprout')?.getBounds() ?? null,
-      getPrompt: () => 'E · Ngắm mầm cây',
+      getPrompt: () => tr('E · Ngắm mầm cây'),
       isEnabled: () => true,
       onInteract: () => this.inspectSprout(),
     });
     reg({
       id: 'l6-exit', x: GARDEN_STANDS.exit.x, y: GARDEN_STANDS.exit.y, radius: GARDEN_STANDS.exit.radius,
       getPromptBounds: () => null,
-      getPrompt: () => this.exitReady() ? 'E · Qua cổng điện thờ' : 'Cổng điện thờ đang khép · chăm khu vườn trước',
+      getPrompt: () => this.exitReady() ? tr('E · Qua cổng điện thờ') : tr('Cổng điện thờ đang khép · chăm khu vườn trước'),
       isEnabled: () => true,
       onInteract: () => this.tryExit(),
     });
@@ -613,11 +620,11 @@ export class SleepingGardenLevel {
   private tryExit(): void {
     if (this.exitReady()) { this.playShadowBeat(); return; }
     const block = gardenCompletionBlock(this.state);
-    const text = block === 'canopy' ? 'Cổng còn khép. Mình phải che bể tích quang trước đã.'
-      : block === 'bar' ? 'Thanh chắn chưa được giữ. Cần gài chốt trước khi cổng mở.'
-        : block === 'drain' ? 'Vườn ươm còn thiếu nước. Mở cống rồi quay lại.'
-          : block === 'side' ? 'Chưa gài chốt lối đá phụ. Lối về cần được giữ.'
-            : 'Lumo vẫn đang đợi bên mầm cây.';
+    const text = block === 'canopy' ? tr('Cổng còn khép. Mình phải che bể tích quang trước đã.')
+      : block === 'bar' ? tr('Thanh chắn chưa được giữ. Cần gài chốt trước khi cổng mở.')
+        : block === 'drain' ? tr('Vườn ươm còn thiếu nước. Mở cống rồi quay lại.')
+          : block === 'side' ? tr('Chưa gài chốt lối đá phụ. Lối về cần được giữ.')
+            : tr('Lumo vẫn đang đợi bên mầm cây.');
     this.say([{ speaker: 'Nhinh', text }]);
   }
 
@@ -704,7 +711,7 @@ export class SleepingGardenLevel {
     this.progress.flags['l6-moon-open'] = true;
     this.save();
     SoundSystem.playMechanismLatch();
-    this.say([{ speaker: 'Nhinh', text: 'Chốt đá đã giữ thanh chắn.' }, { speaker: 'Lumo', text: 'Giờ bóng tối cũng không đóng được lối này.' }]);
+    this.say([{ speaker: 'Nhinh', text: tr('Chốt đá đã giữ thanh chắn.') }, { speaker: 'Lumo', text: tr('Giờ bóng tối cũng không đóng được lối này.') }]);
   }
 
   private openDrain(): void {

@@ -1,0 +1,79 @@
+[
+  {
+    "tag": "statue-notch-1",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/statue-notch-1-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/statue-notch-0-original.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the original statue orientation1 enlarged8x from native64x88. Image2 is approved material/identity reference, use exactly the same monument family and dark physical oval rotating plinth, carved blank stone face and worn brass rim. Preserve image1 canvas and silhouette exactly, face very NARROW EDGE-ON, only a thin stone blade visible. Do not turn narrow states into broad front view. State pin physical brass on RIGHT plinth rim as in image1. Muted cool slate-grey stone, three to five large value planes, weathered restrained moss in joints only, no speckled noise. Pixel art, crisp square native pixel clusters, under48colours, transparent outside. The oval is solid turning plinth, not cast shadow. No text, face, glyphs, glow, light, beam, lantern, character, UI, extra scenery. Match target1 orientation and registration, style only changes."
+    }
+  },
+  {
+    "tag": "statue-notch-2",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/statue-notch-2-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/statue-notch-0-original.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the original statue orientation2 enlarged8x from native64x88. Image2 is approved material/identity reference, use exactly the same monument family and dark physical oval rotating plinth, carved blank stone face and worn brass rim. Preserve image1 canvas and silhouette exactly, face BROAD viewed angled left. Do not turn narrow states into broad front view. State pin physical brass on BOTTOM plinth rim as in image1. Muted cool slate-grey stone, three to five large value planes, weathered restrained moss in joints only, no speckled noise. Pixel art, crisp square native pixel clusters, under48colours, transparent outside. The oval is solid turning plinth, not cast shadow. No text, face, glyphs, glow, light, beam, lantern, character, UI, extra scenery. Match target1 orientation and registration, style only changes."
+    }
+  },
+  {
+    "tag": "statue-notch-3",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/statue-notch-3-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/statue-notch-0-original.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit image1 only, the original statue orientation3 enlarged8x from native64x88. Image2 is approved material/identity reference, use exactly the same monument family and dark physical oval rotating plinth, carved blank stone face and worn brass rim. Preserve image1 canvas and silhouette exactly, face very NARROW EDGE-ON, only a thin stone blade visible. Do not turn narrow states into broad front view. State pin physical brass on LEFT plinth rim as in image1. Muted cool slate-grey stone, three to five large value planes, weathered restrained moss in joints only, no speckled noise. Pixel art, crisp square native pixel clusters, under48colours, transparent outside. The oval is solid turning plinth, not cast shadow. No text, face, glyphs, glow, light, beam, lantern, character, UI, extra scenery. Match target1 orientation and registration, style only changes."
+    }
+  },
+  {
+    "tag": "mirror_0",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/mirror_0-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit target image1, an enlarged8x reference of the36x48 temple pivot mirror state0; image2 is slate stone and brass palette reference only. Redraw a compact rectangular worn slate stone mirror backing/pedestal, with dark timber braces, muted brass edge and one pale silver-blue reflecting plank across it. Keep exactly same rectangular overall canvas/proportions and stone base at bottom. Mandatory plank orientation: rises diagonally from lower-left to upper-right, /, same as target1. One mirror only, not four panels. Plank reflects no landscape and emits no light, only solid pale metal material. Remove old bright yellow dots, orange light and moss noise. True pixel art designed for native36x48, large clean square pixel clusters, worn slate-grey stone, desaturated brass rim, moss only at joints, under32colours. Transparent outside actual physical shape, no background, no light, glow, beam, shadow, text, glyph, lamp, character, UI. Maintain state0 orientation exactly."
+    }
+  },
+  {
+    "tag": "mirror_1",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/mirror_1-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit target image1, an enlarged8x reference of the36x48 temple pivot mirror state1; image2 is slate stone and brass palette reference only. Redraw a compact rectangular worn slate stone mirror backing/pedestal, with dark timber braces, muted brass edge and one pale silver-blue reflecting plank across it. Keep exactly same rectangular overall canvas/proportions and stone base at bottom. Mandatory plank orientation: descends diagonally from upper-left to lower-right, backslash, same as target1. One mirror only, not four panels. Plank reflects no landscape and emits no light, only solid pale metal material. Remove old bright yellow dots, orange light and moss noise. True pixel art designed for native36x48, large clean square pixel clusters, worn slate-grey stone, desaturated brass rim, moss only at joints, under32colours. Transparent outside actual physical shape, no background, no light, glow, beam, shadow, text, glyph, lamp, character, UI. Maintain state1 orientation exactly."
+    }
+  },
+  {
+    "tag": "mirror_2",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/mirror_2-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit target image1, an enlarged8x reference of the36x48 temple pivot mirror state2; image2 is slate stone and brass palette reference only. Redraw a compact rectangular worn slate stone mirror backing/pedestal, with dark timber braces, muted brass edge and one pale silver-blue reflecting plank across it. Keep exactly same rectangular overall canvas/proportions and stone base at bottom. Mandatory plank orientation: perfectly horizontal flat plank across centre, edge-on, same as target1. One mirror only, not four panels. Plank reflects no landscape and emits no light, only solid pale metal material. Remove old bright yellow dots, orange light and moss noise. True pixel art designed for native36x48, large clean square pixel clusters, worn slate-grey stone, desaturated brass rim, moss only at joints, under32colours. Transparent outside actual physical shape, no background, no light, glow, beam, shadow, text, glyph, lamp, character, UI. Maintain state2 orientation exactly."
+    }
+  },
+  {
+    "tag": "mirror_3",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/mirror_3-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit target image1, an enlarged8x reference of the36x48 temple pivot mirror state3; image2 is slate stone and brass palette reference only. Redraw a compact rectangular worn slate stone mirror backing/pedestal, with dark timber braces, muted brass edge and one pale silver-blue reflecting plank across it. Keep exactly same rectangular overall canvas/proportions and stone base at bottom. Mandatory plank orientation: perfectly vertical upright plank through centre, edge-on, same as target1. One mirror only, not four panels. Plank reflects no landscape and emits no light, only solid pale metal material. Remove old bright yellow dots, orange light and moss noise. True pixel art designed for native36x48, large clean square pixel clusters, worn slate-grey stone, desaturated brass rim, moss only at joints, under32colours. Transparent outside actual physical shape, no background, no light, glow, beam, shadow, text, glyph, lamp, character, UI. Maintain state3 orientation exactly."
+    }
+  }
+]

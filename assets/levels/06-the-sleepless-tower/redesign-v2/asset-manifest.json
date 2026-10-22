@@ -1,0 +1,2367 @@
+{
+  "schema_version": 1,
+  "baseline_revision": "8bf1bb0241868f9908be360d6c17e3e14c14d953",
+  "art_direction_brief": "art-direction-brief.md",
+  "scope": "three visual mockups and reuse plan; planned sprites are not produced or runtime-ready",
+  "assets": [
+    {
+      "id": "tower-v2-prism-dark",
+      "role": "new coherent Level 06 art, state prism-dark",
+      "path": "sprites/prism-dark.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          48,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/shared/beam-splitter/prism-dark.png",
+        "sha256": "2a59f03be8b52edb44d396c2f5fd7e3070aad020ff6742244155409aa912a92e",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-prism-receiving",
+      "role": "new coherent Level 06 art, state prism-receiving",
+      "path": "sprites/prism-receiving.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          48,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/shared/beam-splitter/prism-receiving.png",
+        "sha256": "df1eda1961f91bb0e8318624371da69865ad6bbb42c6bff8319631198dbffdef",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-G0-to-A",
+      "role": "new coherent Level 06 art, state G0-to-A",
+      "path": "sprites/G0-to-A.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/G0-to-A.png",
+        "sha256": "9997d0a90a13694cf150dfd322674829f1eac2d11d9e9762502419406e5d101f",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-G0-to-B",
+      "role": "new coherent Level 06 art, state G0-to-B",
+      "path": "sprites/G0-to-B.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/G0-to-B.png",
+        "sha256": "db1ef431197417176ab0de01689a95a7ad3fadf670fb68ad65eb9f8397c285d9",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-G0-to-splitter",
+      "role": "new coherent Level 06 art, state G0-to-splitter",
+      "path": "sprites/G0-to-splitter.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/G0-to-splitter.png",
+        "sha256": "1d11004719987acbc30a79bab69bd83030c0ac3f4bda8eeab11d423b7bcc74d2",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-ring-A-off",
+      "role": "new coherent Level 06 art, state ring-A-off",
+      "path": "sprites/ring-A-off.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/ring-A-off.png",
+        "sha256": "2eebfe7bb30e18ae168ae8399a7680454c987dac782aba0a1fce56b4ebb6fde1",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-ring-A-on",
+      "role": "new coherent Level 06 art, state ring-A-on",
+      "path": "sprites/ring-A-on.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/ring-A-on.png",
+        "sha256": "f85800512c0a6933f5d27b800e9d278be1a1c76bd37b15e0e05cf55201134591",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-ring-B-off",
+      "role": "new coherent Level 06 art, state ring-B-off",
+      "path": "sprites/ring-B-off.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/ring-B-off.png",
+        "sha256": "2c469fba4a2157dd012cbefbfb7de6a691decdc7c654458f2d1ff6dca58a7666",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-ring-B-on",
+      "role": "new coherent Level 06 art, state ring-B-on",
+      "path": "sprites/ring-B-on.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/ring-B-on.png",
+        "sha256": "ad3d345b6579646dee42dc1623111d3084e3523f7185173288fa242a0889cdb9",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-ring-C-off",
+      "role": "new coherent Level 06 art, state ring-C-off",
+      "path": "sprites/ring-C-off.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/ring-C-off.png",
+        "sha256": "a64eb68ef88fe603c1358a052dc610c9a4a9a871c48ace4bdff759e7c3d8a39b",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-ring-C-on",
+      "role": "new coherent Level 06 art, state ring-C-on",
+      "path": "sprites/ring-C-on.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/ring-C-on.png",
+        "sha256": "d16d34435ab739350746b89e5ef3de2ace5b92c4e4fdad0edf5c7026d8c3eb46",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-waiting-for-live-circuits",
+      "role": "new coherent Level 06 art, state waiting-for-live-circuits",
+      "path": "sprites/waiting-for-live-circuits.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          104,
+          28
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/waiting-for-live-circuits.png",
+        "sha256": "28f6ee5159113926ec9d7e69f6c206b401533930b45cf1d2a641da0881ab48f1",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-all-currently-powered",
+      "role": "new coherent Level 06 art, state all-currently-powered",
+      "path": "sprites/all-currently-powered.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          104,
+          28
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/all-currently-powered.png",
+        "sha256": "446a8f1c701a7243b04b0489d9d7180ba4b28d94d418d0664cb26c193f30849d",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-return-flow-waiting",
+      "role": "new coherent Level 06 art, state return-flow-waiting",
+      "path": "sprites/return-flow-waiting.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/return-flow-waiting.png",
+        "sha256": "0fb8924491d1cae8559ad1830934b82c8018dc7ddea812e433a252356b3f9ec9",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-return-flow-held",
+      "role": "new coherent Level 06 art, state return-flow-held",
+      "path": "sprites/return-flow-held.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/return-flow-held.png",
+        "sha256": "de63ecfdd1ec59165c51b0be36144ef63a3bd149ff0514d40a0400e48441ec64",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-chamber-closed",
+      "role": "new coherent Level 06 art, state chamber-closed",
+      "path": "sprites/chamber-closed.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          80,
+          104
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/chamber-closed.png",
+        "sha256": "45d1eb28b38a4b2a0d4e7d0b13271254da436ec71c09b5319b905d093ab0e396",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-chamber-open",
+      "role": "new coherent Level 06 art, state chamber-open",
+      "path": "sprites/chamber-open.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          80,
+          104
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/chamber-open.png",
+        "sha256": "3c2c3a5a4f859ec52e32e6e0372d5ef96ee241f00184a21a4909308d9131c3bf",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-chamber-grille-overlay",
+      "role": "new coherent Level 06 art, state chamber-grille-overlay",
+      "path": "sprites/chamber-grille-overlay.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          80,
+          104
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/chamber-grille-overlay.png",
+        "sha256": "90c7bb7e4d0f1d5e5f9b4bf42ff27edfeed465abf89942add16175043ce82e8c",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-hope-collected",
+      "role": "new coherent Level 06 art, state hope-collected",
+      "path": "sprites/hope-collected.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          41,
+          72
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/hope-collected.png",
+        "sha256": "561c5258b525b44752a39c8cb1ab659cf142b9771c43f7654dd4327ece227c31",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-fountain-up",
+      "role": "new coherent Level 06 art, state fountain-up",
+      "path": "sprites/fountain-up.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          56,
+          112
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/fountain-up.png",
+        "sha256": "46d4d723e40dcba53fe02d77d8a1ed58e6f9a3ce9693a87d7b43df7671c0f8f9",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-fountain-down",
+      "role": "new coherent Level 06 art, state fountain-down",
+      "path": "sprites/fountain-down.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          56,
+          112
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/fountain-down.png",
+        "sha256": "46f0334fa9eb41d2be4021e2233413fe99bd34cc1ee7a30a7d1b1d6df2d569f4",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-tower-intake",
+      "role": "new coherent Level 06 art, state tower-intake",
+      "path": "sprites/tower-intake.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          112,
+          32
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/tower-intake.png",
+        "sha256": "2e1f1a58eb5d8e878c555e41c239d3effcf8a50e41e67632c5bda521ece24373",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-tower-outflow",
+      "role": "new coherent Level 06 art, state tower-outflow",
+      "path": "sprites/tower-outflow.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          112,
+          32
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/tower-outflow.png",
+        "sha256": "28528e112d388ffa173572a1dbbf06056b840e8a4cd077dea1f60df6028d52d5",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-tower-lamp-white",
+      "role": "new coherent Level 06 art, state tower-lamp-white",
+      "path": "sprites/tower-lamp-white.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          72,
+          72
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/tower-lamp-white.png",
+        "sha256": "809f1d72acb5c6bb3c37f55433e0c7454f46606deeb796fe979850c63b162667",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-tower-lamp-dim",
+      "role": "new coherent Level 06 art, state tower-lamp-dim",
+      "path": "sprites/tower-lamp-dim.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          72,
+          72
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/tower-lamp-dim.png",
+        "sha256": "e51f14067015b5f995b06c86b328f01149da0773bf520192b39a3db6906659af",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-record-compartment-closed",
+      "role": "new coherent Level 06 art, state record-compartment-closed",
+      "path": "sprites/record-compartment-closed.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          88,
+          32
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/record-compartment-closed.png",
+        "sha256": "cc16cec4372b6282a5d1e5af1c1fedc661fef0ef1d3a32f97d469f3bbf0b155c",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-record-compartment-open",
+      "role": "new coherent Level 06 art, state record-compartment-open",
+      "path": "sprites/record-compartment-open.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          88,
+          32
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/record-compartment-open.png",
+        "sha256": "482d98d9209ce53f697aef3186ae54e508d6eadb73f0070ad60a4d26dabc8ee0",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-voice-record-panel",
+      "role": "new coherent Level 06 art, state voice-record-panel",
+      "path": "sprites/voice-record-panel.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          160,
+          72
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/voice-record-panel.png",
+        "sha256": "15d6dec640219c9e31427724d099fc10c762fc346be644d3bb35028dad5d6a8e",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-tower-scene-base",
+      "role": "new coherent Level 06 art, state tower-scene-base",
+      "path": "sprites/tower-scene-base.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          640,
+          360
+        ],
+        "alpha": false,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png",
+        "sha256": "0622d77eb66231dc34c17cf8835aa07c43dc6faa5985590378203c21a2ed433d",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "tower-v2-window-faded-red-scarf",
+      "role": "new coherent Level 06 art, state window-faded-red-scarf",
+      "path": "sprites/window-faded-red-scarf.png",
+      "status": "planned-not-produced",
+      "technical": {
+        "dimensions": [
+          112,
+          112
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing layout contract; validate at integration"
+      },
+      "visual_locks": [
+        "palette roles",
+        "three-quarter view",
+        "stone/brass materials",
+        "ground and optical anchors",
+        "state silhouette"
+      ],
+      "source": {
+        "kind": "redesign-of-project-asset",
+        "path": "assets/levels/06-the-sleepless-tower/sprites/window-faded-red-scarf.png",
+        "sha256": "3ad3283b518749e32b8ffb5dcd682db019ccfd509cde5cb83302a7cb146d3f6c",
+        "url_or_tool": "image_gen.imagegen planned",
+        "license": "project source terms retained; no new license asserted",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": false,
+        "approved_by": null
+      }
+    },
+    {
+      "id": "reuse-source-lit",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-lit.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          44
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-lit.png",
+        "sha256": "95f67d1a377815b31018b76930d8f6b12ad357ff22ecdf8a9a35474ca8b13397",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          254
+        ]
+      }
+    },
+    {
+      "id": "reuse-source-empty",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-empty.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          44
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-empty.png",
+        "sha256": "d052e343890304dc2b35a3a22f3da32c0fe79aebd3e2d84c33a6adb505fcec47",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-source-off-source",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-off-source.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          44
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/source-off-source.png",
+        "sha256": "3d6e98fe3bfd4b892f87a5a5e32e72096a8d502c0d98faa21bfa93371e8fb77b",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-receiver-off",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/receiver-off.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          24,
+          24
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/receiver-off.png",
+        "sha256": "98c81a4fe05df90cee71e421e7a28b72e392442ce6bffd68753ba20eab2e05f1",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-receiver-on",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/receiver-on.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          24,
+          24
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/receiver-on.png",
+        "sha256": "de2c00e4c3248e4d15cdef2f1e82095a01339c4cc5d7854a2ee351ef9742b16c",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-G1-slash",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-slash.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-slash.png",
+        "sha256": "4d111d6cd9c689255c6bc4a6c75a3379021a7df5d11dd56fc556496d6930c77a",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-G1-backslash",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-backslash.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-backslash.png",
+        "sha256": "22b443f35b77cda77c362e06d05c4f8de56d19b4634cdf51d5c75c3200195b32",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-G1-horizontal",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-horizontal.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-1-horizontal.png",
+        "sha256": "d6b2614a8c14f9d6e99c6fe3a3af9cff15bd7f2716d57dd42c732938a3d1c444",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-G2-slash",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-slash.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-slash.png",
+        "sha256": "a6377eb5849da38b8bd8b06cce908239cd54913593a407e7aef518a23dad0d5f",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-G2-backslash",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-backslash.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-backslash.png",
+        "sha256": "7807040ecbbff10eb7b3f51a233fd7e1f01686765cc47303d0bee33dc3c98b5a",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-G2-horizontal",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-horizontal.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          32,
+          40
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/04-shattered-moonlit-creek/sprites/mechanisms/mirror-2-horizontal.png",
+        "sha256": "90f914be6fe1a62481770af7060535c907c05be28176743c07f568d647141397",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-call-idle",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/call-idle.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/call-idle.png",
+        "sha256": "bb4b216a1c43b55f99b50328b31838b310a2a588db22a86242bdda970e437cc6",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-call-sent",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/call-sent.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/call-sent.png",
+        "sha256": "0115746994f088a0cef095517a79d75d70cba9471553f274ccd662c36e3a4f95",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-call-arrived",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/call-arrived.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          40,
+          48
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/call-arrived.png",
+        "sha256": "9c228d2609f3719fe480b223afcf8a488a4fb00404126b0d57ef53968568e7c4",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-pressure-empty",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/pressure-empty.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          44,
+          28
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/pressure-empty.png",
+        "sha256": "a867013f68d4826547fe1e8cc8df4e6315369968c75acc45920541d16276bdec",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-pressure-occupied",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/pressure-occupied.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          44,
+          28
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/pressure-occupied.png",
+        "sha256": "8ec58d464ba9b2139be431580808096df09580723ccb5aa3866017fd66c99d13",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-tube-straight",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/tube-straight.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          64,
+          32
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/tube-straight.png",
+        "sha256": "2112a50ac4dc721bddb5c12662e262cb6386982a1168387f8126e73008f64ecf",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-tube-mouth",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/tube-mouth.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          64,
+          32
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/tube-mouth.png",
+        "sha256": "88987b299ab9862f6afce4d3ffe3687cc96c03dc0f53bb0507fcefdc4c002110",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-tube-elbow",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/levels/05-a-path-for-two/sprites/tube-elbow.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          64,
+          32
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/levels/05-a-path-for-two/sprites/tube-elbow.png",
+        "sha256": "256eccfd055ea387981f9a35c0aeb9c83891b72c460de41d24fae3df04e95291",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-hope",
+      "role": "exact existing asset reuse candidate",
+      "path": "src/assets/crystal_hope.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          41,
+          72
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "src/assets/crystal_hope.png",
+        "sha256": "646fd7290f50dfdcfb14c6d29625a285ac4050dd2bb16bc87f9b68e017fef3df",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          253
+        ]
+      }
+    },
+    {
+      "id": "reuse-lumo",
+      "role": "exact existing asset reuse candidate",
+      "path": "src/assets/lumo_0.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          24,
+          24
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "src/assets/lumo_0.png",
+        "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "PASS",
+        "alpha_extrema": [
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "id": "reuse-nhinh",
+      "role": "exact existing asset reuse candidate",
+      "path": "assets/character/nhinh_downright_lantern_off_0.png",
+      "status": "selected-for-reuse-not-integrated",
+      "technical": {
+        "dimensions": [
+          36,
+          42
+        ],
+        "alpha": true,
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "preserve existing ground/optical registration"
+      },
+      "visual_locks": [
+        "original pixels",
+        "original aspect",
+        "original character identity if applicable"
+      ],
+      "source": {
+        "kind": "existing-project-asset",
+        "path": "assets/character/nhinh_downright_lantern_off_0.png",
+        "sha256": "b720c434ed3d9c33eb8af659f60f1d6f4ae9143fb26a1a7fe00f4fb2146373c5",
+        "creator": "see source level manifest",
+        "license": "existing project provenance; not independently re-cleared",
+        "prompt_or_source_record": "source level art-notes.md / generation manifest"
+      },
+      "verification": {
+        "native_scale_reviewed": false,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "source_hash_current": true,
+        "checked_scope": "decode, dimensions, alpha channel, actual transparency, nonempty content and source hash; production registration not checked",
+        "strict_fully_opaque_pixel_probe": "FAIL",
+        "alpha_extrema": [
+          0,
+          254
+        ]
+      }
+    },
+    {
+      "id": "01-entry",
+      "role": "offline scene mockup",
+      "path": "previews/01-entry-640x360.png",
+      "status": "visual-target-pending-user-review",
+      "technical": {
+        "dimensions": [
+          640,
+          360
+        ],
+        "alpha": false,
+        "anchor": "full-frame",
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "none; visual study only",
+        "max_colors": 128,
+        "palette": "palette.json",
+        "mode": "P",
+        "dither": "NONE"
+      },
+      "source": {
+        "kind": "generated-and-normalized",
+        "url_or_tool": "image_gen.imagegen",
+        "backend_model": "not exposed",
+        "path": "sources/01-entry.png",
+        "sha256": "e06bfcc5ae128920ccdc67c75f175d86dac6e3abec2bedc7d76c06e8a548d801",
+        "created_at": "2026-10-21",
+        "license": "generated project study; no new license or rights-clearance claim",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "reviewed_scope": "offline composition and state read only"
+      },
+      "sha256": "2480522b8ae4204960b300de474f57e2e63581e694ce42157d80766e9725f7ff"
+    },
+    {
+      "id": "02-powered",
+      "role": "offline scene mockup",
+      "path": "previews/02-powered-640x360.png",
+      "status": "visual-target-pending-user-review",
+      "technical": {
+        "dimensions": [
+          640,
+          360
+        ],
+        "alpha": false,
+        "anchor": "full-frame",
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "none; visual study only",
+        "max_colors": 128,
+        "palette": "palette.json",
+        "mode": "P",
+        "dither": "NONE"
+      },
+      "source": {
+        "kind": "generated-and-normalized",
+        "url_or_tool": "image_gen.imagegen",
+        "backend_model": "not exposed",
+        "path": "sources/02-powered.png",
+        "sha256": "bf4ef30746b19b5d6c71257f1b8b6859931e727f503f5ce2605408e580dfdaaf",
+        "created_at": "2026-10-21",
+        "license": "generated project study; no new license or rights-clearance claim",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "reviewed_scope": "offline composition and state read only"
+      },
+      "sha256": "74190ab0c0fcd6fe42b6f979f929a38b80347dfe998bc313608c645aff6fc3dd"
+    },
+    {
+      "id": "03-return-flow",
+      "role": "offline scene mockup",
+      "path": "previews/03-return-flow-640x360.png",
+      "status": "visual-target-pending-user-review",
+      "technical": {
+        "dimensions": [
+          640,
+          360
+        ],
+        "alpha": false,
+        "anchor": "full-frame",
+        "frames": 1,
+        "filtering": "nearest",
+        "collision_role": "none; visual study only",
+        "max_colors": 128,
+        "palette": "palette.json",
+        "mode": "P",
+        "dither": "NONE"
+      },
+      "source": {
+        "kind": "generated-and-normalized",
+        "url_or_tool": "image_gen.imagegen",
+        "backend_model": "not exposed",
+        "path": "sources/03-return-flow.png",
+        "sha256": "a8677fd0cc8b647abdfeab067a9c0dbd593e233a07ff7c2469d9482ca14c94c9",
+        "created_at": "2026-10-21",
+        "license": "generated project study; no new license or rights-clearance claim",
+        "prompt_or_source_record": "generation-manifest.json"
+      },
+      "verification": {
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": false,
+        "technical_checks_passed": true,
+        "approved_by": null,
+        "reviewed_scope": "offline composition and state read only"
+      },
+      "sha256": "81688188eff85b78f512f6f59314c9974c16db74ab2c6e561bbb82a14ec81bf7"
+    }
+  ]
+}

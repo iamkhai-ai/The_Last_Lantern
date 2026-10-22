@@ -1,3 +1,4 @@
+import { tr } from '../i18n/catalog.ts';
 import Phaser from 'phaser';
 import { DIALOGUE_DATA } from '../data/dialogue';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -93,7 +94,7 @@ export class RuinsBalancePuzzle {
       x: 260,
       y: 165,
       radius: 44,
-      getPrompt: () => '[E] Đọc bia cổ Cân Bằng Sáng & Tối',
+      getPrompt: () => tr('[E] Đọc bia cổ Cân Bằng Sáng & Tối'),
       onInteract: () => {
         this.dialogueSystem.startDialogue(DIALOGUE_DATA.ruins_inscription);
       },
@@ -132,9 +133,9 @@ export class RuinsBalancePuzzle {
         isEnabled: () => this.questSystem.progress.ruinsLockSequence < 3,
         getPrompt: () => {
           if (idx < this.questSystem.progress.ruinsLockSequence) {
-            return `${def.labelVi} (Đã mở khóa)`;
+            return tr('{label} (Đã mở khóa)', { label: tr(def.labelVi) });
           }
-          return `[E] Kích hoạt ${def.labelVi}`;
+          return tr('[E] Kích hoạt {label}', { label: tr(def.labelVi) });
         },
         onInteract: () => this.handleLockInteract(node),
       });
@@ -154,7 +155,7 @@ export class RuinsBalancePuzzle {
     if (seq >= 3) return;
 
     if (node.index < seq) {
-      this.hud.showToast(`${node.labelVi} đã được mở khóa.`);
+      this.hud.showToast(tr('{label} đã được mở khóa.', { label: tr(node.labelVi) }));
       return;
     }
 
@@ -164,7 +165,7 @@ export class RuinsBalancePuzzle {
       this.refreshLockTextures();
       SoundSystem.playPuzzleError();
       this.hud.showToast(
-        'Sai thứ tự khóa! Hãy kích hoạt lần lượt: Khóa Nhật I -> Khóa Nguyệt II -> Khóa Nhật III.'
+        tr('Sai thứ tự khóa! Hãy kích hoạt lần lượt: Khóa Nhật I -> Khóa Nguyệt II -> Khóa Nhật III.')
       );
       return;
     }
@@ -173,9 +174,9 @@ export class RuinsBalancePuzzle {
     if (this.lanternSystem.lanternOn !== node.requiresLanternOn) {
       SoundSystem.playPuzzleError();
       if (node.requiresLanternOn) {
-        this.hud.showToast('Khóa Mặt Trời cần ánh sáng! Hãy nhấn [F] BẬT đèn lồng rồi thử lại.');
+        this.hud.showToast(tr('Khóa Mặt Trời cần ánh sáng! Hãy nhấn [F] BẬT đèn lồng rồi thử lại.'));
       } else {
-        this.hud.showToast('Khóa Mặt Trăng chỉ mở trong bóng tối! Hãy nhấn [F] TẮT đèn lồng rồi thử lại.');
+        this.hud.showToast(tr('Khóa Mặt Trăng chỉ mở trong bóng tối! Hãy nhấn [F] TẮT đèn lồng rồi thử lại.'));
       }
       return;
     }
@@ -194,11 +195,11 @@ export class RuinsBalancePuzzle {
     if (this.questSystem.progress.ruinsLockSequence === 3) {
       this.questSystem.save();
       SoundSystem.playPuzzleSolved();
-      this.hud.showToast('Ba khóa Cân Bằng đã mở! Một hình bóng cổ xưa xuất hiện nơi điện thờ...');
+      this.hud.showToast(tr('Ba khóa Cân Bằng đã mở! Một hình bóng cổ xưa xuất hiện nơi điện thờ...'));
       this.spawnShadow();
     } else {
       this.hud.showToast(
-        `Đã mở ${node.labelVi} (${this.questSystem.progress.ruinsLockSequence}/3)!`
+        tr('Đã mở {label} ({count}/3)!', { label: tr(node.labelVi), count: this.questSystem.progress.ruinsLockSequence })
       );
     }
   }
@@ -225,7 +226,7 @@ export class RuinsBalancePuzzle {
       getPromptBounds: () => this.shadowSprite?.getBounds() ?? null,
       radius: 52,
       isEnabled: () => !this.questSystem.progress.shadowSeen,
-      getPrompt: () => '[E] Lắng nghe Hình Bóng (The Shadow)',
+      getPrompt: () => tr('[E] Lắng nghe Hình Bóng (The Shadow)'),
       onInteract: () => {
         this.dialogueSystem.startDialogue(DIALOGUE_DATA.ruins_shadow_encounter, () => {
           this.questSystem.progress.shadowSeen = true;
@@ -271,14 +272,14 @@ export class RuinsBalancePuzzle {
       isEnabled: () =>
         this.questSystem.progress.shadowSeen &&
         !this.questSystem.progress.crystals.balance,
-      getPrompt: () => '[E] Thu nhận Tinh thể Cân Bằng (Tím)',
+      getPrompt: () => tr('[E] Thu nhận Tinh thể Cân Bằng (Tím)'),
       onInteract: () => {
         if (!this.questSystem.collectCrystal('balance')) return;
         SoundSystem.playCrystalPickup();
         this.effectsSystem.spawnBurst(366, 114, 0xd28cff, 26);
         this.crystalSprite?.destroy();
         this.crystalSprite = undefined;
-        this.hud.showToast('Đã thu thập đủ 3/3 Tinh thể! Hãy trở về Cây Mẹ!');
+        this.hud.showToast(tr('Đã thu thập đủ 3/3 Tinh thể! Hãy trở về Cây Mẹ!'));
         this.dialogueSystem.startDialogue(DIALOGUE_DATA.ruins_crystal_balance);
       },
     });

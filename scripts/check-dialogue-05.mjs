@@ -43,7 +43,10 @@ function constant(name) {
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
   return new Function(`"use strict";\n${js}\nreturn __value;`)();
 }
+const IDENTITY_TR = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text);
+
 function compile(name, parameters, symbols) {
+  symbols = { tr: IDENTITY_TR, ...symbols };
   const names = Object.keys(symbols);
   const js = ts.transpileModule(`const __unit = function (${parameters.join(', ')}) {\n${methodBody(name)}\n};`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;

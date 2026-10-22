@@ -1,0 +1,7903 @@
+{
+  "result": "PASS",
+  "method": "Seven isolated save fixtures rendered by Phaser in Chromium; actual scene textures, PNG dimensions, bounds, and visible state keys recorded. This is not a full playthrough.",
+  "source_and_sprite_sha256": {
+    "src/art/CampaignArt.ts": "3106f015fe0124faa71c754ab4265354176e8c866457bdd7a239c0dab0b1b036",
+    "src/levels/RuinsOfTwoHalvesLevel.ts": "99c699556b6e9d05223b53e5c3a01f0fd80d865ad3a34314f5b99d4184500384",
+    "src/data/ruinsOfTwoHalvesLayout.ts": "aa6eae063650f1371e7f8ad2a2b832b88d8d70142268a6e13ef9e18b3a5dd2e1",
+    "scripts/inspect-level08-art.cjs": "61fea62f8eb6f33231bf59a7928daeb04043ce184c637896aa2bf1cad1b6e9a4",
+    "docs/scenario/08-ruins-of-two-halves.md": "48e0f441e49fc67f796d39dcb129ed95c3e9bd41120439131c52e10f86074a62",
+    "docs/scenario-v2/08-ruins-of-two-halves.md": "f501e78480737da3671bceff512254402049fe48c0798187aa31e2a6f79dd8c3",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/art-redesign-brief.txt": "28777afc8b6928e2ec9957a868730afb01d694955c806e385419dfe8847460b3",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/beacon_stone.png": "e38846bd98af4163d9f3d2887125506d8cdb3d049bf22a93af151252bb7db17c",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/confirmation-latched.png": "f2f1fbfe1ae7f554e5e2425bb09e498d7abe638de9f8142b003db8ae07681c67",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/confirmation-ready.png": "c2240fb7916b19c9bd1ca6b32766df984dfea6306c809e500f699dd1402d4b8c",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/confirmation-waiting.png": "3b6829fe34d882a6b5f1cce3c02f260e23f335a5d695b004bab66846869fbad6",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/fixed-three-route-splitter-off.png": "d22b17c8cd526dcadd0137e7a4145d67d4ff4fba6fce5b6d4d4496641215fd43",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/fixed-three-route-splitter-on.png": "813468a126c29b319720f67ce0b03168e6af0c7b9c1474d2e6827ca0e9f4d17f",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/inscription-under-statue.png": "0e21e732f0d29278d46936359875402d49e21842b92d1d41f27a674b732c06e9",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-moon-covered.png": "7ba0306fda953dfd34b39d18d012490ffe3e4588989d4bff52027ff73923cc0a",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-moon-lit.png": "541c3e91f7980963cc67c70fc296e94a701170feff1aec90418d07fce8bbeac1",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-sun-off.png": "05c03a048f3cff5d4e648ae8736912a95467968bb9388a357c10de13593da047",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-sun-on.png": "0e0264059e28652bea17be4c51782f5559cb68d5f34cd78ccb0c7960d2b3d84f",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_0.png": "778e613a8427f02086acfaf5c47e155299fc3cb743a571d4eb22da7489c897a6",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_1.png": "64a2659a1ce57ecdb2b23773e3896232f5365950b69fa7a4568c72cd088bd8f9",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_2.png": "68d0646aa206348a700474bf7262476758d192e1d49a8a47012b10990df5bcb1",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_3.png": "fbd003dd4570875adba84a0fe2fe2b58f1f37a1a50fe26cd457a5f5f8e876cda",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/ruins_altar.png": "e50e5b0a38c083fc526337c359e7683d97b5f68a664a4d747d4034f72d45eda7",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/sanctuary-door-closed.png": "9c3fcb13ad85180126d21be207ccac11b42e16ed1c442600bfc3fa07e08eddb6",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/sanctuary-door-open.png": "a858a65d9c35acd1a0b7c9743307fb0ce2dc54c12013467c06d127980a8fd49e",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/seedling-curtain-closed.png": "f8cc627c6fbf29adfb0c2d8c32497b1dec0e77d9f305b24713996194396c2cf7",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/seedling-curtain-open.png": "7fca240028d7bf0a4f53d8b1e7352cdbc49eb890dc2a42cec2c28ce02896e102",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-0.png": "33d3aa018db9043f3e8df9e9c132770b30c47f2f96cf327a1ffc6d58e482ab4c",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-1.png": "567772286b150a5aa6ab3c0e0ac96b110ca4d532d29f2b092c88d65257b4438f",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-2.png": "8cf8d9f7aad69b3b7bb2f22609c8608f42145f5337b69c66770cd8cb28b03f2b",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-3.png": "e93072743423c3779a100906ed5399eb48c5501246a2b9a8aaf52099d555eedc",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/temple-scene-base.png": "a1fa7c721ca4e7c9a2f1556169d1edc27c5dbb5426ee9cbb6439312605c7598c",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-0.png": "3960366d6e5264142ccba0a5dc7d460f18611fca45630bd247fdd535c401567f",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-1.png": "87142e388b1a467fcc82ebb9ac4dc187881db83fe47e0f8fec4a3e6c81cf8ac0",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-2.png": "5ef5b2d3760be41da4e18b35e7b9bb614cd0a7ea0cc8fb85958bc3814c9a14b6",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-3.png": "2d6e88d45c1a11a99df8d60799a7e18cacaf746e7d18ac0733d48bb00f559ae2",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-moon-covered.png": "0a608a9d4fa29a99144bb316fed2ac52897ec0ea91a38baa2ecd9cb9dc13eedc",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-moon-lit.png": "425220c313f7eefb1f1dfd4bd74f3677102ae2939ec6e746e8281a472c20b288",
+    "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-pedestal.png": "6147c1d1ce118b70612b3d4828df07fdf1ac715466e67fc3e578f50c3414be48"
+  },
+  "production_manifest_sha256": "c00f661eee5e10a98485c32035de8078b39c4feb1c90895ab382b272edae01d3",
+  "protected_shared_art_sha256": {
+    "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-0.png": "6d139933c5593cfc82b7d5985e22241e37b9bcb71acf49042fcb0e2d63f31456",
+    "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-1.png": "d98d47335ec75467c9be683ce0cbc454ddf2ea793c473c4f4f1aa44498651b37",
+    "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-2.png": "dba6b1d3bcc27366a81473fe13a02c00fea50e8bca607d2326fb5d0aca27b5ea",
+    "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-3.png": "89045e43815e5d7922516d28eba31e1b0f54d3379ba826eac2068ae600e37ed9",
+    "assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png": "99223b9fdbaff1e4a8636d8334fd57e7f10859b5b77cd0576c7905c2f588aaea",
+    "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png": "259a365f6705ca9868e42b2aefde9a9985ef0c1d86aacf7da723fc781b865649",
+    "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png": "307c7d33a2a506e196da8b54277c5277f2fedf6537c84ecdc3db3c02fa2050d5",
+    "assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png": "e9bd74696f45da069b0ff079b0be177e0052fbb546bad1f11145ef240f3547e1",
+    "assets/levels/shared/characters/the-shadow/sprites/faded-red-scarf-reuse.png": "4d376c5c57df9f9aee651a71bce7eca5b95ae062bfac0e4c6ee288367fb0f863",
+    "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png": "8de5cfae38cf3e842c58671a9fef8575c152b97769d629f9dfb03e7b6de734cc",
+    "assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png": "36d9c6caa12f24ae804f5e61d5ca39f8d4672be61f1d99efd3da30d6a024b350",
+    "assets/levels/shared/characters/the-shadow/sprites/observatory-dawn-scene-base.png": "70679eaf38280540d3104475f7a97ac80aae109adb3ea7b1db46181bd29f2f96",
+    "assets/levels/shared/characters/the-shadow/sprites/observatory-memory-scene-base.png": "6e97f5716f1cde98f3fd7223ac633084d0ae4e1a183b44e95a923b3d55733533",
+    "assets/levels/shared/characters/the-shadow/sprites/shielding.png": "a585e485dd8e5e8ff0ac9ecd14242259acab707d5ce4a0d9a32e438e49477c68",
+    "assets/levels/shared/characters/the-shadow/sprites/stillness.png": "6411f867cb7435d3e3c8cd70c770006a552a26fbec2beaf583ea16d58bf22eda",
+    "assets/levels/shared/characters/the-shadow/sprites/turn.png": "cfd55acdef1eace74bc243687aa4cd7932eaa3ead91dea388e537d982aa71169",
+    "assets/levels/shared/characters/the-shadow/sprites/waiting.png": "e2204188559ce123791ad0520076dc42866523f4ad4fb9c350b259af2e6a0e75",
+    "assets/levels/shared/characters/the-shadow/sprites/walk-right.png": "0b37b3505135e9721382cdd9f8f41f5b0ff0e7324a4eb9afcd33b0871ed968c6",
+    "assets/levels/shared/mechanisms/mirror-1-backslash.png": "7db722acd743a3e6615ae0c7601541a68194c70aff9d35e6d56ab952de611110",
+    "assets/levels/shared/mechanisms/mirror-1-horizontal.png": "8c72f89f7ed228cf3861059e25c7790004df65fe33493361dafe4e15146b2048",
+    "assets/levels/shared/mechanisms/mirror-1-slash.png": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395",
+    "assets/levels/shared/mechanisms/mirror-2-backslash.png": "a11145f3f2a3e9a2b7d96f7ab35113a7c6beb08559242b8fe69927fb63049410",
+    "assets/levels/shared/mechanisms/mirror-2-horizontal.png": "25793954a5b4449979c1465b246ea787b1b0f3b0480e0509a57f75a9db5a4cd6",
+    "assets/levels/shared/mechanisms/mirror-2-slash.png": "e2cbfe3f0e3590197798d9c7d8b74f529c93a9fca37061aec68b393d2df93d85",
+    "assets/levels/shared/mechanisms/mirror-3-backslash.png": "7fff92c447e63d959840ead7065892d3dfe841ea5ea11ee5a67da94216c92899",
+    "assets/levels/shared/mechanisms/mirror-3-horizontal.png": "c001fd35f47f9fda19bbf63b7ddbb3cdc87f01fec372edd16514dcc56865f3ea",
+    "assets/levels/shared/mechanisms/mirror-3-slash.png": "c81a9ef92a5705c7f299b9d899a044f4e97a5b5a5e205d81eb164cd89360bef2"
+  },
+  "decal_authoring_composite": {
+    "file": "previews/decal-placement-authoring-640x360.png",
+    "center": {
+      "x": 320,
+      "y": 222
+    },
+    "source": "untouched HUD-free Phaser render plus the asset-only decal for placement review"
+  },
+  "assertions": [
+    "local opaque backdrop and no procedural floor/masonry overlay",
+    "all four statue orientations",
+    "entry plank mirrors and solved diagonal mirrors",
+    "lamp on/off and Sun/Moon lock state derivation",
+    "confirmation waiting/ready/latched",
+    "door and seedling curtain closed/open",
+    "shared Shadow texture keys",
+    "asset-only inscription decal size, 32-texture registration and inactive gameplay state; separate authoring placement composite at (320,222)",
+    "legacy local-first resolver fallbacks",
+    "no browser/page/PNG load errors"
+  ],
+  "studies": [
+    {
+      "id": "01-entry-planks-waiting",
+      "fixture": {
+        "id": "01-entry-planks-waiting",
+        "flags": {
+          "intro-7": true,
+          "intro-6": true,
+          "l7-practice-seen": true,
+          "l7-two-suns": true,
+          "l7-shadow-covers": true
+        },
+        "counters": {
+          "statue": 1,
+          "ruins-left": 3,
+          "ruins-right": 2,
+          "practice": 0
+        },
+        "lanternOn": true
+      },
+      "status": "PASS",
+      "player": {
+        "x": 320,
+        "y": 286
+      },
+      "lanternOn": true,
+      "puzzle": {
+        "statue": 1,
+        "lightActive": false,
+        "leftLit": false,
+        "rightLit": false,
+        "moonDark": true,
+        "sunsLit": 0,
+        "confirmReady": false
+      },
+      "flags": {
+        "latched": false,
+        "curtainShut": false
+      },
+      "registered": [
+        "ruins_v2_beacon_stone",
+        "ruins_v2_confirmation_latched",
+        "ruins_v2_confirmation_ready",
+        "ruins_v2_confirmation_waiting",
+        "ruins_v2_fixed_three_route_splitter_off",
+        "ruins_v2_fixed_three_route_splitter_on",
+        "ruins_v2_inscription_under_statue",
+        "ruins_v2_lock_moon_covered",
+        "ruins_v2_lock_moon_lit",
+        "ruins_v2_lock_sun_off",
+        "ruins_v2_lock_sun_on",
+        "ruins_v2_mirror_0",
+        "ruins_v2_mirror_1",
+        "ruins_v2_mirror_2",
+        "ruins_v2_mirror_3",
+        "ruins_v2_ruins_altar",
+        "ruins_v2_sanctuary_door_closed",
+        "ruins_v2_sanctuary_door_open",
+        "ruins_v2_seedling_curtain_closed",
+        "ruins_v2_seedling_curtain_open",
+        "ruins_v2_statue_notch_0",
+        "ruins_v2_statue_notch_1",
+        "ruins_v2_statue_notch_2",
+        "ruins_v2_statue_notch_3",
+        "ruins_v2_temple_scene_base",
+        "ruins_v2_test_column_notch_0",
+        "ruins_v2_test_column_notch_1",
+        "ruins_v2_test_column_notch_2",
+        "ruins_v2_test_column_notch_3",
+        "ruins_v2_test_moon_covered",
+        "ruins_v2_test_moon_lit",
+        "ruins_v2_test_pedestal"
+      ],
+      "decalAsset": {
+        "size": [
+          48,
+          12
+        ]
+      },
+      "modules": {
+        "backdrop": {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "lock-left": {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-moon": {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-right": {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "splitter": {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        "practice-slab": {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        "north-door": {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        "shadow": {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_1",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "inscription": {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        "seedling-bed": {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        "shadow-npc": {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        "statue": {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_1",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        "practice-column": {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "practice-column-spin": {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        "mirror-left": {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_3",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "mirror-right": {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_2",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "pedestal": {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        "confirmation": {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "placed-lamp": {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": false,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        }
+      },
+      "images": [
+        {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_1",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_1",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_3",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_2",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": false,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        },
+        {
+          "id": null,
+          "key": "shadow_blob",
+          "sourceSize": [
+            28,
+            12
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 306,
+            "y": 297,
+            "width": 28,
+            "height": 12
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.44125000000000003,
+          "bounds": {
+            "x": 316.8851319456224,
+            "y": 254.7928232526132,
+            "width": 3.500769230769208,
+            "height": 3.5007692307692366
+          }
+        },
+        {
+          "id": null,
+          "key": "light_radial",
+          "sourceSize": [
+            256,
+            256
+          ],
+          "visible": true,
+          "alpha": 0.88,
+          "bounds": {
+            "x": 205.71366937590653,
+            "y": 167.71366937590653,
+            "width": 240.57266124818693,
+            "height": 240.57266124818693
+          }
+        },
+        {
+          "id": null,
+          "key": "vignette",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        }
+      ],
+      "sceneObjects": [
+        {
+          "type": "Image",
+          "depth": 0,
+          "key": "ruins_v2_temple_scene_base",
+          "id": "backdrop"
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 3,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-left"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_moon_covered",
+          "id": "lock-moon"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-right"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "id": "splitter"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_test_moon_covered",
+          "id": "practice-slab"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_sanctuary_door_closed",
+          "id": "north-door"
+        },
+        {
+          "type": "Graphics",
+          "depth": 4.5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 6,
+          "key": "art_08_ruins_of_two_halves_shadow_notch_1",
+          "id": "shadow"
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "1b798bc0-eb06-4da5-a3e0-158b791aaefe",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "2cb0e4fd-e764-40f6-984b-4e703d5353b2",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "d2cc1c35-3762-433f-bb2c-d80cb7e216fc",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 18,
+          "key": "ruins_v2_beacon_stone",
+          "id": "inscription"
+        },
+        {
+          "type": "Image",
+          "depth": 25.2,
+          "key": "ruins_v2_seedling_curtain_open",
+          "id": "seedling-bed"
+        },
+        {
+          "type": "Image",
+          "depth": 26.4,
+          "key": "shadow_shielding",
+          "id": "shadow-npc"
+        },
+        {
+          "type": "Image",
+          "depth": 31.2,
+          "key": "ruins_v2_statue_notch_1",
+          "id": "statue"
+        },
+        {
+          "type": "Image",
+          "depth": 35,
+          "key": "ruins_v2_test_pedestal",
+          "id": "practice-column"
+        },
+        {
+          "type": "Image",
+          "depth": 35.1,
+          "key": "ruins_v2_test_column_notch_0",
+          "id": "practice-column-spin"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_3",
+          "id": "mirror-left"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_2",
+          "id": "mirror-right"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_ruins_altar",
+          "id": "pedestal"
+        },
+        {
+          "type": "Image",
+          "depth": 36.300000000000004,
+          "key": "ruins_v2_confirmation_waiting",
+          "id": "confirmation"
+        },
+        {
+          "type": "Image",
+          "depth": 36.400000000000006,
+          "key": "lantern_hang_2",
+          "id": "placed-lamp"
+        },
+        {
+          "type": "Image",
+          "depth": 39.5,
+          "key": "shadow_blob",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 40.5,
+          "key": "nhinh_down_idle_lit_0",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 55,
+          "key": "lumo_3",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 68,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 69,
+          "key": "light_radial",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 70,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 71,
+          "key": "vignette",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 81,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 82,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 86,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 87,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 88,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 95,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 98,
+          "key": null,
+          "id": null
+        }
+      ],
+      "localBackdrop": {
+        "key": "ruins_v2_temple_scene_base",
+        "alpha": 1,
+        "size": [
+          640,
+          360
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      },
+      "shadow": {
+        "id": "shadow-npc",
+        "key": "shadow_shielding",
+        "sourceSize": [
+          48,
+          64
+        ],
+        "visible": true,
+        "alpha": 1,
+        "bounds": {
+          "x": 214,
+          "y": 100,
+          "width": 48,
+          "height": 64
+        }
+      },
+      "dialogue": false,
+      "browser_errors": [],
+      "screenshot_sha256": "2e1e4a2cbaca19bf1495cfbfa729cbdf40882084936debec8129e0036b3dca4c",
+      "interaction": {
+        "input": "F",
+        "lanternOn": false,
+        "practiceSlab": "ruins_v2_test_moon_lit"
+      }
+    },
+    {
+      "id": "02-statue-0-ready",
+      "fixture": {
+        "id": "02-statue-0-ready",
+        "flags": {
+          "intro-7": true,
+          "intro-6": true,
+          "l7-practice-seen": true,
+          "l7-two-suns": true,
+          "l7-shadow-covers": true,
+          "l7-lantern-placed": true,
+          "l7-lantern-retrieved": false
+        },
+        "counters": {
+          "statue": 0,
+          "ruins-left": 1,
+          "ruins-right": 0,
+          "practice": 0
+        },
+        "lanternOn": true,
+        "expect": {
+          "statue": 0,
+          "ready": true,
+          "sunsLit": 2,
+          "moonDark": true
+        }
+      },
+      "status": "PASS",
+      "player": {
+        "x": 320,
+        "y": 286
+      },
+      "lanternOn": true,
+      "puzzle": {
+        "statue": 0,
+        "lightActive": true,
+        "leftLit": true,
+        "rightLit": true,
+        "moonDark": true,
+        "sunsLit": 2,
+        "confirmReady": true
+      },
+      "flags": {
+        "latched": false,
+        "curtainShut": false
+      },
+      "registered": [
+        "ruins_v2_beacon_stone",
+        "ruins_v2_confirmation_latched",
+        "ruins_v2_confirmation_ready",
+        "ruins_v2_confirmation_waiting",
+        "ruins_v2_fixed_three_route_splitter_off",
+        "ruins_v2_fixed_three_route_splitter_on",
+        "ruins_v2_inscription_under_statue",
+        "ruins_v2_lock_moon_covered",
+        "ruins_v2_lock_moon_lit",
+        "ruins_v2_lock_sun_off",
+        "ruins_v2_lock_sun_on",
+        "ruins_v2_mirror_0",
+        "ruins_v2_mirror_1",
+        "ruins_v2_mirror_2",
+        "ruins_v2_mirror_3",
+        "ruins_v2_ruins_altar",
+        "ruins_v2_sanctuary_door_closed",
+        "ruins_v2_sanctuary_door_open",
+        "ruins_v2_seedling_curtain_closed",
+        "ruins_v2_seedling_curtain_open",
+        "ruins_v2_statue_notch_0",
+        "ruins_v2_statue_notch_1",
+        "ruins_v2_statue_notch_2",
+        "ruins_v2_statue_notch_3",
+        "ruins_v2_temple_scene_base",
+        "ruins_v2_test_column_notch_0",
+        "ruins_v2_test_column_notch_1",
+        "ruins_v2_test_column_notch_2",
+        "ruins_v2_test_column_notch_3",
+        "ruins_v2_test_moon_covered",
+        "ruins_v2_test_moon_lit",
+        "ruins_v2_test_pedestal"
+      ],
+      "decalAsset": {
+        "size": [
+          48,
+          12
+        ]
+      },
+      "modules": {
+        "backdrop": {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "lock-left": {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-moon": {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-right": {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "splitter": {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        "practice-slab": {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        "north-door": {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        "shadow": {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "inscription": {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        "seedling-bed": {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        "shadow-npc": {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        "statue": {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_0",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        "practice-column": {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "practice-column-spin": {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        "mirror-left": {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "mirror-right": {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "pedestal": {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        "confirmation": {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_ready",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "placed-lamp": {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        }
+      },
+      "images": [
+        {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_0",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_ready",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        },
+        {
+          "id": null,
+          "key": "shadow_blob",
+          "sourceSize": [
+            28,
+            12
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 306,
+            "y": 297,
+            "width": 28,
+            "height": 12
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.42125,
+          "bounds": {
+            "x": 316.14832913030864,
+            "y": 253.36620014775622,
+            "width": 3.414615384615388,
+            "height": 3.414615384615388
+          }
+        },
+        {
+          "id": null,
+          "key": "light_radial",
+          "sourceSize": [
+            256,
+            256
+          ],
+          "visible": true,
+          "alpha": 0.88,
+          "bounds": {
+            "x": 359.7222979317707,
+            "y": 93.7222979317707,
+            "width": 240.55540413645855,
+            "height": 240.5554041364586
+          }
+        },
+        {
+          "id": null,
+          "key": "vignette",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        }
+      ],
+      "sceneObjects": [
+        {
+          "type": "Image",
+          "depth": 0,
+          "key": "ruins_v2_temple_scene_base",
+          "id": "backdrop"
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 3,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_on",
+          "id": "lock-left"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_moon_covered",
+          "id": "lock-moon"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_on",
+          "id": "lock-right"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "id": "splitter"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_test_moon_covered",
+          "id": "practice-slab"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_sanctuary_door_closed",
+          "id": "north-door"
+        },
+        {
+          "type": "Graphics",
+          "depth": 4.5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 6,
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "id": "shadow"
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "76bc0443-b07d-4c52-9966-e173a3578a14",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "7c6a7d7d-6153-4da8-87fd-37cf4252d6be",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "d9c2daff-2c71-49a0-aceb-b23f3ec9525f",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 18,
+          "key": "ruins_v2_beacon_stone",
+          "id": "inscription"
+        },
+        {
+          "type": "Image",
+          "depth": 25.2,
+          "key": "ruins_v2_seedling_curtain_open",
+          "id": "seedling-bed"
+        },
+        {
+          "type": "Image",
+          "depth": 26.4,
+          "key": "shadow_shielding",
+          "id": "shadow-npc"
+        },
+        {
+          "type": "Image",
+          "depth": 31.2,
+          "key": "ruins_v2_statue_notch_0",
+          "id": "statue"
+        },
+        {
+          "type": "Image",
+          "depth": 35,
+          "key": "ruins_v2_test_pedestal",
+          "id": "practice-column"
+        },
+        {
+          "type": "Image",
+          "depth": 35.1,
+          "key": "ruins_v2_test_column_notch_0",
+          "id": "practice-column-spin"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_1",
+          "id": "mirror-left"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_0",
+          "id": "mirror-right"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_ruins_altar",
+          "id": "pedestal"
+        },
+        {
+          "type": "Image",
+          "depth": 36.300000000000004,
+          "key": "ruins_v2_confirmation_ready",
+          "id": "confirmation"
+        },
+        {
+          "type": "Image",
+          "depth": 36.400000000000006,
+          "key": "lantern_hang_2",
+          "id": "placed-lamp"
+        },
+        {
+          "type": "Image",
+          "depth": 39.5,
+          "key": "shadow_blob",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 40.5,
+          "key": "nhinh_down_idle_nolamp_0",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 55,
+          "key": "lumo_3",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 68,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 69,
+          "key": "light_radial",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 70,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 71,
+          "key": "vignette",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 81,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 82,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 86,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 87,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 88,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 95,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 98,
+          "key": null,
+          "id": null
+        }
+      ],
+      "localBackdrop": {
+        "key": "ruins_v2_temple_scene_base",
+        "alpha": 1,
+        "size": [
+          640,
+          360
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      },
+      "shadow": {
+        "id": "shadow-npc",
+        "key": "shadow_shielding",
+        "sourceSize": [
+          48,
+          64
+        ],
+        "visible": true,
+        "alpha": 1,
+        "bounds": {
+          "x": 214,
+          "y": 100,
+          "width": 48,
+          "height": 64
+        }
+      },
+      "dialogue": false,
+      "browser_errors": [],
+      "screenshot_sha256": "1796439dee1c9b8fefd844b8ec7a260fe98a59b2076cc15f401dbe97081ce503",
+      "interaction": null
+    },
+    {
+      "id": "03-statue-1",
+      "fixture": {
+        "id": "03-statue-1",
+        "flags": {
+          "intro-7": true,
+          "intro-6": true,
+          "l7-practice-seen": true,
+          "l7-two-suns": true,
+          "l7-shadow-covers": true,
+          "l7-lantern-placed": true,
+          "l7-lantern-retrieved": false
+        },
+        "counters": {
+          "statue": 1,
+          "ruins-left": 1,
+          "ruins-right": 0,
+          "practice": 0
+        },
+        "lanternOn": true,
+        "expect": {
+          "statue": 1
+        }
+      },
+      "status": "PASS",
+      "player": {
+        "x": 320,
+        "y": 286
+      },
+      "lanternOn": true,
+      "puzzle": {
+        "statue": 1,
+        "lightActive": true,
+        "leftLit": true,
+        "rightLit": true,
+        "moonDark": false,
+        "sunsLit": 2,
+        "confirmReady": false
+      },
+      "flags": {
+        "latched": false,
+        "curtainShut": false
+      },
+      "registered": [
+        "ruins_v2_beacon_stone",
+        "ruins_v2_confirmation_latched",
+        "ruins_v2_confirmation_ready",
+        "ruins_v2_confirmation_waiting",
+        "ruins_v2_fixed_three_route_splitter_off",
+        "ruins_v2_fixed_three_route_splitter_on",
+        "ruins_v2_inscription_under_statue",
+        "ruins_v2_lock_moon_covered",
+        "ruins_v2_lock_moon_lit",
+        "ruins_v2_lock_sun_off",
+        "ruins_v2_lock_sun_on",
+        "ruins_v2_mirror_0",
+        "ruins_v2_mirror_1",
+        "ruins_v2_mirror_2",
+        "ruins_v2_mirror_3",
+        "ruins_v2_ruins_altar",
+        "ruins_v2_sanctuary_door_closed",
+        "ruins_v2_sanctuary_door_open",
+        "ruins_v2_seedling_curtain_closed",
+        "ruins_v2_seedling_curtain_open",
+        "ruins_v2_statue_notch_0",
+        "ruins_v2_statue_notch_1",
+        "ruins_v2_statue_notch_2",
+        "ruins_v2_statue_notch_3",
+        "ruins_v2_temple_scene_base",
+        "ruins_v2_test_column_notch_0",
+        "ruins_v2_test_column_notch_1",
+        "ruins_v2_test_column_notch_2",
+        "ruins_v2_test_column_notch_3",
+        "ruins_v2_test_moon_covered",
+        "ruins_v2_test_moon_lit",
+        "ruins_v2_test_pedestal"
+      ],
+      "decalAsset": {
+        "size": [
+          48,
+          12
+        ]
+      },
+      "modules": {
+        "backdrop": {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "lock-left": {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-moon": {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_lit",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-right": {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "splitter": {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        "practice-slab": {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        "north-door": {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        "shadow": {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_1",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "inscription": {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        "seedling-bed": {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        "shadow-npc": {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        "statue": {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_1",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        "practice-column": {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "practice-column-spin": {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        "mirror-left": {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "mirror-right": {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "pedestal": {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        "confirmation": {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "placed-lamp": {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        }
+      },
+      "images": [
+        {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_lit",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_1",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_1",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        },
+        {
+          "id": null,
+          "key": "shadow_blob",
+          "sourceSize": [
+            28,
+            12
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 306,
+            "y": 297,
+            "width": 28,
+            "height": 12
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.44125000000000003,
+          "bounds": {
+            "x": 317.71149295960845,
+            "y": 254.13508827630358,
+            "width": 3.500769230769208,
+            "height": 3.500769230769208
+          }
+        },
+        {
+          "id": null,
+          "key": "light_radial",
+          "sourceSize": [
+            256,
+            256
+          ],
+          "visible": true,
+          "alpha": 0.88,
+          "bounds": {
+            "x": 359.711184138745,
+            "y": 93.71118413874504,
+            "width": 240.57763172250998,
+            "height": 240.57763172250995
+          }
+        },
+        {
+          "id": null,
+          "key": "vignette",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        }
+      ],
+      "sceneObjects": [
+        {
+          "type": "Image",
+          "depth": 0,
+          "key": "ruins_v2_temple_scene_base",
+          "id": "backdrop"
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 3,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_on",
+          "id": "lock-left"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_moon_lit",
+          "id": "lock-moon"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_on",
+          "id": "lock-right"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "id": "splitter"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_test_moon_covered",
+          "id": "practice-slab"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_sanctuary_door_closed",
+          "id": "north-door"
+        },
+        {
+          "type": "Graphics",
+          "depth": 4.5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 6,
+          "key": "art_08_ruins_of_two_halves_shadow_notch_1",
+          "id": "shadow"
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "242c2b37-8c2d-46d0-908e-ad96d7af50c1",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "74157422-da1e-419b-a522-da1be904cea7",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "6e1379f4-1350-44df-a722-abb9a74ecff6",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 18,
+          "key": "ruins_v2_beacon_stone",
+          "id": "inscription"
+        },
+        {
+          "type": "Image",
+          "depth": 25.2,
+          "key": "ruins_v2_seedling_curtain_open",
+          "id": "seedling-bed"
+        },
+        {
+          "type": "Image",
+          "depth": 26.4,
+          "key": "shadow_shielding",
+          "id": "shadow-npc"
+        },
+        {
+          "type": "Image",
+          "depth": 31.2,
+          "key": "ruins_v2_statue_notch_1",
+          "id": "statue"
+        },
+        {
+          "type": "Image",
+          "depth": 35,
+          "key": "ruins_v2_test_pedestal",
+          "id": "practice-column"
+        },
+        {
+          "type": "Image",
+          "depth": 35.1,
+          "key": "ruins_v2_test_column_notch_0",
+          "id": "practice-column-spin"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_1",
+          "id": "mirror-left"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_0",
+          "id": "mirror-right"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_ruins_altar",
+          "id": "pedestal"
+        },
+        {
+          "type": "Image",
+          "depth": 36.300000000000004,
+          "key": "ruins_v2_confirmation_waiting",
+          "id": "confirmation"
+        },
+        {
+          "type": "Image",
+          "depth": 36.400000000000006,
+          "key": "lantern_hang_2",
+          "id": "placed-lamp"
+        },
+        {
+          "type": "Image",
+          "depth": 39.5,
+          "key": "shadow_blob",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 40.5,
+          "key": "nhinh_down_idle_nolamp_0",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 55,
+          "key": "lumo_3",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 68,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 69,
+          "key": "light_radial",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 70,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 71,
+          "key": "vignette",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 81,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 82,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 86,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 87,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 88,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 95,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 98,
+          "key": null,
+          "id": null
+        }
+      ],
+      "localBackdrop": {
+        "key": "ruins_v2_temple_scene_base",
+        "alpha": 1,
+        "size": [
+          640,
+          360
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      },
+      "shadow": {
+        "id": "shadow-npc",
+        "key": "shadow_shielding",
+        "sourceSize": [
+          48,
+          64
+        ],
+        "visible": true,
+        "alpha": 1,
+        "bounds": {
+          "x": 214,
+          "y": 100,
+          "width": 48,
+          "height": 64
+        }
+      },
+      "dialogue": false,
+      "browser_errors": [],
+      "screenshot_sha256": "8ee32f22f23c2d0ae06dd4fd3d8c1c9c6369a94320661666097b232aa9df7283",
+      "interaction": null
+    },
+    {
+      "id": "04-statue-2",
+      "fixture": {
+        "id": "04-statue-2",
+        "flags": {
+          "intro-7": true,
+          "intro-6": true,
+          "l7-practice-seen": true,
+          "l7-two-suns": true,
+          "l7-shadow-covers": true,
+          "l7-lantern-placed": true,
+          "l7-lantern-retrieved": false
+        },
+        "counters": {
+          "statue": 2,
+          "ruins-left": 1,
+          "ruins-right": 0,
+          "practice": 0
+        },
+        "lanternOn": true,
+        "expect": {
+          "statue": 2
+        }
+      },
+      "status": "PASS",
+      "player": {
+        "x": 320,
+        "y": 286
+      },
+      "lanternOn": true,
+      "puzzle": {
+        "statue": 2,
+        "lightActive": true,
+        "leftLit": false,
+        "rightLit": true,
+        "moonDark": false,
+        "sunsLit": 1,
+        "confirmReady": false
+      },
+      "flags": {
+        "latched": false,
+        "curtainShut": false
+      },
+      "registered": [
+        "ruins_v2_beacon_stone",
+        "ruins_v2_confirmation_latched",
+        "ruins_v2_confirmation_ready",
+        "ruins_v2_confirmation_waiting",
+        "ruins_v2_fixed_three_route_splitter_off",
+        "ruins_v2_fixed_three_route_splitter_on",
+        "ruins_v2_inscription_under_statue",
+        "ruins_v2_lock_moon_covered",
+        "ruins_v2_lock_moon_lit",
+        "ruins_v2_lock_sun_off",
+        "ruins_v2_lock_sun_on",
+        "ruins_v2_mirror_0",
+        "ruins_v2_mirror_1",
+        "ruins_v2_mirror_2",
+        "ruins_v2_mirror_3",
+        "ruins_v2_ruins_altar",
+        "ruins_v2_sanctuary_door_closed",
+        "ruins_v2_sanctuary_door_open",
+        "ruins_v2_seedling_curtain_closed",
+        "ruins_v2_seedling_curtain_open",
+        "ruins_v2_statue_notch_0",
+        "ruins_v2_statue_notch_1",
+        "ruins_v2_statue_notch_2",
+        "ruins_v2_statue_notch_3",
+        "ruins_v2_temple_scene_base",
+        "ruins_v2_test_column_notch_0",
+        "ruins_v2_test_column_notch_1",
+        "ruins_v2_test_column_notch_2",
+        "ruins_v2_test_column_notch_3",
+        "ruins_v2_test_moon_covered",
+        "ruins_v2_test_moon_lit",
+        "ruins_v2_test_pedestal"
+      ],
+      "decalAsset": {
+        "size": [
+          48,
+          12
+        ]
+      },
+      "modules": {
+        "backdrop": {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "lock-left": {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-moon": {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_lit",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-right": {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "splitter": {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        "practice-slab": {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        "north-door": {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        "shadow": {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_2",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "inscription": {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        "seedling-bed": {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        "shadow-npc": {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        "statue": {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_2",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        "practice-column": {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "practice-column-spin": {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        "mirror-left": {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "mirror-right": {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "pedestal": {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        "confirmation": {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "placed-lamp": {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        }
+      },
+      "images": [
+        {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_lit",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_2",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_2",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        },
+        {
+          "id": null,
+          "key": "shadow_blob",
+          "sourceSize": [
+            28,
+            12
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 306,
+            "y": 297,
+            "width": 28,
+            "height": 12
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.4425,
+          "bounds": {
+            "x": 318.5188899268178,
+            "y": 254.3676496831799,
+            "width": 3.506153846153836,
+            "height": 3.5061538461538646
+          }
+        },
+        {
+          "id": null,
+          "key": "light_radial",
+          "sourceSize": [
+            256,
+            256
+          ],
+          "visible": true,
+          "alpha": 0.88,
+          "bounds": {
+            "x": 359.7105680780768,
+            "y": 93.71056807807682,
+            "width": 240.5788638438463,
+            "height": 240.5788638438464
+          }
+        },
+        {
+          "id": null,
+          "key": "vignette",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        }
+      ],
+      "sceneObjects": [
+        {
+          "type": "Image",
+          "depth": 0,
+          "key": "ruins_v2_temple_scene_base",
+          "id": "backdrop"
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 3,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-left"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_moon_lit",
+          "id": "lock-moon"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_on",
+          "id": "lock-right"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "id": "splitter"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_test_moon_covered",
+          "id": "practice-slab"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_sanctuary_door_closed",
+          "id": "north-door"
+        },
+        {
+          "type": "Graphics",
+          "depth": 4.5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 6,
+          "key": "art_08_ruins_of_two_halves_shadow_notch_2",
+          "id": "shadow"
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "e1092c9a-3d9f-4040-aa52-5043835f85a3",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "384ca6d2-f317-46b5-b690-a2723c3515f1",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "5ac748d5-0680-4354-80aa-b02caa41be8a",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 18,
+          "key": "ruins_v2_beacon_stone",
+          "id": "inscription"
+        },
+        {
+          "type": "Image",
+          "depth": 25.2,
+          "key": "ruins_v2_seedling_curtain_open",
+          "id": "seedling-bed"
+        },
+        {
+          "type": "Image",
+          "depth": 26.4,
+          "key": "shadow_shielding",
+          "id": "shadow-npc"
+        },
+        {
+          "type": "Image",
+          "depth": 31.2,
+          "key": "ruins_v2_statue_notch_2",
+          "id": "statue"
+        },
+        {
+          "type": "Image",
+          "depth": 35,
+          "key": "ruins_v2_test_pedestal",
+          "id": "practice-column"
+        },
+        {
+          "type": "Image",
+          "depth": 35.1,
+          "key": "ruins_v2_test_column_notch_0",
+          "id": "practice-column-spin"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_1",
+          "id": "mirror-left"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_0",
+          "id": "mirror-right"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_ruins_altar",
+          "id": "pedestal"
+        },
+        {
+          "type": "Image",
+          "depth": 36.300000000000004,
+          "key": "ruins_v2_confirmation_waiting",
+          "id": "confirmation"
+        },
+        {
+          "type": "Image",
+          "depth": 36.400000000000006,
+          "key": "lantern_hang_2",
+          "id": "placed-lamp"
+        },
+        {
+          "type": "Image",
+          "depth": 39.5,
+          "key": "shadow_blob",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 40.5,
+          "key": "nhinh_down_idle_nolamp_0",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 55,
+          "key": "lumo_3",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 68,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 69,
+          "key": "light_radial",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 70,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 71,
+          "key": "vignette",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 81,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 82,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 86,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 87,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 88,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 95,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 98,
+          "key": null,
+          "id": null
+        }
+      ],
+      "localBackdrop": {
+        "key": "ruins_v2_temple_scene_base",
+        "alpha": 1,
+        "size": [
+          640,
+          360
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      },
+      "shadow": {
+        "id": "shadow-npc",
+        "key": "shadow_shielding",
+        "sourceSize": [
+          48,
+          64
+        ],
+        "visible": true,
+        "alpha": 1,
+        "bounds": {
+          "x": 214,
+          "y": 100,
+          "width": 48,
+          "height": 64
+        }
+      },
+      "dialogue": false,
+      "browser_errors": [],
+      "screenshot_sha256": "26fc5e85b76a13220d9aacf323a6a6fb397e01a6e5205bded2e6b01b8de92c29",
+      "interaction": null
+    },
+    {
+      "id": "05-statue-3",
+      "fixture": {
+        "id": "05-statue-3",
+        "flags": {
+          "intro-7": true,
+          "intro-6": true,
+          "l7-practice-seen": true,
+          "l7-two-suns": true,
+          "l7-shadow-covers": true,
+          "l7-lantern-placed": true,
+          "l7-lantern-retrieved": false
+        },
+        "counters": {
+          "statue": 3,
+          "ruins-left": 1,
+          "ruins-right": 0,
+          "practice": 0
+        },
+        "lanternOn": true,
+        "expect": {
+          "statue": 3
+        }
+      },
+      "status": "PASS",
+      "player": {
+        "x": 320,
+        "y": 286
+      },
+      "lanternOn": true,
+      "puzzle": {
+        "statue": 3,
+        "lightActive": true,
+        "leftLit": true,
+        "rightLit": false,
+        "moonDark": false,
+        "sunsLit": 1,
+        "confirmReady": false
+      },
+      "flags": {
+        "latched": false,
+        "curtainShut": false
+      },
+      "registered": [
+        "ruins_v2_beacon_stone",
+        "ruins_v2_confirmation_latched",
+        "ruins_v2_confirmation_ready",
+        "ruins_v2_confirmation_waiting",
+        "ruins_v2_fixed_three_route_splitter_off",
+        "ruins_v2_fixed_three_route_splitter_on",
+        "ruins_v2_inscription_under_statue",
+        "ruins_v2_lock_moon_covered",
+        "ruins_v2_lock_moon_lit",
+        "ruins_v2_lock_sun_off",
+        "ruins_v2_lock_sun_on",
+        "ruins_v2_mirror_0",
+        "ruins_v2_mirror_1",
+        "ruins_v2_mirror_2",
+        "ruins_v2_mirror_3",
+        "ruins_v2_ruins_altar",
+        "ruins_v2_sanctuary_door_closed",
+        "ruins_v2_sanctuary_door_open",
+        "ruins_v2_seedling_curtain_closed",
+        "ruins_v2_seedling_curtain_open",
+        "ruins_v2_statue_notch_0",
+        "ruins_v2_statue_notch_1",
+        "ruins_v2_statue_notch_2",
+        "ruins_v2_statue_notch_3",
+        "ruins_v2_temple_scene_base",
+        "ruins_v2_test_column_notch_0",
+        "ruins_v2_test_column_notch_1",
+        "ruins_v2_test_column_notch_2",
+        "ruins_v2_test_column_notch_3",
+        "ruins_v2_test_moon_covered",
+        "ruins_v2_test_moon_lit",
+        "ruins_v2_test_pedestal"
+      ],
+      "decalAsset": {
+        "size": [
+          48,
+          12
+        ]
+      },
+      "modules": {
+        "backdrop": {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "lock-left": {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-moon": {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_lit",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-right": {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "splitter": {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        "practice-slab": {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        "north-door": {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        "shadow": {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_3",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "inscription": {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        "seedling-bed": {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        "shadow-npc": {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        "statue": {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_3",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        "practice-column": {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "practice-column-spin": {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        "mirror-left": {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "mirror-right": {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "pedestal": {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        "confirmation": {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "placed-lamp": {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        }
+      },
+      "images": [
+        {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_on",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_lit",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_3",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_3",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        },
+        {
+          "id": null,
+          "key": "shadow_blob",
+          "sourceSize": [
+            28,
+            12
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 306,
+            "y": 297,
+            "width": 28,
+            "height": 12
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.275,
+          "bounds": {
+            "x": 316.48477404061174,
+            "y": 251.46511672644587,
+            "width": 2.7846153846153925,
+            "height": 2.7846153846153925
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.545,
+          "bounds": {
+            "x": 315.23763459856406,
+            "y": 249.98461603303662,
+            "width": 3.947692307692307,
+            "height": 3.947692307692307
+          }
+        },
+        {
+          "id": null,
+          "key": "light_radial",
+          "sourceSize": [
+            256,
+            256
+          ],
+          "visible": true,
+          "alpha": 0.88,
+          "bounds": {
+            "x": 354.8315788599388,
+            "y": 88.83157885993882,
+            "width": 250.3368422801223,
+            "height": 250.33684228012237
+          }
+        },
+        {
+          "id": null,
+          "key": "vignette",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        }
+      ],
+      "sceneObjects": [
+        {
+          "type": "Image",
+          "depth": 0,
+          "key": "ruins_v2_temple_scene_base",
+          "id": "backdrop"
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 3,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_on",
+          "id": "lock-left"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_moon_lit",
+          "id": "lock-moon"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-right"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_fixed_three_route_splitter_on",
+          "id": "splitter"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_test_moon_covered",
+          "id": "practice-slab"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_sanctuary_door_closed",
+          "id": "north-door"
+        },
+        {
+          "type": "Graphics",
+          "depth": 4.5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 6,
+          "key": "art_08_ruins_of_two_halves_shadow_notch_3",
+          "id": "shadow"
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "def3f236-43cc-4cc3-b9dd-04c1dc9fb20a",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "c79e5464-82b1-416f-b44e-d6d356b2bd9f",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "4cc788e9-d395-46d7-a730-a8a01a9d68b9",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 18,
+          "key": "ruins_v2_beacon_stone",
+          "id": "inscription"
+        },
+        {
+          "type": "Image",
+          "depth": 25.2,
+          "key": "ruins_v2_seedling_curtain_open",
+          "id": "seedling-bed"
+        },
+        {
+          "type": "Image",
+          "depth": 26.4,
+          "key": "shadow_shielding",
+          "id": "shadow-npc"
+        },
+        {
+          "type": "Image",
+          "depth": 31.2,
+          "key": "ruins_v2_statue_notch_3",
+          "id": "statue"
+        },
+        {
+          "type": "Image",
+          "depth": 35,
+          "key": "ruins_v2_test_pedestal",
+          "id": "practice-column"
+        },
+        {
+          "type": "Image",
+          "depth": 35.1,
+          "key": "ruins_v2_test_column_notch_0",
+          "id": "practice-column-spin"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_1",
+          "id": "mirror-left"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_0",
+          "id": "mirror-right"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_ruins_altar",
+          "id": "pedestal"
+        },
+        {
+          "type": "Image",
+          "depth": 36.300000000000004,
+          "key": "ruins_v2_confirmation_waiting",
+          "id": "confirmation"
+        },
+        {
+          "type": "Image",
+          "depth": 36.400000000000006,
+          "key": "lantern_hang_2",
+          "id": "placed-lamp"
+        },
+        {
+          "type": "Image",
+          "depth": 39.5,
+          "key": "shadow_blob",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 40.5,
+          "key": "nhinh_down_idle_nolamp_0",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 55,
+          "key": "lumo_1",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 68,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 69,
+          "key": "light_radial",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 70,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 71,
+          "key": "vignette",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 81,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 82,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 86,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 87,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 88,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 95,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 98,
+          "key": null,
+          "id": null
+        }
+      ],
+      "localBackdrop": {
+        "key": "ruins_v2_temple_scene_base",
+        "alpha": 1,
+        "size": [
+          640,
+          360
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      },
+      "shadow": {
+        "id": "shadow-npc",
+        "key": "shadow_shielding",
+        "sourceSize": [
+          48,
+          64
+        ],
+        "visible": true,
+        "alpha": 1,
+        "bounds": {
+          "x": 214,
+          "y": 100,
+          "width": 48,
+          "height": 64
+        }
+      },
+      "dialogue": false,
+      "browser_errors": [],
+      "screenshot_sha256": "3ea967d6b80ed458058550e7cd61d44e04b0cf49d4dbe903b7a141be28a26ab1",
+      "interaction": null
+    },
+    {
+      "id": "06-lamp-off-locks-dark",
+      "fixture": {
+        "id": "06-lamp-off-locks-dark",
+        "flags": {
+          "intro-7": true,
+          "intro-6": true,
+          "l7-practice-seen": true,
+          "l7-two-suns": true,
+          "l7-shadow-covers": true
+        },
+        "counters": {
+          "statue": 0,
+          "ruins-left": 1,
+          "ruins-right": 0,
+          "practice": 0
+        },
+        "lanternOn": false,
+        "expect": {
+          "ready": false,
+          "sunsLit": 0,
+          "moonDark": true
+        }
+      },
+      "status": "PASS",
+      "player": {
+        "x": 320,
+        "y": 286
+      },
+      "lanternOn": false,
+      "puzzle": {
+        "statue": 0,
+        "lightActive": false,
+        "leftLit": false,
+        "rightLit": false,
+        "moonDark": true,
+        "sunsLit": 0,
+        "confirmReady": false
+      },
+      "flags": {
+        "latched": false,
+        "curtainShut": false
+      },
+      "registered": [
+        "ruins_v2_beacon_stone",
+        "ruins_v2_confirmation_latched",
+        "ruins_v2_confirmation_ready",
+        "ruins_v2_confirmation_waiting",
+        "ruins_v2_fixed_three_route_splitter_off",
+        "ruins_v2_fixed_three_route_splitter_on",
+        "ruins_v2_inscription_under_statue",
+        "ruins_v2_lock_moon_covered",
+        "ruins_v2_lock_moon_lit",
+        "ruins_v2_lock_sun_off",
+        "ruins_v2_lock_sun_on",
+        "ruins_v2_mirror_0",
+        "ruins_v2_mirror_1",
+        "ruins_v2_mirror_2",
+        "ruins_v2_mirror_3",
+        "ruins_v2_ruins_altar",
+        "ruins_v2_sanctuary_door_closed",
+        "ruins_v2_sanctuary_door_open",
+        "ruins_v2_seedling_curtain_closed",
+        "ruins_v2_seedling_curtain_open",
+        "ruins_v2_statue_notch_0",
+        "ruins_v2_statue_notch_1",
+        "ruins_v2_statue_notch_2",
+        "ruins_v2_statue_notch_3",
+        "ruins_v2_temple_scene_base",
+        "ruins_v2_test_column_notch_0",
+        "ruins_v2_test_column_notch_1",
+        "ruins_v2_test_column_notch_2",
+        "ruins_v2_test_column_notch_3",
+        "ruins_v2_test_moon_covered",
+        "ruins_v2_test_moon_lit",
+        "ruins_v2_test_pedestal"
+      ],
+      "decalAsset": {
+        "size": [
+          48,
+          12
+        ]
+      },
+      "modules": {
+        "backdrop": {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "lock-left": {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-moon": {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-right": {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "splitter": {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        "practice-slab": {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_lit",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        "north-door": {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        "shadow": {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "inscription": {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        "seedling-bed": {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        "shadow-npc": {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        "statue": {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_0",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        "practice-column": {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "practice-column-spin": {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        "mirror-left": {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "mirror-right": {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "pedestal": {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        "confirmation": {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "placed-lamp": {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": false,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        }
+      },
+      "images": [
+        {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_lit",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_closed",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_open",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        {
+          "id": "shadow-npc",
+          "key": "shadow_shielding",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_0",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_waiting",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": false,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        },
+        {
+          "id": null,
+          "key": "shadow_blob",
+          "sourceSize": [
+            28,
+            12
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 306,
+            "y": 297,
+            "width": 28,
+            "height": 12
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.44125000000000003,
+          "bounds": {
+            "x": 316.30170015308795,
+            "y": 253.03086863628778,
+            "width": 3.500769230769208,
+            "height": 3.500769230769208
+          }
+        },
+        {
+          "id": null,
+          "key": "light_radial",
+          "sourceSize": [
+            256,
+            256
+          ],
+          "visible": true,
+          "alpha": 0.32,
+          "bounds": {
+            "x": 271.36,
+            "y": 237.36,
+            "width": 97.27999999999997,
+            "height": 97.27999999999997
+          }
+        },
+        {
+          "id": null,
+          "key": "vignette",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        }
+      ],
+      "sceneObjects": [
+        {
+          "type": "Image",
+          "depth": 0,
+          "key": "ruins_v2_temple_scene_base",
+          "id": "backdrop"
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 3,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-left"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_moon_covered",
+          "id": "lock-moon"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-right"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "id": "splitter"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_test_moon_lit",
+          "id": "practice-slab"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_sanctuary_door_closed",
+          "id": "north-door"
+        },
+        {
+          "type": "Graphics",
+          "depth": 4.5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 6,
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "id": "shadow"
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "1a5e55bf-16df-43f9-be69-61ed41f99fb2",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "6f5f35b4-3d80-4d1d-be3f-96d6c03e61eb",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "c44fe524-ee4a-42f4-aab9-4503efbc9a1a",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 18,
+          "key": "ruins_v2_beacon_stone",
+          "id": "inscription"
+        },
+        {
+          "type": "Image",
+          "depth": 25.2,
+          "key": "ruins_v2_seedling_curtain_open",
+          "id": "seedling-bed"
+        },
+        {
+          "type": "Image",
+          "depth": 26.4,
+          "key": "shadow_shielding",
+          "id": "shadow-npc"
+        },
+        {
+          "type": "Image",
+          "depth": 31.2,
+          "key": "ruins_v2_statue_notch_0",
+          "id": "statue"
+        },
+        {
+          "type": "Image",
+          "depth": 35,
+          "key": "ruins_v2_test_pedestal",
+          "id": "practice-column"
+        },
+        {
+          "type": "Image",
+          "depth": 35.1,
+          "key": "ruins_v2_test_column_notch_0",
+          "id": "practice-column-spin"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_1",
+          "id": "mirror-left"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_0",
+          "id": "mirror-right"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_ruins_altar",
+          "id": "pedestal"
+        },
+        {
+          "type": "Image",
+          "depth": 36.300000000000004,
+          "key": "ruins_v2_confirmation_waiting",
+          "id": "confirmation"
+        },
+        {
+          "type": "Image",
+          "depth": 36.400000000000006,
+          "key": "lantern_hang_2",
+          "id": "placed-lamp"
+        },
+        {
+          "type": "Image",
+          "depth": 39.5,
+          "key": "shadow_blob",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 40.5,
+          "key": "nhinh_down_idle_0",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 55,
+          "key": "lumo_3",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 68,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 69,
+          "key": "light_radial",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 70,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 71,
+          "key": "vignette",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 81,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 82,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 86,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 87,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 88,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 95,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 98,
+          "key": null,
+          "id": null
+        }
+      ],
+      "localBackdrop": {
+        "key": "ruins_v2_temple_scene_base",
+        "alpha": 1,
+        "size": [
+          640,
+          360
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      },
+      "shadow": {
+        "id": "shadow-npc",
+        "key": "shadow_shielding",
+        "sourceSize": [
+          48,
+          64
+        ],
+        "visible": true,
+        "alpha": 1,
+        "bounds": {
+          "x": 214,
+          "y": 100,
+          "width": 48,
+          "height": 64
+        }
+      },
+      "dialogue": false,
+      "browser_errors": [],
+      "screenshot_sha256": "09739fa5d445e27e2b40ee37d0803af8eeb5db212c58f7300227d30e9b84281b",
+      "interaction": null
+    },
+    {
+      "id": "07-latched-door-open-curtain-closed",
+      "fixture": {
+        "id": "07-latched-door-open-curtain-closed",
+        "flags": {
+          "intro-7": true,
+          "intro-6": true,
+          "l7-practice-seen": true,
+          "l7-two-suns": true,
+          "l7-shadow-covers": true,
+          "l7-lantern-placed": false,
+          "l7-lantern-retrieved": true,
+          "l7-route-latched": true,
+          "l7-solved": true,
+          "l7-curtain-shut": true
+        },
+        "counters": {
+          "statue": 0,
+          "ruins-left": 1,
+          "ruins-right": 0,
+          "practice": 0
+        },
+        "lanternOn": true,
+        "expect": {
+          "ready": false,
+          "latched": true
+        }
+      },
+      "status": "PASS",
+      "player": {
+        "x": 320,
+        "y": 286
+      },
+      "lanternOn": true,
+      "puzzle": {
+        "statue": 0,
+        "lightActive": false,
+        "leftLit": false,
+        "rightLit": false,
+        "moonDark": true,
+        "sunsLit": 0,
+        "confirmReady": false
+      },
+      "flags": {
+        "latched": true,
+        "curtainShut": true
+      },
+      "registered": [
+        "ruins_v2_beacon_stone",
+        "ruins_v2_confirmation_latched",
+        "ruins_v2_confirmation_ready",
+        "ruins_v2_confirmation_waiting",
+        "ruins_v2_fixed_three_route_splitter_off",
+        "ruins_v2_fixed_three_route_splitter_on",
+        "ruins_v2_inscription_under_statue",
+        "ruins_v2_lock_moon_covered",
+        "ruins_v2_lock_moon_lit",
+        "ruins_v2_lock_sun_off",
+        "ruins_v2_lock_sun_on",
+        "ruins_v2_mirror_0",
+        "ruins_v2_mirror_1",
+        "ruins_v2_mirror_2",
+        "ruins_v2_mirror_3",
+        "ruins_v2_ruins_altar",
+        "ruins_v2_sanctuary_door_closed",
+        "ruins_v2_sanctuary_door_open",
+        "ruins_v2_seedling_curtain_closed",
+        "ruins_v2_seedling_curtain_open",
+        "ruins_v2_statue_notch_0",
+        "ruins_v2_statue_notch_1",
+        "ruins_v2_statue_notch_2",
+        "ruins_v2_statue_notch_3",
+        "ruins_v2_temple_scene_base",
+        "ruins_v2_test_column_notch_0",
+        "ruins_v2_test_column_notch_1",
+        "ruins_v2_test_column_notch_2",
+        "ruins_v2_test_column_notch_3",
+        "ruins_v2_test_moon_covered",
+        "ruins_v2_test_moon_lit",
+        "ruins_v2_test_pedestal"
+      ],
+      "decalAsset": {
+        "size": [
+          48,
+          12
+        ]
+      },
+      "modules": {
+        "backdrop": {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "lock-left": {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-moon": {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "lock-right": {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        "splitter": {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        "practice-slab": {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        "north-door": {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_open",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        "shadow": {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        "inscription": {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        "seedling-bed": {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_closed",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        "shadow-npc": {
+          "id": "shadow-npc",
+          "key": "shadow_turn",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        "statue": {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_0",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        "practice-column": {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "practice-column-spin": {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        "mirror-left": {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "mirror-right": {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        "pedestal": {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        "confirmation": {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_latched",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        "placed-lamp": {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": false,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        }
+      },
+      "images": [
+        {
+          "id": "backdrop",
+          "key": "ruins_v2_temple_scene_base",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "lock-left",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 224,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-moon",
+          "key": "ruins_v2_lock_moon_covered",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 304,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "lock-right",
+          "key": "ruins_v2_lock_sun_off",
+          "sourceSize": [
+            32,
+            40
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 384,
+            "y": 92,
+            "width": 32,
+            "height": 40
+          }
+        },
+        {
+          "id": "splitter",
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "sourceSize": [
+            48,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 296,
+            "y": 214,
+            "width": 48,
+            "height": 48
+          }
+        },
+        {
+          "id": "practice-slab",
+          "key": "ruins_v2_test_moon_covered",
+          "sourceSize": [
+            16,
+            20
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 198,
+            "y": 214,
+            "width": 16,
+            "height": 20
+          }
+        },
+        {
+          "id": "north-door",
+          "key": "ruins_v2_sanctuary_door_open",
+          "sourceSize": [
+            104,
+            76
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 496,
+            "y": 4,
+            "width": 104,
+            "height": 76
+          }
+        },
+        {
+          "id": "shadow",
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        },
+        {
+          "id": "inscription",
+          "key": "ruins_v2_beacon_stone",
+          "sourceSize": [
+            34,
+            46
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 413,
+            "y": 34,
+            "width": 34,
+            "height": 46
+          }
+        },
+        {
+          "id": "seedling-bed",
+          "key": "ruins_v2_seedling_curtain_closed",
+          "sourceSize": [
+            88,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 136,
+            "y": 104,
+            "width": 88,
+            "height": 48
+          }
+        },
+        {
+          "id": "shadow-npc",
+          "key": "shadow_turn",
+          "sourceSize": [
+            48,
+            64
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 214,
+            "y": 100,
+            "width": 48,
+            "height": 64
+          }
+        },
+        {
+          "id": "statue",
+          "key": "ruins_v2_statue_notch_0",
+          "sourceSize": [
+            64,
+            88
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 288,
+            "y": 132,
+            "width": 64,
+            "height": 88
+          }
+        },
+        {
+          "id": "practice-column",
+          "key": "ruins_v2_test_pedestal",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 126,
+            "y": 216,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "practice-column-spin",
+          "key": "ruins_v2_test_column_notch_0",
+          "sourceSize": [
+            32,
+            44
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 134,
+            "y": 201,
+            "width": 32,
+            "height": 44
+          }
+        },
+        {
+          "id": "mirror-left",
+          "key": "ruins_v2_mirror_1",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 222,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "mirror-right",
+          "key": "ruins_v2_mirror_0",
+          "sourceSize": [
+            36,
+            48
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 382,
+            "y": 214,
+            "width": 36,
+            "height": 48
+          }
+        },
+        {
+          "id": "pedestal",
+          "key": "ruins_v2_ruins_altar",
+          "sourceSize": [
+            104,
+            52
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 428,
+            "y": 210,
+            "width": 104,
+            "height": 52
+          }
+        },
+        {
+          "id": "confirmation",
+          "key": "ruins_v2_confirmation_latched",
+          "sourceSize": [
+            48,
+            36
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 456,
+            "y": 218,
+            "width": 48,
+            "height": 36
+          }
+        },
+        {
+          "id": "placed-lamp",
+          "key": "lantern_hang_2",
+          "sourceSize": [
+            22,
+            48
+          ],
+          "visible": false,
+          "alpha": 1,
+          "bounds": {
+            "x": 469,
+            "y": 184,
+            "width": 22,
+            "height": 48
+          }
+        },
+        {
+          "id": null,
+          "key": "shadow_blob",
+          "sourceSize": [
+            28,
+            12
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 306,
+            "y": 297,
+            "width": 28,
+            "height": 12
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.3375,
+          "bounds": {
+            "x": 318.4070326087727,
+            "y": 252.48320170962964,
+            "width": 3.053846153846166,
+            "height": 3.053846153846166
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.65,
+          "bounds": {
+            "x": 314.48663031063603,
+            "y": 249.16150919711637,
+            "width": 4.399999999999977,
+            "height": 4.400000000000006
+          }
+        },
+        {
+          "id": null,
+          "key": "light_radial",
+          "sourceSize": [
+            256,
+            256
+          ],
+          "visible": true,
+          "alpha": 0.88,
+          "bounds": {
+            "x": 206.12784552490683,
+            "y": 168.12784552490683,
+            "width": 239.7443089501864,
+            "height": 239.7443089501864
+          }
+        },
+        {
+          "id": null,
+          "key": "vignette",
+          "sourceSize": [
+            640,
+            360
+          ],
+          "visible": true,
+          "alpha": 1,
+          "bounds": {
+            "x": 0,
+            "y": 0,
+            "width": 640,
+            "height": 360
+          }
+        }
+      ],
+      "sceneObjects": [
+        {
+          "type": "Image",
+          "depth": 0,
+          "key": "ruins_v2_temple_scene_base",
+          "id": "backdrop"
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Rectangle",
+          "depth": 0,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 3,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-left"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_moon_covered",
+          "id": "lock-moon"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_lock_sun_off",
+          "id": "lock-right"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_fixed_three_route_splitter_off",
+          "id": "splitter"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_test_moon_covered",
+          "id": "practice-slab"
+        },
+        {
+          "type": "Image",
+          "depth": 4,
+          "key": "ruins_v2_sanctuary_door_open",
+          "id": "north-door"
+        },
+        {
+          "type": "Graphics",
+          "depth": 4.5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 5,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 6,
+          "key": "art_08_ruins_of_two_halves_shadow_notch_0",
+          "id": "shadow"
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "31d5dde2-ca56-4033-b23f-cb841ed826d7",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "c5a22144-9927-4e12-9e3c-34bcffbbd809",
+          "id": null
+        },
+        {
+          "type": "Text",
+          "depth": 8,
+          "key": "7d2225cf-1c56-4e8e-a2c9-c5409450a87e",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 18,
+          "key": "ruins_v2_beacon_stone",
+          "id": "inscription"
+        },
+        {
+          "type": "Image",
+          "depth": 25.2,
+          "key": "ruins_v2_seedling_curtain_closed",
+          "id": "seedling-bed"
+        },
+        {
+          "type": "Image",
+          "depth": 26.4,
+          "key": "shadow_turn",
+          "id": "shadow-npc"
+        },
+        {
+          "type": "Image",
+          "depth": 31.2,
+          "key": "ruins_v2_statue_notch_0",
+          "id": "statue"
+        },
+        {
+          "type": "Image",
+          "depth": 35,
+          "key": "ruins_v2_test_pedestal",
+          "id": "practice-column"
+        },
+        {
+          "type": "Image",
+          "depth": 35.1,
+          "key": "ruins_v2_test_column_notch_0",
+          "id": "practice-column-spin"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_1",
+          "id": "mirror-left"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_mirror_0",
+          "id": "mirror-right"
+        },
+        {
+          "type": "Image",
+          "depth": 36.2,
+          "key": "ruins_v2_ruins_altar",
+          "id": "pedestal"
+        },
+        {
+          "type": "Image",
+          "depth": 36.300000000000004,
+          "key": "ruins_v2_confirmation_latched",
+          "id": "confirmation"
+        },
+        {
+          "type": "Image",
+          "depth": 36.400000000000006,
+          "key": "lantern_hang_2",
+          "id": "placed-lamp"
+        },
+        {
+          "type": "Image",
+          "depth": 39.5,
+          "key": "shadow_blob",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 40.5,
+          "key": "nhinh_down_idle_lit_0",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
+          "type": "Sprite",
+          "depth": 55,
+          "key": "lumo_0",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 68,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 69,
+          "key": "light_radial",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 70,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Image",
+          "depth": 71,
+          "key": "vignette",
+          "id": null
+        },
+        {
+          "type": "Graphics",
+          "depth": 81,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 82,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 86,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 87,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 88,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 95,
+          "key": null,
+          "id": null
+        },
+        {
+          "type": "Container",
+          "depth": 98,
+          "key": null,
+          "id": null
+        }
+      ],
+      "localBackdrop": {
+        "key": "ruins_v2_temple_scene_base",
+        "alpha": 1,
+        "size": [
+          640,
+          360
+        ],
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 360
+        }
+      },
+      "shadow": {
+        "id": "shadow-npc",
+        "key": "shadow_turn",
+        "sourceSize": [
+          48,
+          64
+        ],
+        "visible": true,
+        "alpha": 1,
+        "bounds": {
+          "x": 214,
+          "y": 100,
+          "width": 48,
+          "height": 64
+        }
+      },
+      "dialogue": false,
+      "browser_errors": [],
+      "screenshot_sha256": "ddb114a6bc2b9bbb7dc0986f9d48b77b5d8f8ef458b6698e815213d4169bf8a8",
+      "interaction": null
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+Use case: stylized-concept.
+Asset type: production transparent two-state water conduit sprite family for Level 06, The Sleepless Tower.
+Input images: Image 1 is the approved room mockup for the slender back-wall water conduit. Images 2 and 3 are approved G0 and prism sprites for the hard pixel clusters, dark teal stone and restrained cyan palette.
+Primary request: Create a transparent side-by-side strip of two identical narrow 56x112 wall water-conduit sprites, centered in equal cells. Left = water flowing upward toward the tower lamp, shown only by three small contained cyan-white wave/flow clusters. Right = the exact same stone/brass conduit and anchor with those three flow clusters directed downward after Return Flow. State changes only the direction of water cues; stone frame, dimensions, position and visual weight are identical. No water spills outside the conduit.
+Style: crisp pixel clusters, dark teal stone, minimal brass brackets, restrained cool blue water; readable at 56x112 and visibly quieter than the lamp.
+Constraints: true transparent background, equal cells, same 56x112 canvas and centerline; no text, arrow glyphs, labels, scenery, characters, beams, extra pipes, border or watermark. No gradients, blur, antialiasing, photoreal noise or dithering.

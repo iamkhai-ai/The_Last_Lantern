@@ -308,6 +308,8 @@ function makeScene({ campaign = true } = {}) {
     calls,
   };
   const symbols = {
+    // Identity i18n: this harness asserts the authored Vietnamese copy, which is the catalogue key.
+    tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text),
     CampaignSaveSystem: { clear() { calls.campaignCleared += 1; } },
     SaveSystem: {
       clear() { calls.legacyCleared += 1; },

@@ -1,0 +1,7 @@
+Use case: stylized-concept.
+Asset type: ONE transparent pixel-art lever state atlas, exactly TWO equal rows, 1024x1536 RGBA, no labels.
+A small tactile garden latch lever mounted on a weighty chipped slate base. Thin articulated tarnished brass arm with a pale warm wood hand grip, inset hinge and a clearly visible retaining pawl. Elevated three-quarter view exposing the top and south face of the base; horizontal edges. The night garden uses this lever beside the reservoir shutter and at the two path latches.
+TOP frame UNLATCHED: grip lifted upright/diagonally, pawl released.
+BOTTOM frame LATCHED: same base, scale, camera and housing; lever pressed down horizontally into its notch and the pawl visibly engaged. Shape difference must read at 28x32 pixels.
+Base stone blue-gray #293E48/#52666B; brass #806341/#BD975B; selective warm edge highlights. Moss only as two sparse pixels at the base. Quiet readable silhouette, no glow or colored state lamps.
+Use reference 1 for garden materials and reference 2 for matching slate/brass craftsmanship. The source must be a single consistent two-frame family. Each frame centered in its own cell with 20 percent transparent margins, stable base at same relative y. No pedestal columns, no floor tile, no scenery, no text, no arrows, no symbols, no UI, no extra objects, no checkerboard or background shadows.

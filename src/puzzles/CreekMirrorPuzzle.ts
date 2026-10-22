@@ -1,3 +1,4 @@
+import { tr } from '../i18n/catalog.ts';
 import Phaser from 'phaser';
 import { DIALOGUE_DATA } from '../data/dialogue';
 import { DialogueSystem } from '../systems/DialogueSystem';
@@ -83,17 +84,17 @@ export class CreekMirrorPuzzle {
       isEnabled: () => !this.questSystem.progress.creekBridgeActive,
       getPrompt: () =>
         this.lanternSystem.lanternPlaced
-          ? '[E] Thu hồi đèn lồng về tay'
-          : '[E] Đặt đèn lồng lên bệ chiếu sáng',
+          ? tr('[E] Thu hồi đèn lồng về tay')
+          : tr('[E] Đặt đèn lồng lên bệ chiếu sáng'),
       onInteract: () => {
         if (this.lanternSystem.lanternPlaced) {
           this.lanternSystem.retrieveLantern();
           this.pedestalSprite.setTexture('pedestal_empty');
-          this.hud.showToast('Đã thu hồi đèn lồng về tay.');
+          this.hud.showToast(tr('Đã thu hồi đèn lồng về tay.'));
         } else {
           this.lanternSystem.placeLanternAt(this.pedestalPos.x, this.pedestalPos.y - 10);
           this.pedestalSprite.setTexture('pedestal_lit');
-          this.hud.showToast('Đã đặt đèn lên bệ! Hãy xoay 2 gương [E] để dẫn tia sáng qua suối.');
+          this.hud.showToast(tr('Đã đặt đèn lên bệ! Hãy xoay 2 gương [E] để dẫn tia sáng qua suối.'));
           this.checkBeamSolution();
         }
         this.redrawBeam();
@@ -102,7 +103,7 @@ export class CreekMirrorPuzzle {
 
     // Two Rotatable Mirrors (matching 03_moonlit_creek.png)
     const mirrorCoords = [this.mirror1Pos, this.mirror2Pos];
-    const orientationNames = ['Bắc - Tây', 'Đông - Bắc (↗)', 'Đông - Nam (↘)', 'Tây - Nam'];
+    const orientationNames = [tr('Bắc - Tây'), tr('Đông - Bắc (↗)'), tr('Đông - Nam (↘)'), tr('Tây - Nam')];
 
     mirrorCoords.forEach((pos, idx) => {
       const rot = solved
@@ -123,7 +124,7 @@ export class CreekMirrorPuzzle {
         isEnabled: () => !this.questSystem.progress.creekBridgeActive,
         getPrompt: () => {
           const cur = this.questSystem.progress.creekMirrors[idx];
-          return `[E] Xoay Gương ${idx + 1} (Góc hiện tại: ${orientationNames[cur]})`;
+          return tr('[E] Xoay Gương {index} (Góc hiện tại: {orientation})', { index: idx + 1, orientation: orientationNames[cur] });
         },
         onInteract: () => {
           const next = (this.questSystem.progress.creekMirrors[idx] + 1) % 4;
@@ -172,7 +173,7 @@ export class CreekMirrorPuzzle {
       y: 220,
       getPromptBounds: () => mural.getBounds(),
       radius: 48,
-      getPrompt: () => '[E] Xem phù điêu Người Bảo Vệ Cổ Xưa',
+      getPrompt: () => tr('[E] Xem phù điêu Người Bảo Vệ Cổ Xưa'),
       onInteract: () => {
         this.dialogueSystem.startDialogue(DIALOGUE_DATA.creek_mural);
       },
@@ -213,7 +214,7 @@ export class CreekMirrorPuzzle {
       SoundSystem.playPuzzleSolved();
       this.effectsSystem.spawnBurst(this.receiverPos.x, this.receiverPos.y, 0x6ccff6, 20);
       this.hud.showToast(
-        'Tia sáng đã kết nối! Cầu đá qua Suối Trăng đã hiện lên và đèn lồng đã về tay bạn!'
+        tr('Tia sáng đã kết nối! Cầu đá qua Suối Trăng đã hiện lên và đèn lồng đã về tay bạn!')
       );
       this.spawnHopeCrystal();
     }
@@ -242,14 +243,14 @@ export class CreekMirrorPuzzle {
       isEnabled: () =>
         this.questSystem.progress.creekBridgeActive &&
         !this.questSystem.progress.crystals.hope,
-      getPrompt: () => '[E] Thu nhận Tinh thể Hy Vọng (Xanh lam)',
+      getPrompt: () => tr('[E] Thu nhận Tinh thể Hy Vọng (Xanh lam)'),
       onInteract: () => {
         if (!this.questSystem.collectCrystal('hope')) return;
         SoundSystem.playCrystalPickup();
         this.effectsSystem.spawnBurst(508, 114, 0x6ccff6, 24);
         this.crystalSprite?.destroy();
         this.crystalSprite = undefined;
-        this.hud.showToast('Đã nhận Tinh thể Hy Vọng (2/3)!');
+        this.hud.showToast(tr('Đã nhận Tinh thể Hy Vọng (2/3)!'));
         this.dialogueSystem.startDialogue(DIALOGUE_DATA.creek_crystal_hope);
       },
     });
