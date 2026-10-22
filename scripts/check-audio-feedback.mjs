@@ -4,6 +4,10 @@ import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { deriveTowerLive, migrateTowerProgress, resolveTowerSpawn, TOWER } from '../src/data/towerLayout.ts';
 import { GARDEN_ACTOR, nearestSafeGardenSpawn, NO_HELD_SPANS, readGardenState } from '../src/data/sleepingGardenLayout.ts';
+import { observatoryAudioChanges, observatoryAudioState } from '../src/systems/ObservatoryAudio.ts';
+import { OBSERVATORY_SHADOW } from '../src/data/observatoryLayout.ts';
+import { OBSERVATORY_MEMORY_RECORDING, OBSERVATORY_MEMORY_LUMO, OBSERVATORY_MEMORY_SHADOW,
+  OBSERVATORY_MEMORY_CAPTION, OBSERVATORY_MEMORY_MERGE_CAPTION } from '../src/data/observatoryStory.ts';
 
 function source(file) {
   return ts.createSourceFile(file, readFileSync(new URL(`../${file}`, import.meta.url), 'utf8'), ts.ScriptTarget.Latest, true);
@@ -195,6 +199,112 @@ test('garden save restore chooses dry or living ambience without replaying story
     method(gardenFile, 'build', { SoundSystem, GARDEN_ACTOR, nearestSafeGardenSpawn }).call(level);
     assert.deepEqual(calls, [['startAmbient', expected]]);
   }
+});
+
+const quietObservatory = {
+  supply: false, split: false, roots: 'dormant', bridge: false, doorA: false, sunDoor: false, returnLoop: false,
+};
+test('observatory restore and identical frame/room refreshes cannot replay transition sounds', () => {
+  const restored = { ...quietObservatory, supply: true, split: true, bridge: true, roots: 'bridge', sunDoor: true };
+  assert.deepEqual(observatoryAudioChanges(null, restored), []);
+  assert.deepEqual(observatoryAudioChanges(restored, { ...restored }), []);
+  assert.deepEqual(observatoryAudioChanges(restored, { ...restored }), []);
+});
+
+test('observatory supply, split, roots and doors sound only on their actual state edges', () => {
+  const live = { ...quietObservatory, supply: true, split: true, roots: 'lit', doorA: true, sunDoor: true };
+  assert.deepEqual(observatoryAudioChanges(quietObservatory, live), ['tubeOn', 'lightPulse', 'rootsWarm', 'doorOpen']);
+  const bridge = { ...live, bridge: true, roots: 'bridge' };
+  assert.deepEqual(observatoryAudioChanges(live, bridge), ['rootBridgeGrow']);
+  const loop = { ...bridge, returnLoop: true };
+  assert.deepEqual(observatoryAudioChanges(bridge, loop), ['stoneRing']);
+  const off = { ...loop, supply: false, split: false, bridge: false, roots: 'retracted-dark', doorA: false };
+  assert.deepEqual(observatoryAudioChanges(loop, off), ['tubeOff', 'rootBridgeRetract', 'doorClose']);
+  assert.deepEqual(observatoryAudioChanges(off, off), []);
+});
+
+test('root retraction waits for the same safety hold as the visible bridge, while the supply stops immediately', () => {
+  const world = { supplyLive: false, bridgeEligible: false, rootState: 'retracted-dark',
+    doorAUnlocked: false, doorALatched: true, sunDoorUnlocked: false, sunDoorLatched: true, returnLoopOpen: true };
+  const state = { activeBeamPath: { routeId: 'off' } };
+  const held = observatoryAudioState(world, state, true);
+  const previous = { ...held, supply: true, split: true, roots: 'bridge' };
+  assert.deepEqual(observatoryAudioChanges(previous, held), ['tubeOff']);
+  const retracted = observatoryAudioState(world, state, false);
+  assert.deepEqual(observatoryAudioChanges(held, retracted), ['rootBridgeRetract']);
+  assert.equal(retracted.doorA, true, 'latched doors remain open silently after the light stops');
+  assert.equal(retracted.sunDoor, true);
+});
+
+const observatoryFile = 'src/scenes/CampaignScene.ts';
+function memoryHarness() {
+  const calls = [], dialogue = [], timers = [];
+  const SoundSystem = {
+    setMusicLevel: (...args) => calls.push(['music', ...args]),
+    playObservatoryCue: cue => calls.push([cue]),
+    startObservatoryMemoryWeather: () => { calls.push(['weather']); return () => calls.push(['stopWeather']); },
+  };
+  const scene = {
+    activeObservatoryRoom: 'observatory', observatoryMemoryPlaying: false,
+    observatoryMemoryGeneration: 0, observatoryMemoryTimers: [], roomObjects: [],
+    textures: { exists: () => false }, cameras: { main: { flash: () => calls.push(['flash']) } },
+    time: { delayedCall(delay, callback) {
+      const event = { delay, callback, removed: false, remove() { this.removed = true; } }; timers.push(event); return event;
+    } },
+    showObservatoryCaption() {}, say(lines, done) { dialogue.push({ lines, done }); },
+    cancelObservatoryMemory: method(observatoryFile, 'cancelObservatoryMemory', { SoundSystem }),
+  };
+  const play = method(observatoryFile, 'playObservatoryMemory', {
+    SoundSystem, getShadowArtKey: () => null, OBSERVATORY_MEMORY_RECORDING, OBSERVATORY_MEMORY_LUMO,
+    OBSERVATORY_MEMORY_SHADOW, OBSERVATORY_MEMORY_CAPTION, OBSERVATORY_MEMORY_MERGE_CAPTION, OBSERVATORY_SHADOW,
+  });
+  const advance = delay => {
+    const timer = timers.find(timer => timer.delay === delay && !timer.removed);
+    assert.ok(timer, `the ${delay}ms scene beat exists`); timer.removed = true; timer.callback();
+  };
+  return { scene, calls, dialogue, timers, play, advance };
+}
+
+test('recording sounds follow the memory sequence and the final answer holds 3.2 seconds without music', () => {
+  const { scene, calls, dialogue, play, advance } = memoryHarness();
+  play.call(scene);
+  assert.equal(scene.observatoryMemoryPlaying, true);
+  assert.deepEqual(calls, [['music', 0.2], ['weather']]);
+  dialogue[0].done();
+  assert.deepEqual(calls.at(-1), ['memoryImpact']);
+  advance(650); advance(2500); advance(3700);
+  assert.deepEqual(calls.slice(-5), [['memoryWaterFade'], ['memoryCracks'], ['stopWeather'], ['memoryFlash'], ['flash']]);
+  assert.equal(dialogue.length, 1, 'Lumo does not speak over the flash');
+  advance(5200);
+  assert.deepEqual(dialogue[1].lines, OBSERVATORY_MEMORY_LUMO);
+  dialogue[1].done();
+  assert.deepEqual(calls.at(-1), ['memoryMerge']);
+  advance(2200);
+  assert.deepEqual(dialogue[2].lines, OBSERVATORY_MEMORY_SHADOW);
+  dialogue[2].done();
+  assert.deepEqual(calls.at(-1), ['music', 0]);
+  assert.equal(scene.observatoryMemoryPlaying, true, 'the rest keeps movement and interactions locked');
+  advance(3200);
+  assert.equal(scene.observatoryMemoryPlaying, false);
+  assert.deepEqual(calls.at(-1), ['music', 1, 0.6]);
+  assert.equal(scene.observatoryMemoryTimers.length, 0);
+});
+
+test('tearing down a recording cancels timed cues, stale dialogue callbacks and its music duck', () => {
+  const { scene, calls, dialogue, timers, play } = memoryHarness();
+  play.call(scene);
+  dialogue[0].done();
+  scene.cancelObservatoryMemory();
+  const after = calls.length;
+  for (const timer of timers) {
+    assert.equal(timer.removed, true);
+    timer.callback();
+  }
+  dialogue[0].done();
+  assert.equal(calls.length, after, 'even a stale callback delivered after removal is harmless');
+  assert.deepEqual(calls.slice(-2), [['stopWeather'], ['music', 1, 0.6]]);
+  assert.equal(scene.observatoryMemoryPlaying, false);
+  assert.equal(scene.observatoryMemoryTimers.length, 0);
 });
 
 console.log(`\n${count - failures}/${count} audio feedback checks passed.`);
