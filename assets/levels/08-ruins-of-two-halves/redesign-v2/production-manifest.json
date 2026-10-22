@@ -22,14 +22,14 @@
     }
   },
   "authoring_sha256": {
-    "scripts/prepare-level08-art.cjs": "c1433dcf49a2b8aa1f270a097fde041c2cc97786e53ea4481abd374444a6ff99",
-    "scripts/export-level08-art.cjs": "e27ce641075a41d1895e1849e0ae38dbe356a2b8c6bd4d22814e460b3bed3f7c",
+    "scripts/prepare-level08-art.cjs": "a5a6e4a25c0b2d230a59e2d06c3b92c3835e608d9befce7876793a20fb7de93d",
+    "scripts/export-level08-art.cjs": "d498b66c242491aadd05169b144bcd41166129bdbab7b5588831f894b7c88c40",
     "assets/levels/08-ruins-of-two-halves/redesign-v2/art-redesign-brief.txt": "28777afc8b6928e2ec9957a868730afb01d694955c806e385419dfe8847460b3"
   },
   "sources": [
     {
       "file": "sources/baseline-catalog.json",
-      "sha256": "e3ca9c3f14d932ffd75fce29fe9643fa9ca208a794f11dbbb2f31fa5b15ed83d"
+      "sha256": "767aa3a3b96a39fe21b234b2562096ce1d9dec19fde222dce11773f372f2a258"
     },
     {
       "file": "sources/beacon_stone-baseline.png",
@@ -61,7 +61,7 @@
     },
     {
       "file": "sources/generation-prompts.json",
-      "sha256": "beaba44212ccec94d189fb18e99f047227e6c66845c7fd9cd706b6a71a1a3c09"
+      "sha256": "24eabd5ba52480fda79eae580bc3c863cc2ee15a5f235ff1e9bbb99946a2db8d"
     },
     {
       "file": "sources/inscription-under-statue-original.png",
@@ -89,7 +89,7 @@
     },
     {
       "file": "sources/mirror_0-original.png",
-      "sha256": "ef21fb72d1f87b0490fcf57aabbc5242669b748a91450cdcb9aee2470ebd60b2"
+      "sha256": "7fb82d1b20842548d0a43b2eb1bf17da6438d1dc8388c8a34ca6a28b9aae0c5c"
     },
     {
       "file": "sources/mirror_1-baseline.png",
@@ -97,7 +97,7 @@
     },
     {
       "file": "sources/mirror_1-original.png",
-      "sha256": "eee4821b7c1dcc0b1fab8cf819b9af3c9dbbc266767fa6e68249f65e203b1af0"
+      "sha256": "2795e38668beb07b54961febee522c53034b7afef98115a811d6591a415303bf"
     },
     {
       "file": "sources/mirror_2-baseline.png",
@@ -105,7 +105,7 @@
     },
     {
       "file": "sources/mirror_2-original.png",
-      "sha256": "2122e2e24399de2d229e0bfa69163211f79bb41cd968bfb2cbcd639edd902d62"
+      "sha256": "b5161a3ec089d4289af16a0d83310a3dacf8f5d89eee6d32a7c6594ceb40ca0d"
     },
     {
       "file": "sources/mirror_3-baseline.png",
@@ -113,15 +113,15 @@
     },
     {
       "file": "sources/mirror_3-original.png",
-      "sha256": "5babb736ab46857ab73cfeae20280e2dde912be5f9a66e93752f174377e98966"
+      "sha256": "be323599e3248599ae2b606fc5fef5da348d8bff3cbafc3ba35a87e6ca37096e"
     },
     {
       "file": "sources/orientation-prompts.json",
-      "sha256": "dfae0943ccb207d588a4c13233d74b4bb5310ba3c3eec53679163d27cfda95e9"
+      "sha256": "0edf30579e1a0e09a80b8a448dac2410df374f93f791f8f7575177cecb73e4ff"
     },
     {
       "file": "sources/prop-prompts.json",
-      "sha256": "118f3e1678896d2b612124baaa198088d1e261fc3a756a7ce70d1267dc36c84f"
+      "sha256": "67ffcbfc2dc2b30e1f13e73b86d149528fc7281588618153274f2b19a3ad55a6"
     },
     {
       "file": "sources/ruins_altar-baseline.png",
@@ -165,7 +165,7 @@
     },
     {
       "file": "sources/temple-scene-base-original.png",
-      "sha256": "a9831352e53db509254ac0149124fc78c5faebf7c9811216229ac560a571b892"
+      "sha256": "709e1f653d8cfe3e176b00c052915e3407edaa5ee337aa7acb30f687b9739e6f"
     },
     {
       "file": "sources/test-pedestal-original.png",
@@ -1073,8 +1073,8 @@
       ],
       "png_colour_type": 6,
       "family": "mirror",
-      "family_colours": 128,
-      "colours": 113,
+      "family_colours": 40,
+      "colours": 39,
       "opaque_box": {
         "left": 0,
         "top": 0,
@@ -1088,7 +1088,7 @@
       ],
       "source": "sources/mirror_0-original.png",
       "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_0-baseline.png",
-      "sha256": "778e613a8427f02086acfaf5c47e155299fc3cb743a571d4eb22da7489c897a6"
+      "sha256": "f9a88bafb59ddafce4be84e6d715bf01d84a367d30d486c50b202599ea38f583"
     },
     {
       "file": "sprites/mirror_1.png",
@@ -1098,8 +1098,8 @@
       ],
       "png_colour_type": 6,
       "family": "mirror",
-      "family_colours": 128,
-      "colours": 108,
+      "family_colours": 40,
+      "colours": 39,
       "opaque_box": {
         "left": 0,
         "top": 0,
@@ -1113,7 +1113,7 @@
       ],
       "source": "sources/mirror_1-original.png",
       "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_1-baseline.png",
-      "sha256": "64a2659a1ce57ecdb2b23773e3896232f5365950b69fa7a4568c72cd088bd8f9"
+      "sha256": "09e552af25ac4de0686aef0fa0b00fac36a81ca3b39497a1263d7b8cfe1d2f86"
     },
     {
       "file": "sprites/mirror_2.png",
@@ -1123,8 +1123,8 @@
       ],
       "png_colour_type": 6,
       "family": "mirror",
-      "family_colours": 128,
-      "colours": 116,
+      "family_colours": 40,
+      "colours": 40,
       "opaque_box": {
         "left": 0,
         "top": 0,
@@ -1138,7 +1138,7 @@
       ],
       "source": "sources/mirror_2-original.png",
       "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_2-baseline.png",
-      "sha256": "68d0646aa206348a700474bf7262476758d192e1d49a8a47012b10990df5bcb1"
+      "sha256": "6d4f2677bbeded0c3aa0f6617362834ec233e40208bed6dcf3437bcff522c380"
     },
     {
       "file": "sprites/mirror_3.png",
@@ -1148,8 +1148,8 @@
       ],
       "png_colour_type": 6,
       "family": "mirror",
-      "family_colours": 128,
-      "colours": 115,
+      "family_colours": 40,
+      "colours": 40,
       "opaque_box": {
         "left": 0,
         "top": 0,
@@ -1163,7 +1163,7 @@
       ],
       "source": "sources/mirror_3-original.png",
       "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_3-baseline.png",
-      "sha256": "fbd003dd4570875adba84a0fe2fe2b58f1f37a1a50fe26cd457a5f5f8e876cda"
+      "sha256": "0976c495b122c163026b3f58f4ad7cfc9a2b58ab0773f4b51da2883873c1ba41"
     },
     {
       "file": "sprites/ruins_altar.png",
@@ -1237,7 +1237,7 @@
       ],
       "source": "sources/temple-scene-base-original.png",
       "baseline": null,
-      "sha256": "a1fa7c721ca4e7c9a2f1556169d1edc27c5dbb5426ee9cbb6439312605c7598c"
+      "sha256": "ea7a38df1ec562db71fa3c39ce7b75eede176db322a3763e6351c1f3b497fe2c"
     },
     {
       "file": "sprites/inscription-under-statue.png",

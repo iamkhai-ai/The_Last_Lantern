@@ -1,0 +1,27 @@
+name: verify
+
+# The release gate for the `deploy` branch. Make the `verify` job a required status check in the branch
+# protection rule so nothing can be merged into `deploy` unless it passes.
+on:
+  pull_request:
+    branches: [deploy]
+  push:
+    branches: [deploy]
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Some check scripts import .ts files directly, which needs Node's built-in type stripping (22.6+).
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run verify

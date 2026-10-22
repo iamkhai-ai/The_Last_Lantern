@@ -187,6 +187,8 @@ export const TOWER_GARDEN_CREEK_ENTRIES: readonly CatalogEntry[] = [
   entry('l6.prompt.g1', 'E · Xoay gương nhánh G1', 'E · Turn branch mirror G1'),
   entry('l6.prompt.g2', 'E · Xoay gương nhánh G2', 'E · Turn branch mirror G2'),
   entry('l6.prompt.callPlate', 'E · Gọi Lumo tới ấn C', 'E · Call Lumo onto plate C'),
+  entry('l6.prompt.lumoReunited', 'Lumo đang ở bên Nhinh', 'Lumo is beside Nhinh'),
+  entry('l6.prompt.lumoReturning', 'Lumo đang bay về', 'Lumo is flying back'),
   entry('l6.prompt.leverHeld', 'E · Cần đang giữ chế độ Trả dòng', 'E · Lever held in Return Flow'),
   entry('l6.prompt.leverPull', 'E · Gạt cần Trả dòng', 'E · Pull the Return Flow lever'),
   entry('l6.prompt.chamberLocked', 'E · Buồng tinh thể còn khóa', 'E · Crystal chamber is still locked'),

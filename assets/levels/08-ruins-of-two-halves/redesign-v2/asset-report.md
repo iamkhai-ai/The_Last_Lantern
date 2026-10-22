@@ -28,10 +28,10 @@ Generated from decoded PNG pixels, not declared dimensions.
 | test-column-notch-2.png | 32×44 | 109 | 2, 4, 28, 38 | PASS | 128 |
 | test-column-notch-3.png | 32×44 | 97 | 2, 4, 28, 38 | PASS | 128 |
 | test-pedestal.png | 48×36 | 128 | 3, 6, 43, 27 | PASS | 128 |
-| mirror_0.png | 36×48 | 113 | 0, 0, 36, 48 | PASS | 128 |
-| mirror_1.png | 36×48 | 108 | 0, 0, 36, 48 | PASS | 128 |
-| mirror_2.png | 36×48 | 116 | 0, 0, 36, 48 | PASS | 128 |
-| mirror_3.png | 36×48 | 115 | 0, 0, 36, 48 | PASS | 128 |
+| mirror_0.png | 36×48 | 39 | 0, 0, 36, 48 | PASS | 40 |
+| mirror_1.png | 36×48 | 39 | 0, 0, 36, 48 | PASS | 40 |
+| mirror_2.png | 36×48 | 40 | 0, 0, 36, 48 | PASS | 40 |
+| mirror_3.png | 36×48 | 40 | 0, 0, 36, 48 | PASS | 40 |
 | ruins_altar.png | 104×52 | 128 | 8, 6, 88, 42 | PASS | 128 |
 | beacon_stone.png | 34×46 | 127 | 6, 4, 18, 38 | PASS | 127 |
 | temple-scene-base.png | 640×360 | 128 | 0, 0, 640, 360 | PASS | 128 |

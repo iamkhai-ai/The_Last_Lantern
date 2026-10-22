@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "frame_order": "row-major after alpha-gutter discovery using alpha>=128 occupancy; source alpha is preserved inside the tight subject crop; all cell bounds and hashes are emitted into asset-manifest-v3.json",
+  "resampling": "Pillow NEAREST; fit is uniform and preserves source proportions",
+  "anchor_rule": "inherit each v2 native pivot; standing props stay bottom-center, wall/ground layers retain their declared placement anchor",
+  "sources": {
+    "mirror-family": {"file": "mirror-family.png", "alpha_bbox_threshold": 128},
+    "pedestal-family": {"file": "pedestal-family.png", "alpha_bbox_threshold": 128},
+    "statue-family": {"file": "statue-family.png", "alpha_bbox_threshold": 128},
+    "tube-family": {"file": "tube-family.png", "alpha_bbox_threshold": 128},
+    "seal-family": {"file": "seal-family.png", "alpha_bbox_threshold": 128},
+    "sun-lock-family": {"file": "sun-lock-family.png", "alpha_bbox_threshold": 128},
+    "latch-family": {"file": "latch-family.png", "alpha_bbox_threshold": 128},
+    "splitter-family": {"file": "splitter-family.png", "alpha_bbox_threshold": 128},
+    "root-family": {"file": "root-family.png", "alpha_bbox_threshold": 128},
+    "final-door-family": {"file": "final-door-family.png", "alpha_bbox_threshold": 128},
+    "arch-family": {"file": "arch-family.png", "alpha_bbox_threshold": 128},
+    "loop-family": {"file": "loop-family.png", "alpha_bbox_threshold": 128},
+    "star-map-table-source": {"file": "star-map-table-source.png", "alpha_bbox_threshold": 128},
+    "final-record-source": {"file": "final-record-source.png", "alpha_bbox_threshold": 128},
+    "balance-crystal-source": {"file": "balance-crystal-source.png", "alpha_bbox_threshold": 128},
+    "learned-marks-source": {"file": "learned-marks-source.png", "alpha_bbox_threshold": 128},
+    "pipe-family": {"file": "pipe-family.png", "alpha_bbox_threshold": 128, "frame_order": ["horizontal-on", "horizontal-off", "vertical-on", "vertical-off"], "frame_regions": [[0, 90, 760, 170], [760, 90, 759, 170], [260, 260, 240, 740], [1000, 260, 270, 740]]},
+    "wheel-source": {"file": "wheel-source.png", "alpha_bbox_threshold": 128}
+  },
+  "background_samples": {
+    "entrance": {"floor_sample": [72, 145, 496, 142], "wall_sample": [32, 60, 576, 40], "floor_tone": {"brightness": 0.82, "contrast": 0.72}},
+    "corridor": {"floor_sample": [72, 124, 496, 162], "wall_sample": [32, 58, 576, 32], "floor_tone": {"brightness": 0.82, "contrast": 0.72}},
+    "observatory": {"floor_sample": [72, 172, 496, 112], "wall_sample": [104, 101, 360, 40], "floor_tone": {"brightness": 0.82, "contrast": 0.72}}
+  },
+  "asset_rules": {
+    "mirror": {"source_id": "mirror-family", "frame_from_id_suffix": true},
+    "lantern-pedestal": {"source_id": "pedestal-family", "frames_by_state": {"empty": 0, "lit": 1}},
+    "statue": {"source_id": "statue-family", "frames_by_state": {"facing-0": 0, "facing-1": 1, "facing-2": 2, "facing-3": 3}},
+    "lumo-tube": {"source_id": "tube-family", "frames_by_state": {"dark": 0, "remembered": 1}},
+    "lumo-seal": {"source_id": "seal-family", "frames_by_state": {"covered": 0, "revealed": 1}},
+    "sun-lock": {"source_id": "sun-lock-family", "frames_by_state": {"off": 0, "on": 1}},
+    "latch": {"source_id": "latch-family", "frames_by_state": {"locked": 0, "latched": 1}},
+    "splitter": {"source_id": "splitter-family", "frames_by_state": {"off": 0, "on": 1}},
+    "root-bed": {"source_id": "root-family", "frames_by_state": {"dark": 0, "lit": 1, "bridge": 2, "retracted-dark": 3}},
+    "final-door": {"source_id": "final-door-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "stone-return-loop": {"source_id": "loop-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "star-map-table": {"source_id": "star-map-table-source", "frames_by_state": {"static": 0}},
+    "final-record": {"source_id": "final-record-source", "frames_by_state": {"static": 0}},
+    "balance-crystal": {"source_id": "balance-crystal-source", "frames_by_state": {"static": 0}},
+    "learned-marks": {"source_id": "learned-marks-source", "frames_by_state": {"static": 0}},
+    "scenery-wheel": {"source_id": "wheel-source", "frames_by_state": {"static": 0}},
+    "door-a-entrance": {"source_id": "arch-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "door-a-corridor": {"source_id": "arch-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "sun-door-corridor": {"source_id": "arch-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "sun-door-observatory": {"source_id": "arch-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "return-loop-entrance": {"source_id": "arch-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "return-loop-observatory": {"source_id": "arch-family", "frames_by_state": {"closed": 0, "open": 1}},
+    "entrance": {"source_id": "unused", "frames_by_state": {}},
+    "corridor": {"source_id": "unused", "frames_by_state": {}},
+    "observatory": {"source_id": "unused", "frames_by_state": {}}
+  },
+  "asset_overrides": {
+    "lumo-tube-dark": {"source_id": "tube-family", "frame": 0, "top_pad": 2},
+    "lumo-tube-remembered": {"source_id": "tube-family", "frame": 1, "top_pad": 2},
+    "lumo-seal-covered": {"source_id": "seal-family", "frame": 0, "top_pad": 10},
+    "lumo-seal-revealed": {"source_id": "seal-family", "frame": 1, "top_pad": 10},
+    "return-loop-observatory-closed": {"source_id": "arch-family", "frame": 0, "fit_box": [48, 36], "pad_offset": [0, 6], "content_rect": [0, 6, 48, 36]},
+    "return-loop-observatory-open": {"source_id": "arch-family", "frame": 1, "fit_box": [48, 36], "pad_offset": [0, 6], "content_rect": [0, 6, 48, 36]}
+  },
+  "explicit_v2_reuse": {
+    "allowed_families": ["floor-material", "loop-path", "source-ring", "latch-grille", "final-door-sill", "memory", "memory-guardian", "door-a-entrance", "door-a-corridor", "sun-door-corridor", "sun-door-observatory", "return-loop-entrance", "return-loop-observatory", "star-map-table"],
+    "reason": "minor floor/path/threshold stamp, memory effect derivative, or transparent blank overlay not covered by the new generated families",
+    "source": "Each listed item retains the exact v2 source path and its bytes are checked before the v3 copy is written. No v2 runtime file is mutated."
+  }
+}

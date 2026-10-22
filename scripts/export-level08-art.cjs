@@ -70,6 +70,9 @@ async function fit(e){
 }
 async function backdrop(){
   const file=path.join(SRC,'temple-scene-base-original.png');
+  // A source already authored at the native 640x360 keeps its floor, buttress and cap exactly as painted.
+  const meta=await sharp(file).metadata();
+  if(meta.width===640&&meta.height===360)return quantize(await sharp(file).ensureAlpha().png().toBuffer());
   const base=await sharp(file).resize(640,360,{fit:'fill',kernel:'nearest'}).ensureAlpha().png().toBuffer();
   // Place generated material inside the exact authored walkable/solid regions.
   // The guide's buttress is a solid pier, not the model's courtyard inset.
