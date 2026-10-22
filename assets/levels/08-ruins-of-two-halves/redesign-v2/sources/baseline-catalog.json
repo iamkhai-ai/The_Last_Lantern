@@ -1,0 +1,248 @@
+[
+  {
+    "name": "confirmation-latched",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-latched.png",
+    "size": [
+      48,
+      36
+    ]
+  },
+  {
+    "name": "confirmation-ready",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-ready.png",
+    "size": [
+      48,
+      36
+    ]
+  },
+  {
+    "name": "confirmation-waiting",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-waiting.png",
+    "size": [
+      48,
+      36
+    ]
+  },
+  {
+    "name": "fixed-three-route-splitter-off",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-off.png",
+    "size": [
+      48,
+      48
+    ]
+  },
+  {
+    "name": "fixed-three-route-splitter-on",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-on.png",
+    "size": [
+      48,
+      48
+    ]
+  },
+  {
+    "name": "lock-moon-covered",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-covered.png",
+    "size": [
+      32,
+      40
+    ]
+  },
+  {
+    "name": "lock-moon-lit",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-lit.png",
+    "size": [
+      32,
+      40
+    ]
+  },
+  {
+    "name": "lock-sun-off",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+    "size": [
+      32,
+      40
+    ]
+  },
+  {
+    "name": "lock-sun-on",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+    "size": [
+      32,
+      40
+    ]
+  },
+  {
+    "name": "sanctuary-door-closed",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-closed.png",
+    "size": [
+      104,
+      76
+    ]
+  },
+  {
+    "name": "sanctuary-door-open",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-open.png",
+    "size": [
+      104,
+      76
+    ]
+  },
+  {
+    "name": "seedling-curtain-closed",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-closed.png",
+    "size": [
+      88,
+      48
+    ]
+  },
+  {
+    "name": "seedling-curtain-open",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-open.png",
+    "size": [
+      88,
+      48
+    ]
+  },
+  {
+    "name": "statue-notch-0",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+    "size": [
+      64,
+      88
+    ]
+  },
+  {
+    "name": "statue-notch-1",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+    "size": [
+      64,
+      88
+    ]
+  },
+  {
+    "name": "statue-notch-2",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-2.png",
+    "size": [
+      64,
+      88
+    ]
+  },
+  {
+    "name": "statue-notch-3",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-3.png",
+    "size": [
+      64,
+      88
+    ]
+  },
+  {
+    "name": "test-column-notch-0",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-0.png",
+    "size": [
+      32,
+      44
+    ]
+  },
+  {
+    "name": "test-column-notch-1",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-1.png",
+    "size": [
+      32,
+      44
+    ]
+  },
+  {
+    "name": "test-column-notch-2",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-2.png",
+    "size": [
+      32,
+      44
+    ]
+  },
+  {
+    "name": "test-column-notch-3",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-3.png",
+    "size": [
+      32,
+      44
+    ]
+  },
+  {
+    "name": "test-moon-covered",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-covered.png",
+    "size": [
+      16,
+      20
+    ]
+  },
+  {
+    "name": "test-moon-lit",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-lit.png",
+    "size": [
+      16,
+      20
+    ]
+  },
+  {
+    "name": "test-pedestal",
+    "baseline": "assets/levels/08-ruins-of-two-halves/sprites/test-pedestal.png",
+    "size": [
+      48,
+      36
+    ]
+  },
+  {
+    "name": "mirror_0",
+    "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_0-baseline.png",
+    "size": [
+      36,
+      48
+    ],
+    "original": "src/assets/mirror_0.png"
+  },
+  {
+    "name": "mirror_1",
+    "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_1-baseline.png",
+    "size": [
+      36,
+      48
+    ],
+    "original": "src/assets/mirror_1.png"
+  },
+  {
+    "name": "mirror_2",
+    "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_2-baseline.png",
+    "size": [
+      36,
+      48
+    ],
+    "original": "src/assets/mirror_2.png"
+  },
+  {
+    "name": "mirror_3",
+    "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/mirror_3-baseline.png",
+    "size": [
+      36,
+      48
+    ],
+    "original": "src/assets/mirror_3.png"
+  },
+  {
+    "name": "ruins_altar",
+    "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/ruins_altar-baseline.png",
+    "procedural": true,
+    "size": [
+      104,
+      52
+    ]
+  },
+  {
+    "name": "beacon_stone",
+    "baseline": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/beacon_stone-baseline.png",
+    "procedural": true,
+    "size": [
+      34,
+      46
+    ]
+  }
+]

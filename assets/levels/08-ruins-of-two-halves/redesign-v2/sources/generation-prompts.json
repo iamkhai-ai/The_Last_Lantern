@@ -1,0 +1,25 @@
+[
+  {
+    "tag": "temple-scene-base",
+    "args": {
+      "transparent_background": false,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/backdrop-layout.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/sprites/temple-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Production pixel art background, full-frame opaque 640x360, viewed top-down with shallow front-facing stone wall faces like reference 2. Image 1 is the EXACT mandatory geometry mask, image 2 is style/palette only, image 3 is old temple material reference only, disregard its old layout. Redraw image 1 as a quiet ruined temple courtyard with worn cool slate-grey stone, subtle stone joints, tiny restrained dark moss in wall joints, worn grey brass trim only where needed. Floor rectangle x24..616 y80..310, completely empty low contrast stone flagstones. North masonry band y0..80, south masonry band y310..360, west wall x0..24, east wall x616..640. Solid square west buttress x24..88 y80..176 with crisp boundary. Two empty dark wall recesses: x396..464 y34..80 and x496..600 y4..80. No architecture other than those wall bands/buttress. Keep floor completely open, no plants or rubble on floor. Native pixel clusters, muted neutral desaturated palette, hard pixel edges, nearest neighbour, no anti-aliasing, no dithering, no speckled noise, no gradient. Uniform moonlit ambient material shading, no baked cast shadows, no light source or halo. No statue, no door, no altar, no mirror, no glyphs, no text, no characters, no UI, no beam grooves or channels. These are separate runtime objects. Exactly match mask composition and 16:9 framing; no border or external scenery."
+    }
+  },
+  {
+    "tag": "statue-notch-0",
+    "args": {
+      "transparent_background": true,
+      "referenced_image_paths": [
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/08-ruins-of-two-halves/redesign-v2/sources/guides/statue-notch-0-8x.png",
+        "C:/Users/Admin/.codex/worktrees/level08-art-v2/the-last-lantern/assets/levels/07-the-sleeping-garden/redesign-v2/sprites/garden-scene-base.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit target image1 is a 64x88 game sprite enlarged exactly8x. Image2 is cool slate stone material/style reference. Redraw ONLY target1 as a worn four-faced temple stone monument on its elliptical turning plinth. Preserve exact canvas, broad front face, bevel direction, proportions, silhouette, all occupied boundaries and registration. Broad upright face with simple weathered blank inset stone relief instead of old noisy blue texture. The large oval at bottom is physical turning plinth, render it as dark stone with thin worn brass turning rim, NOT a shadow. Top bevel cool grey, narrow side darker slate, moss only a few joint clusters. Remove small yellow light markers; use worn brass material in their place. Hand-clustered crisp true pixel art designed to be reduced to native64x88, few large clear stone planes, under48 colours, no noise, no dithering, no antialiasing. Do not add face, text, symbol, lock glyph, light, beam, glow, lamp, cast shadow, character, UI. Transparent outside physical sprite. Preserve broad face orientation exactly."
+    }
+  }
+]

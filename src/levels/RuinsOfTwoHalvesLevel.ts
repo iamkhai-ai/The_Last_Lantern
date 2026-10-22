@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { getLevelArtKey, getShadowArtKey } from '../art/CampaignArt';
+import { getRuinsArtKey, getRuinsV2ArtKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -314,9 +314,11 @@ export class RuinsOfTwoHalvesLevel {
 
   private artKey(name: string): string | undefined {
     if (name.startsWith('mirror_') || BASE_TEXTURES.has(name)) {
+      const localKey = getRuinsV2ArtKey(name);
+      if (localKey) return localKey;
       return this.scene.textures.exists(name) ? name : undefined;
     }
-    return getLevelArtKey(7, name) ?? undefined;
+    return getRuinsArtKey(name) ?? undefined;
   }
 
   private addImage(id: string, name: string, x: number, y: number, depth: number): Phaser.GameObjects.Image | undefined {
@@ -333,22 +335,26 @@ export class RuinsOfTwoHalvesLevel {
     this.clearVisuals();
     this.interactions.clear();
 
-    this.addImage('backdrop', 'temple-scene-base', 320, 180, RUINS_DEPTH.backdrop)?.setAlpha(0.72);
+    const backdrop = this.addImage('backdrop', 'temple-scene-base', 320, 180, RUINS_DEPTH.backdrop);
+    const hasLocalBackdrop = backdrop?.texture.key.startsWith('ruins_v2_') === true;
+    if (!hasLocalBackdrop) {
+      backdrop?.setAlpha(0.72);
 
-    const floor = this.scene.add.tileSprite(0, 0, 640, 360, 'ground_stone')
-      .setOrigin(0).setTint(0x9a8f79).setAlpha(0.72).setDepth(RUINS_DEPTH.floor);
-    this.track(floor);
+      const floor = this.scene.add.tileSprite(0, 0, 640, 360, 'ground_stone')
+        .setOrigin(0).setTint(0x9a8f79).setAlpha(0.72).setDepth(RUINS_DEPTH.floor);
+      this.track(floor);
 
-    const masonry = this.scene.add.graphics().setDepth(RUINS_DEPTH.masonry);
-    masonry.fillStyle(0x261f1c, 0.94);
-    for (const wall of RUINS_WALLS) masonry.fillRect(wall.x, wall.y, wall.width, wall.height);
-    masonry.lineStyle(2, 0x746352, 0.55);
-    for (const wall of RUINS_WALLS) masonry.strokeRect(wall.x, wall.y, wall.width, wall.height);
-    masonry.lineStyle(1, 0x8a7a63, 0.24);
-    for (let y = 92; y < 304; y += 22) masonry.lineBetween(26, y, 126, y);
-    for (let y = 92; y < 304; y += 22) masonry.lineBetween(534, y, 614, y);
-    for (let y = 60; y < 80; y += 10) masonry.lineBetween(0, y, 640, y);
-    this.track(masonry);
+      const masonry = this.scene.add.graphics().setDepth(RUINS_DEPTH.masonry);
+      masonry.fillStyle(0x261f1c, 0.94);
+      for (const wall of RUINS_WALLS) masonry.fillRect(wall.x, wall.y, wall.width, wall.height);
+      masonry.lineStyle(2, 0x746352, 0.55);
+      for (const wall of RUINS_WALLS) masonry.strokeRect(wall.x, wall.y, wall.width, wall.height);
+      masonry.lineStyle(1, 0x8a7a63, 0.24);
+      for (let y = 92; y < 304; y += 22) masonry.lineBetween(26, y, 126, y);
+      for (let y = 92; y < 304; y += 22) masonry.lineBetween(534, y, 614, y);
+      for (let y = 60; y < 80; y += 10) masonry.lineBetween(0, y, 640, y);
+      this.track(masonry);
+    }
 
     this.conduitGraphics = this.scene.add.graphics().setDepth(RUINS_DEPTH.conduit);
     this.track(this.conduitGraphics);
