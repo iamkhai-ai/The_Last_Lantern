@@ -90,3 +90,11 @@ Decisions recorded: the coming-soon gate is removed for index >= 4 (mirrors `cod
 - The `Hệ thống` speaker line for the switch narration was removed.
 - Gaps of 18/23px between decorative bases (for example between the call base and neighbouring art) are decoration only and are not required routes; required routes keep >= 36px thresholds and >= 48px corridors.
 - Not changed: the tower lamp/fountain wall art sits behind the HUD title band (depth 8 vs HUD 86); their alpha was not measured here. NOT_RUN: browser/visual check of the lifted G2 cluster and the stairs landing at the lower-left spiral staircase of `tower-scene-base.png`.
+
+## Cập nhật 2026-10-22: các vật đứng theo luật 8px
+
+- Các vật đứng có phần đế (nguồn thử, nguồn chính, gương thử, G0, G1, G2, cột gọi, cần gạt, buồng tinh thể) nhận E từ mọi phía trong `TOWER_REACH_GAP` = 8px quanh phần đế (RULE_GAMES 1). Điểm đứng là điểm 8px phía trên mép dưới phần đế.
+- Điểm đứng mới: bench source (95,172), bench mirror (140,172), source (140,234), G0 (212,234), G1 (275,179), G2 (309,272), cột gọi (350,244), cần gạt (540,224), buồng (600,276).
+- Cần gạt và buồng chung một vùng va chạm (9px). Chủ sở hữu vị trí là vật gần cạnh nhất.
+- Hồ sơ (record) và cầu thang (exit) giữ bán kính 24 vì là điều khiển tường và cửa.
+- Đường đi G1 và G2 qua (250,200) và (250,246), vì phần đế của G0 và của prism chặn đường thẳng.

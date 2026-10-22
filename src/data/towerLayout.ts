@@ -13,21 +13,21 @@ export const TOWER = {
   bounds: rect(24, 88, 592, 222),
   spawn: p(135, 272),
   objects: {
-    benchSource: { ground: p(95, 180), optical: p(95, 155), stand: p(95, 200), base: rect(84, 170, 22, 10) },
-    benchMirror: { ground: p(140, 180), optical: p(140, 155), stand: p(140, 202), base: rect(129, 170, 22, 10) },
+    benchSource: { ground: p(95, 180), optical: p(95, 155), stand: p(95, 172), base: rect(84, 170, 22, 10) },
+    benchMirror: { ground: p(140, 180), optical: p(140, 155), stand: p(140, 172), base: rect(129, 170, 22, 10) },
     benchPrism: { center: p(140, 116), input: p(140, 122), left: p(123, 122), right: p(157, 122), base: rect(129, 128, 22, 8) },
     benchEyeA: { ground: p(123, 110), optical: p(123, 98), base: rect(115, 102, 16, 8) },
     benchEyeB: { ground: p(157, 110), optical: p(157, 98), base: rect(149, 102, 16, 8) },
-    source: { ground: p(140, 242), optical: p(140, 215), stand: p(140, 262), base: rect(129, 232, 22, 10) },
-    g0: { ground: p(212, 242), optical: p(212, 215), stand: p(212, 262), base: rect(201, 232, 22, 10) },
+    source: { ground: p(140, 242), optical: p(140, 215), stand: p(140, 234), base: rect(129, 232, 22, 10) },
+    g0: { ground: p(212, 242), optical: p(212, 215), stand: p(212, 234), base: rect(201, 232, 22, 10) },
     prism: { center: p(292, 209), input: p(292, 215), left: p(275, 215), right: p(309, 215), base: rect(281, 221, 22, 8) },
-    g1: { ground: p(275, 187), optical: p(275, 162), stand: p(275, 218), base: rect(264, 177, 22, 10) },
+    g1: { ground: p(275, 187), optical: p(275, 162), stand: p(275, 179), base: rect(264, 177, 22, 10) },
     g2: { ground: p(309, 280), optical: p(309, 255), stand: p(309, 272), base: rect(298, 270, 22, 10) },
     eyeA: { ground: p(460, 174), optical: p(460, 162), base: rect(452, 166, 16, 8) },
     eyeB: { ground: p(460, 267), optical: p(460, 255), base: rect(452, 259, 16, 8) },
-    call: { ground: p(350, 252), stand: p(350, 272), base: rect(339, 242, 22, 10) },
-    lever: { ground: p(540, 232), stand: p(540, 254), base: rect(529, 222, 22, 10) },
-    chamber: { stand: p(600, 288), solid: rect(560, 180, 80, 104), crystal: p(600, 232) },
+    call: { ground: p(350, 252), stand: p(350, 244), base: rect(339, 242, 22, 10) },
+    lever: { ground: p(540, 232), stand: p(540, 224), base: rect(529, 222, 22, 10) },
+    chamber: { stand: p(600, 276), solid: rect(560, 180, 80, 104), crystal: p(600, 232) },
     record: { stand: p(549, 192) },
   },
   lumo: {
@@ -85,15 +85,34 @@ export function towerCanApproach(center: Point, target: Point, obstacles: readon
   return towerCenterWalkable(center, obstacles) && Math.hypot(center.x - target.x, center.y - target.y) <= TOWER.interactionRange;
 }
 
+/** RULE_GAMES 1: a standing prop answers from every side within this many px of its footprint (foot body to rect). */
+export const TOWER_REACH_GAP = 8;
+
+/** Euclidean gap from the foot body at `center` to `rect`; 0 when they touch or overlap. */
+export function towerFootGap(center: Point, rect: Rect): number {
+  const foot = towerBodyRect(center);
+  const dx = Math.max(foot.x - (rect.x + rect.width), rect.x - (foot.x + foot.width), 0);
+  const dy = Math.max(foot.y - (rect.y + rect.height), rect.y - (foot.y + foot.height), 0);
+  return Math.hypot(dx, dy);
+}
+
+/** A standing prop's position is walkable and its foot is within TOWER_REACH_GAP of its footprint, from any side. */
+export function towerCanReach(center: Point, footprint: Rect, obstacles: readonly Rect[] = TOWER_SOLIDS): boolean {
+  return towerCenterWalkable(center, obstacles) && towerFootGap(center, footprint) <= TOWER_REACH_GAP;
+}
+
 /**
- * Standing props are used from their south face only (RULE_GAMES §1): the body must sit at or below
- * the prop's footprint bottom edge (1px tolerance for sub-pixel collision), the player's centre must lie
- * within the footprint's x span (1px tolerance), and the stand must be in range.
+ * ONE OWNER PER POSITION: among the standing footprints, the one whose outer edge is nearest the foot owns it.
+ * Ties go to the first listed. Overlapping reach zones (the lever and the chamber, 9px apart) never answer for two.
  */
-export function towerCanApproachFront(center: Point, stand: Point, front: Rect, obstacles: readonly Rect[] = TOWER_SOLIDS): boolean {
-  const southFace = towerBodyRect(center).y + 1 >= front.y + front.height;
-  const withinSpan = center.x >= front.x - 1 && center.x <= front.x + front.width + 1;
-  return towerCanApproach(center, stand, obstacles) && southFace && withinSpan;
+export function towerReachOwner(id: string, center: Point, footprints: Readonly<Record<string, Rect>>): boolean {
+  let owner: string | null = null;
+  let best = Infinity;
+  for (const [other, rect] of Object.entries(footprints)) {
+    const gap = towerFootGap(center, rect);
+    if (gap < best) { owner = other; best = gap; }
+  }
+  return owner === id;
 }
 
 export function isLumoAtSeal(assignment: LumoAssign, lumo: Point | undefined): boolean {

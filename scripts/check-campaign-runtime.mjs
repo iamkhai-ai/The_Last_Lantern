@@ -34,6 +34,11 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import {
+  isObservatoryStandingProp,
+  observatoryElementSolid,
+  observatoryElements,
+  observatoryReachOwner,
+  observatoryStandingReach,
   OBSERVATORY_ALCOVES,
   OBSERVATORY_BODY,
   OBSERVATORY_RETURN_LOOP_VISUAL_ID,
@@ -408,6 +413,11 @@ function makeRoomBuildPort(calls) {
 const REGISTER_SYMBOLS = {
   OBSERVATORY_ROOT_BED,
   isObservatoryApproachAllowed,
+  isObservatoryStandingProp,
+  observatoryElementSolid,
+  observatoryElements,
+  observatoryReachOwner,
+  observatoryStandingReach,
   observatoryBridgeBlockReason,
   observatoryDoorBlockReason,
   observatoryDoorOpen,

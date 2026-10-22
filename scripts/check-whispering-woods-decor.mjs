@@ -14,7 +14,8 @@ assert.equal(typeof WOODS_DECOR_SEED, 'number', 'seed is a fixed numeric constan
 // Hard guard: the approved Level 02 output is pinned byte-for-byte. A changed seed, draw order, constant or
 // texture choice in forestDecor.ts changes this hash, so the shared generator cannot silently restyle Level 02.
 // repinned for forest-expansion art integration (mushrooms at half scale)
-const APPROVED_WOODS_DECOR_SHA256 = 'e9185b9816c4c85148d2015483812a8aa138c2df03beea9a16f1382e13b0061b';
+// repinned 2026-10-22: the stone reach points moved 8px below each footprint, and ground cover keeps 26px clear of them.
+const APPROVED_WOODS_DECOR_SHA256 = '57833b0724e501c626a6eee760aa02d3b2dd673ce35cf5c10ef10f5d0350a6ef';
 assert.equal(
   createHash('sha256').update(JSON.stringify(buildWoodsDecor())).digest('hex'),
   APPROVED_WOODS_DECOR_SHA256,

@@ -47,6 +47,10 @@ import {
   fitObservatoryArt,
   isObservatoryApproachAllowed,
   isObservatoryFloorWalkable,
+  isObservatoryStandingProp,
+  observatoryReachOwner,
+  observatoryStandingReach,
+  OBSERVATORY_REACH_GAP,
   isObservatoryPositionSafe,
   isObservatoryRestoreSafe,
   nearestSafeObservatorySpawn,
@@ -66,6 +70,7 @@ import {
   rectsOverlap,
 } from '../src/data/observatoryLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
+import { isFootInReach as isFootInReachCheck } from '../src/systems/interactionReach.ts';
 import { deriveObservatoryState } from '../src/systems/ObservatoryPuzzle.ts';
 
 const ROOMS = ['entrance', 'corridor', 'observatory'];
@@ -188,16 +193,34 @@ for (const element of OBSERVATORY_ELEMENTS) {
   assert.ok(element.radius === 0 || element.radius <= 28, `${element.id} interaction radius stays small (RULE_GAMES)`);
   if (element.radius === 0) continue;
 
-  // The stand must be legal for the authored approach side, and walkable.
+  // The stand must be legal for the authored approach side, and walkable. Standing props answer by reach (checked below).
   const standCenter = element.stand;
-  assert.ok(isObservatoryApproachAllowed(element, standCenter),
-    `${element.id} stand ${JSON.stringify(standCenter)} sits at the allowed approach side`);
+  if (!isObservatoryStandingProp(element)) {
+    assert.ok(isObservatoryApproachAllowed(element, standCenter),
+      `${element.id} stand ${JSON.stringify(standCenter)} sits at the allowed approach side`);
+  }
   assert.ok(isObservatoryPositionSafe(element.roomId, standCenter, STAGES.arrival)
     || isObservatoryPositionSafe(element.roomId, standCenter, STAGES.splitWithShadow)
     || isObservatoryPositionSafe(element.roomId, standCenter, STAGES.finished),
     `${element.id} stand is not inside a solid`);
 
-  if (element.approach === 'south') {
+  if (isObservatoryStandingProp(element)) {
+    // RULE_GAMES 1: the prompt answers from every side within OBSERVATORY_REACH_GAP of the solid, and never beyond it.
+    const reach = observatoryStandingReach(element);
+    const solid = rect;
+    const inReach = (center) => isFootInReachCheck(observatoryBody(center), reach);
+    assert.ok(inReach(standCenter), `${element.id} stand is within ${OBSERVATORY_REACH_GAP}px of its solid`);
+    const probes = {
+      north: (gap) => ({ x: solid.x + solid.width / 2, y: solid.y - gap - 22 }),
+      south: (gap) => ({ x: solid.x + solid.width / 2, y: solid.y + solid.height + gap - 16 }),
+      east: (gap) => ({ x: solid.x + solid.width + gap + 7, y: solid.y + solid.height / 2 - 19 }),
+      west: (gap) => ({ x: solid.x - gap - 7, y: solid.y + solid.height / 2 - 19 }),
+    };
+    for (const [side, at] of Object.entries(probes)) {
+      assert.ok(inReach(at(OBSERVATORY_REACH_GAP)), `${element.id}: standing ${side} at ${OBSERVATORY_REACH_GAP}px answers`);
+      assert.equal(inReach(at(OBSERVATORY_REACH_GAP + 2)), false, `${element.id}: standing ${side} 2px beyond is silent`);
+    }
+  } else if (element.approach === 'south') {
     const solid = rect;
     assert.ok(standCenter.y >= solid.y + solid.height - 2,
       `${element.id} stand centre is at or below the object's south edge`);

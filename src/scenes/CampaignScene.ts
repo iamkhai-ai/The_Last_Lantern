@@ -49,6 +49,7 @@ import {
   type ObsRect,
   type ObsWorldState,
 } from '../data/observatoryLayout';
+import { isObservatoryStandingProp, observatoryElementSolid, observatoryReachOwner, observatoryStandingReach } from '../data/observatoryLayout';
 import { DialogueSystem } from '../systems/DialogueSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
 import type { ReachFootprint } from '../systems/interactionReach';
@@ -1142,14 +1143,24 @@ export class CampaignScene extends Phaser.Scene {
      */
     const register = (onInteract: () => void): void => {
       const radius = element && element.radius > 0 ? element.radius : 24;
+      // A standing prop answers from every side within 8px of its solid (RULE_GAMES 1); the nearest solid owns a shared
+      // position. Flat mounts, the side and gate exceptions keep the approach predicate.
+      const standing = element !== undefined && isObservatoryStandingProp(element);
+      const roomFootprints = (): Record<string, ObsRect> => Object.fromEntries(
+        observatoryElements(element?.roomId ?? 'observatory').filter(isObservatoryStandingProp).map((other) => [other.id, observatoryElementSolid(other)]),
+      );
       this.interactions.register({
         id: `observatory-${id}`,
         x: interactionPoint.x,
         y: interactionPoint.y,
         radius,
+        ...(element && standing ? {
+          reach: observatoryStandingReach(element),
+          ownsPosition: (x: number, y: number) => observatoryReachOwner(element.id, { x, y }, roomFootprints()),
+        } : {}),
         getPromptBounds,
         getPrompt: () => observatoryPrompt(id, this.getObservatoryWorldState()),
-        isEnabled: () => (element ? isObservatoryApproachAllowed(element, { x: this.player.x, y: this.player.y }) : true),
+        isEnabled: () => (element && !standing ? isObservatoryApproachAllowed(element, { x: this.player.x, y: this.player.y }) : true),
         onInteract,
       });
     };
@@ -2091,7 +2102,7 @@ export class CampaignScene extends Phaser.Scene {
             { speaker: 'Lumo', text: 'Ánh đèn chưa tới được đó. Cậu thử phát một xung sáng xem.' },
           ]
           : [{ speaker: 'Nhinh', text: inscription }]);
-      }, () => this.progress.lanternPickedUp, 'beacon_stone', undefined, { rect: FOREST_EDGE.objects.tablet.solid });
+      }, () => this.progress.lanternPickedUp, 'beacon_stone', undefined, { rect: FOREST_EDGE.objects.tablet.solid, face: 'any', maxGap: 8 });
       action('gate', () => this.progress.flags['l0-gate-open'] ? 'E · Qua cổng rừng' : 'E · Kiểm tra cổng', FOREST_EDGE.objects.gate.exit.x, FOREST_EDGE.objects.gate.exit.y, () => {
         if (this.progress.flags['l0-gate-open']) {
           this.nextLevel([

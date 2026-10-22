@@ -1,7 +1,7 @@
 {
   "room": {
     "id": "relay",
-    "title": "Buá»“ng Chuyá»ƒn DÃ²ng",
+    "title": "Buồng Chuyển Dòng",
     "spawn": {
       "x": 110,
       "y": 251
@@ -32,13 +32,13 @@
       {
         "x": 24,
         "y": 180,
-        "width": 106,
+        "width": 94,
         "height": 30
       },
       {
-        "x": 130,
+        "x": 118,
         "y": 180,
-        "width": 44,
+        "width": 56,
         "height": 10
       },
       {
@@ -110,13 +110,6 @@
     ],
     "solids": [
       {
-        "elementId": "call-a-far",
-        "x": 36,
-        "y": 180,
-        "width": 40,
-        "height": 48
-      },
-      {
         "elementId": "latch-a",
         "x": 166,
         "y": 208,
@@ -156,18 +149,6 @@
       }
     ],
     "elements": [
-      {
-        "id": "call-a-far",
-        "art": "call-idle",
-        "x": 56,
-        "y": 228,
-        "width": 40,
-        "height": 48,
-        "stand": {
-          "x": 56,
-          "y": 252
-        }
-      },
       {
         "id": "latch-a",
         "art": "latch-unlatched",

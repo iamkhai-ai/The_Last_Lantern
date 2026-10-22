@@ -70,14 +70,14 @@ Conventions: 640×360, native scale, nearest filtering. Actor center coordinates
 | shutter handle | shutter-handle-open/closed 120,86 24×40 | full | stand (132,132) r22, gap band; `E · Kéo màn che bể tích quang`; once |
 | sun (main) | sun-open/folded 196,124 48×72 | 200,152,40,44 | state follows effective light; icon at (252,164) |
 | bar gate | gate-bar-lowered/raised/held 94,104 112×72 | posts + beam | beam solid 107,136,87,26 while lowered; raised/held beam overhead depth 70 |
-| latch west | latch-west-unlatched/latched 128,96 28×32 | full | stand (142,132) r22, only inside the gap band and only when bar raised; `E · Gài chốt thanh chắn` |
+| latch west | latch-west-unlatched/latched 128,96 28×32 | full | reach: every side within 8px of the rect (RULE_GAMES 1), foot at centre y ≤ 120 in the gap, only when bar raised; `E · Gài chốt thanh chắn` |
 | moon (main) | moon-coiled 252,186 48×44 · moon-extended 200,186 112×44 | full (coiled body) | sits at the top of the forecourt; extended reaches toward the canal; icon at (250,240); the 20px band under it is the west bridge approach |
 | root bridge | root-bridge-off/on/held, two images at span centers (327,238) · (371.5,238) | dynamic strip | walkable when deployed; held spans stay under the feet |
-| drain | nursery-drain-closed/open 436,224 52×48 | full | stand (462,286) r24; `E · Mở cống vườn ươm`; once |
+| drain | nursery-drain-closed/open 436,224 52×48 | full | reach: every side within 8px of the rect, nearest edge owns (drain vs sprout corner); `E · Mở cống vườn ươm`; once |
 | delivered water | nursery-water-delivered 466,262 128×24 | none (depth 4) | shown after drain; flows through the steps opening |
-| sprout | sprout-before/after 484,232 32×32 | none | examine stand (500,280) r24; `E · Ngắm mầm cây` |
+| sprout | sprout-before/after 484,232 32×32 | none | examine: reach every side within 8px of the rect; `E · Ngắm mầm cây` |
 | side path | side-stone-path-closed/open 304,284 **80×32 native** | dynamic strip 304,284,80,32 | tiles always visible; the plank blocks only where it is drawn (walkable strip stays 304..396 until `l6-return-latched`) |
-| latch east | latch-east-unlatched/latched 400,240 28×32 | full | stand (414,286) r22; `E · Gài chốt lối đá phụ`; once |
+| latch east | latch-east-unlatched/latched 400,240 28×32 | full | reach: every side within 8px of the rect; `E · Gài chốt lối đá phụ`; once |
 | exit trigger | arch, no art | — | (574,64) r24; `E · Qua cổng điện thờ`; enabled on completion |
 | practice sun pot | sun-open/folded 70,266 48×72 | 74,294,40,44 | lit-state demo; icon (126,275) |
 | practice moon pot | moon-coiled/extended 132,284 48×44 | 136,290,40,38 | dark-state demo; icon (160,274) |
@@ -115,7 +115,7 @@ Depth = `10 + groundAnchorY/10` for standing props and actor feet; ground stamps
 ## Prompt rules (RULE_GAMES audit)
 
 - Every trigger sits at the south edge of its object (handle 6px below the body, latches 4–14px below, drain 14px below, sprout 16px below). Radius 20–24. No trigger center sits inside its own art.
-- The handle/latch pair sits north of the wall gap, so both are worked from the gap band (player centers `104 ≤ x ≤ 196`, `100 ≤ y ≤ 136`): the documented stands are (132,132) and (142,132) and the live guards (`gardenHandleEnabled` / `gardenLatchWestEnabled`) are mutually exclusive, so the two overlapping 22px circles can never fight for the nearest target. The corridor's south band (`y 136..156`) never prompts.
+- The handle/latch pair sits north of the wall gap, so both are worked from the gap band (player centers `104 ≤ x ≤ 196`, `100 ≤ y ≤ 136`): the handle keeps its stand (132,132) (a wall control, RULE_GAMES 2); the west latch answers from its own reach, which takes the foot to (142,120) in the gap (8px from the latch rect, RULE_GAMES 1). The live guards (`gardenHandleEnabled` / `gardenLatchWestEnabled`) are mutually exclusive, so the two overlapping 22px circles can never fight for the nearest target. The corridor's south band (`y 136..156`) never prompts.
 - The arch exit uses the documented gate exception (trigger under the arch, approached from inside the level).
 - No trigger reaches the far (north) face of any object; verified by the check script with the authored 14×6 body.
 

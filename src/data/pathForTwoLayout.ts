@@ -20,6 +20,49 @@ export const PATH_FLOOR_BOUNDS = { x: 24, y: 80, width: 592, height: 230 } as co
  * apart; `scripts/check-path-for-two.mjs` measures the tile against it.
  */
 export const PATH_INK_CORRIDOR: PathRect = { x: 184, y: 218, width: 348, height: 48 };
+/** The three ink glyphs of the corridor. A glyph is the FOOT position: `pathFeet(center)` must come close to it. */
+export type PathInkGlyphId = 'ring' | 'triangle' | 'square';
+/**
+ * The glyphs sit in two lanes of the 48px corridor: ring and square in the upper lane (foot y 228), triangle in
+ * the lower lane (foot y 256). The corridor's centre line (foot y 242) is 14px from every glyph, outside the hit
+ * radius, so walking straight along the corridor never lights or resets anything by accident: a glyph is only
+ * stepped on by choosing its lane.
+ */
+export const PATH_INK_GLYPHS: readonly { id: PathInkGlyphId; x: number; y: number }[] = [
+  { id: 'ring', x: 440, y: 228 },
+  { id: 'triangle', x: 250, y: 256 },
+  { id: 'square', x: 340, y: 228 },
+];
+/** The order the glyphs must be stepped on in. Deliberately not left to right: going from ring to triangle means passing the square's x in the lower lane. */
+export const PATH_INK_ORDER: readonly PathInkGlyphId[] = ['ring', 'triangle', 'square'];
+/** A foot position within this many px of a glyph stands on it. Smaller than half the lane gap (28px), so a lane can be avoided. */
+export const PATH_INK_HIT_RADIUS = 10;
+/** The glyph whose foot position is within `PATH_INK_HIT_RADIUS` of this body's feet (the nearest when several are). */
+export function pathInkGlyphAt(center: PathPoint): PathInkGlyphId | undefined {
+  const feet = pathFeet(center);
+  let best: PathInkGlyphId | undefined;
+  let bestDistance = Infinity;
+  for (const glyph of PATH_INK_GLYPHS) {
+    const distance = Math.hypot(glyph.x - feet.x, glyph.y - feet.y);
+    if (distance <= PATH_INK_HIT_RADIUS && distance < bestDistance) { best = glyph.id; bestDistance = distance; }
+  }
+  return best;
+}
+/**
+ * One step of the glyph sequence. `step` counts the glyphs already lit (0..3). Standing on the glyph just lit
+ * is `none`, so a foot that stays on it cannot reset the sequence. A wrong glyph after at least one is lit resets
+ * it to 0; before anything is lit a wrong glyph is `none`, because there is nothing to lose.
+ */
+export function advancePathInkSequence(step: number, hit: PathInkGlyphId | undefined): { step: number; event: 'none' | 'progress' | 'reset' | 'done' } {
+  if (step >= PATH_INK_ORDER.length) return { step: PATH_INK_ORDER.length, event: 'none' };
+  if (hit === undefined) return { step, event: 'none' };
+  if (hit === PATH_INK_ORDER[step]) {
+    return step + 1 === PATH_INK_ORDER.length ? { step: step + 1, event: 'done' } : { step: step + 1, event: 'progress' };
+  }
+  if (step === 0) return { step, event: 'none' };
+  if (hit === PATH_INK_ORDER[step - 1]) return { step, event: 'none' };
+  return { step: 0, event: 'reset' };
+}
 export const PATH_DOORS = {
   practice: { room: 'entry' as const, x: 156, base: 210, target: 'entry' as const },
   a: { room: 'entry' as const, x: 480, base: 210, target: 'relay' as const },
@@ -39,7 +82,8 @@ export function getPathPipePoint(pipe:PathPipeId,room:PathRoomId,end:'out'|'in')
  * A door's room-side face. `south` doors stand in a room's north wall, so their floor side is below
  * the base; the two reverse portals sit in a room's south wall, so their floor side is north of the
  * threshold. Documented exception (RULE_GAMES §3): a doorway trigger is reached from inside the room
- * it opens into, not from behind the arch.
+ * it opens into, not from behind the arch. An open arch also triggers when the foot body walks into it
+ * from the threshold (`isPathGateWalkIn`); E at the door still works.
  */
 export interface PathDoorFace { id:PathMark; room:PathRoomId; x:number; base:number; approach:PathApproachSide; }
 export const PATH_DOOR_FACES: readonly PathDoorFace[] = [
@@ -77,10 +121,12 @@ export function getPathBackArrival(id:'a'|'b'):PathPoint{
   return face?{x:face.x,y:face.base+PATH_BACK_ARRIVAL_OFFSET}:{x:480,y:250};
 }
 export function isInsidePracticeAlcove(room:PathRoomId,point:PathPoint):boolean{return room==='entry'&&point.x<320&&point.y<180;}
+/** A door's threshold band: the 44x30 strip in front of its arch. One definition for occupancy, walls and walk-in. */
+export function getPathThresholdBand(face:PathDoorFace):PathRect{return{x:face.x-22,y:face.base-30,width:44,height:30};}
 export function isPathThresholdOccupied(room:PathRoomId,id:string,point:PathPoint):boolean{
   const face=getPathDoorFace(id,room);
   if(!face)return false;
-  if(rectsOverlap(pathActorBody(point),{x:face.x-22,y:face.base-30,width:44,height:30}))return true;
+  if(rectsOverlap(pathActorBody(point),getPathThresholdBand(face)))return true;
   return id==='practice'&&isInsidePracticeAlcove(room,point);
 }
 export function isValidPathPipeHop(from:PathRoutePoint|undefined,to:PathRoutePoint):boolean{
@@ -126,6 +172,18 @@ export function choosePathCallAction(assignment:string,target:'practice'|'a'|'b'
   if(assignment===target)return'recall';
   if(assignment!=='follow'&&!eligible)return'recall';
   return'send';
+}
+/**
+ * A call post whose door is already latched has nothing left to do: its door stays open for good, so the
+ * post is dimmed and silent. The practice posts never latch, so they are never spent.
+ */
+export function isPathCallSpent(mark: PathMark, flags: Record<string, boolean | string>): boolean {
+  return mark !== 'practice' && flags['l4-latch-' + mark] === true;
+}
+/** The letter printed above a call post: 'Thử' for the two practice posts, otherwise the door letter. A spent post gets a trailing tick. */
+export function pathCallLabel(mark: PathMark, spent: boolean): string {
+  const base = mark === 'practice' ? 'Thử' : mark.toUpperCase();
+  return spent ? `${base} ✓` : base;
 }
 export function shouldRestorePathFollower(state:{hasRoomMetadata:boolean;assignment:string;travelling:boolean;actuallyArrived:boolean}):boolean{
   if(!state.hasRoomMetadata)return true;
@@ -185,14 +243,17 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
     id: 'relay', title: 'Buồng Chuyển Dòng', spawn: { x: 152, y: 251 }, entrySpawn: { x: 152, y: 251 },
     walls: [
       { x: 0, y: 0, width: 640, height: 80 }, { x: 0, y: 80, width: 24, height: 230 }, { x: 616, y: 80, width: 24, height: 230 },
-      { x: 24, y: 180, width: 424, height: 30 }, { x: 512, y: 180, width: 104, height: 30 },
+      // The partition has a 56px recess (x 118..174) cut into its south edge above the reverse frame. Its
+      // 10px lintel stays as stone, so the passage from the reverse pocket to the hall is 40px tall (y 190..230).
+      { x: 24, y: 180, width: 94, height: 30 }, { x: 118, y: 180, width: 56, height: 10 }, { x: 174, y: 180, width: 274, height: 30 },
+      { x: 512, y: 180, width: 104, height: 30 },
       ...reversePortalWalls(110), { x: 24, y: 300, width: 54, height: 10 }, { x: 142, y: 300, width: 474, height: 10 },
       ...doorWalls(110,318), ...doorWalls(480,210),
     ],
-    // The far-side call A stands in the hall, not in the reverse pocket: the pocket's threshold closes
-    // with door A, so a call placed behind it could never be reached again once Lumo had been recalled.
-    solids: [standingSolid('call-a-far',224,232,40,48),standingSolid('latch-a',180,240,28,32),standingSolid('call-b',360,232,40,48), ...doorPosts(110,318), ...doorPosts(480,210)],
-    elements: [element('call-a-far','call-idle',224,232,40,48,224,256),element('latch-a','latch-unlatched',180,240,28,32,180,264),element('call-b','call-idle',360,232,40,48,360,256),element('plate-b','pressure-empty',546,114,44,28,546,146)],
+    // ONE DOOR, ONE STATION: door A is worked from its latch alone. The latch sends Lumo to plate A when he is
+    // not there, and latches the door when he is. There is no second post on the far side (it only recalled Lumo).
+    solids: [standingSolid('latch-a',180,240,28,32),standingSolid('call-b',360,232,40,48), ...doorPosts(110,318), ...doorPosts(480,210)],
+    elements: [element('latch-a','latch-unlatched',180,240,28,32,180,264),element('call-b','call-idle',360,232,40,48,360,256),element('plate-b','pressure-empty',546,114,44,28,546,146)],
   },
   ink: {
     id: 'ink', title: 'Hành Lang Mực', spawn: { x: 82, y: 246 }, entrySpawn: { x: 82, y: 246 },
@@ -205,8 +266,9 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
       {x:24,y:150,width:10,height:30},{x:130,y:150,width:54,height:30}, {x:532,y:150,width:10,height:30},{x:606,y:150,width:10,height:30},
       ...doorWalls(82,318), ...doorWalls(574,180),
     ],
-    solids: [standingSolid('call-b-far',68,176,40,48),standingSolid('latch-b',158,240,28,32),standingSolid('call-c',122,190,40,48),standingSolid('latch-c',540,192,28,32),...doorPosts(82,318),...doorPosts(574,180)],
-    elements: [element('call-b-far','call-idle',68,176,40,48,68,198),element('latch-b','latch-unlatched',158,240,28,32,158,264),element('call-c','call-idle',122,190,40,48,122,210),element('plate-c','pressure-empty',558,244,44,28,558,276),element('latch-c','latch-unlatched',540,192,28,32,550,218),{...element('spiral','swirl-memory-scratch',622,282,30,30,596,262),approach:'side'}],
+    // Latch B is the only station for door B. Call C sits 64px from it (PATH_STANDING_SPACING is 60) and stays in the west foyer.
+    solids: [standingSolid('latch-b',150,270,28,32),standingSolid('call-c',100,176,40,48),standingSolid('latch-c',540,192,28,32),...doorPosts(82,318),...doorPosts(574,180)],
+    elements: [element('latch-b','latch-unlatched',150,270,28,32,150,280),element('call-c','call-idle',100,176,40,48,100,196),element('plate-c','pressure-empty',558,244,44,28,558,276),element('latch-c','latch-unlatched',540,192,28,32,550,218),{...element('spiral','swirl-memory-scratch',622,282,30,30,596,262),approach:'side'}],
   },
 };
 
@@ -229,27 +291,73 @@ export function getPathElementArtRect(element: PathElement): PathRect {
  * on the same four seals.
  */
 export function isPathSeal(element: PathElement): boolean { return element.art.startsWith('pressure-'); }
-/** How far beside a prop's own span a standing position may still count as its south face. */
-export const PATH_APPROACH_SLACK = 12;
 /**
- * RULE_GAMES §1 — a standing prop answers only while the 14×6 foot body stands in front of its own
- * south edge, inside its own horizontal span, on walkable ground.
+ * RULE_GAMES §1: a standing prop answers while the walkable 14×6 foot body is within this many px of the
+ * OUTER EDGE of its own collision solid, from every side. Corners are measured diagonally.
+ */
+export const PATH_REACH_GAP = 8;
+/**
+ * ONE DOOR, ONE STATION spacing rule: the gap between any two standing solids (call posts and latches) in one room is
+ * at least this many px. Two props that are this far apart can never both be in reach of the same foot position
+ * (reach is `PATH_REACH_GAP` on each side), so every control announces and answers for exactly one object.
+ * `scripts/check-path-for-two.mjs` enforces it for every room.
+ */
+export const PATH_STANDING_SPACING = 60;
+/** Euclidean gap between two rectangles, 0 when they touch or overlap (the same rule as `rectGap` in systems/interactionReach.ts). */
+function pathRectGap(a: PathRect, b: PathRect): number {
+  const dx = Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0);
+  const dy = Math.max(a.y - (b.y + b.height), b.y - (a.y + a.height), 0);
+  return Math.hypot(dx, dy);
+}
+/**
+ * RULE_GAMES §1 — reach of a standing prop (call posts and latches). True only on a walkable position
+ * (`isPathPositionSafe`: walls and solids never answer) whose foot body is at most `PATH_REACH_GAP` px
+ * from the element's own collision solid, in any direction. The solid is the rectangle the prop blocks,
+ * so the prompt follows the object's real footprint, not an anchor point or a radius around it.
+ */
+/** Latch state the reach predicates read. A latched or powered arch is open floor, so a prompt can answer inside it. */
+export interface PathReachOptions { latches?: Partial<Record<'a'|'b'|'c'|'practice', boolean>>; }
+/** Gap from the foot body at `center` to the prop's own solid, or undefined when the prop has no solid. */
+function pathElementGap(room: PathRoomId, element: PathElement, center: PathPoint): number | undefined {
+  const solid = getPathElementSolid(room, element.id);
+  return solid ? pathRectGap(pathActorBody(center), solid) : undefined;
+}
+export function isPathElementInReach(room: PathRoomId, element: PathElement, center: PathPoint, options: PathReachOptions = {}): boolean {
+  if (!isPathPositionSafe(room, center, options)) return false;
+  const gap = pathElementGap(room, element, center);
+  return gap !== undefined && gap <= PATH_REACH_GAP;
+}
+/**
+ * RULE_GAMES §1 — the one approach predicate for Level 05 props. Standing props answer from any side
+ * within `PATH_REACH_GAP` (`isPathElementInReach`).
  *
  * Documented exception (RULE_GAMES §3): the swirl engraving is scratched into the east wall, so it
- * has no walkable south face at all; it answers from the floor directly in front of that wall face
- * (`approach: 'side'` in `PATH_ROOMS.ink.elements`, reason above).
+ * has no walkable face of its own; it keeps the side rule and answers from the floor directly in front
+ * of that wall face (`approach: 'side'` in `PATH_ROOMS.ink.elements`, reason above).
  */
-export function isPathApproachAllowed(room: PathRoomId, element: PathElement, center: PathPoint): boolean {
-  if (!isPathPositionSafe(room, center)) return false;
+export function isPathApproachAllowed(room: PathRoomId, element: PathElement, center: PathPoint, options: PathReachOptions = {}): boolean {
+  if (element.approach !== 'side') return isPathElementInReach(room, element, center, options);
+  if (!isPathPositionSafe(room, center, options)) return false;
   const feet = pathFeet(center);
   const art = getPathElementArtRect(element);
-  if (element.approach === 'side') {
-    if (feet.y < art.y || feet.y > art.y + art.height) return false;
-    return feet.x <= art.x + 6 || feet.x >= art.x + art.width - 6;
+  if (feet.y < art.y || feet.y > art.y + art.height) return false;
+  return feet.x <= art.x + 6 || feet.x >= art.x + art.width - 6;
+}
+/**
+ * RULE_GAMES §1 — which standing prop owns a position. Among the room's standing props (not seals, not the
+ * side-approach engraving) that `isPathElementInReach` accepts, the one with the smallest gap to its own solid
+ * wins; an exact tie goes to the first in `PATH_ROOMS[room].elements` order. Undefined when none answers.
+ */
+export function pathStandingOwner(room: PathRoomId, center: PathPoint, options: PathReachOptions = {}): string | undefined {
+  let owner: string | undefined;
+  let best = Infinity;
+  for (const element of PATH_ROOMS[room].elements) {
+    if (isPathSeal(element) || element.approach === 'side') continue;
+    if (!isPathElementInReach(room, element, center, options)) continue;
+    const gap = pathElementGap(room, element, center) ?? Infinity;
+    if (gap < best) { best = gap; owner = element.id; }
   }
-  if (feet.y < art.y + art.height) return false;
-  const span = element.width / 2 + PATH_APPROACH_SLACK;
-  return center.x >= element.x - span && center.x <= element.x + span;
+  return owner;
 }
 /** The visible passage of a door: the opening the player actually walks through. */
 export function getPathDoorPassage(face: PathDoorFace): PathRect {
@@ -260,13 +368,28 @@ export function getPathDoorPassage(face: PathDoorFace): PathRect {
 /**
  * Documented gate exception (RULE_GAMES §3): a door control is reached from the room floor inside the
  * arch it opens, and is silent from behind the arch or from masonry. See `PathDoorFace.approach`.
+ * Walking into the open arch from its threshold is the same act: `isPathGateWalkIn` names that step.
  */
-export function isPathDoorApproachAllowed(room: PathRoomId, id: string, center: PathPoint): boolean {
+export function isPathDoorApproachAllowed(room: PathRoomId, id: string, center: PathPoint, options: PathReachOptions = {}): boolean {
   const face = getPathDoorFace(id, room);
   if (!face) return false;
-  if (!isPathPositionSafe(room, center)) return false;
+  if (!isPathPositionSafe(room, center, options)) return false;
   const feet = pathFeet(center);
   return face.approach === 'north' ? feet.y <= face.base - 8 : feet.y >= face.base - 30;
+}
+/**
+ * Walk-in trigger (RULE_GAMES §3 gate exception): true only on the one step in which the foot body crosses
+ * from a door's threshold band into its visible passage, starting from the room side. The practice door is
+ * E-only and is never a walk-in. This does not look at whether the door is open; the controller decides that.
+ */
+export function isPathGateWalkIn(room: PathRoomId, id: PathMark, prev: PathPoint, now: PathPoint): boolean {
+  if (id === 'practice') return false;
+  const face = getPathDoorFace(id, room);
+  if (!face) return false;
+  const before = pathActorBody(prev);
+  return rectsOverlap(before, getPathThresholdBand(face))
+    && rectsOverlap(pathActorBody(now), getPathDoorPassage(face))
+    && !rectsOverlap(before, getPathDoorPassage(face));
 }
 /**
  * Held-E guard. A room transition arms it; the controller keeps E refused (and every control silent)
@@ -439,7 +562,7 @@ export function isPathPositionSafe(room: PathRoomId, center: PathPoint, options:
   for (const wall of spec.walls) if (rectsOverlap(body,wall)) return false;
   for (const face of PATH_DOOR_FACES) {
     if(face.room===room&&!options.latches?.[face.id]&&options.allowThreshold!==face.id
-      &&rectsOverlap(body,{x:face.x-22,y:face.base-30,width:44,height:30}))return false;
+      &&rectsOverlap(body,getPathThresholdBand(face)))return false;
   }
   return !spec.solids.some((solid) => rectsOverlap(body,solid));
 }
@@ -468,3 +591,36 @@ export function resolvePathRoom(saved:unknown,visitedRelay:boolean,visitedInk:bo
   return'entry';
 }
 export function pathDoorShouldClose(powered:boolean,occupied:boolean,latched:boolean):boolean{return !powered&&!occupied&&!latched;}
+
+/** The booleans and numbers the ink objective reads, passed in so the guide and the objective cannot disagree. */
+export interface PathInkGuideState {
+  latchB: boolean; hasPowerC: boolean; inkRevealed: boolean; orderKnown: boolean; seals: boolean; step: number;
+  latchC: boolean; memo: boolean; lanternOn: boolean; reunited: boolean;
+}
+/**
+ * The point the ink room's guide ring highlights for the current objective step (the same numbering as
+ * `PathForTwoLevel.getObjectiveText`). Undefined when the step has no single place to point at.
+ */
+export function pathInkGuideTarget(state: PathInkGuideState): PathPoint | undefined {
+  const artCentre = (id: string): PathPoint | undefined => {
+    const element = PATH_ROOMS.ink.elements.find((item) => item.id === id);
+    if (!element) return undefined;
+    const art = getPathElementArtRect(element);
+    return { x: art.x + art.width / 2, y: art.y + art.height / 2 };
+  };
+  if (!state.latchB) return artCentre('latch-b');
+  if (state.latchC) {
+    if (!state.memo) return artCentre('spiral');
+    if (!state.reunited) return artCentre('latch-c');
+    const stand = getPathControlStand('c', 'ink');
+    return stand ? { x: stand.x, y: stand.y } : undefined;
+  }
+  if (!state.orderKnown && !state.hasPowerC) return artCentre('call-c');
+  if (!state.inkRevealed) return { x: 192, y: 242 };
+  if (!state.seals) {
+    if (!state.orderKnown || state.lanternOn || state.step >= PATH_INK_ORDER.length) return undefined;
+    const glyph = PATH_INK_GLYPHS.find((item) => item.id === PATH_INK_ORDER[state.step]);
+    return glyph ? { x: glyph.x, y: glyph.y } : undefined;
+  }
+  return state.hasPowerC ? artCentre('latch-c') : artCentre('call-c');
+}

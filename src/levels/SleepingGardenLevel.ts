@@ -12,7 +12,8 @@ import {
   GARDEN_ACTOR, GARDEN_BAR_BEAM, GARDEN_BAR_BEAM_ROWS, GARDEN_BAR_POSTS, GARDEN_BAR_SPRITE, GARDEN_BRIDGE, GARDEN_SHADOW_PATH, GARDEN_ICONS, GARDEN_MODULES, GARDEN_SIDE_PATH, GARDEN_SPANS,
   GARDEN_SPAWN, GARDEN_STANDS, GARDEN_STATIC_SOLIDS, GARDEN_WATER, NO_HELD_SPANS, barRaised, bridgeWalkable,
   crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody, gardenCompletionBlock, gardenDrainEnabled,
-  gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled, gardenPropDepth, inGateCorridor,
+  gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled, gardenPropDepth, gardenStandingOwner,
+  gardenStandingReach, inGateCorridor,
   isGardenPositionSafe, nearestSafeGardenSpawn, practiceLessonArmed, practiceLessonDue, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed,
   sanitizeGardenState, sidePathOpen, sunOpen, updateHeldSpans,
   type GardenArtVariant, type GardenHeldSpans, type GardenModuleSpec, type GardenPoint, type GardenSpanId, type GardenState,
@@ -543,6 +544,7 @@ export class SleepingGardenLevel {
     });
     reg({
       id: 'l6-latch-west', x: GARDEN_STANDS.latchWest.x, y: GARDEN_STANDS.latchWest.y, radius: GARDEN_STANDS.latchWest.radius,
+      reach: gardenStandingReach('latch-west'), ownsPosition: (x, y) => gardenStandingOwner('latch-west', { x, y }),
       getPromptBounds: () => this.images.get('latch-west')?.getBounds() ?? null,
       getPrompt: () => this.canLatchWest() ? 'E · Gài chốt thanh chắn' : this.canInspectLatchWest() ? 'E · Xem chốt đá (chưa gài được)' : null,
       isEnabled: () => this.canLatchWest() || this.canInspectLatchWest(),
@@ -550,6 +552,7 @@ export class SleepingGardenLevel {
     });
     reg({
       id: 'l6-drain', x: GARDEN_STANDS.drain.x, y: GARDEN_STANDS.drain.y, radius: GARDEN_STANDS.drain.radius,
+      reach: gardenStandingReach('drain'), ownsPosition: (x, y) => gardenStandingOwner('drain', { x, y }),
       getPromptBounds: () => this.images.get('drain')?.getBounds() ?? null,
       getPrompt: () => this.canOpenDrain() ? 'E · Mở cống vườn ươm' : null,
       isEnabled: () => this.canOpenDrain(),
@@ -557,6 +560,7 @@ export class SleepingGardenLevel {
     });
     reg({
       id: 'l6-latch-east', x: GARDEN_STANDS.latchEast.x, y: GARDEN_STANDS.latchEast.y, radius: GARDEN_STANDS.latchEast.radius,
+      reach: gardenStandingReach('latch-east'), ownsPosition: (x, y) => gardenStandingOwner('latch-east', { x, y }),
       getPromptBounds: () => this.images.get('latch-east')?.getBounds() ?? null,
       getPrompt: () => this.canLatchEast() ? 'E · Gài chốt lối đá phụ' : this.canInspectLatchEast() ? 'E · Xem chốt lối đá phụ (chưa gài được)' : null,
       isEnabled: () => this.canLatchEast() || this.canInspectLatchEast(),
@@ -564,6 +568,7 @@ export class SleepingGardenLevel {
     });
     reg({
       id: 'l6-sprout', x: GARDEN_STANDS.sprout.x, y: GARDEN_STANDS.sprout.y, radius: GARDEN_STANDS.sprout.radius,
+      reach: gardenStandingReach('sprout'), ownsPosition: (x, y) => gardenStandingOwner('sprout', { x, y }),
       getPromptBounds: () => this.images.get('sprout')?.getBounds() ?? null,
       getPrompt: () => 'E · Ngắm mầm cây',
       isEnabled: () => true,

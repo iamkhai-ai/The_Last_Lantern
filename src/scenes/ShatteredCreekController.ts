@@ -228,25 +228,30 @@ export class ShatteredCreekController {
     const { interactions } = this.ctx;
     // `front` (optional) lets a control answer E from the foot body standing in front of its collision rectangle,
     // in addition to the stand point. Only controls that pass it change behaviour.
+    // RULE_GAMES 1 (2026-10-22): a standing prop answers from every side within 8px of its base, from its own bank only.
+    // The relief panel and the exit keep their wall and stair rules.
+    const creekStanding = (base: { x: number; y: number; width: number; height: number }): ReachFootprint => ({ rect: base, face: 'any', maxGap: 8 });
     const inApproach = (x: number, y: number, bank: 'west' | 'island' | 'east', front?: ReachFootprint): boolean =>
-      canApproach(this.point(), { x, y }, bank)
-      || (front !== undefined && pointOnBank(this.point(), bank) && isFootInReach(this.ctx.player.getFootBody(), front));
+      front?.face === 'any'
+        ? pointOnBank(this.point(), bank) && isFootInReach(this.ctx.player.getFootBody(), front)
+        : canApproach(this.point(), { x, y }, bank)
+          || (front !== undefined && pointOnBank(this.point(), bank) && isFootInReach(this.ctx.player.getFootBody(), front));
     const add = (id: string, x: number, y: number, prompt: () => string | null, onInteract: () => void, bank: 'west' | 'island' | 'east', artId: string, front?: ReachFootprint) => {
       const config: InteractableConfig = { id: `creek-${id}`, x, y, radius: 24, ...(front ? { isInReach: () => inApproach(x, y, bank, front) } : {}), getPrompt: () => inApproach(x, y, bank, front) ? prompt() : null, getPromptBounds: () => this.visuals.get(artId)?.getBounds() ?? null, isEnabled: () => inApproach(x, y, bank, front) && prompt() !== null, onInteract: () => { if (inApproach(x, y, bank, front)) onInteract(); } };
       interactions.register(config);
     };
     const practice = SHATTERED_CREEK.objects.practiceSource.stand;
-    add('practice-source', practice.x, practice.y, () => this.sourcePrompt('practice'), () => this.useSource('practice'), 'west', 'practice-source');
+    add('practice-source', practice.x, practice.y, () => this.sourcePrompt('practice'), () => this.useSource('practice'), 'west', 'practice-source', creekStanding(SHATTERED_CREEK.objects.practiceSource.base));
     const main = SHATTERED_CREEK.objects.source.stand;
-    add('main-source', main.x, main.y, () => this.sourcePrompt('main'), () => this.useSource('main'), 'west', 'source');
-    add('practice-mirror', 132, 288, () => 'E · Xoay gương thử', () => { this.state.practice = ((this.state.practice + 1) % 3) as MirrorPose; this.ctx.progress.counters['l3-practice'] = this.state.practice; this.saveState(); }, 'west', 'practice-mirror');
+    add('main-source', main.x, main.y, () => this.sourcePrompt('main'), () => this.useSource('main'), 'west', 'source', creekStanding(SHATTERED_CREEK.objects.source.base));
+    add('practice-mirror', 132, 281, () => 'E · Xoay gương thử', () => { this.state.practice = ((this.state.practice + 1) % 3) as MirrorPose; this.ctx.progress.counters['l3-practice'] = this.state.practice; this.saveState(); }, 'west', 'practice-mirror', creekStanding(SHATTERED_CREEK.objects.practiceMirror.base));
     for (const id of ['g1', 'g2', 'g3'] as const) {
       const stand = SHATTERED_CREEK.objects[id].stand;
-      add(id, stand.x, stand.y, () => `${id.toUpperCase()} · Xoay gương`, () => this.rotate(id), id === 'g3' ? 'island' : 'west', id);
+      add(id, stand.x, stand.y, () => `${id.toUpperCase()} · Xoay gương`, () => this.rotate(id), id === 'g3' ? 'island' : 'west', id, creekStanding(SHATTERED_CREEK.objects[id].base));
     }
     for (const which of ['A', 'B'] as const) {
       const id = which === 'A' ? 'latchA' : 'latchB'; const entry = SHATTERED_CREEK.objects[id];
-      add(`latch-${which.toLowerCase()}`, entry.stand.x, entry.stand.y, () => (which === 'A' ? this.state.latchA : this.state.latchB) ? 'E · Chốt đã giữ chắc' : `E · Gài chốt ${which === 'A' ? 'cầu đầu' : 'cầu hai'}`, () => this.latch(which), which === 'A' ? 'west' : 'island', `latch-${which === 'A' ? 'latchA' : 'latchB'}`);
+      add(`latch-${which.toLowerCase()}`, entry.stand.x, entry.stand.y, () => (which === 'A' ? this.state.latchA : this.state.latchB) ? 'E · Chốt đã giữ chắc' : `E · Gài chốt ${which === 'A' ? 'cầu đầu' : 'cầu hai'}`, () => this.latch(which), which === 'A' ? 'west' : 'island', `latch-${which === 'A' ? 'latchA' : 'latchB'}`, creekStanding(entry.base));
     }
     const relief = SHATTERED_CREEK.objects.relief.stand;
     add('relief', relief.x, relief.y, () => 'E · Đọc phù điêu', () => this.readRelief(), 'east', 'relief', { rect: SHATTERED_CREEK.objects.relief.base, face: 'south' });

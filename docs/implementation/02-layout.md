@@ -57,3 +57,10 @@ Temporary Pulse power is never restored from durable seen notes. Resolve unsafe 
 Run the existing woods, forest-edge, and campaign-start-intent checks, affected browser-script syntax checks, `npm run build`, and `git diff --check`. Focused contracts prove poem is the fresh first target; exactly three main stones and no practice art/footprint/target; stage priority; direct poem approach; three rune positions and routes; no silhouette overlap; tree/rock collisions and depth; open/closed gate contact; restore compatibility; and correct/repeat/wrong/legacy puzzle behavior.
 
 Browser runtime is NOT_RUN while Work browser control is disabled. Do not bypass that setting or reuse browser results from an earlier revision. Restore only generated tracked `dist/index.html` after build. Freeze a local commit for two independent read-only Luna High reviews; no push or merge. User visual acceptance remains pending.
+
+## Cập nhật 2026-10-22: bia đá theo luật 8px
+
+- Bốn bia (thơ, trăng, lá, sao) nhận E từ mọi phía trong 8px quanh phần đế (RULE_GAMES 1). Lối vào 24px phía nam đã bỏ.
+- Điểm đứng (`stands`) dời về điểm 8px dưới phần đế: thơ (136,262), trăng (232,234), lá (326,166), sao (408,258). Điểm sinh cũng là (136,262).
+- Cổng và cổng ra (510,181) giữ quy tắc riêng.
+- Mã sha256 của decor màn 2 được chốt lại: cỏ mặt đất giữ 26px khỏi các điểm đứng nên đã đổi vị trí. Cần xem lại decor một lần.

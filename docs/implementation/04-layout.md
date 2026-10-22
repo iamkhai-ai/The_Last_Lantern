@@ -90,3 +90,10 @@ Round-one source review found that restore checks omitted the exit posts while r
 Root and Luna worker run build, existing woods/forest/start/prompt checks and focused `check-shattered-creek.mjs` against runtime-consumed geometry/ray/state helpers. Cover all three reflector mappings, geometric A and B traces, G1 omission regression, unpowered/held/other-source cases, practice independence, every stand and E same-bank range, blocked water/both powered and latched routes, no bypass, props, occupied/far-side power-loss protection, migration idempotence, off-placement restore, stale bridge/memo flags and completion gate. Check initial sole E target, native art dimensions and all state sizes. Keep generated dist out of commits.
 
 If browser control is available, inspect actual feet/occlusion/beam paths and legitimate input progression on a separate origin; do not seed solution flags as playthrough evidence. Browser control was disabled in prior turns; do not bypass it. If still disabled report runtime/visual NOT_RUN. Two independent Luna High reviewers check the same frozen source revision. Root checks user-flow design as well as code and resolves findings before reporting. Human gameplay acceptance remains the user's review. No publication until explicitly requested.
+
+## Cập nhật 2026-10-22: các vật đứng theo luật 8px
+
+- Nguồn thử, nguồn chính, gương thử, G1, G2, G3, chốt A và chốt B nhận E từ mọi phía trong 8px quanh phần đế (RULE_GAMES 1), và chỉ khi người chơi đứng trên bờ của vật (`pointOnBank`).
+- Điểm đứng mới: nguồn thử (68,283), gương thử (132,281), nguồn chính (76,193), G1 (202,191), G2 (202,125), G3 (350,125), chốt A (224,244), chốt B (374,244). Chốt nằm ở đầu cầu nên điểm đứng ở phía bắc.
+- Điểm sinh (68,283) nằm trong vùng nguồn thử.
+- Phù điêu (tường) và cổng bậc thang giữ quy tắc riêng.

@@ -24,14 +24,16 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 import { layoutInteractionPrompt } from '../src/systems/interactionPromptLayout.ts';
-import { isFootInReach } from '../src/systems/interactionReach.ts';
+import { isFootInReach, rectGap } from '../src/systems/interactionReach.ts';
 import {
-  choosePathCallAction, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe,
-  isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_ROOMS, PATH_SCHEMATIC, pathActorBody,
+  choosePathCallAction, getPathElementSolid, isPathApproachAllowed, isPathCallSpent, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe,
+  isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_REACH_GAP, PATH_ROOMS, PATH_SCHEMATIC, pathActorBody,
+  pathStandingOwner,
 } from '../src/data/pathForTwoLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
 import {
   isObservatoryApproachAllowed, isObservatoryPositionSafe, observatoryArtRect, observatoryElement,
+  isObservatoryStandingProp, observatoryBody, observatoryElements, observatoryReachOwner, observatoryStandingReach,
   observatoryElementSolid, observatoryPrompt, observatorySolidRects, OBSERVATORY_ROOT_BED,
 } from '../src/data/observatoryLayout.ts';
 import {
@@ -240,20 +242,21 @@ function selectWith(system, x, y) {
  * runtime. Each helper the shipped bodies call is the shipped body too (`compile` above), with the
  * layout symbols it closes over.
  */
-function makePathForTwoInkRoom(flags) {
+function makePathForTwoInkRoom(flags, room = 'ink') {
   const registered = [];
   const scene = {
-    room: 'ink',
+    room,
     interactions: { register: (config) => registered.push(config) },
     doorImages: new Map(),
     imageFor: () => undefined,
     player: PROBE,
     progress: { flags: { ...flags }, counters: {} },
     assignment: 'follow',
-    lumoRoom: 'ink',
+    lumoRoom: room,
     interactReleasePending: false,
     interactKey: { isDown: false },
     hasPower: () => false,
+    isTravelling: () => false,
     interact: () => {},
     useDoor: () => {},
     registered,
@@ -261,6 +264,7 @@ function makePathForTwoInkRoom(flags) {
   scene.isInteractKeyDown = compile(PATH_SOURCE, 'isInteractKeyDown', 'PathForTwoLevel', [], {});
   scene.heldInteract = compile(PATH_SOURCE, 'heldInteract', 'PathForTwoLevel', [], { isPathInteractHeld });
   scene.elementFor = compile(PATH_SOURCE, 'elementFor', 'PathForTwoLevel', ['id'], { PATH_ROOMS });
+  scene.pathReachOptions = compile(PATH_SOURCE, 'pathReachOptions', 'PathForTwoLevel', [], {});
   scene.elementApproach = compile(PATH_SOURCE, 'elementApproach', 'PathForTwoLevel', ['id', 'x', 'y'],
     { PATH_ROOMS, isPathApproachAllowed });
   scene.doorApproach = compile(PATH_SOURCE, 'doorApproach', 'PathForTwoLevel', ['id', 'x', 'y'], { isPathDoorApproachAllowed });
@@ -268,7 +272,7 @@ function makePathForTwoInkRoom(flags) {
   scene.doorEnabled = compile(PATH_SOURCE, 'doorEnabled', 'PathForTwoLevel', ['id'], {});
   scene.prompt = compile(PATH_SOURCE, 'prompt', 'PathForTwoLevel', ['id'],
     { PLATE_ROOMS: localConstant(PATH_SOURCE, 'PLATE_ROOMS'), choosePathCallAction });
-  scene.interactionEnabled = compile(PATH_SOURCE, 'interactionEnabled', 'PathForTwoLevel', ['id'], {});
+  scene.interactionEnabled = compile(PATH_SOURCE, 'interactionEnabled', 'PathForTwoLevel', ['id'], { isPathCallSpent });
   scene.callMark = compile(PATH_SOURCE, 'callMark', 'PathForTwoLevel', ['id'], {});
   scene.callEligible = compile(PATH_SOURCE, 'callEligible', 'PathForTwoLevel', ['mark'], {});
   // The station plaque reads the same dialogue-free state the shipped scene does; no story is pending here.
@@ -278,8 +282,11 @@ function makePathForTwoInkRoom(flags) {
   scene.stationMapEnabled = compile(PATH_SOURCE, 'stationMapEnabled', 'PathForTwoLevel', [], {});
   scene.stationMapPrompt = compile(PATH_SOURCE, 'stationMapPrompt', 'PathForTwoLevel', [], {});
   compile(PATH_SOURCE, 'registerRoomInteractions', 'PathForTwoLevel', [],
-    { PATH_ROOMS, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_SCHEMATIC, isPathSeal, isPathApproachAllowed }).call(scene);
-  assert.ok(registered.length >= 6, `the ink room still registers its controls (got ${registered.length})`);
+    { PATH_ROOMS, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_SCHEMATIC, isPathSeal, isPathApproachAllowed, pathStandingOwner }).call(scene);
+  // Every non-seal element of the room, its door controls and the station plaque: derived from the layout, not a fixed count.
+  const expected = PATH_ROOMS[room].elements.filter((element) => !isPathSeal(element)).length
+    + PATH_CONTROL_STANDS.filter((stand) => stand.room === room).length + 1;
+  assert.equal(registered.length, expected, `the ${room} room still registers its controls (got ${registered.length}, expected ${expected})`);
   return scene;
 }
 
@@ -294,6 +301,7 @@ const OBSERVATORY_STATE = {
 
 const OBSERVATORY_REGISTER_SYMBOLS = {
   observatoryElement, observatoryPrompt, isObservatoryApproachAllowed, OBSERVATORY_ROOT_BED,
+  isObservatoryStandingProp, observatoryElements, observatoryElementSolid, observatoryReachOwner, observatoryStandingReach,
   Phaser: { GameObjects: { Image: class Image {} } },
 };
 
@@ -369,7 +377,8 @@ function survey(positions, pick, system, targets, barriers, feetOffset) {
     if (!targets.includes(id)) continue;
     const target = byId.get(id);
     const feet = { x: position.x, y: position.y + feetOffset };
-    if (segmentCrossesSolid(feet, { x: target.x, y: target.y }, barriers)) crossings.push({ id, position });
+    // The target is answered from the foot, so the far end of the segment is the target's foot point too.
+    if (segmentCrossesSolid(feet, { x: target.x, y: target.y + feetOffset }, barriers)) crossings.push({ id, position });
   }
   return { domains, crossings };
 }
@@ -455,18 +464,18 @@ const CASES = [
     name: 'cell_owner_keeps_the_standing_position',
     run: () => {
       const x = L10_MOON.stand.x;
-      const y = L10_STATUE.stand.y + 8;
+      const y = L10_MOON.gate.y + 4;
       assert.equal(isInsideHeartGate('heart-moon', { x, y }), true, 'the probe stands inside the Moon cell');
-      assert.ok(Math.hypot(x - L10_STATUE.stand.x, y - L10_STATUE.stand.y) < L10_STATUE.radius,
-        'the neighbouring statue is inside its own radius at the probe, so it still competes');
+      // A nearer neighbour that is always enabled stands in for the statue: its reach cannot reach the cell.
+      const nearer = { id: 'heart-near', x, y: y - 6, radius: 30, getPrompt: () => 'E · Gần', isEnabled: () => true, onInteract: () => {}, hits: { value: 0 } };
+      assert.ok(Math.hypot(x - nearer.x, y - nearer.y) < Math.hypot(x - L10_MOON.stand.x, y - L10_MOON.stand.y),
+        'the neighbour is nearer to the probe, so it still competes');
 
-      const shipped = makeSystem([moonControl(false), statueControl()]);
-      assert.equal(selectWith(shipped, x, y), 'heart-statue',
-        'with no ownsPosition the nearer statue wins, which is exactly today\'s behaviour');
+      const shipped = makeSystem([moonControl(false), nearer]);
+      assert.equal(selectWith(shipped, x, y), 'heart-near', 'with no ownsPosition the nearer neighbour wins, exactly as before');
 
-      const owned = makeSystem([moonControl(true), statueControl()]);
-      assert.equal(selectWith(owned, x, y), 'heart-moon',
-        'a cell that owns the standing position keeps it against a nearer neighbouring prop');
+      const owned = makeSystem([moonControl(true), nearer]);
+      assert.equal(selectWith(owned, x, y), 'heart-moon', 'a cell that owns the standing position keeps it against a nearer neighbouring prop');
       assert.equal(owned.tryInteract(0), true, 'the E press is accepted at the in-cell position');
       assert.equal(owned.interactables[0].hits.value, 1, 'the owned cell really receives the E action');
     },
@@ -479,10 +488,9 @@ const CASES = [
       assert.equal(isInsideHeartGate('heart-moon', { x, y }), false, 'the probe stands outside the Moon cell');
       assert.ok(Math.hypot(x - L10_MOON.stand.x, y - L10_MOON.stand.y) < L10_MOON.radius,
         'the cell is still within its radius, so only the ownership test can drop it');
-
-      const owned = makeSystem([moonControl(true), statueControl()]);
-      assert.equal(selectWith(owned, x, y), 'heart-statue',
-        'outside its cell the owned control is an ordinary candidate and the nearer statue wins');
+      const nearer = { id: 'heart-near', x, y: y - 4, radius: 30, getPrompt: () => 'E · Gần', isEnabled: () => true, onInteract: () => {}, hits: { value: 0 } };
+      const owned = makeSystem([moonControl(true), nearer]);
+      assert.equal(selectWith(owned, x, y), 'heart-near', 'outside its cell the owned control is an ordinary candidate and the nearer neighbour wins');
     },
   },
   {
@@ -689,10 +697,10 @@ const CASES = [
       assert.ok(HEART_CONTROL_ORDER.indexOf('heart-g0') < HEART_CONTROL_ORDER.indexOf('heart-memory-mirror'),
         'HEART_CONTROL_ORDER still registers G0 before the Memory mirror');
 
-      const g0Only = { x: L10_G0.stand.x, y: L10_G0.stand.y + 2 };
+      const g0Only = { x: L10_G0.stand.x, y: L10_G0.stand.y };
       assert.equal(isHeartPositionSafe(g0Only), true, 'the G0 south approach is a legal standing position');
       assert.equal(selectWith(system, g0Only.x, g0Only.y), 'heart-g0', 'G0 keeps a domain of its own');
-      const memoryOnly = { x: L10_MEMORY_MIRROR.stand.x, y: L10_MEMORY_MIRROR.stand.y + 2 };
+      const memoryOnly = { x: L10_MEMORY_MIRROR.stand.x, y: L10_MEMORY_MIRROR.stand.y };
       assert.equal(isHeartPositionSafe(memoryOnly), true, 'the Memory mirror south approach is legal');
       assert.equal(selectWith(system, memoryOnly.x, memoryOnly.y), 'heart-memory-mirror',
         'the Memory mirror keeps a domain of its own');
@@ -726,6 +734,68 @@ const CASES = [
         + ` doorC ${doorDomain.length} position(s) ${example(doorDomain)}`);
       const reachableIds = [...domains.keys()].sort();
       console.log(`      L05 selectable controls: ${reachableIds.join(', ')}`);
+    },
+  },
+  {
+    name: 'l05_standing_props_answer_from_every_side_through_the_selector',
+    run: () => {
+      // RULE_GAMES §1 through the shipped selector: each registered standing prop ranges by its own reach
+      // predicate (`isInReach`), measured by the engine's own `rectGap` from the foot body to the prop's
+      // solid. A walkable spot within 8px answers; 9px and beyond does not. Where no rival is in reach, the
+      // shipped `update()` must select that prop.
+      // Two states: nothing latched (the latches are live), and everything latched (the latches are spent).
+      const flagSets = [{}, { 'l4-latch-a': true, 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true, 'l4-ink-revealed': true }];
+      let probes = 0;
+      let selected = 0;
+      let owned = 0;
+      for (const [flags, room] of flagSets.flatMap((set) => ['entry', 'relay', 'ink'].map((name) => [set, name]))) {
+        const scene = makePathForTwoInkRoom(flags, room);
+        const system = makeSystem(scene.registered);
+        const latches = { a: flags['l4-latch-a'] === true, b: flags['l4-latch-b'] === true, c: flags['l4-latch-c'] === true, practice: false };
+        const standing = PATH_ROOMS[room].elements
+          .filter((element) => !isPathSeal(element) && element.approach !== 'side')
+          .map((element) => ({ element, item: scene.registered.find((config) => config.id === `l4-${element.id}`) }));
+        assert.ok(standing.length > 0 && standing.every(({ item }) => item), `${room} registers every standing prop`);
+        for (const { element, item } of standing) {
+          assert.equal(typeof item.isInReach, 'function', `${item.id} ranges by its reach predicate, not the radius`);
+          const solid = getPathElementSolid(room, element.id);
+          for (let x = solid.x - 12; x <= solid.x + solid.width + 12; x += 1) {
+            for (let y = solid.y - 12; y <= solid.y + solid.height + 12; y += 1) {
+              if (!isPathPositionSafe(room, { x, y })) continue;
+              const allowed = rectGap(pathActorBody({ x, y }), solid) <= PATH_REACH_GAP;
+              const label = `${room}/${element.id} at (${x},${y})`;
+              probes += 1;
+              assert.equal(item.isInReach(x, y), allowed, `${label}: the registered predicate matches the 8px rule`);
+              // RULE_GAMES §1: wherever any standing prop reaches, exactly one registered standing prop owns the
+              // spot, and it is the layout's own owner (smallest gap, ties in element order).
+              if (standing.some(({ item: other }) => other.isInReach(x, y))) {
+                const owners = standing.filter(({ item: other }) => other.ownsPosition?.(x, y) === true).map(({ item: other }) => other.id);
+                assert.deepEqual(owners, [`l4-${pathStandingOwner(room, { x, y }, { latches })}`],
+                  `${label}: exactly one standing prop owns a spot that a standing prop reaches`);
+                owned += 1;
+              }
+              const rivals = scene.registered.filter((other) => other !== item && other.isInReach && other.isInReach(x, y));
+              const picked = selectWith(system, x, y);
+              // A call post in reach is enabled exactly while its own door is not latched: a spent post is silent.
+              const postMark = element.id === 'practice-call' || element.id === 'inner-call' ? 'practice'
+                : element.id.startsWith('call-') ? (element.id.includes('-a') ? 'a' : element.id.includes('-b') ? 'b' : 'c') : null;
+              if (postMark && allowed) {
+                assert.equal(item.isEnabled(), !isPathCallSpent(postMark, flags),
+                  `${label}: a call post in reach is enabled only while its own door is not latched`);
+              }
+              if (!allowed || item.isEnabled?.() === false) {
+                assert.notEqual(picked, item.id, `${label}: a prop out of reach, or already spent, is never selected`);
+                continue;
+              }
+              if (rivals.length === 0) {
+                selected += 1;
+                assert.equal(picked, item.id, `${label}: a prop within 8px is selected by the shipped update()`);
+              }
+            }
+          }
+        }
+      }
+      console.log(`      L05 selector: ${probes} walkable positions swept, ${selected} uncontested answers selected, ${owned} reached spots each with one owner`);
     },
   },
   {
@@ -778,29 +848,32 @@ const CASES = [
     name: 'l09_statue_answers_only_from_the_south',
     run: () => {
       const statue = observatoryElement('statue');
-      const art = observatoryArtRect(statue);
+      const solid = observatoryElementSolid(statue);
+      const reach = observatoryStandingReach(statue);
+      const inReach = (center) => isFootInReach(observatoryBody(center), reach);
       const south = { x: statue.stand.x, y: statue.stand.y };
-      assert.equal(isObservatoryApproachAllowed(statue, south), true, 'the statue answers from its south edge');
-      assert.equal(isObservatoryApproachAllowed(statue, { x: statue.stand.x, y: art.y - 6 }), false,
-        'the statue stays silent from the north, behind its own art');
-      assert.equal(isObservatoryApproachAllowed(statue, { x: art.x - 60, y: statue.stand.y }), false,
-        'the statue stays silent from the west');
-      assert.equal(isObservatoryApproachAllowed(statue, { x: art.x + art.width + 60, y: statue.stand.y }), false,
-        'the statue stays silent from the east');
-      assert.deepEqual(observatoryElementSolid(statue), art,
+      assert.equal(isObservatoryStandingProp(statue), true, 'the statue is a standing prop (RULE_GAMES 1)');
+      assert.equal(inReach({ x: statue.stand.x, y: statue.stand.y }), true, 'the statue answers from its stand, 8px from its solid');
+      assert.equal(inReach({ x: statue.stand.x, y: solid.y - 8 - 22 }), true, 'the statue answers from 8px north of its solid');
+      assert.equal(inReach({ x: solid.x - 8 - 7, y: solid.y + solid.height / 2 - 19 }), true, 'the statue answers from 8px west of its solid');
+      assert.equal(inReach({ x: solid.x - 10 - 7, y: solid.y + solid.height / 2 - 19 }), false, 'the statue is silent 10px west of its solid');
+      assert.equal(inReach({ x: solid.x + solid.width + 10 + 7, y: solid.y + solid.height / 2 - 19 }), false, 'the statue is silent 10px east of its solid');
+      assert.deepEqual(observatoryElementSolid(statue), observatoryArtRect(statue),
         'the statue\'s collider is its visible art box, never an inflated stand-in for the face rule');
 
       // The shipped registration must reach the same predicate this case just exercised.
       const away = registerObservatoryControls({ x: 40, y: 100 }).registered
         .find((item) => item.id === 'observatory-statue');
       assert.ok(away, 'the observatory registers a statue control');
-      assert.equal(away.isEnabled(), false, 'the registered statue is disabled from outside its approach');
+      assert.deepEqual(away.reach, observatoryStandingReach(statue), 'the registered statue answers by reach from its solid');
+      assert.equal(away.isEnabled(), true, 'the registered statue is enabled; the reach footprint decides range');
       const atSouth = registerObservatoryControls(south).registered
         .find((item) => item.id === 'observatory-statue');
       assert.equal(atSouth.isEnabled(), true, 'the registered statue is enabled from its own south edge');
       assert.equal(atSouth.radius, statue.radius, 'the registered statue keeps the layout radius');
       assert.equal(atSouth.x, statue.stand.x, 'the registered statue keeps the layout stand');
       assert.equal(atSouth.y, statue.stand.y, 'the registered statue keeps the layout stand');
+      assert.equal(typeof atSouth.ownsPosition, 'function', 'the registered statue owns its position by nearest solid');
     },
   },
   {

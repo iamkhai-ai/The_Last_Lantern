@@ -29,11 +29,11 @@ The approved target is `docs/scenario-v2/05-a-path-for-two.md`, sections 3, 4, a
 | Room / element | Plaque | Matching seal |
 | --- | --- | --- |
 | Entry: `practice-call` and `inner-call` | `plaque-practice-ring.png` | Entry `practice-plate` at (212,114): `ink-practice-ring-*` |
-| Entry: `call-a`; relay: `call-a-far` | `plaque-1dot.png` | Entry `plate-a` at (546,114): `ink-1dot-*` |
-| New entry marker near (230,232); ink: `call-b-far` | `plaque-2dots.png` | Relay `plate-b` at (546,114): `ink-2dots-*` |
+| Entry: `call-a` | `plaque-1dot.png` | Entry `plate-a` at (546,114): `ink-1dot-*` |
+| No host yet: `call-a-far` (relay) and `call-b-far` (ink) were removed 2026-10-22 under one door, one station. Art must choose a new host for this plaque; latch B at (150,270) is one option | `plaque-2dots.png` | Relay `plate-b` at (546,114): `ink-2dots-*` |
 | Relay: current `call-b`, reassigned to the final seal | `plaque-3dots.png` | Ink `plate-c` at (558,244): `ink-3dots-*` |
 
-The new entry marker position is a scenario proposal; its collision and southern approach must be validated during layout integration. The old ink-room `call-c` and its solid are removed by that integration.
+The new entry marker position is a scenario proposal; its collision and southern approach must be validated during layout integration. Ink-room `call-c` stays at (122,190) under the one door, one station layout (2026-10-22); the earlier plan to remove it no longer applies.
 
 Align each 40x48 plaque with the full host call image. The current renderer uses the center of `getPathElementArtRect(element)`: for a standing call marker this is `(element.x, element.y - 24)`. Align each 44x28 seal overlay with its floor seal at `(element.x, element.y)`. Use nearest-neighbor rendering at native size.
 

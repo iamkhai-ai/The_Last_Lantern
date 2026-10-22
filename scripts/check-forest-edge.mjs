@@ -22,9 +22,9 @@ assert.equal(FOREST_EDGE.player.body.height, 6, 'runtime footprint uses the auth
 // Keep the opening cluster 72 px west of its old layout; the destination stays put.
 assert.deepEqual(FOREST_EDGE.player.spawn, { x: 208, y: 286 }, 'fresh start moves left with the opening path');
 assert.deepEqual(FOREST_EDGE.objects.lantern.anchor, { x: 152, y: 238 }, 'lantern moves 72 px left');
-assert.deepEqual(FOREST_EDGE.objects.lantern.stand, { x: 152, y: 251 }, 'lantern interaction follows its art');
+assert.deepEqual(FOREST_EDGE.objects.lantern.stand, { x: 152, y: 251 }, 'lantern keeps its south-face interaction: a floor pedestal on the path (RULE_GAMES 2)');
 assert.deepEqual(FOREST_EDGE.objects.tablet.anchor, { x: 228, y: 230 }, 'tablet moves 72 px left');
-assert.deepEqual(FOREST_EDGE.objects.tablet.stand, { x: 228, y: 238 }, 'tablet keeps its south-side interaction');
+assert.deepEqual(FOREST_EDGE.objects.tablet.stand, { x: 228, y: 222 }, 'tablet answers from 8px around its solid (RULE_GAMES 1)');
 assert.deepEqual(FOREST_EDGE.objects.tablet.solid, { x: 214, y: 218, width: 28, height: 12 }, 'tablet collider follows its art');
 assert.deepEqual(FOREST_EDGE.checkpoints.start, FOREST_EDGE.player.spawn, 'start checkpoint follows the new spawn');
 assert.deepEqual(FOREST_EDGE.checkpoints.tablet, { x: 228, y: 250 }, 'tablet checkpoint moves with the opening cluster');

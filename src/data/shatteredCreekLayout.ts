@@ -16,24 +16,24 @@ export const SHATTERED_CREEK = {
     b: { gap: rect(396, 230, 60, 36), art: p(426, 248), latch: 'l3-latch-b' },
   },
   objects: {
-    practiceSource: { ground: p(68, 291), optical: p(68, 264), stand: p(68, 288), base: rect(57, 281, 22, 10) },
-    practiceMirror: { ground: p(132, 289), optical: p(132, 264), stand: p(132, 288), base: rect(121, 279, 22, 10) },
+    practiceSource: { ground: p(68, 291), optical: p(68, 264), stand: p(68, 283), base: rect(57, 281, 22, 10) },
+    practiceMirror: { ground: p(132, 289), optical: p(132, 264), stand: p(132, 281), base: rect(121, 279, 22, 10) },
     practiceEye: { ground: p(132, 222), optical: p(132, 208), base: rect(122, 214, 20, 8) },
-    source: { ground: p(76, 201), optical: p(76, 174), stand: p(76, 207), base: rect(65, 191, 22, 10) },
-    g1: { ground: p(202, 199), optical: p(202, 174), stand: p(202, 205), base: rect(191, 189, 22, 10) },
-    g2: { ground: p(202, 133), optical: p(202, 108), stand: p(202, 139), base: rect(191, 123, 22, 10) },
-    g3: { ground: p(350, 133), optical: p(350, 108), stand: p(350, 139), base: rect(339, 123, 22, 10) },
+    source: { ground: p(76, 201), optical: p(76, 174), stand: p(76, 193), base: rect(65, 191, 22, 10) },
+    g1: { ground: p(202, 199), optical: p(202, 174), stand: p(202, 191), base: rect(191, 189, 22, 10) },
+    g2: { ground: p(202, 133), optical: p(202, 108), stand: p(202, 125), base: rect(191, 123, 22, 10) },
+    g3: { ground: p(350, 133), optical: p(350, 108), stand: p(350, 125), base: rect(339, 123, 22, 10) },
     eyeA: { ground: p(76, 120), optical: p(76, 108), stand: p(76, 112), base: rect(68, 112, 16, 8) },
     eyeB: { ground: p(350, 206), optical: p(350, 194), stand: p(350, 198), base: rect(342, 198, 16, 8) },
-    latchA: { ground: p(224, 284), stand: p(224, 252), base: rect(214, 274, 20, 10) },
-    latchB: { ground: p(374, 284), stand: p(374, 252), base: rect(364, 274, 20, 10) },
+    latchA: { ground: p(224, 284), stand: p(224, 244), base: rect(214, 274, 20, 10) },
+    latchB: { ground: p(374, 284), stand: p(374, 244), base: rect(364, 274, 20, 10) },
     // The relief is a 128x80 panel standing on the bank (x 482-610, y 102-182): the whole panel blocks, not just a strip at its foot.
     relief: { ground: p(546, 182), stand: p(546, 188), base: rect(482, 102, 128, 80) },
     // The exit arch is drawn 88 wide and ~87 tall from its ground line. Its two posts and the whole arch body above the
     // steps block, so the player can only reach the doorway from the steps (the stand), never walk onto the painted arch.
     exit: { ground: p(568, 300), stand: p(568, 286), posts: [rect(530, 278, 22, 22), rect(584, 278, 22, 22), rect(524, 213, 88, 65)] },
   },
-  spawn: p(68, 286),
+  spawn: p(68, 283),
   practice: { mirror: 'practiceMirror', source: 'practiceSource', receiver: 'practiceEye' },
   rays: {
     practiceSource: p(68, 264), practiceMirror: p(132, 264), mainSource: p(76, 174), g1: p(202, 174), g2: p(202, 108), g3: p(350, 108), eyeA: p(76, 108), eyeB: p(350, 194), practiceEye: p(132, 208),

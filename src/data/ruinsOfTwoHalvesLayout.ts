@@ -67,38 +67,38 @@ export const RUINS_PROPS: Record<string, RuinsStandingProp> = {
     id: 'statue', art: 'statue-notch-{n}', artWidth: 64, artHeight: 88,
     artCenter: { x: 320, y: 176 }, groundAnchor: { x: 320, y: 212 },
     footprint: { x: 292, y: 148, width: 56, height: 64 },
-    stand: { id: 'statue', x: 320, y: 241, radius: 22 },
+    stand: { id: 'statue', x: 320, y: 204, radius: 22 },
   },
   'mirror-left': {
     id: 'mirror-left', art: 'mirror_{n}', artWidth: 36, artHeight: 48,
     artCenter: { x: 240, y: 238 }, groundAnchor: { x: 240, y: 262 },
     footprint: { x: 222, y: 214, width: 36, height: 48 },
-    stand: { id: 'mirror-left', x: 240, y: 286, radius: 22 },
+    stand: { id: 'mirror-left', x: 240, y: 254, radius: 22 },
   },
   'mirror-right': {
     id: 'mirror-right', art: 'mirror_{n}', artWidth: 36, artHeight: 48,
     artCenter: { x: 400, y: 238 }, groundAnchor: { x: 400, y: 262 },
     footprint: { x: 382, y: 214, width: 36, height: 48 },
-    stand: { id: 'mirror-right', x: 400, y: 286, radius: 22 },
+    stand: { id: 'mirror-right', x: 400, y: 254, radius: 22 },
   },
   pedestal: {
     id: 'pedestal', art: 'ruins_altar', artWidth: 104, artHeight: 52,
     artCenter: { x: 480, y: 236 }, groundAnchor: { x: 480, y: 262 },
     footprint: { x: 428, y: 210, width: 104, height: 52 },
-    stand: { id: 'pedestal', x: 480, y: 286, radius: 22 },
+    stand: { id: 'pedestal', x: 480, y: 254, radius: 22 },
   },
   'practice-column': {
     id: 'practice-column', art: 'test-pedestal', artWidth: 48, artHeight: 36,
     artCenter: { x: 150, y: 234 }, groundAnchor: { x: 150, y: 250 },
     footprint: { x: 126, y: 216, width: 48, height: 36 },
     overlay: { art: 'test-column-notch-{n}', artWidth: 32, artHeight: 44, artCenter: { x: 150, y: 223 }, depthOffset: 0.1 },
-    stand: { id: 'practice-column', x: 150, y: 276, radius: 22 },
+    stand: { id: 'practice-column', x: 150, y: 244, radius: 22 },
   },
   'seedling-bed': {
     id: 'seedling-bed', art: 'seedling-curtain-{curtain}', artWidth: 88, artHeight: 48,
     artCenter: { x: 180, y: 128 }, groundAnchor: { x: 180, y: 152 },
     footprint: { x: 136, y: 104, width: 88, height: 48 },
-    stand: { id: 'seedling-bed', x: 180, y: 176, radius: 22 },
+    stand: { id: 'seedling-bed', x: 180, y: 144, radius: 22 },
   },
 };
 
@@ -130,12 +130,12 @@ export const RUINS_SHADOW = {
     guard: {
       id: 'guard', ground: { x: 238, y: 164 },
       footprint: { x: 224, y: 128, width: 28, height: 36 },
-      stand: { id: 'shadow-guard', x: 246, y: 190, radius: 22 },
+      stand: { id: 'shadow-guard', x: 246, y: 156, radius: 22 },
     },
     wait: {
       id: 'wait', ground: { x: 470, y: 110 },
       footprint: { x: 456, y: 74, width: 28, height: 36 },
-      stand: { id: 'shadow-wait', x: 470, y: 134, radius: 18 },
+      stand: { id: 'shadow-wait', x: 470, y: 102, radius: 18 },
     },
   } as Record<'guard' | 'wait', RuinsShadowSpot>,
   /**
@@ -238,6 +238,36 @@ export function getRuinsSolid(id: string): RuinsSolid | undefined {
   const prop = RUINS_PROPS[id];
   if (prop) return { id: prop.id, prop: true, ...prop.footprint };
   return RUINS_WALLS.find((wall) => wall.id === id);
+}
+
+/** RULE_GAMES 1: a standing prop answers from every side within this many px of its outer edge (foot body to rect). */
+export const RUINS_REACH_GAP = 8;
+
+/** The `reach` footprint of a standing prop that answers from every side (see `isFootInReach` in systems/interactionReach.ts). */
+export function ruinsStandingReach(rect: RuinsRect): { rect: RuinsRect; face: 'any'; maxGap: number } {
+  return { rect, face: 'any', maxGap: RUINS_REACH_GAP };
+}
+
+/** Euclidean gap between the foot body at `center` and a rect; 0 when they touch or overlap. */
+function ruinsFootGap(center: RuinsPoint, rect: RuinsRect): number {
+  const foot = ruinsActorBody(center);
+  const dx = Math.max(foot.x - (rect.x + rect.width), rect.x - (foot.x + foot.width), 0);
+  const dy = Math.max(foot.y - (rect.y + rect.height), rect.y - (foot.y + foot.height), 0);
+  return Math.hypot(dx, dy);
+}
+
+/**
+ * ONE OWNER PER POSITION: among the footprints that can answer here, the one whose outer edge is nearest the foot owns
+ * it. Ties go to the first listed. Overlapping reach zones (a prop 10px from its neighbour) never answer for two at once.
+ */
+export function ruinsStandingOwner(id: string, center: RuinsPoint, footprints: Readonly<Record<string, RuinsRect>>): boolean {
+  let owner: string | null = null;
+  let best = Infinity;
+  for (const [other, rect] of Object.entries(footprints)) {
+    const gap = ruinsFootGap(center, rect);
+    if (gap < best) { owner = other; best = gap; }
+  }
+  return owner === id;
 }
 
 /** Every solid that blocks the player: walls, architecture and standing props. */

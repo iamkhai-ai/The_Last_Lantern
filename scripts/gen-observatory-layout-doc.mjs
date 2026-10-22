@@ -122,7 +122,7 @@ p();
 
 p('## Modules (art + stand + behaviour)');
 p();
-p('The stand is the E trigger, authored at the object\'s **south edge** (RULE_GAMES.md 1) or its documented');
+p('The stand is the E trigger. A standing prop answers from every side within 8px of its solid (RULE_GAMES.md 1, 2026-10-22); its stand is the reach point 8px above its base line, and the documented');
 p('side. A standing prop sorts at `10 + anchor.y/10`; ground-mounted art sits at depth 3.');
 p();
 for (const roomId of ROOMS) {
@@ -218,8 +218,8 @@ for (const element of OBSERVATORY_ELEMENTS) {
   p(`| \`${element.id}\` | ${observatoryPrompt(element.id, sample)} |`);
 }
 p();
-p('- Every trigger centre sits at or below its object\'s south edge, or on the documented side/gate');
-p('  exception; standing north, east or west of a prop shows nothing, and control radii stay 22..24.');
+p('- Standing props answer from every side within 8px of their solid; flat ground mounts keep the south edge, or the documented side/gate');
+p('  exception; control radii stay 22..24 for the exceptions and the approach predicate.');
 p(`- Transit circles are ${sideRadius}px, except the south sill pocket (${pocket.triggerRadius}px): its centre (${point(pocket.trigger)}) sits ${pocketGap}px from the nearest`);
 p(`  foot-body centre while the loop is shut, so the ${pocket.triggerRadius}px circle keeps a ${pocketMargin}px margin and still ends above y=320.`);
 p('- Every locked door and disabled control states the unmet prerequisite in Vietnamese via');

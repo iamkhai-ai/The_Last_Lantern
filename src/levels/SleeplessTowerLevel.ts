@@ -2,7 +2,7 @@ import { HUD_LAYOUT } from '../ui/CampaignHud';
 import { SoundSystem } from '../systems/SoundSystem';
 import Phaser from 'phaser';
 import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
-import { TOWER, TOWER_SOLIDS, canCompleteTower, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanApproachFront, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
+import { TOWER, TOWER_SOLIDS, canCompleteTower, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanReach, towerReachOwner, TOWER_REACH_GAP, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
@@ -333,14 +333,21 @@ export class SleeplessTowerLevel {
 
   private registerActions(): void {
     const { interactions } = this.ctx;
-    // RULE_GAMES §1: standing props answer E from their south face only. Props without a front rect (record, stairs) are wall or door controls.
-    const add = (id: string, stand: Point, prompt: () => string, onInteract: () => void, artId: string, enabled: () => boolean = () => true, front?: Rect) => {
-      const reach = (): boolean => (front ? towerCanApproachFront(this.point(), stand, front) : towerCanApproach(this.point(), stand));
+    // RULE_GAMES §1: standing props answer E from every side within TOWER_REACH_GAP of their footprint, and the nearest
+    // footprint owns a shared position. Props without a footprint (record, stairs) are wall or door controls: radius rule.
+    const footprints: Record<string, Rect> = {};
+    const add = (id: string, stand: Point, prompt: () => string, onInteract: () => void, artId: string, enabled: () => boolean = () => true, footprint?: Rect) => {
+      if (footprint) footprints[id] = footprint;
+      const reach = (): boolean => (footprint ? towerCanReach(this.point(), footprint) : towerCanApproach(this.point(), stand));
       const config: InteractableConfig = {
         id: `tower-${id}`,
         x: stand.x,
         y: stand.y,
         radius: TOWER.interactionRange,
+        ...(footprint ? {
+          reach: { rect: footprint, face: 'any' as const, maxGap: TOWER_REACH_GAP },
+          ownsPosition: (x: number, y: number) => towerReachOwner(id, { x, y }, footprints),
+        } : {}),
         getPrompt: () => (reach() ? prompt() : null),
         getPromptBounds: () => this.visuals.get(artId)?.getBounds() ?? null,
         isEnabled: () => reach() && enabled(),

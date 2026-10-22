@@ -2,24 +2,24 @@ import assert from 'node:assert/strict';
 import {
   WHISPERING_WOODS, WOODS_RUNE_ART, WOODS_POEM_ART, WOODS_RUNE_BODY_FIT, fitWoodsRuneArt, WOODS_RUNE_PROMPT_OFFSET_Y, WOODS_POEM_PROMPT_OFFSET_Y,
   RUNE_ORDER, feetAt, getWoodsTutorialStage, isWoodsCenterWalkable, isWoodsPointSafe, isWoodsStoneInReach, woodsFootBody,
-  WOODS_STONE_REACH_PADDING, WOODS_STONE_APPROACH_RADIUS,
+  WOODS_STONE_REACH_PADDING,
   resolveWoodsSpawn, normalizeRuneProgress, activateWoodsRune, canActivateWoodsRune,
 } from '../src/data/whisperingWoodsLayout.ts';
 
 assert.deepEqual(feetAt({ x: 280, y: 286 }), { x: 280, y: 305 });
 assert.deepEqual(WHISPERING_WOODS.player.body, { width: 14, height: 6, offsetX: 11, offsetY: 37 });
-assert.deepEqual(WHISPERING_WOODS.stands.spawn,{x:136,y:286});
+assert.deepEqual(WHISPERING_WOODS.stands.spawn,{x:136,y:262});
 assert.deepEqual(WHISPERING_WOODS.anchors.poem,{x:136,y:270});
-assert.deepEqual(WHISPERING_WOODS.stands.poem,{x:136,y:276});
+assert.deepEqual(WHISPERING_WOODS.stands.poem,{x:136,y:262});
 assert.deepEqual(WHISPERING_WOODS.footprints.poem,{x:102,y:246,width:68,height:24});
 assert.deepEqual(WHISPERING_WOODS.anchors.moon,{x:232,y:242});
-assert.deepEqual(WHISPERING_WOODS.stands.moon,{x:232,y:248});
+assert.deepEqual(WHISPERING_WOODS.stands.moon,{x:232,y:234});
 assert.deepEqual(WHISPERING_WOODS.footprints.moon,{x:215,y:218,width:34,height:24});
 assert.deepEqual(WHISPERING_WOODS.anchors.leaf,{x:326,y:174});
-assert.deepEqual(WHISPERING_WOODS.stands.leaf,{x:326,y:180});
+assert.deepEqual(WHISPERING_WOODS.stands.leaf,{x:326,y:166});
 assert.deepEqual(WHISPERING_WOODS.footprints.leaf,{x:309,y:150,width:34,height:24});
 assert.deepEqual(WHISPERING_WOODS.anchors.star,{x:408,y:266});
-assert.deepEqual(WHISPERING_WOODS.stands.star,{x:408,y:272});
+assert.deepEqual(WHISPERING_WOODS.stands.star,{x:408,y:258});
 assert.deepEqual(WHISPERING_WOODS.footprints.star,{x:391,y:242,width:34,height:24});
 assert.deepEqual(Object.keys(WHISPERING_WOODS.footprints).sort(),['leaf','moon','poem','star']);
 assert.equal('practice' in WHISPERING_WOODS.anchors,false,'runtime layout has no practice stone');
@@ -154,7 +154,6 @@ const farProbe = (id, side) => {
       const p = { x: base.x + normal.x * out + tangent.x * lateral, y: base.y + normal.y * out + tangent.y * lateral };
       if (!isWoodsCenterWalkable(p)) continue;
       if (rectGap(woodsFootBody(p), fp) < 30) continue;
-      if (Math.hypot(p.x - stand.x, p.y - stand.y) <= WOODS_STONE_APPROACH_RADIUS + 1) continue;
       return p;
     }
   }
@@ -169,19 +168,17 @@ for (const id of stoneIds) {
     assert.equal(isWoodsStoneInReach(id, contact), true, `${id} answers E from ${side} contact`);
     const far = farProbe(id, side);
     assert.ok(far, `${id} ${side} has a walkable probe 30px+ away`);
-    assert.ok(Math.hypot(far.x - WHISPERING_WOODS.stands[id].x, far.y - WHISPERING_WOODS.stands[id].y) > WOODS_STONE_APPROACH_RADIUS,
-      `${id} ${side} far probe is outside the authored approach`);
     assert.equal(isWoodsStoneInReach(id, far), false,
       `${id} is out of reach 30px+ away on the ${side} (${far.x},${far.y})`);
     console.log(`      ${id} ${side}: contact (${contact.x},${contact.y}) reach=true, far (${far.x},${far.y}) reach=false`
       + `, gap ${rectGap(woodsFootBody(far), WHISPERING_WOODS.footprints[id]).toFixed(1)}px`);
   }
-  // The authored south approach is kept: the level plays from these stands, not only from contact.
+  // The reach point is the stand: the level is played from these positions, 8px below each footprint.
   assert.equal(isWoodsCenterWalkable(WHISPERING_WOODS.stands[id]), true, `${id} stand stays walkable`);
   assert.equal(isWoodsStoneInReach(id, WHISPERING_WOODS.stands[id]), true, `${id} answers E at its authored stand`);
 }
-// Reach is a ~10-12px band, so it cannot answer across the stones or from the exit.
-assert.equal(WOODS_STONE_REACH_PADDING >= 10 && WOODS_STONE_REACH_PADDING <= 12, true, 'reach padding is 10-12px');
+// Reach is an 8px band (RULE_GAMES 1), so it cannot answer across the stones or from the exit.
+assert.equal(WOODS_STONE_REACH_PADDING, 8, 'reach padding is 8px');
 for (const id of stoneIds) {
   for (const other of stoneIds.filter((candidate) => candidate !== id)) {
     assert.equal(isWoodsStoneInReach(id, WHISPERING_WOODS.stands[other]), false,
@@ -191,7 +188,7 @@ for (const id of stoneIds) {
   assert.ok(Math.hypot(contactCenter(id, 'north').x - WHISPERING_WOODS.stands.exit.x,
     contactCenter(id, 'north').y - WHISPERING_WOODS.stands.exit.y) > 32, `${id} north contact is outside the exit radius`);
 }
-// Fresh spawn (136,286): the poem is the only prompt, exactly as before this change.
+// Fresh spawn (136,262): the poem is the only prompt; the spawn is its reach point.
 assert.equal(isWoodsStoneInReach('poem', WHISPERING_WOODS.stands.spawn), true, 'the campaign spawn keeps the poem prompt');
 for (const id of runeIds) {
   assert.equal(isWoodsStoneInReach(id, WHISPERING_WOODS.stands.spawn), false, `the spawn does not advertise ${id}`);

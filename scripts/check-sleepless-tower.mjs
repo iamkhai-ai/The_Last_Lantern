@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { canCompleteTower, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCanApproachFront, towerCenterWalkable, TOWER, TOWER_SOLIDS } from '../src/data/towerLayout.ts';
+import { canCompleteTower, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCanReach, towerCenterWalkable, towerFootGap, towerReachOwner, TOWER, TOWER_REACH_GAP, TOWER_SOLIDS } from '../src/data/towerLayout.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const seal = { x: 350, y: 290 };
@@ -88,17 +88,17 @@ const sampled = (waypoints) => waypoints.slice(1).every((to, i) => {
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, TOWER.objects.benchSource.stand]), true, 'spawn reaches the bench source');
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 60, y: 272 }, { x: 60, y: 205 }, TOWER.objects.benchMirror.stand]), true, 'bench mirror is approachable along the west lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.source.stand, TOWER.objects.g0.stand]), true, 'main lamp and G0 stands connect');
-assert.equal(sampled([TOWER.objects.g0.stand, TOWER.objects.g1.stand]), true, 'G1 stand is reachable without entering the prism base');
-assert.equal(sampled([TOWER.objects.g1.stand, { x: 275, y: 246 }, { x: 330, y: 246 }, { x: 330, y: 282 }, TOWER.objects.g2.stand]), true, 'G2 stand is reachable past the call pedestal');
+assert.equal(sampled([TOWER.objects.g0.stand, { x: 240, y: 250 }, { x: 250, y: 200 }, TOWER.objects.g1.stand]), true, 'G1 stand is reachable without entering the prism base');
+assert.equal(sampled([TOWER.objects.g1.stand, { x: 250, y: 200 }, { x: 250, y: 246 }, { x: 330, y: 246 }, { x: 330, y: 282 }, TOWER.objects.g2.stand]), true, 'G2 stand is reachable past the call pedestal');
 assert.equal(sampled([TOWER.objects.g2.stand, { x: 340, y: 285 }, { x: 500, y: 285 }, TOWER.objects.lever.stand]), true, 'lever is reachable around receiver B');
 assert.equal(sampled([TOWER.objects.lever.stand, { x: 545, y: 275 }, { x: 570, y: 285 }, TOWER.objects.chamber.stand]), true, 'chamber stand is reachable through the south lane');
 assert.equal(sampled([TOWER.objects.chamber.stand, { x: 520, y: 288 }, { x: 518, y: 196 }, TOWER.objects.record.stand]), true, 'record stand is reachable past the lever base');
-assert.equal(sampled([{ x: 135, y: 272 }, TOWER.objects.call.stand]), true, 'call pedestal is reachable along the south lane under the G2 base');
+assert.equal(sampled([{ x: 135, y: 272 }, { x: 340, y: 284 }, TOWER.objects.call.stand]), true, 'call pedestal is reachable along the south lane under the G2 base');
 assert.equal(sampled([TOWER.objects.call.stand, { x: 340, y: 288 }, { x: 150, y: 288 }, TOWER.stairsStand]), true, 'stairs are reachable along the south lane');
 assert.equal(sampled([{ x: 135, y: 272 }, TOWER.stairsStand]), true, 'stairs connect to spawn');
 assert.equal(sampled([{ x: 135, y: 272 }, { x: 350, y: 272 }]), true, 'G2 front lane keeps the straight south lane open');
-assert.equal(towerCanApproach({ x: 350, y: 272 }, TOWER.objects.call.stand), true);
-assert.equal(towerCanApproach({ x: 100, y: 272 }, TOWER.objects.call.stand), false, 'E range is local');
+assert.equal(towerCanReach({ x: 350, y: 244 }, TOWER.objects.call.base), true, 'call answers from its south face, 8px from its footprint');
+assert.equal(towerCanReach({ x: 100, y: 272 }, TOWER.objects.call.base), false, 'E range is local');
 
 assert.deepEqual(resolveTowerSpawn(undefined), TOWER.spawn);
 assert.deepEqual(resolveTowerSpawn({ x: 200, y: 150 }), { x: 200, y: 150 });
@@ -117,51 +117,44 @@ assert.equal(switched.waterReturned, true); assert.equal(switched.lumoAssign, 'a
 assert.equal(migrateTowerProgress({ flags: {}, counters: {}, lanternOn: true }).waterReturned, false);
 assert.equal(migrateTowerProgress({ flags: { 'l5-lantern-placed': true, 'l5-lantern-retrieved': true }, counters: {}, lanternOn: true }).source, null);
 
-// T07: standing props answer E from their south face only (raw foot-body probes, all four sides).
+// T07 (RULE_GAMES §1, 2026-10-22): standing props answer E from every side within TOWER_REACH_GAP px of their footprint.
 const g2 = TOWER.objects.g2;
-const g2Probe = (center) => towerCanApproachFront(center, g2.stand, g2.base);
 const baseBottom = g2.base.y + g2.base.height;
-const north = { x: g2.stand.x, y: g2.base.y - 22 };
-const east = { x: g2.base.x + g2.base.width + 7, y: g2.base.y - 14 };
-const west = { x: g2.base.x - 7, y: east.y };
-const south = { x: g2.stand.x, y: baseBottom - 16 + 2 };
-assert.equal(towerCenterWalkable(north) && towerCenterWalkable(east) && towerCenterWalkable(west) && towerCenterWalkable(south), true, 'all four G2 probes are real walkable positions');
-assert.ok(towerBodyRect(north).y + towerBodyRect(north).height <= g2.base.y, 'north probe body sits above the base');
-assert.ok(towerBodyRect(east).x >= g2.base.x + g2.base.width && towerBodyRect(east).y < baseBottom, 'east probe body is beside the base');
-assert.ok(towerBodyRect(west).x + towerBodyRect(west).width <= g2.base.x && towerBodyRect(west).y < baseBottom, 'west probe body is beside the base');
-assert.equal(towerCanApproach(north, g2.stand), true, 'range alone would accept the north probe, so the front rule is what blocks it');
-assert.equal(g2Probe(north), false, 'G2 north does not answer E'); assert.equal(g2Probe(east), false, 'G2 east does not answer E'); assert.equal(g2Probe(west), false, 'G2 west does not answer E');
-assert.equal(g2Probe(south), true, 'G2 south answers E'); assert.equal(g2Probe(g2.stand), true, 'G2 stand answers E');
-// every prop with a footprint: the stand sits at or below the front edge, and its four-side probes behave the same way.
-const standingProps = ['benchSource', 'benchMirror', 'source', 'g0', 'g1', 'g2', 'call', 'lever'].map((id) => [id, TOWER.objects[id]]);
-standingProps.push(['chamber', { stand: TOWER.objects.chamber.stand, base: TOWER.objects.chamber.solid }]);
-for (const [id, prop] of standingProps) {
-  assert.equal(towerCanApproachFront(prop.stand, prop.stand, prop.base), true, `${id} stand answers E`);
-  const n = { x: prop.stand.x, y: prop.base.y - 22 };
-  if (towerCenterWalkable(n)) assert.equal(towerCanApproachFront(n, prop.stand, prop.base), false, `${id} north does not answer E`);
-}
-// RULE_GAMES §1 x-span: beside a standing prop (footprint centre +/- (width/2 + 10) at the stand's row) E stays closed.
-// Obstacles are dropped so the front rule decides; where the probe is within E range, it must be walkable and in range first.
-for (const [id, prop] of standingProps) {
-  const reach = prop.base.width / 2 + 10;
-  for (const x of [prop.stand.x - reach, prop.stand.x + reach]) {
-    const probe = { x, y: prop.stand.y };
-    if (reach <= TOWER.interactionRange) assert.equal(towerCanApproach(probe, prop.stand, []), true, `${id} side probe at x=${x} is in range and in bounds`);
-    assert.equal(towerCanApproachFront(probe, prop.stand, prop.base, []), false, `${id} side probe at x=${x} does not answer E`);
+const standingProps = [
+  ['benchSource', TOWER.objects.benchSource.stand, TOWER.objects.benchSource.base],
+  ['benchMirror', TOWER.objects.benchMirror.stand, TOWER.objects.benchMirror.base],
+  ['source', TOWER.objects.source.stand, TOWER.objects.source.base],
+  ['g0', TOWER.objects.g0.stand, TOWER.objects.g0.base],
+  ['g1', TOWER.objects.g1.stand, TOWER.objects.g1.base],
+  ['g2', g2.stand, g2.base],
+  ['call', TOWER.objects.call.stand, TOWER.objects.call.base],
+  ['lever', TOWER.objects.lever.stand, TOWER.objects.lever.base],
+  ['chamber', TOWER.objects.chamber.stand, TOWER.objects.chamber.solid],
+];
+const footprints = Object.fromEntries(standingProps.map(([id, , rect]) => [id, rect]));
+for (const [id, stand, rect] of standingProps) {
+  assert.equal(towerCanReach(stand, rect), true, `${id} stand is walkable and answers E`);
+  const mid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  const probes = {
+    north: (gap) => ({ x: mid.x, y: rect.y - gap - 22 }),
+    south: (gap) => ({ x: mid.x, y: rect.y + rect.height + gap - 16 }),
+    east: (gap) => ({ x: rect.x + rect.width + gap + 7, y: mid.y - 19 }),
+    west: (gap) => ({ x: rect.x - gap - 7, y: mid.y - 19 }),
+  };
+  for (const [side, at] of Object.entries(probes)) {
+    const near = at(TOWER_REACH_GAP);
+    const far = at(TOWER_REACH_GAP + 2);
+    assert.equal(towerFootGap(near, rect), TOWER_REACH_GAP, `${id}: the ${side} probe sits exactly ${TOWER_REACH_GAP}px from the footprint`);
+    assert.ok(towerFootGap(far, rect) > TOWER_REACH_GAP, `${id}: the ${side} probe 2px beyond is outside reach`);
+    // Overlapping zones (the lever and the chamber are 9px apart) resolve to one owner, which itself reaches the probe.
+    const owners = Object.keys(footprints).filter((other) => towerReachOwner(other, near, footprints));
+    assert.equal(owners.length, 1, `${id}: the ${side} probe has exactly one owner`);
+    assert.ok(towerFootGap(near, footprints[owners[0]]) <= TOWER_REACH_GAP, `${id}: the ${side} probe's owner (${owners[0]}) reaches it`);
   }
 }
-// lever side spot from the review: (553,240) is 2px past the footprint's east edge (x=551) and stays closed; the 1px edge (552) answers.
-const lever = TOWER.objects.lever;
-assert.equal(towerCanApproach({ x: 553, y: 240 }, lever.stand), true, 'lever side spot is in range and walkable');
-assert.equal(towerCanApproachFront({ x: 553, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the east side at (553,240)');
-assert.equal(towerCanApproachFront({ x: 552, y: 240 }, lever.stand, lever.base), true, 'lever E answers at the 1px east edge');
-assert.equal(towerCanApproachFront({ x: 527, y: 240 }, lever.stand, lever.base), false, 'lever E is closed from the west side at (527,240)');
 // usable standing space in front of G2: at least 24px of walkable depth between its front edge and the south bound (layout contract).
 const southBound = TOWER.bounds.y + TOWER.bounds.height;
 assert.ok(southBound - baseBottom >= 24 + towerBodyRect(g2.stand).height, 'G2 keeps 24px of standing space in front of it');
-const frontCenters = [];
-for (let y = baseBottom - 22; y <= southBound; y += 1) if (towerCenterWalkable({ x: g2.stand.x, y }) && g2Probe({ x: g2.stand.x, y })) frontCenters.push(y);
-assert.ok(frontCenters.length >= 12, `G2 front window is usable (${frontCenters.length}px)`);
 // optics relation is preserved after the lift: branch B stays on one row with receiver B, directly under the prism right port.
 assert.equal(g2.optical.x, TOWER.objects.prism.right.x, 'G2 sits under the prism right port');
 assert.equal(g2.optical.y, TOWER.objects.eyeB.optical.y, 'G2 and receiver B share the beam row');

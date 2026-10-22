@@ -18,7 +18,9 @@ import {
   sidePathOpen, sunOpen, updateHeldSpans, GARDEN_BAR_BEAM_ROWS, GARDEN_BAR_POSTS, GARDEN_BAR_SPRITE, GARDEN_OBSERVATION_ZONE,
   GARDEN_SHADOW_PATH, inGardenObservationZone, practiceLessonArmed, practiceLessonDue,
   GARDEN_ACTOR, GARDEN_HUD_BAND, gardenActiveSolids,
+  GARDEN_REACH_GAP, GARDEN_REACH_RECTS, gardenStandingOwner, gardenStandingReach,
 } from '../src/data/sleepingGardenLayout.ts';
+import { isFootInReach } from '../src/systems/interactionReach.ts';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const HUD_TOP = 58;      // shared top HUD band (CampaignScene: title y13 / objective y42 panels)
@@ -180,26 +182,36 @@ assert.equal(reachable(sideClosed, true, { x: 392, y: 280 }), false, 'the east l
 assert.equal(reachable(sideOpen, true, { x: 392, y: 280 }), true, 'the east landing opens with the plank');
 assert.equal(isGardenPositionSafe(sideOpen, true, NO_HELD_SPANS, { x: 392, y: 280 }), true);
 
-// ---------------------------------------------------------------- prompt side rule (RULE_GAMES 1)
-const STAND_OBJECTS = [
-  { id: 'shutter-handle', stand: GARDEN_STANDS.handle, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'shutter-handle').rect },
-  { id: 'latch-west', stand: GARDEN_STANDS.latchWest, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'latch-west').rect },
-  { id: 'drain', stand: GARDEN_STANDS.drain, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'drain').rect },
-  { id: 'latch-east', stand: GARDEN_STANDS.latchEast, rect: GARDEN_STATIC_SOLIDS.find((s) => s.id === 'latch-east').rect },
-  { id: 'sprout', stand: GARDEN_STANDS.sprout, rect: GARDEN_MODULES.find((m) => m.id === 'sprout').rect },
-];
-for (const { id, stand, rect } of STAND_OBJECTS) {
-  const cx = rect.x + rect.width / 2;
-  const cy = rect.y + rect.height / 2;
-  assert.ok(stand.y > rect.y + rect.height, `${id}: stand sits on the south side of the object`);
-  assert.ok(stand.x >= rect.x && stand.x <= rect.x + rect.width, `${id}: stand is inside the object's x span`);
-  assert.ok(stand.y - (rect.y + rect.height) <= 20, `${id}: stand hugs the south edge (<=20px gap)`);
-  const probes = { north: { x: cx, y: rect.y - 12 }, east: { x: rect.x + rect.width + 12, y: cy }, west: { x: rect.x - 12, y: cy } };
-  for (const [side, probe] of Object.entries(probes)) {
-    assert.ok(Math.hypot(probe.x - stand.x, probe.y - stand.y) > stand.radius, `${id}: standing at the ${side} face is outside the prompt radius`);
+// ---------------------------------------------------------------- prompt reach rule (RULE_GAMES 1, 2026-10-22)
+// Standing props answer from every side within GARDEN_REACH_GAP px of their outer edge: the foot body (14x6 at
+// centre + (-7, +16)) against the object's own rect. Probes at exactly the gap answer; probes 2px beyond do not.
+const REACH_PROPS = { 'latch-west': GARDEN_STANDS.latchWest, drain: GARDEN_STANDS.drain, 'latch-east': GARDEN_STANDS.latchEast, sprout: GARDEN_STANDS.sprout };
+const footAt = (side, rect, gap) => {
+  const mid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  if (side === 'west') return { x: rect.x - gap - 7, y: mid.y - 19 };
+  if (side === 'east') return { x: rect.x + rect.width + gap + 7, y: mid.y - 19 };
+  if (side === 'north') return { x: mid.x, y: rect.y - gap - 22 };
+  return { x: mid.x, y: rect.y + rect.height + gap - 16 };
+};
+for (const [id, stand] of Object.entries(REACH_PROPS)) {
+  const rect = GARDEN_REACH_RECTS[id];
+  const reach = gardenStandingReach(id);
+  assert.equal(reach.maxGap, GARDEN_REACH_GAP, `${id}: registers the shared reach gap`);
+  assert.equal(reach.face, 'any', `${id}: answers from every side`);
+  assert.equal(isFootInReach(gardenActorBody(stand), reach), true, `${id}: its stand is inside its own reach`);
+  for (const side of ['north', 'south', 'east', 'west']) {
+    const near = footAt(side, rect, GARDEN_REACH_GAP);
+    const far = footAt(side, rect, GARDEN_REACH_GAP + 2);
+    assert.equal(isFootInReach(gardenActorBody(near), reach), true, `${id}: standing ${side} at the ${GARDEN_REACH_GAP}px edge prompts`);
+    assert.equal(isFootInReach(gardenActorBody(far), reach), false, `${id}: standing ${side} beyond the ${GARDEN_REACH_GAP}px edge is silent`);
+    // Overlapping reach zones (the drain and the sprout share x 484..488) resolve to one owner, the nearest outer edge.
+    const owners = Object.keys(REACH_PROPS).filter((other) => gardenStandingOwner(other, near));
+    assert.equal(owners.length, 1, `${id}: the ${side} probe has exactly one owner`);
+    assert.equal(isFootInReach(gardenActorBody(near), gardenStandingReach(owners[0])), true, `${id}: the ${side} probe's owner (${owners[0]}) also reaches it`);
   }
-  assert.ok(stand.y + stand.radius < HUD_BOTTOM, `${id}: the prompt zone stays clear of the bottom HUD strip`);
 }
+// The handle is a wall control and the arch a gate: both keep their radius from a stand (RULE_GAMES 2 and 3).
+assert.ok(GARDEN_STANDS.handle.y < HUD_BOTTOM && GARDEN_STANDS.exit.y < 96, 'wall and gate controls stay clear of the HUD bands');
 // documented gate-arch exception (RULE_GAMES 3): trigger under the arch, approached from inside
 assert.equal(GARDEN_STANDS.exit.x > 552 && GARDEN_STANDS.exit.x < 596, true, 'arch trigger sits inside the gate opening');
 assert.equal(GARDEN_STANDS.exit.y < 96, true, 'arch trigger sits under the arch');
