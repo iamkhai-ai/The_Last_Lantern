@@ -1,157 +1,233 @@
-"""Task14 offline art assembly. Pillow only; no engine state implementation."""
+"""Reproducible native Level 10 art from retained imagegen masters; Pillow only."""
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageFilter
 import json, hashlib, math
-B=Path(__file__).resolve().parent; R=B.parents[2]; S=B/'sprites'; P=B/'previews'; N=Image.Resampling.NEAREST
-S.mkdir(exist_ok=True); P.mkdir(exist_ok=True)
-exports=[]; refs={}; rows=[]
+
+B=Path(__file__).resolve().parent
+R=B.parents[2]
+S,P,V=B/'sprites',B/'previews',B/'sources/v2'
+COLORS={'memory':'#f2c661','hope':'#74c8ef','balance':'#b98cf0'}
+CORE=(320,115)
+PATHS={'memory':[(158,192),(204,178),(246,152),CORE],
+       'hope':[(320,200),(330,173),(320,146),CORE],
+       'balance':[(480,192),(432,177),(388,151),CORE]}
+exports=[]; sources={}; recipes={}
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def rel(p): return p.relative_to(R).as_posix()
-def dump(n,v): (B/n).write_text(json.dumps(v,ensure_ascii=False,indent=2),encoding='utf8')
+def dump(n,v): (B/n).write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
+def blank(size=(640,360)): return Image.new('RGBA',size)
 def load(p):
- p=R/p; im=Image.open(p).convert('RGBA'); refs[rel(p)]={'file':rel(p),'size':list(im.size),'sha256':sha(p)}; return im
-def blank(w=640,h=360): return Image.new('RGBA',(w,h))
-def save(n,im,kind='native-state-layer',pivot=(.5,.5)):
- p=S/(n+'.png'); im.save(p); exports.append({'file':rel(p),'key':'heart_'+n.replace('-','_'),'size':list(im.size),'pivot':pivot,'kind':kind,'sha256':sha(p)}); return im
-F=ImageFont.truetype('C:/Windows/Fonts/arial.ttf',11)
-def label(im,xy,t,c='#e6e7d3'): ImageDraw.Draw(im).text(xy,t,font=F,fill=c)
-def put(im,a,xy,size=None): im.alpha_composite(a.resize(size,N) if size else a,xy)
-shared='assets/levels/shared/'; l5='assets/levels/05-a-path-for-two/sprites/'; l8='assets/levels/08-ruins-of-two-halves/sprites/'; sh=shared+'characters/the-shadow/sprites/'
-A={k:load(p) for k,p in {'source':shared+'mechanisms/source-lit.png','source-off':shared+'mechanisms/source-off-source.png','source-empty':shared+'mechanisms/source-empty.png','G0':'assets/levels/06-the-sleepless-tower/sprites/G0-to-B.png','mirror':shared+'mechanisms/mirror-1-slash.png','prism':shared+'beam-splitter/prism-receiving.png','sun':l8+'lock-sun-on.png','sun-off':l8+'lock-sun-off.png','moon':l8+'lock-moon-covered.png','moon-lit':l8+'lock-moon-lit.png','statue':l8+'statue-notch-0.png','narrow':l8+'statue-notch-1.png','shadow':l8+'shadow-notch-0.png','splitter':l8+'fixed-three-route-splitter-on.png','C':l5+'pressure-occupied.png','C-empty':l5+'pressure-empty.png','membrane':l5+'door-open.png','membrane-closed':l5+'door-closed.png','pipe':l5+'tube-straight.png','lumo':'src/assets/lumo_0.png','nhinh':'assets/character/nhinh_downright_lantern_on_0.png','nhinh-off':'assets/character/nhinh_downright_lantern_off_0.png'}.items()}
-crystals=[load('src/assets/crystal_'+n+'.png') for n in ['memory','hope','balance']]
-colors=['#efc76d','#70ccea','#bb8bef']; names=['memory','hope','balance']
-orig=load(rel(B/'sources/mother-tree-original.png')); base=orig.resize((640,360),N)
-save('sanctuary-base',base,'generated-source-normalized')
-# Rectangular background crop modules are explicitly scenic patches, not alpha cutouts.
-save('mother-tree-trunk-patch',base.crop((220,0,420,178)),'source-crop-scenic-patch',(.5,1))
-save('mother-tree-canopy-patch',base.crop((90,0,550,91)),'source-crop-scenic-patch',(.5,1))
-# Exact channels and roots use full-scene transparent layers, preventing registration drift.
-core=(320,115); ends=[(158,192),(320,200),(480,192)]
-paths=[[(158,192),(204,178),(246,152),core],[(320,200),(330,173),(320,146),core],[(480,192),(432,177),(388,151),core]]
-roots={}
-for i,n in enumerate(names):
- for state in ['broken','connected','repaired']:
-  im=blank(); d=ImageDraw.Draw(im); pts=paths[i]
-  if state=='broken':
-   d.line(pts[:2],fill='#745e50',width=8); d.line(pts[2:],fill='#745e50',width=8)
-   d.line(pts[:2],fill=colors[i],width=2); d.line((pts[1][0]-4,pts[1][1]+4,pts[1][0]+4,pts[1][1]-4),fill='#d2b69d',width=2)
-  else:
-   d.line(pts,fill='#5d5149',width=9); d.line(pts,fill=colors[i],width=3)
-   if state=='repaired':
-    x,y=pts[1];d.rectangle((x-5,y-5,x+5,y+5),outline='#dfd6aa',width=2); d.rectangle((x-2,y-7,x+2,y+7),fill='#9c8259')
-  roots[n,state]=save(n+'-root-'+state,im)
- for occupied in [False,True]:
-  im=blank(58,64);d=ImageDraw.Draw(im);d.ellipse((2,18,55,62),fill='#1b292f',outline=colors[i],width=2)
-  # Approved crystal itself is the exact matching symbol: no new invented rune vocabulary.
-  put(im,crystals[i],(20,0),(18,30)); d.line((9,40,15,34,21,40),fill=colors[i],width=2)
-  if occupied: put(im,crystals[i],(20,28),(18,30))
-  save(n+'-alcove-'+('inserted' if occupied else 'empty'),im)
-white=blank();d=ImageDraw.Draw(white)
-for pts in [[(220,8),(244,55),core],[(422,8),(399,58),core]]:
- d.line(pts,fill='#576a6b',width=9);d.line(pts,fill='#dcece5',width=3)
- for x,y in pts[1:]:d.polygon([(x-3,y-7),(x+3,y-7),(x,y)],fill='white')
-save('old-white-channels-feeding',white)
-ret=blank();d=ImageDraw.Draw(ret);d.line((220,8,234,39),fill='#71858a',width=3);d.line((422,8,410,37),fill='#71858a',width=3);save('old-white-channels-retracted',ret)
-cores={}
-for state in ['waiting','ready','latched','night','dawn']:
- im=blank(58,68);d=ImageDraw.Draw(im);d.ellipse((4,3,53,62),fill='#152b32',outline='#8bafa4',width=3)
- for i,c in enumerate(colors):d.arc((10+i*3,9+i*3,48-i*3,56-i*3),i*120,i*120+100,fill=c,width=3)
- if state=='waiting':d.line((20,37,26,31,32,37,38,31),fill='#657779',width=2)
- if state in ['ready','latched']:d.ellipse((23,26,35,38),fill='#dfdca2')
- if state=='latched':d.rectangle((10,46,47,52),fill='#a68c5e');d.rectangle((26,42,31,57),fill='#dfd6aa')
- cores[state]=save('core-'+state,im)
-nodes={}
-for state in ['waiting','ready','latched']:
- im=blank(48,32);d=ImageDraw.Draw(im);d.ellipse((1,1,46,30),fill='#304840',outline='#c2d4a4',width=2)
- for i,c in enumerate(colors):d.rectangle((9+i*11,9,15+i*11,15),fill=c if state!='waiting' else '#65716e')
- if state=='latched':d.rectangle((6,20,41,24),fill='#dfbb78');d.rectangle((22,17,26,29),fill='#dfbb78')
- nodes[state]=save('confirmation-root-'+state,im)
-dark=blank();put(dark,A['shadow'],(488,207),(64,42));d=ImageDraw.Draw(dark);d.polygon([(498,210),(544,210),(551,248),(488,248)],fill='#101329',outline=colors[2],width=3);save('fixed-dark-pocket-purple-border',dark)
-bloom=blank();d=ImageDraw.Draw(bloom)
-for r,a in [(44,28),(32,40),(22,64)]: d.ellipse((320-r,115-r,320+r,115+r),fill=(255,238,174,a))
-save('temporary-core-bloom-after-retrieval',bloom)
-line=blank();d=ImageDraw.Draw(line);d.line((366,272,349,204,320,115),fill='#fff2bf',width=3);d.polygon([(343,187),(353,185),(350,176)],fill='white');save('redundant-carried-lantern-line',line)
-# Compact rule reminder: same familiar modules, no extra machine.
-bench=blank(124,48);d=ImageDraw.Draw(bench);d.rounded_rectangle((0,0,123,47),4,fill='#334239',outline='#859180')
-for a,x in [('mirror',3),('C',35),('moon',66),('sun',96)]:put(bench,A[a],(x,5),(24,30))
-save('root-rule-reminder-table',bench)
-wheel=blank(96,80);d=ImageDraw.Draw(wheel);d.ellipse((10,2,85,77),fill='#253b4b',outline='#b3b7a4',width=2)
-for a in range(0,360,45):
- x=48+int(30*math.cos(math.radians(a)));y=40+int(30*math.sin(math.radians(a)));d.line((48,40,x,y),fill='#768b9c')
-d.ellipse((70,34,80,44),fill='#efcb87');d.arc((16,25,42,51),65,295,fill='#bccbea',width=5)
-d.line((81,13,91,20,83,28),fill='#c3dfc5',width=2);save('day-night-wheel-resuming',wheel)
-# All state study records are current inputs, never accumulated historical activations.
-states=[('01-three-empty',dict(insert=0,C=False,route='direct',balance=False)),('02-memory-inserted',dict(insert=1,C=False,route='direct',balance=False)),('03-hope-inserted',dict(insert=2,C=True,route='direct',balance=False)),('04-three-inserted-two-incomplete',dict(insert=3,C=False,route='split',balance=False)),('05-memory-missing',dict(insert=3,C=True,route='wrong-memory',balance=True)),('06-hope-missing',dict(insert=3,C=False,route='split',balance=True)),('07-balance-missing-direct-G0',dict(insert=3,C=True,route='direct',balance=False)),('08-balance-missing-narrow',dict(insert=3,C=True,route='split',balance=False)),('09-all-concurrent-ready',dict(insert=3,C=True,route='split',balance=True)),('10-latched-lamp-on-pedestal',dict(insert=3,C=False,route='none',balance=False,latched=True)),('11-retrieved-on-redundant-overload',dict(insert=3,C=False,route='none',balance=False,latched=True,taken=True)),('12-F-off-night',dict(insert=3,C=False,route='none',balance=False,latched=True,taken=True,off=True,night=True)),('13-off-at-pedestal-alternative',dict(insert=3,C=False,route='none',balance=False,latched=True,off=True,night=True)),('14-dawn-tree',dict(insert=3,C=False,route='none',balance=False,latched=True,taken=True,off=True,dawn=True))]
-def scene(n,s):
- im=base.copy();lat=s.get('latched',False);off=s.get('off',False);taken=s.get('taken',False);night=s.get('night',False);dawn=s.get('dawn',False)
- if night: im=Image.alpha_composite(im,Image.new('RGBA',im.size,(5,9,27,115)))
- if dawn: im=Image.alpha_composite(im,Image.new('RGBA',im.size,(226,161,115,36)))
- # Native staging grounds keep small mechanisms distinct from scenic roots.
- d=ImageDraw.Draw(im);d.rounded_rectangle((35,218,606,327),12,fill='#203936',outline='#466158')
- m=s['insert']>=1 and s['C'] and s['route'] in ['direct','split'];h=s['insert']>=2 and s['C'];b=s['insert']==3 and s['route'] in ['split','wrong-memory'] and s['balance']
- live=[m,h,b]; ready=all(live);over=lat and taken and not off
- for i,name in enumerate(names):
-  put(im,roots[name,'repaired' if lat else 'connected' if live[i] else 'broken'],(0,0));put(im,Image.open(S/(name+'-alcove-'+('inserted' if s['insert']>i else 'empty')+'.png')).convert('RGBA'),(ends[i][0]-29,ends[i][1]-47))
- put(im,ret if off else white,(0,0));put(im,cores['dawn' if dawn else 'night' if night else 'latched' if lat else 'ready' if ready else 'waiting'],(291,81));put(im,nodes['latched' if lat else 'ready' if ready else 'waiting'],(296,221))
- # G0/source/prism/memory path and Hope-operated membrane.
- for k,xy in [('source-empty' if taken else 'source-off' if off else 'source',(53,264)),('G0',(116,252)),('prism',(205,256)),('mirror',(117,205)),('membrane' if s['C'] or lat else 'membrane-closed',(157,223)),('C' if s['C'] else 'C-empty',(273,285)),('splitter',(438,266)),('statue' if s['balance'] or lat else 'narrow',(500,264)),('sun' if b else 'sun-off',(451,216)),('sun' if b else 'sun-off',(554,216)),('moon' if s['balance'] or lat else 'moon-lit',(506,216))]:put(im,A[k],xy,(28,32) if k in ['splitter','statue','narrow','membrane','membrane-closed'] else None)
- if not lat and not off:
-  d=ImageDraw.Draw(im);d.line((77,278,131,278),fill='#fff0c0',width=2)
-  if s['route']=='direct':d.line((131,278,131,218,158,190),fill=colors[0],width=2)
-  else:
-   d.line((131,278,220,278),fill='#fff0c0',width=2);d.line((220,278,220,218,174,218),fill=colors[0],width=2);d.line((220,278,451,278,451,255),fill=colors[2],width=2)
-   if s['C'] and s['route']=='split':d.line((174,218,158,190),fill=colors[0],width=2)
-   if s['balance']:
-    d.line((451,255,465,235),fill=colors[2],width=2);d.line((451,278,568,278,568,235),fill=colors[2],width=2)
- if s['balance'] or lat:put(im,dark,(0,0))
- if lat:
-  # Explicit fixed root curtain guards darkness after Lumo leaves; never reads as live pressure.
-  d=ImageDraw.Draw(im);d.line((489,207,549,207),fill='#8a7963',width=6);d.rectangle((516,201,522,213),fill='#d7be85')
- if over:
-  put(im,bloom,(0,0));put(im,line,(0,0));put(im,dark,(0,0)) # protect purple border and dark pocket after bloom
-  for i in [0,1]:ImageDraw.Draw(im).line(paths[i],fill='#fff0ae',width=2)
- put(im,A['nhinh-off' if off else 'nhinh'],(342,260));put(im,A['lumo'],(287,274) if s['C'] else (384,262),(15,15))
- put(im,bench,(39,164));label(im,(42,151),'E · quy tắc đã học')
- label(im,(40,332),n+' · offline state study');label(im,(216,314),'G0');label(im,(298,275),'E');label(im,(272,322),'C · Lumo');label(im,(500,303),'Nhật · Nguyệt · Nhật')
- if night or dawn: put(im,wheel,(536,13))
- if night:
-  for x,y in [(230,62),(430,83),(195,137),(410,147)]:ImageDraw.Draw(im).rectangle((x,y,x+1,y+1),fill='#bbdbaa')
- out=P/(n+'-640x360.png');im.save(out);rows.append({'name':n,'inputs':s,'current':dict(memory=m,hope=h,balance=b,ready=ready,latched=lat,overload=over,white_old_channels=not off,crystal_roots_self_hold=lat,lumo_can_leave=lat),'file':rel(out),'sha256':sha(out)})
- return im
-studies=[scene(n,s) for n,s in states]
-# Transition reuse studies: source paths stay explicit and Shadow fades only at dawn.
-for i,k in enumerate(['stillness','dawn-dissolve-1','dawn-dissolve-2','dawn-afterimage','dawn-empty']):
- im=load(sh+'observatory-dawn-scene-base.png').resize((640,360),N);put(im,wheel,(328,70));put(im,load(sh+k+'.png'),(390,170));label(im,(18,335),'Dawn only · wheel resumes · '+k);p=P/('15-dawn-shadow-'+str(i)+'-640x360.png');im.save(p);studies.append(im)
-montage=blank();
-for p,xy in [('assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png',(0,0)),('assets/levels/04-shattered-moonlit-creek/sprites/creek-scene-base.png',(320,0)),('assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png',(0,180)),(sh+'observatory-dawn-scene-base.png',(320,180))]:
- put(montage,load(p),xy,(320,180))
-montage=Image.alpha_composite(montage,Image.new('RGBA',(640,360),(231,173,140,24)));label(montage,(12,340),'Dawn montage reuse study · moving plants/water/window/wheel require runtime');montage.save(P/'16-dawn-montage-640x360.png');studies.append(montage)
-# Final staging uses approved Nhinh pose; seated animation is deliberately deferred to task15.
-final=studies[13].copy();d=ImageDraw.Draw(final);d.rectangle((35,218,606,328),fill='#203936');put(final,A['nhinh-off'],(302,246));put(final,A['lumo'],(337,266),(15,15))
-leaf=blank(10,10);ImageDraw.Draw(leaf).polygon([(1,7),(3,1),(8,2),(7,6)],fill='#96be76');save('lantern-new-leaf',leaf);put(final,leaf,(328,276));label(final,(52,228),'Final composition proxy: seated pose belongs to task15');label(final,(240,320),'THE LAST DAWN');final.save(P/'17-final-credits-composition-proxy-640x360.png');studies.append(final)
-# Native asset contact, then exact nearest 2x. Scene contact also keeps every preview at native size.
-contact=Image.new('RGBA',(1280,math.ceil(len(studies)/2)*384),'#111d2b')
-for i,im in enumerate(studies):put(contact,im,((i%2)*640,(i//2)*384))
-contact.save(P/'contact-scenes-native.png');contact.resize((contact.width*2,contact.height*2),N).save(P/'contact-scenes-2x.png')
-small=[e for e in exports if e['size'][0]<640];sheet=Image.new('RGBA',(640,math.ceil(len(small)/4)*210),'#15222c')
+    p=Path(p)
+    if not p.is_absolute(): p=R/p
+    im=Image.open(p).convert('RGBA')
+    sources[rel(p)]={'file':rel(p),'size':list(im.size),'sha256':sha(p)}
+    return im
+def save(n,a=None,kind='native-sprite',pivot=(.5,.5),recipe=None):
+    p=S/(n+'.png')
+    if a is not None: a.save(p,compress_level=9)
+    a=Image.open(p)
+    assert a.mode=='RGBA' and a.getchannel('A').getbbox(), n
+    exports.append({'file':rel(p),'key':'heart_'+n.replace('-','_'),'size':list(a.size),
+                    'pivot':list(pivot),'kind':kind,'alpha_bbox':list(a.getchannel('A').getbbox()),'sha256':sha(p)})
+    if recipe: recipes[n]=recipe
+    return a
+def frame(n,grid=(1,1),i=0):
+    a=load(V/(n+'.png')); w,h=a.size; c,r=grid; x,y=i%c,i//c
+    a=a.crop((round(x*w/c),round(y*h/r),round((x+1)*w/c),round((y+1)*h/r)))
+    alpha=a.getchannel('A').point(lambda v:255 if v>=160 else 0)
+    box=alpha.getbbox(); assert box,(n,i)
+    a.putalpha(alpha)
+    return a.crop(box)
+def native(a,size,pad=1):
+    # Deliberate area preprocessing preserves features before palette/grid enforcement.
+    a=a.resize((size[0]-2*pad,size[1]-2*pad),Image.Resampling.BOX)
+    alpha=a.getchannel('A').point(lambda v:255 if v>=128 else 0)
+    a=a.convert('RGB').quantize(colors=48,dither=Image.Dither.NONE).convert('RGBA'); a.putalpha(alpha)
+    out=blank(size);out.alpha_composite(a,(pad,pad));return out
+def sheet(n,master,grid,i,size,pad=1,prop=False):
+    return save(n,native(frame(master,grid,i),size,pad),pivot=(.5,1) if prop else (.5,.5),
+                recipe={'master':master,'grid':grid,'frame':i,'size':size,'pad':pad})
+# Transfer only broad lighting from the depth study; the original pixel geometry stays registered.
+load(B/'sources/mother-tree-original.png')
+layout=load(V/'sanctuary-layout-reference.png')
+lighting=load(V/'sanctuary-depth-lighting.png').resize(layout.size,Image.Resampling.BOX)
+reference_light=layout.convert('RGB').filter(ImageFilter.GaussianBlur(10))
+target_light=lighting.convert('RGB').filter(ImageFilter.GaussianBlur(10))
+sanctuary=blank(layout.size)
+sanctuary.putdata([tuple(max(0,min(255,round(channel*((target+12)/(reference+12))**.65)))
+    for channel,target,reference in zip(pixel[:3],lit,base))+(pixel[3],)
+    for pixel,lit,base in zip(layout.get_flattened_data(),target_light.get_flattened_data(),reference_light.get_flattened_data())])
+save('sanctuary-base',sanctuary,'registered-scenic-background',pivot=(0,0),
+     recipe={'master':'sanctuary-depth-lighting','geometry':'sanctuary-layout-reference',
+             'size':[640,360],'lighting_blur':10,'lighting_strength':.65})
+for n in ['mother-tree-trunk-patch','mother-tree-canopy-patch',
+          'fixed-dark-pocket-purple-border','redundant-carried-lantern-line','lantern-new-leaf']:
+    save(n,kind='retained-input')
+basin=native(frame('socket'),(54,44),0)
+for branch,c in COLORS.items():
+    crystal=load('src/assets/crystal_'+branch+'.png')
+    for inserted in [False,True]:
+        a=blank((58,64));a.alpha_composite(basin,(2,20))
+        ImageDraw.Draw(a).arc((10,28,48,58),0,180,fill=c,width=2)
+        a.alpha_composite(crystal.resize((15,24),Image.Resampling.NEAREST),(22,0))
+        if inserted: a.alpha_composite(crystal.resize((17,29),Image.Resampling.NEAREST),(21,28))
+        save(branch+'-alcove-'+('inserted' if inserted else 'empty'),a,
+             recipe={'master':'socket','crystal':branch,'inserted':inserted,'size':[58,64]})
+for i in range(4):
+    mirror=native(frame('mirrors',(2,2),i),(36,48))
+    # Reinstate the master's directional notch on the final pixel grid: it must survive reduction.
+    d=ImageDraw.Draw(mirror)
+    notch=[[(28,15),(33,20),(28,25)],[(13,29),(18,35),(23,29)],
+           [(8,15),(3,20),(8,25)],[(13,10),(18,4),(23,10)]][i]
+    d.polygon(notch,fill='#e5bf74',outline='#312b20')
+    d.point(notch[1],fill='#fff0bd')
+    save('mirror_'+str(i),mirror,pivot=(.5,1),
+         recipe={'master':'mirrors','grid':[2,2],'frame':i,'size':[36,48],'direction_notch':i})
+    sheet('statue-notch-'+str(i),'statues',(2,2),i,(64,88),prop=True)
+for i,(n,size) in enumerate([('pedestal_empty',(36,39)),('pedestal_lit',(40,56))]):
+    sheet(n,'pedestal',(2,1),i,size,prop=True)
+for i,n in enumerate(['prism-dark','prism-receiving']):
+    prism=blank((48,48));prism.alpha_composite(native(frame('prism',(2,1),i),(30,30)),(9,0))
+    save(n,prism,recipe={'master':'prism','grid':[2,1],'frame':i,'size':[48,48],
+                        'visible_size':[30,30],'offset':[9,0]})
+for master,prefix,size in [('sun-locks','lock_sun',(40,33)),('moon-locks','lock_moon',(40,34))]:
+    for i,state in enumerate(['off','on']): sheet(prefix+'_'+state,master,(2,1),i,size)
+for i,state in enumerate(['waiting','ready','latched','night','dawn']):
+    sheet('core-'+state,'core-states',(3,2),i,(58,68))
+for i,state in enumerate(['waiting','ready','latched']):
+    sheet('confirmation-root-'+state,'confirmation',(3,1),i,(48,32),0)
+for state in ['empty','occupied']:
+    a=native(frame('socket'),(44,28),0);d=ImageDraw.Draw(a)
+    d.ellipse((9,7,34,21),fill='#142b30',outline='#b2b09a')
+    for x in [14,21,28]:d.rectangle((x,11,x+2,17),fill=COLORS['hope'] if state=='occupied' else '#536d69')
+    save('pressure-'+state,a,recipe={'master':'socket','state':state,'size':[44,28]})
+texture=blank();bark=load(V/'bark-material.png').resize((128,128),Image.Resampling.BOX)
+for x in range(0,640,128):
+    for y in range(0,360,128):texture.alpha_composite(bark,(x,y))
+def root(points,color,state,white=False):
+    segments=[points[:2],points[2:]] if state=='broken' else [points]
+    mask=Image.new('L',(640,360));md=ImageDraw.Draw(mask);out=blank();shadow=blank()
+    for pts in segments:
+        ImageDraw.Draw(shadow).line([(x+2,y+3) for x,y in pts],fill=(4,12,16,115),width=17,joint='curve')
+    out.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(.8)));d=ImageDraw.Draw(out)
+    for pts in segments:
+        md.line(pts,fill=255,width=11,joint='curve')
+        for x,y in pts:md.ellipse((x-5,y-5,x+5,y+5),fill=255)
+        d.line(pts,fill='#101e23',width=15,joint='curve')
+        d.line([(x-1,y-2) for x,y in pts],fill='#b49b74' if not white else '#aab9ad',width=12,joint='curve')
+    mat=texture.copy()
+    if white:mat=ImageOps.colorize(ImageOps.grayscale(mat),'#233537','#a4b2a0').convert('RGBA')
+    mat.putalpha(mask);out.alpha_composite(mat);d=ImageDraw.Draw(out)
+    for j,pts in enumerate(segments):
+        if state!='broken' or j==0:
+            d.line(pts,fill='#102529',width=5,joint='curve');d.line(pts,fill=color,width=3,joint='curve')
+    if state=='broken':
+        for x,y in [points[1],points[2]]:
+            d.line((x-4,y+3,x+4,y-3),fill='#d4b99a',width=2)
+    if state=='connected':
+        # Runtime connected means latched. Brass clasps belong only to the self-holding state.
+        x,y=points[1];d.rectangle((x-5,y-5,x+5,y+5),fill='#624c32',outline='#dfc18a')
+        d.rectangle((x-2,y-7,x+2,y+7),fill='#cba266');d.line((x-1,y-6,x-1,y+5),fill='#ffdf96')
+    return out
+for b,c in COLORS.items():
+    for state in ['broken','repaired','connected']:
+        save(b+'-root-'+state,root(PATHS[b],c,state),'registered-root-layer',
+             recipe={'master':'bark-material','path':PATHS[b],'color':c,'state':state,'size':[640,360]})
+for name,paths,color in [
+    ('old-white-channels-feeding',[[(220,8),(244,55),CORE],[(422,8),(399,58),CORE]],'#e3eee1'),
+    ('old-white-channels-retracted',[[(220,8),(234,39)],[(422,8),(410,37)]],'#718a82')]:
+    a=blank()
+    for pts in paths:a.alpha_composite(root(pts,color,'repaired',True),(0,0))
+    save(name,a,'registered-old-channel-layer')
+# Only a core-local effect. Code owns the carried beam, Moon border, shadow and return ring.
+a=blank();px=a.load()
+for y in range(35,198):
+    for x in range(238,403):
+        r=math.hypot(x-320,(y-115)*1.03)
+        alpha=30*math.exp(-(r/53)**2)+105*math.exp(-((r-45)/3.2)**2)+72*math.exp(-((r-27)/4.5)**2)
+        px[x,y]=(255,230,156,min(155,round(alpha)))
+d=ImageDraw.Draw(a)
+for x,y in [(278,87),(360,91),(285,147),(353,152)]:
+    d.line((x-2,y,x+2,y),fill='#fff4cb');d.line((x,y-2,x,y+2),fill='#fff4cb')
+save('temporary-core-bloom-after-retrieval',a,'registered-overload-effect')
+bench=native(frame('socket'),(124,48),0)
+for n,x in [('mirror_1',8),('pressure-occupied',35),('lock_moon_on',64),('lock_sun_on',93)]:
+    a=Image.open(S/(n+'.png'));a.thumbnail((23,30),Image.Resampling.NEAREST)
+    bench.alpha_composite(a,(x,8+(30-a.height)//2))
+save('root-rule-reminder-table',bench,'familiar-rule-model-composite')
+sheet('day-night-wheel-resuming','wheel',(1,1),0,(96,80))
+dawn=load(V/'dawn-light.png').resize((640,360),Image.Resampling.BOX)
+dawn.putalpha(dawn.getchannel('A').point(lambda v:0 if v<16 else min(150,round(v*.62))))
+save('ending-dawn-lighting-overlay',dawn,'ending-light-overlay')
+# Exact title typography; all other text stays in the engine.
+title=blank();font=ImageFont.truetype('C:/Windows/Fonts/georgia.ttf',29);text='THE LAST DAWN';tracking=4
+width=sum(font.getlength(c) for c in text)+tracking*(len(text)-1);x=(640-width)/2;d=ImageDraw.Draw(title)
+for c in text:
+    d.text((round(x)+1,168),c,font=font,fill=(22,30,25,230))
+    d.text((round(x),166),c,font=font,fill='#f4e4b6');x+=font.getlength(c)+tracking
+d.line((268,212,312,212),fill=(196,164,101,190));d.line((328,212,372,212),fill=(196,164,101,190))
+title.alpha_composite(Image.open(S/'lantern-new-leaf.png'),(315,207))
+save('ending-title-the-last-dawn',title,'exact-ending-title')
+seated=load(B/'sources/task15-nhinh-seated-original.png')
+alpha=seated.getchannel('A').point(lambda v:255 if v>=160 else 0)
+box=alpha.getbbox();seated.putalpha(alpha);seated=seated.crop(box)
+for n,size in [('ending-nhinh-seated-unlit-leaf',(36,42)),('ending-nhinh-seated-detail',(144,168))]:
+    save(n,native(seated,size),pivot=(.5,1),recipe={'master':'../task15-nhinh-seated-original',
+         'alpha_threshold':160,'crop':list(box),'size':list(size)})
+for n in ['ending-nhinh-carry-off-reference','ending-leaf-handle-attachment']:
+    save(n,kind='retained-ending-input',pivot=(.5,1))
+# Contact captions are confined to preview files.
+small=[e for e in exports if e['size'][0]<640 and e['kind']!='retained-input']
+contact=Image.new('RGBA',(640,math.ceil(len(small)/8)*114),'#152b30')
+font=ImageFont.truetype('C:/Windows/Fonts/arial.ttf',10)
 for i,e in enumerate(small):
- im=Image.open(R/e['file']).convert('RGBA');x=(i%4)*160;y=(i//4)*210
- if im.width>156 or im.height>170:im.thumbnail((156,170),N)
- put(sheet,im,(x,y+25));label(sheet,(x+2,y+4),Path(e['file']).stem[:25])
-sheet.save(P/'contact-assets-native.png');sheet.resize((sheet.width*2,sheet.height*2),N).save(P/'contact-assets-2x.png')
-dump('asset-map.json',{'exports':exports,'reuse':list(refs.values()),'pivots':'Normalized center except bottom-centered scenic patches. Full-scene overlays pivot center and position 0,0.','symbols':'Exact approved original crystal silhouettes used as matching alcove emblems; original gold/blue/purple preserved, no invented rune.'})
-dump('state-and-layout.json',{'states':rows,'core':core,'alcoves':ends,'root_paths':paths,'fixed_dark_pocket':[488,207,551,248],'overload_rule':'latched AND lantern_retrieved AND lantern_on; bloom starts after retrieval only','off_alternative':'After latch, F at pedestal is valid; old white channels retract, night begins directly, no forced relighting.','save_restore_contract':'Latched state persists. Reload overload: safe pedestal bank, Lumo beside Nhinh, lamp on; F immediately available. Final action saves completion; completed load goes to ending.','controls':'E inserts/confirm/retrieve, F immediate off, existing Lumo call/pressure only, H scenario hints. No timers/damage.'})
-requirements=[R/'docs/scenario/10-the-heart-of-elaria.md',R/'tasks/plan.md',R/'tasks/todo.md',B/'generation-prompts.json',Path(__file__)]
-dump('provenance.json',{'requirements':[{'file':rel(p),'sha256':sha(p)} for p in requirements],'source_crop_boxes':{'trunk':[220,0,420,178],'canopy':[90,0,550,91]},'source_normalization':'Original nearest resized to 640x360; scenic patches retain background and are not alpha-extracted sprites.','sources':list(refs.values())})
-checks=[]
+    x,y=i%8*80,i//8*114;a=Image.open(R/e['file']);a.thumbnail((78,88),Image.Resampling.NEAREST)
+    contact.alpha_composite(a,(x+(80-a.width)//2,y+14+(88-a.height)//2))
+    ImageDraw.Draw(contact).text((x+2,y+2),Path(e['file']).stem[:12],font=font,fill='#cfceae')
+contact.save(P/'v2-assets-native.png')
+contact.resize((contact.width*3,contact.height*3),Image.Resampling.NEAREST).save(P/'v2-assets-3x.png')
 for e in exports:
- im=Image.open(R/e['file']);assert im.mode=='RGBA' and list(im.size)==e['size'] and im.getchannel('A').getbbox();assert sha(R/e['file'])==e['sha256'];checks.append(e['file'])
-for r in refs.values():assert (R/r['file']).exists() and sha(R/r['file'])==r['sha256']
-for r in rows:
- c=r['current'];assert c['ready']==(c['memory'] and c['hope'] and c['balance']);assert c['overload']==(c['latched'] and r['inputs'].get('taken',False) and not r['inputs'].get('off',False))
-assert not rows[9]['current']['overload'] and rows[10]['current']['overload'] and not rows[12]['current']['overload']
-preview_checks=[]
-for p in P.glob('*.png'):
- im=Image.open(p);assert im.mode=='RGBA' and im.getchannel('A').getbbox();preview_checks.append({'file':rel(p),'size':list(im.size),'sha256':sha(p)})
-dump('validation.json',{'technical':'PASS','exports':len(exports),'reuse':len(refs),'preview_checks':preview_checks,'branch_truth_table':'PASS: current conjunction, no historical accumulation; latch self holds; overload only retrieved on; off-at-pedestal no overload','runtime':'NOT_RUN','visual_review':'Pending contact inspection by agent','limits':['Offline staging is not a live optical solver or navigation/collision map.','Tree crop patches retain scenery, not final alpha cutouts.','Final seated pose is task15; proxy uses approved standing pose.','Wheel arrow is animation direction study, no animated runtime supplied.']})
-print(json.dumps({'exports':len(exports),'reuse':len(refs),'previews':len(preview_checks),'technical':'PASS'}))
+    a=Image.open(R/e['file'])
+    assert a.mode=='RGBA' and list(a.size)==e['size'] and a.getchannel('A').getbbox()
+    if Path(e['file']).stem in recipes: assert list(a.size)==list(recipes[Path(e['file']).stem]['size'])
+assert sha(S/'core-dawn.png')!=sha(S/'core-night.png')
+for b,c in COLORS.items():
+    assert tuple(bytes.fromhex(c[1:])) in {rgb for _,rgb in Image.open(S/(b+'-root-repaired.png')).convert('RGB').getcolors(640*360)}
+dump('asset-map.json',{'exports':sorted(exports,key=lambda e:e['file']),'reuse':list(sources.values()),'recipes':recipes,
+     'palette':COLORS,'pivots':'Props bottom-center; cells center; full-scene layers origin0,0 in engine.',
+     'normalization':'Area reduction,48-color quantization,binary alpha; no native-size changes.',
+     'title_text':text,'background':'Original sanctuary geometry; broad lighting transfer from retained depth study.'})
+req=[R/'docs/scenario/10-the-heart-of-elaria.md',R/'docs/scenario-v2/10-the-heart-of-elaria.md',
+     R/'docs/implementation/10-layout.md',R/'src/data/heartOfElariaLayout.ts',
+     R/'src/levels/HeartOfElariaLevel.ts',R/'src/art/CampaignArt.ts',
+     R/'src/scenes/CampaignScene.ts',R/'src/scenes/EndingScene.ts',
+     R/'src/systems/CampaignEndingSequence.ts',R/'src/data/campaignEnding.ts',
+     B/'generation-prompts.json',B/'capture_runtime.py',B/'prepare_ending.py',Path(__file__)]
+dump('provenance.json',{'tool':'built-in image_gen for retained v2 masters; Pillow deterministic assembly',
+     'rights':'New masters generated for this task; project-owned art reused. No third-party stock added.',
+     'image_backend_model':'Not exposed','requirements':[{'file':rel(p),'sha256':sha(p)} for p in req],
+     'sources':list(sources.values()),'background_sha256':sha(S/'sanctuary-base.png'),
+     'retained_legacy':'Original sanctuary geometry, two unused scenic crops, unused border/beam and leaf come from task14 at base11a40eb. Historical prompt remains in generation-prompts.json.',
+     'depth_polish':'A generated lighting study supplies broad color ratios only; all original background geometry and pixel detail come from sanctuary-layout-reference.png.',
+     'seated_pose':'Original task15 source retained unchanged; low-alpha outliers removed before fitting native36x42.'})
+capture=P/'runtime-v2/capture-results.json'
+runtime={'status':'NOT_RUN','reason':'Capture final generated revision with capture_runtime.py.'}
+if capture.exists():
+    evidence=json.loads(capture.read_text(encoding='utf8'))
+    required={'01-empty','02-inserted','03-lumo-holding','04-ready','05-latched','06-overload',
+              '07-after-F-night','08-dawn','09-seated','10-title','11-variants-west','12-variants-north'}
+    captures=evidence.get('captures',[]) if isinstance(evidence,dict) else []
+    if (isinstance(evidence,dict) and evidence.get('status') in ['PASS','FAIL']
+        and {c['name'] for c in captures}==required
+        and evidence.get('provenance_sha256')==sha(B/'provenance.json')
+        and evidence.get('sprite_hashes')=={p.name:sha(p) for p in sorted(S.glob('*.png'))}
+        and all((B/c['file']).is_file() and sha(B/c['file'])==c.get('sha256') for c in captures)):
+        runtime={'status':'PASS' if evidence['status']=='PASS' and not any(c['errors'] for c in captures) else 'FAIL',
+                 'evidence':rel(capture),'scope':'Isolated seeded WebGL scenes and real F transition; not full playthrough.'}
+dump('validation.json',{'technical':'PASS','exports':len(exports),'native_dimensions':'PASS: all local variants',
+     'alpha':'PASS: all exports RGBA, nonempty','core_dawn_distinct':'PASS','palette':COLORS,'runtime':runtime,
+     'visual_review':'See docs/implementation/10-art-v2-report.md and native WebGL captures.',
+     'limits':['Offline historical previews predate v2 and are superseded by runtime-v2.',
+               'Legacy shared-art check still measures shared statue/pressure; local sizes checked here and runtime keys captured.',
+               'Seeded captures are not a full player playthrough.']})
+print(json.dumps({'exports':len(exports),'sources':len(sources),'technical':'PASS','runtime':runtime['status']}))
