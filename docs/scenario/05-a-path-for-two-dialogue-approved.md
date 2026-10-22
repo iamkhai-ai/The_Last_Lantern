@@ -174,3 +174,11 @@ Giữ nguyên câu đố, khu thử tùy chọn, thời điểm cảnh ký ức 
 **Chữ hiện nhanh trên màn hình (không phải thoại, giữ riêng):** “Sáng lên!” khi một dấu sáng; “Vết mực nhòe đi. Thử lại từ đầu.” khi bước sai sau khi đã có dấu sáng; “Chưa biết thứ tự. Nhờ Lumo tới ấn C xem.” khi bước lên dấu mà Lumo chưa kể thứ tự.
 
 *Bước lên một dấu sai khi chưa có dấu nào sáng không bị phạt và không hiện chữ. Các dấu nằm hai làn của hành lang nên đi thẳng giữa hành lang không chạm dấu nào.*
+
+## 10. Lời thoại bổ sung (duyệt 2026-10-22)
+
+Người dùng xác nhận duyệt các lời thoại mới của Level 05 trong phiên làm việc ngày 2026-10-22. Mục này ghi lại dòng thoại đang có trong game nhưng chưa được liệt kê ở mục 1–9. Dòng hướng dẫn trên kênh mục tiêu (objective) và các nhãn trên mốc không phải lời thoại, nên không nằm trong mục này.
+
+### Khi cửa thử đã mở và cậu nhấn E ở cửa thử
+
+**Nhinh:** “Cửa thử đã mở. Mình có thể đi qua rồi gọi Lumo về.”
