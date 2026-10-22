@@ -8,7 +8,7 @@ The user approved `redesign-v4/concepts/temple-depth-study-v2.png` and requested
 
 - Produce a separate opaque native 640×360 environment and independent RGBA state sprites in `redesign-v4`.
 - Retain 128 colours per family, binary alpha, nearest filtering, existing sprite canvases and placement. Preserve measured puzzle shadow masks and shared characters.
-- Preserve puzzle logic and save state. Mirror collision envelopes may shrink to the visible standalone instrument; south-only interaction and reachability must still hold.
+- Preserve puzzle logic and save state. Mirror collision envelopes may shrink to the visible standalone instrument. Mirror interaction follows RULE_GAMES.md §1 (8px from every side); see the 8px follow-up below.
 - Switch only Level 08's local art registration to the new pack. Keep runtime light, beams, receiver glyph states and puzzle shadows separate from the backdrop.
 - Preserve source image generation outputs, exact prompts, export recipe and decoded-pixel manifest. The existing unrelated Level 05 script edits are outside this change.
 
@@ -49,3 +49,18 @@ The active Codex tool metadata lists `gpt-6-luna` with `high` effort. Both indep
 - **Reviewer B — `review_level08_depth_b`: PASS**, no actionable findings. Independently checked runtime, authoring, inspection changes, retained generation hashes, sprite/state directions, transparency, collision and recorded Phaser captures. Ran art v4/hash audit, Level 08 geometry/state and campaign art checks. No files changed.
 
 Build/browser regeneration by reviewers, full human playthrough and remote CI remain **NOT_RUN**. Root's actual build and browser results are above. This follow-up records evidence only; all reviewed runtime, art, requirements and test bytes remain identical to the frozen revision. No merge or deployment approval is implied.
+
+## 8px reach follow-up
+
+RULE_GAMES.md §1 applies to the Level 08 mirrors: the prompt and E answer from every side within 8px of the
+footprint (`ruinsStandingReach`, `face: 'any'`, `maxGap: 8`), not only from the south. The earlier south-only
+expectation is retired. The inspection now checks the four walkable sides of the left mirror and the three walkable
+sides of the right mirror, plus far points just outside the gap, where neither prompt nor rotation may occur.
+The right mirror's east face meets the altar 12px away, which is too narrow for the 14px foot, so no standing
+spot exists there and that side is not probed.
+
+Rotating a mirror opens a short message that blocks prompts until it is read, so the inspection advances it
+before the next probe.
+
+Re-run on the rebased revision: `node scripts/inspect-level08-art.cjs` reports PASS (7 renders, 32 sprites, no
+browser or PNG errors), and `node scripts/check-level08-art-v4.cjs` reports PASS.

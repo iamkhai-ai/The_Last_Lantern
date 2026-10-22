@@ -3,9 +3,9 @@
   "method": "Seven isolated save fixtures rendered by Phaser in Chromium; actual scene textures, PNG dimensions, bounds, and visible state keys recorded. This is not a full playthrough.",
   "source_and_sprite_sha256": {
     "src/art/CampaignArt.ts": "d25ea699fce853fd5e98db3c04fab2e99a95a5fa3b2710f20518cd713cb33eec",
-    "src/levels/RuinsOfTwoHalvesLevel.ts": "d8b4f349c65dfa2af6ca2a3adadfe8e6a4e242f464a933b30a46c096fec4a326",
-    "src/data/ruinsOfTwoHalvesLayout.ts": "fd855af5f154a0d05ffb04e5c74d622f9bc4414a6fa711bfd22cb2056fc2df49",
-    "scripts/inspect-level08-art.cjs": "8804c472a29ea199a765d63198b3e6b532c55c46cdd6529225d55edfbb218391",
+    "src/levels/RuinsOfTwoHalvesLevel.ts": "43ec266532ea96a29289780a7c6128ed912e63f0760f792e985bef454c988e5c",
+    "src/data/ruinsOfTwoHalvesLayout.ts": "465dea5a29fd3b5ce2fdd3e014f287da695dd180ed6e3c2a138ff8343a07032a",
+    "scripts/inspect-level08-art.cjs": "176c4214e165af188f0889ae0e886a11fb155178e43bc98ae83591445df69bd5",
     "docs/scenario/08-ruins-of-two-halves.md": "48e0f441e49fc67f796d39dcb129ed95c3e9bd41120439131c52e10f86074a62",
     "docs/scenario-v2/08-ruins-of-two-halves.md": "f501e78480737da3671bceff512254402049fe48c0798187aa31e2a6f79dd8c3",
     "assets/levels/08-ruins-of-two-halves/redesign-v4/art-direction.md": "6732643cc37747260ca5d1ef06fdd1a20678177a2b264d3b8530736cd83918f3",
@@ -840,28 +840,12 @@
             8
           ],
           "visible": true,
-          "alpha": 0.31750000000000006,
+          "alpha": 0.44125000000000003,
           "bounds": {
-            "x": 317.5921448722304,
-            "y": 252.22903530260282,
-            "width": 2.967692307692289,
-            "height": 2.9676923076923174
-          }
-        },
-        {
-          "id": null,
-          "key": "particle_firefly",
-          "sourceSize": [
-            8,
-            8
-          ],
-          "visible": true,
-          "alpha": 0.65,
-          "bounds": {
-            "x": 316.4196258255077,
-            "y": 250.93008954723987,
-            "width": 4.399999999999977,
-            "height": 4.400000000000006
+            "x": 318.9290620001856,
+            "y": 254.13040008466623,
+            "width": 3.500769230769208,
+            "height": 3.500769230769208
           }
         },
         {
@@ -874,10 +858,10 @@
           "visible": true,
           "alpha": 0.88,
           "bounds": {
-            "x": 205.478877660516,
-            "y": 167.478877660516,
-            "width": 241.04224467896802,
-            "height": 241.04224467896802
+            "x": 205.71644277522967,
+            "y": 167.71644277522967,
+            "width": 240.56711444954067,
+            "height": 240.56711444954067
           }
         },
         {
@@ -1045,19 +1029,19 @@
         {
           "type": "Text",
           "depth": 8,
-          "key": "015da0af-c1e3-40a7-87d6-61919fd60659",
+          "key": "8d8dc42f-d33e-406d-972a-4f00eb5129d1",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "94ac21d2-2751-42e7-ad67-0af03911e898",
+          "key": "cbcffe07-c572-4e66-ba37-4c78f7217158",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "065a5275-edb0-43b2-abba-38f56f775de7",
+          "key": "f4902339-9c9b-4e3b-b362-abb4657668b9",
           "id": null
         },
         {
@@ -1145,15 +1129,9 @@
           "id": null
         },
         {
-          "type": "Image",
-          "depth": 54,
-          "key": "particle_firefly",
-          "id": null
-        },
-        {
           "type": "Sprite",
           "depth": 55,
-          "key": "lumo_0",
+          "key": "lumo_3",
           "id": null
         },
         {
@@ -1255,7 +1233,7 @@
       },
       "dialogue": false,
       "browser_errors": [],
-      "screenshot_sha256": "e6282775f42f7af81fc5503ac0b4e482cddb4773f7e0495c7c51921b0f9564fc",
+      "screenshot_sha256": "59d1252df859d3f1f78808c35021d5e96d32a4cd73c8c17105ceb4921132f018",
       "interaction": {
         "input": "F",
         "lanternOn": false,
@@ -1265,58 +1243,72 @@
         {
           "side": "left",
           "direction": "north",
-          "target": "l7-shadow-npc",
-          "before": 3,
-          "after": 3
-        },
-        {
-          "side": "left",
-          "direction": "west",
-          "target": null,
-          "before": 3,
-          "after": 3
-        },
-        {
-          "side": "left",
-          "direction": "east",
-          "target": null,
-          "before": 3,
-          "after": 3
-        },
-        {
-          "side": "left",
-          "direction": "south",
           "target": "l7-mirror-left",
           "before": 3,
           "after": 0
         },
         {
+          "side": "left",
+          "direction": "west",
+          "target": "l7-mirror-left",
+          "before": 0,
+          "after": 1
+        },
+        {
+          "side": "left",
+          "direction": "east",
+          "target": "l7-mirror-left",
+          "before": 1,
+          "after": 2
+        },
+        {
+          "side": "left",
+          "direction": "south",
+          "target": "l7-mirror-left",
+          "before": 2,
+          "after": 3
+        },
+        {
+          "side": "left",
+          "direction": "far-west",
+          "target": null,
+          "before": 3,
+          "after": 3
+        },
+        {
+          "side": "left",
+          "direction": "far-east",
+          "target": null,
+          "before": 3,
+          "after": 3
+        },
+        {
           "side": "right",
           "direction": "north",
-          "target": null,
+          "target": "l7-mirror-right",
           "before": 2,
-          "after": 2
+          "after": 3
         },
         {
           "side": "right",
           "direction": "west",
-          "target": null,
-          "before": 2,
-          "after": 2
-        },
-        {
-          "side": "right",
-          "direction": "east",
-          "target": null,
-          "before": 2,
-          "after": 2
+          "target": "l7-mirror-right",
+          "before": 3,
+          "after": 0
         },
         {
           "side": "right",
           "direction": "south",
           "target": "l7-mirror-right",
-          "before": 2,
-          "after": 3
+          "before": 0,
+          "after": 1
+        },
+        {
+          "side": "right",
+          "direction": "far-west",
+          "target": null,
+          "before": 1,
+          "after": 1
         }
       ]
     },
@@ -2074,12 +2066,28 @@
             8
           ],
           "visible": true,
-          "alpha": 0.42125,
+          "alpha": 0.31625000000000003,
           "bounds": {
-            "x": 318.03868075590236,
-            "y": 252.34312098772847,
-            "width": 3.414615384615388,
-            "height": 3.414615384615388
+            "x": 317.7533476986915,
+            "y": 250.69215669033537,
+            "width": 2.962307692307718,
+            "height": 2.9623076923076894
+          }
+        },
+        {
+          "id": null,
+          "key": "particle_firefly",
+          "sourceSize": [
+            8,
+            8
+          ],
+          "visible": true,
+          "alpha": 0.62875,
+          "bounds": {
+            "x": 315.2403376099954,
+            "y": 249.70916108981234,
+            "width": 4.308461538461529,
+            "height": 4.308461538461529
           }
         },
         {
@@ -2092,10 +2100,10 @@
           "visible": true,
           "alpha": 0.88,
           "bounds": {
-            "x": 359.72723128359223,
-            "y": 93.72723128359223,
-            "width": 240.54553743281554,
-            "height": 240.54553743281554
+            "x": 359.03914669057167,
+            "y": 93.03914669057168,
+            "width": 241.92170661885666,
+            "height": 241.92170661885666
           }
         },
         {
@@ -2263,19 +2271,19 @@
         {
           "type": "Text",
           "depth": 8,
-          "key": "f67a9555-4346-4cd5-b80d-fcbcdc931be8",
+          "key": "4c37049d-c823-4e9d-b798-a0cb5e8e937b",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "8b0302a0-84f9-4300-8c0d-74209215121e",
+          "key": "35bf8923-349c-4192-bf8a-b3859b9e1f17",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "acddeb86-5551-48f1-9e1f-d736f1c63157",
+          "key": "deb9f99a-9b14-4c49-951c-0b0a1d8082f6",
           "id": null
         },
         {
@@ -2363,9 +2371,15 @@
           "id": null
         },
         {
+          "type": "Image",
+          "depth": 54,
+          "key": "particle_firefly",
+          "id": null
+        },
+        {
           "type": "Sprite",
           "depth": 55,
-          "key": "lumo_3",
+          "key": "lumo_0",
           "id": null
         },
         {
@@ -2467,7 +2481,7 @@
       },
       "dialogue": false,
       "browser_errors": [],
-      "screenshot_sha256": "6a1e6ddc1a0a4dc0e7840b2f302a5f0d40e2d07f14014642d726d308431da257",
+      "screenshot_sha256": "312795b6355f050fcad7945ccdf3be47fde961c69c715e05fdfb5ff5758add11",
       "interaction": null,
       "approaches": []
     },
@@ -3222,12 +3236,12 @@
             8
           ],
           "visible": true,
-          "alpha": 0.25500000000000006,
+          "alpha": 0.29625,
           "bounds": {
-            "x": 318.1052548115833,
-            "y": 252.67778948240712,
-            "width": 2.6984615384615154,
-            "height": 2.698461538461544
+            "x": 316.3643181852542,
+            "y": 253.470188165179,
+            "width": 2.8761538461538407,
+            "height": 2.876153846153869
           }
         },
         {
@@ -3238,12 +3252,12 @@
             8
           ],
           "visible": true,
-          "alpha": 0.525,
+          "alpha": 0.60875,
           "bounds": {
-            "x": 317.64108943625246,
-            "y": 249.87515223785536,
-            "width": 3.861538461538487,
-            "height": 3.8615384615384585
+            "x": 313.8356288099102,
+            "y": 249.05266535933526,
+            "width": 4.222307692307709,
+            "height": 4.22230769230768
           }
         },
         {
@@ -3256,10 +3270,10 @@
           "visible": true,
           "alpha": 0.88,
           "bounds": {
-            "x": 354.1937429847374,
-            "y": 88.19374298473741,
-            "width": 251.61251403052523,
-            "height": 251.61251403052518
+            "x": 358.075624160941,
+            "y": 92.075624160941,
+            "width": 243.84875167811794,
+            "height": 243.848751678118
           }
         },
         {
@@ -3427,19 +3441,19 @@
         {
           "type": "Text",
           "depth": 8,
-          "key": "974a0064-d182-4760-98f4-c5b177081cf6",
+          "key": "9fc4d3cb-c608-4ecc-8da1-b27511447665",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "6fa962e5-8d12-4b87-a9b7-4d1dab959079",
+          "key": "801a0b44-f0fd-47db-9da5-29d59af0a4ea",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "708b4e89-0b5b-4491-b38a-379ae5f5a48c",
+          "key": "2fb6de57-4048-4049-99e7-87651247419a",
           "id": null
         },
         {
@@ -3535,7 +3549,7 @@
         {
           "type": "Sprite",
           "depth": 55,
-          "key": "lumo_1",
+          "key": "lumo_0",
           "id": null
         },
         {
@@ -3637,7 +3651,7 @@
       },
       "dialogue": false,
       "browser_errors": [],
-      "screenshot_sha256": "c452dc01ee2b3ab5e0bf48104c358b5e99af696785f35eaaa6541efedd5cc309",
+      "screenshot_sha256": "e73d990fb57c2250dfa50c1102d97236cfb13bb5a874dde6a325580e42001ba1",
       "interaction": null,
       "approaches": []
     },
@@ -4394,10 +4408,10 @@
           "visible": true,
           "alpha": 0.31750000000000006,
           "bounds": {
-            "x": 319.1152339529586,
-            "y": 251.23690140436867,
+            "x": 317.6137217727566,
+            "y": 253.4099829995895,
             "width": 2.967692307692289,
-            "height": 2.9676923076923174
+            "height": 2.967692307692289
           }
         },
         {
@@ -4408,12 +4422,12 @@
             8
           ],
           "visible": true,
-          "alpha": 0.62875,
+          "alpha": 0.65,
           "bounds": {
-            "x": 316.6825716217958,
-            "y": 251.9303951754373,
-            "width": 4.308461538461529,
-            "height": 4.308461538461529
+            "x": 316.6511957130661,
+            "y": 252.2884298988266,
+            "width": 4.399999999999977,
+            "height": 4.400000000000006
           }
         },
         {
@@ -4426,10 +4440,10 @@
           "visible": true,
           "alpha": 0.88,
           "bounds": {
-            "x": 359.01800925610024,
-            "y": 93.01800925610023,
-            "width": 241.96398148779957,
-            "height": 241.96398148779951
+            "x": 359.01766419449496,
+            "y": 93.01766419449498,
+            "width": 241.9646716110101,
+            "height": 241.96467161101006
           }
         },
         {
@@ -4597,19 +4611,19 @@
         {
           "type": "Text",
           "depth": 8,
-          "key": "f9e6840f-51ac-4ca1-92c0-9beb54d432e7",
+          "key": "ac20f3bf-cec6-4e14-af83-edd7954a90f7",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "3e4cb85d-88e3-45c9-9a6c-efe43f7fb28d",
+          "key": "b21afd0f-0d0d-479b-bd72-8e77bd85d628",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "7bf430f3-0dd5-4010-9a3d-9bd89957dd66",
+          "key": "e3d975ea-bd7d-40d0-b6a6-5babfba8958a",
           "id": null
         },
         {
@@ -4807,7 +4821,7 @@
       },
       "dialogue": false,
       "browser_errors": [],
-      "screenshot_sha256": "9e64cac549ff5aaccd7a6148d6b032178a2ea7f8497c07e77b946deb152a5f4e",
+      "screenshot_sha256": "355c3f971a3363b25b3f1353e1a1548ff1b87caf5136155f5daf9afa57d6f815",
       "interaction": null,
       "approaches": []
     },
@@ -5562,28 +5576,12 @@
             8
           ],
           "visible": true,
-          "alpha": 0.27625000000000005,
+          "alpha": 0.44125000000000003,
           "bounds": {
-            "x": 319.1572044087486,
-            "y": 253.04431544939686,
-            "width": 2.7900000000000205,
-            "height": 2.789999999999992
-          }
-        },
-        {
-          "id": null,
-          "key": "particle_firefly",
-          "sourceSize": [
-            8,
-            8
-          ],
-          "visible": true,
-          "alpha": 0.5675,
-          "bounds": {
-            "x": 317.6962127929918,
-            "y": 251.73913264136485,
-            "width": 4.044615384615383,
-            "height": 4.044615384615383
+            "x": 317.212196096306,
+            "y": 251.74028931228668,
+            "width": 3.500769230769208,
+            "height": 3.5007692307692366
           }
         },
         {
@@ -5596,10 +5594,10 @@
           "visible": true,
           "alpha": 0.88,
           "bounds": {
-            "x": 355.78326181208257,
-            "y": 89.78326181208256,
-            "width": 248.4334763758349,
-            "height": 248.43347637583486
+            "x": 359.70996335065684,
+            "y": 93.70996335065684,
+            "width": 240.58007329868633,
+            "height": 240.58007329868633
           }
         },
         {
@@ -5767,19 +5765,19 @@
         {
           "type": "Text",
           "depth": 8,
-          "key": "a18cc30d-ffa6-4755-b5d4-f3876a1ea17e",
+          "key": "78ef0974-058a-49a9-b734-98af381acf0c",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "2834395c-a9bd-440f-9e09-2b3a04b1f253",
+          "key": "13ae680f-a07d-467c-8524-d1f2c3a88d88",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "bc77990e-614e-4a9d-8a0d-80159e2cc41f",
+          "key": "bbb6d5c0-089c-44b4-bdff-8182c7a2f81a",
           "id": null
         },
         {
@@ -5867,15 +5865,9 @@
           "id": null
         },
         {
-          "type": "Image",
-          "depth": 54,
-          "key": "particle_firefly",
-          "id": null
-        },
-        {
           "type": "Sprite",
           "depth": 55,
-          "key": "lumo_0",
+          "key": "lumo_3",
           "id": null
         },
         {
@@ -5977,7 +5969,7 @@
       },
       "dialogue": false,
       "browser_errors": [],
-      "screenshot_sha256": "612eba5b6a0411b5f847727b48909e4b6a72294d0b4dc6098811b1b5eda15bd2",
+      "screenshot_sha256": "164a28ad7adee170a2161aee845858e8bb160c50d109885552a203b289cd202f",
       "interaction": null,
       "approaches": []
     },
@@ -6734,8 +6726,8 @@
           "visible": true,
           "alpha": 0.3375,
           "bounds": {
-            "x": 318.4525226567127,
-            "y": 251.51346221298903,
+            "x": 316.07586382863053,
+            "y": 250.81743862197087,
             "width": 3.053846153846166,
             "height": 3.053846153846166
           }
@@ -6750,8 +6742,8 @@
           "visible": true,
           "alpha": 0.65,
           "bounds": {
-            "x": 313.86797275523816,
-            "y": 248.65819207006416,
+            "x": 314.06038292680455,
+            "y": 249.23536595729018,
             "width": 4.399999999999977,
             "height": 4.400000000000006
           }
@@ -6937,19 +6929,19 @@
         {
           "type": "Text",
           "depth": 8,
-          "key": "a8b58c03-8c46-4c24-a55c-bb3bd770220e",
+          "key": "bf9bfc59-e006-44bc-a944-20b4c64eedee",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "6913a3f7-2051-4e94-bbc8-80c564c55395",
+          "key": "6f95996b-036b-467b-8c11-e9d45881f8f8",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "878496c8-8808-4dd7-9f86-d9a4c2298b86",
+          "key": "3462e122-2417-4f67-a660-90de5ff0c560",
           "id": null
         },
         {
@@ -7147,7 +7139,7 @@
       },
       "dialogue": false,
       "browser_errors": [],
-      "screenshot_sha256": "809eef68df4a77113a949444761ad6c68ef557d90b6a109349c9f5a15b3b18cd",
+      "screenshot_sha256": "412da2a670ba3204decbeb1f6b9ed9d859cc06d1c04a70bf4a45101d08a3ef95",
       "interaction": null,
       "approaches": []
     },
@@ -7906,28 +7898,12 @@
             8
           ],
           "visible": true,
-          "alpha": 0.31750000000000006,
+          "alpha": 0.4425,
           "bounds": {
-            "x": 317.19496315784545,
-            "y": 252.93193868617277,
-            "width": 2.967692307692289,
-            "height": 2.9676923076923174
-          }
-        },
-        {
-          "id": null,
-          "key": "particle_firefly",
-          "sourceSize": [
-            8,
-            8
-          ],
-          "visible": true,
-          "alpha": 0.5675,
-          "bounds": {
-            "x": 316.9964829880855,
-            "y": 250.63999308690515,
-            "width": 4.044615384615383,
-            "height": 4.044615384615383
+            "x": 316.96826737546326,
+            "y": 254.58452735577222,
+            "width": 3.506153846153836,
+            "height": 3.5061538461538646
           }
         },
         {
@@ -7940,10 +7916,10 @@
           "visible": true,
           "alpha": 0.88,
           "bounds": {
-            "x": 200.82751029179354,
-            "y": 162.82751029179354,
-            "width": 250.34497941641285,
-            "height": 250.34497941641285
+            "x": 205.71175882639784,
+            "y": 167.71175882639784,
+            "width": 240.57648234720432,
+            "height": 240.57648234720432
           }
         },
         {
@@ -8111,19 +8087,19 @@
         {
           "type": "Text",
           "depth": 8,
-          "key": "8eafac55-314e-4090-bdb9-b5cb9d793454",
+          "key": "34a196a1-7cf3-48e1-ac03-40f9652ab33e",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "64711e79-a403-4512-9658-bcb36a9d64fa",
+          "key": "d691a589-95a2-494c-b4e5-af310e9fd333",
           "id": null
         },
         {
           "type": "Text",
           "depth": 8,
-          "key": "763ee3b4-e95c-4871-83fd-49415fbffa6d",
+          "key": "937a0eb3-6ff5-4ac3-99bb-cf00f24b640b",
           "id": null
         },
         {
@@ -8211,15 +8187,9 @@
           "id": null
         },
         {
-          "type": "Image",
-          "depth": 54,
-          "key": "particle_firefly",
-          "id": null
-        },
-        {
           "type": "Sprite",
           "depth": 55,
-          "key": "lumo_1",
+          "key": "lumo_3",
           "id": null
         },
         {
@@ -8321,7 +8291,7 @@
       },
       "dialogue": false,
       "browser_errors": [],
-      "screenshot_sha256": "90b02259250c6443c7b179f99b2e82921f60d97c133edb162f77604d1d9794db",
+      "screenshot_sha256": "b7e2310799e37408541981b66923fcc5c458db05f8aa277658bf0acea8743936",
       "interaction": null,
       "approaches": []
     }

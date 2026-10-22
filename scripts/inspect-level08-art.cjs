@@ -208,8 +208,10 @@ async function main() {
         assert.equal(interaction.lanternOn,false,'actual F input turns carried lamp off');
         assert.equal(interaction.practiceSlab,'ruins_v4_test_moon_lit','actual F input refreshes local practice Moon state');
         for (const [side, x] of [['left', 240], ['right', 400]]) {
-          for (const [direction, px, py] of [['north', x, 194], ['west', x - 26, 221],
-            ['east', x + 26, 221], ['south', x, 286]]) {
+          const probes = [['north', x, 194], ['west', x - 26, 221], ['south', x, 250]];
+          // The right mirror's east face meets the altar 12px away, too narrow for the 14px foot: no standing spot there.
+          if (side === 'left') probes.splice(2, 0, ['east', x + 26, 221]);
+          for (const [direction, px, py] of probes) {
             const before = await page.evaluate(({ px, py, side }) => {
               const scene = window.__LAST_LANTERN_GAME__.scene.getScene('CampaignScene');
               scene.player.sprite.body.reset(px, py);
@@ -219,14 +221,42 @@ async function main() {
             await page.waitForTimeout(200);
             const target = await page.evaluate(() => window.__LAST_LANTERN_GAME__
               .scene.getScene('CampaignScene').interactions.getActiveTarget()?.id ?? null);
-            if (direction === 'south') assert.equal(target, 'l7-mirror-' + side);
-            else assert.notEqual(target, 'l7-mirror-' + side, `${side}: no ${direction} prompt`);
+            // RULE_GAMES §1: the mirror answers from every side within 8px of its footprint.
+            assert.equal(target, 'l7-mirror-' + side, `${side}: ${direction} prompt within 8px`);
             await page.keyboard.press('e');
             await page.waitForTimeout(200);
             const after = await page.evaluate(side => window.__LAST_LANTERN_GAME__
               .scene.getScene('CampaignScene').progress.counters['ruins-' + side], side);
-            assert.equal(after, direction === 'south' ? (before + 1) % 4 : before,
-              `${side}: E only rotates from the south`);
+            assert.equal(after, (before + 1) % 4, `${side}: E rotates the mirror from the ${direction}`);
+            // Rotating opens a short message that blocks prompts until it is read.
+            for (let i = 0; i < 8; i += 1) {
+              const open = await page.evaluate(() => window.__LAST_LANTERN_GAME__.scene.getScene('CampaignScene').dialogue.isActive());
+              if (!open) break;
+              await page.waitForTimeout(350);
+              await page.keyboard.press('e');
+              await page.waitForTimeout(250);
+            }
+            approaches.push({ side, direction, target, before, after });
+          }
+          // Beyond the 8px gap the mirror must not answer, and E must not rotate it.
+          const farProbes = [['far-west', x - 40, 221]];
+          if (side === 'left') farProbes.push(['far-east', x + 40, 221]);
+          for (const [direction, px, py] of farProbes) {
+            const before = await page.evaluate(({ px, py, side }) => {
+              const scene = window.__LAST_LANTERN_GAME__.scene.getScene('CampaignScene');
+              scene.player.sprite.body.reset(px, py);
+              scene.player.sprite.body.setVelocity(0, 0);
+              return scene.progress.counters['ruins-' + side];
+            }, { px, py, side });
+            await page.waitForTimeout(200);
+            const target = await page.evaluate(() => window.__LAST_LANTERN_GAME__
+              .scene.getScene('CampaignScene').interactions.getActiveTarget()?.id ?? null);
+            assert.notEqual(target, 'l7-mirror-' + side, `${side}: no prompt ${direction}`);
+            await page.keyboard.press('e');
+            await page.waitForTimeout(200);
+            const after = await page.evaluate(side => window.__LAST_LANTERN_GAME__
+              .scene.getScene('CampaignScene').progress.counters['ruins-' + side], side);
+            assert.equal(after, before, `${side}: E does nothing ${direction}`);
             approaches.push({ side, direction, target, before, after });
           }
         }

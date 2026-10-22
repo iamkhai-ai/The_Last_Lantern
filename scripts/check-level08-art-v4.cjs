@@ -50,8 +50,13 @@ async function main() {
   }
   for (const e of [...manifest.sources, ...manifest.references, ...manifest.protected])
     assert.equal(sha(await read(e.file)), e.sha256, e.file + ': source/reference/protected hash');
-  for (const [file, hash] of Object.entries(manifest.authoring_sha256))
-    assert.equal(sha(await read(file)), hash, file + ': authoring hash');
+  // Authoring scripts are hashed as text, so accept either line ending: git autocrlf checkouts write CRLF.
+  for (const [file, hash] of Object.entries(manifest.authoring_sha256)) {
+    const bytes = await read(file);
+    const text = bytes.toString('utf8');
+    const variants = [bytes, Buffer.from(text.replace(/\r\n/g, '\n')), Buffer.from(text.replace(/\r?\n/g, '\r\n'))];
+    assert.ok(variants.some((v) => sha(v) === hash), file + ': authoring hash');
+  }
   const browser = JSON.parse(await read(ART + '/browser-inspection.json'));
   assert.equal(browser.result, 'PASS');
   assert.equal(browser.production_manifest_sha256, sha(manifestBytes), 'browser uses the current manifest');
@@ -61,7 +66,16 @@ async function main() {
     assert.deepEqual(study.browser_errors, []);
     assert.equal(sha(await read(ART + '/previews/' + study.id + '-640x360.png')), study.screenshot_sha256);
   }
-  assert.equal(browser.studies[0].approaches.length, 8, 'both mirrors checked from four sides');
+  // RULE_GAMES §1: the left mirror is probed from four sides and two far points; the right mirror from three sides
+  // and one far point (its east face is walled in by the altar).
+  const approaches = browser.studies[0].approaches;
+  assert.equal(approaches.filter(a => a.side === 'left' && !a.direction.startsWith('far')).length, 4, 'left mirror: four sides');
+  assert.equal(approaches.filter(a => a.side === 'right' && !a.direction.startsWith('far')).length, 3, 'right mirror: three walkable sides');
+  assert.equal(approaches.filter(a => a.direction.startsWith('far')).length, 3, 'far points outside the 8px gap');
+  for (const a of approaches) {
+    if (a.direction.startsWith('far')) assert.equal(a.after, a.before, `${a.side} ${a.direction}: no rotation`);
+    else assert.equal(a.target, 'l7-mirror-' + a.side, `${a.side} ${a.direction}: prompt within 8px`);
+  }
   console.log('PASS: decoded 32 PNGs, shared palettes, mirror transparency, all provenance hashes and current browser evidence.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
