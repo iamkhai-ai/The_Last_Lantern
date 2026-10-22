@@ -706,6 +706,11 @@ export class RuinsOfTwoHalvesLevel {
     fixture('north-door', () => this.exitPrompt(), () => this.useExit());
   }
 
+  /** The Moon's lock label: TỐI only where the lit lamp's shadow covers it (or during the demonstration). */
+  private moonLabel(state: RuinsPuzzleState): string {
+    return `NGUYỆT · ${ruinsMoonShadowed(state, this.shadowDemo !== null) ? 'TỐI' : 'SÁNG'}`;
+  }
+
   /** Statue and mirror prompts: once the ring is latched the turn is over, and the prompt says so. */
   private turnPrompt(base: string): string {
     return ruinsTurnPrompt(base, this.progress.flags['l7-route-latched'] === true);
@@ -1089,6 +1094,14 @@ export class RuinsOfTwoHalvesLevel {
     if (!walk || !image || !image.active) return;
     const path = RUINS_SHADOW.path;
     if (walk.index >= path.length) { this.persistShadowWalk(); return; }
+    // The carved-name hold (scenario 08 §5) stops him where he is, on `stillness`, until its line ends. The walk index is not
+    // touched, so the walk then resumes from the same waypoint.
+    if (this.shadowStill) {
+      const stillKey = this.shadowKey('stillness');
+      if (stillKey && image.texture.key !== stillKey) image.setTexture(stillKey);
+      this.placeShadowSolid();
+      return;
+    }
     const near = Math.hypot(this.player.x - image.x, this.player.y - (image.y - 20)) <= RUINS_SHADOW.followRange;
     const walking = this.shadowKey('walk-right');
     const waiting = this.shadowKey('stillness');
@@ -1293,7 +1306,7 @@ export class RuinsOfTwoHalvesLevel {
 
     this.lockLabels.get('left')?.setText(`NHẬT TRÁI · ${state.leftLit ? 'SÁNG' : 'TẮT'}`);
     this.lockLabels.get('right')?.setText(`NHẬT PHẢI · ${state.rightLit ? 'SÁNG' : 'TẮT'}`);
-    this.lockLabels.get('moon')?.setText(`NGUYỆT · ${moonShadowed ? 'TỐI' : 'SÁNG'}`);
+    this.lockLabels.get('moon')?.setText(this.moonLabel(state));
 
     if (this.lastLanternOn !== this.lantern.lanternOn) {
       this.lastLanternOn = this.lantern.lanternOn;

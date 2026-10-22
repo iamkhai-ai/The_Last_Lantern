@@ -254,15 +254,21 @@ export function ruinsShadowDemoEligible(input: RuinsShadowDemoInput): boolean {
 }
 
 /**
+ * How close The Shadow's ground anchor must be to the statue's base (`RUINS_PROPS.statue.groundAnchor`, y 212) for the name
+ * reveal to hold him still. His guard spot is 95px from that base ((238,164) to (320,212)) and his wait spot is 181px away
+ * ((470,110)). 110px takes in the guard spot and leaves the wait spot outside.
+ */
+export const RUINS_SHADOW_NEAR_STATUE_PX = 110;
+
+/**
  * Scenario 08 §5 "Mạch phụ": a worn name carved under the statue. It is a ground decal (`RUINS_DEPTH.groundStamp`) that a
- * Pulse within `pulseRadius` of its centre reveals. The Shadow holds `stillness` for the reveal when he is within
- * `stillRadius` of the statue's base.
+ * Pulse within `pulseRadius` of its centre reveals. When The Shadow is near the statue's base (see
+ * `RUINS_SHADOW_NEAR_STATUE_PX`) he holds `stillness` for the reveal.
  */
 export const RUINS_NAME = {
   art: 'inscription-under-statue',
   centre: { x: 320, y: 222 },
   pulseRadius: 56,
-  stillRadius: 80,
 } as const;
 
 /** True when a Pulse originating at `origin` reaches the carved name. */
@@ -273,16 +279,16 @@ export function ruinsPulseReachesName(origin: RuinsPoint): boolean {
 /** True when The Shadow's ground anchor is close enough to the statue's base for the reveal to hold him still. */
 export function ruinsShadowNearStatue(ground: RuinsPoint): boolean {
   const base = RUINS_PROPS.statue.groundAnchor;
-  return Math.hypot(ground.x - base.x, ground.y - base.y) <= RUINS_NAME.stillRadius;
+  return Math.hypot(ground.x - base.x, ground.y - base.y) <= RUINS_SHADOW_NEAR_STATUE_PX;
 }
 
 /**
- * Display only: whether the Moon lock and its labels read as shadowed. The statue's shadow is what covers the Moon, so this is
- * `moonCovered`, plus the optional demonstration, which holds the Moon covered while it runs. It deliberately does not use
- * `moonDark` (which also turns true when the lamp is off or not placed) and feeds no puzzle or latch rule.
+ * Display only: whether the Moon lock and its labels read as shadowed. The statue's shadow covers the Moon only while the lamp
+ * is lit (`lightActive`), so the Moon reads SÁNG with the lamp off, whatever the statue is set to. The optional demonstration
+ * holds it covered while it runs. It deliberately does not use `moonDark` and feeds no puzzle or latch rule.
  */
-export function ruinsMoonShadowed(puzzle: { moonCovered: boolean }, demonstrating: boolean): boolean {
-  return puzzle.moonCovered || demonstrating;
+export function ruinsMoonShadowed(puzzle: { moonCovered: boolean; lightActive: boolean }, demonstrating: boolean): boolean {
+  return (puzzle.moonCovered && puzzle.lightActive) || demonstrating;
 }
 
 /** The prompt of every control that turns a piece (statue, mirrors) once the ring is committed. */

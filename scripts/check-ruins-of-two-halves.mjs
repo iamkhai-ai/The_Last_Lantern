@@ -16,7 +16,7 @@ import {
   RUINS_SHADOW_SOLID_EPS, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
   RUINS_NAME, RUINS_SHADOW_DEMO, ruinsIsInsideFloor, ruinsPulseReachesName, ruinsShadowDemoEligible,
   ruinsShadowNearStatue, ruinsMoonShadowed, ruinsNormalizeNotch, ruinsTurnPrompt, RUINS_LATCHED_TURN_PROMPT,
-  RUINS_STATUE_NOTCHES,
+  RUINS_STATUE_NOTCHES, RUINS_SHADOW_NEAR_STATUE_PX,
 } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import { LOCK_TONE_HZ, lockMoonVoice } from '../src/audio/effects.ts';
 
@@ -1010,9 +1010,11 @@ assert.equal(ruinsPulseReachesName({ x: 120, y: 288 }), false, 'the spawn is too
   assert.ok(RUINS_NAME.centre.y - sprite.height / 2 >= RUINS_PROPS.statue.groundAnchor.y,
     'the decal sits just under the statue base (its top edge is at or below the base)');
 }
-assert.equal(ruinsShadowNearStatue(RUINS_SHADOW.spots.guard.ground), false, 'the guard spot is outside the reveal stillness radius');
-assert.equal(ruinsShadowNearStatue({ x: 400, y: 212 }), true, 'a spot exactly 80px from the statue base holds him still');
-assert.equal(ruinsShadowNearStatue({ x: 401, y: 212 }), false, 'a spot 81px away does not');
+assert.equal(ruinsShadowNearStatue(RUINS_SHADOW.spots.guard.ground), true, 'the guard spot is inside the reveal stillness radius');
+assert.equal(ruinsShadowNearStatue({ x: 320 + RUINS_SHADOW_NEAR_STATUE_PX, y: 212 }), true,
+  `a spot exactly ${RUINS_SHADOW_NEAR_STATUE_PX}px from the statue base holds him still`);
+assert.equal(ruinsShadowNearStatue({ x: 320 + RUINS_SHADOW_NEAR_STATUE_PX + 1, y: 212 }), false,
+  `a spot ${RUINS_SHADOW_NEAR_STATUE_PX + 1}px away does not`);
 
 /* -------------------------------------------------------------------------- */
 /* 20. HUD and blocked-exit texts, read from the shipped methods              */
@@ -1123,14 +1125,18 @@ console.log('Level 08 optional demonstration, carved name, HUD and lock-tone che
 /* -------------------------------------------------------------------------- */
 
 // 22a. The Moon reads shadowed only where the statue's shadow covers it. The dark flag is a puzzle input, not a display rule.
-assert.equal(ruinsMoonShadowed({ moonCovered: false }, false), false, 'the Moon reads lit when no shadow covers it');
-assert.equal(ruinsMoonShadowed({ moonCovered: true }, false), true, 'the Moon reads shadowed under the statue shadow');
-assert.equal(ruinsMoonShadowed({ moonCovered: false }, true), true, 'the demonstration holds the Moon covered while it runs');
+assert.equal(ruinsMoonShadowed({ moonCovered: false, lightActive: true }, false), false, 'the Moon reads lit when no shadow covers it');
+assert.equal(ruinsMoonShadowed({ moonCovered: true, lightActive: true }, false), true, 'the Moon reads shadowed under the lit statue shadow');
+assert.equal(ruinsMoonShadowed({ moonCovered: false, lightActive: false }, true), true, 'the demonstration holds the Moon covered while it runs');
 const lampNotPlaced = deriveRuinsPuzzleState({ lanternPlaced: false, lanternOn: true, statue: 1, leftMirror: 1, rightMirror: 0 });
 assert.equal(lampNotPlaced.moonDark, true, 'the puzzle still reads the Moon as dark with the lamp off the altar');
 assert.equal(ruinsMoonShadowed(lampNotPlaced, false), false, 'with no shadow on the Moon the display does not read tối');
-assert.equal(ruinsMoonShadowed(deriveRuinsPuzzleState({ ...solved, lanternOn: false }), false), true,
-  'the solving statue shadow still reads on the Moon with the lamp off (the shadow overlay is drawn regardless of light)');
+// Lamp off, statue at notch 0: the statue's shadow is geometry only, so the display reads SÁNG until the lamp is lit.
+const lampOffSolvingStatue = deriveRuinsPuzzleState({ ...solved, lanternOn: false });
+assert.equal(lampOffSolvingStatue.moonCovered, true, 'the solving statue covers the Moon geometrically with the lamp off');
+assert.equal(ruinsMoonShadowed(lampOffSolvingStatue, false), false,
+  'with the lamp off the Moon reads SÁNG even when the statue is at notch 0');
+assert.equal(ruinsMoonShadowed({ moonCovered: true, lightActive: false }, false), false, 'a shadow with no lit lamp is not shadowing the Moon');
 assert.ok(!levelText.includes('moonDark'), 'the Level 08 controller never reads the dark flag for display');
 assert.ok(methodNode('refreshArt').body.getText(levelSourceFile).includes('ruinsMoonShadowed'), 'the Moon lock art and label use the shadow rule');
 {
@@ -1141,6 +1147,19 @@ assert.ok(methodNode('refreshArt').body.getText(levelSourceFile).includes('ruins
   assert.ok(statusFor(lampNotPlaced).includes('Nguyệt sáng'), `the status row reads sáng with no shadow on the Moon (${statusFor(lampNotPlaced)})`);
   assert.ok(statusFor(deriveRuinsPuzzleState({ ...solved, statue: 0 })).includes('Nguyệt tối'),
     `the status row reads tối under the statue shadow (${statusFor(deriveRuinsPuzzleState({ ...solved, statue: 0 }))})`);
+  assert.ok(statusFor(lampOffSolvingStatue).includes('Nguyệt sáng'),
+    `the status row reads sáng with the lamp off and the statue at notch 0 (${statusFor(lampOffSolvingStatue)})`);
+}
+// The Moon label itself (the NGUYỆT text on the lock) is read from the shipped method.
+{
+  const moonLabel = shippedMethod('moonLabel', { ruinsMoonShadowed });
+  assert.equal(moonLabel.call({ shadowDemo: null }, lampOffSolvingStatue), 'NGUYỆT · SÁNG',
+    'the NGUYỆT label reads SÁNG when the lamp is off and the statue is at notch 0');
+  assert.equal(moonLabel.call({ shadowDemo: null }, deriveRuinsPuzzleState(solved)), 'NGUYỆT · TỐI',
+    'the NGUYỆT label reads TỐI under the lit statue shadow');
+  assert.equal(moonLabel.call({ shadowDemo: {} }, lampOffSolvingStatue), 'NGUYỆT · TỐI',
+    'the NGUYỆT label reads TỐI while the demonstration holds the Moon covered');
+  assert.equal(moonLabel.call({ shadowDemo: null }, lampNotPlaced), 'NGUYỆT · SÁNG', 'the NGUYỆT label reads SÁNG with the Moon lit');
 }
 // The latch still requires the Moon in the statue's shadow (no display change reaches the latch rule).
 assert.equal(deriveRuinsPuzzleState({ ...solved, statue: 1 }).confirmReady, false, 'the latch still needs the Moon covered by the statue shadow');
@@ -1205,3 +1224,67 @@ const campaignSource = readFileSync(new URL('../src/scenes/CampaignScene.ts', im
 assert.ok(!campaignSource.includes('isRuinsOuterBeamReady'), 'the unused legacy beam helper is removed from the scene');
 
 console.log('Level 08 playtest fixes (Moon display, Sun-off turn message, suns hint, turn prompts, Pulse path) checks passed.');
+
+/* -------------------------------------------------------------------------- */
+/* 23. the carved-name hold: reachable distances, and the walk holds still     */
+/* -------------------------------------------------------------------------- */
+
+assert.ok(methodNode('refreshArt').body.getText(levelSourceFile).includes('this.moonLabel(state)'), 'the Moon label is set through moonLabel');
+
+{
+  const statueBase = RUINS_PROPS.statue.groundAnchor;
+  const distanceToBase = (point) => Math.hypot(point.x - statueBase.x, point.y - statueBase.y);
+  // The comment on the constant gives the two distances; the numbers must match the spots they describe.
+  assert.ok(Math.abs(distanceToBase(RUINS_SHADOW.spots.guard.ground) - 95) < 1, 'the guard spot is 95px from the statue base, as documented');
+  assert.ok(Math.abs(distanceToBase(RUINS_SHADOW.spots.wait.ground) - 181) < 1, 'the wait spot is 181px from the statue base, as documented');
+  assert.equal(RUINS_SHADOW_NEAR_STATUE_PX, 110, 'the stillness radius is the documented 110px');
+  assert.equal(ruinsShadowNearStatue(RUINS_SHADOW.spots.guard.ground), true, 'the guard spot is near: the reveal holds him still there');
+  assert.equal(ruinsShadowNearStatue(RUINS_SHADOW.spots.wait.ground), false, 'the wait spot is not near: a reveal after the talk does not hold him');
+}
+
+// The story walk does not move while the hold is set: he stays on stillness, and the waypoint index is kept.
+{
+  const advance = shippedMethod('advanceShadowWalk', { RUINS_SHADOW, ruinsDepthAt });
+  const walkFake = ({ shadowStill, index = 0 }) => {
+    const image = {
+      active: true, x: RUINS_SHADOW.spots.guard.ground.x, y: RUINS_SHADOW.spots.guard.ground.y, texture: { key: 'shadow_shielding' },
+      setTexture(key) { this.texture = { key }; return this; }, setFlipX() { return this; },
+      setPosition(x, y) { this.x = x; this.y = y; return this; }, setDepth() { return this; },
+    };
+    return {
+      image,
+      fake: {
+        shadowWalk: { index }, shadowImage: image, shadowStill,
+        player: { x: RUINS_SHADOW.spots.guard.ground.x, y: RUINS_SHADOW.spots.guard.ground.y + 20 },
+        shadowKey: (pose) => `shadow_${pose.replace(/-/g, '_')}`,
+        placeShadowSolid() { this.solidCalls = (this.solidCalls ?? 0) + 1; },
+        persistShadowWalk() {},
+      },
+    };
+  };
+  const held = walkFake({ shadowStill: true });
+  const startAt = { x: held.image.x, y: held.image.y };
+  for (let frame = 0; frame < 60; frame += 1) advance.call(held.fake, 16);
+  assert.deepEqual({ x: held.image.x, y: held.image.y }, startAt, 'while the hold is set the walk does not move him');
+  assert.equal(held.image.texture.key, 'shadow_stillness', 'while the hold is set he stands on stillness');
+  assert.equal(held.fake.shadowWalk.index, 0, 'the waypoint index is kept during the hold');
+
+  // When the hold ends the walk resumes from the same point and moves toward the next waypoint.
+  held.fake.shadowStill = false;
+  advance.call(held.fake, 16);
+  const next = RUINS_SHADOW.path[0];
+  assert.ok(Math.hypot(held.image.x - next.x, held.image.y - next.y) < Math.hypot(startAt.x - next.x, startAt.y - next.y),
+    'once the hold ends the walk resumes toward the next waypoint');
+
+  // Without a hold he moves on the same frames (the guard against an always-true check).
+  const free = walkFake({ shadowStill: false });
+  advance.call(free.fake, 16);
+  assert.notDeepEqual({ x: free.image.x, y: free.image.y }, { x: startAt.x, y: startAt.y }, 'with no hold the walk moves him');
+}
+{
+  const walkSource = methodNode('advanceShadowWalk').body.getText(levelSourceFile);
+  assert.ok(walkSource.indexOf('this.shadowStill') > 0 && walkSource.indexOf('this.shadowStill') < walkSource.indexOf('const target = path[walk.index]'),
+    'the hold is checked before any movement toward a waypoint');
+}
+
+console.log('Level 08 carved-name hold checks passed (guard spot near, wait spot not, walk holds still and resumes).');
