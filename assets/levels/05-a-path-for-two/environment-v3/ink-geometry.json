@@ -110,23 +110,16 @@
     ],
     "solids": [
       {
-        "elementId": "call-b-far",
-        "x": 48,
-        "y": 128,
-        "width": 40,
-        "height": 48
-      },
-      {
         "elementId": "latch-b",
-        "x": 144,
-        "y": 208,
+        "x": 136,
+        "y": 238,
         "width": 28,
         "height": 32
       },
       {
         "elementId": "call-c",
-        "x": 102,
-        "y": 142,
+        "x": 80,
+        "y": 128,
         "width": 40,
         "height": 48
       },
@@ -164,39 +157,27 @@
     ],
     "elements": [
       {
-        "id": "call-b-far",
-        "art": "call-idle",
-        "x": 68,
-        "y": 176,
-        "width": 40,
-        "height": 48,
-        "stand": {
-          "x": 68,
-          "y": 198
-        }
-      },
-      {
         "id": "latch-b",
         "art": "latch-unlatched",
-        "x": 158,
-        "y": 240,
+        "x": 150,
+        "y": 270,
         "width": 28,
         "height": 32,
         "stand": {
-          "x": 158,
-          "y": 264
+          "x": 150,
+          "y": 280
         }
       },
       {
         "id": "call-c",
         "art": "call-idle",
-        "x": 122,
-        "y": 190,
+        "x": 100,
+        "y": 176,
         "width": 40,
         "height": 48,
         "stand": {
-          "x": 122,
-          "y": 210
+          "x": 100,
+          "y": 196
         }
       },
       {

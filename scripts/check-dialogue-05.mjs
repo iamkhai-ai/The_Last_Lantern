@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { choosePathCallAction, getPathExitBlock, hasDoorPower, isActuallyReunited, pathActorBody, PATH_INK_CORRIDOR, PATH_ROOMS, rectsOverlap } from '../src/data/pathForTwoLayout.ts';
+import { choosePathCallAction, getPathExitBlock, hasDoorPower, isActuallyReunited, isPathApproachAllowed, isPathCallSpent, isPathInteractHeld, pathActorBody, PATH_INK_CORRIDOR, PATH_ROOMS, rectsOverlap } from '../src/data/pathForTwoLayout.ts';
 
 /**
  * Level 05 approved-dialogue regression.
@@ -186,6 +186,8 @@ function makeScene(room, flags, extra = {}) {
   scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete', 'guard', 'onStale'], {});
   scene.flushPendingStoryBeat = compile('flushPendingStoryBeat', [], {});
   scene.isActuallyReunited = compile('isActuallyReunited', [], { isActuallyReunited });
+  // The lantern toggle also redraws the ink glyphs (check-path-for-two.mjs owns their behaviour); this copy check only needs the call to exist.
+  scene.refreshInkGlyphs = () => {};
   return scene;
 }
 const saidText = (scene) => scene.said.flat().map((line) => line.text).join(' | ');
@@ -230,13 +232,25 @@ function bindInteract(scene) {
   scene.interact = compile('interact', ['id'], {
     MEMORY: constant('MEMORY'), choosePathCallAction,
     LATCH_A_LINES: constant('LATCH_A_LINES'), NEXT_MARK_UNLATCHED: constant('NEXT_MARK_UNLATCHED'),
+    STILL_TRAVELLING: constant('STILL_TRAVELLING'),
   });
   scene.send = (mark) => scene.sent.push(mark);
   scene.recallToCall = () => { scene.recalled += 1; };
 }
+/** The shipped E gate in front of interact(): held-E, the approach predicate and the spent-post check. */
+function bindLivePress(scene) {
+  scene.isInteractKeyDown = compile('isInteractKeyDown', [], {});
+  scene.heldInteract = compile('heldInteract', [], { isPathInteractHeld });
+  scene.elementFor = compile('elementFor', ['id'], { PATH_ROOMS });
+  scene.pathReachOptions = compile('pathReachOptions', [], {});
+  scene.elementApproach = compile('elementApproach', ['id', 'x', 'y'], { PATH_ROOMS, isPathApproachAllowed });
+  scene.interactionEnabled = compile('interactionEnabled', ['id'], { isPathCallSpent });
+}
 function bindDoor(scene) {
-  scene.useDoor = compile('useDoor', ['id'], {
-    getPathExitBlock, getPathBackArrival: () => ({ x: 0, y: 0 }),
+  // E at a door is `useDoor` (the gate), which hands an accepted press to `runDoor` (the same path a walk-in takes).
+  scene.useDoor = compile('useDoor', ['id'], {});
+  scene.runDoor = compile('runDoor', ['id'], {
+    PATH_ROOMS, getPathExitBlock, getPathBackArrival: () => ({ x: 0, y: 0 }),
     STILL_TRAVELLING: constant('STILL_TRAVELLING'), MARK_NOT_CALLED: constant('MARK_NOT_CALLED'),
     TOWER_NEEDS_LUMO: constant('TOWER_NEEDS_LUMO'),
   });
@@ -543,7 +557,8 @@ dialogueCase('ink_observation_is_not_a_requirement_for_C_or_the_exit_flow', () =
  * 5. Latch C memory, latch A copy, held-mark and door feedback
  * ------------------------------------------------------------------ */
 dialogueCase('memory_is_spoken_at_the_latch_C_hold_not_at_reunion', () => {
-  const scene = makeScene('ink', { 'l4-latch-b': true, 'l4-ink-revealed': true }, { assignment: 'c' });
+  // The exit latch now also needs the three glyphs lit (l4-ink-seals), so the scene carries that step.
+  const scene = makeScene('ink', { 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-seals': true }, { assignment: 'c' });
   scene.lumoRoom = 'ink';
   scene.lumo.sprite.setPosition(558, 244);
   scene.interactionEnabled = () => true;
@@ -589,10 +604,21 @@ dialogueCase('latch_and_mark_feedback_use_the_approved_lines', () => {
   assert.deepEqual(latchA.said.at(-1), LATCH_A, `latch A uses the approved first-door copy (${saidText(latchA)})`);
   assert.equal(latchA.progress.flags['l4-latch-a'], true, 'latch A is still recorded');
 
+  // send() keeps its own guard for a held mark, and that guard speaks the approved §7 copy.
   const held = makeScene('entry', { 'l4-latch-a': true }, { player: { x: 384, y: 256 } });
   bindSend(held);
   held.send('a');
-  assert.deepEqual(held.said.at(-1), LATCHED_CALL, `a held mark uses the approved §7 copy (${saidText(held)})`);
+  assert.deepEqual(held.said.at(-1), LATCHED_CALL, `send's guard for a held mark uses the approved §7 copy (${saidText(held)})`);
+  // The press itself is silent now: a latched call post is disabled, so E never reaches send() or that copy.
+  const press = makeScene('entry', { 'l4-latch-a': true }, { player: { x: 384, y: 218 } });
+  press.interactReleasePending = false;
+  press.interactKey = { isDown: false };
+  bindInteract(press);
+  bindLivePress(press);
+  assert.equal(press.interactionEnabled('call-a'), false, 'the latched A post is disabled');
+  press.interact('call-a');
+  assert.equal(press.said.length, 0, 'E at the latched A post says nothing');
+  assert.equal(press.sent.length, 0, 'and sends Lumo nowhere');
 
   const unlatched = makeScene('entry', {}, { player: { x: 384, y: 256 } });
   unlatched.interactionEnabled = () => true;

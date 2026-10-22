@@ -1,0 +1,1004 @@
+{
+  "type": "seeded fixtures followed by real keyboard movement; not a full level playthrough",
+  "url": "http://localhost:5180/",
+  "asset_sha256": "a0cb53e73a6ebe18bbbe5fcff4bfab858d84f92c52cfb6e09cada3b4bcc6e790",
+  "cases": [
+    {
+      "name": "a-open",
+      "status": "PASS",
+      "insideRecess": {
+        "level": 4,
+        "room": "relay",
+        "x": 125.75,
+        "y": 175.75,
+        "body": {
+          "x": 118.75,
+          "y": 191.75,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": true,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_open"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": true
+      },
+      "hall": {
+        "level": 4,
+        "room": "relay",
+        "x": 150.25,
+        "y": 251,
+        "body": {
+          "x": 143.25,
+          "y": 267,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": true,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_open"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": true
+      },
+      "returned": {
+        "level": 4,
+        "room": "relay",
+        "x": 110,
+        "y": 251,
+        "body": {
+          "x": 103,
+          "y": 267,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": true,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_open"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": true
+      },
+      "dark": {
+        "level": 4,
+        "room": "relay",
+        "x": 110,
+        "y": 251,
+        "body": {
+          "x": 103,
+          "y": 267,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": false,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_open"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": true
+      },
+      "samples": [
+        {
+          "target": {
+            "y": 200
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 110,
+          "y": 200.25,
+          "body": {
+            "x": 103,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        },
+        {
+          "target": {
+            "x": 126
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 125.75,
+          "y": 200.25,
+          "body": {
+            "x": 118.75,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        },
+        {
+          "target": {
+            "y": 176
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 125.75,
+          "y": 175.75,
+          "body": {
+            "x": 118.75,
+            "y": 191.75,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        },
+        {
+          "target": {
+            "x": 150
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 150.25,
+          "y": 175.75,
+          "body": {
+            "x": 143.25,
+            "y": 191.75,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        },
+        {
+          "target": {
+            "y": 251
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 150.25,
+          "y": 251,
+          "body": {
+            "x": 143.25,
+            "y": 267,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        },
+        {
+          "target": {
+            "y": 200
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 150.25,
+          "y": 200.25,
+          "body": {
+            "x": 143.25,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        },
+        {
+          "target": {
+            "x": 110
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 110,
+          "y": 200.25,
+          "body": {
+            "x": 103,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        },
+        {
+          "target": {
+            "y": 251
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 110,
+          "y": 251,
+          "body": {
+            "x": 103,
+            "y": 267,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_open"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": true
+        }
+      ],
+      "assetResponses": [
+        {
+          "url": "http://localhost:5180/assets/levels/05-a-path-for-two/sprites/relay-environment-base.png?t=1792665324021&import&url",
+          "status": 200
+        },
+        {
+          "url": "http://localhost:5180/assets/levels/05-a-path-for-two/sprites/relay-environment-base.png",
+          "status": 200
+        }
+      ],
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "name": "a-closed",
+      "status": "PASS",
+      "insideRecess": {
+        "level": 4,
+        "room": "relay",
+        "x": 125.75,
+        "y": 175.75,
+        "body": {
+          "x": 118.75,
+          "y": 191.75,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": true,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_closed"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": false
+      },
+      "hall": {
+        "level": 4,
+        "room": "relay",
+        "x": 150.25,
+        "y": 251,
+        "body": {
+          "x": 143.25,
+          "y": 267,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": true,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_closed"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": false
+      },
+      "returned": {
+        "level": 4,
+        "room": "relay",
+        "x": 110,
+        "y": 251,
+        "body": {
+          "x": 103,
+          "y": 267,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": true,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_closed"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": false
+      },
+      "dark": {
+        "level": 4,
+        "room": "relay",
+        "x": 110,
+        "y": 251,
+        "body": {
+          "x": 103,
+          "y": 267,
+          "width": 14,
+          "height": 6
+        },
+        "lantern": false,
+        "dialogue": false,
+        "line": "",
+        "background": [
+          {
+            "key": "art_05_a_path_for_two_relay_environment_base",
+            "x": 0,
+            "y": 0,
+            "depth": 0,
+            "width": 640,
+            "height": 360,
+            "originX": 0,
+            "originY": 0
+          }
+        ],
+        "doors": [
+          {
+            "id": "a",
+            "texture": "art_05_a_path_for_two_door_closed"
+          },
+          {
+            "id": "b",
+            "texture": "art_05_a_path_for_two_door_closed"
+          }
+        ],
+        "latchA": false
+      },
+      "samples": [
+        {
+          "target": {
+            "y": 200
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 110,
+          "y": 200.25,
+          "body": {
+            "x": 103,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        },
+        {
+          "target": {
+            "x": 126
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 125.75,
+          "y": 200.25,
+          "body": {
+            "x": 118.75,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        },
+        {
+          "target": {
+            "y": 176
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 125.75,
+          "y": 175.75,
+          "body": {
+            "x": 118.75,
+            "y": 191.75,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        },
+        {
+          "target": {
+            "x": 150
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 150.25,
+          "y": 175.75,
+          "body": {
+            "x": 143.25,
+            "y": 191.75,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        },
+        {
+          "target": {
+            "y": 251
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 150.25,
+          "y": 251,
+          "body": {
+            "x": 143.25,
+            "y": 267,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        },
+        {
+          "target": {
+            "y": 200
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 150.25,
+          "y": 200.25,
+          "body": {
+            "x": 143.25,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        },
+        {
+          "target": {
+            "x": 110
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 110,
+          "y": 200.25,
+          "body": {
+            "x": 103,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        },
+        {
+          "target": {
+            "y": 251
+          },
+          "level": 4,
+          "room": "relay",
+          "x": 110,
+          "y": 251,
+          "body": {
+            "x": 103,
+            "y": 267,
+            "width": 14,
+            "height": 6
+          },
+          "lantern": true,
+          "dialogue": false,
+          "line": "",
+          "background": [
+            {
+              "key": "art_05_a_path_for_two_relay_environment_base",
+              "x": 0,
+              "y": 0,
+              "depth": 0,
+              "width": 640,
+              "height": 360,
+              "originX": 0,
+              "originY": 0
+            }
+          ],
+          "doors": [
+            {
+              "id": "a",
+              "texture": "art_05_a_path_for_two_door_closed"
+            },
+            {
+              "id": "b",
+              "texture": "art_05_a_path_for_two_door_closed"
+            }
+          ],
+          "latchA": false
+        }
+      ],
+      "assetResponses": [
+        {
+          "url": "http://localhost:5180/assets/levels/05-a-path-for-two/sprites/relay-environment-base.png?t=1792665324021&import&url",
+          "status": 200
+        },
+        {
+          "url": "http://localhost:5180/assets/levels/05-a-path-for-two/sprites/relay-environment-base.png",
+          "status": 200
+        }
+      ],
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "status": "PASS"
+}

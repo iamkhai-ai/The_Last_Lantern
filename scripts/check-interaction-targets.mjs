@@ -24,10 +24,11 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 import { layoutInteractionPrompt } from '../src/systems/interactionPromptLayout.ts';
-import { isFootInReach } from '../src/systems/interactionReach.ts';
+import { isFootInReach, rectGap } from '../src/systems/interactionReach.ts';
 import {
-  choosePathCallAction, isPathApproachAllowed, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe,
-  isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_ROOMS, PATH_SCHEMATIC, pathActorBody,
+  choosePathCallAction, getPathElementSolid, isPathApproachAllowed, isPathCallSpent, isPathDoorApproachAllowed, isPathInteractHeld, isPathPositionSafe,
+  isPathSeal, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_REACH_GAP, PATH_ROOMS, PATH_SCHEMATIC, pathActorBody,
+  pathStandingOwner,
 } from '../src/data/pathForTwoLayout.ts';
 import { OBSERVATORY_ROOMS } from '../src/data/observatoryRooms.ts';
 import {
@@ -240,20 +241,21 @@ function selectWith(system, x, y) {
  * runtime. Each helper the shipped bodies call is the shipped body too (`compile` above), with the
  * layout symbols it closes over.
  */
-function makePathForTwoInkRoom(flags) {
+function makePathForTwoInkRoom(flags, room = 'ink') {
   const registered = [];
   const scene = {
-    room: 'ink',
+    room,
     interactions: { register: (config) => registered.push(config) },
     doorImages: new Map(),
     imageFor: () => undefined,
     player: PROBE,
     progress: { flags: { ...flags }, counters: {} },
     assignment: 'follow',
-    lumoRoom: 'ink',
+    lumoRoom: room,
     interactReleasePending: false,
     interactKey: { isDown: false },
     hasPower: () => false,
+    isTravelling: () => false,
     interact: () => {},
     useDoor: () => {},
     registered,
@@ -261,6 +263,7 @@ function makePathForTwoInkRoom(flags) {
   scene.isInteractKeyDown = compile(PATH_SOURCE, 'isInteractKeyDown', 'PathForTwoLevel', [], {});
   scene.heldInteract = compile(PATH_SOURCE, 'heldInteract', 'PathForTwoLevel', [], { isPathInteractHeld });
   scene.elementFor = compile(PATH_SOURCE, 'elementFor', 'PathForTwoLevel', ['id'], { PATH_ROOMS });
+  scene.pathReachOptions = compile(PATH_SOURCE, 'pathReachOptions', 'PathForTwoLevel', [], {});
   scene.elementApproach = compile(PATH_SOURCE, 'elementApproach', 'PathForTwoLevel', ['id', 'x', 'y'],
     { PATH_ROOMS, isPathApproachAllowed });
   scene.doorApproach = compile(PATH_SOURCE, 'doorApproach', 'PathForTwoLevel', ['id', 'x', 'y'], { isPathDoorApproachAllowed });
@@ -268,7 +271,7 @@ function makePathForTwoInkRoom(flags) {
   scene.doorEnabled = compile(PATH_SOURCE, 'doorEnabled', 'PathForTwoLevel', ['id'], {});
   scene.prompt = compile(PATH_SOURCE, 'prompt', 'PathForTwoLevel', ['id'],
     { PLATE_ROOMS: localConstant(PATH_SOURCE, 'PLATE_ROOMS'), choosePathCallAction });
-  scene.interactionEnabled = compile(PATH_SOURCE, 'interactionEnabled', 'PathForTwoLevel', ['id'], {});
+  scene.interactionEnabled = compile(PATH_SOURCE, 'interactionEnabled', 'PathForTwoLevel', ['id'], { isPathCallSpent });
   scene.callMark = compile(PATH_SOURCE, 'callMark', 'PathForTwoLevel', ['id'], {});
   scene.callEligible = compile(PATH_SOURCE, 'callEligible', 'PathForTwoLevel', ['mark'], {});
   // The station plaque reads the same dialogue-free state the shipped scene does; no story is pending here.
@@ -278,8 +281,11 @@ function makePathForTwoInkRoom(flags) {
   scene.stationMapEnabled = compile(PATH_SOURCE, 'stationMapEnabled', 'PathForTwoLevel', [], {});
   scene.stationMapPrompt = compile(PATH_SOURCE, 'stationMapPrompt', 'PathForTwoLevel', [], {});
   compile(PATH_SOURCE, 'registerRoomInteractions', 'PathForTwoLevel', [],
-    { PATH_ROOMS, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_SCHEMATIC, isPathSeal, isPathApproachAllowed }).call(scene);
-  assert.ok(registered.length >= 6, `the ink room still registers its controls (got ${registered.length})`);
+    { PATH_ROOMS, PATH_CONTROL_STANDS, PATH_ELEMENT_RADIUS, PATH_SCHEMATIC, isPathSeal, isPathApproachAllowed, pathStandingOwner }).call(scene);
+  // Every non-seal element of the room, its door controls and the station plaque: derived from the layout, not a fixed count.
+  const expected = PATH_ROOMS[room].elements.filter((element) => !isPathSeal(element)).length
+    + PATH_CONTROL_STANDS.filter((stand) => stand.room === room).length + 1;
+  assert.equal(registered.length, expected, `the ${room} room still registers its controls (got ${registered.length}, expected ${expected})`);
   return scene;
 }
 
@@ -726,6 +732,68 @@ const CASES = [
         + ` doorC ${doorDomain.length} position(s) ${example(doorDomain)}`);
       const reachableIds = [...domains.keys()].sort();
       console.log(`      L05 selectable controls: ${reachableIds.join(', ')}`);
+    },
+  },
+  {
+    name: 'l05_standing_props_answer_from_every_side_through_the_selector',
+    run: () => {
+      // RULE_GAMES §1 through the shipped selector: each registered standing prop ranges by its own reach
+      // predicate (`isInReach`), measured by the engine's own `rectGap` from the foot body to the prop's
+      // solid. A walkable spot within 8px answers; 9px and beyond does not. Where no rival is in reach, the
+      // shipped `update()` must select that prop.
+      // Two states: nothing latched (the latches are live), and everything latched (the latches are spent).
+      const flagSets = [{}, { 'l4-latch-a': true, 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true, 'l4-ink-revealed': true }];
+      let probes = 0;
+      let selected = 0;
+      let owned = 0;
+      for (const [flags, room] of flagSets.flatMap((set) => ['entry', 'relay', 'ink'].map((name) => [set, name]))) {
+        const scene = makePathForTwoInkRoom(flags, room);
+        const system = makeSystem(scene.registered);
+        const latches = { a: flags['l4-latch-a'] === true, b: flags['l4-latch-b'] === true, c: flags['l4-latch-c'] === true, practice: false };
+        const standing = PATH_ROOMS[room].elements
+          .filter((element) => !isPathSeal(element) && element.approach !== 'side')
+          .map((element) => ({ element, item: scene.registered.find((config) => config.id === `l4-${element.id}`) }));
+        assert.ok(standing.length > 0 && standing.every(({ item }) => item), `${room} registers every standing prop`);
+        for (const { element, item } of standing) {
+          assert.equal(typeof item.isInReach, 'function', `${item.id} ranges by its reach predicate, not the radius`);
+          const solid = getPathElementSolid(room, element.id);
+          for (let x = solid.x - 12; x <= solid.x + solid.width + 12; x += 1) {
+            for (let y = solid.y - 12; y <= solid.y + solid.height + 12; y += 1) {
+              if (!isPathPositionSafe(room, { x, y })) continue;
+              const allowed = rectGap(pathActorBody({ x, y }), solid) <= PATH_REACH_GAP;
+              const label = `${room}/${element.id} at (${x},${y})`;
+              probes += 1;
+              assert.equal(item.isInReach(x, y), allowed, `${label}: the registered predicate matches the 8px rule`);
+              // RULE_GAMES §1: wherever any standing prop reaches, exactly one registered standing prop owns the
+              // spot, and it is the layout's own owner (smallest gap, ties in element order).
+              if (standing.some(({ item: other }) => other.isInReach(x, y))) {
+                const owners = standing.filter(({ item: other }) => other.ownsPosition?.(x, y) === true).map(({ item: other }) => other.id);
+                assert.deepEqual(owners, [`l4-${pathStandingOwner(room, { x, y }, { latches })}`],
+                  `${label}: exactly one standing prop owns a spot that a standing prop reaches`);
+                owned += 1;
+              }
+              const rivals = scene.registered.filter((other) => other !== item && other.isInReach && other.isInReach(x, y));
+              const picked = selectWith(system, x, y);
+              // A call post in reach is enabled exactly while its own door is not latched: a spent post is silent.
+              const postMark = element.id === 'practice-call' || element.id === 'inner-call' ? 'practice'
+                : element.id.startsWith('call-') ? (element.id.includes('-a') ? 'a' : element.id.includes('-b') ? 'b' : 'c') : null;
+              if (postMark && allowed) {
+                assert.equal(item.isEnabled(), !isPathCallSpent(postMark, flags),
+                  `${label}: a call post in reach is enabled only while its own door is not latched`);
+              }
+              if (!allowed || item.isEnabled?.() === false) {
+                assert.notEqual(picked, item.id, `${label}: a prop out of reach, or already spent, is never selected`);
+                continue;
+              }
+              if (rivals.length === 0) {
+                selected += 1;
+                assert.equal(picked, item.id, `${label}: a prop within 8px is selected by the shipped update()`);
+              }
+            }
+          }
+        }
+      }
+      console.log(`      L05 selector: ${probes} walkable positions swept, ${selected} uncontested answers selected, ${owned} reached spots each with one owner`);
     },
   },
   {

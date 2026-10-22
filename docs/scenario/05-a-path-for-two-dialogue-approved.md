@@ -2,7 +2,8 @@
 
 **Tên màn:** Lối Đi Hai Người.\
 **Trạng thái:** Người dùng đã chốt; bản nội dung để áp dụng vào game trên nhánh riêng.\
-**Xác nhận của người dùng:** “Lời thoại ổn rồi. Chốt bản này. Bạn giao cho subagent là deepseek v4.1 flash từ provider commandcode, thực hiện việc áp dụng vào dự án. Tạo nhánh riêng để làm điều này nhé”
+**Xác nhận của người dùng:** “Lời thoại ổn rồi. Chốt bản này. Bạn giao cho subagent là deepseek v4.1 flash từ provider commandcode, thực hiện việc áp dụng vào dự án. Tạo nhánh riêng để làm điều này nhé”\
+**Bổ sung 2026-10-22 (mục 9):** Người dùng chốt các lời thoại của câu đố dấu mực theo đề xuất của trợ lý: “Chốt 2 cái này theo đề xuất của bạn”.
 
 ## Phạm vi và mạch truyện
 
@@ -152,3 +153,24 @@ Giữ nguyên câu đố, khu thử tùy chọn, thời điểm cảnh ký ức 
 **Nhinh:** “Mình lên xem có cách trả nước về suối không.”
 
 *Thay “Mình lên xem nó đang đợi điều gì” bằng mục đích cụ thể. Hai người thấy nước bị hút lên và ánh đèn còn sáng, nhưng chưa biết máy hoạt động thế nào hoặc trên đó còn ai.*
+
+## 9. Câu đố dấu mực (bổ sung 2026-10-22)
+
+*Ba dấu mực (vòng, tam giác, vuông) chỉ hiện khi tắt đèn. Lumo chỉ biết thứ tự khi thực sự đứng ở ấn C, nên người chơi phải gọi Lumo tới ấn C trước. Chốt cửa ra chỉ nhả khi ba dấu đã sáng đúng thứ tự. Không đổi mạch truyện: vết xoắn và mảnh ký ức (mục 5) vẫn đến sau khi gài chốt cửa ra.*
+
+### Khi Lumo tới ấn C và nhìn thấy thứ tự
+
+**Lumo:** “Từ chỗ tôi đứng, tôi thấy vết mực kể thứ tự: vòng, rồi tam giác, rồi vuông.”\
+**Nhinh:** “Mình sẽ bước lên từng dấu theo đúng thứ tự đó. Phải tắt đèn mới thấy chúng.”
+
+### Khi ba dấu đã sáng đúng thứ tự
+
+**Nhinh:** “Ba dấu mực đã sáng. Chốt cuối cùng nhả ra rồi.”
+
+### Tới chốt cuối nhưng ba dấu mực chưa sáng
+
+**Nhinh:** “Chốt này còn khóa. Ba dấu mực trong hành lang phải sáng theo đúng thứ tự.”
+
+**Chữ hiện nhanh trên màn hình (không phải thoại, giữ riêng):** “Sáng lên!” khi một dấu sáng; “Vết mực nhòe đi. Thử lại từ đầu.” khi bước sai sau khi đã có dấu sáng; “Chưa biết thứ tự. Nhờ Lumo tới ấn C xem.” khi bước lên dấu mà Lumo chưa kể thứ tự.
+
+*Bước lên một dấu sai khi chưa có dấu nào sáng không bị phạt và không hiện chữ. Các dấu nằm hai làn của hành lang nên đi thẳng giữa hành lang không chạm dấu nào.*

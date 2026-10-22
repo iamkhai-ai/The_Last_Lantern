@@ -41,7 +41,7 @@ Door A's reverse face is the southwest entrance (x=110,base y=318). Arriving fro
 
 | Element | Art anchor | Stand / behavior |
 | --- | --- | --- |
-| Far-side call A | (224,232) | (224,256), in the hall, usable whether or not door A is open. It recalls/reassigns A and recovers the entry door. It was at (56,228) behind the reverse frame, which closes with door A and stranded the player after a recall from B. |
+| Far-side call A | (224,232) | Removed 2026-10-22 (one door, one station). It was a second post that only recalled Lumo, and recalling from beside door A could lock the player behind it. Door A is worked from latch A alone. |
 | Latch A | (180,240) | (180,264), reachable only after entering this room. E permanently holds A; exact scenario exchange follows. |
 | Call B | (360,232) | (360,256), send/recall B. Ask to latch A before moving Lumo to B, preventing accidental stranding. |
 | Door B | x=480,base210 | Same open/locked approach logic as A; E transfers to ink room. |
@@ -54,9 +54,9 @@ Door B's reverse face is southwest (x=82,base318); arrival center (82,246). West
 
 | Element | Art anchor / target | Stand / behavior |
 | --- | --- | --- |
-| Far-side call B | (68,176) | (68,198), restores the B assignment before latching. Shifted west into a clear part of the west foyer to separate its art and interaction radius from call C. |
-| Latch B | (158,240) | (158,264), holds B before Lumo moves to C. |
-| Call C | (122,190) | (122,210), sends Lumo through the clearly drawn pipe to east foyer. |
+| Far-side call B | (68,176) | Removed 2026-10-22 (one door, one station), for the same reason as far-side call A. Its clue plaque has no host yet (see `assets/levels/05-a-path-for-two/scenario-v2-clues/README.md`). |
+| Latch B | (150,270) | (150,280). The only station for door B: E sends Lumo to plate B when he is not there, and latches the door when he is. Its solid is x 136..164, y 238..270, 64px from call C's solid. |
+| Call C | (100,176) (moved from (122,190) on 2026-10-22) | (100,196), sends Lumo through the clearly drawn pipe to east foyer. Moved north-west so its solid is 64px from latch B's solid (minimum 60px). |
 | Plate/beacon C | (558,244), floor | Lumo's actual arrival is shown; only the dedicated seal is powered. |
 | Final door / stairs C | x=574,base180 | Exit stand (574,188) with radius 24, distinct from latch/memory. Side wall segments x=532..542,606..616,y=150..180 close the flanks. Stairs/floor never cover Nhinh. |
 | Latch C / recall handle | (540,192), full 28×32 | (550,218), radius 22, reachable from corridor on this side. Shifted the art 10px west so it ends at x=554 and leaves a 42px route to the right gatepost at x=596. First E latches C after B, ink discovery and C arrival; afterward this same reachable handle recalls Lumo. Do not add a pedestal that narrows the east foyer. |

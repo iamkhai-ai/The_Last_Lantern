@@ -181,6 +181,23 @@ const LANTERN_REPAIRS = [
 
 const CASES = [
   {
+    // Level 05's ink glyph puzzle keys are plain flags and counters: validation must keep them, not strip them.
+    name: 'the_ink_glyph_puzzle_keys_survive_save_and_load',
+    run: () => {
+      const save = fullSave();
+      save.flags = { ...save.flags, 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-order-known': true, 'l4-ink-seals': true };
+      save.counters = { ...save.counters, 'l4-ink-step': 3 };
+      store = new Map();
+      CampaignSaveSystem.save(save);
+      const loaded = CampaignSaveSystem.load();
+      assert.equal(loaded.flags['l4-ink-seals'], true, 'the glyph seals survive a save and load');
+      assert.equal(loaded.flags['l4-ink-order-known'], true, 'the learned glyph order survives a save and load');
+      assert.equal(loaded.flags['l4-ink-revealed'], true, 'the revealed corridor survives a save and load');
+      assert.equal(loaded.counters['l4-ink-step'], 3, 'the glyph step survives a save and load');
+      assert.equal(store.has(BACKUP), false, 'a save with the glyph keys is valid, so no backup is written');
+    },
+  },
+  {
     name: 'a_valid_save_round_trips_unchanged',
     run: () => {
       assert.deepEqual(loadRaw(fullSave()), fullSave());

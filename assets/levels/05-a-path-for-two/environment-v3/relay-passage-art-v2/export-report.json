@@ -1,0 +1,126 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "model": "not exposed by tool; limitation approved in existing art record",
+  "generation_reference": "exec-7df9aa90-c211-4122-9301-d38010437f60",
+  "draft_reference": "exec-92bfa94c-6f23-400c-84c2-62becbc6dd19",
+  "base_revision": "c677b459b774f6c0a5611184fe4c0765ef08b7e4 + existing uncommitted working tree",
+  "hashes": {
+    "before_sha256": "928ec2ad9d1eaedeb50ff5a720a4f126017d8e2463c6f4a8a6b465cacb1a6e4d",
+    "after_sha256": "a0cb53e73a6ebe18bbbe5fcff4bfab858d84f92c52cfb6e09cada3b4bcc6e790",
+    "raw_sha256": "87d55ea3b2e32dd85488a9ff06d5ead35776c89fa25c2fc9b2e03b8f46cec912"
+  },
+  "registration": {
+    "crop_native": [
+      78,
+      160,
+      198,
+      224
+    ],
+    "raw_size": [
+      1717,
+      916
+    ],
+    "sampling": "nearest",
+    "editable_regions": [
+      {
+        "name": "fixture",
+        "rect": [
+          94,
+          178,
+          118,
+          210
+        ]
+      },
+      {
+        "name": "lintel",
+        "rect": [
+          118,
+          180,
+          174,
+          190
+        ]
+      },
+      {
+        "name": "floor-recess",
+        "rect": [
+          118,
+          190,
+          174,
+          210
+        ]
+      }
+    ]
+  },
+  "export": {
+    "width": 640,
+    "height": 360,
+    "png_color_type": 3,
+    "mode": "P",
+    "opaque": true,
+    "palette_entries": 128,
+    "palette_byte_identical": true,
+    "dither": false,
+    "changed_pixel_count": 2272,
+    "changed_bbox_half_open": [
+      94,
+      178,
+      174,
+      210
+    ],
+    "changed_indices_outside_mask": 0
+  },
+  "checks": {
+    "outside_region": "PASS",
+    "png_contract": "PASS",
+    "raw_master_preserved": "PASS",
+    "runtime_matches_preview": "PASS"
+  },
+  "review_notes": [
+    "A shallow continuous flagstone floor with sparse mineral flecks and a solid stone cap.",
+    "Aged olive-bronze fixture remains on the partition entirely left of x118.",
+    "Inspect the subtle contact shade under the lintel with runtime lantern lighting."
+  ],
+  "verification": {
+    "revision": "c677b459b774f6c0a5611184fe4c0765ef08b7e4",
+    "source_manifest": "verification-inputs.json",
+    "source_hashes_before_after_identical": true,
+    "command_results": "command-results.json",
+    "checks": {
+      "path-for-two": "PASS",
+      "path-entry-environment": "PASS",
+      "typescript": "PASS",
+      "build": "PASS",
+      "remaining-environments": "FAIL"
+    },
+    "clearance": {
+      "status": "PASS",
+      "minimum_px": 40,
+      "x_range_inclusive": [
+        126,
+        150
+      ],
+      "step": 1,
+      "evidence": "clearance-review.json"
+    },
+    "browser": {
+      "status": "PASS",
+      "evidence": "runtime-final-review.json",
+      "fixtures": "A open/closed, lantern on/off; keyboard roundtrip through recess; not full playthrough"
+    },
+    "asset_contract": {
+      "status": "PASS",
+      "method": "Independent Pillow inspection",
+      "original_palette_identical": true,
+      "door_A_frame_columns_unchanged": true
+    },
+    "review": {
+      "method": "root visual inspection of native and enlarged output plus actual-game captures",
+      "status": "PASS",
+      "subjective_attention": "Shallow contact shade under lintel and aged bronze values with lantern on/off."
+    },
+    "not_run": [
+      "full Level 05 playthrough",
+      "full campaign playthrough"
+    ]
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "type": "final revision fixture recheck using keyboard traversal, not a full playthrough",
+  "status": "PASS",
+  "cases": [
+    {
+      "name": "a-open",
+      "status": "PASS",
+      "insideRecess": {
+        "x": 125.75,
+        "y": 174.75,
+        "room": "relay",
+        "dialogue": false,
+        "lantern": true,
+        "body": {
+          "x": 118.75,
+          "y": 190.75,
+          "width": 14,
+          "height": 6
+        }
+      },
+      "samples": [
+        {
+          "x": 110,
+          "y": 199.25,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 103,
+            "y": 215.25,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 125.75,
+          "y": 199.25,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 118.75,
+            "y": 215.25,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 125.75,
+          "y": 174.75,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 118.75,
+            "y": 190.75,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 150.25,
+          "y": 174.75,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 143.25,
+            "y": 190.75,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 150.25,
+          "y": 251.75,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 143.25,
+            "y": 267.75,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 150.25,
+          "y": 201,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 143.25,
+            "y": 217,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 110,
+          "y": 201,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 103,
+            "y": 217,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 110,
+          "y": 250,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 103,
+            "y": 266,
+            "width": 14,
+            "height": 6
+          }
+        }
+      ],
+      "issues": []
+    },
+    {
+      "name": "a-closed",
+      "status": "PASS",
+      "insideRecess": {
+        "x": 125.75,
+        "y": 175.75,
+        "room": "relay",
+        "dialogue": false,
+        "lantern": true,
+        "body": {
+          "x": 118.75,
+          "y": 191.75,
+          "width": 14,
+          "height": 6
+        }
+      },
+      "samples": [
+        {
+          "x": 110,
+          "y": 200.25,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 103,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 125.75,
+          "y": 200.25,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 118.75,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 125.75,
+          "y": 175.75,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 118.75,
+            "y": 191.75,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 150.25,
+          "y": 175.75,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 143.25,
+            "y": 191.75,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 150.25,
+          "y": 251,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 143.25,
+            "y": 267,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 150.25,
+          "y": 200.25,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 143.25,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 110,
+          "y": 200.25,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 103,
+            "y": 216.25,
+            "width": 14,
+            "height": 6
+          }
+        },
+        {
+          "x": 110,
+          "y": 251,
+          "room": "relay",
+          "dialogue": false,
+          "lantern": true,
+          "body": {
+            "x": 103,
+            "y": 267,
+            "width": 14,
+            "height": 6
+          }
+        }
+      ],
+      "issues": []
+    }
+  ]
+}

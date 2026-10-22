@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
-import { PATH_INK_CORRIDOR, PATH_ROOMS, PATH_TUBE_MOUTHS, getPathElementArtRect } from '../src/data/pathForTwoLayout.ts';
+import { PATH_INK_CORRIDOR, PATH_ROOMS, PATH_TUBE_MOUTHS, getPathElementArtRect, pathCallLabel } from '../src/data/pathForTwoLayout.ts';
 
 // Like check-path-for-two.mjs, execute shipped methods without importing browser-only Phaser.
 const file = new URL('../src/levels/PathForTwoLevel.ts', import.meta.url);
@@ -41,7 +41,7 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
     return object;
   };
   const symbols = {
-    PATH_ROOMS, PATH_INK_CORRIDOR, PATH_TUBE_MOUTHS, getPathElementArtRect,
+    PATH_ROOMS, PATH_INK_CORRIDOR, PATH_TUBE_MOUTHS, getPathElementArtRect, pathCallLabel,
     getLevelArtKey(level, filename) {
       assert.equal(level, 4, 'Level 05 uses its existing zero-based art index');
       return filename === `${room}-environment-base` ? key : filename;
@@ -53,7 +53,7 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
     progress: { flags: {}, counters: {} }, route: [{ room, x: 100, y: 200 }], routeIndex: 0,
     player: { sprite: {}, x: 100, y: 200 }, interactions: { clear() {} },
     scene: {
-      add: Object.fromEntries(['image', 'tileSprite', 'graphics', 'rectangle'].map(kind => [kind, (...args) => makeObject(kind, args)])),
+      add: Object.fromEntries(['image', 'tileSprite', 'graphics', 'rectangle', 'text'].map(kind => [kind, (...args) => makeObject(kind, args)])),
       textures: { exists(value) { textureLookups.push(value); return value === ENVIRONMENT_KEYS[room] && textureExists; } },
       physics: { add: {
         existing(object, isStatic) {
@@ -67,11 +67,12 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
     },
     drawTubeRoutes() { overlays.push('routes'); },
     drawStationSchematic() { overlays.push('schematic'); },
+    drawInkPuzzle() { overlays.push('ink-puzzle'); },
     addDoors() { overlays.push('doors'); },
     registerRoomInteractions() { overlays.push('interactions'); },
     refreshArt() { overlays.push('state-art'); },
   };
-  for (const name of ['drawRoom', 'addCollider', 'addNativeArt', 'depthAt', 'track']) level[name] = compile(name, symbols);
+  for (const name of ['drawRoom', 'addCollider', 'addNativeArt', 'depthAt', 'track', 'callMark']) level[name] = compile(name, symbols);
   const layoutBefore = structuredClone(PATH_ROOMS);
   const gameplayBefore = JSON.stringify([level.progress, level.route, level.routeIndex, level.player]);
   level.drawRoom();
@@ -80,7 +81,11 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
   assert.deepEqual(collisionRects, [...PATH_ROOMS[room].walls, ...PATH_ROOMS[room].solids].map(({ x, y, width, height }) => ({ x, y, width, height })), 'all original walls and solids still create identical colliders');
   assert.equal(level.colliders.length, collisionRects.length);
   assert.equal(level.bodies.length, collisionRects.length);
-  assert.deepEqual(overlays, ['routes', 'schematic', 'doors', 'interactions', 'state-art'], 'dynamic overlays and controls still run after the environment');
+  // The ink glyph puzzle draws only in the ink room, right after the schematic; no other room gets it.
+  const expectedOverlays = room === 'ink'
+    ? ['routes', 'schematic', 'ink-puzzle', 'doors', 'interactions', 'state-art']
+    : ['routes', 'schematic', 'doors', 'interactions', 'state-art'];
+  assert.deepEqual(overlays, expectedOverlays, 'dynamic overlays and controls still run after the environment');
   for (const element of PATH_ROOMS[room].elements) {
     const image = drawn.find(object => object.data.get('path-id') === element.id);
     const art = getPathElementArtRect(element);
