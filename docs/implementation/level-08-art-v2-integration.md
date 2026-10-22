@@ -40,7 +40,8 @@ discovery/flags/dialogue and other v2 gameplay changes are outside this scope.
 - **PASS** — `git diff --check`; comparison with the base revision shows no
   changes to original Level 08 sprites, shared assets, Level 07 artwork,
   `src/assets/mirror_0..3.png` or the Level 08 layout data.
-- **NOT_RUN** — independent frozen-revision reviews (pending freeze).
+- **PASS** — two independent read-only reviewer tasks completed on the frozen
+  revision below, with no actionable findings in their checked scopes.
 - **NOT_RUN** — complete manual spawn-to-exit playthrough and remote CI.
 
 An initial Level 08 check could not start before `npm ci` because TypeScript was
@@ -68,7 +69,35 @@ The runtime does not expose resolved model/effort; those remain unknown. Root
 owns the art/export files, while the worker owned only the two runtime files and
 the browser inspection harness. No concurrent edits to those files occurred.
 
-Two separate read-only reviewer tasks will inspect the same frozen revision
-after production export and applicable checks. Their current-round findings
-will remain separate until both finish. Prompts do not enforce a read-only
-runtime sandbox, and reviewers sharing a model may have correlated blind spots.
+## Frozen revision and independent reviews
+
+Code/art revision: `e9d180d465974246417b50faf2f750b8005ba354`.
+Both reviewers checked this exact revision against the base above. Their
+current-round results were kept separate until both completed. Both native
+dispatches accepted `gpt-6-luna` / `high`; resolved model/effort were not exposed
+and remain unknown. Read-only instructions were not an enforced runtime sandbox.
+Reviewers sharing a model may have correlated blind spots.
+
+- **Reviewer A — `review_level08_a`:** no actionable findings. Reviewed all
+  runtime and authoring changes, requirements, native/2× imagery and evidence.
+  **PASS:** Level 08 and campaign-art commands, whitespace, independent decoded
+  PNG dimensions/RGBA/binary-alpha/family palette/baseline-mask audit, all
+  manifest/browser hashes and protected-art comparison to the base.
+  **NOT_RUN:** build and Chromium rerun by this reviewer; full playthrough/CI.
+- **Reviewer B — `review_level08_b`:** no actionable findings. Independently
+  reviewed runtime/export/inspection code, native entry/ready/latched captures,
+  all statue/mirror directions, backdrop, contact sheet and evidence.
+  **PASS:** independent decoded PNG and hash audit for all 32 exports, source,
+  reference, protected, authoring, manifest and all seven screenshot bindings;
+  whitespace. **NOT_RUN:** build/browser/Level 08/campaign commands by this
+  reviewer; full playthrough/CI. An initial audit assumption expected HUD-free
+  files for all seven cases; the corrected audit checked the three explicitly
+  intended HUD-free cases and all seven ordinary screenshots and passed. This
+  was not a repository finding.
+
+Root additionally verified all generation/export/reference/protected hashes,
+authoring hashes and browser input/manifest bindings against the frozen working
+tree. Build and browser results above apply to these final code/art bytes.
+The follow-up documentation commit records review evidence only; runtime,
+sprites, source images, authoring tools and requirements remain identical to
+the reviewed revision.
