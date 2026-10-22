@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getLevelArtKey } from '../art/CampaignArt';
+import { tr } from '../i18n/catalog.ts';
 import type { Player } from '../actors/Player';
 import { LIBRARY_DAIS, LIBRARY_EXIT_THRESHOLD, LIBRARY_LAYOUT, LIBRARY_MURAL_SOLID, LIBRARY_RACK_SOLIDS, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -275,14 +276,14 @@ export class LibraryLevel {
 
   public showJournal(): void {
     const entries: DialogueLine[] = [];
-    if (this.progress.flags['l2-inscription-read']) entries.push({ speaker: 'Nhinh', text: `Dòng khắc: ${INSCRIPTION}` });
-    if (this.progress.flags['l2-book-lit']) entries.push({ speaker: 'Nhinh', text: `Trang sách · Đèn bật: ${BOOK_OBSERVATION.lit}` });
-    if (this.progress.flags['l2-book-dark']) entries.push({ speaker: 'Nhinh', text: `Trang sách · Đèn tắt: ${BOOK_OBSERVATION.dark}` });
+    if (this.progress.flags['l2-inscription-read']) entries.push({ speaker: 'Nhinh', text: tr('Dòng khắc: {inscription}', { inscription: tr(INSCRIPTION) }) });
+    if (this.progress.flags['l2-book-lit']) entries.push({ speaker: 'Nhinh', text: tr('Trang sách · Đèn bật: {text}', { text: tr(BOOK_OBSERVATION.lit) }) });
+    if (this.progress.flags['l2-book-dark']) entries.push({ speaker: 'Nhinh', text: tr('Trang sách · Đèn tắt: {text}', { text: tr(BOOK_OBSERVATION.dark) }) });
     for (const stone of STONES) {
       for (const [state, label] of [['lit', 'Đèn bật'], ['dark', 'Đèn tắt']] as const) {
         if (!this.progress.flags[`l2-${stone}-${state}`]) continue;
-        const answer = this.progress.flags['l2-memory'] ? ` · ${TIME_LABELS[stone]}` : '';
-        entries.push({ speaker: 'Nhinh', text: `${LABELS[stone]} · ${label}${answer}: ${CLUES[stone][state]}` });
+        const answer = this.progress.flags['l2-memory'] ? ` · ${tr(TIME_LABELS[stone])}` : '';
+        entries.push({ speaker: 'Nhinh', text: `${tr(LABELS[stone])} · ${tr(label)}${answer}: ${tr(CLUES[stone][state])}` });
       }
     }
     if (this.progress.flags['l2-memory']) entries.push({ speaker: 'Nhinh', text: 'Vòng ngày đêm: Chim — bình minh; Lá — ban ngày; Thuyền — hoàng hôn; Hạt — ban đêm.' });

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
 import { getLevelArtKey } from '../art/CampaignArt';
 import { EffectsSystem } from '../systems/EffectsSystem';
 import { SoundSystem } from '../systems/SoundSystem';
@@ -85,7 +86,7 @@ export class ComingSoonScene extends Phaser.Scene {
     panel.fillRoundedRect(88, 74, 464, 212, 10);
     panel.strokeRoundedRect(88, 74, 464, 212, 10);
 
-    const overline = this.add.text(320, 94, 'THE LAST LANTERN · BẢN CHƠI THỬ', {
+    const overline = this.add.text(320, 94, tr('THE LAST LANTERN · BẢN CHƠI THỬ'), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '9.5px',
       color: '#9eb8b2',
@@ -93,7 +94,7 @@ export class ComingSoonScene extends Phaser.Scene {
     overline.setOrigin(0.5);
     overline.setDepth(81);
 
-    const title = this.add.text(320, 122, copy.title, {
+    const title = this.add.text(320, 122, tr(copy.title), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: mode === 'demo-complete' ? '19px' : '17px',
       fontStyle: 'bold',
@@ -106,7 +107,7 @@ export class ComingSoonScene extends Phaser.Scene {
     divider.lineStyle(1, 0x3b5c63, 0.9);
     divider.lineBetween(150, 144, 490, 144);
 
-    const subtitle = this.add.text(320, 160, copy.subtitle, {
+    const subtitle = this.add.text(320, 160, tr(copy.subtitle), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '12px',
       fontStyle: 'bold',
@@ -115,7 +116,7 @@ export class ComingSoonScene extends Phaser.Scene {
     subtitle.setOrigin(0.5);
     subtitle.setDepth(81);
 
-    const body = this.add.text(320, 192, copy.body, {
+    const body = this.add.text(320, 192, tr(copy.body), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '11px',
       color: '#cddbd8',
@@ -125,7 +126,7 @@ export class ComingSoonScene extends Phaser.Scene {
     body.setOrigin(0.5);
     body.setDepth(81);
 
-    const note = this.add.text(320, 224, copy.note, {
+    const note = this.add.text(320, 224, tr(copy.note), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '10.5px',
       color: '#9eb8b2',
@@ -136,7 +137,7 @@ export class ComingSoonScene extends Phaser.Scene {
     note.setDepth(81);
     note.setVisible(copy.note !== '');
 
-    this.button = this.add.text(320, 258, BUTTON_LABEL, {
+    this.button = this.add.text(320, 258, tr(BUTTON_LABEL), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '13px',
       fontStyle: 'bold',
@@ -149,7 +150,7 @@ export class ComingSoonScene extends Phaser.Scene {
     this.button.on('pointerout', () => this.button.setColor('#ffe680'));
     this.button.on('pointerdown', () => this.backToMenu());
 
-    const hint = this.add.text(320, 338, '[E / Enter / ESC] Quay về màn hình chính', {
+    const hint = this.add.text(320, 338, tr('[E / Enter / ESC] Quay về màn hình chính'), {
       fontFamily: 'Segoe UI, sans-serif',
       fontSize: '10px',
       color: '#a8c4bd',

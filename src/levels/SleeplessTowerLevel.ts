@@ -1,6 +1,7 @@
-import { HUD_LAYOUT } from '../ui/CampaignHud';
+﻿import { HUD_LAYOUT } from '../ui/CampaignHud';
 import { SoundSystem } from '../systems/SoundSystem';
 import Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
 import { getLevelArtKey, getSharedMechanismKey, getTowerArtKey } from '../art/CampaignArt';
 import { TOWER, TOWER_SOLIDS, canCompleteTower, canUseCallMark, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanApproachFront, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
@@ -373,7 +374,7 @@ export class SleeplessTowerLevel {
   private useSource(which: 'practice' | 'main'): void {
     const { lantern } = this.ctx;
     if (this.state.source && this.state.source !== which) {
-      this.ctx.say([{ speaker: 'Nhinh', text: `Đèn vẫn nằm trên bệ ${this.state.source === 'practice' ? 'thử' : 'chính'}.` }]);
+      this.ctx.say([{ speaker: 'Nhinh', text: tr('Đèn vẫn nằm trên bệ {stand}.', { stand: tr(this.state.source === 'practice' ? 'thử' : 'chính') }) }]);
       return;
     }
     if (this.state.source === which) {
@@ -445,13 +446,13 @@ export class SleeplessTowerLevel {
     const live = deriveTowerLive(this.state, this.lumoPoint());
     if (!live.canSwitch) {
       const missing: string[] = [];
-      if (this.state.source === null) missing.push('đặt đèn lên bệ chính');
-      else if (this.state.source === 'practice') missing.push('đưa đèn sang bệ chính');
-      else if (!this.state.lanternOn) missing.push('bật đèn');
-      if (!live.liveA) missing.push('nối nhánh A');
-      if (!live.liveB) missing.push('nối nhánh B');
-      if (!live.lumoAtC) missing.push('giữ ấn C');
-      this.ctx.say([{ speaker: 'Nhinh', text: `Máy vẫn đang chờ. Mình còn thiếu: ${missing.join(', ')}.` }]);
+      if (this.state.source === null) missing.push(tr('đặt đèn lên bệ chính'));
+      else if (this.state.source === 'practice') missing.push(tr('đưa đèn sang bệ chính'));
+      else if (!this.state.lanternOn) missing.push(tr('bật đèn'));
+      if (!live.liveA) missing.push(tr('nối nhánh A'));
+      if (!live.liveB) missing.push(tr('nối nhánh B'));
+      if (!live.lumoAtC) missing.push(tr('giữ ấn C'));
+      this.ctx.say([{ speaker: 'Nhinh', text: tr('Máy vẫn đang chờ. Mình còn thiếu: {missing}.', { missing: missing.join(', ') }) }]);
       return;
     }
     this.state.waterReturned = true;

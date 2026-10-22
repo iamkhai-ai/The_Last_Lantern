@@ -119,13 +119,15 @@ function localFunction(file, name) {
  * layout symbol the body closes over is passed in as a parameter.
  */
 function compile(file, methodName, owner, params, symbols) {
-  const names = Object.keys(symbols);
+  // Identity i18n: these assertions target prompt layout, not language.
+  const boundSymbols = { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text), ...symbols };
+  const names = Object.keys(boundSymbols);
   const body = methodSource(file, methodName, owner);
   const decl = params.map((name) => `const ${name} = __params.${name};`).join('\n');
   const js = transpile(`const __unit = function (__params) { ${decl}\n${body} };`, `${owner}.${methodName}()`);
   let unit;
   try {
-    unit = new Function(...names, `"use strict";\n${js}\nreturn __unit;`)(...names.map((name) => symbols[name]));
+    unit = new Function(...names, `"use strict";\n${js}\nreturn __unit;`)(...names.map((name) => boundSymbols[name]));
   } catch (error) {
     throw new Error(`could not bind ${owner}.${methodName}() extracted from its source: ${error.message}`);
   }

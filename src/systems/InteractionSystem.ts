@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
 import { InteractableConfig } from '../types/gameTypes';
 import { layoutInteractionPrompt } from './interactionPromptLayout';
 import type { PromptRect } from './interactionPromptLayout';
@@ -112,7 +113,8 @@ export class InteractionSystem {
 
     if (best) {
       const label = best.getPrompt() ?? '';
-      this.promptText.setText(label);
+      // Localized here, once, so every level's prompt copy crosses the same boundary.
+      this.promptText.setText(tr(label));
       const w = Math.min(378, Math.max(68, this.promptText.width + 18));
       const h = Math.max(24, this.promptText.height + 10);
 

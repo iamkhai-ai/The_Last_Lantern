@@ -46,11 +46,13 @@ function controllerConstant(name) {
 }
 /** Compile one extracted body into a method, closing over the symbols it uses. */
 function compile(name, parameters, symbols) {
-  const names = Object.keys(symbols);
+  // Identity i18n: this check asserts the authored Vietnamese copy, which is the catalogue key.
+  const bound = { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text), ...symbols };
+  const names = Object.keys(bound);
   const js = ts.transpileModule(`const __unit = function (${parameters.join(', ')}) {\n${methodBody(name)}\n};`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
   try {
-    return new Function(...names, `"use strict";\n${js}\nreturn __unit;`)(...names.map((key) => symbols[key]));
+    return new Function(...names, `"use strict";\n${js}\nreturn __unit;`)(...names.map((key) => bound[key]));
   } catch (error) {
     throw new Error(`could not bind the shipped ShatteredCreekController.${name}(): ${error.message}`);
   }

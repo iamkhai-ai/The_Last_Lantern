@@ -359,7 +359,7 @@ function makeMenuHarness({ policy, campaignLevel, campaignFlags = {}, legacyStag
     NEW_GAME_CONFIRM_TEXT: CONFIRM_SENTENCE,
     CONFIRM_LABELS: ['Quay lại', 'Bắt đầu lại'],
     // Identity i18n: this harness asserts the Vietnamese copy, which is the catalogue key.
-    tr: (text) => text,
+    tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text),
     getLocale: () => 'vi',
     otherLocale: () => 'en',
     setLocale: () => {},
@@ -474,6 +474,7 @@ const loadedComingSoon = (() => {
     if (id === '../systems/SoundSystem') {
       return { SoundSystem: { playLanternToggle() {} } };
     }
+    if (id === '../i18n/catalog' || id === '../i18n/catalog.ts') return { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text) };
     throw new Error(`ComingSoonScene imports an unexpected module: ${id}`);
   };
   new Function('module', 'exports', 'require', js)(module, module.exports, require);
@@ -1027,7 +1028,7 @@ const CASES = [
     run: () => {
       const harness = openComingSoon('demo-save-blocked');
       const texts = harness.calls.texts.map((object) => object.text);
-      assert.ok(texts.some((text) => text.includes('BẢN LƯU')), 'the blocked screen names the save');
+      assert.ok(texts.some((text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text).includes('BẢN LƯU')), 'the blocked screen names the save');
       assert.ok(texts.some((text) => /ngoài phạm vi.*bản chơi thử|thuộc phiên bản cũ/.test(text)),
         'the blocked screen says the save is outside the demo or legacy');
       assert.ok(texts.some((text) => /giữ nguyên|chưa có thao tác nào xóa/.test(text)),

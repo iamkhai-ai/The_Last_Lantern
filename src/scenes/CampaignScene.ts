@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { getLevelArtKey, getLevelBackgroundKey, getShadowArtKey } from '../art/CampaignArt';
 import { Lumo } from '../actors/Lumo';
 import { Player } from '../actors/Player';
@@ -50,6 +50,7 @@ import {
   type ObsWorldState,
 } from '../data/observatoryLayout';
 import { DialogueSystem } from '../systems/DialogueSystem';
+import { tr } from '../i18n/catalog.ts';
 import { getLocale, otherLocale, setLocale } from '../i18n/locale.ts';
 import { InteractionSystem } from '../systems/InteractionSystem';
 import type { ReachFootprint } from '../systems/interactionReach';
@@ -1237,7 +1238,7 @@ export class CampaignScene extends Phaser.Scene {
             this.say([{ speaker: 'Nhinh', text: 'Chốt đã gài. Cửa A giữ mở dù tia sáng đi hướng khác.' }]);
             return;
           }
-          this.say([{ speaker: 'Nhinh', text: `Chốt chưa gài được. ${observatoryDoorBlockReason('door-a', state)}` }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Chốt chưa gài được. {reason}', { reason: tr(observatoryDoorBlockReason('door-a', state)) }) }]);
         },
       );
     } else if (id === 'sun-door-control') {
@@ -1297,7 +1298,7 @@ export class CampaignScene extends Phaser.Scene {
           // The loop is purely a floor route: it needs the crossing and the far
           // latch, never the lantern's current place or Lumo's current position.
           if (!state.bridgeCrossed || !state.finalDoorLatched) {
-            this.say([{ speaker: 'Nhinh', text: `Lối đá vòng chưa mở được. ${observatoryDoorBlockReason('return-loop', state)}` }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Lối đá vòng chưa mở được. {reason}', { reason: tr(observatoryDoorBlockReason('return-loop', state)) }) }]);
             return;
           }
           this.progress.flags['l8-return-loop-open'] = true;
@@ -1316,11 +1317,11 @@ export class CampaignScene extends Phaser.Scene {
           }
           const state = this.getObservatoryWorldState();
           const missing: string[] = [];
-          if (this.lantern.lanternPlaced || !this.lantern.lanternInHand) missing.push('thu hồi đèn về tay');
-          if (!state.lumoRecalled || state.lumoAtSeal) missing.push('gọi Lumo về bên đèn');
-          if (!state.returnLoopOpen) missing.push('mở lối đá vòng');
+          if (this.lantern.lanternPlaced || !this.lantern.lanternInHand) missing.push(tr('thu hồi đèn về tay'));
+          if (!state.lumoRecalled || state.lumoAtSeal) missing.push(tr('gọi Lumo về bên đèn'));
+          if (!state.returnLoopOpen) missing.push(tr('mở lối đá vòng'));
           if (missing.length) {
-            this.say([{ speaker: 'Nhinh', text: `Bản ghi chưa mở. Còn cần: ${missing.join(' và ')}.` },
+            this.say([{ speaker: 'Nhinh', text: tr('Bản ghi chưa mở. Còn cần: {missing}.', { missing: missing.join(' và ') }) },
               { speaker: 'Lumo', text: 'Tôi sẽ ở cạnh cậu khi mọi thứ đã sẵn sàng.' }]);
             return;
           }

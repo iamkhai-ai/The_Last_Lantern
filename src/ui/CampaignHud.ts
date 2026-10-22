@@ -207,26 +207,30 @@ export class CampaignHud {
   }
 
   public setTitle(text: string): void {
-    if (this.titleText.text === text) return;
-    this.titleText.setText(text);
+    const localized = tr(text);
+    if (this.titleText.text === localized) return;
+    this.titleText.setText(localized);
     this.redrawPanels();
   }
 
   public setObjective(text: string): void {
-    if (this.objectiveText.text === text) return;
-    this.objectiveText.setText(text);
+    const localized = tr(text);
+    if (this.objectiveText.text === localized) return;
+    this.objectiveText.setText(localized);
     this.redrawPanels();
   }
 
   public setStatus(text: string): void {
-    if (this.statusText.text === text) return;
-    this.statusText.setText(text);
+    const localized = tr(text);
+    if (this.statusText.text === localized) return;
+    this.statusText.setText(localized);
     this.redrawPanels();
   }
 
   public setLumo(text: string): void {
-    if (this.lumoText.text === text) return;
-    this.lumoText.setText(text);
+    const localized = tr(text);
+    if (this.lumoText.text === localized) return;
+    this.lumoText.setText(localized);
     this.redrawPanels();
   }
 
@@ -280,12 +284,12 @@ export class CampaignHud {
   }
 
   public notePulseBlocked(remainingMs: number): void {
-    this.showToast(`Xung sáng còn ${(remainingMs / 1000).toFixed(1)} giây`);
+    this.showToast(tr('Xung sáng còn {seconds} giây', { seconds: (remainingMs / 1000).toFixed(1) }));
     this.pulseShake = PULSE_SHAKE_MS;
   }
 
   public showToast(message: string, durationMs = TOAST_DEFAULT_MS): void {
-    this.toastText.setText(message);
+    this.toastText.setText(tr(message));
     if (message === '' || durationMs <= 0) {
       this.hideToast();
       return;

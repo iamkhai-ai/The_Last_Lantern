@@ -1,4 +1,5 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
 import { getRuinsArtKey, getRuinsV2ArtKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
@@ -724,20 +725,20 @@ export class RuinsOfTwoHalvesLevel {
     this.refresh();
     const aimed = side === 'left' ? state.leftAimed : state.rightAimed;
     const lit = side === 'left' ? state.leftLit : state.rightLit;
-    const label = side === 'left' ? 'Gương trái' : 'Gương phải';
+    const label = side === 'left' ? tr('Gương trái') : tr('Gương phải');
     if (!this.lantern.lanternPlaced) {
-      this.say([{ speaker: 'Nhinh', text: `${label} đã xoay, nhưng bệ chính chưa có đèn.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('{mirror} đã xoay, nhưng bệ chính chưa có đèn.', { mirror: label }) }]);
       return;
     }
     if (!aimed) {
-      this.say([{ speaker: 'Nhinh', text: `${label} chưa hướng tia lên khóa Nhật.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('{mirror} chưa hướng tia lên khóa Nhật.', { mirror: label }) }]);
       return;
     }
     if (!lit) {
-      this.say([{ speaker: 'Nhinh', text: `${label} đã hướng đúng, nhưng bóng của tượng chắn mất tia.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('{mirror} đã hướng đúng, nhưng bóng của tượng chắn mất tia.', { mirror: label }) }]);
       return;
     }
-    this.say([{ speaker: 'Nhinh', text: `${label} đã bật tia tới khóa Nhật.` }]);
+    this.say([{ speaker: 'Nhinh', text: tr('{mirror} đã bật tia tới khóa Nhật.', { mirror: label }) }]);
   }
 
   private usePedestal(): void {
@@ -774,11 +775,11 @@ export class RuinsOfTwoHalvesLevel {
     const state = this.getPuzzleState();
     if (!canLatchRuinsSanctuary(state, false)) {
       const missing: string[] = [];
-      if (!state.lightActive) missing.push('đặt đèn đang bật lên bệ');
-      if (state.sunsLit < 2) missing.push('cho hai khóa Nhật sáng cùng lúc');
-      if (!state.moonCovered) missing.push('cho bóng tượng phủ khóa Nguyệt');
+      if (!state.lightActive) missing.push(tr('đặt đèn đang bật lên bệ'));
+      if (state.sunsLit < 2) missing.push(tr('cho hai khóa Nhật sáng cùng lúc'));
+      if (!state.moonCovered) missing.push(tr('cho bóng tượng phủ khóa Nguyệt'));
       SoundSystem.playPuzzleError();
-      this.say([{ speaker: 'Nhinh', text: `Bàn xác nhận chưa sáng đều. Mình còn phải ${missing.join(', ')}.` }]);
+      this.say([{ speaker: 'Nhinh', text: tr('Bàn xác nhận chưa sáng đều. Mình còn phải {missing}.', { missing: missing.join(', ') }) }]);
       return;
     }
     this.progress.flags['l7-route-latched'] = true;
@@ -828,7 +829,7 @@ export class RuinsOfTwoHalvesLevel {
     this.progress.flags['l7-inscription-read'] = true;
     this.save();
     this.hintIndex = 0;
-    this.say([{ speaker: 'Hệ thống', text: `Bia đá: ${INSCRIPTION}` }]);
+    this.say([{ speaker: 'Hệ thống', text: tr('Bia đá: {text}', { text: tr(INSCRIPTION) }) }]);
   }
 
   private useExit(): void {
@@ -1182,7 +1183,7 @@ export class RuinsOfTwoHalvesLevel {
     if (stage === 'moon' && !state.moonCovered) missing.push('bóng tượng chưa phủ khóa Nguyệt');
     const index = Math.min(this.hintIndex, ladder.length - 1);
     this.hintIndex = Math.min(this.hintIndex + 1, ladder.length - 1);
-    const suffix = index > 0 && missing.length ? ` Còn thiếu: ${missing.join(', ')}.` : '';
+    const suffix = index > 0 && missing.length ? tr(' Còn thiếu: {missing}.', { missing: missing.join(', ') }) : '';
     this.say([{ speaker: 'Hệ thống', text: ladder[index] + suffix }]);
   }
 
@@ -1191,7 +1192,7 @@ export class RuinsOfTwoHalvesLevel {
     if (this.progress.flags['l7-practice-seen'] === true) {
       lines.push({ speaker: 'Nhinh', text: 'Một vật chắn sáng tạo ra một vùng tối. Mặt rộng của cột chắn, mặt hẹp thì không.' });
     }
-    if (this.progress.flags['l7-inscription-read'] === true) lines.push({ speaker: 'Nhinh', text: `Bia đá: ${INSCRIPTION}` });
+    if (this.progress.flags['l7-inscription-read'] === true) lines.push({ speaker: 'Nhinh', text: tr('Bia đá: {text}', { text: tr(INSCRIPTION) }) });
     if (this.progress.flags['l7-two-suns'] === true) lines.push({ speaker: 'Lumo', text: 'Hai khóa Nhật sáng cùng lúc vẫn chưa đủ. Khóa Nguyệt cần ở trong bóng.' });
     if (this.progress.flags['l7-shadow-covers'] === true) lines.push({ speaker: 'Nhinh', text: 'Bóng đổ có thể bảo vệ một vùng. Ba khóa phải đúng cùng một lúc.' });
     if (this.progress.flags['l7-shadow-spiral'] === true) lines.push({ speaker: 'Lumo', text: 'Dấu vòng xoắn trên cửa Bắc giống dấu ở đường hầm dẫn nước.' });

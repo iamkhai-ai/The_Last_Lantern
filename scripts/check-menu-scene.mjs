@@ -72,7 +72,7 @@ function fixture({ campaign = false, legacy = false, completed = false, victory 
   const SoundSystem = { isMuted: () => muted, toggleMute: () => { muted = !muted; }, playLanternToggle() {}, playMirrorRotate() {}, playUiClick() {}, playUiCancel() {} };
   const MenuScene = new Function('Phaser', 'getLevelArtKey', 'getNhinhTexture', 'EffectsSystem', 'SaveSystem', 'SoundSystem', 'WorldFactory', 'CampaignSaveSystem', 'RELEASE_POLICY', 'tr', 'getLocale', 'otherLocale', 'setLocale', `${js}\nreturn MenuScene;`)(
     { Scene }, () => 'backdrop', () => 'nhinh', class { setupZoneEffects() {} update() {} }, SaveSystem, SoundSystem, {}, CampaignSaveSystem, createReleasePolicy(flavor),
-    (text) => text, () => 'vi', () => 'en', () => {},
+    (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text), () => 'vi', () => 'en', () => {},
   );
   const scene = new MenuScene(); scene.create();
   return { scene, objects, starts, tweens, clears: () => clears, muted: () => muted,

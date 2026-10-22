@@ -1,4 +1,5 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
+import { tr } from '../i18n/catalog.ts';
 import { getLevelArtKey } from '../art/CampaignArt';
 import { SHATTERED_CREEK, canApproach, pointOnBank, canCompleteCreek, deriveCreekState, migrateV1Creek, resolveCreekSpawn, unsafePowerChange, type CreekLiveState, type CreekState, type MirrorPose, type Point, type RaySegment } from '../data/shatteredCreekLayout';
 import type { Player } from '../actors/Player';
@@ -262,7 +263,7 @@ export class ShatteredCreekController {
   }
 
   private useSource(which: 'practice' | 'main'): void {
-    if (this.state.source && this.state.source !== which) { this.ctx.say([{ speaker: 'Nhinh', text: `Đèn vẫn nằm trên bệ ${this.state.source === 'practice' ? 'thử' : 'chính'}.` }]); return; }
+    if (this.state.source && this.state.source !== which) { this.ctx.say([{ speaker: 'Nhinh', text: tr('Đèn vẫn nằm trên bệ {stand}.', { stand: tr(this.state.source === 'practice' ? 'thử' : 'chính') }) }]); return; }
     if (this.state.source === which) {
       const next = { ...this.state, source: null };
       const unsafe = unsafePowerChange(this.point(), deriveCreekState(this.state), deriveCreekState(next));
@@ -322,8 +323,8 @@ export class ShatteredCreekController {
     if (this.state.source !== null || !this.state.lanternRetrieved) { this.ctx.say(EXIT_LEAVE_LAMP); return; }
     if (!this.state.memo) { this.ctx.say(EXIT_UNREAD_RELIEF); return; }
     if (!canCompleteCreek(this.state)) {
-      const missing = [!this.state.latchA && 'gài chốt cầu đầu', !this.state.latchB && 'gài chốt cầu thứ hai'].filter(Boolean).join(', ');
-      this.ctx.say([{ speaker: 'Nhinh', text: `Trạm chưa mở. Mình còn cần ${missing}.` }]); return;
+      const missing = [!this.state.latchA && tr('gài chốt cầu đầu'), !this.state.latchB && tr('gài chốt cầu thứ hai')].filter(Boolean).join(', ');
+      this.ctx.say([{ speaker: 'Nhinh', text: tr('Trạm chưa mở. Mình còn cần {missing}.', { missing }) }]); return;
     }
     this.ctx.nextLevel(EXIT_NEXT);
   }

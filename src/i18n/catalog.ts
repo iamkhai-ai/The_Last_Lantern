@@ -11,17 +11,27 @@
  */
 import { getLocale } from './locale.ts';
 import { CHROME_ENTRIES } from './entries/chrome.ts';
-import { CAMPAIGN_0105_ENTRIES } from './entries/campaign0105.ts';
-import { CAMPAIGN_0610_ENTRIES } from './entries/campaign0610.ts';
 import { PROLOGUE_ENTRIES } from './entries/prologue.ts';
+import { LEGACY_DIALOGUE_ENTRIES } from './entries/legacyDialogue.ts';
+import { LIBRARY_AND_PATH_ENTRIES } from './entries/libraryAndPath.ts';
+import { CAMPAIGN_SCENE_ENTRIES } from './entries/campaignScene.ts';
+import { TOWER_GARDEN_CREEK_ENTRIES } from './entries/towerGardenCreek.ts';
+import { RUINS_HEART_OBSERVATORY_ENTRIES } from './entries/ruinsHeartObservatory.ts';
+import { CAMPAIGN_LEVEL_ENTRIES } from './entries/campaignLevels.ts';
+import { FRAGMENT_ENTRIES } from './entries/fragments.ts';
 import type { CatalogEntry } from './entry.ts';
 
 export type { CatalogEntry } from './entry.ts';
 
 export const CATALOG: readonly CatalogEntry[] = [
   ...PROLOGUE_ENTRIES,
-  ...CAMPAIGN_0105_ENTRIES,
-  ...CAMPAIGN_0610_ENTRIES,
+  ...LEGACY_DIALOGUE_ENTRIES,
+  ...CAMPAIGN_SCENE_ENTRIES,
+  ...LIBRARY_AND_PATH_ENTRIES,
+  ...TOWER_GARDEN_CREEK_ENTRIES,
+  ...RUINS_HEART_OBSERVATORY_ENTRIES,
+  ...CAMPAIGN_LEVEL_ENTRIES,
+  ...FRAGMENT_ENTRIES,
   ...CHROME_ENTRIES,
 ];
 

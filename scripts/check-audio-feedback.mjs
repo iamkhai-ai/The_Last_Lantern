@@ -16,8 +16,10 @@ function find(ast, predicate) {
   return found;
 }
 function compile(code, symbols = {}) {
+  // Identity i18n: these checks assert sound behaviour, not language.
+  const bound = { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text), ...symbols };
   const js = ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.None } }).outputText;
-  return new Function(...Object.keys(symbols), `${js}\nreturn unit;`)(...Object.values(symbols));
+  return new Function(...Object.keys(bound), `${js}\nreturn unit;`)(...Object.values(bound));
 }
 function method(file, name, symbols = {}) {
   const ast = source(file);

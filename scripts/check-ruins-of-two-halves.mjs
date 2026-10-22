@@ -856,7 +856,7 @@ console.log('Level 08 Shadow state, spots, walk and exit-guidance checks passed.
   const method = find((node) => ts.isMethodDeclaration(node) && node.name.getText(sourceFile) === 'showHint');
   assert.ok(method?.body, 'the Ruins level still authors showHint()');
   const showHintJs = ts.transpileModule(`const __unit = function () ${method.body.getText(sourceFile)};`, COMPILER).outputText;
-  const showHint = new Function('HINT_LADDER', `"use strict";\n${showHintJs}\nreturn __unit;`)(HINT_LADDER);
+  const showHint = new Function('HINT_LADDER', 'tr', `"use strict";\n${showHintJs}\nreturn __unit;`)(HINT_LADDER, (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text));
 
   const ALL_MET = { lightActive: true, leftAimed: true, rightAimed: true, moonCovered: true };
   const presses = (stages, puzzle = ALL_MET) => {

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getLevelArtKey, getSharedMechanismKey } from '../art/CampaignArt';
+import { tr } from '../i18n/catalog.ts';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -803,15 +804,15 @@ export class HeartOfElariaLevel {
         const side = element.id === 'heart-eye-left' ? 'trái' : 'phải';
         const lit = element.id === 'heart-eye-left' ? state.eyeLeft : state.eyeRight;
         if (lit) {
-          this.say([{ speaker: 'Nhinh', text: `Mắt nắng ${side} đang nhận tia sáng.` }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Mắt nắng {side} đang nhận tia sáng.', { side }) }]);
           return;
         }
         const reasons: string[] = [];
-        if (!state.light) reasons.push('đèn chưa ở trên bệ hoặc đang tắt');
-        if (!state.balanceRoute) reasons.push('bộ chia chưa nhận được tia từ G0 và gương Cân Bằng');
+        if (!state.light) reasons.push(tr('đèn chưa ở trên bệ hoặc đang tắt'));
+        if (!state.balanceRoute) reasons.push(tr('bộ chia chưa nhận được tia từ G0 và gương Cân Bằng'));
         if (state.balanceRoute && ((element.id === 'heart-eye-left' && this.value('heart-statue') === HEART_STATUE_BLOCKS_LEFT_EYE)
-          || (element.id === 'heart-eye-right' && this.value('heart-statue') === HEART_STATUE_BLOCKS_RIGHT_EYE))) reasons.push('tượng đang chắn ngay trước mắt này');
-        this.say([{ speaker: 'Nhinh', text: `Mắt nắng ${side} vẫn tối: còn ${reasons.join('; ')}.` }]);
+          || (element.id === 'heart-eye-right' && this.value('heart-statue') === HEART_STATUE_BLOCKS_RIGHT_EYE))) reasons.push(tr('tượng đang chắn ngay trước mắt này'));
+        this.say([{ speaker: 'Nhinh', text: tr('Mắt nắng {side} vẫn tối: còn {reasons}.', { side, reasons: reasons.join('; ') }) }]);
         return;
       }
       case 'heart-moon': {
@@ -820,10 +821,10 @@ export class HeartOfElariaLevel {
           return;
         }
         const reasons: string[] = [];
-        if (!state.light) reasons.push('đèn chưa ở trên bệ hoặc đang tắt');
-        if (!state.balanceRoute) reasons.push('nhánh Cân Bằng chưa nhận được tia từ bộ chia');
-        if (this.value('heart-statue') !== HEART_STATUE_SHADOW) reasons.push('tượng chưa xoay cho bóng phủ lên hốc');
-        this.say([{ speaker: 'Nhinh', text: `Lõi Nguyệt vẫn còn sáng: còn ${reasons.join('; ')}.` }]);
+        if (!state.light) reasons.push(tr('đèn chưa ở trên bệ hoặc đang tắt'));
+        if (!state.balanceRoute) reasons.push(tr('nhánh Cân Bằng chưa nhận được tia từ bộ chia'));
+        if (this.value('heart-statue') !== HEART_STATUE_SHADOW) reasons.push(tr('tượng chưa xoay cho bóng phủ lên hốc'));
+        this.say([{ speaker: 'Nhinh', text: tr('Lõi Nguyệt vẫn còn sáng: còn {reasons}.', { reasons: reasons.join('; ') }) }]);
         return;
       }
       case HEART_CONFIRM_ID: {

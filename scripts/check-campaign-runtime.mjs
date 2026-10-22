@@ -140,8 +140,10 @@ function methodSource(methodName, file = sourceFile, owner = 'CampaignScene') {
  * the fake `this` the way it captures the scene at runtime.
  */
 function bind(source, symbols, label) {
-  const names = Object.keys(symbols);
-  const values = names.map((name) => symbols[name]);
+  // Identity i18n: these cases assert puzzle state and copy, which stay authored in Vietnamese.
+  const bound = { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text), ...symbols };
+  const names = Object.keys(bound);
+  const values = names.map((name) => bound[name]);
   const isBlock = source.trimStart().startsWith('{');
   const wrapper = isBlock ? `function () ${source}` : `function () { return (${source}); }`;
   let unit;
