@@ -1,0 +1,5651 @@
+{
+  "schema_version": 3,
+  "created_at": "2026-10-22",
+  "scope": "offline Level 09 scenario-v2 redraw v3",
+  "authority": [
+    {
+      "file": "docs/scenario-v2/09-dark-moon-observatory.md",
+      "sha256": "6717ee2d99d8749ca8f4c9a7b3a739b996b328a4877db350293bbf73d2ad72ad"
+    },
+    {
+      "file": "docs/implementation/09-layout.md",
+      "sha256": "d069e36007595ee98258ec4dd676351452f803710d1067d09fd5f4bee52bdd99"
+    },
+    {
+      "file": "src/data/observatoryLayout.ts",
+      "sha256": "a12e5afe8c35509b27a03f10fa4eca6a00fb7bb7968328c907cde70453a006c5"
+    },
+    {
+      "file": "src/data/observatoryRooms.ts",
+      "sha256": "5095dbdc9c4b76d0dc0119c13a35457b5a2f7116ddf9af0d1ad724f6262c10c2"
+    }
+  ],
+  "style_authority": {
+    "file": "assets/levels/09-dark-moon-observatory/sources/v3/art-direction.md",
+    "sha256": "1f64b3674e8afb2c9d8f77eb6996264c75b584b6d899a1a0c7469c45d083fa9b"
+  },
+  "layout_contract": "assets/levels/09-dark-moon-observatory/sources/v3/layout-contract.json",
+  "layout_contract_sha256": "7bfbd9fb341b467c431a7a812784329eabbe6b370f7bb80928f157d210042052",
+  "normalization_map": "assets/levels/09-dark-moon-observatory/sources/v3/normalization-map.json",
+  "normalization_map_sha256": "1d803aadfbbd2d13eaa19f62405cd8bf9c5a781ed36aed4bafceba8a9fec8cb0",
+  "color_source": "generated source art, guided by art-direction.md; no machine palette or exact color match is asserted",
+  "native_canvas_policy": "native dimensions and pivots are carried from the frozen v2 manifest; every resize/crop/pad is recorded per asset",
+  "engine_integration": "NOT_RUN: offline assets only",
+  "approval": "PENDING visual review",
+  "assets": [
+    {
+      "id": "g0-0",
+      "module_id": "g0",
+      "state": "notch-0",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-0.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          543,
+          724,
+          128,
+          118,
+          520,
+          660
+        ],
+        "source_crop_size": [
+          392,
+          542
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          34,
+          47
+        ],
+        "offset": [
+          1,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g0-1",
+      "module_id": "g0",
+      "state": "notch-1",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-1.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 1,
+        "cell_bounds": [
+          543,
+          0,
+          1086,
+          724,
+          93,
+          118,
+          459,
+          659
+        ],
+        "source_crop_size": [
+          366,
+          541
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          32,
+          47
+        ],
+        "offset": [
+          2,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g0-2",
+      "module_id": "g0",
+      "state": "notch-2",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-2.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 2,
+        "cell_bounds": [
+          0,
+          724,
+          543,
+          1448,
+          111,
+          77,
+          501,
+          626
+        ],
+        "source_crop_size": [
+          390,
+          549
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          34,
+          48
+        ],
+        "offset": [
+          1,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g0-3",
+      "module_id": "g0",
+      "state": "notch-3",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-3.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 3,
+        "cell_bounds": [
+          543,
+          724,
+          1086,
+          1448,
+          81,
+          84,
+          462,
+          629
+        ],
+        "source_crop_size": [
+          381,
+          545
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          33,
+          48
+        ],
+        "offset": [
+          2,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g1-0",
+      "module_id": "g1",
+      "state": "notch-0",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-0.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          543,
+          724,
+          128,
+          118,
+          520,
+          660
+        ],
+        "source_crop_size": [
+          392,
+          542
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          34,
+          47
+        ],
+        "offset": [
+          1,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g1-1",
+      "module_id": "g1",
+      "state": "notch-1",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-1.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 1,
+        "cell_bounds": [
+          543,
+          0,
+          1086,
+          724,
+          93,
+          118,
+          459,
+          659
+        ],
+        "source_crop_size": [
+          366,
+          541
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          32,
+          47
+        ],
+        "offset": [
+          2,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g1-2",
+      "module_id": "g1",
+      "state": "notch-2",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-2.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 2,
+        "cell_bounds": [
+          0,
+          724,
+          543,
+          1448,
+          111,
+          77,
+          501,
+          626
+        ],
+        "source_crop_size": [
+          390,
+          549
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          34,
+          48
+        ],
+        "offset": [
+          1,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g1-3",
+      "module_id": "g1",
+      "state": "notch-3",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-3.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 3,
+        "cell_bounds": [
+          543,
+          724,
+          1086,
+          1448,
+          81,
+          84,
+          462,
+          629
+        ],
+        "source_crop_size": [
+          381,
+          545
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          33,
+          48
+        ],
+        "offset": [
+          2,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g2-0",
+      "module_id": "g2",
+      "state": "notch-0",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-0.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          543,
+          724,
+          128,
+          118,
+          520,
+          660
+        ],
+        "source_crop_size": [
+          392,
+          542
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          34,
+          47
+        ],
+        "offset": [
+          1,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g2-1",
+      "module_id": "g2",
+      "state": "notch-1",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-1.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 1,
+        "cell_bounds": [
+          543,
+          0,
+          1086,
+          724,
+          93,
+          118,
+          459,
+          659
+        ],
+        "source_crop_size": [
+          366,
+          541
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          32,
+          47
+        ],
+        "offset": [
+          2,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g2-2",
+      "module_id": "g2",
+      "state": "notch-2",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-2.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 2,
+        "cell_bounds": [
+          0,
+          724,
+          543,
+          1448,
+          111,
+          77,
+          501,
+          626
+        ],
+        "source_crop_size": [
+          390,
+          549
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          34,
+          48
+        ],
+        "offset": [
+          1,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "g2-3",
+      "module_id": "g2",
+      "state": "notch-3",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-3.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "size": [
+        36,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "mirror",
+      "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd",
+      "source_sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "mirror-family",
+        "frame": 3,
+        "cell_bounds": [
+          543,
+          724,
+          1086,
+          1448,
+          81,
+          84,
+          462,
+          629
+        ],
+        "source_crop_size": [
+          381,
+          545
+        ],
+        "uniform_scale": 0.08743169398907104,
+        "fitted_size": [
+          33,
+          48
+        ],
+        "offset": [
+          2,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "lantern-pedestal-empty",
+      "module_id": "lantern-pedestal",
+      "state": "empty",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lantern-pedestal-empty.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pedestal-family.png",
+      "size": [
+        36,
+        39
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "lantern-pedestal",
+      "sha256": "e73875f24f4a1cdb9e7e8bf48124ccfbe362dc168d42a68d6f946336ba6074a2",
+      "source_sha256": "ddfafad91530d911aa742a6d9c2adebc7acef819849a442d6d40841e859fa2b9",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pedestal-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          848,
+          927,
+          163,
+          318,
+          726,
+          864
+        ],
+        "source_crop_size": [
+          563,
+          546
+        ],
+        "uniform_scale": 0.04961832061068702,
+        "fitted_size": [
+          28,
+          27
+        ],
+        "offset": [
+          4,
+          12
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "lantern-pedestal-lit",
+      "module_id": "lantern-pedestal",
+      "state": "lit",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lantern-pedestal-lit.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pedestal-family.png",
+      "size": [
+        36,
+        39
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "lantern-pedestal",
+      "sha256": "43a55f82447c52dad318c11632f481322080b0c876e3fa4b04f33805f7d3822f",
+      "source_sha256": "ddfafad91530d911aa742a6d9c2adebc7acef819849a442d6d40841e859fa2b9",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pedestal-family",
+        "frame": 1,
+        "cell_bounds": [
+          848,
+          0,
+          1697,
+          927,
+          132,
+          78,
+          698,
+          864
+        ],
+        "source_crop_size": [
+          566,
+          786
+        ],
+        "uniform_scale": 0.04961832061068702,
+        "fitted_size": [
+          28,
+          39
+        ],
+        "offset": [
+          4,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-door-control-off",
+      "module_id": "sun-door-control",
+      "state": "off",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-control-off.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/sun-lock-family.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "sun-lock",
+      "sha256": "e3cac3d4534ae7ed66c633edb223d30e2354edc7ff37e07e5e0bb25634b6e8a4",
+      "source_sha256": "49d717e34eae1fe3c9757381da990ec93853cdc1d80f7e92eeb7a849d72f7af5",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "sun-lock-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          793,
+          992,
+          75,
+          223,
+          750,
+          805
+        ],
+        "source_crop_size": [
+          675,
+          582
+        ],
+        "uniform_scale": 0.047407407407407405,
+        "fitted_size": [
+          32,
+          28
+        ],
+        "offset": [
+          0,
+          12
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-door-control-on",
+      "module_id": "sun-door-control",
+      "state": "on",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-control-on.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/sun-lock-family.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "sun-lock",
+      "sha256": "53d59dc54f601ed35dc4995d4f575dd587ade28a034098fb862fea3134a9a181",
+      "source_sha256": "49d717e34eae1fe3c9757381da990ec93853cdc1d80f7e92eeb7a849d72f7af5",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "sun-lock-family",
+        "frame": 1,
+        "cell_bounds": [
+          793,
+          0,
+          1586,
+          992,
+          43,
+          223,
+          718,
+          805
+        ],
+        "source_crop_size": [
+          675,
+          582
+        ],
+        "uniform_scale": 0.047407407407407405,
+        "fitted_size": [
+          32,
+          28
+        ],
+        "offset": [
+          0,
+          12
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-lock-off",
+      "module_id": "sun-lock",
+      "state": "off",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-lock-off.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/sun-lock-family.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "sun-lock",
+      "sha256": "e3cac3d4534ae7ed66c633edb223d30e2354edc7ff37e07e5e0bb25634b6e8a4",
+      "source_sha256": "49d717e34eae1fe3c9757381da990ec93853cdc1d80f7e92eeb7a849d72f7af5",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "sun-lock-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          793,
+          992,
+          75,
+          223,
+          750,
+          805
+        ],
+        "source_crop_size": [
+          675,
+          582
+        ],
+        "uniform_scale": 0.047407407407407405,
+        "fitted_size": [
+          32,
+          28
+        ],
+        "offset": [
+          0,
+          12
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-lock-on",
+      "module_id": "sun-lock",
+      "state": "on",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-lock-on.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/sun-lock-family.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "sun-lock",
+      "sha256": "53d59dc54f601ed35dc4995d4f575dd587ade28a034098fb862fea3134a9a181",
+      "source_sha256": "49d717e34eae1fe3c9757381da990ec93853cdc1d80f7e92eeb7a849d72f7af5",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "sun-lock-family",
+        "frame": 1,
+        "cell_bounds": [
+          793,
+          0,
+          1586,
+          992,
+          43,
+          223,
+          718,
+          805
+        ],
+        "source_crop_size": [
+          675,
+          582
+        ],
+        "uniform_scale": 0.047407407407407405,
+        "fitted_size": [
+          32,
+          28
+        ],
+        "offset": [
+          0,
+          12
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "door-a-control-locked",
+      "module_id": "door-a-control",
+      "state": "locked",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-control-locked.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/latch-family.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "latch",
+      "sha256": "9bd40183a74ee4cb550118d7042a68f925c03264265880cc38bdb1bfe81a871a",
+      "source_sha256": "3531059d03d65c86e49f69522168cef2ae4c4a1031b38b7db8a30cc5702a977a",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "latch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          830,
+          948,
+          99,
+          160,
+          769,
+          784
+        ],
+        "source_crop_size": [
+          670,
+          624
+        ],
+        "uniform_scale": 0.041666666666666664,
+        "fitted_size": [
+          28,
+          26
+        ],
+        "offset": [
+          0,
+          6
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "door-a-control-latched",
+      "module_id": "door-a-control",
+      "state": "latched",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-control-latched.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/latch-family.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "latch",
+      "sha256": "30d951c6ebd09a4a4cf6e35ed8d84626191a0e281ec088046cb44df6e4161a35",
+      "source_sha256": "3531059d03d65c86e49f69522168cef2ae4c4a1031b38b7db8a30cc5702a977a",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "latch-family",
+        "frame": 1,
+        "cell_bounds": [
+          830,
+          0,
+          1659,
+          948,
+          65,
+          288,
+          737,
+          784
+        ],
+        "source_crop_size": [
+          672,
+          496
+        ],
+        "uniform_scale": 0.041666666666666664,
+        "fitted_size": [
+          28,
+          21
+        ],
+        "offset": [
+          0,
+          11
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "final-door-control-locked",
+      "module_id": "final-door-control",
+      "state": "locked",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-control-locked.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/latch-family.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "latch",
+      "sha256": "9bd40183a74ee4cb550118d7042a68f925c03264265880cc38bdb1bfe81a871a",
+      "source_sha256": "3531059d03d65c86e49f69522168cef2ae4c4a1031b38b7db8a30cc5702a977a",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "latch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          830,
+          948,
+          99,
+          160,
+          769,
+          784
+        ],
+        "source_crop_size": [
+          670,
+          624
+        ],
+        "uniform_scale": 0.041666666666666664,
+        "fitted_size": [
+          28,
+          26
+        ],
+        "offset": [
+          0,
+          6
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "final-door-control-latched",
+      "module_id": "final-door-control",
+      "state": "latched",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-control-latched.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/latch-family.png",
+      "size": [
+        28,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "latch",
+      "sha256": "30d951c6ebd09a4a4cf6e35ed8d84626191a0e281ec088046cb44df6e4161a35",
+      "source_sha256": "3531059d03d65c86e49f69522168cef2ae4c4a1031b38b7db8a30cc5702a977a",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "latch-family",
+        "frame": 1,
+        "cell_bounds": [
+          830,
+          0,
+          1659,
+          948,
+          65,
+          288,
+          737,
+          784
+        ],
+        "source_crop_size": [
+          672,
+          496
+        ],
+        "uniform_scale": 0.041666666666666664,
+        "fitted_size": [
+          28,
+          21
+        ],
+        "offset": [
+          0,
+          11
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "lumo-tube-dark",
+      "module_id": "lumo-tube",
+      "state": "dark",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-tube-dark.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/tube-family.png",
+      "size": [
+        64,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "lumo-tube",
+      "sha256": "fd13137f0437d59713d73fe4793056a32a87bac4c9c03e367c003f5f940a83e2",
+      "source_sha256": "46fcc537d9caf284b23ee0e0af37456d55db848f2c1da9b54ff6b59f03adfec6",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "visible_top_padding": 2,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "tube-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          158,
+          194,
+          821,
+          724
+        ],
+        "source_crop_size": [
+          663,
+          530
+        ],
+        "uniform_scale": 0.05660377358490566,
+        "fitted_size": [
+          38,
+          30
+        ],
+        "offset": [
+          13,
+          2
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 2,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "lumo-tube-remembered",
+      "module_id": "lumo-tube",
+      "state": "remembered",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-tube-remembered.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/tube-family.png",
+      "size": [
+        64,
+        32
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "lumo-tube",
+      "sha256": "02c9bdfc8e6d181423c7dd11ab0aa5b9cd05e698d799bb7f1308b36a5d660bad",
+      "source_sha256": "46fcc537d9caf284b23ee0e0af37456d55db848f2c1da9b54ff6b59f03adfec6",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "visible_top_padding": 2,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "tube-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          121,
+          195,
+          784,
+          724
+        ],
+        "source_crop_size": [
+          663,
+          529
+        ],
+        "uniform_scale": 0.05660377358490566,
+        "fitted_size": [
+          38,
+          30
+        ],
+        "offset": [
+          13,
+          2
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 2,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "lumo-seal-covered",
+      "module_id": "lumo-seal",
+      "state": "covered",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-seal-covered.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/seal-family.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "lumo-seal",
+      "sha256": "2e4284fb396635cd947988e6667ab44046940754e8f1bc74e2fe8b6b852fee82",
+      "source_sha256": "1440720171a932c0422c4126e1c4328eaf3ffa33ae9e920f3c32f0922e9dfd7f",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "visible_top_padding": 10,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "seal-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          793,
+          992,
+          174,
+          143,
+          713,
+          853
+        ],
+        "source_crop_size": [
+          539,
+          710
+        ],
+        "uniform_scale": 0.04225352112676056,
+        "fitted_size": [
+          23,
+          30
+        ],
+        "offset": [
+          4,
+          10
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 10,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "lumo-seal-revealed",
+      "module_id": "lumo-seal",
+      "state": "revealed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-seal-revealed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/seal-family.png",
+      "size": [
+        32,
+        40
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "lumo-seal",
+      "sha256": "8dcc12a51ddb0e6e1daeb8452a745edccebf01cc954a93a6362cf7c18e2aecec",
+      "source_sha256": "1440720171a932c0422c4126e1c4328eaf3ffa33ae9e920f3c32f0922e9dfd7f",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "visible_top_padding": 10,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "seal-family",
+        "frame": 1,
+        "cell_bounds": [
+          793,
+          0,
+          1586,
+          992,
+          140,
+          143,
+          680,
+          853
+        ],
+        "source_crop_size": [
+          540,
+          710
+        ],
+        "uniform_scale": 0.04225352112676056,
+        "fitted_size": [
+          23,
+          30
+        ],
+        "offset": [
+          4,
+          10
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 10,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "splitter-off",
+      "module_id": "splitter",
+      "state": "off",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/splitter-off.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/splitter-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "splitter",
+      "sha256": "27a559893d1ed5f0d12e42e115f0246b54414ea96b84910db4e1ccc3c3fb5a90",
+      "source_sha256": "7896419442ef9a4b483fe1a9867b73b3e0074bbba6ef7b14607b64123c39868a",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "splitter-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          120,
+          178,
+          858,
+          752
+        ],
+        "source_crop_size": [
+          738,
+          574
+        ],
+        "uniform_scale": 0.06495263870094722,
+        "fitted_size": [
+          48,
+          37
+        ],
+        "offset": [
+          0,
+          11
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "splitter-on",
+      "module_id": "splitter",
+      "state": "on",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/splitter-on.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/splitter-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "splitter",
+      "sha256": "ba434ef08468ad587681f687c367dcbeb071dbdecbbbddc8b949d7906de5eede",
+      "source_sha256": "7896419442ef9a4b483fe1a9867b73b3e0074bbba6ef7b14607b64123c39868a",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "splitter-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          27,
+          178,
+          766,
+          752
+        ],
+        "source_crop_size": [
+          739,
+          574
+        ],
+        "uniform_scale": 0.06495263870094722,
+        "fitted_size": [
+          48,
+          37
+        ],
+        "offset": [
+          0,
+          11
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "statue-0",
+      "module_id": "statue",
+      "state": "facing-0",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-0.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/statue-family.png",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "statue",
+      "sha256": "0438a74280bcebeaf6c00afd5bb3633a51afd5ad7045d39a713bd2918fd0dc99",
+      "source_sha256": "e82c58e55f66a62dd6069c5aa2e8c243b702556d5d53fd986b1bee1c6dfbcf53",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "statue-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          768,
+          512,
+          353,
+          30,
+          676,
+          495
+        ],
+        "source_crop_size": [
+          323,
+          465
+        ],
+        "uniform_scale": 0.18924731182795698,
+        "fitted_size": [
+          61,
+          88
+        ],
+        "offset": [
+          2,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "statue-1",
+      "module_id": "statue",
+      "state": "facing-1",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-1.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/statue-family.png",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "statue",
+      "sha256": "a1f5bc83c679ae9ead229ecabf6680b9718b33d63c2527084366166a7a768b11",
+      "source_sha256": "e82c58e55f66a62dd6069c5aa2e8c243b702556d5d53fd986b1bee1c6dfbcf53",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "statue-family",
+        "frame": 1,
+        "cell_bounds": [
+          768,
+          0,
+          1536,
+          512,
+          94,
+          30,
+          416,
+          495
+        ],
+        "source_crop_size": [
+          322,
+          465
+        ],
+        "uniform_scale": 0.18924731182795698,
+        "fitted_size": [
+          61,
+          88
+        ],
+        "offset": [
+          2,
+          0
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "statue-2",
+      "module_id": "statue",
+      "state": "facing-2",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-2.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/statue-family.png",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "statue",
+      "sha256": "5acc984061b4be39e5e703af1c880b306d1c93e6dce7f6e183353f7dc8cc3bfa",
+      "source_sha256": "e82c58e55f66a62dd6069c5aa2e8c243b702556d5d53fd986b1bee1c6dfbcf53",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "statue-family",
+        "frame": 2,
+        "cell_bounds": [
+          0,
+          512,
+          768,
+          1024,
+          353,
+          11,
+          682,
+          464
+        ],
+        "source_crop_size": [
+          329,
+          453
+        ],
+        "uniform_scale": 0.18924731182795698,
+        "fitted_size": [
+          62,
+          86
+        ],
+        "offset": [
+          1,
+          2
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "statue-3",
+      "module_id": "statue",
+      "state": "facing-3",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-3.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/statue-family.png",
+      "size": [
+        64,
+        88
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "statue",
+      "sha256": "38fbd49a90605c85de36068409bde89deacef31a7954cb2d0123c46a45a0a0ef",
+      "source_sha256": "e82c58e55f66a62dd6069c5aa2e8c243b702556d5d53fd986b1bee1c6dfbcf53",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "statue-family",
+        "frame": 3,
+        "cell_bounds": [
+          768,
+          512,
+          1536,
+          1024,
+          90,
+          11,
+          416,
+          465
+        ],
+        "source_crop_size": [
+          326,
+          454
+        ],
+        "uniform_scale": 0.18924731182795698,
+        "fitted_size": [
+          62,
+          86
+        ],
+        "offset": [
+          1,
+          2
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "star-map-table",
+      "module_id": "star-map-table",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/star-map-table.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/star-map-table-source.png",
+      "size": [
+        104,
+        52
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "star-map-table",
+      "sha256": "ebde8cd8d39db865fe658a2cf8fb3f18af6babd2a7a86e421b77d9c724e10fb3",
+      "source_sha256": "d852ed5cfd99ee8bc02de18f742a981a6c7c547c4dedfec732d41d2700b215ea",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "star-map-table-source",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          1774,
+          887,
+          154,
+          213,
+          1620,
+          758
+        ],
+        "source_crop_size": [
+          1466,
+          545
+        ],
+        "uniform_scale": 0.07094133697135062,
+        "fitted_size": [
+          104,
+          39
+        ],
+        "offset": [
+          0,
+          13
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "star-map-table-margin-ink",
+      "module_id": "star-map-table",
+      "state": "margin-ink",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/star-map-table-margin-ink.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/star-map-table-margin-ink.png",
+      "size": [
+        104,
+        52
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "overlay",
+      "family": "star-map-table",
+      "sha256": "ed022fa9207b50f5841393c9db61afa13ab7e1d362cdea177df5d97e15da530e",
+      "source_sha256": "ed022fa9207b50f5841393c9db61afa13ab7e1d362cdea177df5d97e15da530e",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "contains_text": false,
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "ed022fa9207b50f5841393c9db61afa13ab7e1d362cdea177df5d97e15da530e"
+      }
+    },
+    {
+      "id": "final-record",
+      "module_id": "final-record",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-record.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/final-record-source.png",
+      "size": [
+        104,
+        52
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "final-record",
+      "sha256": "9863b007f77fc735946516faf4d1425d0796093eaef2310fc0f9fd5c59dcabce",
+      "source_sha256": "511d92d333590a900b14695a32a5764fad3f7a4b93d8499ed77c3be67b07505b",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "final-record-source",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          1774,
+          887,
+          251,
+          236,
+          1523,
+          774
+        ],
+        "source_crop_size": [
+          1272,
+          538
+        ],
+        "uniform_scale": 0.08176100628930817,
+        "fitted_size": [
+          104,
+          44
+        ],
+        "offset": [
+          0,
+          8
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "final-door-closed",
+      "module_id": "final-door",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/final-door-family.png",
+      "size": [
+        104,
+        76
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "final-door",
+      "sha256": "babb0a255129a838428e2396c8c116575318a54b9b5cd3cfb9dcbaaeb0c756d3",
+      "source_sha256": "0b1affb18113b89673ae80fe5091056aaccd271dcfcd3d58382b85c3fbe1a48f",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "final-door-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          1039,
+          757,
+          105,
+          68,
+          976,
+          692
+        ],
+        "source_crop_size": [
+          871,
+          624
+        ],
+        "uniform_scale": 0.11940298507462686,
+        "fitted_size": [
+          104,
+          75
+        ],
+        "offset": [
+          0,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "final-door-open",
+      "module_id": "final-door",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/final-door-family.png",
+      "size": [
+        104,
+        76
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "final-door",
+      "sha256": "b572c9f5c2ce432c52565ddce434bf1c02c0ca200518d3687668f3626e46bcec",
+      "source_sha256": "0b1affb18113b89673ae80fe5091056aaccd271dcfcd3d58382b85c3fbe1a48f",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "final-door-family",
+        "frame": 1,
+        "cell_bounds": [
+          1039,
+          0,
+          2078,
+          757,
+          63,
+          68,
+          934,
+          692
+        ],
+        "source_crop_size": [
+          871,
+          624
+        ],
+        "uniform_scale": 0.11940298507462686,
+        "fitted_size": [
+          104,
+          75
+        ],
+        "offset": [
+          0,
+          1
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "stone-return-loop-closed",
+      "module_id": "stone-return-loop",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-return-loop-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/loop-family.png",
+      "size": [
+        40,
+        37
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "stone-return-loop",
+      "sha256": "11b461c6db58978439ae875f4aa9fc9dfe4cca803ed11078caa19690ff8c446e",
+      "source_sha256": "86a759e8660d93ea9d8a72686e1dfa33779f20bfa1ede56d6b112494ada339ee",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "loop-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          923,
+          852,
+          141,
+          286,
+          880,
+          721
+        ],
+        "source_crop_size": [
+          739,
+          435
+        ],
+        "uniform_scale": 0.05412719891745602,
+        "fitted_size": [
+          40,
+          24
+        ],
+        "offset": [
+          0,
+          13
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "stone-return-loop-open",
+      "module_id": "stone-return-loop",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-return-loop-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/loop-family.png",
+      "size": [
+        40,
+        37
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "stone-return-loop",
+      "sha256": "e7b74116a31e36d9f2d639bd564827bbed9d201a2477ea06390d85b27acbe5f9",
+      "source_sha256": "86a759e8660d93ea9d8a72686e1dfa33779f20bfa1ede56d6b112494ada339ee",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "loop-family",
+        "frame": 1,
+        "cell_bounds": [
+          923,
+          0,
+          1846,
+          852,
+          76,
+          169,
+          815,
+          721
+        ],
+        "source_crop_size": [
+          739,
+          552
+        ],
+        "uniform_scale": 0.05412719891745602,
+        "fitted_size": [
+          40,
+          30
+        ],
+        "offset": [
+          0,
+          7
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "root-bed-dark",
+      "module_id": "root-bed",
+      "state": "dark",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-dark.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/root-family.png",
+      "size": [
+        44,
+        148
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "root-bed",
+      "sha256": "c79e86d7390787d084a456b6ab1e6ca8e43cec8b3fc19304b952842ab59e750b",
+      "source_sha256": "93ee138ea6e896f66e9fb341c0680cef4338705d9c4a23cfed2859915beb017d",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "crossing_local_rect": [
+        0,
+        50,
+        44,
+        48
+      ],
+      "bridge_present": false,
+      "shadowed": false,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "root-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          342,
+          1152,
+          70,
+          123,
+          333,
+          1051
+        ],
+        "root_mapping": "nearest uniform-fit north/lane/south source regions into exact frozen geometry bands",
+        "lane_relative_y": [
+          50,
+          98
+        ],
+        "band_mapping": [
+          {
+            "source_y": [
+              0,
+              314
+            ],
+            "target_rect": [
+              0,
+              0,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              263,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              42,
+              50
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              314,
+              614
+            ],
+            "target_rect": [
+              0,
+              50,
+              44,
+              48
+            ],
+            "source_crop_size": [
+              263,
+              300
+            ],
+            "uniform_scale": 0.16,
+            "fitted_size": [
+              42,
+              48
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              614,
+              928
+            ],
+            "target_rect": [
+              0,
+              98,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              263,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              42,
+              50
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "root-bed-lit",
+      "module_id": "root-bed",
+      "state": "lit",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-lit.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/root-family.png",
+      "size": [
+        44,
+        148
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "root-bed",
+      "sha256": "a70d5fcfe3c415a837132eaaa483706922cd2ef666c1f55c3598c0ed6cc478ca",
+      "source_sha256": "93ee138ea6e896f66e9fb341c0680cef4338705d9c4a23cfed2859915beb017d",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "crossing_local_rect": [
+        0,
+        50,
+        44,
+        48
+      ],
+      "bridge_present": false,
+      "shadowed": false,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "root-family",
+        "frame": 1,
+        "cell_bounds": [
+          342,
+          0,
+          683,
+          1152,
+          49,
+          124,
+          312,
+          1052
+        ],
+        "root_mapping": "nearest uniform-fit north/lane/south source regions into exact frozen geometry bands",
+        "lane_relative_y": [
+          50,
+          98
+        ],
+        "band_mapping": [
+          {
+            "source_y": [
+              0,
+              314
+            ],
+            "target_rect": [
+              0,
+              0,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              263,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              42,
+              50
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              314,
+              614
+            ],
+            "target_rect": [
+              0,
+              50,
+              44,
+              48
+            ],
+            "source_crop_size": [
+              263,
+              300
+            ],
+            "uniform_scale": 0.16,
+            "fitted_size": [
+              42,
+              48
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              614,
+              928
+            ],
+            "target_rect": [
+              0,
+              98,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              263,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              42,
+              50
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "root-bed-bridge",
+      "module_id": "root-bed",
+      "state": "bridge",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-bridge.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/root-family.png",
+      "size": [
+        44,
+        148
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "root-bed",
+      "sha256": "1edd3a0825d5877c9df552de314f844c78a81ded8d1cc8582080c8b2c5deff3e",
+      "source_sha256": "93ee138ea6e896f66e9fb341c0680cef4338705d9c4a23cfed2859915beb017d",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "crossing_local_rect": [
+        0,
+        50,
+        44,
+        48
+      ],
+      "bridge_present": true,
+      "shadowed": true,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "root-family",
+        "frame": 2,
+        "cell_bounds": [
+          683,
+          0,
+          1024,
+          1152,
+          27,
+          122,
+          301,
+          1051
+        ],
+        "root_mapping": "nearest uniform-fit north/lane/south source regions into exact frozen geometry bands",
+        "lane_relative_y": [
+          50,
+          98
+        ],
+        "band_mapping": [
+          {
+            "source_y": [
+              0,
+              314
+            ],
+            "target_rect": [
+              0,
+              0,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              274,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              44,
+              50
+            ],
+            "offset": [
+              0,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              314,
+              615
+            ],
+            "target_rect": [
+              0,
+              50,
+              44,
+              48
+            ],
+            "source_crop_size": [
+              274,
+              301
+            ],
+            "uniform_scale": 0.15946843853820597,
+            "fitted_size": [
+              44,
+              48
+            ],
+            "offset": [
+              0,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              615,
+              929
+            ],
+            "target_rect": [
+              0,
+              98,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              274,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              44,
+              50
+            ],
+            "offset": [
+              0,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "root-bed-retracted-dark",
+      "module_id": "root-bed",
+      "state": "retracted-dark",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-retracted-dark.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/root-family.png",
+      "size": [
+        44,
+        148
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "root-bed",
+      "sha256": "f98165ad24cd93070830d575b1852fed121ef821163567ca861efc4635fb7c2f",
+      "source_sha256": "93ee138ea6e896f66e9fb341c0680cef4338705d9c4a23cfed2859915beb017d",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "crossing_local_rect": [
+        0,
+        50,
+        44,
+        48
+      ],
+      "bridge_present": false,
+      "shadowed": true,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "root-family",
+        "frame": 3,
+        "cell_bounds": [
+          1024,
+          0,
+          1366,
+          1152,
+          12,
+          122,
+          277,
+          1050
+        ],
+        "root_mapping": "nearest uniform-fit north/lane/south source regions into exact frozen geometry bands",
+        "lane_relative_y": [
+          50,
+          98
+        ],
+        "band_mapping": [
+          {
+            "source_y": [
+              0,
+              314
+            ],
+            "target_rect": [
+              0,
+              0,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              265,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              42,
+              50
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              314,
+              614
+            ],
+            "target_rect": [
+              0,
+              50,
+              44,
+              48
+            ],
+            "source_crop_size": [
+              265,
+              300
+            ],
+            "uniform_scale": 0.16,
+            "fitted_size": [
+              42,
+              48
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          },
+          {
+            "source_y": [
+              614,
+              928
+            ],
+            "target_rect": [
+              0,
+              98,
+              44,
+              50
+            ],
+            "source_crop_size": [
+              265,
+              314
+            ],
+            "uniform_scale": 0.1592356687898089,
+            "fitted_size": [
+              42,
+              50
+            ],
+            "offset": [
+              1,
+              0
+            ],
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "top_pad": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "balance-crystal",
+      "module_id": "balance-crystal",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/balance-crystal.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/balance-crystal-source.png",
+      "size": [
+        42,
+        78
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "standing",
+      "family": "balance-crystal",
+      "sha256": "4543b4442071e392bfeca607cd0dbad4eae090201538ba3bcf0f2d2be9e2a50a",
+      "source_sha256": "3606af3c395c8ddcac4a1dd48a2e1fd6f00d847ed3fb32204fc2e9fdbf5a7215",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "balance-crystal-source",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          921,
+          1707,
+          99,
+          325,
+          823,
+          1508
+        ],
+        "source_crop_size": [
+          724,
+          1183
+        ],
+        "uniform_scale": 0.058011049723756904,
+        "fitted_size": [
+          42,
+          69
+        ],
+        "offset": [
+          0,
+          9
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "corridor-pipe-run-off",
+      "module_id": "pipe-run",
+      "state": "off",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-pipe-run-off.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pipe-family.png",
+      "size": [
+        215,
+        18
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "pipe-run",
+      "sha256": "6cd61b73c502e66db6e22f02c8a2366455ba83bedc9ff2d98354a86bf5716d16",
+      "source_sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "corridor",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pipe-family",
+        "frame": 1,
+        "cell_bounds": [
+          760,
+          90,
+          1519,
+          260,
+          38,
+          24,
+          701,
+          111
+        ],
+        "pipe_tiling": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 215,
+          "target_axis_length": 215,
+          "source_alpha_preserved": true,
+          "source_frame": 1,
+          "state": "off"
+        }
+      }
+    },
+    {
+      "id": "corridor-pipe-run-on",
+      "module_id": "pipe-run",
+      "state": "on",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-pipe-run-on.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pipe-family.png",
+      "size": [
+        215,
+        18
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "pipe-run",
+      "sha256": "4a35a8a41ea6c2b04d40a99ef9c92021f78392d80cb5a59d1c804d0e6c45d23e",
+      "source_sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "corridor",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pipe-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          90,
+          760,
+          260,
+          59,
+          24,
+          721,
+          111
+        ],
+        "pipe_tiling": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 215,
+          "target_axis_length": 215,
+          "source_alpha_preserved": true,
+          "source_frame": 0,
+          "state": "on"
+        }
+      }
+    },
+    {
+      "id": "observatory-pipe-run-off",
+      "module_id": "pipe-run",
+      "state": "off",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-pipe-run-off.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pipe-family.png",
+      "size": [
+        264,
+        18
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "pipe-run",
+      "sha256": "f6c18291d74219656f7f33fc34c7d4a462eafb6fe3d542a766fd6740fa121987",
+      "source_sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "observatory",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pipe-family",
+        "frame": 1,
+        "cell_bounds": [
+          760,
+          90,
+          1519,
+          260,
+          38,
+          24,
+          701,
+          111
+        ],
+        "pipe_tiling": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 264,
+          "target_axis_length": 264,
+          "source_alpha_preserved": true,
+          "source_frame": 1,
+          "state": "off"
+        }
+      }
+    },
+    {
+      "id": "observatory-pipe-run-on",
+      "module_id": "pipe-run",
+      "state": "on",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-pipe-run-on.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pipe-family.png",
+      "size": [
+        264,
+        18
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "pipe-run",
+      "sha256": "5bb0843616d28b6c02c904f3a83411e391cdc65411127124df7fa4647557088a",
+      "source_sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "observatory",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pipe-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          90,
+          760,
+          260,
+          59,
+          24,
+          721,
+          111
+        ],
+        "pipe_tiling": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 264,
+          "target_axis_length": 264,
+          "source_alpha_preserved": true,
+          "source_frame": 0,
+          "state": "on"
+        }
+      }
+    },
+    {
+      "id": "pipe-drop-off",
+      "module_id": "pipe-drop",
+      "state": "off",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/pipe-drop-off.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pipe-family.png",
+      "size": [
+        18,
+        180
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "pipe-drop",
+      "sha256": "8ffff070242ce5b7273425602209992a3e2d1b37fbb9a9ed0ae2a56ad6c74cf3",
+      "source_sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "observatory",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pipe-family",
+        "frame": 3,
+        "cell_bounds": [
+          1000,
+          260,
+          1270,
+          1000,
+          90,
+          15,
+          179,
+          691
+        ],
+        "pipe_tiling": {
+          "orientation": "vertical",
+          "tile_source_size": [
+            18,
+            137
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 180,
+          "target_axis_length": 180,
+          "source_alpha_preserved": true,
+          "source_frame": 3,
+          "state": "off"
+        }
+      }
+    },
+    {
+      "id": "pipe-drop-on",
+      "module_id": "pipe-drop",
+      "state": "on",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/pipe-drop-on.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/pipe-family.png",
+      "size": [
+        18,
+        180
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "wall",
+      "family": "pipe-drop",
+      "sha256": "6bba4a2700b0b6e0b9f7203c2378a4b24b75bce8d2ea93ca1b15be59c56ae5c1",
+      "source_sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "observatory",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "pipe-family",
+        "frame": 2,
+        "cell_bounds": [
+          260,
+          260,
+          500,
+          1000,
+          80,
+          15,
+          170,
+          691
+        ],
+        "pipe_tiling": {
+          "orientation": "vertical",
+          "tile_source_size": [
+            18,
+            135
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 180,
+          "target_axis_length": 180,
+          "source_alpha_preserved": true,
+          "source_frame": 2,
+          "state": "on"
+        }
+      }
+    },
+    {
+      "id": "door-a-entrance-closed",
+      "module_id": "door-a-entrance",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-entrance-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "door-a-entrance",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 576,
+        "y": 152,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          186,
+          165,
+          823,
+          750
+        ],
+        "source_crop_size": [
+          637,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "door-a-entrance-open",
+      "module_id": "door-a-entrance",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-entrance-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "door-a-entrance",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 576,
+        "y": 152,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          65,
+          165,
+          705,
+          750
+        ],
+        "source_crop_size": [
+          640,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "door-a-corridor-closed",
+      "module_id": "door-a-corridor",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-corridor-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "door-a-corridor",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 72,
+        "y": 152,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          186,
+          165,
+          823,
+          750
+        ],
+        "source_crop_size": [
+          637,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "door-a-corridor-open",
+      "module_id": "door-a-corridor",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-corridor-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "door-a-corridor",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 72,
+        "y": 152,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          65,
+          165,
+          705,
+          750
+        ],
+        "source_crop_size": [
+          640,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-door-corridor-closed",
+      "module_id": "sun-door-corridor",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-corridor-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "sun-door-corridor",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 576,
+        "y": 192,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          186,
+          165,
+          823,
+          750
+        ],
+        "source_crop_size": [
+          637,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-door-corridor-open",
+      "module_id": "sun-door-corridor",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-corridor-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "sun-door-corridor",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 576,
+        "y": 192,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          65,
+          165,
+          705,
+          750
+        ],
+        "source_crop_size": [
+          640,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-door-observatory-closed",
+      "module_id": "sun-door-observatory",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-observatory-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "sun-door-observatory",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 56,
+        "y": 186,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          186,
+          165,
+          823,
+          750
+        ],
+        "source_crop_size": [
+          637,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "sun-door-observatory-open",
+      "module_id": "sun-door-observatory",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-observatory-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "sun-door-observatory",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 56,
+        "y": 186,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          65,
+          165,
+          705,
+          750
+        ],
+        "source_crop_size": [
+          640,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "return-loop-entrance-closed",
+      "module_id": "return-loop-entrance",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-entrance-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "return-loop-entrance",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 72,
+        "y": 192,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          186,
+          165,
+          823,
+          750
+        ],
+        "source_crop_size": [
+          637,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "return-loop-entrance-open",
+      "module_id": "return-loop-entrance",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-entrance-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "return-loop-entrance",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        0,
+        48,
+        48
+      ],
+      "layout_rect": {
+        "x": 72,
+        "y": 192,
+        "width": 48,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          65,
+          165,
+          705,
+          750
+        ],
+        "source_crop_size": [
+          640,
+          585
+        ],
+        "uniform_scale": 0.075,
+        "fitted_size": [
+          48,
+          44
+        ],
+        "offset": [
+          0,
+          2
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "return-loop-observatory-closed",
+      "module_id": "return-loop-observatory",
+      "state": "closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-observatory-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "return-loop-observatory",
+      "sha256": "5b5564aabb9f54ab4221eef965e982aaee738bd10e88272edb8f3209645a57dd",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "layout_rect": {
+        "x": 496,
+        "y": 284,
+        "width": 48,
+        "height": 36
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          887,
+          887,
+          186,
+          165,
+          823,
+          750
+        ],
+        "source_crop_size": [
+          637,
+          585
+        ],
+        "uniform_scale": 0.06153846153846154,
+        "fitted_size": [
+          39,
+          36
+        ],
+        "offset": [
+          4,
+          0
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true,
+        "canvas_padding": {
+          "offset": [
+            0,
+            6
+          ],
+          "content_canvas": [
+            48,
+            36
+          ],
+          "target_canvas": [
+            48,
+            48
+          ]
+        },
+        "content_rect": [
+          0,
+          6,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "id": "return-loop-observatory-open",
+      "module_id": "return-loop-observatory",
+      "state": "open",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-observatory-open.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "size": [
+        48,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "arch",
+      "family": "return-loop-observatory",
+      "sha256": "5a2fd6d47452fb9631e11213d2076d424bfc461c64aede29a31c7c84125d7efe",
+      "source_sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "content_box": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "layout_rect": {
+        "x": 496,
+        "y": 284,
+        "width": 48,
+        "height": 36
+      },
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "arch-family",
+        "frame": 1,
+        "cell_bounds": [
+          887,
+          0,
+          1774,
+          887,
+          65,
+          165,
+          705,
+          750
+        ],
+        "source_crop_size": [
+          640,
+          585
+        ],
+        "uniform_scale": 0.06153846153846154,
+        "fitted_size": [
+          39,
+          36
+        ],
+        "offset": [
+          4,
+          0
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true,
+        "canvas_padding": {
+          "offset": [
+            0,
+            6
+          ],
+          "content_canvas": [
+            48,
+            36
+          ],
+          "target_canvas": [
+            48,
+            48
+          ]
+        },
+        "content_rect": [
+          0,
+          6,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "id": "learned-marks",
+      "module_id": "learned-marks",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/learned-marks.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/learned-marks-source.png",
+      "size": [
+        160,
+        80
+      ],
+      "pivot": [
+        0.5,
+        1
+      ],
+      "kind": "ground",
+      "family": "learned-marks",
+      "sha256": "148d6c451895f499d0172d311ff8976eaa0b95c1c9e6d38b4e400fcdff9d36f6",
+      "source_sha256": "d22918eeca451eba8795c44e26f2b8f9fd6e351c883a930ad35760e70c5e0508",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "learned-marks-source",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          1774,
+          887,
+          58,
+          245,
+          1717,
+          724
+        ],
+        "source_crop_size": [
+          1659,
+          479
+        ],
+        "uniform_scale": 0.09644364074743822,
+        "fitted_size": [
+          160,
+          46
+        ],
+        "offset": [
+          0,
+          34
+        ],
+        "anchor": [
+          0.5,
+          1
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "wheel-stopped-sun-among-stars",
+      "module_id": "scenery-wheel",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/wheel-stopped-sun-among-stars.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/wheel-source.png",
+      "size": [
+        144,
+        88
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "kind": "wall",
+      "family": "scenery-wheel",
+      "sha256": "629d876646f06b214f460af6a3e926288f8754c697972a15d19f78c2fa434c12",
+      "source_sha256": "6ac4d743a2adbdd21782acc2f4817ac0d8ac5ace2e152b1e80e7cb5c1e834727",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "interactive": false,
+      "normalization": {
+        "kind": "generated-sheet-frame",
+        "source_id": "wheel-source",
+        "frame": 0,
+        "cell_bounds": [
+          0,
+          0,
+          1605,
+          980,
+          210,
+          37,
+          1394,
+          916
+        ],
+        "source_crop_size": [
+          1184,
+          879
+        ],
+        "uniform_scale": 0.10011376564277588,
+        "fitted_size": [
+          119,
+          88
+        ],
+        "offset": [
+          12,
+          0
+        ],
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "top_pad": 0,
+        "shared_family_scale": true
+      }
+    },
+    {
+      "id": "stone-floor-tile-0",
+      "module_id": "floor-material",
+      "state": "0",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-0.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-0.png",
+      "size": [
+        80,
+        32
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "material",
+      "family": "floor-material",
+      "sha256": "59eb844961f3974de08f508f6eb8abcea4c1845d39ff8f52705f6b0150be630d",
+      "source_sha256": "59eb844961f3974de08f508f6eb8abcea4c1845d39ff8f52705f6b0150be630d",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "material_source": "assets/levels/09-dark-moon-observatory/sources/v2/entrance-material-source.png",
+      "material_transform": "native 1:1 crop and palette remap",
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "59eb844961f3974de08f508f6eb8abcea4c1845d39ff8f52705f6b0150be630d"
+      }
+    },
+    {
+      "id": "stone-floor-tile-1",
+      "module_id": "floor-material",
+      "state": "1",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-1.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-1.png",
+      "size": [
+        80,
+        32
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "material",
+      "family": "floor-material",
+      "sha256": "64d4a1f15850d37e8d47567bdd3ec88853e3cdb6c81b3593854a362d62baa5a6",
+      "source_sha256": "64d4a1f15850d37e8d47567bdd3ec88853e3cdb6c81b3593854a362d62baa5a6",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "material_source": "assets/levels/09-dark-moon-observatory/sources/v2/entrance-material-source.png",
+      "material_transform": "native 1:1 crop and palette remap",
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "64d4a1f15850d37e8d47567bdd3ec88853e3cdb6c81b3593854a362d62baa5a6"
+      }
+    },
+    {
+      "id": "stone-floor-tile-2",
+      "module_id": "floor-material",
+      "state": "2",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-2.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-2.png",
+      "size": [
+        80,
+        32
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "material",
+      "family": "floor-material",
+      "sha256": "bd75a8c1f9bdc879d45aae2b8cce3e78a8f5fa4a6d38c1bc2758398f364c9abd",
+      "source_sha256": "bd75a8c1f9bdc879d45aae2b8cce3e78a8f5fa4a6d38c1bc2758398f364c9abd",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "material_source": "assets/levels/09-dark-moon-observatory/sources/v2/entrance-material-source.png",
+      "material_transform": "native 1:1 crop and palette remap",
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "bd75a8c1f9bdc879d45aae2b8cce3e78a8f5fa4a6d38c1bc2758398f364c9abd"
+      }
+    },
+    {
+      "id": "stone-floor-tile-3",
+      "module_id": "floor-material",
+      "state": "3",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-3.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-3.png",
+      "size": [
+        80,
+        32
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "material",
+      "family": "floor-material",
+      "sha256": "0e9b5d5875478951f96196ceb137b97ba0a820f6fd054e0a768dfc96493a6df0",
+      "source_sha256": "0e9b5d5875478951f96196ceb137b97ba0a820f6fd054e0a768dfc96493a6df0",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "material_source": "assets/levels/09-dark-moon-observatory/sources/v2/entrance-material-source.png",
+      "material_transform": "native 1:1 crop and palette remap",
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "0e9b5d5875478951f96196ceb137b97ba0a820f6fd054e0a768dfc96493a6df0"
+      }
+    },
+    {
+      "id": "lobby-base",
+      "module_id": "entrance",
+      "state": "background",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lobby-base.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/lobby-clean-source.png",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "background",
+      "family": "entrance",
+      "sha256": "09e710a441902aa9d69d19adcf88db75fb8646ff1705f51deaf2a69fbac852d5",
+      "source_sha256": "92c30c72204b612c5cd3f06eb6dd3399f2df42b2eed3d7cd34efdf8d4e6d7171",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "entrance",
+      "normalization": {
+        "kind": "generated-clean-background",
+        "resize": "nearest-uniform-cover-center-crop",
+        "source_size": [
+          1672,
+          941
+        ],
+        "fitted_size": [
+          640,
+          360
+        ],
+        "crop_origin": [
+          0,
+          0
+        ],
+        "floor_mask": "assets/levels/09-dark-moon-observatory/sources/v2/entrance-floor-mask.png",
+        "floor_mask_sha256": "770c34c153174aec5cab54fbaceaf44f2ce44491c919c200bfe7de6ebb474d70",
+        "source_floor_sample": [
+          72,
+          145,
+          496,
+          142
+        ],
+        "source_masonry_sample": [
+          32,
+          60,
+          576,
+          40
+        ],
+        "floor_tone": {
+          "brightness": 0.82,
+          "contrast": 0.72
+        },
+        "geometry_mask": "source floor pixels placed only in frozen floors/alcove thresholds; source masonry pixels placed only in frozen wall/jamb rectangles; final door recess stays void",
+        "walkable_pixel_count": 120192,
+        "floor_pixel_count": 120192,
+        "masonry_pixel_count": 109056,
+        "geometry_pixel_count": 229248,
+        "hud_bands_forced": [
+          [
+            0,
+            0,
+            640,
+            58
+          ],
+          [
+            0,
+            320,
+            640,
+            40
+          ]
+        ]
+      }
+    },
+    {
+      "id": "star-chart-base",
+      "module_id": "corridor",
+      "state": "background",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/star-chart-base.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/corridor-clean-source.png",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "background",
+      "family": "corridor",
+      "sha256": "5e486d44d6e15ee1033034f31057d92b2501bac4ad4124efe8bed4328ac196f5",
+      "source_sha256": "9e4c2fb9d73a8f0e5f3dab9a5dad6ed7fb6610564f64add3bce86249dd858afb",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "corridor",
+      "normalization": {
+        "kind": "generated-clean-background",
+        "resize": "nearest-uniform-cover-center-crop",
+        "source_size": [
+          1672,
+          941
+        ],
+        "fitted_size": [
+          640,
+          360
+        ],
+        "crop_origin": [
+          0,
+          0
+        ],
+        "floor_mask": "assets/levels/09-dark-moon-observatory/sources/v2/corridor-floor-mask.png",
+        "floor_mask_sha256": "871eb24cc440f561d0022c4cd64b5deceaa90291a7d792b1e5af32e8426e617d",
+        "source_floor_sample": [
+          72,
+          124,
+          496,
+          162
+        ],
+        "source_masonry_sample": [
+          32,
+          58,
+          576,
+          32
+        ],
+        "floor_tone": {
+          "brightness": 0.82,
+          "contrast": 0.72
+        },
+        "geometry_mask": "source floor pixels placed only in frozen floors/alcove thresholds; source masonry pixels placed only in frozen wall/jamb rectangles; final door recess stays void",
+        "walkable_pixel_count": 120192,
+        "floor_pixel_count": 120192,
+        "masonry_pixel_count": 109056,
+        "geometry_pixel_count": 229248,
+        "hud_bands_forced": [
+          [
+            0,
+            0,
+            640,
+            58
+          ],
+          [
+            0,
+            320,
+            640,
+            40
+          ]
+        ]
+      }
+    },
+    {
+      "id": "observatory-clean-base",
+      "module_id": "observatory",
+      "state": "background",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-clean-base.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/observatory-clean-source.png",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "background",
+      "family": "observatory",
+      "sha256": "27e8571fe841383ee14c18a8a8aa3253318dc96500bd98b20869e4c8d2487049",
+      "source_sha256": "ddf48a8755bf299187969101b34b6d8dcb605a954d9288ec7c917b03e68cb1f3",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "observatory",
+      "normalization": {
+        "kind": "generated-clean-background",
+        "resize": "nearest-uniform-cover-center-crop",
+        "source_size": [
+          1672,
+          941
+        ],
+        "fitted_size": [
+          640,
+          360
+        ],
+        "crop_origin": [
+          0,
+          0
+        ],
+        "floor_mask": "assets/levels/09-dark-moon-observatory/sources/v2/observatory-floor-mask.png",
+        "floor_mask_sha256": "da48e1833554b03497b04dcb9acc44365de8349fd15ea58ff98beac08f404317",
+        "source_floor_sample": [
+          72,
+          172,
+          496,
+          112
+        ],
+        "source_masonry_sample": [
+          104,
+          101,
+          360,
+          40
+        ],
+        "floor_tone": {
+          "brightness": 0.82,
+          "contrast": 0.72
+        },
+        "geometry_mask": "source floor pixels placed only in frozen floors/alcove thresholds; source masonry pixels placed only in frozen wall/jamb rectangles; final door recess stays void",
+        "walkable_pixel_count": 88064,
+        "floor_pixel_count": 84736,
+        "masonry_pixel_count": 141184,
+        "geometry_pixel_count": 225920,
+        "hud_bands_forced": [
+          [
+            0,
+            0,
+            640,
+            58
+          ],
+          [
+            0,
+            320,
+            640,
+            40
+          ]
+        ]
+      }
+    },
+    {
+      "id": "door-a-entrance-threshold-closed",
+      "module_id": "door-a-entrance",
+      "state": "threshold-closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-entrance-threshold-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/door-a-entrance-threshold-closed.png",
+      "size": [
+        104,
+        48
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "threshold",
+      "family": "door-a-entrance",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "layout_rect": {
+        "x": 536,
+        "y": 156,
+        "width": 104,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "id": "door-a-corridor-threshold-closed",
+      "module_id": "door-a-corridor",
+      "state": "threshold-closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-corridor-threshold-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/door-a-corridor-threshold-closed.png",
+      "size": [
+        104,
+        48
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "threshold",
+      "family": "door-a-corridor",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "layout_rect": {
+        "x": 24,
+        "y": 156,
+        "width": 104,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "id": "sun-door-corridor-threshold-closed",
+      "module_id": "sun-door-corridor",
+      "state": "threshold-closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-corridor-threshold-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/sun-door-corridor-threshold-closed.png",
+      "size": [
+        104,
+        48
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "threshold",
+      "family": "sun-door-corridor",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "layout_rect": {
+        "x": 536,
+        "y": 196,
+        "width": 104,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "id": "sun-door-observatory-threshold-closed",
+      "module_id": "sun-door-observatory",
+      "state": "threshold-closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-observatory-threshold-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/sun-door-observatory-threshold-closed.png",
+      "size": [
+        80,
+        48
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "threshold",
+      "family": "sun-door-observatory",
+      "sha256": "9b70bccaba8ad89add31be413c3c4a12dce45c8d3a19b55834e969a1bfa18b9d",
+      "source_sha256": "9b70bccaba8ad89add31be413c3c4a12dce45c8d3a19b55834e969a1bfa18b9d",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "layout_rect": {
+        "x": 24,
+        "y": 190,
+        "width": 80,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "9b70bccaba8ad89add31be413c3c4a12dce45c8d3a19b55834e969a1bfa18b9d"
+      }
+    },
+    {
+      "id": "return-loop-entrance-threshold-closed",
+      "module_id": "return-loop-entrance",
+      "state": "threshold-closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-entrance-threshold-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/return-loop-entrance-threshold-closed.png",
+      "size": [
+        104,
+        48
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "threshold",
+      "family": "return-loop-entrance",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "layout_rect": {
+        "x": 24,
+        "y": 196,
+        "width": 104,
+        "height": 48
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "id": "return-loop-observatory-threshold-closed",
+      "module_id": "return-loop-observatory",
+      "state": "threshold-closed",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-observatory-threshold-closed.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/return-loop-observatory-threshold-closed.png",
+      "size": [
+        48,
+        20
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "threshold",
+      "family": "return-loop-observatory",
+      "sha256": "0b117e653042cc11dc393e366e8a515294927ba0683e4b9ad143510f24cc0d78",
+      "source_sha256": "0b117e653042cc11dc393e366e8a515294927ba0683e4b9ad143510f24cc0d78",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "layout_rect": {
+        "x": 496,
+        "y": 300,
+        "width": 48,
+        "height": 20
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "0b117e653042cc11dc393e366e8a515294927ba0683e4b9ad143510f24cc0d78"
+      }
+    },
+    {
+      "id": "entrance-loop-path",
+      "module_id": "loop-path",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/entrance-loop-path.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/entrance-loop-path.png",
+      "size": [
+        60,
+        24
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "ground",
+      "family": "loop-path",
+      "sha256": "e07b0a9a071d926c524022053eee4167b1537eef93e9dd98bff4f3fdd4ac64b4",
+      "source_sha256": "e07b0a9a071d926c524022053eee4167b1537eef93e9dd98bff4f3fdd4ac64b4",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "room": "entrance",
+      "layout_rect": {
+        "id": "loop-path",
+        "x": 128,
+        "y": 210,
+        "width": 60,
+        "height": 24,
+        "depth": 2
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "e07b0a9a071d926c524022053eee4167b1537eef93e9dd98bff4f3fdd4ac64b4"
+      }
+    },
+    {
+      "id": "entrance-source-ring",
+      "module_id": "source-ring",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/entrance-source-ring.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/entrance-source-ring.png",
+      "size": [
+        64,
+        34
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "ground",
+      "family": "source-ring",
+      "sha256": "d89a9fb7675de78742df91e32af0e08ac66ba342bef7d389f3b2229a5e92a84a",
+      "source_sha256": "d89a9fb7675de78742df91e32af0e08ac66ba342bef7d389f3b2229a5e92a84a",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "room": "entrance",
+      "layout_rect": {
+        "id": "source-ring",
+        "x": 156,
+        "y": 214,
+        "width": 64,
+        "height": 34,
+        "depth": 1
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "d89a9fb7675de78742df91e32af0e08ac66ba342bef7d389f3b2229a5e92a84a"
+      }
+    },
+    {
+      "id": "corridor-latch-grille",
+      "module_id": "latch-grille",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-latch-grille.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/corridor-latch-grille.png",
+      "size": [
+        56,
+        28
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "ground",
+      "family": "latch-grille",
+      "sha256": "b55b6ea8ee856eae339f60e58303ab77b3d93f1fd1f8aa01a06dba4a6d3b9cf6",
+      "source_sha256": "b55b6ea8ee856eae339f60e58303ab77b3d93f1fd1f8aa01a06dba4a6d3b9cf6",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "room": "corridor",
+      "layout_rect": {
+        "id": "latch-grille",
+        "x": 28,
+        "y": 236,
+        "width": 56,
+        "height": 28,
+        "depth": 2
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "b55b6ea8ee856eae339f60e58303ab77b3d93f1fd1f8aa01a06dba4a6d3b9cf6"
+      }
+    },
+    {
+      "id": "observatory-loop-path",
+      "module_id": "loop-path",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-loop-path.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v3/observatory-clean-source.png",
+      "size": [
+        96,
+        32
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "ground",
+      "family": "loop-path",
+      "sha256": "80a641241cac70a1ceeaf22ce56d06ab49fa60fc7e9389f88c427d6c97cb3f56",
+      "source_sha256": "ddf48a8755bf299187969101b34b6d8dcb605a954d9288ec7c917b03e68cb1f3",
+      "authoring": "generated source normalized with recorded nearest-neighbor operations",
+      "room": "observatory",
+      "layout_rect": {
+        "id": "loop-path",
+        "x": 472,
+        "y": 266,
+        "width": 96,
+        "height": 32,
+        "depth": 2
+      },
+      "normalization": {
+        "kind": "generated-material-mask-derivative",
+        "texture_sample": [
+          72,
+          172,
+          496,
+          112
+        ],
+        "floor_tone": {
+          "brightness": 0.82,
+          "contrast": 0.72
+        },
+        "mask_source_v2": "assets/levels/09-dark-moon-observatory/sources/v2/native/observatory-loop-path.png",
+        "mask_source_v2_sha256": "b310edd763d57966ac2209d809412806caabe2df7fc06c3505ec21eadf54b495",
+        "mask_alpha_preserved": true,
+        "resize": "nearest-uniform-cover-center-crop",
+        "source_size": [
+          1672,
+          941
+        ],
+        "fitted_size": [
+          640,
+          360
+        ],
+        "crop_origin": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "observatory-final-door-sill",
+      "module_id": "final-door-sill",
+      "state": "static",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-final-door-sill.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/observatory-final-door-sill.png",
+      "size": [
+        64,
+        14
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "ground",
+      "family": "final-door-sill",
+      "sha256": "29769c2a84bf055bf6e0155c42adcd0e6592f9544d06f7c80e9a9077662b2474",
+      "source_sha256": "29769c2a84bf055bf6e0155c42adcd0e6592f9544d06f7c80e9a9077662b2474",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "room": "observatory",
+      "layout_rect": {
+        "id": "final-door-sill",
+        "x": 468,
+        "y": 140,
+        "width": 64,
+        "height": 14,
+        "depth": 2
+      },
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "29769c2a84bf055bf6e0155c42adcd0e6592f9544d06f7c80e9a9077662b2474"
+      }
+    },
+    {
+      "id": "memory-wheel-blocked",
+      "module_id": "memory",
+      "state": "wheel-blocked",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-wheel-blocked.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-wheel-blocked.png",
+      "size": [
+        144,
+        88
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "overlay",
+      "family": "memory",
+      "sha256": "b164a2daf36591dec803ca206b816734b636b34be9fed6ab75852b9f47e9d51f",
+      "source_sha256": "b164a2daf36591dec803ca206b816734b636b34be9fed6ab75852b9f47e9d51f",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "b164a2daf36591dec803ca206b816734b636b34be9fed6ab75852b9f47e9d51f"
+      }
+    },
+    {
+      "id": "memory-water-drained",
+      "module_id": "memory",
+      "state": "water-drained",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-water-drained.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-water-drained.png",
+      "size": [
+        128,
+        40
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "overlay",
+      "family": "memory",
+      "sha256": "45c2d5f057caa079c166eacd35108bcfb1de8392685d2ac46812f8b198b6e65b",
+      "source_sha256": "45c2d5f057caa079c166eacd35108bcfb1de8392685d2ac46812f8b198b6e65b",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "45c2d5f057caa079c166eacd35108bcfb1de8392685d2ac46812f8b198b6e65b"
+      }
+    },
+    {
+      "id": "memory-three-root-circuits-cracked",
+      "module_id": "memory",
+      "state": "three-root-circuits-cracked",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-three-root-circuits-cracked.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-three-root-circuits-cracked.png",
+      "size": [
+        128,
+        60
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "overlay",
+      "family": "memory",
+      "sha256": "aaf8d95ddb3f196c658356384d2a14edbd41fcf4e412c9529e1fd140b2c60e7c",
+      "source_sha256": "aaf8d95ddb3f196c658356384d2a14edbd41fcf4e412c9529e1fd140b2c60e7c",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "aaf8d95ddb3f196c658356384d2a14edbd41fcf4e412c9529e1fd140b2c60e7c"
+      }
+    },
+    {
+      "id": "memory-amber-tint",
+      "module_id": "memory",
+      "state": "memory-amber-tint",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-amber-tint.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-amber-tint.png",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "overlay",
+      "family": "memory",
+      "sha256": "5396554e9b18335d564139c441087904aaeedb756dd24771afbe68d29774ded7",
+      "source_sha256": "5396554e9b18335d564139c441087904aaeedb756dd24771afbe68d29774ded7",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "5396554e9b18335d564139c441087904aaeedb756dd24771afbe68d29774ded7"
+      }
+    },
+    {
+      "id": "memory-white-flash",
+      "module_id": "memory",
+      "state": "memory-white-flash",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-white-flash.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-white-flash.png",
+      "size": [
+        640,
+        360
+      ],
+      "pivot": [
+        0,
+        0
+      ],
+      "kind": "overlay",
+      "family": "memory",
+      "sha256": "28fb70733ed9490ca25f7472db9b2f7553be2ab334a212d2861db73fbbf3f45f",
+      "source_sha256": "28fb70733ed9490ca25f7472db9b2f7553be2ab334a212d2861db73fbbf3f45f",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "28fb70733ed9490ca25f7472db9b2f7553be2ab334a212d2861db73fbbf3f45f"
+      }
+    },
+    {
+      "id": "memory-guardian-1",
+      "module_id": "memory-guardian",
+      "state": "overlap-fade-1",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-guardian-1.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-guardian-1.png",
+      "size": [
+        48,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "kind": "character",
+      "family": "memory-guardian",
+      "sha256": "d1ea01869f954f8e4bac1d64c8da98e26749976648436c605043a5cdd0c5ca64",
+      "source_sha256": "d1ea01869f954f8e4bac1d64c8da98e26749976648436c605043a5cdd0c5ca64",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "source_reference": "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png",
+      "foot_pixel": [
+        24,
+        62
+      ],
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "d1ea01869f954f8e4bac1d64c8da98e26749976648436c605043a5cdd0c5ca64"
+      }
+    },
+    {
+      "id": "memory-guardian-2",
+      "module_id": "memory-guardian",
+      "state": "overlap-fade-2",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-guardian-2.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-guardian-2.png",
+      "size": [
+        48,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "kind": "character",
+      "family": "memory-guardian",
+      "sha256": "8dfbe98793bbcca78bd1583f6ba8158d24e79ceaab4ca90838d77ad0e02f1699",
+      "source_sha256": "8dfbe98793bbcca78bd1583f6ba8158d24e79ceaab4ca90838d77ad0e02f1699",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "source_reference": "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png",
+      "foot_pixel": [
+        24,
+        62
+      ],
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "8dfbe98793bbcca78bd1583f6ba8158d24e79ceaab4ca90838d77ad0e02f1699"
+      }
+    },
+    {
+      "id": "memory-guardian-3",
+      "module_id": "memory-guardian",
+      "state": "overlap-fade-3",
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-guardian-3.png",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-guardian-3.png",
+      "size": [
+        48,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0.96875
+      ],
+      "kind": "character",
+      "family": "memory-guardian",
+      "sha256": "8ebb4f7d1acc28c14140339d7af61db8743950be7d50e7da7dd252fe666933fe",
+      "source_sha256": "8ebb4f7d1acc28c14140339d7af61db8743950be7d50e7da7dd252fe666933fe",
+      "authoring": "explicit historical source raster reused with unchanged pixels",
+      "intentional_partial_alpha": true,
+      "source_reference": "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png",
+      "foot_pixel": [
+        24,
+        62
+      ],
+      "normalization": {
+        "kind": "explicit-v2-source-reuse",
+        "reason": "historical minor effect or transparent derivative",
+        "source_v2_sha256": "8ebb4f7d1acc28c14140339d7af61db8743950be7d50e7da7dd252fe666933fe"
+      }
+    }
+  ],
+  "source_sheets": {
+    "mirror-family": {
+      "source": "mirror-family.png",
+      "sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "sheet_size": [
+        1086,
+        1448
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          543,
+          724,
+          128,
+          118,
+          520,
+          660
+        ],
+        [
+          543,
+          0,
+          1086,
+          724,
+          93,
+          118,
+          459,
+          659
+        ],
+        [
+          0,
+          724,
+          543,
+          1448,
+          111,
+          77,
+          501,
+          626
+        ],
+        [
+          543,
+          724,
+          1086,
+          1448,
+          81,
+          84,
+          462,
+          629
+        ]
+      ]
+    },
+    "pedestal-family": {
+      "source": "pedestal-family.png",
+      "sha256": "ddfafad91530d911aa742a6d9c2adebc7acef819849a442d6d40841e859fa2b9",
+      "sheet_size": [
+        1697,
+        927
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          848,
+          927,
+          163,
+          318,
+          726,
+          864
+        ],
+        [
+          848,
+          0,
+          1697,
+          927,
+          132,
+          78,
+          698,
+          864
+        ]
+      ]
+    },
+    "sun-lock-family": {
+      "source": "sun-lock-family.png",
+      "sha256": "49d717e34eae1fe3c9757381da990ec93853cdc1d80f7e92eeb7a849d72f7af5",
+      "sheet_size": [
+        1586,
+        992
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          793,
+          992,
+          75,
+          223,
+          750,
+          805
+        ],
+        [
+          793,
+          0,
+          1586,
+          992,
+          43,
+          223,
+          718,
+          805
+        ]
+      ]
+    },
+    "latch-family": {
+      "source": "latch-family.png",
+      "sha256": "3531059d03d65c86e49f69522168cef2ae4c4a1031b38b7db8a30cc5702a977a",
+      "sheet_size": [
+        1659,
+        948
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          830,
+          948,
+          99,
+          160,
+          769,
+          784
+        ],
+        [
+          830,
+          0,
+          1659,
+          948,
+          65,
+          288,
+          737,
+          784
+        ]
+      ]
+    },
+    "tube-family": {
+      "source": "tube-family.png",
+      "sha256": "46fcc537d9caf284b23ee0e0af37456d55db848f2c1da9b54ff6b59f03adfec6",
+      "sheet_size": [
+        1774,
+        887
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          887,
+          887,
+          158,
+          194,
+          821,
+          724
+        ],
+        [
+          887,
+          0,
+          1774,
+          887,
+          121,
+          195,
+          784,
+          724
+        ]
+      ]
+    },
+    "seal-family": {
+      "source": "seal-family.png",
+      "sha256": "1440720171a932c0422c4126e1c4328eaf3ffa33ae9e920f3c32f0922e9dfd7f",
+      "sheet_size": [
+        1586,
+        992
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          793,
+          992,
+          174,
+          143,
+          713,
+          853
+        ],
+        [
+          793,
+          0,
+          1586,
+          992,
+          140,
+          143,
+          680,
+          853
+        ]
+      ]
+    },
+    "splitter-family": {
+      "source": "splitter-family.png",
+      "sha256": "7896419442ef9a4b483fe1a9867b73b3e0074bbba6ef7b14607b64123c39868a",
+      "sheet_size": [
+        1774,
+        887
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          887,
+          887,
+          120,
+          178,
+          858,
+          752
+        ],
+        [
+          887,
+          0,
+          1774,
+          887,
+          27,
+          178,
+          766,
+          752
+        ]
+      ]
+    },
+    "statue-family": {
+      "source": "statue-family.png",
+      "sha256": "e82c58e55f66a62dd6069c5aa2e8c243b702556d5d53fd986b1bee1c6dfbcf53",
+      "sheet_size": [
+        1536,
+        1024
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          768,
+          512,
+          353,
+          30,
+          676,
+          495
+        ],
+        [
+          768,
+          0,
+          1536,
+          512,
+          94,
+          30,
+          416,
+          495
+        ],
+        [
+          0,
+          512,
+          768,
+          1024,
+          353,
+          11,
+          682,
+          464
+        ],
+        [
+          768,
+          512,
+          1536,
+          1024,
+          90,
+          11,
+          416,
+          465
+        ]
+      ]
+    },
+    "star-map-table-source": {
+      "source": "star-map-table-source.png",
+      "sha256": "d852ed5cfd99ee8bc02de18f742a981a6c7c547c4dedfec732d41d2700b215ea",
+      "sheet_size": [
+        1774,
+        887
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          1774,
+          887,
+          154,
+          213,
+          1620,
+          758
+        ]
+      ]
+    },
+    "final-record-source": {
+      "source": "final-record-source.png",
+      "sha256": "511d92d333590a900b14695a32a5764fad3f7a4b93d8499ed77c3be67b07505b",
+      "sheet_size": [
+        1774,
+        887
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          1774,
+          887,
+          251,
+          236,
+          1523,
+          774
+        ]
+      ]
+    },
+    "final-door-family": {
+      "source": "final-door-family.png",
+      "sha256": "0b1affb18113b89673ae80fe5091056aaccd271dcfcd3d58382b85c3fbe1a48f",
+      "sheet_size": [
+        2078,
+        757
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          1039,
+          757,
+          105,
+          68,
+          976,
+          692
+        ],
+        [
+          1039,
+          0,
+          2078,
+          757,
+          63,
+          68,
+          934,
+          692
+        ]
+      ]
+    },
+    "loop-family": {
+      "source": "loop-family.png",
+      "sha256": "86a759e8660d93ea9d8a72686e1dfa33779f20bfa1ede56d6b112494ada339ee",
+      "sheet_size": [
+        1846,
+        852
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          923,
+          852,
+          141,
+          286,
+          880,
+          721
+        ],
+        [
+          923,
+          0,
+          1846,
+          852,
+          76,
+          169,
+          815,
+          721
+        ]
+      ]
+    },
+    "balance-crystal-source": {
+      "source": "balance-crystal-source.png",
+      "sha256": "3606af3c395c8ddcac4a1dd48a2e1fd6f00d847ed3fb32204fc2e9fdbf5a7215",
+      "sheet_size": [
+        921,
+        1707
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          921,
+          1707,
+          99,
+          325,
+          823,
+          1508
+        ]
+      ]
+    },
+    "pipe-family": {
+      "source": "pipe-family.png",
+      "sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36",
+      "sheet_size": [
+        1519,
+        1036
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          90,
+          760,
+          260,
+          59,
+          24,
+          721,
+          111
+        ],
+        [
+          760,
+          90,
+          1519,
+          260,
+          38,
+          24,
+          701,
+          111
+        ],
+        [
+          260,
+          260,
+          500,
+          1000,
+          80,
+          15,
+          170,
+          691
+        ],
+        [
+          1000,
+          260,
+          1270,
+          1000,
+          90,
+          15,
+          179,
+          691
+        ]
+      ]
+    },
+    "arch-family": {
+      "source": "arch-family.png",
+      "sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e",
+      "sheet_size": [
+        1774,
+        887
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          887,
+          887,
+          186,
+          165,
+          823,
+          750
+        ],
+        [
+          887,
+          0,
+          1774,
+          887,
+          65,
+          165,
+          705,
+          750
+        ]
+      ]
+    },
+    "learned-marks-source": {
+      "source": "learned-marks-source.png",
+      "sha256": "d22918eeca451eba8795c44e26f2b8f9fd6e351c883a930ad35760e70c5e0508",
+      "sheet_size": [
+        1774,
+        887
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          1774,
+          887,
+          58,
+          245,
+          1717,
+          724
+        ]
+      ]
+    },
+    "wheel-source": {
+      "source": "wheel-source.png",
+      "sha256": "6ac4d743a2adbdd21782acc2f4817ac0d8ac5ace2e152b1e80e7cb5c1e834727",
+      "sheet_size": [
+        1605,
+        980
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          1605,
+          980,
+          210,
+          37,
+          1394,
+          916
+        ]
+      ]
+    },
+    "root-family": {
+      "source": "root-family.png",
+      "sha256": "93ee138ea6e896f66e9fb341c0680cef4338705d9c4a23cfed2859915beb017d",
+      "sheet_size": [
+        1366,
+        1152
+      ],
+      "alpha_bbox_threshold": 128,
+      "source_alpha_preserved_within_crop": true,
+      "cells": [
+        [
+          0,
+          0,
+          342,
+          1152,
+          70,
+          123,
+          333,
+          1051
+        ],
+        [
+          342,
+          0,
+          683,
+          1152,
+          49,
+          124,
+          312,
+          1052
+        ],
+        [
+          683,
+          0,
+          1024,
+          1152,
+          27,
+          122,
+          301,
+          1051
+        ],
+        [
+          1024,
+          0,
+          1366,
+          1152,
+          12,
+          122,
+          277,
+          1050
+        ]
+      ]
+    }
+  },
+  "reused": [
+    {
+      "id": "star-map-table-margin-ink",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/star-map-table-margin-ink.png",
+      "source_sha256": "ed022fa9207b50f5841393c9db61afa13ab7e1d362cdea177df5d97e15da530e",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "stone-floor-tile-0",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-0.png",
+      "source_sha256": "59eb844961f3974de08f508f6eb8abcea4c1845d39ff8f52705f6b0150be630d",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "stone-floor-tile-1",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-1.png",
+      "source_sha256": "64d4a1f15850d37e8d47567bdd3ec88853e3cdb6c81b3593854a362d62baa5a6",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "stone-floor-tile-2",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-2.png",
+      "source_sha256": "bd75a8c1f9bdc879d45aae2b8cce3e78a8f5fa4a6d38c1bc2758398f364c9abd",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "stone-floor-tile-3",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/stone-floor-tile-3.png",
+      "source_sha256": "0e9b5d5875478951f96196ceb137b97ba0a820f6fd054e0a768dfc96493a6df0",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "door-a-entrance-threshold-closed",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/door-a-entrance-threshold-closed.png",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "door-a-corridor-threshold-closed",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/door-a-corridor-threshold-closed.png",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "sun-door-corridor-threshold-closed",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/sun-door-corridor-threshold-closed.png",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "sun-door-observatory-threshold-closed",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/sun-door-observatory-threshold-closed.png",
+      "source_sha256": "9b70bccaba8ad89add31be413c3c4a12dce45c8d3a19b55834e969a1bfa18b9d",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "return-loop-entrance-threshold-closed",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/return-loop-entrance-threshold-closed.png",
+      "source_sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "return-loop-observatory-threshold-closed",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/return-loop-observatory-threshold-closed.png",
+      "source_sha256": "0b117e653042cc11dc393e366e8a515294927ba0683e4b9ad143510f24cc0d78",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "entrance-loop-path",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/entrance-loop-path.png",
+      "source_sha256": "e07b0a9a071d926c524022053eee4167b1537eef93e9dd98bff4f3fdd4ac64b4",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "entrance-source-ring",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/entrance-source-ring.png",
+      "source_sha256": "d89a9fb7675de78742df91e32af0e08ac66ba342bef7d389f3b2229a5e92a84a",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "corridor-latch-grille",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/corridor-latch-grille.png",
+      "source_sha256": "b55b6ea8ee856eae339f60e58303ab77b3d93f1fd1f8aa01a06dba4a6d3b9cf6",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "observatory-final-door-sill",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/observatory-final-door-sill.png",
+      "source_sha256": "29769c2a84bf055bf6e0155c42adcd0e6592f9544d06f7c80e9a9077662b2474",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-wheel-blocked",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-wheel-blocked.png",
+      "source_sha256": "b164a2daf36591dec803ca206b816734b636b34be9fed6ab75852b9f47e9d51f",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-water-drained",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-water-drained.png",
+      "source_sha256": "45c2d5f057caa079c166eacd35108bcfb1de8392685d2ac46812f8b198b6e65b",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-three-root-circuits-cracked",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-three-root-circuits-cracked.png",
+      "source_sha256": "aaf8d95ddb3f196c658356384d2a14edbd41fcf4e412c9529e1fd140b2c60e7c",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-amber-tint",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-amber-tint.png",
+      "source_sha256": "5396554e9b18335d564139c441087904aaeedb756dd24771afbe68d29774ded7",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-white-flash",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-white-flash.png",
+      "source_sha256": "28fb70733ed9490ca25f7472db9b2f7553be2ab334a212d2861db73fbbf3f45f",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-guardian-1",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-guardian-1.png",
+      "source_sha256": "d1ea01869f954f8e4bac1d64c8da98e26749976648436c605043a5cdd0c5ca64",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-guardian-2",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-guardian-2.png",
+      "source_sha256": "8dfbe98793bbcca78bd1583f6ba8158d24e79ceaab4ca90838d77ad0e02f1699",
+      "reason": "historical minor effect or transparent derivative"
+    },
+    {
+      "id": "memory-guardian-3",
+      "source": "assets/levels/09-dark-moon-observatory/sources/v2/native/memory-guardian-3.png",
+      "source_sha256": "8ebb4f7d1acc28c14140339d7af61db8743950be7d50e7da7dd252fe666933fe",
+      "reason": "historical minor effect or transparent derivative"
+    }
+  ],
+  "reused_policy": "only explicitly mapped Level 09 v2 floor/path/threshold/memory layers; the observatory loop path uses generated floor material under its unchanged v2 alpha mask"
+}

@@ -1,0 +1,1903 @@
+{
+  "canvas": [
+    640,
+    360
+  ],
+  "hud_bands": [
+    [
+      0,
+      0,
+      640,
+      58
+    ],
+    [
+      0,
+      320,
+      640,
+      40
+    ]
+  ],
+  "floors": {
+    "entrance": {
+      "x": 24,
+      "y": 88,
+      "width": 592,
+      "height": 216,
+      "minX": 24,
+      "maxX": 616
+    },
+    "corridor": {
+      "x": 24,
+      "y": 88,
+      "width": 592,
+      "height": 216,
+      "minX": 24,
+      "maxX": 616
+    },
+    "observatory": {
+      "x": 24,
+      "y": 152,
+      "width": 592,
+      "height": 148,
+      "minX": 24,
+      "maxX": 616
+    }
+  },
+  "walls": {
+    "entrance": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 640,
+        "height": 88
+      },
+      {
+        "x": 0,
+        "y": 304,
+        "width": 640,
+        "height": 56
+      },
+      {
+        "x": 0,
+        "y": 88,
+        "width": 24,
+        "height": 108
+      },
+      {
+        "x": 0,
+        "y": 244,
+        "width": 24,
+        "height": 60
+      },
+      {
+        "x": 616,
+        "y": 88,
+        "width": 24,
+        "height": 68
+      },
+      {
+        "x": 616,
+        "y": 204,
+        "width": 24,
+        "height": 100
+      }
+    ],
+    "corridor": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 640,
+        "height": 88
+      },
+      {
+        "x": 0,
+        "y": 304,
+        "width": 640,
+        "height": 56
+      },
+      {
+        "x": 0,
+        "y": 88,
+        "width": 24,
+        "height": 68
+      },
+      {
+        "x": 0,
+        "y": 204,
+        "width": 24,
+        "height": 100
+      },
+      {
+        "x": 616,
+        "y": 88,
+        "width": 24,
+        "height": 108
+      },
+      {
+        "x": 616,
+        "y": 244,
+        "width": 24,
+        "height": 60
+      }
+    ],
+    "observatory": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 640,
+        "height": 100
+      },
+      {
+        "x": 0,
+        "y": 100,
+        "width": 468,
+        "height": 52
+      },
+      {
+        "x": 532,
+        "y": 100,
+        "width": 108,
+        "height": 52
+      },
+      {
+        "x": 0,
+        "y": 152,
+        "width": 24,
+        "height": 38
+      },
+      {
+        "x": 0,
+        "y": 238,
+        "width": 24,
+        "height": 62
+      },
+      {
+        "x": 616,
+        "y": 152,
+        "width": 24,
+        "height": 148
+      },
+      {
+        "x": 0,
+        "y": 300,
+        "width": 488,
+        "height": 60
+      },
+      {
+        "x": 548,
+        "y": 300,
+        "width": 92,
+        "height": 60
+      },
+      {
+        "x": 488,
+        "y": 320,
+        "width": 64,
+        "height": 40
+      }
+    ]
+  },
+  "alcoves": [
+    {
+      "id": "door-a-entrance",
+      "roomId": "entrance",
+      "doorId": "door-a",
+      "threshold": {
+        "x": 536,
+        "y": 156,
+        "width": 104,
+        "height": 48
+      },
+      "jambs": [
+        {
+          "x": 536,
+          "y": 132,
+          "width": 104,
+          "height": 24
+        },
+        {
+          "x": 536,
+          "y": 204,
+          "width": 104,
+          "height": 24
+        }
+      ],
+      "inspect": {
+        "x": 520,
+        "y": 180
+      },
+      "inspectRadius": 24,
+      "trigger": {
+        "x": 604,
+        "y": 180
+      },
+      "triggerRadius": 28,
+      "arch": {
+        "x": 576,
+        "y": 152,
+        "width": 48,
+        "height": 48
+      },
+      "label": "Cửa A"
+    },
+    {
+      "id": "door-a-corridor",
+      "roomId": "corridor",
+      "doorId": "door-a",
+      "threshold": {
+        "x": 24,
+        "y": 156,
+        "width": 104,
+        "height": 48
+      },
+      "jambs": [
+        {
+          "x": 24,
+          "y": 132,
+          "width": 104,
+          "height": 24
+        },
+        {
+          "x": 24,
+          "y": 204,
+          "width": 104,
+          "height": 24
+        }
+      ],
+      "inspect": {
+        "x": 144,
+        "y": 180
+      },
+      "inspectRadius": 22,
+      "trigger": {
+        "x": 36,
+        "y": 180
+      },
+      "triggerRadius": 28,
+      "arch": {
+        "x": 72,
+        "y": 152,
+        "width": 48,
+        "height": 48
+      },
+      "label": "Cửa A"
+    },
+    {
+      "id": "sun-door-corridor",
+      "roomId": "corridor",
+      "doorId": "sun-door",
+      "threshold": {
+        "x": 536,
+        "y": 196,
+        "width": 104,
+        "height": 48
+      },
+      "jambs": [
+        {
+          "x": 536,
+          "y": 172,
+          "width": 104,
+          "height": 24
+        },
+        {
+          "x": 536,
+          "y": 244,
+          "width": 104,
+          "height": 24
+        }
+      ],
+      "inspect": {
+        "x": 512,
+        "y": 220
+      },
+      "inspectRadius": 22,
+      "trigger": {
+        "x": 604,
+        "y": 220
+      },
+      "triggerRadius": 28,
+      "arch": {
+        "x": 576,
+        "y": 192,
+        "width": 48,
+        "height": 48
+      },
+      "label": "Cửa Mặt Trời"
+    },
+    {
+      "id": "sun-door-observatory",
+      "roomId": "observatory",
+      "doorId": "sun-door",
+      "threshold": {
+        "x": 24,
+        "y": 190,
+        "width": 80,
+        "height": 48
+      },
+      "jambs": [
+        {
+          "x": 24,
+          "y": 166,
+          "width": 80,
+          "height": 24
+        },
+        {
+          "x": 24,
+          "y": 238,
+          "width": 80,
+          "height": 24
+        }
+      ],
+      "inspect": {
+        "x": 118,
+        "y": 214
+      },
+      "inspectRadius": 22,
+      "trigger": {
+        "x": 36,
+        "y": 214
+      },
+      "triggerRadius": 28,
+      "arch": {
+        "x": 56,
+        "y": 186,
+        "width": 48,
+        "height": 48
+      },
+      "label": "Cửa Mặt Trời"
+    },
+    {
+      "id": "return-loop-entrance",
+      "roomId": "entrance",
+      "doorId": "return-loop",
+      "threshold": {
+        "x": 24,
+        "y": 196,
+        "width": 104,
+        "height": 48
+      },
+      "jambs": [
+        {
+          "x": 24,
+          "y": 172,
+          "width": 104,
+          "height": 24
+        },
+        {
+          "x": 24,
+          "y": 244,
+          "width": 104,
+          "height": 24
+        }
+      ],
+      "inspect": {
+        "x": 140,
+        "y": 220
+      },
+      "inspectRadius": 22,
+      "trigger": {
+        "x": 36,
+        "y": 220
+      },
+      "triggerRadius": 28,
+      "arch": {
+        "x": 72,
+        "y": 192,
+        "width": 48,
+        "height": 48
+      },
+      "label": "Lối đá vòng"
+    },
+    {
+      "id": "return-loop-observatory",
+      "roomId": "observatory",
+      "doorId": "return-loop",
+      "threshold": {
+        "x": 496,
+        "y": 300,
+        "width": 48,
+        "height": 20
+      },
+      "jambs": [
+        {
+          "x": 488,
+          "y": 300,
+          "width": 8,
+          "height": 20
+        },
+        {
+          "x": 544,
+          "y": 300,
+          "width": 8,
+          "height": 20
+        }
+      ],
+      "inspect": {
+        "x": 520,
+        "y": 262
+      },
+      "inspectRadius": 22,
+      "trigger": {
+        "x": 520,
+        "y": 304
+      },
+      "triggerRadius": 16,
+      "arch": {
+        "x": 496,
+        "y": 284,
+        "width": 48,
+        "height": 36
+      },
+      "label": "Lối đá vòng"
+    }
+  ],
+  "elements": [
+    {
+      "id": "lantern-pedestal",
+      "roomId": "entrance",
+      "art": {
+        "kind": "texture",
+        "key": "pedestal_empty"
+      },
+      "nativeWidth": 36,
+      "nativeHeight": 39,
+      "scale": 1,
+      "anchor": {
+        "x": 188,
+        "y": 232
+      },
+      "stand": {
+        "x": 188,
+        "y": 250
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 170,
+        "y": 193,
+        "width": 36,
+        "height": 39
+      }
+    },
+    {
+      "id": "g0",
+      "roomId": "entrance",
+      "art": {
+        "kind": "texture",
+        "key": "mirror_0"
+      },
+      "nativeWidth": 36,
+      "nativeHeight": 48,
+      "scale": 0.9,
+      "anchor": {
+        "x": 432,
+        "y": 236
+      },
+      "stand": {
+        "x": 432,
+        "y": 254
+      },
+      "radius": 22,
+      "approach": "south",
+      "rotatesWith": "g0",
+      "drawn_rect": {
+        "x": 416,
+        "y": 193,
+        "width": 32,
+        "height": 43
+      }
+    },
+    {
+      "id": "learned-marks",
+      "roomId": "entrance",
+      "art": {
+        "kind": "level",
+        "level": 8,
+        "file": "learned-marks-miniature"
+      },
+      "nativeWidth": 160,
+      "nativeHeight": 80,
+      "scale": 1,
+      "anchor": {
+        "x": 320,
+        "y": 184
+      },
+      "stand": {
+        "x": 320,
+        "y": 202
+      },
+      "radius": 24,
+      "approach": "south",
+      "mount": "ground",
+      "drawn_rect": {
+        "x": 240,
+        "y": 104,
+        "width": 160,
+        "height": 80
+      }
+    },
+    {
+      "id": "g1",
+      "roomId": "corridor",
+      "art": {
+        "kind": "texture",
+        "key": "mirror_1"
+      },
+      "nativeWidth": 36,
+      "nativeHeight": 48,
+      "scale": 0.9,
+      "anchor": {
+        "x": 240,
+        "y": 216
+      },
+      "stand": {
+        "x": 240,
+        "y": 234
+      },
+      "radius": 22,
+      "approach": "south",
+      "rotatesWith": "g1",
+      "drawn_rect": {
+        "x": 224,
+        "y": 173,
+        "width": 32,
+        "height": 43
+      }
+    },
+    {
+      "id": "lumo-tube",
+      "roomId": "corridor",
+      "art": {
+        "kind": "level",
+        "level": 4,
+        "file": "tube-mouth"
+      },
+      "nativeWidth": 64,
+      "nativeHeight": 32,
+      "scale": 1,
+      "anchor": {
+        "x": 105,
+        "y": 88
+      },
+      "stand": {
+        "x": 105,
+        "y": 106
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 73,
+        "y": 56,
+        "width": 64,
+        "height": 32
+      }
+    },
+    {
+      "id": "lumo-seal",
+      "roomId": "corridor",
+      "art": {
+        "kind": "level",
+        "level": 7,
+        "file": "lock-moon-covered"
+      },
+      "nativeWidth": 32,
+      "nativeHeight": 40,
+      "scale": 1,
+      "anchor": {
+        "x": 320,
+        "y": 88
+      },
+      "stand": {
+        "x": 320,
+        "y": 106
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 304,
+        "y": 48,
+        "width": 32,
+        "height": 40
+      }
+    },
+    {
+      "id": "door-a-control",
+      "roomId": "corridor",
+      "art": {
+        "kind": "level",
+        "level": 4,
+        "file": "latch-unlatched"
+      },
+      "nativeWidth": 28,
+      "nativeHeight": 32,
+      "scale": 1,
+      "anchor": {
+        "x": 56,
+        "y": 204
+      },
+      "stand": {
+        "x": 56,
+        "y": 222
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 42,
+        "y": 172,
+        "width": 28,
+        "height": 32
+      }
+    },
+    {
+      "id": "sun-door-control",
+      "roomId": "corridor",
+      "art": {
+        "kind": "level",
+        "level": 7,
+        "file": "lock-sun-off"
+      },
+      "nativeWidth": 32,
+      "nativeHeight": 40,
+      "scale": 1,
+      "anchor": {
+        "x": 500,
+        "y": 260
+      },
+      "stand": {
+        "x": 500,
+        "y": 278
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 484,
+        "y": 220,
+        "width": 32,
+        "height": 40
+      }
+    },
+    {
+      "id": "star-map-table",
+      "roomId": "corridor",
+      "art": {
+        "kind": "texture",
+        "key": "ruins_altar"
+      },
+      "nativeWidth": 104,
+      "nativeHeight": 52,
+      "scale": 0.8,
+      "anchor": {
+        "x": 320,
+        "y": 280
+      },
+      "stand": {
+        "x": 320,
+        "y": 280
+      },
+      "radius": 0,
+      "approach": "side",
+      "drawn_rect": {
+        "x": 278.5,
+        "y": 238,
+        "width": 83,
+        "height": 42
+      }
+    },
+    {
+      "id": "g2",
+      "roomId": "observatory",
+      "art": {
+        "kind": "texture",
+        "key": "mirror_2"
+      },
+      "nativeWidth": 36,
+      "nativeHeight": 48,
+      "scale": 0.9,
+      "anchor": {
+        "x": 168,
+        "y": 258
+      },
+      "stand": {
+        "x": 168,
+        "y": 276
+      },
+      "radius": 22,
+      "approach": "south",
+      "rotatesWith": "g2",
+      "drawn_rect": {
+        "x": 152,
+        "y": 215,
+        "width": 32,
+        "height": 43
+      }
+    },
+    {
+      "id": "splitter",
+      "roomId": "observatory",
+      "art": {
+        "kind": "level-set",
+        "level": 7,
+        "files": [
+          "fixed-three-route-splitter-off",
+          "fixed-three-route-splitter-on"
+        ]
+      },
+      "nativeWidth": 48,
+      "nativeHeight": 48,
+      "scale": 0.8,
+      "anchor": {
+        "x": 240,
+        "y": 240
+      },
+      "stand": {
+        "x": 240,
+        "y": 258
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 221,
+        "y": 202,
+        "width": 38,
+        "height": 38
+      }
+    },
+    {
+      "id": "statue",
+      "roomId": "observatory",
+      "art": {
+        "kind": "level-set",
+        "level": 7,
+        "files": [
+          "statue-notch-0",
+          "statue-notch-1",
+          "statue-notch-2",
+          "statue-notch-3"
+        ]
+      },
+      "nativeWidth": 64,
+      "nativeHeight": 88,
+      "scale": 0.8,
+      "anchor": {
+        "x": 296,
+        "y": 252
+      },
+      "stand": {
+        "x": 296,
+        "y": 270
+      },
+      "radius": 22,
+      "approach": "south",
+      "rotatesWith": "statue",
+      "drawn_rect": {
+        "x": 270.5,
+        "y": 182,
+        "width": 51,
+        "height": 70
+      }
+    },
+    {
+      "id": "sun-lock",
+      "roomId": "observatory",
+      "art": {
+        "kind": "level",
+        "level": 7,
+        "file": "lock-sun-off"
+      },
+      "nativeWidth": 32,
+      "nativeHeight": 40,
+      "scale": 0.85,
+      "anchor": {
+        "x": 176,
+        "y": 152
+      },
+      "stand": {
+        "x": 176,
+        "y": 170
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 162.5,
+        "y": 118,
+        "width": 27,
+        "height": 34
+      }
+    },
+    {
+      "id": "root-bed",
+      "roomId": "observatory",
+      "art": {
+        "kind": "texture",
+        "key": "root-bed"
+      },
+      "nativeWidth": 44,
+      "nativeHeight": 148,
+      "scale": 1,
+      "mount": "ground",
+      "anchor": {
+        "x": 362,
+        "y": 300
+      },
+      "stand": {
+        "x": 330,
+        "y": 252
+      },
+      "radius": 24,
+      "approach": "side",
+      "solidOverride": {
+        "x": 340,
+        "y": 152,
+        "width": 44,
+        "height": 148
+      },
+      "drawn_rect": {
+        "x": 340,
+        "y": 152,
+        "width": 44,
+        "height": 148
+      }
+    },
+    {
+      "id": "final-door-control",
+      "roomId": "observatory",
+      "art": {
+        "kind": "level",
+        "level": 3,
+        "file": "mechanisms/latch-east-unlatched"
+      },
+      "nativeWidth": 28,
+      "nativeHeight": 32,
+      "scale": 1,
+      "anchor": {
+        "x": 500,
+        "y": 152
+      },
+      "stand": {
+        "x": 500,
+        "y": 170
+      },
+      "radius": 22,
+      "approach": "south",
+      "mount": "ground",
+      "drawn_rect": {
+        "x": 486,
+        "y": 120,
+        "width": 28,
+        "height": 32
+      }
+    },
+    {
+      "id": "final-door",
+      "roomId": "observatory",
+      "art": {
+        "kind": "level-set",
+        "level": 7,
+        "files": [
+          "sanctuary-door-closed",
+          "sanctuary-door-open"
+        ]
+      },
+      "nativeWidth": 104,
+      "nativeHeight": 76,
+      "scale": 0.62,
+      "anchor": {
+        "x": 500,
+        "y": 152
+      },
+      "stand": {
+        "x": 500,
+        "y": 152
+      },
+      "radius": 0,
+      "approach": "gate",
+      "mount": "ground",
+      "drawn_rect": {
+        "x": 468,
+        "y": 105,
+        "width": 64,
+        "height": 47
+      }
+    },
+    {
+      "id": "stone-return-loop",
+      "roomId": "observatory",
+      "art": {
+        "kind": "texture",
+        "key": "receiver_off"
+      },
+      "nativeWidth": 40,
+      "nativeHeight": 37,
+      "scale": 0.7,
+      "anchor": {
+        "x": 466,
+        "y": 252
+      },
+      "stand": {
+        "x": 466,
+        "y": 270
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 452,
+        "y": 226,
+        "width": 28,
+        "height": 26
+      }
+    },
+    {
+      "id": "final-record",
+      "roomId": "observatory",
+      "art": {
+        "kind": "texture",
+        "key": "ruins_altar"
+      },
+      "nativeWidth": 104,
+      "nativeHeight": 52,
+      "scale": 0.62,
+      "anchor": {
+        "x": 418,
+        "y": 256
+      },
+      "stand": {
+        "x": 418,
+        "y": 274
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 386,
+        "y": 224,
+        "width": 64,
+        "height": 32
+      }
+    },
+    {
+      "id": "balance-crystal",
+      "roomId": "observatory",
+      "art": {
+        "kind": "texture",
+        "key": "crystal_balance"
+      },
+      "nativeWidth": 42,
+      "nativeHeight": 78,
+      "scale": 0.5,
+      "anchor": {
+        "x": 568,
+        "y": 252
+      },
+      "stand": {
+        "x": 568,
+        "y": 270
+      },
+      "radius": 22,
+      "approach": "south",
+      "drawn_rect": {
+        "x": 557.5,
+        "y": 213,
+        "width": 21,
+        "height": 39
+      }
+    }
+  ],
+  "stamps": {
+    "entrance": [
+      {
+        "id": "loop-path",
+        "x": 128,
+        "y": 210,
+        "width": 60,
+        "height": 24,
+        "depth": 2
+      },
+      {
+        "id": "source-ring",
+        "x": 156,
+        "y": 214,
+        "width": 64,
+        "height": 34,
+        "depth": 1
+      }
+    ],
+    "corridor": [
+      {
+        "id": "pipe-run",
+        "x": 73,
+        "y": 74,
+        "width": 215,
+        "height": 18,
+        "depth": 2
+      },
+      {
+        "id": "latch-grille",
+        "x": 28,
+        "y": 236,
+        "width": 56,
+        "height": 28,
+        "depth": 2
+      }
+    ],
+    "observatory": [
+      {
+        "id": "pipe-run",
+        "x": 344,
+        "y": 60,
+        "width": 264,
+        "height": 18,
+        "depth": 2
+      },
+      {
+        "id": "pipe-drop",
+        "x": 592,
+        "y": 76,
+        "width": 18,
+        "height": 180,
+        "depth": 2
+      },
+      {
+        "id": "loop-path",
+        "x": 472,
+        "y": 266,
+        "width": 96,
+        "height": 32,
+        "depth": 2
+      },
+      {
+        "id": "final-door-sill",
+        "x": 468,
+        "y": 140,
+        "width": 64,
+        "height": 14,
+        "depth": 2
+      }
+    ]
+  },
+  "root_bed": {
+    "x": 340,
+    "y": 152,
+    "width": 44,
+    "height": 148
+  },
+  "bridge_lane": {
+    "x": 340,
+    "y": 202,
+    "width": 44,
+    "height": 48
+  },
+  "final_door_head": {
+    "x": 468,
+    "y": 100,
+    "width": 64,
+    "height": 52
+  },
+  "shadow": {
+    "art": {
+      "width": 48,
+      "height": 64
+    },
+    "ground": {
+      "x": 424,
+      "y": 190
+    },
+    "footprint": {
+      "x": 410,
+      "y": 174,
+      "width": 28,
+      "height": 16
+    },
+    "guardianGround": {
+      "x": 466,
+      "y": 190
+    }
+  },
+  "rooms": {
+    "entrance": {
+      "id": "entrance",
+      "title": "Tiền sảnh",
+      "width": 640,
+      "height": 360,
+      "backgroundBiome": "observatory",
+      "entrySpawnId": "entrance-start",
+      "spawns": [
+        {
+          "id": "entrance-start",
+          "position": {
+            "x": 100,
+            "y": 268
+          },
+          "safe": true
+        },
+        {
+          "id": "entrance-from-corridor",
+          "position": {
+            "x": 500,
+            "y": 180
+          },
+          "safe": true
+        },
+        {
+          "id": "entrance-from-return-loop",
+          "position": {
+            "x": 176,
+            "y": 268
+          },
+          "safe": true
+        }
+      ],
+      "exits": [
+        {
+          "id": "entrance-to-corridor",
+          "doorId": "door-a",
+          "fromRoom": "entrance",
+          "toRoom": "corridor",
+          "interactionPoint": {
+            "x": 604,
+            "y": 180
+          },
+          "inspectPoint": {
+            "x": 520,
+            "y": 180
+          },
+          "destinationSpawnId": "corridor-from-entrance"
+        },
+        {
+          "id": "entrance-return-loop-to-observatory",
+          "doorId": "return-loop",
+          "fromRoom": "entrance",
+          "toRoom": "observatory",
+          "interactionPoint": {
+            "x": 36,
+            "y": 220
+          },
+          "inspectPoint": {
+            "x": 140,
+            "y": 220
+          },
+          "destinationSpawnId": "observatory-far-bank"
+        }
+      ],
+      "obstacles": [
+        {
+          "id": "entrance-wall-0",
+          "kind": "wall",
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 88
+        },
+        {
+          "id": "entrance-wall-1",
+          "kind": "wall",
+          "x": 0,
+          "y": 304,
+          "width": 640,
+          "height": 56
+        },
+        {
+          "id": "entrance-wall-2",
+          "kind": "wall",
+          "x": 0,
+          "y": 88,
+          "width": 24,
+          "height": 108
+        },
+        {
+          "id": "entrance-wall-3",
+          "kind": "wall",
+          "x": 0,
+          "y": 244,
+          "width": 24,
+          "height": 60
+        },
+        {
+          "id": "entrance-wall-4",
+          "kind": "wall",
+          "x": 616,
+          "y": 88,
+          "width": 24,
+          "height": 68
+        },
+        {
+          "id": "entrance-wall-5",
+          "kind": "wall",
+          "x": 616,
+          "y": 204,
+          "width": 24,
+          "height": 100
+        },
+        {
+          "id": "entrance-prop-0",
+          "kind": "furniture",
+          "x": 170,
+          "y": 193,
+          "width": 36,
+          "height": 39
+        },
+        {
+          "id": "entrance-prop-1",
+          "kind": "furniture",
+          "x": 416,
+          "y": 193,
+          "width": 32,
+          "height": 43
+        }
+      ],
+      "interactables": [
+        {
+          "id": "lantern-pedestal",
+          "kind": "pedestal",
+          "position": {
+            "x": 188,
+            "y": 232
+          },
+          "interactionPoint": {
+            "x": 188,
+            "y": 250
+          },
+          "textureKey": "pedestal_empty",
+          "label": "Bệ đèn"
+        },
+        {
+          "id": "g0",
+          "kind": "mirror",
+          "position": {
+            "x": 432,
+            "y": 236
+          },
+          "interactionPoint": {
+            "x": 432,
+            "y": 254
+          },
+          "textureKey": "mirror_0",
+          "label": "G0"
+        },
+        {
+          "id": "learned-marks",
+          "kind": "marks",
+          "position": {
+            "x": 320,
+            "y": 184
+          },
+          "interactionPoint": {
+            "x": 320,
+            "y": 202
+          },
+          "label": "Mô hình các dấu đã học"
+        }
+      ],
+      "waypoints": [
+        {
+          "id": "lantern-source",
+          "position": {
+            "roomId": "entrance",
+            "x": 188,
+            "y": 176
+          }
+        },
+        {
+          "id": "door-a-eye",
+          "position": {
+            "roomId": "entrance",
+            "x": 604,
+            "y": 168
+          }
+        }
+      ]
+    },
+    "corridor": {
+      "id": "corridor",
+      "title": "Hành lang phòng sao",
+      "width": 640,
+      "height": 360,
+      "backgroundBiome": "library",
+      "entrySpawnId": "corridor-from-entrance",
+      "spawns": [
+        {
+          "id": "corridor-from-entrance",
+          "position": {
+            "x": 152,
+            "y": 180
+          },
+          "safe": true
+        },
+        {
+          "id": "corridor-from-observatory",
+          "position": {
+            "x": 516,
+            "y": 190
+          },
+          "safe": true
+        }
+      ],
+      "exits": [
+        {
+          "id": "corridor-to-entrance",
+          "doorId": "door-a",
+          "fromRoom": "corridor",
+          "toRoom": "entrance",
+          "interactionPoint": {
+            "x": 36,
+            "y": 180
+          },
+          "destinationSpawnId": "entrance-from-corridor",
+          "latchControl": {
+            "x": 56,
+            "y": 222
+          }
+        },
+        {
+          "id": "corridor-to-observatory",
+          "doorId": "sun-door",
+          "fromRoom": "corridor",
+          "toRoom": "observatory",
+          "interactionPoint": {
+            "x": 604,
+            "y": 220
+          },
+          "inspectPoint": {
+            "x": 512,
+            "y": 220
+          },
+          "destinationSpawnId": "observatory-from-corridor"
+        }
+      ],
+      "obstacles": [
+        {
+          "id": "corridor-wall-0",
+          "kind": "wall",
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 88
+        },
+        {
+          "id": "corridor-wall-1",
+          "kind": "wall",
+          "x": 0,
+          "y": 304,
+          "width": 640,
+          "height": 56
+        },
+        {
+          "id": "corridor-wall-2",
+          "kind": "wall",
+          "x": 0,
+          "y": 88,
+          "width": 24,
+          "height": 68
+        },
+        {
+          "id": "corridor-wall-3",
+          "kind": "wall",
+          "x": 0,
+          "y": 204,
+          "width": 24,
+          "height": 100
+        },
+        {
+          "id": "corridor-wall-4",
+          "kind": "wall",
+          "x": 616,
+          "y": 88,
+          "width": 24,
+          "height": 108
+        },
+        {
+          "id": "corridor-wall-5",
+          "kind": "wall",
+          "x": 616,
+          "y": 244,
+          "width": 24,
+          "height": 60
+        },
+        {
+          "id": "corridor-prop-0",
+          "kind": "furniture",
+          "x": 224,
+          "y": 173,
+          "width": 32,
+          "height": 43
+        },
+        {
+          "id": "corridor-prop-1",
+          "kind": "furniture",
+          "x": 484,
+          "y": 220,
+          "width": 32,
+          "height": 40
+        },
+        {
+          "id": "corridor-prop-2",
+          "kind": "furniture",
+          "x": 278.5,
+          "y": 238,
+          "width": 83,
+          "height": 42
+        }
+      ],
+      "interactables": [
+        {
+          "id": "g1",
+          "kind": "mirror",
+          "position": {
+            "x": 240,
+            "y": 216
+          },
+          "interactionPoint": {
+            "x": 240,
+            "y": 234
+          },
+          "textureKey": "mirror_1",
+          "label": "G1"
+        },
+        {
+          "id": "lumo-tube",
+          "kind": "tube",
+          "position": {
+            "x": 105,
+            "y": 88
+          },
+          "interactionPoint": {
+            "x": 105,
+            "y": 106
+          },
+          "label": "Ống dẫn Lumo"
+        },
+        {
+          "id": "lumo-seal",
+          "kind": "seal",
+          "position": {
+            "x": 320,
+            "y": 88
+          },
+          "interactionPoint": {
+            "x": 320,
+            "y": 106
+          },
+          "label": "Ấn Lumo"
+        },
+        {
+          "id": "door-a-control",
+          "kind": "door-control",
+          "position": {
+            "x": 56,
+            "y": 204
+          },
+          "interactionPoint": {
+            "x": 56,
+            "y": 222
+          },
+          "label": "Chốt cửa A"
+        },
+        {
+          "id": "sun-door-control",
+          "kind": "lock",
+          "position": {
+            "x": 500,
+            "y": 260
+          },
+          "interactionPoint": {
+            "x": 500,
+            "y": 278
+          },
+          "label": "Khóa Nhật"
+        }
+      ],
+      "waypoints": [
+        {
+          "id": "g1",
+          "position": {
+            "roomId": "corridor",
+            "x": 240,
+            "y": 190
+          }
+        },
+        {
+          "id": "lumo-tube-entry",
+          "position": {
+            "roomId": "corridor",
+            "x": 105,
+            "y": 78
+          }
+        },
+        {
+          "id": "lumo-seal",
+          "position": {
+            "roomId": "corridor",
+            "x": 320,
+            "y": 80
+          }
+        }
+      ]
+    },
+    "observatory": {
+      "id": "observatory",
+      "title": "Phòng thiên văn",
+      "width": 640,
+      "height": 360,
+      "backgroundBiome": "ruins",
+      "entrySpawnId": "observatory-from-corridor",
+      "spawns": [
+        {
+          "id": "observatory-from-corridor",
+          "position": {
+            "x": 128,
+            "y": 200
+          },
+          "safe": true
+        },
+        {
+          "id": "observatory-near-bridge",
+          "position": {
+            "x": 280,
+            "y": 276
+          },
+          "safe": true
+        },
+        {
+          "id": "observatory-far-bank",
+          "position": {
+            "x": 452,
+            "y": 276
+          },
+          "safe": true
+        }
+      ],
+      "exits": [
+        {
+          "id": "observatory-to-corridor",
+          "doorId": "sun-door",
+          "fromRoom": "observatory",
+          "toRoom": "corridor",
+          "interactionPoint": {
+            "x": 36,
+            "y": 214
+          },
+          "inspectPoint": {
+            "x": 118,
+            "y": 214
+          },
+          "destinationSpawnId": "corridor-from-observatory"
+        },
+        {
+          "id": "observatory-return-loop-to-entrance",
+          "doorId": "return-loop",
+          "fromRoom": "observatory",
+          "toRoom": "entrance",
+          "interactionPoint": {
+            "x": 520,
+            "y": 304
+          },
+          "inspectPoint": {
+            "x": 520,
+            "y": 262
+          },
+          "destinationSpawnId": "entrance-from-return-loop"
+        }
+      ],
+      "obstacles": [
+        {
+          "id": "observatory-wall-0",
+          "kind": "wall",
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 100
+        },
+        {
+          "id": "observatory-wall-1",
+          "kind": "wall",
+          "x": 0,
+          "y": 100,
+          "width": 468,
+          "height": 52
+        },
+        {
+          "id": "observatory-wall-2",
+          "kind": "wall",
+          "x": 532,
+          "y": 100,
+          "width": 108,
+          "height": 52
+        },
+        {
+          "id": "observatory-wall-3",
+          "kind": "wall",
+          "x": 0,
+          "y": 152,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "id": "observatory-wall-4",
+          "kind": "wall",
+          "x": 0,
+          "y": 238,
+          "width": 24,
+          "height": 62
+        },
+        {
+          "id": "observatory-wall-5",
+          "kind": "wall",
+          "x": 616,
+          "y": 152,
+          "width": 24,
+          "height": 148
+        },
+        {
+          "id": "observatory-wall-6",
+          "kind": "wall",
+          "x": 0,
+          "y": 300,
+          "width": 488,
+          "height": 60
+        },
+        {
+          "id": "observatory-wall-7",
+          "kind": "wall",
+          "x": 548,
+          "y": 300,
+          "width": 92,
+          "height": 60
+        },
+        {
+          "id": "observatory-wall-8",
+          "kind": "wall",
+          "x": 488,
+          "y": 320,
+          "width": 64,
+          "height": 40
+        },
+        {
+          "id": "observatory-prop-0",
+          "kind": "furniture",
+          "x": 152,
+          "y": 215,
+          "width": 32,
+          "height": 43
+        },
+        {
+          "id": "observatory-prop-1",
+          "kind": "furniture",
+          "x": 221,
+          "y": 202,
+          "width": 38,
+          "height": 38
+        },
+        {
+          "id": "observatory-prop-2",
+          "kind": "furniture",
+          "x": 270.5,
+          "y": 182,
+          "width": 51,
+          "height": 70
+        },
+        {
+          "id": "observatory-prop-3",
+          "kind": "furniture",
+          "x": 162.5,
+          "y": 118,
+          "width": 27,
+          "height": 34
+        },
+        {
+          "id": "observatory-prop-4",
+          "kind": "furniture",
+          "x": 452,
+          "y": 226,
+          "width": 28,
+          "height": 26
+        },
+        {
+          "id": "observatory-prop-5",
+          "kind": "furniture",
+          "x": 386,
+          "y": 224,
+          "width": 64,
+          "height": 32
+        },
+        {
+          "id": "observatory-prop-6",
+          "kind": "furniture",
+          "x": 557.5,
+          "y": 213,
+          "width": 21,
+          "height": 39
+        },
+        {
+          "id": "observatory-root-bed",
+          "kind": "root-bed",
+          "x": 340,
+          "y": 152,
+          "width": 44,
+          "height": 148,
+          "dynamic": true
+        },
+        {
+          "id": "observatory-final-door-head",
+          "kind": "furniture",
+          "x": 468,
+          "y": 100,
+          "width": 64,
+          "height": 52,
+          "dynamic": true
+        }
+      ],
+      "interactables": [
+        {
+          "id": "g2",
+          "kind": "mirror",
+          "position": {
+            "x": 168,
+            "y": 258
+          },
+          "interactionPoint": {
+            "x": 168,
+            "y": 276
+          },
+          "textureKey": "mirror_2",
+          "label": "G2"
+        },
+        {
+          "id": "splitter",
+          "kind": "splitter",
+          "position": {
+            "x": 240,
+            "y": 240
+          },
+          "interactionPoint": {
+            "x": 240,
+            "y": 258
+          },
+          "label": "Khung chia tia"
+        },
+        {
+          "id": "statue",
+          "kind": "statue",
+          "position": {
+            "x": 296,
+            "y": 252
+          },
+          "interactionPoint": {
+            "x": 296,
+            "y": 270
+          },
+          "label": "Tượng chắn sáng"
+        },
+        {
+          "id": "sun-lock",
+          "kind": "lock",
+          "position": {
+            "x": 176,
+            "y": 152
+          },
+          "interactionPoint": {
+            "x": 176,
+            "y": 170
+          },
+          "label": "Khóa Nhật"
+        },
+        {
+          "id": "root-bed",
+          "kind": "roots",
+          "position": {
+            "x": 362,
+            "y": 300
+          },
+          "interactionPoint": {
+            "x": 330,
+            "y": 252
+          },
+          "label": "Luống rễ"
+        },
+        {
+          "id": "final-door-control",
+          "kind": "door-control",
+          "position": {
+            "x": 500,
+            "y": 152
+          },
+          "interactionPoint": {
+            "x": 500,
+            "y": 170
+          },
+          "label": "Chốt cửa cuối"
+        },
+        {
+          "id": "stone-return-loop",
+          "kind": "door-control",
+          "position": {
+            "x": 466,
+            "y": 252
+          },
+          "interactionPoint": {
+            "x": 466,
+            "y": 270
+          },
+          "label": "Lối đá vòng"
+        },
+        {
+          "id": "final-record",
+          "kind": "record",
+          "position": {
+            "x": 418,
+            "y": 256
+          },
+          "interactionPoint": {
+            "x": 418,
+            "y": 274
+          },
+          "textureKey": "ruins_altar",
+          "label": "Bản ghi cuối"
+        },
+        {
+          "id": "balance-crystal",
+          "kind": "crystal",
+          "position": {
+            "x": 568,
+            "y": 252
+          },
+          "interactionPoint": {
+            "x": 568,
+            "y": 270
+          },
+          "textureKey": "crystal_balance",
+          "label": "Tinh thể Cân Bằng"
+        }
+      ],
+      "waypoints": [
+        {
+          "id": "g2",
+          "position": {
+            "roomId": "observatory",
+            "x": 168,
+            "y": 226
+          }
+        },
+        {
+          "id": "sun-lock",
+          "position": {
+            "roomId": "observatory",
+            "x": 176,
+            "y": 133
+          }
+        },
+        {
+          "id": "splitter",
+          "position": {
+            "roomId": "observatory",
+            "x": 240,
+            "y": 220
+          }
+        },
+        {
+          "id": "root-branch",
+          "position": {
+            "roomId": "observatory",
+            "x": 362,
+            "y": 226
+          }
+        }
+      ]
+    }
+  },
+  "inputs": [
+    {
+      "file": "docs/scenario-v2/09-dark-moon-observatory.md",
+      "sha256": "6717ee2d99d8749ca8f4c9a7b3a739b996b328a4877db350293bbf73d2ad72ad"
+    },
+    {
+      "file": "docs/implementation/09-layout.md",
+      "sha256": "d069e36007595ee98258ec4dd676351452f803710d1067d09fd5f4bee52bdd99"
+    },
+    {
+      "file": "src/data/observatoryLayout.ts",
+      "sha256": "a12e5afe8c35509b27a03f10fa4eca6a00fb7bb7968328c907cde70453a006c5"
+    },
+    {
+      "file": "src/data/observatoryRooms.ts",
+      "sha256": "5095dbdc9c4b76d0dc0119c13a35457b5a2f7116ddf9af0d1ad724f6262c10c2"
+    }
+  ]
+}

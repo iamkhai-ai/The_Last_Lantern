@@ -1,0 +1,1003 @@
+[
+  {
+    "index": 0,
+    "id": "g0-0",
+    "cell": [
+      0,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 1,
+    "id": "g0-1",
+    "cell": [
+      176,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 2,
+    "id": "g0-2",
+    "cell": [
+      352,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 3,
+    "id": "g0-3",
+    "cell": [
+      528,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 4,
+    "id": "g1-0",
+    "cell": [
+      704,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 5,
+    "id": "g1-1",
+    "cell": [
+      880,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 6,
+    "id": "g1-2",
+    "cell": [
+      1056,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 7,
+    "id": "g1-3",
+    "cell": [
+      1232,
+      0,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 8,
+    "id": "g2-0",
+    "cell": [
+      0,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 9,
+    "id": "g2-1",
+    "cell": [
+      176,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 10,
+    "id": "g2-2",
+    "cell": [
+      352,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 11,
+    "id": "g2-3",
+    "cell": [
+      528,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 12,
+    "id": "lantern-pedestal-empty",
+    "cell": [
+      704,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 13,
+    "id": "lantern-pedestal-lit",
+    "cell": [
+      880,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 14,
+    "id": "sun-door-control-off",
+    "cell": [
+      1056,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 15,
+    "id": "sun-door-control-on",
+    "cell": [
+      1232,
+      164,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 16,
+    "id": "sun-lock-off",
+    "cell": [
+      0,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 17,
+    "id": "sun-lock-on",
+    "cell": [
+      176,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 18,
+    "id": "door-a-control-locked",
+    "cell": [
+      352,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 19,
+    "id": "door-a-control-latched",
+    "cell": [
+      528,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 20,
+    "id": "final-door-control-locked",
+    "cell": [
+      704,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 21,
+    "id": "final-door-control-latched",
+    "cell": [
+      880,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 22,
+    "id": "lumo-tube-dark",
+    "cell": [
+      1056,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 23,
+    "id": "lumo-tube-remembered",
+    "cell": [
+      1232,
+      328,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 24,
+    "id": "lumo-seal-covered",
+    "cell": [
+      0,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 25,
+    "id": "lumo-seal-revealed",
+    "cell": [
+      176,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 26,
+    "id": "splitter-off",
+    "cell": [
+      352,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 27,
+    "id": "splitter-on",
+    "cell": [
+      528,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 28,
+    "id": "statue-0",
+    "cell": [
+      704,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 29,
+    "id": "statue-1",
+    "cell": [
+      880,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 30,
+    "id": "statue-2",
+    "cell": [
+      1056,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 31,
+    "id": "statue-3",
+    "cell": [
+      1232,
+      492,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 32,
+    "id": "star-map-table",
+    "cell": [
+      0,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 33,
+    "id": "star-map-table-margin-ink",
+    "cell": [
+      176,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 34,
+    "id": "final-record",
+    "cell": [
+      352,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 35,
+    "id": "final-door-closed",
+    "cell": [
+      528,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 36,
+    "id": "final-door-open",
+    "cell": [
+      704,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 37,
+    "id": "stone-return-loop-closed",
+    "cell": [
+      880,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 38,
+    "id": "stone-return-loop-open",
+    "cell": [
+      1056,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 39,
+    "id": "root-bed-dark",
+    "cell": [
+      1232,
+      656,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 40,
+    "id": "root-bed-lit",
+    "cell": [
+      0,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 41,
+    "id": "root-bed-bridge",
+    "cell": [
+      176,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 42,
+    "id": "root-bed-retracted-dark",
+    "cell": [
+      352,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 43,
+    "id": "balance-crystal",
+    "cell": [
+      528,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 44,
+    "id": "corridor-pipe-run-off",
+    "cell": [
+      704,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-pipe-run-off.png"
+  },
+  {
+    "index": 45,
+    "id": "corridor-pipe-run-on",
+    "cell": [
+      880,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-pipe-run-on.png"
+  },
+  {
+    "index": 46,
+    "id": "observatory-pipe-run-off",
+    "cell": [
+      1056,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-pipe-run-off.png"
+  },
+  {
+    "index": 47,
+    "id": "observatory-pipe-run-on",
+    "cell": [
+      1232,
+      820,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-pipe-run-on.png"
+  },
+  {
+    "index": 48,
+    "id": "pipe-drop-off",
+    "cell": [
+      0,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/pipe-drop-off.png"
+  },
+  {
+    "index": 49,
+    "id": "pipe-drop-on",
+    "cell": [
+      176,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/pipe-drop-on.png"
+  },
+  {
+    "index": 50,
+    "id": "door-a-entrance-closed",
+    "cell": [
+      352,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 51,
+    "id": "door-a-entrance-open",
+    "cell": [
+      528,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 52,
+    "id": "door-a-corridor-closed",
+    "cell": [
+      704,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 53,
+    "id": "door-a-corridor-open",
+    "cell": [
+      880,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 54,
+    "id": "sun-door-corridor-closed",
+    "cell": [
+      1056,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 55,
+    "id": "sun-door-corridor-open",
+    "cell": [
+      1232,
+      984,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 56,
+    "id": "sun-door-observatory-closed",
+    "cell": [
+      0,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 57,
+    "id": "sun-door-observatory-open",
+    "cell": [
+      176,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 58,
+    "id": "return-loop-entrance-closed",
+    "cell": [
+      352,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 59,
+    "id": "return-loop-entrance-open",
+    "cell": [
+      528,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 60,
+    "id": "return-loop-observatory-closed",
+    "cell": [
+      704,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 61,
+    "id": "return-loop-observatory-open",
+    "cell": [
+      880,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 62,
+    "id": "learned-marks",
+    "cell": [
+      1056,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 63,
+    "id": "wheel-stopped-sun-among-stars",
+    "cell": [
+      1232,
+      1148,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 64,
+    "id": "stone-floor-tile-0",
+    "cell": [
+      0,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 65,
+    "id": "stone-floor-tile-1",
+    "cell": [
+      176,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 66,
+    "id": "stone-floor-tile-2",
+    "cell": [
+      352,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 67,
+    "id": "stone-floor-tile-3",
+    "cell": [
+      528,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 68,
+    "id": "lobby-base",
+    "cell": [
+      704,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/lobby-base.png"
+  },
+  {
+    "index": 69,
+    "id": "star-chart-base",
+    "cell": [
+      880,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/star-chart-base.png"
+  },
+  {
+    "index": 70,
+    "id": "observatory-clean-base",
+    "cell": [
+      1056,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-clean-base.png"
+  },
+  {
+    "index": 71,
+    "id": "door-a-entrance-threshold-closed",
+    "cell": [
+      1232,
+      1312,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 72,
+    "id": "door-a-corridor-threshold-closed",
+    "cell": [
+      0,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 73,
+    "id": "sun-door-corridor-threshold-closed",
+    "cell": [
+      176,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 74,
+    "id": "sun-door-observatory-threshold-closed",
+    "cell": [
+      352,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 75,
+    "id": "return-loop-entrance-threshold-closed",
+    "cell": [
+      528,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 76,
+    "id": "return-loop-observatory-threshold-closed",
+    "cell": [
+      704,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 77,
+    "id": "entrance-loop-path",
+    "cell": [
+      880,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 78,
+    "id": "entrance-source-ring",
+    "cell": [
+      1056,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 79,
+    "id": "corridor-latch-grille",
+    "cell": [
+      1232,
+      1476,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 80,
+    "id": "observatory-loop-path",
+    "cell": [
+      0,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 81,
+    "id": "observatory-final-door-sill",
+    "cell": [
+      176,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 82,
+    "id": "memory-wheel-blocked",
+    "cell": [
+      352,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 83,
+    "id": "memory-water-drained",
+    "cell": [
+      528,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 84,
+    "id": "memory-three-root-circuits-cracked",
+    "cell": [
+      704,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 85,
+    "id": "memory-amber-tint",
+    "cell": [
+      880,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-amber-tint.png"
+  },
+  {
+    "index": 86,
+    "id": "memory-white-flash",
+    "cell": [
+      1056,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": false,
+    "dedicated_native_file": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-white-flash.png"
+  },
+  {
+    "index": 87,
+    "id": "memory-guardian-1",
+    "cell": [
+      1232,
+      1640,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 88,
+    "id": "memory-guardian-2",
+    "cell": [
+      0,
+      1804,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  },
+  {
+    "index": 89,
+    "id": "memory-guardian-3",
+    "cell": [
+      176,
+      1804,
+      176,
+      164
+    ],
+    "shown_at_native": true
+  }
+]

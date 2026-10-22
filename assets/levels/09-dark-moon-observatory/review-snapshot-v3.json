@@ -1,0 +1,661 @@
+{
+  "date": "2026-10-22",
+  "base_git_head": "92a8374912313a224c45581c0a1f3b2baf47b546",
+  "scope": "Level 09 v3 offline art deliverable: README, 90 native assets, 31 previews, source prompts, original generations and reproducible recipes",
+  "revision_sha256": "826ff659ed6451c3138a72831f2416c4b533bdba82f5dd6f158a6787999f19b6",
+  "asset_fingerprint_sha256": "9d1585a814b64b626583cb6f266b95a336c439634e2212c11eb7b2a472cfc890",
+  "validation_revision": {
+    "manifest_sha256": "4be7f7044d2007b9553aff28c819fd74580d2f8a76ea15822ce0f6e43b3fd222",
+    "review_manifest_sha256": "4aa303b7405785a781d91d15f7a14e0d35920c62f136698021b8b378c7e969d0",
+    "normalization_map_sha256": "1d803aadfbbd2d13eaa19f62405cd8bf9c5a781ed36aed4bafceba8a9fec8cb0",
+    "normalizer_sha256": "d3c5241efb600a1dd6805a30cb1815490f724d41e75aa66309b18ef37f503c8f",
+    "validator_sha256": "a448da5a23f848f423d4aa618d57153aef44dcac5805ef4808d22f1786bd6a04",
+    "asset_fingerprint_sha256": "9d1585a814b64b626583cb6f266b95a336c439634e2212c11eb7b2a472cfc890"
+  },
+  "files": [
+    {
+      "path": "assets/levels/09-dark-moon-observatory/asset-manifest-v3.json",
+      "sha256": "4be7f7044d2007b9553aff28c819fd74580d2f8a76ea15822ce0f6e43b3fd222"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-corridor.png",
+      "sha256": "25e13555252f06d27549e1d3f5952b0bd9b539179cf7abcf1191a60ae4298a7f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-entrance-nearest-2x.png",
+      "sha256": "8c0a4e926b9a91998df48aaff107b8022cc02f3d0be014c6d4892a532f80f464"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-entrance.png",
+      "sha256": "55ef4a53c249790f4fc2020141d1fe4b2cd7d473303f615feededfd7d46963d0"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-observatory.png",
+      "sha256": "a6f777cb0064bfdace6e0c9d88c50134d7059e4fd50d714acae7331daf0cde29"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-three-rooms.png",
+      "sha256": "75554f495870198cb91b95f583359caa20f896d619910dba219803115bf6d9e1"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-corridor.png",
+      "sha256": "3844c6e9f6cf7da30a9651af6fb80a64ef6e963b72c25a758a2cfff4b28304d2"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-entrance.png",
+      "sha256": "e6f20c9258a1e6f24f44e448344d54ce3886b4f27074a6d6cf3b4025ad77a3c5"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-observatory-nearest-2x.png",
+      "sha256": "61fac0405454465ef4ab51c84bd8eb97bad833871f46c476c4502406b9fc6b94"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-observatory.png",
+      "sha256": "6b20363977e83f7c3a64d81f074a1871deb5fb397043d1edd92c26c07cbc6006"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-three-rooms.png",
+      "sha256": "77044635f86d1c0e323914d39892bca3307f3fe83f46477b944524fbf36f6d04"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-corridor.png",
+      "sha256": "5f65e59210bb5178d143e73c659a2fc0871672b49835b2bb3fd09b8e12949fc2"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-entrance.png",
+      "sha256": "d72660c9b1d74902e8fcce5f19ebba34c2dc7e31efd3732578cb898baf1fc9f7"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-observatory-nearest-2x.png",
+      "sha256": "242a815cab839657af7f805e3626e12cb7c7e76692aaddae445eda3fd32c8f0b"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-observatory.png",
+      "sha256": "48e8f2630217803692aeaa3cb2223b2187fe1c232d0e8f6e64f08bd0e27787a0"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-three-rooms.png",
+      "sha256": "a7d37a15fbe94a3756a59130a921dd5613f5360e92b32aca0e1f49894b4d0a3f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-corridor.png",
+      "sha256": "3844c6e9f6cf7da30a9651af6fb80a64ef6e963b72c25a758a2cfff4b28304d2"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-entrance.png",
+      "sha256": "e6f20c9258a1e6f24f44e448344d54ce3886b4f27074a6d6cf3b4025ad77a3c5"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-observatory.png",
+      "sha256": "b848f551060ac66632eac7a674413bc623be06dfe3c87612310989f6f690f8bf"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-three-rooms.png",
+      "sha256": "ae7d0578ef0026891fee91acfc7eb13c44af12883bb804071810753bf70cf194"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/05-margin-ink-blank-for-runtime-text.png",
+      "sha256": "922da8ef8cca4d51187944ceb14f82b494ea99b9f5f97623ca6c9df8d32d933b"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/06-memory-record-guardian.png",
+      "sha256": "2911cb8a06b77769fe92672270cc36c094913bb188a25332eb2627191191a17c"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/07-memory-white-flash.png",
+      "sha256": "d1c625083c6ae00d49785d0ca4456a6ac0e48f5d630757b1fdfd55eee5491955"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-1-nearest-2x.png",
+      "sha256": "e14390e40563985e46ec5ae5a716251241748e858b6f22f10e2b8cf17cce7311"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-1.png",
+      "sha256": "e10d129f8f11264e54f0f071a14bbda9485713951e9106215af717af255e4d7e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-2.png",
+      "sha256": "2bf2d1cdff6e1a0d365b4123473605804ff6885a990431d097bd7bff6205ec2c"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-3.png",
+      "sha256": "aa9581699bfeccf46de7eda5cc6644d62cf821703f458f14282e6a3760a2b754"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/09-after-memory-shadow-remains-crystal-revealed.png",
+      "sha256": "1beeaf9fb8ed9f487511dcbf100a15f06e277e6c9b662b7d3194e5b7e61344cf"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/contact-index-v3.json",
+      "sha256": "be052cd0f63206b17e0cb633ca7ae0dd437e8638da5093588f4ad4fa862a993f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/memory-sequence-native.png",
+      "sha256": "74386cc5fefce541bc0bb390dbb314eb49aac050fdcc58e8c5f091fdd94837e9"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/native-sprite-contact-nearest-2x.png",
+      "sha256": "dd8b19211108a70f4315eb4f781a7ebf9450307956b9ba590a28747f04e76955"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/native-sprite-contact.png",
+      "sha256": "8e35633a3da25663cbce2daa07dd5c1be2567de1c2b712629907644507a70ebb"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/three-required-states-native.png",
+      "sha256": "c26f891c7ff71a2473385b3741a77d4a54a87984662eaf099ca6551e48e65986"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/provenance-v3.json",
+      "sha256": "8255014e6ce2fd5a8afc03a39fe6e7e883004dcb053d5c0367ee33b139284a13"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/README-v3.md",
+      "sha256": "f875db245b005adb9a9d8b6914fab2a4b0ec15657698cac7d09ab39c61276658"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/review-manifest-v3.json",
+      "sha256": "4aa303b7405785a781d91d15f7a14e0d35920c62f136698021b8b378c7e969d0"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/arch-family.png",
+      "sha256": "08aca1b3d2f567300c416cee8bfecf22d888b7ed38874cd2f1e5bbeeca4e126e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/art-direction.md",
+      "sha256": "1f64b3674e8afb2c9d8f77eb6996264c75b584b6d899a1a0c7469c45d083fa9b"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/background-prompts.json",
+      "sha256": "d3000f86f4d69cadd449e7efb7d42becd847f1fd23a7ed08b2b10542537331a7"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/balance-crystal-source.png",
+      "sha256": "3606af3c395c8ddcac4a1dd48a2e1fd6f00d847ed3fb32204fc2e9fdbf5a7215"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/compose-reviews.py",
+      "sha256": "64f39339bc1f3a05e3bd12c795201277907feacdeddc66e5245e5b87b840e1fb"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/corridor-clean-source.png",
+      "sha256": "9e4c2fb9d73a8f0e5f3dab9a5dad6ed7fb6610564f64add3bce86249dd858afb"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/final-door-family.png",
+      "sha256": "0b1affb18113b89673ae80fe5091056aaccd271dcfcd3d58382b85c3fbe1a48f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/final-record-source.png",
+      "sha256": "511d92d333590a900b14695a32a5764fad3f7a4b93d8499ed77c3be67b07505b"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/generation-prompts.json",
+      "sha256": "f15c2599b2618efeed3c4bdc6756232b069adead3ec3d3721b9daf93003d9b50"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/generation-results-primary.json",
+      "sha256": "591c06de2c16a4c5d506e28cb44ec4b719e86ce8d91e91905e945d57ab123d7a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/generation-results-secondary.json",
+      "sha256": "3bf66670df40bc0173fbdc688ed952cf0f3b200fcb2015984e38fcdd1871263c"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/latch-family.png",
+      "sha256": "3531059d03d65c86e49f69522168cef2ae4c4a1031b38b7db8a30cc5702a977a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/layout-contract.json",
+      "sha256": "7bfbd9fb341b467c431a7a812784329eabbe6b370f7bb80928f157d210042052"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/learned-marks-source.png",
+      "sha256": "d22918eeca451eba8795c44e26f2b8f9fd6e351c883a930ad35760e70c5e0508"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/lobby-clean-source.png",
+      "sha256": "92c30c72204b612c5cd3f06eb6dd3399f2df42b2eed3d7cd34efdf8d4e6d7171"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/loop-family.png",
+      "sha256": "86a759e8660d93ea9d8a72686e1dfa33779f20bfa1ede56d6b112494ada339ee"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/mirror-family.png",
+      "sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/normalization-map.json",
+      "sha256": "1d803aadfbbd2d13eaa19f62405cd8bf9c5a781ed36aed4bafceba8a9fec8cb0"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/normalize-assets.py",
+      "sha256": "d3c5241efb600a1dd6805a30cb1815490f724d41e75aa66309b18ef37f503c8f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/observatory-art-target.png",
+      "sha256": "98609d3ae624fbf17987f6dfed30f6ebb450b69e8e5d42b3bd589457abebdbf9"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/observatory-clean-source.png",
+      "sha256": "ddf48a8755bf299187969101b34b6d8dcb605a954d9288ec7c917b03e68cb1f3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/pedestal-family.png",
+      "sha256": "ddfafad91530d911aa742a6d9c2adebc7acef819849a442d6d40841e859fa2b9"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/pipe-family.png",
+      "sha256": "c54ce838775eb8994159b9ca91b0c9e1f75dc2e897b66ccb7d208d7088205a36"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/production-brief.md",
+      "sha256": "d02510722d013f4e8dbbaf8bbc99c1845e3a90a02fda4ab7ceb856f126478e30"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/root-family.png",
+      "sha256": "93ee138ea6e896f66e9fb341c0680cef4338705d9c4a23cfed2859915beb017d"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/seal-family.png",
+      "sha256": "1440720171a932c0422c4126e1c4328eaf3ffa33ae9e920f3c32f0922e9dfd7f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/splitter-family.png",
+      "sha256": "7896419442ef9a4b483fe1a9867b73b3e0074bbba6ef7b14607b64123c39868a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/sprite-prompts.json",
+      "sha256": "a00ce584354667d8e62f5924ae429b93ee7a51a0f9058f9dff003572b42ef57a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/star-map-table-source.png",
+      "sha256": "d852ed5cfd99ee8bc02de18f742a981a6c7c547c4dedfec732d41d2700b215ea"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/statue-family.png",
+      "sha256": "e82c58e55f66a62dd6069c5aa2e8c243b702556d5d53fd986b1bee1c6dfbcf53"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/sun-lock-family.png",
+      "sha256": "49d717e34eae1fe3c9757381da990ec93853cdc1d80f7e92eeb7a849d72f7af5"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/tube-family.png",
+      "sha256": "46fcc537d9caf284b23ee0e0af37456d55db848f2c1da9b54ff6b59f03adfec6"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/validate-assets.py",
+      "sha256": "a448da5a23f848f423d4aa618d57153aef44dcac5805ef4808d22f1786bd6a04"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sources/v3/wheel-source.png",
+      "sha256": "6ac4d743a2adbdd21782acc2f4817ac0d8ac5ace2e152b1e80e7cb5c1e834727"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/balance-crystal.png",
+      "sha256": "4543b4442071e392bfeca607cd0dbad4eae090201538ba3bcf0f2d2be9e2a50a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-latch-grille.png",
+      "sha256": "b55b6ea8ee856eae339f60e58303ab77b3d93f1fd1f8aa01a06dba4a6d3b9cf6"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-pipe-run-off.png",
+      "sha256": "6cd61b73c502e66db6e22f02c8a2366455ba83bedc9ff2d98354a86bf5716d16"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/corridor-pipe-run-on.png",
+      "sha256": "4a35a8a41ea6c2b04d40a99ef9c92021f78392d80cb5a59d1c804d0e6c45d23e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-control-latched.png",
+      "sha256": "30d951c6ebd09a4a4cf6e35ed8d84626191a0e281ec088046cb44df6e4161a35"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-control-locked.png",
+      "sha256": "9bd40183a74ee4cb550118d7042a68f925c03264265880cc38bdb1bfe81a871a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-corridor-closed.png",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-corridor-open.png",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-corridor-threshold-closed.png",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-entrance-closed.png",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-entrance-open.png",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/door-a-entrance-threshold-closed.png",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/entrance-loop-path.png",
+      "sha256": "e07b0a9a071d926c524022053eee4167b1537eef93e9dd98bff4f3fdd4ac64b4"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/entrance-source-ring.png",
+      "sha256": "d89a9fb7675de78742df91e32af0e08ac66ba342bef7d389f3b2229a5e92a84a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-closed.png",
+      "sha256": "babb0a255129a838428e2396c8c116575318a54b9b5cd3cfb9dcbaaeb0c756d3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-control-latched.png",
+      "sha256": "30d951c6ebd09a4a4cf6e35ed8d84626191a0e281ec088046cb44df6e4161a35"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-control-locked.png",
+      "sha256": "9bd40183a74ee4cb550118d7042a68f925c03264265880cc38bdb1bfe81a871a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-door-open.png",
+      "sha256": "b572c9f5c2ce432c52565ddce434bf1c02c0ca200518d3687668f3626e46bcec"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/final-record.png",
+      "sha256": "9863b007f77fc735946516faf4d1425d0796093eaef2310fc0f9fd5c59dcabce"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-0.png",
+      "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-1.png",
+      "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-2.png",
+      "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g0-3.png",
+      "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-0.png",
+      "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-1.png",
+      "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-2.png",
+      "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g1-3.png",
+      "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-0.png",
+      "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-1.png",
+      "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-2.png",
+      "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/g2-3.png",
+      "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lantern-pedestal-empty.png",
+      "sha256": "e73875f24f4a1cdb9e7e8bf48124ccfbe362dc168d42a68d6f946336ba6074a2"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lantern-pedestal-lit.png",
+      "sha256": "43a55f82447c52dad318c11632f481322080b0c876e3fa4b04f33805f7d3822f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/learned-marks.png",
+      "sha256": "148d6c451895f499d0172d311ff8976eaa0b95c1c9e6d38b4e400fcdff9d36f6"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lobby-base.png",
+      "sha256": "09e710a441902aa9d69d19adcf88db75fb8646ff1705f51deaf2a69fbac852d5"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-seal-covered.png",
+      "sha256": "2e4284fb396635cd947988e6667ab44046940754e8f1bc74e2fe8b6b852fee82"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-seal-revealed.png",
+      "sha256": "8dcc12a51ddb0e6e1daeb8452a745edccebf01cc954a93a6362cf7c18e2aecec"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-tube-dark.png",
+      "sha256": "fd13137f0437d59713d73fe4793056a32a87bac4c9c03e367c003f5f940a83e2"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/lumo-tube-remembered.png",
+      "sha256": "02c9bdfc8e6d181423c7dd11ab0aa5b9cd05e698d799bb7f1308b36a5d660bad"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-amber-tint.png",
+      "sha256": "5396554e9b18335d564139c441087904aaeedb756dd24771afbe68d29774ded7"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-guardian-1.png",
+      "sha256": "d1ea01869f954f8e4bac1d64c8da98e26749976648436c605043a5cdd0c5ca64"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-guardian-2.png",
+      "sha256": "8dfbe98793bbcca78bd1583f6ba8158d24e79ceaab4ca90838d77ad0e02f1699"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-guardian-3.png",
+      "sha256": "8ebb4f7d1acc28c14140339d7af61db8743950be7d50e7da7dd252fe666933fe"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-three-root-circuits-cracked.png",
+      "sha256": "aaf8d95ddb3f196c658356384d2a14edbd41fcf4e412c9529e1fd140b2c60e7c"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-water-drained.png",
+      "sha256": "45c2d5f057caa079c166eacd35108bcfb1de8392685d2ac46812f8b198b6e65b"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-wheel-blocked.png",
+      "sha256": "b164a2daf36591dec803ca206b816734b636b34be9fed6ab75852b9f47e9d51f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/memory-white-flash.png",
+      "sha256": "28fb70733ed9490ca25f7472db9b2f7553be2ab334a212d2861db73fbbf3f45f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-clean-base.png",
+      "sha256": "27e8571fe841383ee14c18a8a8aa3253318dc96500bd98b20869e4c8d2487049"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-final-door-sill.png",
+      "sha256": "29769c2a84bf055bf6e0155c42adcd0e6592f9544d06f7c80e9a9077662b2474"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-loop-path.png",
+      "sha256": "80a641241cac70a1ceeaf22ce56d06ab49fa60fc7e9389f88c427d6c97cb3f56"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-pipe-run-off.png",
+      "sha256": "f6c18291d74219656f7f33fc34c7d4a462eafb6fe3d542a766fd6740fa121987"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/observatory-pipe-run-on.png",
+      "sha256": "5bb0843616d28b6c02c904f3a83411e391cdc65411127124df7fa4647557088a"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/pipe-drop-off.png",
+      "sha256": "8ffff070242ce5b7273425602209992a3e2d1b37fbb9a9ed0ae2a56ad6c74cf3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/pipe-drop-on.png",
+      "sha256": "6bba4a2700b0b6e0b9f7203c2378a4b24b75bce8d2ea93ca1b15be59c56ae5c1"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-entrance-closed.png",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-entrance-open.png",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-entrance-threshold-closed.png",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-observatory-closed.png",
+      "sha256": "5b5564aabb9f54ab4221eef965e982aaee738bd10e88272edb8f3209645a57dd"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-observatory-open.png",
+      "sha256": "5a2fd6d47452fb9631e11213d2076d424bfc461c64aede29a31c7c84125d7efe"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/return-loop-observatory-threshold-closed.png",
+      "sha256": "0b117e653042cc11dc393e366e8a515294927ba0683e4b9ad143510f24cc0d78"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-bridge.png",
+      "sha256": "1edd3a0825d5877c9df552de314f844c78a81ded8d1cc8582080c8b2c5deff3e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-dark.png",
+      "sha256": "c79e86d7390787d084a456b6ab1e6ca8e43cec8b3fc19304b952842ab59e750b"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-lit.png",
+      "sha256": "a70d5fcfe3c415a837132eaaa483706922cd2ef666c1f55c3598c0ed6cc478ca"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/root-bed-retracted-dark.png",
+      "sha256": "f98165ad24cd93070830d575b1852fed121ef821163567ca861efc4635fb7c2f"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/splitter-off.png",
+      "sha256": "27a559893d1ed5f0d12e42e115f0246b54414ea96b84910db4e1ccc3c3fb5a90"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/splitter-on.png",
+      "sha256": "ba434ef08468ad587681f687c367dcbeb071dbdecbbbddc8b949d7906de5eede"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/star-chart-base.png",
+      "sha256": "5e486d44d6e15ee1033034f31057d92b2501bac4ad4124efe8bed4328ac196f5"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/star-map-table-margin-ink.png",
+      "sha256": "ed022fa9207b50f5841393c9db61afa13ab7e1d362cdea177df5d97e15da530e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/star-map-table.png",
+      "sha256": "ebde8cd8d39db865fe658a2cf8fb3f18af6babd2a7a86e421b77d9c724e10fb3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-0.png",
+      "sha256": "0438a74280bcebeaf6c00afd5bb3633a51afd5ad7045d39a713bd2918fd0dc99"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-1.png",
+      "sha256": "a1f5bc83c679ae9ead229ecabf6680b9718b33d63c2527084366166a7a768b11"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-2.png",
+      "sha256": "5acc984061b4be39e5e703af1c880b306d1c93e6dce7f6e183353f7dc8cc3bfa"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/statue-3.png",
+      "sha256": "38fbd49a90605c85de36068409bde89deacef31a7954cb2d0123c46a45a0a0ef"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-0.png",
+      "sha256": "59eb844961f3974de08f508f6eb8abcea4c1845d39ff8f52705f6b0150be630d"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-1.png",
+      "sha256": "64d4a1f15850d37e8d47567bdd3ec88853e3cdb6c81b3593854a362d62baa5a6"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-2.png",
+      "sha256": "bd75a8c1f9bdc879d45aae2b8cce3e78a8f5fa4a6d38c1bc2758398f364c9abd"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-floor-tile-3.png",
+      "sha256": "0e9b5d5875478951f96196ceb137b97ba0a820f6fd054e0a768dfc96493a6df0"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-return-loop-closed.png",
+      "sha256": "11b461c6db58978439ae875f4aa9fc9dfe4cca803ed11078caa19690ff8c446e"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/stone-return-loop-open.png",
+      "sha256": "e7b74116a31e36d9f2d639bd564827bbed9d201a2477ea06390d85b27acbe5f9"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-control-off.png",
+      "sha256": "e3cac3d4534ae7ed66c633edb223d30e2354edc7ff37e07e5e0bb25634b6e8a4"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-control-on.png",
+      "sha256": "53d59dc54f601ed35dc4995d4f575dd587ade28a034098fb862fea3134a9a181"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-corridor-closed.png",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-corridor-open.png",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-corridor-threshold-closed.png",
+      "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-observatory-closed.png",
+      "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-observatory-open.png",
+      "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-door-observatory-threshold-closed.png",
+      "sha256": "9b70bccaba8ad89add31be413c3c4a12dce45c8d3a19b55834e969a1bfa18b9d"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-lock-off.png",
+      "sha256": "e3cac3d4534ae7ed66c633edb223d30e2354edc7ff37e07e5e0bb25634b6e8a4"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/sun-lock-on.png",
+      "sha256": "53d59dc54f601ed35dc4995d4f575dd587ade28a034098fb862fea3134a9a181"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/sprites/v3/wheel-stopped-sun-among-stars.png",
+      "sha256": "629d876646f06b214f460af6a3e926288f8754c697972a15d19f78c2fa434c12"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/validation-v3.json",
+      "sha256": "956d94db8a09aa92cd8c8e2b3bb8bddd99443801f40641c2de634bd7a9911e82"
+    }
+  ]
+}

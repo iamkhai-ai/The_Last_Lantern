@@ -1,0 +1,6819 @@
+{
+  "result": "PASS",
+  "revision": {
+    "manifest_sha256": "4be7f7044d2007b9553aff28c819fd74580d2f8a76ea15822ce0f6e43b3fd222",
+    "review_manifest_sha256": "4aa303b7405785a781d91d15f7a14e0d35920c62f136698021b8b378c7e969d0",
+    "normalization_map_sha256": "1d803aadfbbd2d13eaa19f62405cd8bf9c5a781ed36aed4bafceba8a9fec8cb0",
+    "normalizer_sha256": "d3c5241efb600a1dd6805a30cb1815490f724d41e75aa66309b18ef37f503c8f",
+    "validator_sha256": "a448da5a23f848f423d4aa618d57153aef44dcac5805ef4808d22f1786bd6a04",
+    "asset_fingerprint_sha256": "9d1585a814b64b626583cb6f266b95a336c439634e2212c11eb7b2a472cfc890"
+  },
+  "counts": {
+    "assets": 90,
+    "reviews": 31,
+    "checks": 428
+  },
+  "checks": [
+    {
+      "check": "schema-and-scope",
+      "result": "PASS",
+      "detail": {
+        "schema_version": 3,
+        "scope": "offline Level 09 scenario-v2 redraw v3"
+      }
+    },
+    {
+      "check": "no-stale-v2-palette-or-authoring-claims",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "layout-contract-is-exact-v2-copy",
+      "result": "PASS",
+      "detail": {
+        "sha256": "7bfbd9fb341b467c431a7a812784329eabbe6b370f7bb80928f157d210042052"
+      }
+    },
+    {
+      "check": "manifest-contract-hash",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "normalization-map-hash",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "production-brief-hash-recorded",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "frozen-authority-hashes",
+      "result": "PASS",
+      "detail": {
+        "expected": {
+          "docs/scenario-v2/09-dark-moon-observatory.md": "6717ee2d99d8749ca8f4c9a7b3a739b996b328a4877db350293bbf73d2ad72ad",
+          "docs/implementation/09-layout.md": "d069e36007595ee98258ec4dd676351452f803710d1067d09fd5f4bee52bdd99",
+          "src/data/observatoryLayout.ts": "a12e5afe8c35509b27a03f10fa4eca6a00fb7bb7968328c907cde70453a006c5",
+          "src/data/observatoryRooms.ts": "5095dbdc9c4b76d0dc0119c13a35457b5a2f7116ddf9af0d1ad724f6262c10c2"
+        },
+        "actual": {
+          "docs/scenario-v2/09-dark-moon-observatory.md": "6717ee2d99d8749ca8f4c9a7b3a739b996b328a4877db350293bbf73d2ad72ad",
+          "docs/implementation/09-layout.md": "d069e36007595ee98258ec4dd676351452f803710d1067d09fd5f4bee52bdd99",
+          "src/data/observatoryLayout.ts": "a12e5afe8c35509b27a03f10fa4eca6a00fb7bb7968328c907cde70453a006c5",
+          "src/data/observatoryRooms.ts": "5095dbdc9c4b76d0dc0119c13a35457b5a2f7116ddf9af0d1ad724f6262c10c2"
+        }
+      }
+    },
+    {
+      "check": "layout-contract-frozen-inputs",
+      "result": "PASS",
+      "detail": {
+        "files": [
+          "docs/scenario-v2/09-dark-moon-observatory.md",
+          "docs/implementation/09-layout.md",
+          "src/data/observatoryLayout.ts",
+          "src/data/observatoryRooms.ts"
+        ]
+      }
+    },
+    {
+      "check": "complete-v2-native-id-coverage",
+      "result": "PASS",
+      "detail": {
+        "expected": 90,
+        "actual": 90,
+        "missing": [],
+        "extra": []
+      }
+    },
+    {
+      "check": "unique-output-paths",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "all-output-pngs-are-manifested",
+      "result": "PASS",
+      "detail": {
+        "missing": [],
+        "unmanifested": []
+      }
+    },
+    {
+      "check": "asset:g0-0",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e"
+      }
+    },
+    {
+      "check": "asset:g0-1",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96"
+      }
+    },
+    {
+      "check": "asset:g0-2",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172"
+      }
+    },
+    {
+      "check": "asset:g0-3",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd"
+      }
+    },
+    {
+      "check": "asset:g1-0",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e"
+      }
+    },
+    {
+      "check": "asset:g1-1",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96"
+      }
+    },
+    {
+      "check": "asset:g1-2",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172"
+      }
+    },
+    {
+      "check": "asset:g1-3",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd"
+      }
+    },
+    {
+      "check": "asset:g2-0",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "556821f7b3f21d08496f9f1b79ae992f644e61c1c49deb160e2c4f8dfb2d2a9e"
+      }
+    },
+    {
+      "check": "asset:g2-1",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "3501a292125a6cf371112d04b0bd02cd19fd877cd9ab609515002d7867be6b96"
+      }
+    },
+    {
+      "check": "asset:g2-2",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "01f9a327ce491b48a4ed04fdf3711f7b8d3fb07819e6cc14f55ef697d4bd3172"
+      }
+    },
+    {
+      "check": "asset:g2-3",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "7d7ea444f61f0238dda8495f9d45446c42c40b140bbc46fc2953c5ee1a65cabd"
+      }
+    },
+    {
+      "check": "asset:lantern-pedestal-empty",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          39
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "e73875f24f4a1cdb9e7e8bf48124ccfbe362dc168d42a68d6f946336ba6074a2"
+      }
+    },
+    {
+      "check": "asset:lantern-pedestal-lit",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          36,
+          39
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "43a55f82447c52dad318c11632f481322080b0c876e3fa4b04f33805f7d3822f"
+      }
+    },
+    {
+      "check": "asset:sun-door-control-off",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          32,
+          40
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "e3cac3d4534ae7ed66c633edb223d30e2354edc7ff37e07e5e0bb25634b6e8a4"
+      }
+    },
+    {
+      "check": "asset:sun-door-control-on",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          32,
+          40
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "53d59dc54f601ed35dc4995d4f575dd587ade28a034098fb862fea3134a9a181"
+      }
+    },
+    {
+      "check": "asset:sun-lock-off",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          32,
+          40
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "e3cac3d4534ae7ed66c633edb223d30e2354edc7ff37e07e5e0bb25634b6e8a4"
+      }
+    },
+    {
+      "check": "asset:sun-lock-on",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          32,
+          40
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "53d59dc54f601ed35dc4995d4f575dd587ade28a034098fb862fea3134a9a181"
+      }
+    },
+    {
+      "check": "asset:door-a-control-locked",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          28,
+          32
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "9bd40183a74ee4cb550118d7042a68f925c03264265880cc38bdb1bfe81a871a"
+      }
+    },
+    {
+      "check": "asset:door-a-control-latched",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          28,
+          32
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "30d951c6ebd09a4a4cf6e35ed8d84626191a0e281ec088046cb44df6e4161a35"
+      }
+    },
+    {
+      "check": "asset:final-door-control-locked",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          28,
+          32
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "9bd40183a74ee4cb550118d7042a68f925c03264265880cc38bdb1bfe81a871a"
+      }
+    },
+    {
+      "check": "asset:final-door-control-latched",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          28,
+          32
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "30d951c6ebd09a4a4cf6e35ed8d84626191a0e281ec088046cb44df6e4161a35"
+      }
+    },
+    {
+      "check": "asset:lumo-tube-dark",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          32
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "fd13137f0437d59713d73fe4793056a32a87bac4c9c03e367c003f5f940a83e2"
+      }
+    },
+    {
+      "check": "asset:lumo-tube-remembered",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          32
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "02c9bdfc8e6d181423c7dd11ab0aa5b9cd05e698d799bb7f1308b36a5d660bad"
+      }
+    },
+    {
+      "check": "asset:lumo-seal-covered",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          32,
+          40
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "2e4284fb396635cd947988e6667ab44046940754e8f1bc74e2fe8b6b852fee82"
+      }
+    },
+    {
+      "check": "asset:lumo-seal-revealed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          32,
+          40
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "8dcc12a51ddb0e6e1daeb8452a745edccebf01cc954a93a6362cf7c18e2aecec"
+      }
+    },
+    {
+      "check": "asset:splitter-off",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "27a559893d1ed5f0d12e42e115f0246b54414ea96b84910db4e1ccc3c3fb5a90"
+      }
+    },
+    {
+      "check": "asset:splitter-on",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "ba434ef08468ad587681f687c367dcbeb071dbdecbbbddc8b949d7906de5eede"
+      }
+    },
+    {
+      "check": "asset:statue-0",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          88
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "0438a74280bcebeaf6c00afd5bb3633a51afd5ad7045d39a713bd2918fd0dc99"
+      }
+    },
+    {
+      "check": "asset:statue-1",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          88
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "a1f5bc83c679ae9ead229ecabf6680b9718b33d63c2527084366166a7a768b11"
+      }
+    },
+    {
+      "check": "asset:statue-2",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          88
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "5acc984061b4be39e5e703af1c880b306d1c93e6dce7f6e183353f7dc8cc3bfa"
+      }
+    },
+    {
+      "check": "asset:statue-3",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          88
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "38fbd49a90605c85de36068409bde89deacef31a7954cb2d0123c46a45a0a0ef"
+      }
+    },
+    {
+      "check": "asset:star-map-table",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          52
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "ebde8cd8d39db865fe658a2cf8fb3f18af6babd2a7a86e421b77d9c724e10fb3"
+      }
+    },
+    {
+      "check": "asset:star-map-table-margin-ink",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          52
+        ],
+        "alpha": [
+          0,
+          85
+        ],
+        "sha256": "ed022fa9207b50f5841393c9db61afa13ab7e1d362cdea177df5d97e15da530e"
+      }
+    },
+    {
+      "check": "asset:final-record",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          52
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "9863b007f77fc735946516faf4d1425d0796093eaef2310fc0f9fd5c59dcabce"
+      }
+    },
+    {
+      "check": "asset:final-door-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          76
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "babb0a255129a838428e2396c8c116575318a54b9b5cd3cfb9dcbaaeb0c756d3"
+      }
+    },
+    {
+      "check": "asset:final-door-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          76
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "b572c9f5c2ce432c52565ddce434bf1c02c0ca200518d3687668f3626e46bcec"
+      }
+    },
+    {
+      "check": "asset:stone-return-loop-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          40,
+          37
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "11b461c6db58978439ae875f4aa9fc9dfe4cca803ed11078caa19690ff8c446e"
+      }
+    },
+    {
+      "check": "asset:stone-return-loop-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          40,
+          37
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "e7b74116a31e36d9f2d639bd564827bbed9d201a2477ea06390d85b27acbe5f9"
+      }
+    },
+    {
+      "check": "asset:root-bed-dark",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          44,
+          148
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "c79e86d7390787d084a456b6ab1e6ca8e43cec8b3fc19304b952842ab59e750b"
+      }
+    },
+    {
+      "check": "asset:root-bed-lit",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          44,
+          148
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "a70d5fcfe3c415a837132eaaa483706922cd2ef666c1f55c3598c0ed6cc478ca"
+      }
+    },
+    {
+      "check": "asset:root-bed-bridge",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          44,
+          148
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "1edd3a0825d5877c9df552de314f844c78a81ded8d1cc8582080c8b2c5deff3e"
+      }
+    },
+    {
+      "check": "asset:root-bed-retracted-dark",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          44,
+          148
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "f98165ad24cd93070830d575b1852fed121ef821163567ca861efc4635fb7c2f"
+      }
+    },
+    {
+      "check": "asset:balance-crystal",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          42,
+          78
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "4543b4442071e392bfeca607cd0dbad4eae090201538ba3bcf0f2d2be9e2a50a"
+      }
+    },
+    {
+      "check": "asset:corridor-pipe-run-off",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          215,
+          18
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "6cd61b73c502e66db6e22f02c8a2366455ba83bedc9ff2d98354a86bf5716d16"
+      }
+    },
+    {
+      "check": "asset:corridor-pipe-run-on",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          215,
+          18
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "4a35a8a41ea6c2b04d40a99ef9c92021f78392d80cb5a59d1c804d0e6c45d23e"
+      }
+    },
+    {
+      "check": "asset:observatory-pipe-run-off",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          264,
+          18
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "f6c18291d74219656f7f33fc34c7d4a462eafb6fe3d542a766fd6740fa121987"
+      }
+    },
+    {
+      "check": "asset:observatory-pipe-run-on",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          264,
+          18
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "5bb0843616d28b6c02c904f3a83411e391cdc65411127124df7fa4647557088a"
+      }
+    },
+    {
+      "check": "asset:pipe-drop-off",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          18,
+          180
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "8ffff070242ce5b7273425602209992a3e2d1b37fbb9a9ed0ae2a56ad6c74cf3"
+      }
+    },
+    {
+      "check": "asset:pipe-drop-on",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          18,
+          180
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "6bba4a2700b0b6e0b9f7203c2378a4b24b75bce8d2ea93ca1b15be59c56ae5c1"
+      }
+    },
+    {
+      "check": "asset:door-a-entrance-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+      }
+    },
+    {
+      "check": "asset:door-a-entrance-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+      }
+    },
+    {
+      "check": "asset:door-a-corridor-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+      }
+    },
+    {
+      "check": "asset:door-a-corridor-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+      }
+    },
+    {
+      "check": "asset:sun-door-corridor-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+      }
+    },
+    {
+      "check": "asset:sun-door-corridor-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+      }
+    },
+    {
+      "check": "asset:sun-door-observatory-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+      }
+    },
+    {
+      "check": "asset:sun-door-observatory-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+      }
+    },
+    {
+      "check": "asset:return-loop-entrance-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          253
+        ],
+        "sha256": "691645060e5918940e2ef5ef50ecdf72c537b7e799211d0bb0fe168bee2882d3"
+      }
+    },
+    {
+      "check": "asset:return-loop-entrance-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          254
+        ],
+        "sha256": "2cd09ed7bdc3ed725525da2447b4826f393cd4ad0742c9ffe300aa3043168964"
+      }
+    },
+    {
+      "check": "asset:return-loop-observatory-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "5b5564aabb9f54ab4221eef965e982aaee738bd10e88272edb8f3209645a57dd"
+      }
+    },
+    {
+      "check": "asset:return-loop-observatory-open",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          48
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "5a2fd6d47452fb9631e11213d2076d424bfc461c64aede29a31c7c84125d7efe"
+      }
+    },
+    {
+      "check": "asset:learned-marks",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          160,
+          80
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "148d6c451895f499d0172d311ff8976eaa0b95c1c9e6d38b4e400fcdff9d36f6"
+      }
+    },
+    {
+      "check": "asset:wheel-stopped-sun-among-stars",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          144,
+          88
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "629d876646f06b214f460af6a3e926288f8754c697972a15d19f78c2fa434c12"
+      }
+    },
+    {
+      "check": "asset:stone-floor-tile-0",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          80,
+          32
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "59eb844961f3974de08f508f6eb8abcea4c1845d39ff8f52705f6b0150be630d"
+      }
+    },
+    {
+      "check": "asset:stone-floor-tile-1",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          80,
+          32
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "64d4a1f15850d37e8d47567bdd3ec88853e3cdb6c81b3593854a362d62baa5a6"
+      }
+    },
+    {
+      "check": "asset:stone-floor-tile-2",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          80,
+          32
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "bd75a8c1f9bdc879d45aae2b8cce3e78a8f5fa4a6d38c1bc2758398f364c9abd"
+      }
+    },
+    {
+      "check": "asset:stone-floor-tile-3",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          80,
+          32
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "0e9b5d5875478951f96196ceb137b97ba0a820f6fd054e0a768dfc96493a6df0"
+      }
+    },
+    {
+      "check": "asset:lobby-base",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          640,
+          360
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "09e710a441902aa9d69d19adcf88db75fb8646ff1705f51deaf2a69fbac852d5"
+      }
+    },
+    {
+      "check": "asset:star-chart-base",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          640,
+          360
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "5e486d44d6e15ee1033034f31057d92b2501bac4ad4124efe8bed4328ac196f5"
+      }
+    },
+    {
+      "check": "asset:observatory-clean-base",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          640,
+          360
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "27e8571fe841383ee14c18a8a8aa3253318dc96500bd98b20869e4c8d2487049"
+      }
+    },
+    {
+      "check": "asset:door-a-entrance-threshold-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          48
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "check": "asset:door-a-corridor-threshold-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          48
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "check": "asset:sun-door-corridor-threshold-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          48
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "check": "asset:sun-door-observatory-threshold-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          80,
+          48
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "9b70bccaba8ad89add31be413c3c4a12dce45c8d3a19b55834e969a1bfa18b9d"
+      }
+    },
+    {
+      "check": "asset:return-loop-entrance-threshold-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          104,
+          48
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "fb7ea23b2ac9eb6b4bae45b252d75f7731072f40dfa133439cd57de2826e63df"
+      }
+    },
+    {
+      "check": "asset:return-loop-observatory-threshold-closed",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          20
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "0b117e653042cc11dc393e366e8a515294927ba0683e4b9ad143510f24cc0d78"
+      }
+    },
+    {
+      "check": "asset:entrance-loop-path",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          60,
+          24
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "e07b0a9a071d926c524022053eee4167b1537eef93e9dd98bff4f3fdd4ac64b4"
+      }
+    },
+    {
+      "check": "asset:entrance-source-ring",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          34
+        ],
+        "alpha": [
+          0,
+          255
+        ],
+        "sha256": "d89a9fb7675de78742df91e32af0e08ac66ba342bef7d389f3b2229a5e92a84a"
+      }
+    },
+    {
+      "check": "asset:corridor-latch-grille",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          56,
+          28
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "b55b6ea8ee856eae339f60e58303ab77b3d93f1fd1f8aa01a06dba4a6d3b9cf6"
+      }
+    },
+    {
+      "check": "asset:observatory-loop-path",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          96,
+          32
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "80a641241cac70a1ceeaf22ce56d06ab49fa60fc7e9389f88c427d6c97cb3f56"
+      }
+    },
+    {
+      "check": "asset:observatory-final-door-sill",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          64,
+          14
+        ],
+        "alpha": [
+          255,
+          255
+        ],
+        "sha256": "29769c2a84bf055bf6e0155c42adcd0e6592f9544d06f7c80e9a9077662b2474"
+      }
+    },
+    {
+      "check": "asset:memory-wheel-blocked",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          144,
+          88
+        ],
+        "alpha": [
+          0,
+          150
+        ],
+        "sha256": "b164a2daf36591dec803ca206b816734b636b34be9fed6ab75852b9f47e9d51f"
+      }
+    },
+    {
+      "check": "asset:memory-water-drained",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          128,
+          40
+        ],
+        "alpha": [
+          0,
+          110
+        ],
+        "sha256": "45c2d5f057caa079c166eacd35108bcfb1de8392685d2ac46812f8b198b6e65b"
+      }
+    },
+    {
+      "check": "asset:memory-three-root-circuits-cracked",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          128,
+          60
+        ],
+        "alpha": [
+          0,
+          220
+        ],
+        "sha256": "aaf8d95ddb3f196c658356384d2a14edbd41fcf4e412c9529e1fd140b2c60e7c"
+      }
+    },
+    {
+      "check": "asset:memory-amber-tint",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          640,
+          360
+        ],
+        "alpha": [
+          0,
+          34
+        ],
+        "sha256": "5396554e9b18335d564139c441087904aaeedb756dd24771afbe68d29774ded7"
+      }
+    },
+    {
+      "check": "asset:memory-white-flash",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          640,
+          360
+        ],
+        "alpha": [
+          0,
+          206
+        ],
+        "sha256": "28fb70733ed9490ca25f7472db9b2f7553be2ab334a212d2861db73fbbf3f45f"
+      }
+    },
+    {
+      "check": "asset:memory-guardian-1",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          64
+        ],
+        "alpha": [
+          0,
+          140
+        ],
+        "sha256": "d1ea01869f954f8e4bac1d64c8da98e26749976648436c605043a5cdd0c5ca64"
+      }
+    },
+    {
+      "check": "asset:memory-guardian-2",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          64
+        ],
+        "alpha": [
+          0,
+          90
+        ],
+        "sha256": "8dfbe98793bbcca78bd1583f6ba8158d24e79ceaab4ca90838d77ad0e02f1699"
+      }
+    },
+    {
+      "check": "asset:memory-guardian-3",
+      "result": "PASS",
+      "detail": {
+        "size": [
+          48,
+          64
+        ],
+        "alpha": [
+          0,
+          36
+        ],
+        "sha256": "8ebb4f7d1acc28c14140339d7af61db8743950be7d50e7da7dd252fe666933fe"
+      }
+    },
+    {
+      "check": "generated-source-provenance-coverage",
+      "result": "PASS",
+      "detail": {
+        "missing": []
+      }
+    },
+    {
+      "check": "generated-source:latch-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:corridor-clean-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:mirror-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:pipe-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:final-door-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:statue-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:star-map-table-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:learned-marks-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:arch-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:sun-lock-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:tube-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:root-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:seal-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:balance-crystal-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:splitter-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:final-record-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:wheel-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:observatory-clean-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:loop-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:lobby-clean-source.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "generated-source:pedestal-family.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "sprite-generation-record-metadata",
+      "result": "PASS",
+      "detail": {
+        "mirror-family": {
+          "status": "PASS",
+          "size": [
+            1086,
+            1448
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "pedestal-family": {
+          "status": "PASS",
+          "size": [
+            1697,
+            927
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "statue-family": {
+          "status": "PASS",
+          "size": [
+            1536,
+            1024
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "tube-family": {
+          "status": "PASS",
+          "size": [
+            1774,
+            887
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "seal-family": {
+          "status": "PASS",
+          "size": [
+            1586,
+            992
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "sun-lock-family": {
+          "status": "PASS",
+          "size": [
+            1586,
+            992
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "latch-family": {
+          "status": "PASS",
+          "size": [
+            1659,
+            948
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "splitter-family": {
+          "status": "PASS",
+          "size": [
+            1774,
+            887
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "root-family": {
+          "status": "PASS",
+          "size": [
+            1366,
+            1152
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "final-door-family": {
+          "status": "generated_source",
+          "size": [
+            2078,
+            757
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "arch-family": {
+          "status": "generated_source",
+          "size": [
+            1774,
+            887
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "loop-family": {
+          "status": "generated_source",
+          "size": [
+            1846,
+            852
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "star-map-table-source": {
+          "status": "generated_source",
+          "size": [
+            1774,
+            887
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "final-record-source": {
+          "status": "generated_source",
+          "size": [
+            1774,
+            887
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "balance-crystal-source": {
+          "status": "generated_source",
+          "size": [
+            921,
+            1707
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "learned-marks-source": {
+          "status": "generated_source",
+          "size": [
+            1774,
+            887
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "pipe-family": {
+          "status": "generated_source",
+          "size": [
+            1519,
+            1036
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        },
+        "wheel-source": {
+          "status": "generated_source",
+          "size": [
+            1605,
+            980
+          ],
+          "recorded_hash_matches": true,
+          "recorded_prompt_matches": true
+        }
+      }
+    },
+    {
+      "check": "observatory-loop-path-generated-floor-material-preserves-v2-mask",
+      "result": "PASS",
+      "detail": {
+        "kind": "generated-material-mask-derivative",
+        "mask_source": "assets/levels/09-dark-moon-observatory/sources/v2/native/observatory-loop-path.png",
+        "mask_sha256": "b310edd763d57966ac2209d809412806caabe2df7fc06c3505ec21eadf54b495"
+      }
+    },
+    {
+      "check": "explicit-v2-reuse-hashes",
+      "result": "PASS",
+      "detail": {
+        "source_count": 23
+      }
+    },
+    {
+      "check": "background-hud-flat:entrance",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "floor-mask-contract:entrance",
+      "result": "PASS",
+      "detail": {
+        "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v2\\entrance-floor-mask.png",
+        "sha256": "770c34c153174aec5cab54fbaceaf44f2ce44491c919c200bfe7de6ebb474d70"
+      }
+    },
+    {
+      "check": "background-geometry-mask:entrance",
+      "result": "PASS",
+      "detail": {
+        "pixels_outside_layout_geometry_with_art": 0
+      }
+    },
+    {
+      "check": "background-floor-and-masonry-source-zones:entrance",
+      "result": "PASS",
+      "detail": {
+        "pixel_diff_bbox": null,
+        "source": "assets/levels/09-dark-moon-observatory/sources/v3/lobby-clean-source.png"
+      }
+    },
+    {
+      "check": "background-hud-flat:corridor",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "floor-mask-contract:corridor",
+      "result": "PASS",
+      "detail": {
+        "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v2\\corridor-floor-mask.png",
+        "sha256": "871eb24cc440f561d0022c4cd64b5deceaa90291a7d792b1e5af32e8426e617d"
+      }
+    },
+    {
+      "check": "background-geometry-mask:corridor",
+      "result": "PASS",
+      "detail": {
+        "pixels_outside_layout_geometry_with_art": 0
+      }
+    },
+    {
+      "check": "background-floor-and-masonry-source-zones:corridor",
+      "result": "PASS",
+      "detail": {
+        "pixel_diff_bbox": null,
+        "source": "assets/levels/09-dark-moon-observatory/sources/v3/corridor-clean-source.png"
+      }
+    },
+    {
+      "check": "background-hud-flat:observatory",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "floor-mask-contract:observatory",
+      "result": "PASS",
+      "detail": {
+        "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v2\\observatory-floor-mask.png",
+        "sha256": "da48e1833554b03497b04dcb9acc44365de8349fd15ea58ff98beac08f404317"
+      }
+    },
+    {
+      "check": "background-geometry-mask:observatory",
+      "result": "PASS",
+      "detail": {
+        "pixels_outside_layout_geometry_with_art": 0
+      }
+    },
+    {
+      "check": "background-floor-and-masonry-source-zones:observatory",
+      "result": "PASS",
+      "detail": {
+        "pixel_diff_bbox": null,
+        "source": "assets/levels/09-dark-moon-observatory/sources/v3/observatory-clean-source.png"
+      }
+    },
+    {
+      "check": "hud-clearance:lumo-tube-dark",
+      "result": "PASS",
+      "detail": [
+        13,
+        2,
+        51,
+        32
+      ]
+    },
+    {
+      "check": "hud-clearance:lumo-tube-remembered",
+      "result": "PASS",
+      "detail": [
+        13,
+        2,
+        51,
+        32
+      ]
+    },
+    {
+      "check": "hud-clearance:lumo-seal-covered",
+      "result": "PASS",
+      "detail": [
+        4,
+        10,
+        27,
+        40
+      ]
+    },
+    {
+      "check": "hud-clearance:lumo-seal-revealed",
+      "result": "PASS",
+      "detail": [
+        4,
+        10,
+        27,
+        40
+      ]
+    },
+    {
+      "check": "all-sheet-bounds-use-alpha-128-with-source-alpha-preserved",
+      "result": "PASS",
+      "detail": {
+        "mirror-family": 128,
+        "pedestal-family": 128,
+        "sun-lock-family": 128,
+        "latch-family": 128,
+        "tube-family": 128,
+        "seal-family": 128,
+        "splitter-family": 128,
+        "statue-family": 128,
+        "star-map-table-source": 128,
+        "final-record-source": 128,
+        "final-door-family": 128,
+        "loop-family": 128,
+        "balance-crystal-source": 128,
+        "pipe-family": 128,
+        "arch-family": 128,
+        "learned-marks-source": 128,
+        "wheel-source": 128,
+        "root-family": 128
+      }
+    },
+    {
+      "check": "statue-halo-alpha-trim",
+      "result": "PASS",
+      "detail": {
+        "source_alpha_bbox_threshold": 128
+      }
+    },
+    {
+      "check": "return-loop-observatory-content:return-loop-observatory-closed",
+      "result": "PASS",
+      "detail": {
+        "alpha_bbox": [
+          4,
+          6,
+          43,
+          42
+        ],
+        "canvas": [
+          48,
+          48
+        ],
+        "content_rect": [
+          0,
+          6,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "return-loop-observatory-content:return-loop-observatory-open",
+      "result": "PASS",
+      "detail": {
+        "alpha_bbox": [
+          4,
+          6,
+          43,
+          42
+        ],
+        "canvas": [
+          48,
+          48
+        ],
+        "content_rect": [
+          0,
+          6,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "root-bands-land-on-frozen-geometry",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "root-lane-state-changes",
+      "result": "PASS",
+      "detail": {
+        "lane_relative_rect": [
+          0,
+          50,
+          44,
+          48
+        ],
+        "alpha_bounds": [
+          [
+            1,
+            0,
+            43,
+            48
+          ],
+          [
+            2,
+            0,
+            43,
+            48
+          ],
+          [
+            1,
+            0,
+            44,
+            48
+          ],
+          [
+            1,
+            0,
+            43,
+            48
+          ]
+        ]
+      }
+    },
+    {
+      "check": "root-lit-amber-localized",
+      "result": "PASS",
+      "detail": {
+        "warm_pixels": 1264,
+        "dark_baseline": 311
+      }
+    },
+    {
+      "check": "root-retracted-dark",
+      "result": "PASS",
+      "detail": {
+        "non_emissive_warm_material_pixels": 301,
+        "emissive_pixels": 13,
+        "dark_emissive_baseline": 27
+      }
+    },
+    {
+      "check": "state-contract:02-shadowed-bed-grown-bridge",
+      "result": "PASS",
+      "detail": {
+        "expected": [
+          true,
+          true,
+          2,
+          "bridge"
+        ],
+        "actual": [
+          true,
+          true,
+          2,
+          "bridge"
+        ]
+      }
+    },
+    {
+      "check": "state-contract:03-lumo-recalled-dark-retracted-roots",
+      "result": "PASS",
+      "detail": {
+        "expected": [
+          false,
+          false,
+          2,
+          "retracted-dark"
+        ],
+        "actual": [
+          false,
+          false,
+          2,
+          "retracted-dark"
+        ]
+      }
+    },
+    {
+      "check": "state-final-door-powered-open:02-shadowed-bed-grown-bridge",
+      "result": "PASS",
+      "detail": {
+        "state": "02-shadowed-bed-grown-bridge",
+        "asset": "final-door-open"
+      }
+    },
+    {
+      "check": "state-final-door-powered-open:03-lumo-recalled-dark-retracted-roots",
+      "result": "PASS",
+      "detail": {
+        "state": "03-lumo-recalled-dark-retracted-roots",
+        "asset": "final-door-open"
+      }
+    },
+    {
+      "check": "pipe-source-frame-span-and-state:corridor-pipe-run",
+      "result": "PASS",
+      "detail": {
+        "orientation": "horizontal",
+        "on": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 215,
+          "target_axis_length": 215,
+          "source_alpha_preserved": true,
+          "source_frame": 0,
+          "state": "on"
+        },
+        "off": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 215,
+          "target_axis_length": 215,
+          "source_alpha_preserved": true,
+          "source_frame": 1,
+          "state": "off"
+        },
+        "blue_signal": {
+          "on": 743,
+          "off": 179
+        }
+      }
+    },
+    {
+      "check": "pipe-source-frame-span-and-state:observatory-pipe-run",
+      "result": "PASS",
+      "detail": {
+        "orientation": "horizontal",
+        "on": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 264,
+          "target_axis_length": 264,
+          "source_alpha_preserved": true,
+          "source_frame": 0,
+          "state": "on"
+        },
+        "off": {
+          "orientation": "horizontal",
+          "tile_source_size": [
+            137,
+            18
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 264,
+          "target_axis_length": 264,
+          "source_alpha_preserved": true,
+          "source_frame": 1,
+          "state": "off"
+        },
+        "blue_signal": {
+          "on": 933,
+          "off": 226
+        }
+      }
+    },
+    {
+      "check": "pipe-source-frame-span-and-state:pipe-drop",
+      "result": "PASS",
+      "detail": {
+        "orientation": "vertical",
+        "on": {
+          "orientation": "vertical",
+          "tile_source_size": [
+            18,
+            135
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 180,
+          "target_axis_length": 180,
+          "source_alpha_preserved": true,
+          "source_frame": 2,
+          "state": "on"
+        },
+        "off": {
+          "orientation": "vertical",
+          "tile_source_size": [
+            18,
+            137
+          ],
+          "tile_count": 2,
+          "visible_axis_span": 180,
+          "target_axis_length": 180,
+          "source_alpha_preserved": true,
+          "source_frame": 3,
+          "state": "off"
+        },
+        "blue_signal": {
+          "on": 551,
+          "off": 153
+        }
+      }
+    },
+    {
+      "check": "placement:0",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:source-ring",
+        "expected": [
+          156,
+          214,
+          64,
+          34
+        ],
+        "actual": [
+          156,
+          214,
+          64,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:1",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-entrance",
+        "expected": [
+          576,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:2",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:return-loop-entrance",
+        "expected": [
+          24,
+          196,
+          104,
+          48
+        ],
+        "actual": [
+          24,
+          196,
+          104,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:3",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-entrance",
+        "expected": [
+          72,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:4",
+      "result": "PASS",
+      "detail": {
+        "module": "learned-marks",
+        "expected": [
+          240,
+          104,
+          160,
+          80
+        ],
+        "actual": [
+          240,
+          104,
+          160,
+          80
+        ]
+      }
+    },
+    {
+      "check": "placement:5",
+      "result": "PASS",
+      "detail": {
+        "module": "lantern-pedestal",
+        "expected": [
+          170,
+          193,
+          36,
+          39
+        ],
+        "actual": [
+          170,
+          193,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "check": "placement:6",
+      "result": "PASS",
+      "detail": {
+        "module": "g0",
+        "expected": [
+          416,
+          193,
+          32,
+          43
+        ],
+        "actual": [
+          416,
+          193,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:7",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          73,
+          74,
+          215,
+          18
+        ],
+        "actual": [
+          73,
+          74,
+          215,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:8",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:latch-grille",
+        "expected": [
+          28,
+          236,
+          56,
+          28
+        ],
+        "actual": [
+          28,
+          236,
+          56,
+          28
+        ]
+      }
+    },
+    {
+      "check": "placement:9",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-corridor",
+        "expected": [
+          72,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:10",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:sun-door-corridor",
+        "expected": [
+          536,
+          196,
+          104,
+          48
+        ],
+        "actual": [
+          536,
+          196,
+          104,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:11",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-corridor",
+        "expected": [
+          576,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:12",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-tube",
+        "expected": [
+          73,
+          56,
+          64,
+          32
+        ],
+        "actual": [
+          73,
+          56,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:13",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-seal",
+        "expected": [
+          304,
+          48,
+          32,
+          40
+        ],
+        "actual": [
+          304,
+          48,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:14",
+      "result": "PASS",
+      "detail": {
+        "module": "door-a-control",
+        "expected": [
+          42,
+          172,
+          28,
+          32
+        ],
+        "actual": [
+          42,
+          172,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:15",
+      "result": "PASS",
+      "detail": {
+        "module": "g1",
+        "expected": [
+          224,
+          173,
+          32,
+          43
+        ],
+        "actual": [
+          224,
+          173,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:16",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-door-control",
+        "expected": [
+          484,
+          220,
+          32,
+          40
+        ],
+        "actual": [
+          484,
+          220,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:17",
+      "result": "PASS",
+      "detail": {
+        "module": "star-map-table",
+        "expected": [
+          279,
+          238,
+          83,
+          42
+        ],
+        "actual": [
+          279,
+          238,
+          83,
+          42
+        ]
+      }
+    },
+    {
+      "check": "placement:18",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          344,
+          60,
+          264,
+          18
+        ],
+        "actual": [
+          344,
+          60,
+          264,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:19",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-drop",
+        "expected": [
+          592,
+          76,
+          18,
+          180
+        ],
+        "actual": [
+          592,
+          76,
+          18,
+          180
+        ]
+      }
+    },
+    {
+      "check": "placement:20",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:final-door-sill",
+        "expected": [
+          468,
+          140,
+          64,
+          14
+        ],
+        "actual": [
+          468,
+          140,
+          64,
+          14
+        ]
+      }
+    },
+    {
+      "check": "placement:21",
+      "result": "PASS",
+      "detail": {
+        "module": "scenery-wheel",
+        "expected": [
+          186,
+          59,
+          144,
+          88
+        ],
+        "actual": [
+          186,
+          59,
+          144,
+          88
+        ]
+      }
+    },
+    {
+      "check": "placement:22",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:sun-door-observatory",
+        "expected": [
+          24,
+          190,
+          80,
+          48
+        ],
+        "actual": [
+          24,
+          190,
+          80,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:23",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-observatory",
+        "expected": [
+          56,
+          186,
+          48,
+          48
+        ],
+        "actual": [
+          56,
+          186,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:24",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:return-loop-observatory",
+        "expected": [
+          496,
+          300,
+          48,
+          20
+        ],
+        "actual": [
+          496,
+          300,
+          48,
+          20
+        ]
+      }
+    },
+    {
+      "check": "placement:25",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-observatory",
+        "expected": [
+          496,
+          284,
+          48,
+          36
+        ],
+        "actual": [
+          496,
+          284,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "placement:26",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-lock",
+        "expected": [
+          163,
+          118,
+          27,
+          34
+        ],
+        "actual": [
+          163,
+          118,
+          27,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:27",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door-control",
+        "expected": [
+          486,
+          120,
+          28,
+          32
+        ],
+        "actual": [
+          486,
+          120,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:28",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door",
+        "expected": [
+          468,
+          105,
+          64,
+          47
+        ],
+        "actual": [
+          468,
+          105,
+          64,
+          47
+        ]
+      }
+    },
+    {
+      "check": "placement:29",
+      "result": "PASS",
+      "detail": {
+        "module": "splitter",
+        "expected": [
+          221,
+          202,
+          38,
+          38
+        ],
+        "actual": [
+          221,
+          202,
+          38,
+          38
+        ]
+      }
+    },
+    {
+      "check": "placement:30",
+      "result": "PASS",
+      "detail": {
+        "module": "statue",
+        "expected": [
+          271,
+          182,
+          51,
+          70
+        ],
+        "actual": [
+          271,
+          182,
+          51,
+          70
+        ]
+      }
+    },
+    {
+      "check": "placement:31",
+      "result": "PASS",
+      "detail": {
+        "module": "stone-return-loop",
+        "expected": [
+          452,
+          226,
+          28,
+          26
+        ],
+        "actual": [
+          452,
+          226,
+          28,
+          26
+        ]
+      }
+    },
+    {
+      "check": "placement:32",
+      "result": "PASS",
+      "detail": {
+        "module": "final-record",
+        "expected": [
+          386,
+          224,
+          64,
+          32
+        ],
+        "actual": [
+          386,
+          224,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:33",
+      "result": "PASS",
+      "detail": {
+        "module": "g2",
+        "expected": [
+          152,
+          215,
+          32,
+          43
+        ],
+        "actual": [
+          152,
+          215,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:34",
+      "result": "PASS",
+      "detail": {
+        "module": "root-bed",
+        "expected": [
+          340,
+          152,
+          44,
+          148
+        ],
+        "actual": [
+          340,
+          152,
+          44,
+          148
+        ]
+      }
+    },
+    {
+      "check": "placement:35",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:source-ring",
+        "expected": [
+          156,
+          214,
+          64,
+          34
+        ],
+        "actual": [
+          156,
+          214,
+          64,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:36",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-entrance",
+        "expected": [
+          576,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:37",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:return-loop-entrance",
+        "expected": [
+          24,
+          196,
+          104,
+          48
+        ],
+        "actual": [
+          24,
+          196,
+          104,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:38",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-entrance",
+        "expected": [
+          72,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:39",
+      "result": "PASS",
+      "detail": {
+        "module": "learned-marks",
+        "expected": [
+          240,
+          104,
+          160,
+          80
+        ],
+        "actual": [
+          240,
+          104,
+          160,
+          80
+        ]
+      }
+    },
+    {
+      "check": "placement:40",
+      "result": "PASS",
+      "detail": {
+        "module": "lantern-pedestal",
+        "expected": [
+          170,
+          193,
+          36,
+          39
+        ],
+        "actual": [
+          170,
+          193,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "check": "placement:41",
+      "result": "PASS",
+      "detail": {
+        "module": "g0",
+        "expected": [
+          416,
+          193,
+          32,
+          43
+        ],
+        "actual": [
+          416,
+          193,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:42",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          73,
+          74,
+          215,
+          18
+        ],
+        "actual": [
+          73,
+          74,
+          215,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:43",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:latch-grille",
+        "expected": [
+          28,
+          236,
+          56,
+          28
+        ],
+        "actual": [
+          28,
+          236,
+          56,
+          28
+        ]
+      }
+    },
+    {
+      "check": "placement:44",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-corridor",
+        "expected": [
+          72,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:45",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-corridor",
+        "expected": [
+          576,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:46",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-tube",
+        "expected": [
+          73,
+          56,
+          64,
+          32
+        ],
+        "actual": [
+          73,
+          56,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:47",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-seal",
+        "expected": [
+          304,
+          48,
+          32,
+          40
+        ],
+        "actual": [
+          304,
+          48,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:48",
+      "result": "PASS",
+      "detail": {
+        "module": "door-a-control",
+        "expected": [
+          42,
+          172,
+          28,
+          32
+        ],
+        "actual": [
+          42,
+          172,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:49",
+      "result": "PASS",
+      "detail": {
+        "module": "g1",
+        "expected": [
+          224,
+          173,
+          32,
+          43
+        ],
+        "actual": [
+          224,
+          173,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:50",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-door-control",
+        "expected": [
+          484,
+          220,
+          32,
+          40
+        ],
+        "actual": [
+          484,
+          220,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:51",
+      "result": "PASS",
+      "detail": {
+        "module": "star-map-table",
+        "expected": [
+          279,
+          238,
+          83,
+          42
+        ],
+        "actual": [
+          279,
+          238,
+          83,
+          42
+        ]
+      }
+    },
+    {
+      "check": "placement:52",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          344,
+          60,
+          264,
+          18
+        ],
+        "actual": [
+          344,
+          60,
+          264,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:53",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-drop",
+        "expected": [
+          592,
+          76,
+          18,
+          180
+        ],
+        "actual": [
+          592,
+          76,
+          18,
+          180
+        ]
+      }
+    },
+    {
+      "check": "placement:54",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:final-door-sill",
+        "expected": [
+          468,
+          140,
+          64,
+          14
+        ],
+        "actual": [
+          468,
+          140,
+          64,
+          14
+        ]
+      }
+    },
+    {
+      "check": "placement:55",
+      "result": "PASS",
+      "detail": {
+        "module": "scenery-wheel",
+        "expected": [
+          186,
+          59,
+          144,
+          88
+        ],
+        "actual": [
+          186,
+          59,
+          144,
+          88
+        ]
+      }
+    },
+    {
+      "check": "placement:56",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-observatory",
+        "expected": [
+          56,
+          186,
+          48,
+          48
+        ],
+        "actual": [
+          56,
+          186,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:57",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:return-loop-observatory",
+        "expected": [
+          496,
+          300,
+          48,
+          20
+        ],
+        "actual": [
+          496,
+          300,
+          48,
+          20
+        ]
+      }
+    },
+    {
+      "check": "placement:58",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-observatory",
+        "expected": [
+          496,
+          284,
+          48,
+          36
+        ],
+        "actual": [
+          496,
+          284,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "placement:59",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-lock",
+        "expected": [
+          163,
+          118,
+          27,
+          34
+        ],
+        "actual": [
+          163,
+          118,
+          27,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:60",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door-control",
+        "expected": [
+          486,
+          120,
+          28,
+          32
+        ],
+        "actual": [
+          486,
+          120,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:61",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door",
+        "expected": [
+          468,
+          105,
+          64,
+          47
+        ],
+        "actual": [
+          468,
+          105,
+          64,
+          47
+        ]
+      }
+    },
+    {
+      "check": "placement:62",
+      "result": "PASS",
+      "detail": {
+        "module": "splitter",
+        "expected": [
+          221,
+          202,
+          38,
+          38
+        ],
+        "actual": [
+          221,
+          202,
+          38,
+          38
+        ]
+      }
+    },
+    {
+      "check": "placement:63",
+      "result": "PASS",
+      "detail": {
+        "module": "statue",
+        "expected": [
+          271,
+          182,
+          51,
+          70
+        ],
+        "actual": [
+          271,
+          182,
+          51,
+          70
+        ]
+      }
+    },
+    {
+      "check": "placement:64",
+      "result": "PASS",
+      "detail": {
+        "module": "stone-return-loop",
+        "expected": [
+          452,
+          226,
+          28,
+          26
+        ],
+        "actual": [
+          452,
+          226,
+          28,
+          26
+        ]
+      }
+    },
+    {
+      "check": "placement:65",
+      "result": "PASS",
+      "detail": {
+        "module": "final-record",
+        "expected": [
+          386,
+          224,
+          64,
+          32
+        ],
+        "actual": [
+          386,
+          224,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:66",
+      "result": "PASS",
+      "detail": {
+        "module": "g2",
+        "expected": [
+          152,
+          215,
+          32,
+          43
+        ],
+        "actual": [
+          152,
+          215,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:67",
+      "result": "PASS",
+      "detail": {
+        "module": "root-bed",
+        "expected": [
+          340,
+          152,
+          44,
+          148
+        ],
+        "actual": [
+          340,
+          152,
+          44,
+          148
+        ]
+      }
+    },
+    {
+      "check": "placement:68",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          128,
+          210,
+          60,
+          24
+        ],
+        "actual": [
+          128,
+          210,
+          60,
+          24
+        ]
+      }
+    },
+    {
+      "check": "placement:69",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:source-ring",
+        "expected": [
+          156,
+          214,
+          64,
+          34
+        ],
+        "actual": [
+          156,
+          214,
+          64,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:70",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-entrance",
+        "expected": [
+          576,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:71",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-entrance",
+        "expected": [
+          72,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:72",
+      "result": "PASS",
+      "detail": {
+        "module": "learned-marks",
+        "expected": [
+          240,
+          104,
+          160,
+          80
+        ],
+        "actual": [
+          240,
+          104,
+          160,
+          80
+        ]
+      }
+    },
+    {
+      "check": "placement:73",
+      "result": "PASS",
+      "detail": {
+        "module": "lantern-pedestal",
+        "expected": [
+          170,
+          193,
+          36,
+          39
+        ],
+        "actual": [
+          170,
+          193,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "check": "placement:74",
+      "result": "PASS",
+      "detail": {
+        "module": "g0",
+        "expected": [
+          416,
+          193,
+          32,
+          43
+        ],
+        "actual": [
+          416,
+          193,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:75",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          73,
+          74,
+          215,
+          18
+        ],
+        "actual": [
+          73,
+          74,
+          215,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:76",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:latch-grille",
+        "expected": [
+          28,
+          236,
+          56,
+          28
+        ],
+        "actual": [
+          28,
+          236,
+          56,
+          28
+        ]
+      }
+    },
+    {
+      "check": "placement:77",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-corridor",
+        "expected": [
+          72,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:78",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-corridor",
+        "expected": [
+          576,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:79",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-tube",
+        "expected": [
+          73,
+          56,
+          64,
+          32
+        ],
+        "actual": [
+          73,
+          56,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:80",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-seal",
+        "expected": [
+          304,
+          48,
+          32,
+          40
+        ],
+        "actual": [
+          304,
+          48,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:81",
+      "result": "PASS",
+      "detail": {
+        "module": "door-a-control",
+        "expected": [
+          42,
+          172,
+          28,
+          32
+        ],
+        "actual": [
+          42,
+          172,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:82",
+      "result": "PASS",
+      "detail": {
+        "module": "g1",
+        "expected": [
+          224,
+          173,
+          32,
+          43
+        ],
+        "actual": [
+          224,
+          173,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:83",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-door-control",
+        "expected": [
+          484,
+          220,
+          32,
+          40
+        ],
+        "actual": [
+          484,
+          220,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:84",
+      "result": "PASS",
+      "detail": {
+        "module": "star-map-table",
+        "expected": [
+          279,
+          238,
+          83,
+          42
+        ],
+        "actual": [
+          279,
+          238,
+          83,
+          42
+        ]
+      }
+    },
+    {
+      "check": "placement:85",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          344,
+          60,
+          264,
+          18
+        ],
+        "actual": [
+          344,
+          60,
+          264,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:86",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-drop",
+        "expected": [
+          592,
+          76,
+          18,
+          180
+        ],
+        "actual": [
+          592,
+          76,
+          18,
+          180
+        ]
+      }
+    },
+    {
+      "check": "placement:87",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          472,
+          266,
+          96,
+          32
+        ],
+        "actual": [
+          472,
+          266,
+          96,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:88",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:final-door-sill",
+        "expected": [
+          468,
+          140,
+          64,
+          14
+        ],
+        "actual": [
+          468,
+          140,
+          64,
+          14
+        ]
+      }
+    },
+    {
+      "check": "placement:89",
+      "result": "PASS",
+      "detail": {
+        "module": "scenery-wheel",
+        "expected": [
+          186,
+          59,
+          144,
+          88
+        ],
+        "actual": [
+          186,
+          59,
+          144,
+          88
+        ]
+      }
+    },
+    {
+      "check": "placement:90",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-observatory",
+        "expected": [
+          56,
+          186,
+          48,
+          48
+        ],
+        "actual": [
+          56,
+          186,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:91",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-observatory",
+        "expected": [
+          496,
+          284,
+          48,
+          36
+        ],
+        "actual": [
+          496,
+          284,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "placement:92",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-lock",
+        "expected": [
+          163,
+          118,
+          27,
+          34
+        ],
+        "actual": [
+          163,
+          118,
+          27,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:93",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door-control",
+        "expected": [
+          486,
+          120,
+          28,
+          32
+        ],
+        "actual": [
+          486,
+          120,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:94",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door",
+        "expected": [
+          468,
+          105,
+          64,
+          47
+        ],
+        "actual": [
+          468,
+          105,
+          64,
+          47
+        ]
+      }
+    },
+    {
+      "check": "placement:95",
+      "result": "PASS",
+      "detail": {
+        "module": "splitter",
+        "expected": [
+          221,
+          202,
+          38,
+          38
+        ],
+        "actual": [
+          221,
+          202,
+          38,
+          38
+        ]
+      }
+    },
+    {
+      "check": "placement:96",
+      "result": "PASS",
+      "detail": {
+        "module": "statue",
+        "expected": [
+          271,
+          182,
+          51,
+          70
+        ],
+        "actual": [
+          271,
+          182,
+          51,
+          70
+        ]
+      }
+    },
+    {
+      "check": "placement:97",
+      "result": "PASS",
+      "detail": {
+        "module": "stone-return-loop",
+        "expected": [
+          452,
+          226,
+          28,
+          26
+        ],
+        "actual": [
+          452,
+          226,
+          28,
+          26
+        ]
+      }
+    },
+    {
+      "check": "placement:98",
+      "result": "PASS",
+      "detail": {
+        "module": "final-record",
+        "expected": [
+          386,
+          224,
+          64,
+          32
+        ],
+        "actual": [
+          386,
+          224,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:99",
+      "result": "PASS",
+      "detail": {
+        "module": "g2",
+        "expected": [
+          152,
+          215,
+          32,
+          43
+        ],
+        "actual": [
+          152,
+          215,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:100",
+      "result": "PASS",
+      "detail": {
+        "module": "root-bed",
+        "expected": [
+          340,
+          152,
+          44,
+          148
+        ],
+        "actual": [
+          340,
+          152,
+          44,
+          148
+        ]
+      }
+    },
+    {
+      "check": "placement:101",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:source-ring",
+        "expected": [
+          156,
+          214,
+          64,
+          34
+        ],
+        "actual": [
+          156,
+          214,
+          64,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:102",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-entrance",
+        "expected": [
+          576,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:103",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:return-loop-entrance",
+        "expected": [
+          24,
+          196,
+          104,
+          48
+        ],
+        "actual": [
+          24,
+          196,
+          104,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:104",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-entrance",
+        "expected": [
+          72,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:105",
+      "result": "PASS",
+      "detail": {
+        "module": "learned-marks",
+        "expected": [
+          240,
+          104,
+          160,
+          80
+        ],
+        "actual": [
+          240,
+          104,
+          160,
+          80
+        ]
+      }
+    },
+    {
+      "check": "placement:106",
+      "result": "PASS",
+      "detail": {
+        "module": "lantern-pedestal",
+        "expected": [
+          170,
+          193,
+          36,
+          39
+        ],
+        "actual": [
+          170,
+          193,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "check": "placement:107",
+      "result": "PASS",
+      "detail": {
+        "module": "g0",
+        "expected": [
+          416,
+          193,
+          32,
+          43
+        ],
+        "actual": [
+          416,
+          193,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:108",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          73,
+          74,
+          215,
+          18
+        ],
+        "actual": [
+          73,
+          74,
+          215,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:109",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:latch-grille",
+        "expected": [
+          28,
+          236,
+          56,
+          28
+        ],
+        "actual": [
+          28,
+          236,
+          56,
+          28
+        ]
+      }
+    },
+    {
+      "check": "placement:110",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-corridor",
+        "expected": [
+          72,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:111",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-corridor",
+        "expected": [
+          576,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:112",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-tube",
+        "expected": [
+          73,
+          56,
+          64,
+          32
+        ],
+        "actual": [
+          73,
+          56,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:113",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-seal",
+        "expected": [
+          304,
+          48,
+          32,
+          40
+        ],
+        "actual": [
+          304,
+          48,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:114",
+      "result": "PASS",
+      "detail": {
+        "module": "door-a-control",
+        "expected": [
+          42,
+          172,
+          28,
+          32
+        ],
+        "actual": [
+          42,
+          172,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:115",
+      "result": "PASS",
+      "detail": {
+        "module": "g1",
+        "expected": [
+          224,
+          173,
+          32,
+          43
+        ],
+        "actual": [
+          224,
+          173,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:116",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-door-control",
+        "expected": [
+          484,
+          220,
+          32,
+          40
+        ],
+        "actual": [
+          484,
+          220,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:117",
+      "result": "PASS",
+      "detail": {
+        "module": "star-map-table",
+        "expected": [
+          279,
+          238,
+          83,
+          42
+        ],
+        "actual": [
+          279,
+          238,
+          83,
+          42
+        ]
+      }
+    },
+    {
+      "check": "placement:118",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          344,
+          60,
+          264,
+          18
+        ],
+        "actual": [
+          344,
+          60,
+          264,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:119",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-drop",
+        "expected": [
+          592,
+          76,
+          18,
+          180
+        ],
+        "actual": [
+          592,
+          76,
+          18,
+          180
+        ]
+      }
+    },
+    {
+      "check": "placement:120",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:final-door-sill",
+        "expected": [
+          468,
+          140,
+          64,
+          14
+        ],
+        "actual": [
+          468,
+          140,
+          64,
+          14
+        ]
+      }
+    },
+    {
+      "check": "placement:121",
+      "result": "PASS",
+      "detail": {
+        "module": "scenery-wheel",
+        "expected": [
+          186,
+          59,
+          144,
+          88
+        ],
+        "actual": [
+          186,
+          59,
+          144,
+          88
+        ]
+      }
+    },
+    {
+      "check": "placement:122",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-observatory",
+        "expected": [
+          56,
+          186,
+          48,
+          48
+        ],
+        "actual": [
+          56,
+          186,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:123",
+      "result": "PASS",
+      "detail": {
+        "module": "threshold:return-loop-observatory",
+        "expected": [
+          496,
+          300,
+          48,
+          20
+        ],
+        "actual": [
+          496,
+          300,
+          48,
+          20
+        ]
+      }
+    },
+    {
+      "check": "placement:124",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-observatory",
+        "expected": [
+          496,
+          284,
+          48,
+          36
+        ],
+        "actual": [
+          496,
+          284,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "placement:125",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-lock",
+        "expected": [
+          163,
+          118,
+          27,
+          34
+        ],
+        "actual": [
+          163,
+          118,
+          27,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:126",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door-control",
+        "expected": [
+          486,
+          120,
+          28,
+          32
+        ],
+        "actual": [
+          486,
+          120,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:127",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door",
+        "expected": [
+          468,
+          105,
+          64,
+          47
+        ],
+        "actual": [
+          468,
+          105,
+          64,
+          47
+        ]
+      }
+    },
+    {
+      "check": "placement:128",
+      "result": "PASS",
+      "detail": {
+        "module": "splitter",
+        "expected": [
+          221,
+          202,
+          38,
+          38
+        ],
+        "actual": [
+          221,
+          202,
+          38,
+          38
+        ]
+      }
+    },
+    {
+      "check": "placement:129",
+      "result": "PASS",
+      "detail": {
+        "module": "statue",
+        "expected": [
+          271,
+          182,
+          51,
+          70
+        ],
+        "actual": [
+          271,
+          182,
+          51,
+          70
+        ]
+      }
+    },
+    {
+      "check": "placement:130",
+      "result": "PASS",
+      "detail": {
+        "module": "stone-return-loop",
+        "expected": [
+          452,
+          226,
+          28,
+          26
+        ],
+        "actual": [
+          452,
+          226,
+          28,
+          26
+        ]
+      }
+    },
+    {
+      "check": "placement:131",
+      "result": "PASS",
+      "detail": {
+        "module": "final-record",
+        "expected": [
+          386,
+          224,
+          64,
+          32
+        ],
+        "actual": [
+          386,
+          224,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:132",
+      "result": "PASS",
+      "detail": {
+        "module": "g2",
+        "expected": [
+          152,
+          215,
+          32,
+          43
+        ],
+        "actual": [
+          152,
+          215,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:133",
+      "result": "PASS",
+      "detail": {
+        "module": "root-bed",
+        "expected": [
+          340,
+          152,
+          44,
+          148
+        ],
+        "actual": [
+          340,
+          152,
+          44,
+          148
+        ]
+      }
+    },
+    {
+      "check": "placement:134",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          128,
+          210,
+          60,
+          24
+        ],
+        "actual": [
+          128,
+          210,
+          60,
+          24
+        ]
+      }
+    },
+    {
+      "check": "placement:135",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:source-ring",
+        "expected": [
+          156,
+          214,
+          64,
+          34
+        ],
+        "actual": [
+          156,
+          214,
+          64,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:136",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-entrance",
+        "expected": [
+          576,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:137",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-entrance",
+        "expected": [
+          72,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:138",
+      "result": "PASS",
+      "detail": {
+        "module": "learned-marks",
+        "expected": [
+          240,
+          104,
+          160,
+          80
+        ],
+        "actual": [
+          240,
+          104,
+          160,
+          80
+        ]
+      }
+    },
+    {
+      "check": "placement:139",
+      "result": "PASS",
+      "detail": {
+        "module": "lantern-pedestal",
+        "expected": [
+          170,
+          193,
+          36,
+          39
+        ],
+        "actual": [
+          170,
+          193,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "check": "placement:140",
+      "result": "PASS",
+      "detail": {
+        "module": "g0",
+        "expected": [
+          416,
+          193,
+          32,
+          43
+        ],
+        "actual": [
+          416,
+          193,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:141",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          73,
+          74,
+          215,
+          18
+        ],
+        "actual": [
+          73,
+          74,
+          215,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:142",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:latch-grille",
+        "expected": [
+          28,
+          236,
+          56,
+          28
+        ],
+        "actual": [
+          28,
+          236,
+          56,
+          28
+        ]
+      }
+    },
+    {
+      "check": "placement:143",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-corridor",
+        "expected": [
+          72,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:144",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-corridor",
+        "expected": [
+          576,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:145",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-tube",
+        "expected": [
+          73,
+          56,
+          64,
+          32
+        ],
+        "actual": [
+          73,
+          56,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:146",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-seal",
+        "expected": [
+          304,
+          48,
+          32,
+          40
+        ],
+        "actual": [
+          304,
+          48,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:147",
+      "result": "PASS",
+      "detail": {
+        "module": "door-a-control",
+        "expected": [
+          42,
+          172,
+          28,
+          32
+        ],
+        "actual": [
+          42,
+          172,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:148",
+      "result": "PASS",
+      "detail": {
+        "module": "g1",
+        "expected": [
+          224,
+          173,
+          32,
+          43
+        ],
+        "actual": [
+          224,
+          173,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:149",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-door-control",
+        "expected": [
+          484,
+          220,
+          32,
+          40
+        ],
+        "actual": [
+          484,
+          220,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:150",
+      "result": "PASS",
+      "detail": {
+        "module": "star-map-table",
+        "expected": [
+          279,
+          238,
+          83,
+          42
+        ],
+        "actual": [
+          279,
+          238,
+          83,
+          42
+        ]
+      }
+    },
+    {
+      "check": "placement:151",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          344,
+          60,
+          264,
+          18
+        ],
+        "actual": [
+          344,
+          60,
+          264,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:152",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-drop",
+        "expected": [
+          592,
+          76,
+          18,
+          180
+        ],
+        "actual": [
+          592,
+          76,
+          18,
+          180
+        ]
+      }
+    },
+    {
+      "check": "placement:153",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          472,
+          266,
+          96,
+          32
+        ],
+        "actual": [
+          472,
+          266,
+          96,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:154",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:final-door-sill",
+        "expected": [
+          468,
+          140,
+          64,
+          14
+        ],
+        "actual": [
+          468,
+          140,
+          64,
+          14
+        ]
+      }
+    },
+    {
+      "check": "placement:155",
+      "result": "PASS",
+      "detail": {
+        "module": "scenery-wheel",
+        "expected": [
+          186,
+          59,
+          144,
+          88
+        ],
+        "actual": [
+          186,
+          59,
+          144,
+          88
+        ]
+      }
+    },
+    {
+      "check": "placement:156",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-observatory",
+        "expected": [
+          56,
+          186,
+          48,
+          48
+        ],
+        "actual": [
+          56,
+          186,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:157",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-observatory",
+        "expected": [
+          496,
+          284,
+          48,
+          36
+        ],
+        "actual": [
+          496,
+          284,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "placement:158",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-lock",
+        "expected": [
+          163,
+          118,
+          27,
+          34
+        ],
+        "actual": [
+          163,
+          118,
+          27,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:159",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door-control",
+        "expected": [
+          486,
+          120,
+          28,
+          32
+        ],
+        "actual": [
+          486,
+          120,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:160",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door",
+        "expected": [
+          468,
+          105,
+          64,
+          47
+        ],
+        "actual": [
+          468,
+          105,
+          64,
+          47
+        ]
+      }
+    },
+    {
+      "check": "placement:161",
+      "result": "PASS",
+      "detail": {
+        "module": "splitter",
+        "expected": [
+          221,
+          202,
+          38,
+          38
+        ],
+        "actual": [
+          221,
+          202,
+          38,
+          38
+        ]
+      }
+    },
+    {
+      "check": "placement:162",
+      "result": "PASS",
+      "detail": {
+        "module": "statue",
+        "expected": [
+          271,
+          182,
+          51,
+          70
+        ],
+        "actual": [
+          271,
+          182,
+          51,
+          70
+        ]
+      }
+    },
+    {
+      "check": "placement:163",
+      "result": "PASS",
+      "detail": {
+        "module": "stone-return-loop",
+        "expected": [
+          452,
+          226,
+          28,
+          26
+        ],
+        "actual": [
+          452,
+          226,
+          28,
+          26
+        ]
+      }
+    },
+    {
+      "check": "placement:164",
+      "result": "PASS",
+      "detail": {
+        "module": "final-record",
+        "expected": [
+          386,
+          224,
+          64,
+          32
+        ],
+        "actual": [
+          386,
+          224,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:165",
+      "result": "PASS",
+      "detail": {
+        "module": "g2",
+        "expected": [
+          152,
+          215,
+          32,
+          43
+        ],
+        "actual": [
+          152,
+          215,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:166",
+      "result": "PASS",
+      "detail": {
+        "module": "root-bed",
+        "expected": [
+          340,
+          152,
+          44,
+          148
+        ],
+        "actual": [
+          340,
+          152,
+          44,
+          148
+        ]
+      }
+    },
+    {
+      "check": "placement:167",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          128,
+          210,
+          60,
+          24
+        ],
+        "actual": [
+          128,
+          210,
+          60,
+          24
+        ]
+      }
+    },
+    {
+      "check": "placement:168",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:source-ring",
+        "expected": [
+          156,
+          214,
+          64,
+          34
+        ],
+        "actual": [
+          156,
+          214,
+          64,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:169",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-entrance",
+        "expected": [
+          576,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:170",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-entrance",
+        "expected": [
+          72,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:171",
+      "result": "PASS",
+      "detail": {
+        "module": "learned-marks",
+        "expected": [
+          240,
+          104,
+          160,
+          80
+        ],
+        "actual": [
+          240,
+          104,
+          160,
+          80
+        ]
+      }
+    },
+    {
+      "check": "placement:172",
+      "result": "PASS",
+      "detail": {
+        "module": "lantern-pedestal",
+        "expected": [
+          170,
+          193,
+          36,
+          39
+        ],
+        "actual": [
+          170,
+          193,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "check": "placement:173",
+      "result": "PASS",
+      "detail": {
+        "module": "g0",
+        "expected": [
+          416,
+          193,
+          32,
+          43
+        ],
+        "actual": [
+          416,
+          193,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:174",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          73,
+          74,
+          215,
+          18
+        ],
+        "actual": [
+          73,
+          74,
+          215,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:175",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:latch-grille",
+        "expected": [
+          28,
+          236,
+          56,
+          28
+        ],
+        "actual": [
+          28,
+          236,
+          56,
+          28
+        ]
+      }
+    },
+    {
+      "check": "placement:176",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-corridor",
+        "expected": [
+          72,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:177",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-corridor",
+        "expected": [
+          576,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:178",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-tube",
+        "expected": [
+          73,
+          56,
+          64,
+          32
+        ],
+        "actual": [
+          73,
+          56,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:179",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-seal",
+        "expected": [
+          304,
+          48,
+          32,
+          40
+        ],
+        "actual": [
+          304,
+          48,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:180",
+      "result": "PASS",
+      "detail": {
+        "module": "door-a-control",
+        "expected": [
+          42,
+          172,
+          28,
+          32
+        ],
+        "actual": [
+          42,
+          172,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:181",
+      "result": "PASS",
+      "detail": {
+        "module": "g1",
+        "expected": [
+          224,
+          173,
+          32,
+          43
+        ],
+        "actual": [
+          224,
+          173,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:182",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-door-control",
+        "expected": [
+          484,
+          220,
+          32,
+          40
+        ],
+        "actual": [
+          484,
+          220,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:183",
+      "result": "PASS",
+      "detail": {
+        "module": "star-map-table",
+        "expected": [
+          279,
+          238,
+          83,
+          42
+        ],
+        "actual": [
+          279,
+          238,
+          83,
+          42
+        ]
+      }
+    },
+    {
+      "check": "placement:184",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          344,
+          60,
+          264,
+          18
+        ],
+        "actual": [
+          344,
+          60,
+          264,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:185",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-drop",
+        "expected": [
+          592,
+          76,
+          18,
+          180
+        ],
+        "actual": [
+          592,
+          76,
+          18,
+          180
+        ]
+      }
+    },
+    {
+      "check": "placement:186",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          472,
+          266,
+          96,
+          32
+        ],
+        "actual": [
+          472,
+          266,
+          96,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:187",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:final-door-sill",
+        "expected": [
+          468,
+          140,
+          64,
+          14
+        ],
+        "actual": [
+          468,
+          140,
+          64,
+          14
+        ]
+      }
+    },
+    {
+      "check": "placement:188",
+      "result": "PASS",
+      "detail": {
+        "module": "scenery-wheel",
+        "expected": [
+          186,
+          59,
+          144,
+          88
+        ],
+        "actual": [
+          186,
+          59,
+          144,
+          88
+        ]
+      }
+    },
+    {
+      "check": "placement:189",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-observatory",
+        "expected": [
+          56,
+          186,
+          48,
+          48
+        ],
+        "actual": [
+          56,
+          186,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:190",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-observatory",
+        "expected": [
+          496,
+          284,
+          48,
+          36
+        ],
+        "actual": [
+          496,
+          284,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "placement:191",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-lock",
+        "expected": [
+          163,
+          118,
+          27,
+          34
+        ],
+        "actual": [
+          163,
+          118,
+          27,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:192",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door-control",
+        "expected": [
+          486,
+          120,
+          28,
+          32
+        ],
+        "actual": [
+          486,
+          120,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:193",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door",
+        "expected": [
+          468,
+          105,
+          64,
+          47
+        ],
+        "actual": [
+          468,
+          105,
+          64,
+          47
+        ]
+      }
+    },
+    {
+      "check": "placement:194",
+      "result": "PASS",
+      "detail": {
+        "module": "splitter",
+        "expected": [
+          221,
+          202,
+          38,
+          38
+        ],
+        "actual": [
+          221,
+          202,
+          38,
+          38
+        ]
+      }
+    },
+    {
+      "check": "placement:195",
+      "result": "PASS",
+      "detail": {
+        "module": "statue",
+        "expected": [
+          271,
+          182,
+          51,
+          70
+        ],
+        "actual": [
+          271,
+          182,
+          51,
+          70
+        ]
+      }
+    },
+    {
+      "check": "placement:196",
+      "result": "PASS",
+      "detail": {
+        "module": "stone-return-loop",
+        "expected": [
+          452,
+          226,
+          28,
+          26
+        ],
+        "actual": [
+          452,
+          226,
+          28,
+          26
+        ]
+      }
+    },
+    {
+      "check": "placement:197",
+      "result": "PASS",
+      "detail": {
+        "module": "final-record",
+        "expected": [
+          386,
+          224,
+          64,
+          32
+        ],
+        "actual": [
+          386,
+          224,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:198",
+      "result": "PASS",
+      "detail": {
+        "module": "g2",
+        "expected": [
+          152,
+          215,
+          32,
+          43
+        ],
+        "actual": [
+          152,
+          215,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:199",
+      "result": "PASS",
+      "detail": {
+        "module": "root-bed",
+        "expected": [
+          340,
+          152,
+          44,
+          148
+        ],
+        "actual": [
+          340,
+          152,
+          44,
+          148
+        ]
+      }
+    },
+    {
+      "check": "placement:200",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          128,
+          210,
+          60,
+          24
+        ],
+        "actual": [
+          128,
+          210,
+          60,
+          24
+        ]
+      }
+    },
+    {
+      "check": "placement:201",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:source-ring",
+        "expected": [
+          156,
+          214,
+          64,
+          34
+        ],
+        "actual": [
+          156,
+          214,
+          64,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:202",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-entrance",
+        "expected": [
+          576,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:203",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-entrance",
+        "expected": [
+          72,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:204",
+      "result": "PASS",
+      "detail": {
+        "module": "learned-marks",
+        "expected": [
+          240,
+          104,
+          160,
+          80
+        ],
+        "actual": [
+          240,
+          104,
+          160,
+          80
+        ]
+      }
+    },
+    {
+      "check": "placement:205",
+      "result": "PASS",
+      "detail": {
+        "module": "lantern-pedestal",
+        "expected": [
+          170,
+          193,
+          36,
+          39
+        ],
+        "actual": [
+          170,
+          193,
+          36,
+          39
+        ]
+      }
+    },
+    {
+      "check": "placement:206",
+      "result": "PASS",
+      "detail": {
+        "module": "g0",
+        "expected": [
+          416,
+          193,
+          32,
+          43
+        ],
+        "actual": [
+          416,
+          193,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:207",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          73,
+          74,
+          215,
+          18
+        ],
+        "actual": [
+          73,
+          74,
+          215,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:208",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:latch-grille",
+        "expected": [
+          28,
+          236,
+          56,
+          28
+        ],
+        "actual": [
+          28,
+          236,
+          56,
+          28
+        ]
+      }
+    },
+    {
+      "check": "placement:209",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:door-a-corridor",
+        "expected": [
+          72,
+          152,
+          48,
+          48
+        ],
+        "actual": [
+          72,
+          152,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:210",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-corridor",
+        "expected": [
+          576,
+          192,
+          48,
+          48
+        ],
+        "actual": [
+          576,
+          192,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:211",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-tube",
+        "expected": [
+          73,
+          56,
+          64,
+          32
+        ],
+        "actual": [
+          73,
+          56,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:212",
+      "result": "PASS",
+      "detail": {
+        "module": "lumo-seal",
+        "expected": [
+          304,
+          48,
+          32,
+          40
+        ],
+        "actual": [
+          304,
+          48,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:213",
+      "result": "PASS",
+      "detail": {
+        "module": "door-a-control",
+        "expected": [
+          42,
+          172,
+          28,
+          32
+        ],
+        "actual": [
+          42,
+          172,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:214",
+      "result": "PASS",
+      "detail": {
+        "module": "g1",
+        "expected": [
+          224,
+          173,
+          32,
+          43
+        ],
+        "actual": [
+          224,
+          173,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:215",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-door-control",
+        "expected": [
+          484,
+          220,
+          32,
+          40
+        ],
+        "actual": [
+          484,
+          220,
+          32,
+          40
+        ]
+      }
+    },
+    {
+      "check": "placement:216",
+      "result": "PASS",
+      "detail": {
+        "module": "star-map-table",
+        "expected": [
+          279,
+          238,
+          83,
+          42
+        ],
+        "actual": [
+          279,
+          238,
+          83,
+          42
+        ]
+      }
+    },
+    {
+      "check": "placement:217",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-run",
+        "expected": [
+          344,
+          60,
+          264,
+          18
+        ],
+        "actual": [
+          344,
+          60,
+          264,
+          18
+        ]
+      }
+    },
+    {
+      "check": "placement:218",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:pipe-drop",
+        "expected": [
+          592,
+          76,
+          18,
+          180
+        ],
+        "actual": [
+          592,
+          76,
+          18,
+          180
+        ]
+      }
+    },
+    {
+      "check": "placement:219",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:loop-path",
+        "expected": [
+          472,
+          266,
+          96,
+          32
+        ],
+        "actual": [
+          472,
+          266,
+          96,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:220",
+      "result": "PASS",
+      "detail": {
+        "module": "stamp:final-door-sill",
+        "expected": [
+          468,
+          140,
+          64,
+          14
+        ],
+        "actual": [
+          468,
+          140,
+          64,
+          14
+        ]
+      }
+    },
+    {
+      "check": "placement:221",
+      "result": "PASS",
+      "detail": {
+        "module": "scenery-wheel",
+        "expected": [
+          186,
+          59,
+          144,
+          88
+        ],
+        "actual": [
+          186,
+          59,
+          144,
+          88
+        ]
+      }
+    },
+    {
+      "check": "placement:222",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:sun-door-observatory",
+        "expected": [
+          56,
+          186,
+          48,
+          48
+        ],
+        "actual": [
+          56,
+          186,
+          48,
+          48
+        ]
+      }
+    },
+    {
+      "check": "placement:223",
+      "result": "PASS",
+      "detail": {
+        "module": "arch:return-loop-observatory",
+        "expected": [
+          496,
+          284,
+          48,
+          36
+        ],
+        "actual": [
+          496,
+          284,
+          48,
+          36
+        ]
+      }
+    },
+    {
+      "check": "placement:224",
+      "result": "PASS",
+      "detail": {
+        "module": "sun-lock",
+        "expected": [
+          163,
+          118,
+          27,
+          34
+        ],
+        "actual": [
+          163,
+          118,
+          27,
+          34
+        ]
+      }
+    },
+    {
+      "check": "placement:225",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door-control",
+        "expected": [
+          486,
+          120,
+          28,
+          32
+        ],
+        "actual": [
+          486,
+          120,
+          28,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:226",
+      "result": "PASS",
+      "detail": {
+        "module": "final-door",
+        "expected": [
+          468,
+          105,
+          64,
+          47
+        ],
+        "actual": [
+          468,
+          105,
+          64,
+          47
+        ]
+      }
+    },
+    {
+      "check": "placement:227",
+      "result": "PASS",
+      "detail": {
+        "module": "splitter",
+        "expected": [
+          221,
+          202,
+          38,
+          38
+        ],
+        "actual": [
+          221,
+          202,
+          38,
+          38
+        ]
+      }
+    },
+    {
+      "check": "placement:228",
+      "result": "PASS",
+      "detail": {
+        "module": "statue",
+        "expected": [
+          271,
+          182,
+          51,
+          70
+        ],
+        "actual": [
+          271,
+          182,
+          51,
+          70
+        ]
+      }
+    },
+    {
+      "check": "placement:229",
+      "result": "PASS",
+      "detail": {
+        "module": "stone-return-loop",
+        "expected": [
+          452,
+          226,
+          28,
+          26
+        ],
+        "actual": [
+          452,
+          226,
+          28,
+          26
+        ]
+      }
+    },
+    {
+      "check": "placement:230",
+      "result": "PASS",
+      "detail": {
+        "module": "final-record",
+        "expected": [
+          386,
+          224,
+          64,
+          32
+        ],
+        "actual": [
+          386,
+          224,
+          64,
+          32
+        ]
+      }
+    },
+    {
+      "check": "placement:231",
+      "result": "PASS",
+      "detail": {
+        "module": "g2",
+        "expected": [
+          152,
+          215,
+          32,
+          43
+        ],
+        "actual": [
+          152,
+          215,
+          32,
+          43
+        ]
+      }
+    },
+    {
+      "check": "placement:232",
+      "result": "PASS",
+      "detail": {
+        "module": "root-bed",
+        "expected": [
+          340,
+          152,
+          44,
+          148
+        ],
+        "actual": [
+          340,
+          152,
+          44,
+          148
+        ]
+      }
+    },
+    {
+      "check": "placement:233",
+      "result": "PASS",
+      "detail": {
+        "module": "balance-crystal",
+        "expected": [
+          558,
+          213,
+          21,
+          39
+        ],
+        "actual": [
+          558,
+          213,
+          21,
+          39
+        ]
+      }
+    },
+    {
+      "check": "review:01-door-a-powered-entrance.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:01-door-a-powered-corridor.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:01-door-a-powered-observatory.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:01-door-a-powered-three-rooms.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:02-shadowed-bed-grown-bridge-entrance.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:02-shadowed-bed-grown-bridge-corridor.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:02-shadowed-bed-grown-bridge-observatory.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:02-shadowed-bed-grown-bridge-three-rooms.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:03-lumo-recalled-dark-retracted-roots-entrance.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:03-lumo-recalled-dark-retracted-roots-corridor.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:03-lumo-recalled-dark-retracted-roots-observatory.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:03-lumo-recalled-dark-retracted-roots-three-rooms.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:04-direct-light-amber-roots-no-bridge-entrance.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:04-direct-light-amber-roots-no-bridge-corridor.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:04-direct-light-amber-roots-no-bridge-observatory.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:04-direct-light-amber-roots-no-bridge-three-rooms.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:05-margin-ink-blank-for-runtime-text.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:08-memory-overlap-1.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:08-memory-overlap-2.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:08-memory-overlap-3.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:07-memory-white-flash.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:09-after-memory-shadow-remains-crystal-revealed.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:06-memory-record-guardian.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:three-required-states-native.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:memory-sequence-native.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:native-sprite-contact.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:native-sprite-contact-nearest-2x.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:01-door-a-powered-entrance-nearest-2x.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:02-shadowed-bed-grown-bridge-observatory-nearest-2x.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:03-lumo-recalled-dark-retracted-roots-observatory-nearest-2x.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review:08-memory-overlap-1-nearest-2x.png",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "review-pngs-are-manifested",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "check": "negative-control:wrong-size",
+      "result": "PASS",
+      "detail": [
+        "wrong-size",
+        "opaque-sprite"
+      ]
+    },
+    {
+      "check": "negative-control:opaque-sprite",
+      "result": "PASS",
+      "detail": [
+        "opaque-sprite"
+      ]
+    },
+    {
+      "check": "negative-control:empty-sprite",
+      "result": "PASS",
+      "detail": [
+        "empty"
+      ]
+    },
+    {
+      "check": "negative-control:transparent-background",
+      "result": "PASS",
+      "detail": [
+        "empty",
+        "nonopaque-background"
+      ]
+    },
+    {
+      "check": "negative-control:tampered-hash",
+      "result": "PASS",
+      "detail": "mismatching digest rejected"
+    }
+  ],
+  "visual_review": "PENDING; machine validation does not assert visual quality",
+  "engine": "NOT_RUN",
+  "collision": "NOT_RUN",
+  "browser_play": "NOT_RUN"
+}
