@@ -92,42 +92,42 @@
 
 ## Modules (art + stand + behaviour)
 
-The stand is the E trigger, authored at the object's **south edge** (RULE_GAMES.md 1) or its documented
+The stand is the E trigger. A standing prop answers from every side within 8px of its solid (RULE_GAMES.md 1, 2026-10-22); its stand is the reach point 8px above its base line, and the documented
 side. A standing prop sorts at `10 + anchor.y/10`; ground-mounted art sits at depth 3.
 
 ### tiền sảnh (composed stone floor; the `lobby-base` staging board is not used)
 
 | id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
 | --- | --- | --- | --- | --- | --- | --- |
-| `lantern-pedestal` | texture `pedestal_empty` | 36×39 ×1 | 188,232 | 170,193,36,39 | 188,250 (22) | south |
-| `g0` | texture `mirror_0` | 36×48 ×0.9 | 432,236 | 416,193,32,43 | 432,254 (22) | south |
+| `lantern-pedestal` | texture `pedestal_empty` | 36×39 ×1 | 188,232 | 170,193,36,39 | 188,224 (22) | south |
+| `g0` | texture `mirror_0` | 36×48 ×0.9 | 432,236 | 416,193,32,43 | 432,228 (22) | south |
 | `learned-marks` | level 8 `learned-marks-miniature` | 160×80 ×1 | 320,184 | 240,104,160,80 | 320,202 (24) | south, ground mount |
 
 ### hành lang phòng sao (composed stone floor; the `star-chart-base` staging board is not used)
 
 | id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
 | --- | --- | --- | --- | --- | --- | --- |
-| `g1` | texture `mirror_1` | 36×48 ×0.9 | 240,216 | 224,173,32,43 | 240,234 (22) | south |
-| `lumo-tube` | level 4 `tube-mouth` | 64×32 ×1 | 105,88 | 73,56,64,32 | 105,106 (22) | south |
-| `lumo-seal` | level 7 `lock-moon-covered` | 32×40 ×1 | 320,88 | 304,48,32,40 | 320,106 (22) | south |
+| `g1` | texture `mirror_1` | 36×48 ×0.9 | 240,216 | 224,173,32,43 | 240,208 (22) | south |
+| `lumo-tube` | level 4 `tube-mouth` | 64×32 ×1 | 105,88 | 73,56,64,32 | 105,80 (22) | south |
+| `lumo-seal` | level 7 `lock-moon-covered` | 32×40 ×1 | 320,88 | 304,48,32,40 | 320,80 (22) | south |
 | `door-a-control` | level 4 `latch-unlatched` | 28×32 ×1 | 56,204 | 42,172,28,32 | 56,222 (22) | south |
-| `sun-door-control` | level 7 `lock-sun-off` | 32×40 ×1 | 500,260 | 484,220,32,40 | 500,278 (22) | south |
+| `sun-door-control` | level 7 `lock-sun-off` | 32×40 ×1 | 500,260 | 484,220,32,40 | 500,252 (22) | south |
 | `star-map-table` | texture `ruins_altar` | 104×52 ×0.8 | 320,280 | 278.5,238,83,42 | 320,280 (—) | side |
 
 ### phòng thiên văn (`observatory-clean-base`)
 
 | id | art | native × scale | anchor | drawn rect | stand (radius) | approach |
 | --- | --- | --- | --- | --- | --- | --- |
-| `g2` | texture `mirror_2` | 36×48 ×0.9 | 168,258 | 152,215,32,43 | 168,276 (22) | south |
-| `splitter` | level 7 set `fixed-three-route-splitter-off / fixed-three-route-splitter-on` | 48×48 ×0.8 | 240,240 | 221,202,38,38 | 240,258 (22) | south |
-| `statue` | level 7 set `statue-notch-0 / statue-notch-1 / statue-notch-2 / statue-notch-3` | 64×88 ×0.8 | 296,252 | 270.5,182,51,70 | 296,270 (22) | south |
-| `sun-lock` | level 7 `lock-sun-off` | 32×40 ×0.85 | 176,152 | 162.5,118,27,34 | 176,170 (22) | south |
+| `g2` | texture `mirror_2` | 36×48 ×0.9 | 168,258 | 152,215,32,43 | 168,250 (22) | south |
+| `splitter` | level 7 set `fixed-three-route-splitter-off / fixed-three-route-splitter-on` | 48×48 ×0.8 | 240,240 | 221,202,38,38 | 240,232 (22) | south |
+| `statue` | level 7 set `statue-notch-0 / statue-notch-1 / statue-notch-2 / statue-notch-3` | 64×88 ×0.8 | 296,252 | 270.5,182,51,70 | 296,244 (22) | south |
+| `sun-lock` | level 7 `lock-sun-off` | 32×40 ×0.85 | 176,152 | 162.5,118,27,34 | 176,144 (22) | south |
 | `root-bed` | texture `root-bed` | 44×148 ×1 | 362,300 | 340,152,44,148 | 330,252 (24) | side, ground mount |
 | `final-door-control` | level 3 `mechanisms/latch-east-unlatched` | 28×32 ×1 | 500,152 | 486,120,28,32 | 500,170 (22) | south, ground mount |
 | `final-door` | level 7 set `sanctuary-door-closed / sanctuary-door-open` | 104×76 ×0.62 | 500,152 | 468,105,64,47 | 500,152 (—) | gate, ground mount |
-| `stone-return-loop` | texture `receiver_off` | 40×37 ×0.7 | 466,252 | 452,226,28,26 | 466,270 (22) | south |
-| `final-record` | texture `ruins_altar` | 104×52 ×0.62 | 418,256 | 386,224,64,32 | 418,274 (22) | south |
-| `balance-crystal` | texture `crystal_balance` | 42×78 ×0.5 | 568,252 | 557.5,213,21,39 | 568,270 (22) | south |
+| `stone-return-loop` | texture `receiver_off` | 40×37 ×0.7 | 466,252 | 452,226,28,26 | 466,244 (22) | south |
+| `final-record` | texture `ruins_altar` | 104×52 ×0.62 | 418,256 | 386,224,64,32 | 418,248 (22) | south |
+| `balance-crystal` | texture `crystal_balance` | 42×78 ×0.5 | 568,252 | 557.5,213,21,39 | 568,244 (22) | south |
 
 Rooms, spawns, exits and beam waypoints:
 
@@ -223,8 +223,8 @@ load and after every change; they are never persisted.
 | `final-record` | E · Đọc bản ghi cuối — Bản ghi chưa mở. Còn cần: mở lối đá vòng và gọi Lumo về bên đèn. |
 | `balance-crystal` | E · Nhận Tinh thể Cân Bằng |
 
-- Every trigger centre sits at or below its object's south edge, or on the documented side/gate
-  exception; standing north, east or west of a prop shows nothing, and control radii stay 22..24.
+- Standing props answer from every side within 8px of their solid; flat ground mounts keep the south edge, or the documented side/gate
+  exception; control radii stay 22..24 for the exceptions and the approach predicate.
 - Transit circles are 28px, except the south sill pocket (16px): its centre (520,304) sits 26px from the nearest
   foot-body centre while the loop is shut, so the 16px circle keeps a 10px margin and still ends above y=320.
 - Every locked door and disabled control states the unmet prerequisite in Vietnamese via

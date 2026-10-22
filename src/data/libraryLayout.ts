@@ -11,7 +11,8 @@ export const LIBRARY_LAYOUT = {
     { x: 132, y: 126 }, { x: 180, y: 126 },
     { x: 132, y: 236 }, { x: 180, y: 236 },
   ] as LibraryPoint[],
-  rackStandOffset: 46,
+  // The reach point under each rack: its foot sits 8px below the rack block (RULE_GAMES 1), so the rack block centre plus 16.
+  rackStandOffset: 16,
   groundDepth: 7,
   well: { x: 320, y: 188, width: 220, height: 220 },
   seats: [
@@ -49,6 +50,9 @@ export const LIBRARY_LAYOUT = {
 
 /** Footprint of the central well dais (approximates the core radius of 46). */
 export const LIBRARY_DAIS: LibraryRect = { x: 284, y: 158, width: 72, height: 60 };
+
+/** RULE_GAMES 1: a standing prop answers from every side within this many px of its footprint (foot body to rect). */
+export const LIBRARY_REACH_GAP = 8;
 
 /** The inscription tablet's small footprint: 20x10 with its south edge on the tablet base. */
 export const LIBRARY_INSCRIPTION_SOLID: LibraryRect = {
@@ -94,6 +98,28 @@ const LIBRARY_WALLS: LibraryRect[] = [
   { x: 24, y: 72, width: 592, height: 8 },
   { x: 24, y: 310, width: 592, height: 8 },
 ];
+
+/** Euclidean gap between the foot body at `center` and a rect; 0 when they touch or overlap. */
+export function libraryFootGap(center: LibraryPoint, rect: LibraryRect): number {
+  const foot = libraryActorBody(center);
+  const dx = Math.max(foot.x - (rect.x + rect.width), rect.x - (foot.x + foot.width), 0);
+  const dy = Math.max(foot.y - (rect.y + rect.height), rect.y - (foot.y + foot.height), 0);
+  return Math.hypot(dx, dy);
+}
+
+/**
+ * ONE OWNER PER POSITION: among the standing footprints that can answer here, the nearest outer edge owns the position.
+ * Ties go to the first listed. The racks, the book and the inscription overlap each other's reach zones.
+ */
+export function libraryReachOwner(id: string, center: LibraryPoint, footprints: Readonly<Record<string, LibraryRect>>): boolean {
+  let owner: string | null = null;
+  let best = Infinity;
+  for (const [other, rect] of Object.entries(footprints)) {
+    const gap = libraryFootGap(center, rect);
+    if (gap < best) { owner = other; best = gap; }
+  }
+  return owner === id;
+}
 
 export function libraryActorBody(center: LibraryPoint): LibraryRect {
   const { bodyX, bodyY, bodyWidth, bodyHeight } = LIBRARY_LAYOUT.actor;

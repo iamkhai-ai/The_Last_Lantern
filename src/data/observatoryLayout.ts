@@ -295,11 +295,11 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   // --- entrance / lobby: source pedestal, G0, and the safe practice miniature.
   {
     id: 'lantern-pedestal', roomId: 'entrance', art: pedestal, nativeWidth: 36, nativeHeight: 39, scale: 1,
-    anchor: { x: 188, y: 232 }, stand: { x: 188, y: 250 }, radius: 22, approach: 'south',
+    anchor: { x: 188, y: 232 }, stand: { x: 188, y: 224 }, radius: 22, approach: 'south',
   },
   {
     id: 'g0', roomId: 'entrance', art: mirror(0), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
-    anchor: { x: 432, y: 236 }, stand: { x: 432, y: 254 }, radius: 22, approach: 'south', rotatesWith: 'g0',
+    anchor: { x: 432, y: 236 }, stand: { x: 432, y: 228 }, radius: 22, approach: 'south', rotatesWith: 'g0',
   },
   {
     id: 'learned-marks', roomId: 'entrance', art: { kind: 'level', level: 8, file: 'learned-marks-miniature' },
@@ -309,15 +309,15 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   // --- corridor / star-map room.
   {
     id: 'g1', roomId: 'corridor', art: mirror(1), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
-    anchor: { x: 240, y: 216 }, stand: { x: 240, y: 234 }, radius: 22, approach: 'south', rotatesWith: 'g1',
+    anchor: { x: 240, y: 216 }, stand: { x: 240, y: 208 }, radius: 22, approach: 'south', rotatesWith: 'g1',
   },
   {
     id: 'lumo-tube', roomId: 'corridor', art: tubeMouth, nativeWidth: 64, nativeHeight: 32, scale: 1,
-    anchor: { x: 105, y: 88 }, stand: { x: 105, y: 106 }, radius: 22, approach: 'south',
+    anchor: { x: 105, y: 88 }, stand: { x: 105, y: 80 }, radius: 22, approach: 'south',
   },
   {
     id: 'lumo-seal', roomId: 'corridor', art: lumoSeal, nativeWidth: 32, nativeHeight: 40, scale: 1,
-    anchor: { x: 320, y: 88 }, stand: { x: 320, y: 106 }, radius: 22, approach: 'south',
+    anchor: { x: 320, y: 88 }, stand: { x: 320, y: 80 }, radius: 22, approach: 'south',
   },
   {
     // A latch plate on the sill of Door A: it is drawn inside the alcove, so the
@@ -327,7 +327,7 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   },
   {
     id: 'sun-door-control', roomId: 'corridor', art: lockSun, nativeWidth: 32, nativeHeight: 40, scale: 1,
-    anchor: { x: 500, y: 260 }, stand: { x: 500, y: 278 }, radius: 22, approach: 'south',
+    anchor: { x: 500, y: 260 }, stand: { x: 500, y: 252 }, radius: 22, approach: 'south',
   },
   {
     id: 'star-map-table', roomId: 'corridor', art: altar, nativeWidth: 104, nativeHeight: 52, scale: 0.8,
@@ -336,19 +336,19 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   // --- observatory: the combined puzzle room.
   {
     id: 'g2', roomId: 'observatory', art: mirror(2), nativeWidth: 36, nativeHeight: 48, scale: 0.9,
-    anchor: { x: 168, y: 258 }, stand: { x: 168, y: 276 }, radius: 22, approach: 'south', rotatesWith: 'g2',
+    anchor: { x: 168, y: 258 }, stand: { x: 168, y: 250 }, radius: 22, approach: 'south', rotatesWith: 'g2',
   },
   {
     id: 'splitter', roomId: 'observatory', art: splitter, nativeWidth: 48, nativeHeight: 48, scale: 0.8,
-    anchor: { x: 240, y: 240 }, stand: { x: 240, y: 258 }, radius: 22, approach: 'south',
+    anchor: { x: 240, y: 240 }, stand: { x: 240, y: 232 }, radius: 22, approach: 'south',
   },
   {
     id: 'statue', roomId: 'observatory', art: statue, nativeWidth: 64, nativeHeight: 88, scale: 0.8,
-    anchor: { x: 296, y: 252 }, stand: { x: 296, y: 270 }, radius: 22, approach: 'south', rotatesWith: 'statue',
+    anchor: { x: 296, y: 252 }, stand: { x: 296, y: 244 }, radius: 22, approach: 'south', rotatesWith: 'statue',
   },
   {
     id: 'sun-lock', roomId: 'observatory', art: lockSun, nativeWidth: 32, nativeHeight: 40, scale: 0.85,
-    anchor: { x: 176, y: 152 }, stand: { x: 176, y: 170 }, radius: 22, approach: 'south',
+    anchor: { x: 176, y: 152 }, stand: { x: 176, y: 144 }, radius: 22, approach: 'south',
   },
   {
     // The root bed is a full-depth divider: it can only be approached from its
@@ -373,15 +373,15 @@ export const OBSERVATORY_ELEMENTS: readonly ObsElement[] = [
   },
   {
     id: 'stone-return-loop', roomId: 'observatory', art: receiver, nativeWidth: 40, nativeHeight: 37, scale: 0.7,
-    anchor: { x: 466, y: 252 }, stand: { x: 466, y: 270 }, radius: 22, approach: 'south',
+    anchor: { x: 466, y: 252 }, stand: { x: 466, y: 244 }, radius: 22, approach: 'south',
   },
   {
     id: 'final-record', roomId: 'observatory', art: altar, nativeWidth: 104, nativeHeight: 52, scale: 0.62,
-    anchor: { x: 418, y: 256 }, stand: { x: 418, y: 274 }, radius: 22, approach: 'south',
+    anchor: { x: 418, y: 256 }, stand: { x: 418, y: 248 }, radius: 22, approach: 'south',
   },
   {
     id: 'balance-crystal', roomId: 'observatory', art: crystal, nativeWidth: 42, nativeHeight: 78, scale: 0.5,
-    anchor: { x: 568, y: 252 }, stand: { x: 568, y: 270 }, radius: 22, approach: 'south',
+    anchor: { x: 568, y: 252 }, stand: { x: 568, y: 244 }, radius: 22, approach: 'south',
   },
 ];
 
@@ -652,6 +652,44 @@ function round1(value: number): number {
 
 export function observatoryFeet(center: ObsPoint): ObsPoint {
   return { x: center.x, y: center.y + OBSERVATORY_BODY.feetY };
+}
+
+/** RULE_GAMES 1: a standing prop answers from every side within this many px of its outer edge (foot body to rect). */
+export const OBSERVATORY_REACH_GAP = 8;
+
+/** Standing south-approach props answer from every side (RULE_GAMES 1). Flat ground mounts, the side and gate exceptions keep their rules. */
+/** Wall-mounted controls (RULE_GAMES 2): masonry sits between them and the floor, so they keep the south-edge radius. */
+const OBSERVATORY_WALL_CONTROL_IDS: readonly string[] = ['door-a-control'];
+
+export function isObservatoryStandingProp(element: ObsElement): boolean {
+  return element.approach === 'south' && element.mount !== 'ground' && !OBSERVATORY_WALL_CONTROL_IDS.includes(element.id);
+}
+
+/** The `reach` footprint of a standing prop: its solid rectangle, answered from any side within OBSERVATORY_REACH_GAP. */
+export function observatoryStandingReach(element: ObsElement): { rect: ObsRect; face: 'any'; maxGap: number } {
+  return { rect: observatoryElementSolid(element), face: 'any', maxGap: OBSERVATORY_REACH_GAP };
+}
+
+/** Euclidean gap between the foot body at `center` and a rect; 0 when they touch or overlap. */
+function observatoryFootGap(center: ObsPoint, rect: ObsRect): number {
+  const foot = observatoryBody(center);
+  const dx = Math.max(foot.x - (rect.x + rect.width), rect.x - (foot.x + foot.width), 0);
+  const dy = Math.max(foot.y - (rect.y + rect.height), rect.y - (foot.y + foot.height), 0);
+  return Math.hypot(dx, dy);
+}
+
+/**
+ * ONE OWNER PER POSITION: among the standing props of one room, the one whose outer edge is nearest the foot owns it.
+ * Ties go to the first listed. Overlapping reach zones never answer for two props at once.
+ */
+export function observatoryReachOwner(id: string, center: ObsPoint, footprints: Readonly<Record<string, ObsRect>>): boolean {
+  let owner: string | null = null;
+  let best = Infinity;
+  for (const [other, rect] of Object.entries(footprints)) {
+    const gap = observatoryFootGap(center, rect);
+    if (gap < best) { owner = other; best = gap; }
+  }
+  return owner === id;
 }
 
 /** True only when the player stands at the object's south edge (or its allowed side). */

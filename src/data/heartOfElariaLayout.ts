@@ -26,6 +26,9 @@ export interface HeartRect extends HeartPoint {
 /** Actor feet body relative to the sprite centre. Matches Library / Level 05. */
 export const HEART_BODY = { feetY: 19, x: -7, y: 16, width: 14, height: 6 } as const;
 
+/** RULE_GAMES 1: a standing prop answers from every side within this many px of its solid (foot body to rect). */
+export const HEART_REACH_GAP = 8;
+
 export const HEART_WORLD = { width: 640, height: 360, hudBottom: 58, statusTop: 320 } as const;
 
 /** Walkable foot bounds: the actor body must stay inside this rectangle. */
@@ -147,7 +150,8 @@ const prop = (
   const solid = { x: Math.round(centerX - solidWidth / 2), y: baseY - solidHeight, width: Math.round(solidWidth), height: solidHeight };
   return {
     id, kind: 'prop', x: centerX, y: baseY - height / 2, width, height, art, artSource, solid,
-    stand: { x: centerX, y: baseY }, radius,
+    // The reach point: the foot body sits HEART_REACH_GAP px south of the solid, so every side answers from there.
+    stand: { x: centerX, y: baseY - HEART_REACH_GAP }, radius,
   };
 };
 
@@ -360,11 +364,29 @@ export function heartGateCenter(element: HeartElement): HeartPoint {
  */
 export function canReachHeartElement(element: HeartElement, player: HeartPoint): boolean {
   if (element.kind === 'cell') return isInsideHeartGate(element.id, player);
-  const distance = Math.hypot(player.x - element.stand.x, player.y - element.stand.y);
-  if (distance > element.radius) return false;
-  // The trigger circle sits on the south edge; standing at or above the prop's vertical centre is
-  // "behind" it and must stay silent.
-  return player.y >= element.y - 2;
+  return element.solid !== undefined && heartFootGap(player, element.solid) <= HEART_REACH_GAP;
+}
+
+/** Euclidean gap between the foot body at `center` and a rect; 0 when they touch or overlap. */
+export function heartFootGap(center: HeartPoint, rect: HeartRect): number {
+  const foot = heartActorBody(center);
+  const dx = Math.max(foot.x - (rect.x + rect.width), rect.x - (foot.x + foot.width), 0);
+  const dy = Math.max(foot.y - (rect.y + rect.height), rect.y - (foot.y + foot.height), 0);
+  return Math.hypot(dx, dy);
+}
+
+/**
+ * ONE OWNER PER POSITION: among the standing props, the one whose solid is nearest the foot owns it. Ties go to the
+ * first listed. Overlapping reach zones (the Memory and G0 solids sit 8px apart) never answer for two at once.
+ */
+export function heartReachOwner(id: string, center: HeartPoint, footprints: Readonly<Record<string, HeartRect>>): boolean {
+  let owner: string | null = null;
+  let best = Infinity;
+  for (const [other, rect] of Object.entries(footprints)) {
+    const gap = heartFootGap(center, rect);
+    if (gap < best) { owner = other; best = gap; }
+  }
+  return owner === id;
 }
 
 export function getHeartElement(id: string): HeartElement | undefined {
@@ -444,7 +466,7 @@ export function auditHeartStands(): HeartStandReport[] {
   return HEART_ELEMENTS.map((element) => {
     const artBottom = element.y + element.height / 2;
     const artTop = element.y - element.height / 2;
-    const resting = element.kind === 'prop' ? { x: element.stand.x, y: element.stand.y - 16 } : { x: element.stand.x, y: element.stand.y };
+    const resting = { x: element.stand.x, y: element.stand.y };
     const cellGate = element.gate ?? { x: element.x - element.width / 2, y: element.y - element.height / 2, width: element.width, height: element.height };
     const gateOnArt = cellGate.y >= artTop - 2 && cellGate.y + cellGate.height <= artBottom + 6;
     return {

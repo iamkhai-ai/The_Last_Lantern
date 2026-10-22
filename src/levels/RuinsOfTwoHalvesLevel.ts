@@ -19,7 +19,7 @@ import {
   ruinsMoonShadowed, ruinsNextStep, ruinsPulseReachesName, ruinsShadowDemoEligible, ruinsShadowFootprintAt, ruinsShadowNearStatue, ruinsTurnPrompt,
   ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSolidEnabled,
   ruinsShadowSpotFor, ruinsShadowWalkResume, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
-  RUINS_WALLS, ruinsActorBody, ruinsDepthAt, ruinsNormalizeCounters,
+  RUINS_WALLS, ruinsActorBody, ruinsDepthAt, ruinsNormalizeCounters, ruinsStandingOwner, ruinsStandingReach,
   ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsRect, type RuinsShadowPoseId, type RuinsStage,
 } from '../data/ruinsOfTwoHalvesLayout';
 
@@ -635,6 +635,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-practice-column',
       x: prop('practice-column').stand.x, y: prop('practice-column').stand.y, radius: prop('practice-column').stand.radius,
+      reach: ruinsStandingReach(prop('practice-column').footprint), ownsPosition: (x, y) => ruinsStandingOwner('practice-column', { x, y }, this.ruinsReachFootprints()),
       getPrompt: () => tr('E · Xoay cột đá thử'),
       getPromptBounds: () => this.artById.get('practice-column-spin')?.getBounds() ?? null,
       isEnabled: () => true,
@@ -644,6 +645,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-statue',
       x: prop('statue').stand.x, y: prop('statue').stand.y, radius: prop('statue').stand.radius,
+      reach: ruinsStandingReach(prop('statue').footprint), ownsPosition: (x, y) => ruinsStandingOwner('statue', { x, y }, this.ruinsReachFootprints()),
       getPrompt: () => this.turnPrompt(tr('E · Xoay tượng')),
       getPromptBounds: () => this.artById.get('statue')?.getBounds() ?? null,
       isEnabled: () => true,
@@ -654,6 +656,7 @@ export class RuinsOfTwoHalvesLevel {
       register({
         id: `l7-mirror-${side}`,
         x: prop(`mirror-${side}`).stand.x, y: prop(`mirror-${side}`).stand.y, radius: prop(`mirror-${side}`).stand.radius,
+        reach: ruinsStandingReach(prop(`mirror-${side}`).footprint), ownsPosition: (x, y) => ruinsStandingOwner(`mirror-${side}`, { x, y }, this.ruinsReachFootprints()),
         getPrompt: () => this.turnPrompt(tr('E · Xoay gương {side}', { side: side === 'left' ? tr('trái') : tr('phải') })),
         getPromptBounds: () => this.artById.get(`mirror-${side}`)?.getBounds() ?? null,
         isEnabled: () => true,
@@ -664,6 +667,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-pedestal',
       x: prop('pedestal').stand.x, y: prop('pedestal').stand.y, radius: prop('pedestal').stand.radius,
+      reach: ruinsStandingReach(prop('pedestal').footprint), ownsPosition: (x, y) => ruinsStandingOwner('pedestal', { x, y }, this.ruinsReachFootprints()),
       getPrompt: () => this.pedestalPrompt(),
       getPromptBounds: () => this.artById.get('confirmation')?.getBounds() ?? this.artById.get('pedestal')?.getBounds() ?? null,
       isEnabled: () => true,
@@ -673,6 +677,7 @@ export class RuinsOfTwoHalvesLevel {
     register({
       id: 'l7-seedling-bed',
       x: prop('seedling-bed').stand.x, y: prop('seedling-bed').stand.y, radius: prop('seedling-bed').stand.radius,
+      reach: ruinsStandingReach(prop('seedling-bed').footprint), ownsPosition: (x, y) => ruinsStandingOwner('seedling-bed', { x, y }, this.ruinsReachFootprints()),
       getPrompt: () => tr('E · Xem luống mầm'),
       getPromptBounds: () => this.artById.get('seedling-bed')?.getBounds() ?? null,
       isEnabled: () => true,
@@ -684,6 +689,7 @@ export class RuinsOfTwoHalvesLevel {
     this.shadowTalk = {
       id: 'l7-shadow-npc',
       x: talkSpot.stand.x, y: talkSpot.stand.y, radius: talkSpot.stand.radius,
+      reach: ruinsStandingReach(talkSpot.footprint), ownsPosition: (x, y) => ruinsStandingOwner('shadow-npc', { x, y }, this.ruinsReachFootprints()),
       getPrompt: () => (this.shadowWalk || this.shadowDemo ? null : tr('E · Nói chuyện với The Shadow')),
       getPromptBounds: () => this.artById.get('shadow-npc')?.getBounds() ?? null,
       isEnabled: () => !this.shadowWalk && !this.shadowDemo,
@@ -1062,7 +1068,16 @@ export class RuinsOfTwoHalvesLevel {
     this.placeShadowSolid();
     if (this.shadowTalk) {
       this.shadowTalk.x = spot.stand.x; this.shadowTalk.y = spot.stand.y; this.shadowTalk.radius = spot.stand.radius;
+      this.shadowTalk.reach = ruinsStandingReach(spot.footprint);
     }
+  }
+
+  /** Footprints that can own a standing position: every prop, and the Shadow only while he is parked and talkable. */
+  private ruinsReachFootprints(): Record<string, RuinsRect> {
+    const footprints: Record<string, RuinsRect> = {};
+    for (const prop of Object.values(RUINS_PROPS)) footprints[prop.id] = prop.footprint;
+    if (!this.shadowWalk) footprints['shadow-npc'] = ruinsShadowSpotFor(this.shadowPhase()).footprint;
+    return footprints;
   }
 
   /** After the conversation he walks to the north stair; he pauses whenever the player falls behind (scenario §7). */

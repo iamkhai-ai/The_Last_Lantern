@@ -16,9 +16,10 @@ import {
   RUINS_SHADOW_SOLID_EPS, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
   RUINS_NAME, RUINS_SHADOW_DEMO, ruinsIsInsideFloor, ruinsPulseReachesName, ruinsShadowDemoEligible,
   ruinsShadowNearStatue, ruinsMoonShadowed, ruinsNormalizeNotch, ruinsTurnPrompt, RUINS_LATCHED_TURN_PROMPT,
-  RUINS_STATUE_NOTCHES, RUINS_SHADOW_NEAR_STATUE_PX,
+  RUINS_STATUE_NOTCHES, RUINS_SHADOW_NEAR_STATUE_PX, RUINS_REACH_GAP, ruinsStandingOwner, ruinsStandingReach,
 } from '../src/data/ruinsOfTwoHalvesLayout.ts';
 import { LOCK_TONE_HZ, lockMoonVoice } from '../src/audio/effects.ts';
+import { isFootInReach } from '../src/systems/interactionReach.ts';
 
 /* -------------------------------------------------------------------------- */
 /* 1. body constants                                                          */
@@ -540,32 +541,47 @@ for (const prop of Object.values(RUINS_PROPS)) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 13. RULE_GAMES §1 — a control only answers from the object's south edge      */
+/* 13. RULE_GAMES §1 — standing props answer from every side within 8px          */
 /* -------------------------------------------------------------------------- */
 
-const artBoxes = {};
-for (const prop of Object.values(RUINS_PROPS)) {
-  artBoxes[prop.stand.id] = {
-    x: prop.artCenter.x - prop.artWidth / 2, y: prop.artCenter.y - prop.artHeight / 2,
-    width: prop.artWidth, height: prop.artHeight,
-  };
-}
+// Each prop and the Shadow answer from every side within RUINS_REACH_GAP px of their footprint: the foot body
+// (14x6 at centre + (-7, +16)) against the object's own rect. Probes at exactly the gap answer; 2px beyond do not.
+const propFootprints = Object.fromEntries(Object.values(RUINS_PROPS).map((prop) => [prop.id, prop.footprint]));
+const footAt = (side, rect, gap) => {
+  const mid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  if (side === 'west') return { x: rect.x - gap - 7, y: mid.y - 19 };
+  if (side === 'east') return { x: rect.x + rect.width + gap + 7, y: mid.y - 19 };
+  if (side === 'north') return { x: mid.x, y: rect.y - gap - 22 };
+  return { x: mid.x, y: rect.y + rect.height + gap - 16 };
+};
+// The Shadow owns one footprint per parked spot; the props are always talkable, so they stay in every map.
 for (const spot of Object.values(RUINS_SHADOW.spots)) {
-  // registered Shadow poses are 48x64 with a bottom-centre pivot on the spot's ground anchor
-  artBoxes[spot.stand.id] = {
-    x: spot.ground.x - RUINS_SHADOW.art.width / 2, y: spot.ground.y - RUINS_SHADOW.art.height,
-    width: RUINS_SHADOW.art.width, height: RUINS_SHADOW.art.height,
-  };
+  const footprints = { ...propFootprints, 'shadow-npc': spot.footprint };
+  for (const [id, rect] of Object.entries(footprints)) {
+    const reach = ruinsStandingReach(rect);
+    const stand = id === 'shadow-npc' ? spot.stand : RUINS_PROPS[id].stand;
+    assert.equal(isFootInReach(ruinsActorBody(stand), reach), true, `${id} (${spot.id}): its stand is inside its own reach`);
+    for (const side of ['north', 'south', 'east', 'west']) {
+      const near = footAt(side, rect, RUINS_REACH_GAP);
+      const far = footAt(side, rect, RUINS_REACH_GAP + 2);
+      assert.equal(isFootInReach(ruinsActorBody(near), reach), true, `${id} (${spot.id}): standing ${side} at the ${RUINS_REACH_GAP}px edge prompts`);
+      assert.equal(isFootInReach(ruinsActorBody(far), reach), false, `${id} (${spot.id}): standing ${side} beyond the ${RUINS_REACH_GAP}px edge is silent`);
+      // Overlapping zones resolve to exactly one owner, which is itself in reach of the probe.
+      const owners = Object.keys(footprints).filter((other) => ruinsStandingOwner(other, near, footprints));
+      assert.equal(owners.length, 1, `${id} (${spot.id}): the ${side} probe has exactly one owner`);
+      assert.equal(isFootInReach(ruinsActorBody(near), ruinsStandingReach(footprints[owners[0]])), true,
+        `${id} (${spot.id}): the ${side} probe's owner (${owners[0]}) also reaches it`);
+    }
+  }
 }
+
+// Wall-mounted fixtures keep the radius rule (RULE_GAMES 2): reachable from the south span, never from above or beside.
 for (const fixture of RUINS_WALL_FIXTURES) {
-  artBoxes[fixture.stand.id] = {
+  const stand = fixture.stand;
+  const art = {
     x: fixture.artCenter.x - fixture.artWidth / 2, y: fixture.artCenter.y - fixture.artHeight / 2,
     width: fixture.artWidth, height: fixture.artHeight,
   };
-}
-
-for (const stand of RUINS_STANDS) {
-  const art = artBoxes[stand.id];
   const artBottom = art.y + art.height;
   let fromAbove = 0; let fromBeside = 0; let fromSouth = 0;
   const reach = Math.ceil(stand.radius) + 1;
@@ -580,11 +596,9 @@ for (const stand of RUINS_STANDS) {
       else fromSouth += 1;
     }
   }
-  assert.ok(fromSouth > 0, `${stand.id}: the control is reachable from its own south edge`);
-  assert.equal(fromAbove, 0,
-    `${stand.id}: no walkable position above the object's art bottom can reach the trigger (radius ${stand.radius})`);
-  assert.equal(fromBeside, 0,
-    `${stand.id}: no walkable position beside the object's art span can reach the trigger (radius ${stand.radius})`);
+  assert.ok(fromSouth > 0, `${stand.id}: the wall control is reachable from its own south span`);
+  assert.equal(fromAbove, 0, `${stand.id}: no walkable position above the wall control's art can reach it (radius ${stand.radius})`);
+  assert.equal(fromBeside, 0, `${stand.id}: no walkable position beside the wall control's art can reach it (radius ${stand.radius})`);
 }
 
 /* -------------------------------------------------------------------------- */

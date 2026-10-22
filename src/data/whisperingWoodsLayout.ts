@@ -10,7 +10,8 @@ export type WoodsTutorialState = Readonly<{ open: boolean; sequence: number; poe
 export const RUNE_ORDER: readonly RuneId[] = ['moon', 'leaf', 'star'];
 const point = (x: number, y: number): WoodsPoint => Object.freeze({ x, y });
 const rect = (x: number, y: number, width: number, height: number): WoodsRect => Object.freeze({ x, y, width, height });
-const stands = Object.freeze({ spawn: point(136, 286), poem: point(136, 276), moon: point(232, 248), leaf: point(326, 180), star: point(408, 272), exit: point(510, 181) });
+// Each rune stone is answered from its reach point: 8px below its footprint (foot body to rect, RULE_GAMES 1).
+const stands = Object.freeze({ spawn: point(136, 262), poem: point(136, 262), moon: point(232, 234), leaf: point(326, 166), star: point(408, 258), exit: point(510, 181) });
 export const WOODS_RUNE_ART = Object.freeze({ sourceWidth: 40, sourceHeight: 52, width: 60, height: 78 });
 export const WOODS_POEM_ART = Object.freeze({ sourceWidth: 48, sourceHeight: 40, width: 96, height: 80 });
 export const WOODS_RUNE_BODY_FIT = Object.freeze({ height: 39, centerX: 20.5, bottomY: 44, alphaThreshold: 96 });
@@ -50,7 +51,7 @@ export const WHISPERING_WOODS = Object.freeze({
     Object.freeze([point(208,222),point(215,188),point(240,156),point(274,134),point(311,120),point(348,126),point(382,144),point(411,175),point(430,211),point(437,244),point(428,276),point(405,304),point(375,321),point(340,328),point(302,324),point(269,310),point(237,287),point(219,256)]),
     Object.freeze([point(390,244),point(410,244),point(426,252),point(449,255),point(472,256),point(491,258),point(500,236),point(482,212),point(482,170),point(538,170),point(538,236),point(524,270),point(503,294),point(477,316),point(444,316),point(414,295),point(392,278)]),
   ]),
-  route: Object.freeze([point(136,286),point(136,276),point(232,248),point(326,180),point(408,272),point(510,286),point(510,181)]),
+  route: Object.freeze([point(136,262),point(136,262),point(232,234),point(326,166),point(408,258),point(510,286),point(510,181)]),
   fireflyRoute: Object.freeze([point(232,242),point(326,174),point(408,266)]),
   checkpoints: stands,
 });
@@ -83,10 +84,8 @@ export function isWoodsCenterWalkable(center: WoodsPoint, gateOpen = false): boo
 export function isWoodsPointSafe(center: WoodsPoint, gateOpen = false): boolean { return isWoodsCenterWalkable(center, gateOpen); }
 
 export type WoodsStoneId = 'poem' | 'moon' | 'leaf' | 'star';
-/** How far the foot body may sit outside a stone footprint and still answer E (~10-12px). */
-export const WOODS_STONE_REACH_PADDING = 11;
-/** The authored south approach each stone keeps; the campaign spawns 10px south of the poem stand. */
-export const WOODS_STONE_APPROACH_RADIUS = 24;
+/** RULE_GAMES 1: a stone answers E from every side within this many px of its footprint (foot body to rect). */
+export const WOODS_STONE_REACH_PADDING = 8;
 
 function rectGap(a: WoodsRect, b: WoodsRect): number {
   const dx = Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), 0);
@@ -95,18 +94,12 @@ function rectGap(a: WoodsRect, b: WoodsRect): number {
 }
 
 /**
- * RULE_GAMES.md §3 exception (decision 2026-10-20): the Level 02 poem and rune stones answer the E
- * prompt from all four sides. A stone is in reach while the actor's 14x6 foot body — the same rect
- * `isWoodsCenterWalkable` collides with — is within `WOODS_STONE_REACH_PADDING` of its footprint, on any
- * side. Each stone also keeps its authored south approach (`WOODS_STONE_APPROACH_RADIUS` around its
- * stand) because that is where the level places the player: the campaign spawn (136,286) is 10px south
- * of the poem stand, and the rune stands are how Level 02 is played. The circles stay 48px+ apart and the
- * footprints leave 45px+ of clear floor between stones, so no stone answers from another one's stand.
+ * RULE_GAMES.md 1 (2026-10-22): the Level 02 poem and rune stones answer E from every side within
+ * `WOODS_STONE_REACH_PADDING` of their footprint: the foot body (the 14x6 rect `isWoodsCenterWalkable` collides with)
+ * against the footprint. The stands are the reach points 8px below each footprint, so the player stands there to press E.
  */
 export function isWoodsStoneInReach(id: WoodsStoneId, player: WoodsPoint): boolean {
-  if (rectGap(woodsFootBody(player), WHISPERING_WOODS.footprints[id]) <= WOODS_STONE_REACH_PADDING) return true;
-  const stand = WHISPERING_WOODS.stands[id];
-  return Math.hypot(player.x - stand.x, player.y - stand.y) <= WOODS_STONE_APPROACH_RADIUS;
+  return rectGap(woodsFootBody(player), WHISPERING_WOODS.footprints[id]) <= WOODS_STONE_REACH_PADDING;
 }
 export function resolveWoodsSpawn(saved: WoodsPoint | undefined, gateOpen: boolean): WoodsPoint {
   const threshold=WHISPERING_WOODS.gate.threshold;

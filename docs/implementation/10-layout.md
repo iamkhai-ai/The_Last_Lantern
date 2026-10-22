@@ -61,18 +61,18 @@ and the southern bank starts at y = 308, so every cell keeps usable standing roo
 
 ## 3. Standing props (solid base + south-edge trigger)
 
-Rule 1 of `RULE_GAMES.md`: the trigger centre is the **south edge** of the visible base; standing
-north of the art can never open the prompt (`canReachHeartElement` is shared by the runtime and the
-check script, and `promptLeaksBehindArt` proves no reachable position above the art centre answers).
+Rule 1 of `RULE_GAMES.md` (2026-10-22): a standing prop answers from **every side within 8px** of its solid
+(foot body to rect, `heartFootGap`). Its stand is the reach point 8px above the base line; `canReachHeartElement`
+is shared by the runtime and the check script, and the nearest solid owns a shared position (`heartReachOwner`).
 Art is bottom-anchored on the base line at native size — a prop is never stretched into its footprint.
 
 | id | x | art (native) | solid footprint | stand / radius | interaction |
 | --- | --- | --- | --- | --- | --- |
-| `heart-pedestal` | 85 | `pedestal_lit` / `pedestal_empty` (40×56 / 36×39) | 71..99 × 238..260 | 85,260 (r 24) | place the lit lantern / take it back |
-| `heart-g0` | 207 | `mirror_0` / `mirror_1` (36×48) | 192..222 × 238..260 | 207,260 (r 22) | aim G0: split at the prism ↔ straight at Memory |
-| `heart-memory-mirror` | 245 | `mirror_N` (36×48) | 230..260 × 238..260 | 245,260 (r 22) | rotate the Memory mirror (goal 1 = nam) |
-| `heart-statue` | 416 | `statue-notch-N` (64×88, reused from level 08) | 392..440 × 238..260 | 416,260 (r 24) | rotate the statue that shadows the Moon pocket |
-| `heart-balance-mirror` | 530 | `mirror_N` (36×48) | 515..545 × 238..260 | 530,260 (r 22) | rotate the Balance mirror (goal 2 = tây) |
+| `heart-pedestal` | 85 | `pedestal_lit` / `pedestal_empty` (40×56 / 36×39) | 71..99 × 238..260 | reach 85,252 (8px) | place the lit lantern / take it back |
+| `heart-g0` | 207 | `mirror_0` / `mirror_1` (36×48) | 192..222 × 238..260 | reach 207,252 (8px) | aim G0: split at the prism ↔ straight at Memory |
+| `heart-memory-mirror` | 245 | `mirror_N` (36×48) | 230..260 × 238..260 | reach 245,252 (8px) | rotate the Memory mirror (goal 1 = nam) |
+| `heart-statue` | 416 | `statue-notch-N` (64×88, reused from level 08) | 392..440 × 238..260 | reach 416,252 (8px) | rotate the statue that shadows the Moon pocket |
+| `heart-balance-mirror` | 530 | `mirror_N` (36×48) | 515..545 × 238..260 | reach 530,252 (8px) | rotate the Balance mirror (goal 2 = tây) |
 | `heart-prism` | 207,214 | `shared_prism_{dark,receiving}` (48×48) | none (mounted inside G0) | none | passive: glows once G0 splits a live beam |
 
 Every footprint is backed by visible art (the prop's own base) and blocks the 14×6 foot body from all

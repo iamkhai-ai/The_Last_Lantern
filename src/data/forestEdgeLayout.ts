@@ -13,7 +13,7 @@ export const FOREST_EDGE = {
   player: { spawn: { x: 208, y: 286 }, footOffsetY: 19, body: { width: 14, height: 6, offsetX: 11, offsetY: 37 } },
   objects: {
     lantern: { anchor: { x: 152, y: 238 }, stand: { x: 152, y: 251 }, texture: 'pickup-lantern' },
-    tablet: { anchor: { x: 228, y: 230 }, stand: { x: 228, y: 238 }, solid: { x: 214, y: 218, width: 28, height: 12 } },
+    tablet: { anchor: { x: 228, y: 230 }, stand: { x: 228, y: 222 }, solid: { x: 214, y: 218, width: 28, height: 12 } },
     ring: { anchor: { x: 410, y: 225 }, ground: { x: 410, y: 210 }, stand: { x: 410, y: 191 }, radius: 16, texture: 'stone-standing-ring' },
     gate: { anchor: { x: 486, y: 166 }, stand: { x: 486, y: 151 }, exit: { x: 486, y: 151 }, posts: [{ x: 410, y: 126, width: 50, height: 40 }, { x: 512, y: 126, width: 50, height: 40 }], header: { x: 447, y: 126, width: 78, height: 18 }, threshold: { x: 447, y: 126, width: 78, height: 18 }, backing: { x: 410, y: 96, width: 152, height: 30 } },
     eye: { anchor: { x: 538, y: 122 }, texture: 'sun-eye-dormant' },

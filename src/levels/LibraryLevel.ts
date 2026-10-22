@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { getLevelArtKey } from '../art/CampaignArt';
 import { tr } from '../i18n/catalog.ts';
 import type { Player } from '../actors/Player';
-import { LIBRARY_DAIS, LIBRARY_EXIT_THRESHOLD, LIBRARY_LAYOUT, LIBRARY_MURAL_SOLID, LIBRARY_RACK_SOLIDS, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
+import { type LibraryRect, LIBRARY_DAIS, LIBRARY_EXIT_THRESHOLD, LIBRARY_INSCRIPTION_SOLID, LIBRARY_LAYOUT, LIBRARY_MURAL_SOLID, LIBRARY_RACK_SOLIDS, LIBRARY_REACH_GAP, LIBRARY_SOLID_RECTS, LIBRARY_WALL_RECTS, libraryActorBody, libraryReachOwner, isLibraryPositionSafe, sanitizeLibrarySlots } from '../data/libraryLayout';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
@@ -534,7 +534,19 @@ export class LibraryLevel {
 
   private registerInteractions(): void {
     const inscription = LIBRARY_LAYOUT.inscription;
+    // RULE_GAMES 1: the standing props (tablet, racks) answer from every side within LIBRARY_REACH_GAP of their footprint;
+    // the nearest footprint owns a shared position. The reading book stays on its radius (a floor lectern that overlaps rack 2),
+    // and the mural, the exit and the floor dais keep their rules.
+    const standingFootprints = (): Record<string, LibraryRect> => ({
+      'library-inscription': LIBRARY_INSCRIPTION_SOLID,
+      ...Object.fromEntries(LIBRARY_RACK_SOLIDS.map((rect, index) => [`library-rack-${index}`, rect])),
+    });
+    const standingReach = (id: string, rect: LibraryRect) => ({
+      reach: { rect, face: 'any' as const, maxGap: LIBRARY_REACH_GAP },
+      ownsPosition: (x: number, y: number) => libraryReachOwner(id, { x, y }, standingFootprints()),
+    });
     this.register({ id: 'library-inscription', x: inscription.x, y: inscription.y, radius: inscription.radius,
+      ...standingReach('library-inscription', LIBRARY_INSCRIPTION_SOLID),
       getPrompt: () => tr('E · Đọc dòng khắc'),
       // Rule 1: the stand sits on the tablet's south edge; the label anchors to the stone's own bounds.
       getPromptBounds: () => this.inscriptionImage?.getBounds() ?? null,
@@ -548,8 +560,8 @@ export class LibraryLevel {
       onInteract: () => this.readBook() });
     LIBRARY_LAYOUT.racks.forEach((point, rackIndex) => this.register({
       id: `library-rack-${rackIndex}`, x: point.x, y: point.y + LIBRARY_LAYOUT.rackStandOffset, radius: 22,
-      // RULE_GAMES §1: measured from the foot body to the rack block, so E shows flush against its south face.
-      reach: { rect: LIBRARY_RACK_SOLIDS[rackIndex] },
+      // RULE_GAMES 1: measured from the foot body to the rack block, from every side within LIBRARY_REACH_GAP.
+      ...standingReach(`library-rack-${rackIndex}`, LIBRARY_RACK_SOLIDS[rackIndex]),
       getPrompt: () => {
         const stone = this.rackStone(rackIndex);
         return stone ? tr('E · Xem và chọn phiến {stone}', { stone: tr(LABELS[stone]) }) : '';

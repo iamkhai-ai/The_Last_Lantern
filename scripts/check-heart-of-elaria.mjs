@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import {
-  auditHeartGaps, auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartExitBlock, getHeartPrerequisiteFeedback,
+  auditHeartGaps, auditHeartStands, canReachHeartElement, heartFootGap, heartReachOwner, HEART_REACH_GAP, deriveHeartPuzzle, getHeartElement, getHeartExitBlock, getHeartPrerequisiteFeedback,
   getHeartSolid, getHeartStage, heartArtCandidates, heartArtNativeSize, heartSealPlateArt, HEART_BLOCKERS, HEART_BODY, HEART_CELLS, HEART_CHECKPOINTS, HEART_CONTROL_ORDER, HEART_ELEMENTS, HEART_FLOOR, HEART_MOON_SHADOW,
   HEART_OVERLOAD_CHECKPOINT, HEART_PROPS, HEART_SEAL_RADIUS, HEART_SPAWN, HEART_STATUE_SHADOW, HEART_WORLD, heartActorBody, heartRectsOverlap,
   canExtinguishHeartLantern, isHeartFinalActionAvailable, isHeartPositionSafe, isInsideHeartGate, nearestSafeHeartSpawn, normalizeHeartProgress,
@@ -67,8 +67,16 @@ for (const report of standReports) {
 /* ------------------------------------------------------------------ nearest-target ownership */
 
 for (const element of HEART_ELEMENTS) {
-  const press = element.kind === 'prop' ? { x: element.stand.x, y: element.stand.y - 16 } : { x: element.stand.x, y: element.stand.y };
+  // RULE_GAMES 1: a prop's stand is its reach point, 8px from its solid, and the nearest solid owns it.
+  const press = { x: element.stand.x, y: element.stand.y };
   assert.equal(isHeartPositionSafe(press), true, `${element.id}: its canonical press position is walkable`);
+  if (element.kind === 'prop') {
+    const footprints = Object.fromEntries(HEART_PROPS.filter((item) => item.solid).map((item) => [item.id, item.solid]));
+    assert.equal(canReachHeartElement(element, press), true, `${element.id}: its press position answers E`);
+    assert.equal(heartReachOwner(element.id, press, footprints), true, `${element.id}: at its press position it is the nearest solid`);
+    assert.equal(HEART_ELEMENTS.some((other) => other.kind === 'cell' && isInsideHeartGate(other.id, press)), false, `${element.id}: no floor socket claims its press position`);
+    continue;
+  }
   const owned = HEART_ELEMENTS.filter((other) => {
     if (other.id === element.id) return false;
     if (other.kind === 'cell' && isInsideHeartGate(other.id, press)) return true;
@@ -536,28 +544,39 @@ for (const prism of ['prism-dark', 'prism-receiving']) {
 /* ------------------------------------------------------------------ anchors and the south-edge rule */
 
 for (const element of HEART_PROPS) {
-  assert.equal(element.y + element.height / 2, element.stand.y, `${element.id}: art is bottom-anchored on its base line`);
+  assert.equal(element.y + element.height / 2 - HEART_REACH_GAP, element.stand.y, `${element.id}: its reach stand sits ${HEART_REACH_GAP}px above the base line`);
 }
 for (const element of HEART_ELEMENTS) {
-  const press = element.kind === 'prop' ? { x: element.stand.x, y: element.stand.y - 16 } : { x: element.stand.x, y: element.stand.y };
-  assert.equal(canReachHeartElement(element, press), true, `${element.id}: its authored south-edge stand opens the prompt`);
+  assert.equal(canReachHeartElement(element, element.stand), true, `${element.id}: its authored stand opens the prompt`);
 }
-// RULE_GAMES rule 1: no reachable position behind a prop (or outside a socket cell) may answer, and
-// standing due north of a prop at its own vertical centre must be silent for every prop.
+// RULE_GAMES rule 1: a prop answers from every side within HEART_REACH_GAP of its solid, and from nowhere beyond it.
 for (const element of HEART_PROPS) {
-  for (const northY of [element.y - 2, element.y - 8, element.y - element.height / 2]) {
-    assert.equal(canReachHeartElement(element, { x: element.stand.x, y: northY }), false,
-      `${element.id}: never answers from behind/above the art (y=${northY})`);
+  const solid = element.solid;
+  const mid = { x: solid.x + solid.width / 2, y: solid.y + solid.height / 2 };
+  const sides = {
+    north: { at: { x: mid.x, y: solid.y - HEART_REACH_GAP - 22 }, out: [0, -2] },
+    south: { at: { x: mid.x, y: solid.y + solid.height + HEART_REACH_GAP - 16 }, out: [0, 2] },
+    west: { at: { x: solid.x - HEART_REACH_GAP - 7, y: mid.y - 19 }, out: [-2, 0] },
+    east: { at: { x: solid.x + solid.width + HEART_REACH_GAP + 7, y: mid.y - 19 }, out: [2, 0] },
+  };
+  for (const [name, { at, out }] of Object.entries(sides)) {
+    assert.equal(heartFootGap(at, solid), HEART_REACH_GAP, `${element.id}: ${name} probe sits exactly ${HEART_REACH_GAP}px from the solid`);
+    assert.equal(canReachHeartElement(element, at), true, `${element.id}: answers from the ${name} at ${HEART_REACH_GAP}px`);
+    const beyond = { x: at.x + out[0], y: at.y + out[1] };
+    assert.equal(canReachHeartElement(element, beyond), false, `${element.id}: silent from the ${name} beyond ${HEART_REACH_GAP}px`);
   }
 }
 for (const report of auditHeartStands()) {
-  assert.equal(report.blindFromNorth, true, `${report.id}: no reachable position above the art can hold the prompt open`);
   assert.equal(report.southOfArt, true, `${report.id}: its trigger sits at the south edge / inside the socket cell`);
 }
 
 /* ------------------------------------------------------------------ nearest-target ownership over the whole floor */
 
 const sampleStride = 3;
+// Nearest control: a prop is ranked by its foot gap to its solid (the reach rule); a socket by its stand point.
+const rankDistance = (element, point) => (element.kind === 'prop'
+  ? heartFootGap(point, element.solid)
+  : Math.hypot(point.x - element.stand.x, point.y - element.stand.y));
 const ownedPairs = new Map();
 const strictlyOwned = new Set();
 for (let y = HEART_FLOOR.top; y <= HEART_FLOOR.bottom; y += sampleStride) {
@@ -567,7 +586,7 @@ for (let y = HEART_FLOOR.top; y <= HEART_FLOOR.bottom; y += sampleStride) {
     const live = HEART_ELEMENTS.filter((element) => canReachHeartElement(element, point));
     if (live.length === 0) continue;
     const ranked = live
-      .map((element) => ({ element, distance: Math.hypot(point.x - element.stand.x, point.y - element.stand.y) }))
+      .map((element) => ({ element, distance: rankDistance(element, point) }))
       .sort((a, b) => a.distance - b.distance);
     if (ranked.length === 1 || ranked[0].distance + 3 < ranked[1].distance) strictlyOwned.add(ranked[0].element.id);
     for (let i = 0; i < ranked.length; i += 1) {
@@ -590,8 +609,20 @@ for (const [key, entry] of ownedPairs) {
   // Overlapping discs are fine as long as the nearest one wins. Two co-linear stands can only tie on
   // the perpendicular bisector, i.e. one line: assert the tie region really is a single line, where
   // HEART_CONTROL_ORDER (cells before props) then decides it deterministically.
-  assert.ok(entry.tieXs.size <= 1 || entry.tieYs.size <= 1,
-    `${key}: ties are confined to one line (saw ${entry.tieXs.size}x${entry.tieYs.size})`);
+  const [idA, idB] = key.split('|');
+  const solidA = HEART_PROPS.find((item) => item.id === idA)?.solid;
+  const solidB = HEART_PROPS.find((item) => item.id === idB)?.solid;
+  if (solidA && solidB) {
+    // Two props whose reach zones overlap (8px apart) tie only in the column between their solids, where the foot
+    // body straddles the gap; that tie is resolved by registration order, which HEART_CONTROL_ORDER checks below.
+    const lo = Math.min(solidA.x + solidA.width, solidB.x + solidB.width) - HEART_BODY.width / 2;
+    const hi = Math.max(solidA.x, solidB.x) + HEART_BODY.width / 2;
+    assert.ok([...entry.tieXs].every((x) => x >= lo && x <= hi),
+      `${key}: prop ties stay in the gap column between their solids [${lo}, ${hi}]`);
+  } else {
+    assert.ok(entry.tieXs.size <= 1 || entry.tieYs.size <= 1,
+      `${key}: ties are confined to one line (saw ${entry.tieXs.size}x${entry.tieYs.size})`);
+  }
 }
 assert.ok(HEART_CONTROL_ORDER.indexOf('heart-g0') < HEART_CONTROL_ORDER.indexOf('heart-memory-mirror'),
   'the documented arbitration puts G0 before the Memory mirror, matching registration order');

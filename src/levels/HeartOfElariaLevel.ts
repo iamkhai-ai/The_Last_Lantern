@@ -12,7 +12,7 @@ import { SoundSystem } from '../systems/SoundSystem';
 import {
   auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
   getHeartStage, heartArtCandidates, heartArtNativeSize, heartFinalActionAlreadyDone, heartFinalActionSource, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
-  HEART_G0_ID, HEART_LANE_COLORS, HEART_MAT_ID, HEART_MOON_SHADOW, HEART_OVERLOAD_CHECKPOINT, HEART_PROPS,
+  HEART_G0_ID, HEART_LANE_COLORS, HEART_MAT_ID, HEART_MOON_SHADOW, HEART_OVERLOAD_CHECKPOINT, HEART_PROPS, HEART_REACH_GAP, heartReachOwner, type HeartRect,
   HEART_RING_LANES, HEART_SEAL_ID, HEART_SEAL_RADIUS, HEART_STATUE_BLOCKS_LEFT_EYE, HEART_STATUE_BLOCKS_RIGHT_EYE,
   HEART_STATUE_SHADOW, isHeartPositionSafe, nearestSafeHeartSpawn, normalizeHeartProgress,
   resolveHeartLumoMode, resolveHeartRestoreState, type HeartBranchId, type HeartFinalSource, type HeartElement, type HeartPoint, type HeartPuzzleState, type HeartStage,
@@ -718,12 +718,21 @@ export class HeartOfElariaLevel {
   /* ---------------------------------------------------------------- interactions */
 
   private registerInteractions(): void {
+    // RULE_GAMES 1: a standing prop answers from every side within HEART_REACH_GAP of its solid; the nearest solid owns a
+    // shared position. Floor sockets keep their cell rule (RULE_GAMES 2).
+    const propFootprints = (): Record<string, HeartRect> => Object.fromEntries(
+      HEART_PROPS.filter((item) => item.solid).map((item) => [item.id, item.solid!]),
+    );
     for (const element of HEART_ELEMENTS) {
       const config: InteractableConfig = {
         id: element.id,
         x: element.stand.x,
         y: element.stand.y,
         radius: element.radius,
+        ...(element.kind === 'prop' && element.solid ? {
+          reach: { rect: element.solid, face: 'any' as const, maxGap: HEART_REACH_GAP },
+          ownsPosition: (x: number, y: number) => heartReachOwner(element.id, { x, y }, propFootprints()),
+        } : {}),
         getPromptBounds: () => this.images.get(element.id)?.getBounds() ?? null,
         getPrompt: () => this.promptFor(element),
         isEnabled: () => this.imageVisible(element.id) && this.canReach(element),

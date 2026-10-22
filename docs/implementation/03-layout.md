@@ -61,3 +61,10 @@ Named checkpoints include entry, desk approach, south rim, mural front and exit 
 Read the script against scenario and this layout. Build and static review are allowed; do not add or run tests unless the user asks for verification. Preserve prior checks without invoking them as part of an unsolicited suite. Root may visually inspect the implementation to ensure the requested appearance is present. Full human puzzle playthrough remains user review.
 
 Required inspection focus: reachable controls on the intended side, complete prop footprints solid from all four approach directions, central ring walkable/core blocked, correctly sorted actors in front/behind shelves, bright/dark clues and source/seat moves consistent, no duplicate tablet or story reveal, locked/open exit accessible without overlap, and compatibility handling explicit. Report verification honestly as PASS/FAIL/NOT_RUN on the frozen source revision.
+
+## Cập nhật 2026-10-22: giá sách và phiến khắc theo luật 8px
+
+- Bốn giá sách (`library-rack-0..3`) nhận E từ mọi phía trong 8px quanh khối giá (RULE_GAMES 1). Điểm đứng dời về 16px dưới tâm giá (`rackStandOffset` = 16).
+- Phiến khắc (`library-inscription`, khối 20×10 tại (222,260)) nhận E từ mọi phía trong 8px.
+- Quyển sách (`library-book`) giữ bán kính 22: nó đè lên khối giá số 2, nên nếu áp luật 8px thì giá số 2 bị tranh điểm.
+- Bức tranh thứ năm, cổng đá và bệ giữa (các ô sàn) giữ quy tắc cũ.

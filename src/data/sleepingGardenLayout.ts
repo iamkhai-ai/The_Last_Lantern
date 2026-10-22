@@ -382,15 +382,59 @@ export function nearestSafeGardenSpawn(state: GardenState, lanternOn: boolean, h
 export const GARDEN_SPAWN: GardenPoint = { x: 238, y: 298 };
 
 export const GARDEN_STANDS = {
-  // The handle/latch sit on the north side of the wall gap, so their reachable stand sits
-  // at the gap's north band (player centers y<=136) rather than deeper inside the gap.
+  // The handle is a wall control (RULE_GAMES 2): it keeps the radius test from its stand.
+  // The standing props below answer from every side inside GARDEN_REACH_GAP (RULE_GAMES 1); their stands
+  // are the nearest centres that reach them, so the sweeps and region checks start from a real foot position.
   handle: { x: 132, y: 132, radius: 22 },
-  latchWest: { x: 142, y: 132, radius: 22 },
-  drain: { x: 462, y: 286, radius: 24 },
-  latchEast: { x: 414, y: 286, radius: 22 },
-  sprout: { x: 500, y: 280, radius: 24 },
+  latchWest: { x: 142, y: 120, radius: 22 },
+  drain: { x: 462, y: 264, radius: 24 },
+  latchEast: { x: 414, y: 264, radius: 22 },
+  sprout: { x: 500, y: 256, radius: 24 },
   exit: { x: 574, y: 64, radius: 24 },
 } as const;
+
+/** RULE_GAMES 1: a standing prop answers from every side within this many px of its outer edge (foot body to rect). */
+export const GARDEN_REACH_GAP = 8;
+
+/**
+ * Collision/art rectangles of the standing props that answer from every side. Each rect is the object's own
+ * footprint (the latch and drain solids, the sprout art bottom-centred on its module rect), not its stand point.
+ */
+export const GARDEN_REACH_RECTS = {
+  'latch-west': { x: 128, y: 96, width: 28, height: 32 },
+  drain: { x: 436, y: 224, width: 52, height: 48 },
+  'latch-east': { x: 400, y: 240, width: 28, height: 32 },
+  sprout: { x: 484, y: 232, width: 32, height: 32 },
+} as const;
+export type GardenReachId = keyof typeof GARDEN_REACH_RECTS;
+
+/** The `reach` footprint a standing prop registers with (see `isFootInReach` in systems/interactionReach.ts). */
+export function gardenStandingReach(id: GardenReachId): { rect: GardenRect; face: 'any'; maxGap: number } {
+  return { rect: GARDEN_REACH_RECTS[id], face: 'any', maxGap: GARDEN_REACH_GAP };
+}
+
+/** Euclidean gap between the foot body at `center` and a rect; 0 when they touch or overlap. */
+function gardenFootGap(center: GardenPoint, rect: GardenRect): number {
+  const foot = gardenActorBody(center);
+  const dx = Math.max(foot.x - (rect.x + rect.width), rect.x - (foot.x + foot.width), 0);
+  const dy = Math.max(foot.y - (rect.y + rect.height), rect.y - (foot.y + foot.height), 0);
+  return Math.hypot(dx, dy);
+}
+
+/**
+ * ONE OWNER PER POSITION: among the standing props, the one whose outer edge is nearest the foot owns it.
+ * Ties go to the first listed. Used as `ownsPosition`, so overlapping reach zones (the drain and its
+ * neighbours sit 8px apart) never answer for two props at once.
+ */
+export function gardenStandingOwner(id: GardenReachId, center: GardenPoint): boolean {
+  let owner: GardenReachId | null = null;
+  let best = Infinity;
+  for (const other of Object.keys(GARDEN_REACH_RECTS) as GardenReachId[]) {
+    const gap = gardenFootGap(center, GARDEN_REACH_RECTS[other]);
+    if (gap < best) { owner = other; best = gap; }
+  }
+  return owner === id;
+}
 
 export function gardenCompletionBlock(state: GardenState): 'canopy' | 'bar' | 'drain' | 'side' | 'scene' | null {
   if (!state.canopyShut) return 'canopy';
