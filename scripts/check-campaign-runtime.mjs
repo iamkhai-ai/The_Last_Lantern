@@ -673,6 +673,8 @@ function makeFrameScene(level, { controllers = [] } = {}) {
     scene[field] = {
       update: (dt) => calls.controller.push({ field, level, dt }),
       getProtectedPromptBounds: () => [],
+      // Mirrors the real controller API: the scene's input lock reads it every frame (Level 08's demonstration owns controls).
+      isControlLocked: () => false,
     };
   }
   return scene;

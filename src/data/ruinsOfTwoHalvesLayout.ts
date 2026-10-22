@@ -220,6 +220,62 @@ export function ruinsShadowWalkResume(counter: number | undefined): { start: Rui
   return { start: { x: at.x, y: at.y }, next: counter + 1 };
 }
 
+/**
+ * Optional demonstration (scenario 08 §4 "Người giữ bóng"). The Shadow leaves his guard spot, steps onto the centre light
+ * flow and holds `shielding` there, so his footprint breaks the flow at x 320. The spot is the flow's own segment between
+ * the statue's north edge (footprint top y 148) and the Moon lock. Footprint x 306..334, y 104..140: 8px clear of the statue
+ * footprint, and the passage north of the statue stays open for the foot body (y 80..104). Both legs pass the statue's
+ * north-west corner, so the footprint never overlaps the statue, the mirrors, the pedestal or any control stand (checked).
+ */
+export const RUINS_SHADOW_DEMO = {
+  /** ground anchor of the demonstration spot, on the centre flow (`RUINS_BEAMS.centreVisible[1]`) */
+  ground: { x: 320, y: 140 },
+  /** walk from the guard spot to the demonstration spot */
+  outRoute: [{ x: 270, y: 124 }, { x: 320, y: 140 }] as readonly RuinsPoint[],
+  /** walk back to the guard spot (the same corner as the way out) */
+  backRoute: [{ x: 270, y: 124 }, { x: 238, y: 164 }] as readonly RuinsPoint[],
+} as const;
+
+export interface RuinsShadowDemoInput {
+  lanternPlaced: boolean;
+  lanternOn: boolean;
+  sunsLit: number;
+  moonCovered: boolean;
+  latched: boolean;
+  demoSeen: boolean;
+}
+
+/**
+ * Whether the optional demonstration may run: the lamp is lit on the altar, both Suns are lit, the Moon is not yet covered,
+ * the temple is not latched, and the demonstration has not been seen in this save. Pure: it never reads or writes puzzle state.
+ */
+export function ruinsShadowDemoEligible(input: RuinsShadowDemoInput): boolean {
+  return input.lanternPlaced && input.lanternOn && input.sunsLit === 2 && !input.moonCovered && !input.latched && !input.demoSeen;
+}
+
+/**
+ * Scenario 08 §5 "Mạch phụ": a worn name carved under the statue. It is a ground decal (`RUINS_DEPTH.groundStamp`) that a
+ * Pulse within `pulseRadius` of its centre reveals. The Shadow holds `stillness` for the reveal when he is within
+ * `stillRadius` of the statue's base.
+ */
+export const RUINS_NAME = {
+  art: 'inscription-under-statue',
+  centre: { x: 320, y: 222 },
+  pulseRadius: 56,
+  stillRadius: 80,
+} as const;
+
+/** True when a Pulse originating at `origin` reaches the carved name. */
+export function ruinsPulseReachesName(origin: RuinsPoint): boolean {
+  return Math.hypot(origin.x - RUINS_NAME.centre.x, origin.y - RUINS_NAME.centre.y) <= RUINS_NAME.pulseRadius;
+}
+
+/** True when The Shadow's ground anchor is close enough to the statue's base for the reveal to hold him still. */
+export function ruinsShadowNearStatue(ground: RuinsPoint): boolean {
+  const base = RUINS_PROPS.statue.groundAnchor;
+  return Math.hypot(ground.x - base.x, ground.y - base.y) <= RUINS_NAME.stillRadius;
+}
+
 /** Wall-mounted fixtures with interaction stand points but no extra collider. */
 export const RUINS_WALL_FIXTURES: readonly {
   id: string; art: string; artWidth: number; artHeight: number; artCenter: RuinsPoint; stand: RuinsStand;

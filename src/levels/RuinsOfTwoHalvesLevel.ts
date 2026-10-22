@@ -6,18 +6,20 @@ import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import { SoundSystem } from '../systems/SoundSystem';
+import { lockMoonVoice, lockSunLeftVoice, lockSunRightVoice } from '../audio/effects';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
   canLatchRuinsSanctuary, deriveRuinsPracticeState, deriveRuinsPuzzleState, getRuinsExitBlock, getRuinsSolid,
   getRuinsStage, isRuinsExitReady, isRuinsMainPuzzleEngaged, resolveRuinsSpawn, RUINS_BEAMS, RUINS_CONDUIT,
   RUINS_DEPTH, RUINS_FOOT_PLACEMENT,
-  RUINS_MIRROR_STATES, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
-  RUINS_SHADOW, RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
-  ruinsNextStep, ruinsShadowFootprintAt, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSolidEnabled,
+  RUINS_MIRROR_STATES, RUINS_NAME, RUINS_PEDESTAL_LAMP, RUINS_PRACTICE, RUINS_PROPS, RUINS_RECEIVERS, RUINS_RECEIVER_DEPTH,
+  RUINS_SHADOW, RUINS_SHADOW_DEMO, RUINS_SHADOW_OVERLAY, RUINS_SPLITTER, RUINS_STATUE_NOTCHES, RUINS_WALL_FIXTURES,
+  ruinsNextStep, ruinsPulseReachesName, ruinsShadowDemoEligible, ruinsShadowFootprintAt, ruinsShadowNearStatue,
+  ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSolidEnabled,
   ruinsShadowSpotFor, ruinsShadowWalkResume, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
   RUINS_WALLS, ruinsActorBody, ruinsDepthAt, ruinsNormalizeCounters,
-  ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsRect, type RuinsStage,
+  ruinsNormalizeNotch, type RuinsPoint, type RuinsPuzzleState, type RuinsRect, type RuinsShadowPoseId, type RuinsStage,
 } from '../data/ruinsOfTwoHalvesLayout';
 
 export interface RuinsOfTwoHalvesLevelOptions {
@@ -78,6 +80,28 @@ const ENDING: DialogueLine[] = [
   { speaker: 'Lumo', text: 'Tôi sợ điều mình sắp nhớ ra.' },
   { speaker: 'Nhinh', text: 'Mình sẽ đọc cùng nhau.' },
 ];
+
+/** Scenario 08 §4: the optional demonstration, spoken once The Shadow stands on the centre flow. */
+const SHADOW_DEMO_TALK: DialogueLine[] = [
+  { speaker: 'The Shadow', text: 'Chỉ cần chỗ này tối.' },
+  { speaker: 'Lumo', text: 'Ông ấy đang che luồng giữa bằng chính mình.' },
+  { speaker: 'The Shadow', text: 'Ta đã đứng như thế này rất lâu. Tay ta không giữ được nữa.' },
+];
+
+/** Scenario 08 §4: F while the lamp sits lit on the altar switches nothing; Lumo says why. */
+const LAMP_ON_ALTAR_LINE: DialogueLine = { speaker: 'Lumo', text: 'Tối hết thì hai bên cũng ngủ.' };
+
+/** Scenario 08 §5 "Mạch phụ": the worn name, once a Pulse reveals it. */
+const NAME_LINE: DialogueLine = { speaker: 'Nhinh', text: 'Có ai đó khắc một cái tên ở đây. Mòn hết rồi.' };
+const NAME_JOURNAL_LINE: DialogueLine = { speaker: 'Nhinh', text: 'Một cái tên mòn dưới chân tượng. Không đọc được, và không ai nói đó là tên ai.' };
+
+/** The Shadow's demonstration walk: in-memory only, never saved, so a reload always shows his normal spot. */
+interface ShadowDemo {
+  /** `in`: walking to the spot; `talk`: the lines are playing; `out`: walking back to the guard spot */
+  stage: 'in' | 'talk' | 'out';
+  route: readonly RuinsPoint[];
+  index: number;
+}
 
 const INSCRIPTION = 'Mặt trời giữ đường đi. Mặt trăng giữ giờ nghỉ. Đừng đặt một bên vào chỗ của cả hai.';
 
@@ -158,6 +182,12 @@ export class RuinsOfTwoHalvesLevel {
   private shadowSolidAt?: { ground: RuinsPoint; footprint: RuinsRect };
   /** The player's largest step this frame in px (max speed x dt), used by the Shadow's solid. */
   private playerStepPx = 0;
+  /** The optional demonstration while it runs; while set, it owns the controls (see isControlLocked). */
+  private shadowDemo: ShadowDemo | null = null;
+  /** Holds him on `stillness` while the carved name's reveal line plays (scenario 08 §5). */
+  private shadowStill = false;
+  /** Lock tones, held by key in SoundSystem; released in destroy(). */
+  private static readonly LOCK_TONE_KEYS = { sunLeft: 'ruins-sun-left', sunRight: 'ruins-sun-right', moon: 'ruins-moon', practice: 'ruins-practice-slab' } as const;
 
   constructor(options: RuinsOfTwoHalvesLevelOptions) {
     this.scene = options.scene;
@@ -210,6 +240,9 @@ export class RuinsOfTwoHalvesLevel {
   public destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    // An interrupted demonstration writes nothing: `l7-shadow-demo` is only set when its walk back has finished.
+    this.shadowDemo = null;
+    SoundSystem.releaseHeldTones();
     this.clearVisuals();
     this.interactions.clear();
   }
@@ -219,8 +252,15 @@ export class RuinsOfTwoHalvesLevel {
     this.updateStoryBeats();
     this.playerStepPx = (this.player.maxSpeed * dt) / 1000;
     this.advanceShadowWalk(dt);
+    this.advanceShadowDemo(dt);
+    this.syncLockTones();
     this.refreshArt();
     this.flushPendingBeats();
+  }
+
+  /** True while the optional Shadow demonstration owns the controls. The scene folds this into its input lock. */
+  public isControlLocked(): boolean {
+    return this.shadowDemo !== null;
   }
 
   /* ---------------------------------------------------------------------- */
@@ -374,6 +414,16 @@ export class RuinsOfTwoHalvesLevel {
     this.addImage('shadow', `shadow-notch-${statueNotch}`,
       RUINS_SHADOW_OVERLAY.center.x, RUINS_SHADOW_OVERLAY.center.y, RUINS_SHADOW_OVERLAY.depth);
 
+    // Scenario 08 §5: the worn name under the statue. Hidden until a Pulse reveals it; the saved flag drives visibility.
+    const nameKey = getRuinsV2ArtKey(RUINS_NAME.art);
+    if (nameKey) {
+      const decal = this.scene.add.image(RUINS_NAME.centre.x, RUINS_NAME.centre.y, nameKey).setDepth(RUINS_DEPTH.groundStamp);
+      decal.setData('ruins-id', 'statue-name');
+      decal.setVisible(this.progress.flags['l7-name-seen'] === true);
+      this.artById.set('statue-name', decal);
+      this.track(decal);
+    }
+
     this.drawProps();
     this.drawShadow();
     this.drawWallFixtures();
@@ -511,7 +561,8 @@ export class RuinsOfTwoHalvesLevel {
       graphics.strokePath();
     };
 
-    if (state.moonCovered) {
+    // During the optional demonstration the centre flow reads as broken by The Shadow (rendering only; the state is unchanged).
+    if (state.moonCovered || this.shadowDemo !== null) {
       // the centre flow dies where the statue's shadow begins
       segment(RUINS_BEAMS.centreVisible[0].from, RUINS_BEAMS.centreVisible[0].to, 0x8b7a52, 0.55);
     } else {
@@ -632,9 +683,9 @@ export class RuinsOfTwoHalvesLevel {
     this.shadowTalk = {
       id: 'l7-shadow-npc',
       x: talkSpot.stand.x, y: talkSpot.stand.y, radius: talkSpot.stand.radius,
-      getPrompt: () => (this.shadowWalk ? null : 'E · Nói chuyện với The Shadow'),
+      getPrompt: () => (this.shadowWalk || this.shadowDemo ? null : 'E · Nói chuyện với The Shadow'),
       getPromptBounds: () => this.artById.get('shadow-npc')?.getBounds() ?? null,
-      isEnabled: () => !this.shadowWalk,
+      isEnabled: () => !this.shadowWalk && !this.shadowDemo,
       onInteract: () => this.talkToShadow(),
     };
     register(this.shadowTalk);
@@ -804,6 +855,11 @@ export class RuinsOfTwoHalvesLevel {
       return;
     }
     if (this.progress.flags['l7-route-latched'] !== true) {
+      // Scenario 08 §4: E at his stand asks for the optional demonstration when the same eligibility holds as for H.
+      if (this.isShadowDemoEligible()) {
+        this.startShadowDemo();
+        return;
+      }
       this.say([{ speaker: 'The Shadow', text: 'Hạ ánh sáng xuống. Điện thờ còn khóa, và luống mầm vẫn chờ một khoảng tối.' }]);
       return;
     }
@@ -973,10 +1029,10 @@ export class RuinsOfTwoHalvesLevel {
   /** Puts the sprite, solid and stand where the story says he is, unless he is mid-walk. */
   private syncShadow(): void {
     const image = this.shadowImage;
-    if (!image || !image.active || this.shadowWalk) return;
+    if (!image || !image.active || this.shadowWalk || this.shadowDemo) return;
     const phase = this.shadowPhase();
     const spot = ruinsShadowSpotFor(phase);
-    const key = this.shadowKey(ruinsShadowPoseFor(phase));
+    const key = this.shadowKey(this.shadowStill ? 'stillness' : ruinsShadowPoseFor(phase));
     if (key && image.texture.key !== key) image.setTexture(key);
     image.setFlipX(false);
     if (image.x !== spot.ground.x || image.y !== spot.ground.y) {
@@ -1045,6 +1101,136 @@ export class RuinsOfTwoHalvesLevel {
     this.placeShadowSolid(true);
   }
 
+  /* ---------------------------------------------------------------------- */
+  /* optional Shadow demonstration, carved name, lamp feedback, lock tones   */
+  /* ---------------------------------------------------------------------- */
+
+  /** Scenario 08 §4: the one eligibility shared by E at his stand and H on the Sun/Moon ladder. Reads live state only. */
+  private isShadowDemoEligible(): boolean {
+    const puzzle = this.getPuzzleState();
+    return ruinsShadowDemoEligible({
+      lanternPlaced: this.lantern.lanternPlaced,
+      lanternOn: this.lantern.lanternOn,
+      sunsLit: puzzle.sunsLit,
+      moonCovered: puzzle.moonCovered,
+      latched: this.progress.flags['l7-route-latched'] === true,
+      demoSeen: this.progress.flags['l7-shadow-demo'] === true,
+    });
+  }
+
+  /**
+   * Starts the demonstration: The Shadow leaves his guard spot for the centre flow and the controls lock. Nothing is
+   * written here; `l7-shadow-demo` is set only once the walk back has ended (finishShadowDemo).
+   */
+  private startShadowDemo(): void {
+    if (this.destroyed || this.shadowDemo || this.shadowWalk) return;
+    if (!this.shadowImage || !this.shadowImage.active) return;
+    if (!this.isShadowDemoEligible()) return;
+    this.shadowDemo = { stage: 'in', route: RUINS_SHADOW_DEMO.outRoute, index: 0 };
+    this.setShadowTexture('walk-right');
+    // The Moon lock and the centre flow render as covered for the demonstration; the puzzle state is untouched.
+    this.refresh();
+  }
+
+  /** Walks The Shadow along the demonstration route, holds him for the lines, then walks him back. */
+  private advanceShadowDemo(dt: number): void {
+    const demo = this.shadowDemo;
+    const image = this.shadowImage;
+    if (!demo || !image || !image.active || demo.stage === 'talk') return;
+    if (demo.index >= demo.route.length) {
+      if (demo.stage === 'out') {
+        this.finishShadowDemo();
+        return;
+      }
+      // Arrived on the centre flow. The lines wait for any beat still on screen, so two dialogues never overlap.
+      this.setShadowTexture('shielding');
+      if (this.canStartStory()) this.beginShadowDemoTalk(demo);
+      return;
+    }
+    const target = demo.route[demo.index];
+    const dx = target.x - image.x;
+    const dy = target.y - image.y;
+    const distance = Math.hypot(dx, dy);
+    const step = (RUINS_SHADOW.speed * Math.min(dt, 50)) / 1000;
+    this.setShadowTexture('walk-right');
+    if (Math.abs(dx) > 0.5) image.setFlipX(dx < 0);
+    if (distance <= step) {
+      image.setPosition(target.x, target.y);
+      demo.index += 1;
+    } else {
+      image.setPosition(image.x + (dx / distance) * step, image.y + (dy / distance) * step);
+    }
+    image.setDepth(ruinsDepthAt(image.y));
+    // Same solid rule as the story walk: it yields to a player within one step, so the walk never traps them.
+    this.placeShadowSolid(true);
+  }
+
+  private beginShadowDemoTalk(demo: ShadowDemo): void {
+    demo.stage = 'talk';
+    this.setShadowTexture('shielding');
+    this.placeShadowSolid();
+    this.say(SHADOW_DEMO_TALK, () => this.beginShadowDemoReturn(demo));
+  }
+
+  private beginShadowDemoReturn(demo: ShadowDemo): void {
+    if (this.destroyed || this.shadowDemo !== demo) return;
+    demo.stage = 'out';
+    demo.route = RUINS_SHADOW_DEMO.backRoute;
+    demo.index = 0;
+  }
+
+  /** The walk back has ended and he is on his guard spot again. Only now is the demonstration recorded. */
+  private finishShadowDemo(): void {
+    this.shadowDemo = null;
+    this.progress.flags['l7-shadow-demo'] = true;
+    this.save();
+    this.syncShadow();
+    this.refresh();
+  }
+
+  private setShadowTexture(pose: RuinsShadowPoseId): void {
+    const image = this.shadowImage;
+    const key = this.shadowKey(pose);
+    if (image && key && image.texture.key !== key) image.setTexture(key);
+  }
+
+  /**
+   * Scenario 08 §5 "Mạch phụ": a Pulse near the statue's base reveals the worn name, once. The Pulse rule already requires the
+   * lamp in hand (LanternSystem.triggerPulse), so this is only reached with the lamp in hand.
+   */
+  public onPulse(x: number, y: number): void {
+    if (this.destroyed || this.progress.flags['l7-name-seen'] === true) return;
+    if (!ruinsPulseReachesName({ x, y })) return;
+    this.progress.flags['l7-name-seen'] = true;
+    this.save();
+    // If The Shadow stands near the statue's base, he holds still while the reveal is said, and says nothing.
+    if (this.shadowImage?.active && ruinsShadowNearStatue(this.shadowGround())) this.shadowStill = true;
+    this.refreshArt();
+    this.queueBeat([NAME_LINE], () => { this.shadowStill = false; });
+  }
+
+  /** F while the lamp sits lit on the altar switches nothing (the lamp stays lit); Lumo says why (scenario 08 §4). */
+  public handleLanternKey(): void {
+    if (this.destroyed || this.shadowDemo) return;
+    if (!this.lantern.lanternPlaced || !this.lantern.lanternOn) return;
+    this.say([LAMP_ON_ALTAR_LINE]);
+  }
+
+  /**
+   * Scenario 08 §4: the lock tones follow the rendered locks. A Sun tone sounds while its Sun is lit. The Moon tone sounds
+   * while the shadow covers the Moon with the lamp lit (so a lamp not yet placed never hums), and during the demonstration.
+   * Each tone fades out the moment its condition is lost.
+   */
+  private syncLockTones(): void {
+    const state = this.getPuzzleState();
+    const practice = this.getPracticeState();
+    const keys = RuinsOfTwoHalvesLevel.LOCK_TONE_KEYS;
+    SoundSystem.setHeldTone(keys.sunLeft, state.leftLit, lockSunLeftVoice);
+    SoundSystem.setHeldTone(keys.sunRight, state.rightLit, lockSunRightVoice);
+    SoundSystem.setHeldTone(keys.moon, (state.lightActive && state.moonCovered) || this.shadowDemo !== null, lockMoonVoice);
+    SoundSystem.setHeldTone(keys.practice, practice.slabShadowed, lockMoonVoice);
+  }
+
   private queueBeat(lines: DialogueLine[], onComplete?: () => void): void {
     this.pendingBeats.push({ lines, onComplete });
     this.flushPendingBeats();
@@ -1077,7 +1263,9 @@ export class RuinsOfTwoHalvesLevel {
     this.setArt('practice-column-spin', `test-column-notch-${ruinsNormalizeNotch(this.progress.counters['practice'] ?? 0)}`);
     this.setArt('lock-left', state.leftLit ? 'lock-sun-on' : 'lock-sun-off');
     this.setArt('lock-right', state.rightLit ? 'lock-sun-on' : 'lock-sun-off');
-    this.setArt('lock-moon', state.moonDark ? 'lock-moon-covered' : 'lock-moon-lit');
+    // The Moon renders as covered during the optional demonstration; the puzzle state itself is unchanged.
+    const moonShownDark = state.moonDark || this.shadowDemo !== null;
+    this.setArt('lock-moon', moonShownDark ? 'lock-moon-covered' : 'lock-moon-lit');
     this.setArt('splitter', state.lightActive ? 'fixed-three-route-splitter-on' : 'fixed-three-route-splitter-off');
     this.setArt('practice-slab', practice.slabShadowed ? 'test-moon-covered' : 'test-moon-lit');
     this.setArt('confirmation', `confirmation-${this.confirmationArt()}`);
@@ -1085,11 +1273,12 @@ export class RuinsOfTwoHalvesLevel {
     this.setArt('north-door', `sanctuary-door-${latched ? 'open' : 'closed'}`);
     this.setArt('shadow', `shadow-notch-${state.statue}`);
     this.artById.get('placed-lamp')?.setVisible(this.lantern.lanternPlaced);
+    this.artById.get('statue-name')?.setVisible(this.progress.flags['l7-name-seen'] === true);
     this.syncShadow();
 
     this.lockLabels.get('left')?.setText(`NHẬT TRÁI · ${state.leftLit ? 'SÁNG' : 'TẮT'}`);
     this.lockLabels.get('right')?.setText(`NHẬT PHẢI · ${state.rightLit ? 'SÁNG' : 'TẮT'}`);
-    this.lockLabels.get('moon')?.setText(`NGUYỆT · ${state.moonDark ? 'TỐI' : 'SÁNG'}`);
+    this.lockLabels.get('moon')?.setText(`NGUYỆT · ${moonShownDark ? 'TỐI' : 'SÁNG'}`);
 
     if (this.lastLanternOn !== this.lantern.lanternOn) {
       this.lastLanternOn = this.lantern.lanternOn;
@@ -1125,6 +1314,8 @@ export class RuinsOfTwoHalvesLevel {
     this.shadowSolidAt = undefined;
     this.shadowTalk = undefined;
     this.shadowWalk = null;
+    this.shadowDemo = null;
+    this.shadowStill = false;
   }
 
   /* ---------------------------------------------------------------------- */
@@ -1144,7 +1335,7 @@ export class RuinsOfTwoHalvesLevel {
       case 'moon': return 'Xoay tượng giữa sân cho bóng phủ khóa Nguyệt.';
       case 'confirm': return 'Điều kiện đã đủ. Nhấn E ở bệ chính để gài điện thờ.';
       case 'retrieve': return 'Thu hồi đèn ở bệ chính.';
-      case 'shadow': return 'Tới The Shadow ở phía đông bắc và nhấn E.';
+      case 'shadow': return 'Tới The Shadow ở phía tây bắc và nhấn E.';
       default: return 'Tới cửa Bắc và nhấn E để đi tiếp.';
     }
   }
@@ -1183,7 +1374,13 @@ export class RuinsOfTwoHalvesLevel {
     const index = Math.min(this.hintIndex, ladder.length - 1);
     this.hintIndex = Math.min(this.hintIndex + 1, ladder.length - 1);
     const suffix = index > 0 && missing.length ? ` Còn thiếu: ${missing.join(', ')}.` : '';
-    this.say([{ speaker: 'Hệ thống', text: ladder[index] + suffix }]);
+    const line: DialogueLine = { speaker: 'Hệ thống', text: ladder[index] + suffix };
+    // Scenario 08 §4/§6: asking for Mức 2 or 3 on the Sun/Moon ladder offers the optional demonstration once it is eligible.
+    if (index >= 1 && (stage === 'suns' || stage === 'moon') && this.isShadowDemoEligible()) {
+      this.say([line], () => this.startShadowDemo());
+      return;
+    }
+    this.say([line]);
   }
 
   public showJournal(): void {
@@ -1195,6 +1392,7 @@ export class RuinsOfTwoHalvesLevel {
     if (this.progress.flags['l7-two-suns'] === true) lines.push({ speaker: 'Lumo', text: 'Hai khóa Nhật sáng cùng lúc vẫn chưa đủ. Khóa Nguyệt cần ở trong bóng.' });
     if (this.progress.flags['l7-shadow-covers'] === true) lines.push({ speaker: 'Nhinh', text: 'Bóng đổ có thể bảo vệ một vùng. Ba khóa phải đúng cùng một lúc.' });
     if (this.progress.flags['l7-shadow-spiral'] === true) lines.push({ speaker: 'Lumo', text: 'Dấu vòng xoắn trên cửa Bắc giống dấu ở đường hầm dẫn nước.' });
+    if (this.progress.flags['l7-name-seen'] === true) lines.push(NAME_JOURNAL_LINE);
     if (this.progress.flags['l7-met-shadow'] === true) lines.push({ speaker: 'The Shadow', text: 'Trên đài nhìn trăng. Nơi ta đã dừng vòng trời.' });
     this.say([
       { speaker: 'Nhinh', text: 'Sổ tay giữ những điều hai đứa đã học.' },
