@@ -688,8 +688,8 @@ console.log(`Level 10 geometry/state checks passed (${HEART_ELEMENTS.length} con
   const PUZZLE_HINTS = constantOf('PUZZLE_HINTS');
   const HINTS = constantOf('HINTS', { PUZZLE_HINTS });
   const showHint = methodOf('showHint', { HINTS, hintLadderOf });
-  assert.deepEqual(PUZZLE_HINTS.map((text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text).normalize('NFC')), PRIMARY, 'PUZZLE_HINTS is the 10 §8 primary Mức 1-3 verbatim');
-  assert.deepEqual(HINTS.overload.map((text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text).normalize('NFC')), OVERLOAD, 'the overload stage is the 10 §8 overload Mức 1-3 verbatim');
+  assert.deepEqual(PUZZLE_HINTS.map((text) => text.normalize('NFC')), PRIMARY, 'PUZZLE_HINTS is the 10 §8 primary Mức 1-3 verbatim');
+  assert.deepEqual(HINTS.overload.map((text) => text.normalize('NFC')), OVERLOAD, 'the overload stage is the 10 §8 overload Mức 1-3 verbatim');
   // Presses on a fake level, one per stage name in `stages`, as the H key would press them.
   const presses = (stages) => {
     const spoken = [];

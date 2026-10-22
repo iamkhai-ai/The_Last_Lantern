@@ -1,3 +1,4 @@
+const IDENTITY_TR = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text);
 // Pure checks for Level 07 (The Sleeping Garden, campaign index 6).
 // Covers: state derive/sanitize, body math, light model, held spans, crossings, per-stage
 // collision-aware reachability from the entry, prompt-side rules, safe restore (safe AND
@@ -622,6 +623,7 @@ const levelMethod = (name) => {
 };
 /** Compile one shipped method body into a function; `this` is the fake level it is called on. */
 function compileLevelMethod(name, symbols = {}) {
+  symbols = { tr: IDENTITY_TR, ...symbols };
   const method = levelMethod(name);
   const params = method.parameters.map((p) => p.name.getText(levelAst));
   const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${method.body.getText(levelAst)};`, COMPILER).outputText;
@@ -871,7 +873,7 @@ function makeBeatHarness({ gateOpen = true, paused = false, art = true } = {}) {
   };
   const evaluate = (text, context) => {
     const js = ts.transpileModule(`const __unit = function () { return (${text}); };`, COMPILER).outputText;
-    return new Function(`"use strict";\n${js}\nreturn __unit;`)().call(context)();
+    return new Function('tr', `"use strict";\n${js}\nreturn __unit;`)(IDENTITY_TR).call(context)();
   };
   const sceneContext = (dialogueActive, pauseOpen) => ({ dialogue: { isActive: () => dialogueActive }, pauseMenu: { isOpen: () => pauseOpen } });
   assert.equal(evaluate(option('canStartStory'), sceneContext(false, false)), true, 'the garden starts a beat when idle');

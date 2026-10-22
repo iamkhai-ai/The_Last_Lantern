@@ -1,6 +1,7 @@
 # English localization — implementation report
 
 **Branch:** `feat/english-localization` (from `test-develop` @ `63def874`, 2026-10-22)
+**Gap fix:** `fix/english-localization-gaps` (worktree on top of `8bdbe92`, uncommitted)
 **Spec:** [`docs/superpowers/specs/2026-10-22-english-localization-design.md`](../superpowers/specs/2026-10-22-english-localization-design.md)
 **Plan:** [`docs/superpowers/plans/2026-10-22-english-localization.md`](../superpowers/plans/2026-10-22-english-localization.md)
 
@@ -8,29 +9,32 @@
 
 The whole campaign now runs in Vietnamese (default) or English, chosen from the main menu or the pause
 menu. Vietnamese remains the authored source; English is a catalogue layer keyed by the authored
-sentence, so content modules are untouched and the approved-copy regressions still assert the same
-Vietnamese literals.
+sentence, so content modules keep their Vietnamese copy and the approved-copy regressions still assert
+the same Vietnamese literals.
 
 | Measure | Result |
 | --- | --- |
-| Catalogue entries | 1,094 |
-| Dialogue lines in `src/` | 551 |
+| Catalogue entries | 1,470 |
+| `tr()` call sites | 1,017 |
+| Dialogue lines in `src/` | 573 |
 | Dialogue coverage | **100 %** |
-| `tr()` call sites | 70 |
-| Existing checks | all pass, unmodified assertions |
-| `npm run build` | passes |
+| Vietnamese copy in `src/` without a catalogue entry or `tr()` | **0** (strict gate) |
+| `check-i18n.mjs --strict` | PASS |
+| `check-i18n-runtime.mjs` | 7/7 |
+| `scripts/check-*.mjs` | 40/40 |
+| `npm run build` | PASS |
 
 ## Architecture
 
 ```
-src/i18n/locale.ts              Locale type, cached getter, own storage key
-src/i18n/entry.ts               CatalogEntry { id, vi, en } + entry()
-src/i18n/catalog.ts             CATALOG, byVi lookup, tr(), speakerLabel()
-src/i18n/entries/*.ts           translated copy grouped by chapter
-scripts/check-i18n.mjs          static gate (keys, duplicates, coverage, speakers)
-scripts/check-i18n-runtime.mjs  runtime gate (default, fallback, params, persistence)
-scripts/i18n-inventory.mjs      authoring aid, regenerates docs/i18n/inventory.md
-tools/verify-entries.mjs        per-file translator check: keys exist byte-for-byte
+src/i18n/locale.ts                    Locale type, cached getter, own storage key
+src/i18n/entry.ts                     CatalogEntry { id, vi, en } + entry()
+src/i18n/catalog.ts                   CATALOG, byVi lookup, tr(), speakerLabel()
+src/i18n/entries/*.ts                 translated copy grouped by chapter and area
+scripts/check-i18n.mjs                static gate (keys, duplicates, coverage, speakers, untranslated copy)
+scripts/check-i18n-runtime.mjs        runtime gate (default, fallback, params, persistence)
+scripts/i18n-inventory.mjs            authoring aid, regenerates docs/i18n/inventory.md
+tools/verify-entries.mjs              per-file translator check: keys exist byte-for-byte
 ```
 
 `tr(vi, params?)` returns the authored sentence for `vi` and the catalogue row for `en`, filling
@@ -38,17 +42,14 @@ tools/verify-entries.mjs        per-file translator check: keys exist byte-for-b
 degrades instead of breaking. `speakerLabel()` localizes only the displayed name — portraits, speaker
 colour and dialogue tick audio keep using the authored id.
 
-Render boundaries (one `tr()` each):
+Rules that keep the copy honest:
 
-- `DialogueSystem.showLine` — every campaign line, journal entry, caption and H hint.
-- `PrologueScene.showLine` — the four prologue panels.
-- `InteractionSystem` — every `[E] …` prompt.
-- `CampaignHud` — objective, status, toasts, key chips.
-- Menus, ending and ComingSoon — their own labels.
-
-Dynamic copy that cannot be a single key (journal lines, "still missing" reasons, mirror labels) is
-composed from translated fragments with a `{placeholder}` template; those fragments live in
-`entries/fragments.ts`.
+- A whole sentence is one key. Copy assembled from values is one template key with `{placeholders}`
+  (`tr('Cổ tự: {count}/3 …', { count })`), so word order can be translated.
+- Module-level label tables (`ROOM_NAME`, `LABELS`, zone titles, `labelVi`) stay Vietnamese in the data
+  and are passed through `tr()` where they render. Literals inside functions are wrapped at source.
+- `--strict` fails on any Vietnamese string literal in `src/` that has no catalogue entry and is not
+  inside `tr()`, so a new untranslated line cannot land silently.
 
 ## Language switch
 
@@ -61,28 +62,37 @@ composed from translated fragments with a `{placeholder}` template; those fragme
 ## Verification
 
 ```
-node scripts/check-i18n.mjs           PASS  1094 entries, 0 duplicate keys, 100 % dialogue coverage
-node scripts/check-i18n-runtime.mjs   7/7   default, resolution, params, fallback, speakers, persistence
-node scripts/check-*.mjs              all   (40 scripts)
-npm run build                         PASS
+node scripts/check-i18n.mjs --strict        PASS  1470 entries, 0 duplicate keys, 100 % dialogue coverage
+node scripts/check-i18n-runtime.mjs         7/7
+node scripts/check-*.mjs                    40/40
+npm run build                               PASS
 ```
 
-Note: the source-level harnesses bind shipped method bodies directly, so the ones touching localized
-paths now receive an identity `tr` stub that interpolates `{param}` — identity keeps their Vietnamese
-copy assertions meaningful.
+Changes in the gap-fix pass:
 
-## Known gaps and follow-ups
+- The Level 01, 02 and 05 HUD composed lines, the observatory guidance and prompts, the quest and puzzle
+  copy, the Heart, Library, Ruins, Garden, Tower and Creek copy, the journals, and the legacy
+  `WorldScene` prompts now run through `tr()`.
+- `check-i18n.mjs --strict` now checks for untranslated copy and counts `text: tr('…')` as dialogue.
+- Seven harnesses that compile shipped source get an identity `tr()` (it interpolates `{param}` and
+  returns Vietnamese unchanged), so their Vietnamese assertions still test the authored copy. Two
+  harnesses had an index passed as `params` inside `.map`/`.some` callbacks; those callbacks are
+  restored to their original form.
 
-1. **Two journal composites stay partly Vietnamese.** The Level 01 journal (`Các dấu đã ghi: …`) and
-   the Observatory journal (`Sổ tay của mình. · <facts>`) assemble many short facts; their wrapper is
-   templated but the fact strings are not yet in the catalogue. They fall back as designed.
-2. **Legacy `WorldScene` path.** `src/data/dialogue.ts` is fully translated, but that scene's HUD,
-   quest text and prompts are not wired through `tr()`. It only opens for a pre-campaign save.
-3. **Translation review.** The copy was produced slice by slice against `docs/i18n/glossary.md`. It
-   needs a native-speaker pass, especially the Level 02 poem (word chain preserved, rhythm not) and
-   The Shadow/Guardian register.
-4. **Text fit.** No clipping was seen in the static review, but the English run has not been played
-   end to end in a browser on this branch.
+## Known gaps
+
+1. **Gate blind spot for copy without diacritics.** The gate detects Vietnamese by its accents. Plain
+   words such as `trong tay`, `Nam`, `Sao`, `xong` are not detected. The ones found by search were
+   wrapped (`trong tay`, `Sao`, `xong`, `thử`/`chính`), but a full sweep needs a word list or a
+   native-speaker read.
+2. **Not played end to end.** No browser run of the English campaign has been done on this branch.
+   Text fit in the HUD boxes, the Level 02 poem card layout, and the pause-menu restart are unverified.
+3. **Translation review.** The copy was drafted against `docs/i18n/glossary.md`. It needs a native-speaker
+   pass, especially the Level 02 poem (word chain kept, rhythm not) and The Shadow/Guardian register.
+4. **Render sites for module-level tables.** Each table was traced to its render site for the cases
+   found. A missing `tr()` at a new render site shows Vietnamese without an error.
+5. **Language switch mid-level.** Switching in the pause menu restarts the scene from the last
+   checkpoint. This is by design, but players lose unsaved progress in the current room.
 
 ## Rulings made during implementation
 

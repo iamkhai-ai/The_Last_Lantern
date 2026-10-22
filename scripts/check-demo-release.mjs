@@ -1028,7 +1028,7 @@ const CASES = [
     run: () => {
       const harness = openComingSoon('demo-save-blocked');
       const texts = harness.calls.texts.map((object) => object.text);
-      assert.ok(texts.some((text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text).includes('BẢN LƯU')), 'the blocked screen names the save');
+      assert.ok(texts.some((text) => text.includes('BẢN LƯU')), 'the blocked screen names the save');
       assert.ok(texts.some((text) => /ngoài phạm vi.*bản chơi thử|thuộc phiên bản cũ/.test(text)),
         'the blocked screen says the save is outside the demo or legacy');
       assert.ok(texts.some((text) => /giữ nguyên|chưa có thao tác nào xóa/.test(text)),

@@ -1,3 +1,4 @@
+import { tr } from '../i18n/catalog.ts';
 import { CrystalId, GameProgress, QuestStage, ZoneId } from '../types/gameTypes';
 import { SaveSystem } from './SaveSystem';
 
@@ -22,7 +23,7 @@ export class QuestSystem {
     if (this.progress.stage === 'intro') {
       return {
         allowed: false,
-        reason: 'Hãy thắp đèn [F], phát xung sáng [SPACE] và xem xét Cây Mẹ trước khi rời khu trung tâm.',
+        reason: tr('Hãy thắp đèn [F], phát xung sáng [SPACE] và xem xét Cây Mẹ trước khi rời khu trung tâm.'),
       };
     }
 
@@ -34,7 +35,7 @@ export class QuestSystem {
       if (!this.progress.crystals.memory) {
         return {
           allowed: false,
-          reason: 'Sương mù dày đặc đang chặn lối Đông. Hãy tìm Tinh thể Ký Ức ở Rừng Đom Đóm (phía Bắc) trước!',
+          reason: tr('Sương mù dày đặc đang chặn lối Đông. Hãy tìm Tinh thể Ký Ức ở Rừng Đom Đóm (phía Bắc) trước!'),
         };
       }
       return { allowed: true };
@@ -44,7 +45,7 @@ export class QuestSystem {
       if (!this.progress.crystals.memory || !this.progress.crystals.hope) {
         return {
           allowed: false,
-          reason: 'Cổ ngữ phong ấn lối Nam. Hãy thu thập Tinh thể Ký Ức (Bắc) và Tinh thể Hy Vọng (Đông) trước!',
+          reason: tr('Cổ ngữ phong ấn lối Nam. Hãy thu thập Tinh thể Ký Ức (Bắc) và Tinh thể Hy Vọng (Đông) trước!'),
         };
       }
       return { allowed: true };

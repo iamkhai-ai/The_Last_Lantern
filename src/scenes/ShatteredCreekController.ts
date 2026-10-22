@@ -207,15 +207,15 @@ export class ShatteredCreekController {
 
   public showJournal(): void {
     const discoveries: DialogueLine[] = [];
-    if (this.state.practiceComplete) discoveries.push({ speaker: 'Hệ thống', text: 'Ghi chép: tia sáng đổi hướng khi gương xoay; đèn có thể thu hồi.' });
-    if (this.state.latchA || this.state.latchB) discoveries.push({ speaker: 'Hệ thống', text: 'Ghi chép: chốt cơ khí giữ cầu khi tia sáng đổi hướng.' });
-    if (this.ctx.progress.flags['l3-eye-a-discovered']) discoveries.push({ speaker: 'Hệ thống', text: 'Ghi chép — cấu hình A: G1 / rồi G2 \\ dẫn tia tới mắt nhận A.' });
-    if (this.ctx.progress.flags['l3-eye-b-discovered']) discoveries.push({ speaker: 'Hệ thống', text: 'Ghi chép — cấu hình B: G1 /, G2 / rồi G3 \\ dẫn tia tới mắt nhận B.' });
+    if (this.state.practiceComplete) discoveries.push({ speaker: 'Hệ thống', text: tr('Ghi chép: tia sáng đổi hướng khi gương xoay; đèn có thể thu hồi.') });
+    if (this.state.latchA || this.state.latchB) discoveries.push({ speaker: 'Hệ thống', text: tr('Ghi chép: chốt cơ khí giữ cầu khi tia sáng đổi hướng.') });
+    if (this.ctx.progress.flags['l3-eye-a-discovered']) discoveries.push({ speaker: 'Hệ thống', text: tr('Ghi chép — cấu hình A: G1 / rồi G2 \\ dẫn tia tới mắt nhận A.') });
+    if (this.ctx.progress.flags['l3-eye-b-discovered']) discoveries.push({ speaker: 'Hệ thống', text: tr('Ghi chép — cấu hình B: G1 /, G2 / rồi G3 \\ dẫn tia tới mắt nhận B.') });
     if (this.state.memo) discoveries.push(
-      { speaker: 'Hệ thống', text: 'Ghi chép — phù điêu: những tia sáng đều hướng về Cây Mẹ. Đêm ấy có một cơn bão lớn và tiếng chuông tháp còn in trong ký ức.' },
-      { speaker: 'Hệ thống', text: 'Ghi chép — trong phù điêu, dòng nước vẫn chảy. Chưa rõ điều gì xảy ra sau đó; trạm phía trước có thể giữ thêm manh mối.' },
+      { speaker: 'Hệ thống', text: tr('Ghi chép — phù điêu: những tia sáng đều hướng về Cây Mẹ. Đêm ấy có một cơn bão lớn và tiếng chuông tháp còn in trong ký ức.') },
+      { speaker: 'Hệ thống', text: tr('Ghi chép — trong phù điêu, dòng nước vẫn chảy. Chưa rõ điều gì xảy ra sau đó; trạm phía trước có thể giữ thêm manh mối.') },
     );
-    this.ctx.say(discoveries.length ? discoveries : [{ speaker: 'Hệ thống', text: 'Chưa có ghi chép mới từ suối.' }]);
+    this.ctx.say(discoveries.length ? discoveries : [{ speaker: 'Hệ thống', text: tr('Chưa có ghi chép mới từ suối.') }]);
   }
 
   public destroy(): void {
@@ -240,30 +240,30 @@ export class ShatteredCreekController {
     add('practice-source', practice.x, practice.y, () => this.sourcePrompt('practice'), () => this.useSource('practice'), 'west', 'practice-source');
     const main = SHATTERED_CREEK.objects.source.stand;
     add('main-source', main.x, main.y, () => this.sourcePrompt('main'), () => this.useSource('main'), 'west', 'source');
-    add('practice-mirror', 132, 288, () => 'E · Xoay gương thử', () => { this.state.practice = ((this.state.practice + 1) % 3) as MirrorPose; this.ctx.progress.counters['l3-practice'] = this.state.practice; this.saveState(); }, 'west', 'practice-mirror');
+    add('practice-mirror', 132, 288, () => tr('E · Xoay gương thử'), () => { this.state.practice = ((this.state.practice + 1) % 3) as MirrorPose; this.ctx.progress.counters['l3-practice'] = this.state.practice; this.saveState(); }, 'west', 'practice-mirror');
     for (const id of ['g1', 'g2', 'g3'] as const) {
       const stand = SHATTERED_CREEK.objects[id].stand;
-      add(id, stand.x, stand.y, () => `${id.toUpperCase()} · Xoay gương`, () => this.rotate(id), id === 'g3' ? 'island' : 'west', id);
+      add(id, stand.x, stand.y, () => tr('{id} · Xoay gương', { id: id.toUpperCase() }), () => this.rotate(id), id === 'g3' ? 'island' : 'west', id);
     }
     for (const which of ['A', 'B'] as const) {
       const id = which === 'A' ? 'latchA' : 'latchB'; const entry = SHATTERED_CREEK.objects[id];
-      add(`latch-${which.toLowerCase()}`, entry.stand.x, entry.stand.y, () => (which === 'A' ? this.state.latchA : this.state.latchB) ? 'E · Chốt đã giữ chắc' : `E · Gài chốt ${which === 'A' ? 'cầu đầu' : 'cầu hai'}`, () => this.latch(which), which === 'A' ? 'west' : 'island', `latch-${which === 'A' ? 'latchA' : 'latchB'}`);
+      add(`latch-${which.toLowerCase()}`, entry.stand.x, entry.stand.y, () => (which === 'A' ? this.state.latchA : this.state.latchB) ? tr('E · Chốt đã giữ chắc') : tr('E · Gài chốt {bridge}', { bridge: which === 'A' ? tr('cầu đầu') : tr('cầu hai') }), () => this.latch(which), which === 'A' ? 'west' : 'island', `latch-${which === 'A' ? 'latchA' : 'latchB'}`);
     }
     const relief = SHATTERED_CREEK.objects.relief.stand;
-    add('relief', relief.x, relief.y, () => 'E · Đọc phù điêu', () => this.readRelief(), 'east', 'relief', { rect: SHATTERED_CREEK.objects.relief.base, face: 'south' });
+    add('relief', relief.x, relief.y, () => tr('E · Đọc phù điêu'), () => this.readRelief(), 'east', 'relief', { rect: SHATTERED_CREEK.objects.relief.base, face: 'south' });
     const exit = SHATTERED_CREEK.objects.exit.stand;
-    add('exit', exit.x, exit.y, () => canCompleteCreek(this.state) ? 'E · Qua trạm dẫn nước' : 'E · Kiểm tra trạm dẫn nước', () => this.exit(), 'east', 'exit');
+    add('exit', exit.x, exit.y, () => canCompleteCreek(this.state) ? tr('E · Qua trạm dẫn nước') : tr('E · Kiểm tra trạm dẫn nước'), () => this.exit(), 'east', 'exit');
   }
 
   private sourcePrompt(which: 'practice' | 'main'): string | null {
-    const display = which === 'practice' ? 'đèn thử' : 'đèn chính';
-    if (this.state.source && this.state.source !== which) return `E · Đèn đang ở bệ ${this.state.source === 'practice' ? 'thử' : 'chính'}`;
-    if (this.state.source === which) return 'E · Thu hồi đèn';
-    return `E · Đặt ${display}`;
+    const display = which === 'practice' ? tr('đèn thử') : tr('đèn chính');
+    if (this.state.source && this.state.source !== which) return tr('E · Đèn đang ở bệ {source}', { source: this.state.source === 'practice' ? tr('thử') : tr('chính') });
+    if (this.state.source === which) return tr('E · Thu hồi đèn');
+    return tr('E · Đặt {item}', { item: display });
   }
 
   private useSource(which: 'practice' | 'main'): void {
-    if (this.state.source && this.state.source !== which) { this.ctx.say([{ speaker: 'Nhinh', text: tr('Đèn vẫn nằm trên bệ {stand}.', { stand: tr(this.state.source === 'practice' ? 'thử' : 'chính') }) }]); return; }
+    if (this.state.source && this.state.source !== which) { this.ctx.say([{ speaker: 'Nhinh', text: tr('Đèn vẫn nằm trên bệ {stand}.', { stand: tr(this.state.source === 'practice' ? tr('thử') : tr('chính')) }) }]); return; }
     if (this.state.source === which) {
       const next = { ...this.state, source: null };
       const unsafe = unsafePowerChange(this.point(), deriveCreekState(this.state), deriveCreekState(next));
@@ -309,13 +309,13 @@ export class ShatteredCreekController {
   }
 
   private hintsFor(live: CreekLiveState): string[] {
-    if (live.step === 'practice' && this.state.source === 'practice' && !this.state.lanternOn) return ['Đèn thử đang tắt. Nhấn F để bật tia sáng.'];
-    if (live.step === 'main' && this.state.source === null) return ['Đèn đang ở trong tay. Tới bệ chính ở bờ Tây và nhấn E để đặt xuống.', 'Đặt đèn lên bệ chính bằng E; khi nằm yên, đèn sẽ giữ đường tia.'];
-    if (live.step === 'main' && this.state.source === 'main' && !this.state.lanternOn) return ['Đèn chính đang tắt. Nhấn F để bật tia sáng.'];
-    if (live.step === 'main') return ['Bệ chính ở bờ Tây. Tia cần tới G1.', `G1 ${this.state.g1 === 2 ? 'đã hướng tới G2' : 'cần chuyển sang /'}, G2 ${this.state.g2 === 1 ? 'đang hướng về mắt A' : 'chưa hướng về mắt A'}.`, 'Dẫn tia qua G1 / tới G2, rồi xoay G2 sang \\ để chiếu vào mắt A.'];
-    if (live.step === 'reroute' && this.state.source === 'main' && !this.state.lanternOn) return ['Đèn đang tắt. Nhấn F để bật tia rồi tiếp tục dẫn sáng tới G3.'];
-    if (live.step === 'reroute') return ['Giữ cầu A bằng chốt trước khi đổi tia.', 'Xoay G2 sang / để gửi tia tới G3.', `G3 ${this.state.g3 === 2 ? 'đang hướng về mắt B' : 'cần xoay sang \\'}.`];
-    if (live.step === 'retrieve' && this.state.source === null) return ['Hai chốt đã giữ cầu. Bệ đèn chính ở bờ Tây.', 'Đặt đèn lên bệ chính rồi nhấn E lần nữa để thu hồi.'];
+    if (live.step === 'practice' && this.state.source === 'practice' && !this.state.lanternOn) return [tr('Đèn thử đang tắt. Nhấn F để bật tia sáng.')];
+    if (live.step === 'main' && this.state.source === null) return [tr('Đèn đang ở trong tay. Tới bệ chính ở bờ Tây và nhấn E để đặt xuống.'), tr('Đặt đèn lên bệ chính bằng E; khi nằm yên, đèn sẽ giữ đường tia.')];
+    if (live.step === 'main' && this.state.source === 'main' && !this.state.lanternOn) return [tr('Đèn chính đang tắt. Nhấn F để bật tia sáng.')];
+    if (live.step === 'main') return [tr('Bệ chính ở bờ Tây. Tia cần tới G1.'), `G1 ${this.state.g1 === 2 ? tr('đã hướng tới G2') : tr('cần chuyển sang /')}, G2 ${this.state.g2 === 1 ? tr('đang hướng về mắt A') : tr('chưa hướng về mắt A')}.`, tr('Dẫn tia qua G1 / tới G2, rồi xoay G2 sang \\ để chiếu vào mắt A.')];
+    if (live.step === 'reroute' && this.state.source === 'main' && !this.state.lanternOn) return [tr('Đèn đang tắt. Nhấn F để bật tia rồi tiếp tục dẫn sáng tới G3.')];
+    if (live.step === 'reroute') return [tr('Giữ cầu A bằng chốt trước khi đổi tia.'), tr('Xoay G2 sang / để gửi tia tới G3.'), `G3 ${this.state.g3 === 2 ? tr('đang hướng về mắt B') : tr('cần xoay sang \\')}.`];
+    if (live.step === 'retrieve' && this.state.source === null) return [tr('Hai chốt đã giữ cầu. Bệ đèn chính ở bờ Tây.'), tr('Đặt đèn lên bệ chính rồi nhấn E lần nữa để thu hồi.')];
     return HINTS[live.step];
   }
 
@@ -413,9 +413,9 @@ export class ShatteredCreekController {
     this.addImage('relief', getLevelArtKey(3, 'storm-relief'), objects.relief.ground, 128, 80);
     this.addImage('exit', this.exitTexture(), objects.exit.ground, 88, canCompleteCreek(this.state) ? 86.625 : 90.3, 5);
     for (const [id, name, x, y] of [['g1', 'G1 · •', 202, 150], ['g2', 'G2 · ••', 202, 84], ['g3', 'G3 · •••', 350, 84]] as const) this.addLabel(id, name, x, y);
-    this.addLabel('practice-source-label', 'Bệ thử', 68, 238, 7);
-    this.addLabel('practice-mirror-label', 'Gương thử', 132, 238, 7);
-    this.addLabel('source-label', 'Bệ đèn', 40, 214);
+    this.addLabel('practice-source-label', tr('Bệ thử'), 68, 238, 7);
+    this.addLabel('practice-mirror-label', tr('Gương thử'), 132, 238, 7);
+    this.addLabel('source-label', tr('Bệ đèn'), 40, 214);
     this.beams = this.keep(this.ctx.scene.add.graphics().setDepth(6));
   }
 
@@ -497,15 +497,19 @@ export class ShatteredCreekController {
 
   public getStatusText(): string {
     const glyph = (id: 'g1' | 'g2' | 'g3'): string => this.state[id] === 0 ? '—' : id === 'g3' ? this.state[id] === 1 ? '/' : '\\' : this.state[id] === 1 ? '\\' : '/';
-    return `Tập: ${this.state.practiceComplete ? 'xong' : 'thử'} · Cầu: ${Number(this.state.latchA) + Number(this.state.latchB)}/2 · G1 ${glyph('g1')} / G2 ${glyph('g2')} / G3 ${glyph('g3')}`;
+    return tr('Tập: {practice} · Cầu: {bridges}/2 · G1 {g1} / G2 {g2} / G3 {g3}', {
+      practice: this.state.practiceComplete ? tr('xong') : tr('thử'),
+      bridges: Number(this.state.latchA) + Number(this.state.latchB),
+      g1: glyph('g1'), g2: glyph('g2'), g3: glyph('g3'),
+    });
   }
 
   public refreshHud(): void { this.updateHud(deriveCreekState(this.state)); }
 
   private objectiveFor(live: CreekLiveState): string {
-    const goals: Record<CreekLiveState['step'], string> = { practice: 'Thử đặt đèn và gương nhỏ cạnh lối vào.', pickup: 'Thu hồi đèn bằng E.', main: 'Đặt đèn chính rồi điều hướng tia qua gương.', 'latch-a': 'Gài chốt cầu đầu bên bờ Tây.', reroute: 'Giữ cầu đầu rồi điều hướng tia sang gương trên đảo.', 'latch-b': 'Gài chốt cầu thứ hai trên đảo.', retrieve: this.state.source ? 'Thu hồi đèn khỏi bệ.' : 'Đặt đèn lên bệ chính rồi thu hồi.', relief: 'Đọc phù điêu bờ Đông.', exit: 'Đến trạm dẫn nước.' };
+    const goals: Record<CreekLiveState['step'], string> = { practice: tr('Thử đặt đèn và gương nhỏ cạnh lối vào.'), pickup: tr('Thu hồi đèn bằng E.'), main: tr('Đặt đèn chính rồi điều hướng tia qua gương.'), 'latch-a': tr('Gài chốt cầu đầu bên bờ Tây.'), reroute: tr('Giữ cầu đầu rồi điều hướng tia sang gương trên đảo.'), 'latch-b': tr('Gài chốt cầu thứ hai trên đảo.'), retrieve: this.state.source ? tr('Thu hồi đèn khỏi bệ.') : tr('Đặt đèn lên bệ chính rồi thu hồi.'), relief: tr('Đọc phù điêu bờ Đông.'), exit: tr('Đến trạm dẫn nước.') };
     const placedPowerStep = ['practice', 'main', 'latch-a', 'reroute', 'latch-b'].includes(live.step) && this.state.source !== null;
-    return !this.state.lanternOn && placedPowerStep ? 'Đèn đang tắt. Nhấn F để bật tia sáng.' : live.step === 'main' && this.state.source === null ? 'Đặt đèn lên bệ chính bằng E.' : goals[live.step];
+    return !this.state.lanternOn && placedPowerStep ? tr('Đèn đang tắt. Nhấn F để bật tia sáng.') : live.step === 'main' && this.state.source === null ? tr('Đặt đèn lên bệ chính bằng E.') : goals[live.step];
   }
 
   private updateHud(live: CreekLiveState): void {

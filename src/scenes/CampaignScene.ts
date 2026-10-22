@@ -347,9 +347,9 @@ export class CampaignScene extends Phaser.Scene {
         this.revealForestEdgeFootprints();
         this.hintIndex = 0;
         if (firstDiscovery) this.say([
-          { speaker: 'Nhinh', text: 'Có dấu chân thật! Chúng dẫn về phía cổng.' },
-          { speaker: 'Lumo', text: 'Có lẽ trước đây người ta cũng đi lối này.' },
-          { speaker: 'Nhinh', text: 'Mình theo thử xem.' },
+          { speaker: 'Nhinh', text: tr('Có dấu chân thật! Chúng dẫn về phía cổng.') },
+          { speaker: 'Lumo', text: tr('Có lẽ trước đây người ta cũng đi lối này.') },
+          { speaker: 'Nhinh', text: tr('Mình theo thử xem.') },
         ]);
       }
       if (this.progress.level === 1) {
@@ -502,26 +502,26 @@ export class CampaignScene extends Phaser.Scene {
       this.progress.counters['lumo-y'] = this.lumoTarget.y;
       this.save();
       this.say([
-        { speaker: 'Lumo', text: 'Này! Ở đây!' },
-        { speaker: 'Nhinh', text: 'Ai vừa nói đấy?' },
-        { speaker: 'Lumo', text: 'Cạnh chiếc đèn này! Tôi là Lumo.' },
-        { speaker: 'Nhinh', text: 'Một con đom đóm… biết nói?' },
-        { speaker: 'Lumo', text: 'Còn cậu? Sao lại ngủ ở đây?' },
-        { speaker: 'Nhinh', text: 'Tôi là Nhinh. Tôi bị lạc. Cậu có biết đường ra khỏi rừng không?' },
-        { speaker: 'Lumo', text: 'Đây là Elaria. Tôi từng biết các lối ở đây, nhưng giờ chẳng nhớ rõ nữa.' },
-        { speaker: 'Nhinh', text: 'Tôi định chờ trời sáng rồi tìm đường. Mà chờ mãi…' },
-        { speaker: 'Lumo', text: 'Ở đây đã lâu không có bình minh rồi.' },
-        { speaker: 'Nhinh', text: 'Không có bình minh? Vậy cứ ngồi đợi cũng chẳng ích gì.' },
-        { speaker: 'Lumo', text: 'Tôi còn nhớ Cây Mẹ, ở sâu trong rừng. Có lẽ tới đó, tôi sẽ nhớ thêm được điều gì.' },
-        { speaker: 'Nhinh', text: 'Vậy mình tới đó thử xem. Cậu đi cùng tôi nhé?' },
-        { speaker: 'Lumo', text: 'Tất nhiên rồi! Nhưng mang chiếc đèn này theo nhé. Trong rừng tối lắm.' },
+        { speaker: 'Lumo', text: tr('Này! Ở đây!') },
+        { speaker: 'Nhinh', text: tr('Ai vừa nói đấy?') },
+        { speaker: 'Lumo', text: tr('Cạnh chiếc đèn này! Tôi là Lumo.') },
+        { speaker: 'Nhinh', text: tr('Một con đom đóm… biết nói?') },
+        { speaker: 'Lumo', text: tr('Còn cậu? Sao lại ngủ ở đây?') },
+        { speaker: 'Nhinh', text: tr('Tôi là Nhinh. Tôi bị lạc. Cậu có biết đường ra khỏi rừng không?') },
+        { speaker: 'Lumo', text: tr('Đây là Elaria. Tôi từng biết các lối ở đây, nhưng giờ chẳng nhớ rõ nữa.') },
+        { speaker: 'Nhinh', text: tr('Tôi định chờ trời sáng rồi tìm đường. Mà chờ mãi…') },
+        { speaker: 'Lumo', text: tr('Ở đây đã lâu không có bình minh rồi.') },
+        { speaker: 'Nhinh', text: tr('Không có bình minh? Vậy cứ ngồi đợi cũng chẳng ích gì.') },
+        { speaker: 'Lumo', text: tr('Tôi còn nhớ Cây Mẹ, ở sâu trong rừng. Có lẽ tới đó, tôi sẽ nhớ thêm được điều gì.') },
+        { speaker: 'Nhinh', text: tr('Vậy mình tới đó thử xem. Cậu đi cùng tôi nhé?') },
+        { speaker: 'Lumo', text: tr('Tất nhiên rồi! Nhưng mang chiếc đèn này theo nhé. Trong rừng tối lắm.') },
       ]);
     }
     const ring = FOREST_EDGE.objects.ring.ground;
     const inRing = Math.hypot(feet.x - ring.x, feet.y - ring.y) <= FOREST_EDGE.objects.ring.radius;
     if (inRing && !this.lantern.lanternOn && this.progress.lanternPickedUp && this.progress.flags['l0-tablet-read'] && this.progress.flags['l0-footprints-found'] && !this.progress.flags['l0-ring-dark-cued']) {
       this.progress.flags['l0-ring-dark-cued'] = true;
-      this.say([{ speaker: 'Lumo', text: 'Cậu thử thắp đèn lên nhé. Từ chỗ đó, ánh sáng có thể chiếu tới mắt đá.' }]);
+      this.say([{ speaker: 'Lumo', text: tr('Cậu thử thắp đèn lên nhé. Từ chỗ đó, ánh sáng có thể chiếu tới mắt đá.') }]);
     }
     if (!inRing) this.progress.flags['l0-ring-dark-cued'] = false;
     const canCharge = canChargeForestEdgeReceiver(
@@ -536,7 +536,7 @@ export class CampaignScene extends Phaser.Scene {
         this.forestEdgeChargeMs = 0;
         this.save();
         this.setForestEdgeArt('sun-eye', 'sun-eye-full');
-        this.say([{ speaker: 'Nhinh', text: 'Mắt đá sáng lên… Cổng mở rồi!' }, { speaker: 'Lumo', text: 'Tôi biết mà! Ánh sáng vẫn đánh thức được những thứ trong khu rừng này.' }]);
+        this.say([{ speaker: 'Nhinh', text: tr('Mắt đá sáng lên… Cổng mở rồi!') }, { speaker: 'Lumo', text: tr('Tôi biết mà! Ánh sáng vẫn đánh thức được những thứ trong khu rừng này.') }]);
       }
     } else {
       this.forestEdgeChargeMs = 0;
@@ -1171,17 +1171,17 @@ export class CampaignScene extends Phaser.Scene {
       );
     } else if (id === 'splitter') {
       register(
-        () => this.say([{ speaker: 'Nhinh', text: 'Bộ chia cố định gửi một nhánh lên khóa Nhật, nhánh giữa đi qua vị trí tượng tới luống rễ.' }]),
+        () => this.say([{ speaker: 'Nhinh', text: tr('Bộ chia cố định gửi một nhánh lên khóa Nhật, nhánh giữa đi qua vị trí tượng tới luống rễ.') }]),
       );
     } else if (id === 'learned-marks') {
       // The safe practice model recalls marks the player already met: it teaches
       // nothing new and never touches a puzzle flag beyond "viewed".
       const captions: DialogueLine[][] = [
-        [{ speaker: 'Nhinh', text: 'Dấu gương: một tia vào, nhiều hướng ra tuỳ nấc xoay.' }],
-        [{ speaker: 'Nhinh', text: 'Dấu chốt: chốt giữ được cửa, nhưng cảm biến và ấn thì không tự giữ.' }],
-        [{ speaker: 'Lumo', text: 'Dấu ấn: chỉ khi tôi thật sự đứng ở đó thì đường sáng mới đi tiếp.' }],
-        [{ speaker: 'Nhinh', text: 'Dấu tượng: mặt rộng của tượng che được nhánh giữa, phía sau nó là một khoảng tối.' }],
-        [{ speaker: 'Nhinh', text: 'Dấu rễ: rễ chỉ nối lại khi có bóng, có ấn và khóa còn sáng.' }],
+        [{ speaker: 'Nhinh', text: tr('Dấu gương: một tia vào, nhiều hướng ra tuỳ nấc xoay.') }],
+        [{ speaker: 'Nhinh', text: tr('Dấu chốt: chốt giữ được cửa, nhưng cảm biến và ấn thì không tự giữ.') }],
+        [{ speaker: 'Lumo', text: tr('Dấu ấn: chỉ khi tôi thật sự đứng ở đó thì đường sáng mới đi tiếp.') }],
+        [{ speaker: 'Nhinh', text: tr('Dấu tượng: mặt rộng của tượng che được nhánh giữa, phía sau nó là một khoảng tối.') }],
+        [{ speaker: 'Nhinh', text: tr('Dấu rễ: rễ chỉ nối lại khi có bóng, có ấn và khóa còn sáng.') }],
       ];
       register(
         () => {
@@ -1191,9 +1191,9 @@ export class CampaignScene extends Phaser.Scene {
             this.progress.flags['l8-miniature-viewed'] = true;
             this.save();
             this.say([...lines,
-              { speaker: 'Nhinh', text: 'Một đường vào, một người giữ ấn, một khoảng tối để rễ nối lại.' },
-              { speaker: 'Lumo', text: 'Và chiếc đèn phải đi qua cùng những chiếc gương. Mình không thể giải mỗi phòng rồi quên phòng trước.' },
-              { speaker: 'Nhinh', text: 'Vậy mình đi từng bước và giữ lại từng chốt.' }]);
+              { speaker: 'Nhinh', text: tr('Một đường vào, một người giữ ấn, một khoảng tối để rễ nối lại.') },
+              { speaker: 'Lumo', text: tr('Và chiếc đèn phải đi qua cùng những chiếc gương. Mình không thể giải mỗi phòng rồi quên phòng trước.') },
+              { speaker: 'Nhinh', text: tr('Vậy mình đi từng bước và giữ lại từng chốt.') }]);
             return;
           }
           this.say(lines);
@@ -1223,7 +1223,7 @@ export class CampaignScene extends Phaser.Scene {
         () => {
           if (this.getObservatoryState().lumoAtSeal) {
             if (id === 'lumo-tube') this.callObservatoryLumo('recall');
-            else this.say([{ speaker: 'Lumo', text: 'Tôi đang giữ ấn. Đứng ở đầu ống hoặc gài xong cửa cuối rồi gọi tôi về nhé.' }]);
+            else this.say([{ speaker: 'Lumo', text: tr('Tôi đang giữ ấn. Đứng ở đầu ống hoặc gài xong cửa cuối rồi gọi tôi về nhé.') }]);
           } else this.callObservatoryLumo('seal');
         },
       );
@@ -1235,7 +1235,7 @@ export class CampaignScene extends Phaser.Scene {
             this.progress.flags['l8-door-a-latched'] = true;
             this.save();
             this.refreshObservatoryDoors();
-            this.say([{ speaker: 'Nhinh', text: 'Chốt đã gài. Cửa A giữ mở dù tia sáng đi hướng khác.' }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Chốt đã gài. Cửa A giữ mở dù tia sáng đi hướng khác.') }]);
             return;
           }
           this.say([{ speaker: 'Nhinh', text: tr('Chốt chưa gài được. {reason}', { reason: tr(observatoryDoorBlockReason('door-a', state)) }) }]);
@@ -1246,21 +1246,21 @@ export class CampaignScene extends Phaser.Scene {
         () => {
           const state = this.getObservatoryWorldState();
           this.say([{ speaker: 'Nhinh', text: observatoryDoorOpen('sun-door', state)
-            ? 'Cửa Mặt Trời đã nhận ánh sáng và đang mở.'
-            : `Cửa Mặt Trời còn khép. ${observatoryDoorBlockReason('sun-door', state)}` }]);
+            ? tr('Cửa Mặt Trời đã nhận ánh sáng và đang mở.')
+            : tr('Cửa Mặt Trời còn khép. {reason}', { reason: observatoryDoorBlockReason('sun-door', state) }) }]);
         },
       );
     } else if (id === 'sun-lock') {
       register(
         () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().sunDoorUnlocked
-          ? 'Khóa Nhật đang sáng.'
-          : 'Khóa Nhật cần một đường tia đi tới đây.' }]),
+          ? tr('Khóa Nhật đang sáng.')
+          : tr('Khóa Nhật cần một đường tia đi tới đây.') }]),
       );
     } else if (id === 'root-bed') {
       register(
         () => this.say([{ speaker: 'Nhinh', text: this.getObservatoryState().rootBedShadowed
-          ? 'Bóng của tượng đã phủ kín luống rễ.'
-          : `Luống rễ vẫn còn sáng. ${observatoryBridgeBlockReason(this.getObservatoryWorldState())}` }]),
+          ? tr('Bóng của tượng đã phủ kín luống rễ.')
+          : tr('Luống rễ vẫn còn sáng. {reason}', { reason: observatoryBridgeBlockReason(this.getObservatoryWorldState()) }) }]),
       );
     } else if (id === 'final-door-control') {
       register(
@@ -1274,7 +1274,7 @@ export class CampaignScene extends Phaser.Scene {
             this.progress.flags['l8-final-door-latched'] = true;
             this.save();
             this.refreshObservatoryDoors();
-            this.say([{ speaker: 'Nhinh', text: 'Chốt đá đã gài. Lối đá vòng có thể mở ngay từ bệ này.' }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Chốt đá đã gài. Lối đá vòng có thể mở ngay từ bệ này.') }]);
             return;
           }
           if (this.isObservatoryCompletionReady()) {
@@ -1292,7 +1292,7 @@ export class CampaignScene extends Phaser.Scene {
         () => {
           const state = this.getObservatoryWorldState();
           if (observatoryDoorOpen('return-loop', state)) {
-            this.say([{ speaker: 'Nhinh', text: 'Lối đá vòng đang mở. Đường về bệ đèn thông suốt.' }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Lối đá vòng đang mở. Đường về bệ đèn thông suốt.') }]);
             return;
           }
           // The loop is purely a floor route: it needs the crossing and the far
@@ -1305,14 +1305,14 @@ export class CampaignScene extends Phaser.Scene {
           this.save();
           this.refreshObservatoryDoors();
           this.refreshObservatoryReturnLoop();
-          this.say([{ speaker: 'Nhinh', text: 'Lối đá đã khớp vào vòng. Đường về bệ đèn thông suốt ngay cả khi ánh sáng tắt.' }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Lối đá đã khớp vào vòng. Đường về bệ đèn thông suốt ngay cả khi ánh sáng tắt.') }]);
         },
       );
     } else if (id === 'final-record') {
       register(
         () => {
           if (this.progress.flags['l8-record-read'] === true) {
-            this.say([{ speaker: 'Nhinh', text: 'Bản ghi đã được chép vào sổ. The Shadow là phần ký ức còn mắc lại trong đêm cuối.' }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Bản ghi đã được chép vào sổ. The Shadow là phần ký ức còn mắc lại trong đêm cuối.') }]);
             return;
           }
           const state = this.getObservatoryWorldState();
@@ -1321,8 +1321,8 @@ export class CampaignScene extends Phaser.Scene {
           if (!state.lumoRecalled || state.lumoAtSeal) missing.push(tr('gọi Lumo về bên đèn'));
           if (!state.returnLoopOpen) missing.push(tr('mở lối đá vòng'));
           if (missing.length) {
-            this.say([{ speaker: 'Nhinh', text: tr('Bản ghi chưa mở. Còn cần: {missing}.', { missing: missing.join(' và ') }) },
-              { speaker: 'Lumo', text: 'Tôi sẽ ở cạnh cậu khi mọi thứ đã sẵn sàng.' }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Bản ghi chưa mở. Còn cần: {missing}.', { missing: missing.join(tr(' và ')) }) },
+              { speaker: 'Lumo', text: tr('Tôi sẽ ở cạnh cậu khi mọi thứ đã sẵn sàng.') }]);
             return;
           }
           this.progress.flags['l8-record-read'] = true;
@@ -1335,11 +1335,11 @@ export class CampaignScene extends Phaser.Scene {
         () => {
           const state = this.getObservatoryWorldState();
           if (state.crystalTaken) {
-            this.say([{ speaker: 'Nhinh', text: 'Tinh thể Cân Bằng đã nằm trong tay mình.' }]);
+            this.say([{ speaker: 'Nhinh', text: tr('Tinh thể Cân Bằng đã nằm trong tay mình.') }]);
             return;
           }
           if (!state.recordRead) {
-            this.say([{ speaker: 'The Shadow', text: 'Khoan đã. Nghe bản ghi của ta trước rồi hãy nhận vòng ngày đêm.' }]);
+            this.say([{ speaker: 'The Shadow', text: tr('Khoan đã. Nghe bản ghi của ta trước rồi hãy nhận vòng ngày đêm.') }]);
             return;
           }
           this.progress.flags['l8-balance-crystal'] = true;
@@ -1442,7 +1442,7 @@ export class CampaignScene extends Phaser.Scene {
     this.progress.counters['l8-lumo-route-index'] = 0;
     this.progress.flags['l8-lumo-recalled'] = false;
     this.save();
-    this.say([{ speaker: 'Nhinh', text: destination === 'seal' ? 'Lumo, đi theo ống sáng tới ấn giúp mình nhé.' : 'Lumo, trở về bên bệ đèn nhé.' }, { speaker: 'Lumo', text: 'Tôi sẽ đi theo đường đã mở.' }]);
+    this.say([{ speaker: 'Nhinh', text: destination === 'seal' ? tr('Lumo, đi theo ống sáng tới ấn giúp mình nhé.') : tr('Lumo, trở về bên bệ đèn nhé.') }, { speaker: 'Lumo', text: tr('Tôi sẽ đi theo đường đã mở.') }]);
   }
 
   public transitionObservatory(exitId: string): void {
@@ -1550,8 +1550,8 @@ export class CampaignScene extends Phaser.Scene {
       radius: alcove ? alcove.triggerRadius : 28,
       getPromptBounds: () => archBounds,
       getPrompt: () => this.isObservatoryExitOpen(exit)
-        ? `E · Đi sang ${title}`
-        : `E · ${alcove?.label ?? 'Cửa'} đang khóa — ${observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState())}`,
+        ? tr('E · Đi sang {title}', { title: tr(title) })
+        : tr('E · {door} đang khóa — {reason}', { door: tr(alcove?.label ?? 'Cửa'), reason: observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState()) }),
       isEnabled: () => (alcove ? isObservatoryGateApproachAllowed(alcove, { x: this.player.x, y: this.player.y }) : true),
       onInteract: () => this.transitionObservatory(exit.id),
     });
@@ -1563,11 +1563,11 @@ export class CampaignScene extends Phaser.Scene {
       radius: alcove.inspectRadius,
       getPromptBounds: () => archBounds,
       getPrompt: () => (this.isObservatoryExitOpen(exit)
-        ? `E · ${alcove.label} đang mở`
-        : `E · Kiểm tra ${alcove.label} — ${observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState())}`),
+        ? tr('E · {door} đang mở', { door: tr(alcove.label) })
+        : tr('E · Kiểm tra {door} — {reason}', { door: tr(alcove.label), reason: observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState()) })),
       onInteract: () => this.say([{ speaker: 'Nhinh', text: this.isObservatoryExitOpen(exit)
-        ? `${alcove.label} đã mở. Nhấn E để đi sang ${title}.`
-        : `${alcove.label} còn đóng. ${observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState())}` }]),
+        ? tr('{door} đã mở. Nhấn E để đi sang {title}.', { door: tr(alcove.label), title: tr(title) })
+        : tr('{door} còn đóng. {reason}', { door: tr(alcove.label), reason: observatoryDoorBlockReason(exit.doorId, this.getObservatoryWorldState()) }) }]),
     });
   }
 
@@ -1789,27 +1789,27 @@ export class CampaignScene extends Phaser.Scene {
 
   private showObservatoryJournal(): void {
     const state = this.getObservatoryWorldState();
-    const room = this.activeObservatoryRoom ? OBSERVATORY_ROOMS[this.activeObservatoryRoom].title : 'tiền sảnh';
-    const facts: string[] = [`Nơi đang đứng: ${room}.`, 'Một nguồn sáng ở tiền sảnh chạy qua cả ba phòng nhờ các gương.'];
-    if (state.miniatureViewed) facts.push('Mô hình ở tiền sảnh: gương đổi hướng tia, chốt giữ cửa, ấn cần Lumo đứng thật, tượng che được nhánh giữa, rễ cần bóng.');
-    facts.push(state.lumoAtSeal ? 'Lumo đang giữ ấn ở hành lang phòng sao.' : 'Ấn chỉ hoạt động khi Lumo thật sự đứng ở đó.');
-    if (state.doorALatched) facts.push('Cửa A đã gài chốt từ bên trong nên giữ mở dù G0 đổi hướng.');
+    const room = this.activeObservatoryRoom ? tr(OBSERVATORY_ROOMS[this.activeObservatoryRoom].title) : tr('tiền sảnh');
+    const facts: string[] = [tr('Nơi đang đứng: {room}.', { room }), tr('Một nguồn sáng ở tiền sảnh chạy qua cả ba phòng nhờ các gương.')];
+    if (state.miniatureViewed) facts.push(tr('Mô hình ở tiền sảnh: gương đổi hướng tia, chốt giữ cửa, ấn cần Lumo đứng thật, tượng che được nhánh giữa, rễ cần bóng.'));
+    facts.push(state.lumoAtSeal ? tr('Lumo đang giữ ấn ở hành lang phòng sao.') : tr('Ấn chỉ hoạt động khi Lumo thật sự đứng ở đó.'));
+    if (state.doorALatched) facts.push(tr('Cửa A đã gài chốt từ bên trong nên giữ mở dù G0 đổi hướng.'));
     facts.push(state.rootBedShadowed
-      ? 'Luống rễ đang nằm trong bóng của mặt tượng rộng.'
-      : 'Luống rễ vẫn cần một khoảng tối để nối lại.');
-    if (state.bridgeEligible) facts.push('Khóa Nhật sáng, rễ trong bóng và Lumo giữ ấn: cầu rễ đã mọc.');
-    if (state.bridgeCrossed) facts.push('Đã qua cầu sang bờ bên kia phòng thiên văn.');
-    if (state.finalDoorLatched) facts.push('Chốt cửa cuối đã gài.');
-    if (state.returnLoopOpen) facts.push('Lối đá vòng đang mở: đường bộ về bệ đèn và mốc gọi Lumo vẫn thông khi mạng sáng tắt.');
-    if (state.lanternPlaced) facts.push('Đèn còn trên bệ đá ở tiền sảnh.');
+      ? tr('Luống rễ đang nằm trong bóng của mặt tượng rộng.')
+      : tr('Luống rễ vẫn cần một khoảng tối để nối lại.'));
+    if (state.bridgeEligible) facts.push(tr('Khóa Nhật sáng, rễ trong bóng và Lumo giữ ấn: cầu rễ đã mọc.'));
+    if (state.bridgeCrossed) facts.push(tr('Đã qua cầu sang bờ bên kia phòng thiên văn.'));
+    if (state.finalDoorLatched) facts.push(tr('Chốt cửa cuối đã gài.'));
+    if (state.returnLoopOpen) facts.push(tr('Lối đá vòng đang mở: đường bộ về bệ đèn và mốc gọi Lumo vẫn thông khi mạng sáng tắt.'));
+    if (state.lanternPlaced) facts.push(tr('Đèn còn trên bệ đá ở tiền sảnh.'));
     if (state.recordRead) {
-      facts.push('Bản ghi cuối: Người Bảo Vệ đã giữ ngày đêm đứng yên vì sợ mất người thân. Lumo đã giữ mạch phía Bắc theo lời ông, và khi Cây Mẹ vỡ thì ký ức của cậu cũng vỡ theo.');
-      facts.push('The Shadow là phần ký ức còn mắc lại trong đêm ấy; ông ở lại bên cửa sổ tới khi đêm này kết thúc.');
+      facts.push(tr('Bản ghi cuối: Người Bảo Vệ đã giữ ngày đêm đứng yên vì sợ mất người thân. Lumo đã giữ mạch phía Bắc theo lời ông, và khi Cây Mẹ vỡ thì ký ức của cậu cũng vỡ theo.'));
+      facts.push(tr('The Shadow là phần ký ức còn mắc lại trong đêm ấy; ông ở lại bên cửa sổ tới khi đêm này kết thúc.'));
     } else {
-      facts.push('Bản ghi cuối ở phòng thiên văn chưa được đọc: cần mở lối vòng, thu hồi đèn và gọi Lumo về trước.');
+      facts.push(tr('Bản ghi cuối ở phòng thiên văn chưa được đọc: cần mở lối vòng, thu hồi đèn và gọi Lumo về trước.'));
     }
-    if (state.crystalTaken) facts.push('Tinh thể Cân Bằng đã nằm trong tay Nhinh.');
-    this.say([{ speaker: 'Nhinh', text: `Sổ tay của mình.\n· ${facts.join('\n· ')}` }]);
+    if (state.crystalTaken) facts.push(tr('Tinh thể Cân Bằng đã nằm trong tay Nhinh.'));
+    this.say([{ speaker: 'Nhinh', text: tr('Sổ tay của mình.\n· {facts}', { facts: facts.join('\n· ') }) }]);
   }
 
   private restoreObservatoryLanternPlacement(): void {
@@ -2061,27 +2061,27 @@ export class CampaignScene extends Phaser.Scene {
   private registerLevel(level: number): void {
     const action = (id: string, label: string | (() => string), x: number, y: number, fn: () => void, enabled: () => unknown = () => true, texture = 'beacon_stone', isInReach?: (playerX: number, playerY: number) => boolean, reach?: ReachFootprint) => this.addAction(id, label, x, y, fn, enabled, texture, isInReach, reach);
     if (level === 0) {
-      action('lamp', 'E · Nhận đèn lồng', FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
+      action('lamp', tr('E · Nhận đèn lồng'), FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
         this.progress.lanternPickedUp = true; this.progress.lanternOn = false; this.lantern.lanternInHand = true; this.lantern.lanternOn = false;
         SoundSystem.playUiItemGet();
         const pickup = getLevelArtKey(0, 'pickup-lantern');
         this.objects.find((object) => object instanceof Phaser.GameObjects.Image && object.texture.key === pickup)?.destroy();
         this.forestEdgeLanternGlow?.setVisible(false);
         this.say([
-          { speaker: 'Nhinh', text: 'Trên quai có khắc một dòng chữ…' },
-          { speaker: 'Nhinh', text: 'Hãy giữ ánh sáng cho đến khi mọi người trở về.' },
-          { speaker: 'Nhinh', text: 'Không biết ai đã để nó lại đây.' },
-          { speaker: 'Lumo', text: 'Tôi cũng không nhớ… Cậu thử thắp lên xem. Có khi nó vẫn còn dùng được.' },
+          { speaker: 'Nhinh', text: tr('Trên quai có khắc một dòng chữ…') },
+          { speaker: 'Nhinh', text: tr('Hãy giữ ánh sáng cho đến khi mọi người trở về.') },
+          { speaker: 'Nhinh', text: tr('Không biết ai đã để nó lại đây.') },
+          { speaker: 'Lumo', text: tr('Tôi cũng không nhớ… Cậu thử thắp lên xem. Có khi nó vẫn còn dùng được.') },
         ]);
         this.hintIndex = 0; this.save();
       }, () => !this.progress.lanternPickedUp && this.progress.flags['l0-lumo-met'] === true, 'pedestal_empty', undefined, { rect: FOREST_EDGE_LANTERN_PEDESTAL });
-      action('lantern-inscription', 'E · Xem dòng khắc trên đèn', FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
-        this.say([{ speaker: 'Nhinh', text: 'Quai đèn đã mòn nhẵn. Chắc trước đây có người mang nó bên mình suốt.' }]);
+      action('lantern-inscription', tr('E · Xem dòng khắc trên đèn'), FOREST_EDGE.objects.lantern.stand.x, FOREST_EDGE.objects.lantern.stand.y, () => {
+        this.say([{ speaker: 'Nhinh', text: tr('Quai đèn đã mòn nhẵn. Chắc trước đây có người mang nó bên mình suốt.') }]);
       }, () => this.progress.lanternPickedUp, 'pedestal_empty', undefined, { rect: FOREST_EDGE_LANTERN_PEDESTAL });
-      action('tablet', 'E · Đọc bia đá', FOREST_EDGE.objects.tablet.stand.x, FOREST_EDGE.objects.tablet.stand.y, () => {
-        const inscription = 'Khách qua rừng, hãy tìm dấu chân dưới lớp sương. Ánh sáng đánh thức điều mắt thường bỏ quên.';
+      action('tablet', tr('E · Đọc bia đá'), FOREST_EDGE.objects.tablet.stand.x, FOREST_EDGE.objects.tablet.stand.y, () => {
+        const inscription = tr('Khách qua rừng, hãy tìm dấu chân dưới lớp sương. Ánh sáng đánh thức điều mắt thường bỏ quên.');
         if (!this.lantern.lanternOn) {
-          this.say([{ speaker: 'Nhinh', text: 'Có chữ trên bia, nhưng tối quá. Mình không đọc được.' }, { speaker: 'Lumo', text: 'Thử soi đèn vào xem.' }]);
+          this.say([{ speaker: 'Nhinh', text: tr('Có chữ trên bia, nhưng tối quá. Mình không đọc được.') }, { speaker: 'Lumo', text: tr('Thử soi đèn vào xem.') }]);
           return;
         }
         const firstRead = !this.progress.flags['l0-tablet-read'];
@@ -2089,26 +2089,26 @@ export class CampaignScene extends Phaser.Scene {
         this.hintIndex = 0; this.save();
         this.say(firstRead
           ? [
-            { speaker: 'Nhinh', text: 'Nhìn kìa. Những nét khắc đang sáng lên!' },
+            { speaker: 'Nhinh', text: tr('Nhìn kìa. Những nét khắc đang sáng lên!') },
             { speaker: 'Nhinh', text: inscription },
-            { speaker: 'Nhinh', text: 'Dấu chân dưới lớp sương… Nhưng quanh đây có thấy gì đâu.' },
-            { speaker: 'Lumo', text: 'Ánh đèn chưa tới được đó. Cậu thử phát một xung sáng xem.' },
+            { speaker: 'Nhinh', text: tr('Dấu chân dưới lớp sương… Nhưng quanh đây có thấy gì đâu.') },
+            { speaker: 'Lumo', text: tr('Ánh đèn chưa tới được đó. Cậu thử phát một xung sáng xem.') },
           ]
           : [{ speaker: 'Nhinh', text: inscription }]);
       }, () => this.progress.lanternPickedUp, 'beacon_stone', undefined, { rect: FOREST_EDGE.objects.tablet.solid });
-      action('gate', () => this.progress.flags['l0-gate-open'] ? 'E · Qua cổng rừng' : 'E · Kiểm tra cổng', FOREST_EDGE.objects.gate.exit.x, FOREST_EDGE.objects.gate.exit.y, () => {
+      action('gate', () => this.progress.flags['l0-gate-open'] ? tr('E · Qua cổng rừng') : tr('E · Kiểm tra cổng'), FOREST_EDGE.objects.gate.exit.x, FOREST_EDGE.objects.gate.exit.y, () => {
         if (this.progress.flags['l0-gate-open']) {
           this.nextLevel([
-            { speaker: 'Nhinh', text: 'Đàn đom đóm đang bay sâu vào rừng.' },
-            { speaker: 'Lumo', text: 'Tôi nhớ chúng vẫn thường đi lối này.' },
-            { speaker: 'Nhinh', text: 'Vậy mình theo chúng nhé. Cậu đi cạnh tôi được không?' },
-            { speaker: 'Lumo', text: 'Được chứ. Tôi ở ngay đây.' },
+            { speaker: 'Nhinh', text: tr('Đàn đom đóm đang bay sâu vào rừng.') },
+            { speaker: 'Lumo', text: tr('Tôi nhớ chúng vẫn thường đi lối này.') },
+            { speaker: 'Nhinh', text: tr('Vậy mình theo chúng nhé. Cậu đi cạnh tôi được không?') },
+            { speaker: 'Lumo', text: tr('Được chứ. Tôi ở ngay đây.') },
           ]);
         } else {
           this.say([
-            { speaker: 'Nhinh', text: 'Cổng đóng rồi. Không thấy ổ khóa đâu cả.' },
-            { speaker: 'Lumo', text: 'Cậu nhìn con mắt đá trên kia xem. Nó hướng về vòng đá dưới đất.' },
-            { speaker: 'Nhinh', text: 'Có lẽ mình phải đứng ở đó?' },
+            { speaker: 'Nhinh', text: tr('Cổng đóng rồi. Không thấy ổ khóa đâu cả.') },
+            { speaker: 'Lumo', text: tr('Cậu nhìn con mắt đá trên kia xem. Nó hướng về vòng đá dưới đất.') },
+            { speaker: 'Nhinh', text: tr('Có lẽ mình phải đứng ở đó?') },
           ]);
         }
       }, () => true, 'woods_arch_open', undefined, { rect: FOREST_EDGE_GATE_SLOT, face: 'south', sideMargin: 0 });
@@ -2119,24 +2119,24 @@ export class CampaignScene extends Phaser.Scene {
       // and breaks ties, and each control keeps its existing enabled/label gating untouched.
       const stoneReach = (id: WoodsStoneId) => (playerX: number, playerY: number) => isWoodsStoneInReach(id, { x: playerX, y: playerY });
       const poemLines: DialogueLine[] = [
-        { speaker: 'Hệ thống', text: 'Trăng soi qua kẽ lá,\nLá gọi sao về đây.' },
-        { speaker: 'Hệ thống', text: 'Sao canh rừng yên giấc,\nChờ nắng mai vén mây.' },
+        { speaker: 'Hệ thống', text: tr('Trăng soi qua kẽ lá,\nLá gọi sao về đây.') },
+        { speaker: 'Hệ thống', text: tr('Sao canh rừng yên giấc,\nChờ nắng mai vén mây.') },
       ];
-      action('poem', 'E · Đọc mẩu bia thơ', stands.poem.x, stands.poem.y, () => {
+      action('poem', tr('E · Đọc mẩu bia thơ'), stands.poem.x, stands.poem.y, () => {
         const first=!this.progress.flags['l1-poem-read']; this.progress.flags['l1-poem-read']=true; this.save();
         this.say(first ? [...poemLines,
-          {speaker:'Nhinh',text:'Trăng, lá, sao… Không biết có liên quan đến những tấm bia kia không.'},
-          {speaker:'Lumo',text:'Mình thử soi chúng xem. Chiếc đèn đã giúp cậu tìm thấy dấu chân mà.'}] : [...poemLines]);
+          {speaker:'Nhinh',text:tr('Trăng, lá, sao… Không biết có liên quan đến những tấm bia kia không.')},
+          {speaker:'Lumo',text:tr('Mình thử soi chúng xem. Chiếc đèn đã giúp cậu tìm thấy dấu chân mà.')}] : [...poemLines]);
       }, undefined, 'mural_tablet', stoneReach('poem'));
-      for (const id of RUNE_ORDER) action(`rune-${id}`, `E · Cổ tự ${id==='moon'?'Trăng':id==='leaf'?'Lá':'Sao'}`, stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`, stoneReach(id));
-      action('stairs', () => this.progress.flags['l1-open'] ? 'E · Xuống Thư viện' : 'E · Kiểm tra cổng', stands.exit.x, stands.exit.y, () => {
-        if (!this.progress.flags['l1-open']) { this.say([{speaker:'Nhinh',text:'Rễ cây quấn kín cả lối xuống rồi.'},{speaker:'Lumo',text:'Ở cổng ngoài, chiếc đèn đã mở được đường. Có lẽ những tấm bia ở đây cũng cần ánh sáng.'}]); return; }
+      for (const id of RUNE_ORDER) action(`rune-${id}`, tr('E · Cổ tự {rune}', { rune: id==='moon'?tr('Trăng'):id==='leaf'?tr('Lá'):tr('Sao') }), stands[id].x, stands[id].y, () => this.activateRune(id), undefined, `runestone_${id}_lit`, stoneReach(id));
+      action('stairs', () => this.progress.flags['l1-open'] ? tr('E · Xuống Thư viện') : tr('E · Kiểm tra cổng'), stands.exit.x, stands.exit.y, () => {
+        if (!this.progress.flags['l1-open']) { this.say([{speaker:'Nhinh',text:tr('Rễ cây quấn kín cả lối xuống rồi.')},{speaker:'Lumo',text:tr('Ở cổng ngoài, chiếc đèn đã mở được đường. Có lẽ những tấm bia ở đây cũng cần ánh sáng.')}]); return; }
         this.nextLevel([
-          {speaker:'Nhinh',text:'Có bậc thang dưới những rễ cây này.'},
-          {speaker:'Lumo',text:'Thư viện… Đúng rồi, dưới này có một thư viện!'},
-          {speaker:'Nhinh',text:'Cậu nhớ ra rồi à?'},
-          {speaker:'Lumo',text:'Một chút. Người Elaria từng lưu lại chuyện của khu rừng ở đó.'},
-          {speaker:'Nhinh',text:'Biết đâu có gì giúp mình tìm đường. Mình xuống xem nhé?'},
+          {speaker:'Nhinh',text:tr('Có bậc thang dưới những rễ cây này.')},
+          {speaker:'Lumo',text:tr('Thư viện… Đúng rồi, dưới này có một thư viện!')},
+          {speaker:'Nhinh',text:tr('Cậu nhớ ra rồi à?')},
+          {speaker:'Lumo',text:tr('Một chút. Người Elaria từng lưu lại chuyện của khu rừng ở đó.')},
+          {speaker:'Nhinh',text:tr('Biết đâu có gì giúp mình tìm đường. Mình xuống xem nhé?')},
         ]);
       }, undefined, 'woods_arch_open', undefined, { rect: WHISPERING_WOODS.gate.threshold, face: 'south', sideMargin: 0 });
     }
@@ -2167,24 +2167,24 @@ export class CampaignScene extends Phaser.Scene {
 
   private activateRune(id: RuneId): void {
     if (!canActivateWoodsRune(this.activeRevealedRunes.has(id), this.progress.flags[`l1-activated-${id}`]===true)) {
-      this.say([{ speaker:'Nhinh', text:'Nét khắc mờ quá. Mình thử soi lại bằng xung sáng xem.' }]); return;
+      this.say([{ speaker:'Nhinh', text:tr('Nét khắc mờ quá. Mình thử soi lại bằng xung sáng xem.') }]); return;
     }
     const before = this.normalizeAndPersistWoodsProgress();
     const result = activateWoodsRune(before,id);
-    if (result.kind === 'open') { this.say([{speaker:'Nhinh',text:'Chúng vẫn sáng. Cổng cũng không đóng lại nữa.'}]); return; }
-    if (result.kind === 'repeat') { this.say([{speaker:'Nhinh',text:'Bia này vẫn sáng. Mình xem tấm tiếp theo thôi.'}]); return; }
+    if (result.kind === 'open') { this.say([{speaker:'Nhinh',text:tr('Chúng vẫn sáng. Cổng cũng không đóng lại nữa.')}]); return; }
+    if (result.kind === 'repeat') { this.say([{speaker:'Nhinh',text:tr('Bia này vẫn sáng. Mình xem tấm tiếp theo thôi.')}]); return; }
     this.progress.counters['rune-sequence']=result.state.sequence;
     this.progress.flags['l1-open']=result.state.open;
     for (const rune of RUNE_ORDER) this.progress.flags[`l1-activated-${rune}`]=result.state.activated[rune];
     this.save(); this.updateRuneRevealVisuals(); this.hintIndex=0;
     if (result.kind==='wrong') {
-      this.say([{speaker:'Nhinh',text:'Bia không sáng lên…'},{speaker:'Lumo',text:'Mình thử nhìn xem đàn đom đóm bắt đầu từ đâu nhé.'}]); return;
+      this.say([{speaker:'Nhinh',text:tr('Bia không sáng lên…')},{speaker:'Lumo',text:tr('Mình thử nhìn xem đàn đom đóm bắt đầu từ đâu nhé.')}]); return;
     }
     if (result.kind==='reset') {
-      this.say([{speaker:'Nhinh',text:'Những bia vừa sáng đều tắt rồi.'},{speaker:'Lumo',text:'Không sao. Mình thử lại từ đầu. Đàn đom đóm vẫn đang chỉ đường.'}]); return;
+      this.say([{speaker:'Nhinh',text:tr('Những bia vừa sáng đều tắt rồi.')},{speaker:'Lumo',text:tr('Không sao. Mình thử lại từ đầu. Đàn đom đóm vẫn đang chỉ đường.')}]); return;
     }
-    if (result.state.sequence===1) { this.say([{speaker:'Nhinh',text:'Bia vẫn sáng, dù xung sáng đã tan rồi!'},{speaker:'Lumo',text:'Nhìn đàn đom đóm kìa. Chúng đang bay sang tấm tiếp theo.'}]); return; }
-    if (result.state.sequence===2) { this.say([{speaker:'Lumo',text:'Nhìn kìa! Rễ cây trên cổng đang nới ra!'}]); return; }
+    if (result.state.sequence===1) { this.say([{speaker:'Nhinh',text:tr('Bia vẫn sáng, dù xung sáng đã tan rồi!')},{speaker:'Lumo',text:tr('Nhìn đàn đom đóm kìa. Chúng đang bay sang tấm tiếp theo.')}]); return; }
+    if (result.state.sequence===2) { this.say([{speaker:'Lumo',text:tr('Nhìn kìa! Rễ cây trên cổng đang nới ra!')}]); return; }
     if (result.state.sequence===3) {
       if (this.progress.flags['l1-memory-seen'] !== true) {
         this.progress.flags['l1-memory-seen']=true; this.save(); this.showWoodsMemory();
@@ -2199,14 +2199,14 @@ export class CampaignScene extends Phaser.Scene {
     if(vignetteKey&&this.textures.exists(vignetteKey)){const vignette=this.add.image(480,248,vignetteKey).setOrigin(.5,1).setDisplaySize(128,64).setDepth(80);vignette.setData('woodsId','memory-vignette');this.objects.push(vignette);}
     const clear=()=>{ this.woodsMemoryOverlay?.destroy(); this.woodsMemoryOverlay=undefined; this.objects.find((o)=>o.getData('woodsId')==='memory-vignette')?.destroy(); };
     this.say([
-      {speaker:'Đứa trẻ trong ký ức',text:'Mai mình lại ra đây chơi nhé?'},
-      {speaker:'Người lớn trong ký ức',text:'Ừ. Đợi mặt trời lên nhé. Giờ về thôi, để rừng ngủ.'},
-      {speaker:'Nhinh',text:'Lumo… Cậu cũng nhìn thấy chứ?'},
-      {speaker:'Lumo',text:'Ừ. Đã lâu rồi tôi không nghe tiếng cười ở đây.'},
-      {speaker:'Nhinh',text:'Cậu biết những người đó à?'},
-      {speaker:'Lumo',text:'Tôi không nhớ. Nhưng giọng nói ấy… quen lắm.'},
-      {speaker:'Nhinh',text:'Không sao. Nếu nhớ thêm điều gì, cậu cứ kể tôi nghe nhé.'},
-      {speaker:'Lumo',text:'Ừ. Tôi sẽ kể.'},
+      {speaker:'Đứa trẻ trong ký ức',text:tr('Mai mình lại ra đây chơi nhé?')},
+      {speaker:'Người lớn trong ký ức',text:tr('Ừ. Đợi mặt trời lên nhé. Giờ về thôi, để rừng ngủ.')},
+      {speaker:'Nhinh',text:tr('Lumo… Cậu cũng nhìn thấy chứ?')},
+      {speaker:'Lumo',text:tr('Ừ. Đã lâu rồi tôi không nghe tiếng cười ở đây.')},
+      {speaker:'Nhinh',text:tr('Cậu biết những người đó à?')},
+      {speaker:'Lumo',text:tr('Tôi không nhớ. Nhưng giọng nói ấy… quen lắm.')},
+      {speaker:'Nhinh',text:tr('Không sao. Nếu nhớ thêm điều gì, cậu cứ kể tôi nghe nhé.')},
+      {speaker:'Lumo',text:tr('Ừ. Tôi sẽ kể.')},
     ],clear);
   }
 
@@ -2760,29 +2760,29 @@ export class CampaignScene extends Phaser.Scene {
   private showRuneJournal(): void {
     if (this.progress.level !== 1) return;
     const discovered: string[] = (['moon', 'leaf', 'star'] as const).filter((id) => this.progress.flags[`l1-seen-${id}`]);
-    const labels: Record<string, string> = { moon: 'Trăng — bia bên trái', leaf: 'Lá — bia ở giữa phía trên', star: 'Sao — bia bên phải' };
-    const lines: DialogueLine[] = [{ speaker: 'Nhinh', text: 'Sổ tay của mình.' }];
-    if (discovered.length) lines.push({ speaker: 'Nhinh', text: `Các dấu đã ghi:\n${discovered.map((id) => `• ${labels[id]}`).join('\n')}` });
+    const labels: Record<string, string> = { moon: tr('Trăng — bia bên trái'), leaf: tr('Lá — bia ở giữa phía trên'), star: tr('Sao — bia bên phải') };
+    const lines: DialogueLine[] = [{ speaker: 'Nhinh', text: tr('Sổ tay của mình.') }];
+    if (discovered.length) lines.push({ speaker: 'Nhinh', text: tr('Các dấu đã ghi:\n{marks}', { marks: discovered.map((id) => `• ${labels[id]}`).join('\n') }) });
     if (this.progress.flags['l1-poem-read']) {
       lines.push(
-        { speaker: 'Nhinh', text: 'Bài thơ:' },
-        { speaker: 'Hệ thống', text: 'Trăng soi qua kẽ lá,\nLá gọi sao về đây.' },
-        { speaker: 'Hệ thống', text: 'Sao canh rừng yên giấc,\nChờ nắng mai vén mây.' },
+        { speaker: 'Nhinh', text: tr('Bài thơ:') },
+        { speaker: 'Hệ thống', text: tr('Trăng soi qua kẽ lá,\nLá gọi sao về đây.') },
+        { speaker: 'Hệ thống', text: tr('Sao canh rừng yên giấc,\nChờ nắng mai vén mây.') },
       );
     }
-    if (this.progress.flags['l1-memory-seen']) lines.push({ speaker: 'Nhinh', text: 'Ký ức: một đứa trẻ hẹn ngày mai; người lớn bảo đợi mặt trời lên rồi về để rừng ngủ.' });
-    if (lines.length === 1) lines.push({ speaker: 'Nhinh', text: 'Sổ tay chưa ghi cổ tự nào. Đọc mẩu thơ rồi dùng SPACE gần ba bia đá.' });
+    if (this.progress.flags['l1-memory-seen']) lines.push({ speaker: 'Nhinh', text: tr('Ký ức: một đứa trẻ hẹn ngày mai; người lớn bảo đợi mặt trời lên rồi về để rừng ngủ.') });
+    if (lines.length === 1) lines.push({ speaker: 'Nhinh', text: tr('Sổ tay chưa ghi cổ tự nào. Đọc mẩu thơ rồi dùng SPACE gần ba bia đá.') });
     this.say(lines);
   }
 
   private showOpeningJournal(): void {
     const notes = [
-      this.progress.lanternPickedUp ? 'Dòng khắc trên đèn: “Hãy giữ ánh sáng cho đến khi mọi người trở về.”' : '',
-      this.progress.flags['l0-tablet-read'] ? 'Bia đá nhắc rằng ánh sáng đánh thức điều mắt thường bỏ quên.' : '',
-      this.progress.flags['l0-footprints-found'] ? 'Dấu chân hiện lên sau Light Pulse và dẫn tới vòng đá.' : '',
-      this.progress.flags['l0-gate-open'] ? 'Mắt đá giữ cổng mở sau khi nhận ánh sáng.' : '',
+      this.progress.lanternPickedUp ? tr('Dòng khắc trên đèn: “Hãy giữ ánh sáng cho đến khi mọi người trở về.”') : '',
+      this.progress.flags['l0-tablet-read'] ? tr('Bia đá nhắc rằng ánh sáng đánh thức điều mắt thường bỏ quên.') : '',
+      this.progress.flags['l0-footprints-found'] ? tr('Dấu chân hiện lên sau Light Pulse và dẫn tới vòng đá.') : '',
+      this.progress.flags['l0-gate-open'] ? tr('Mắt đá giữ cổng mở sau khi nhận ánh sáng.') : '',
     ].filter(Boolean);
-    this.say([{ speaker: 'Nhinh', text: notes.length ? `Sổ tay của mình.\n${notes.join('\n')}` : 'Sổ tay còn trống.' }]);
+    this.say([{ speaker: 'Nhinh', text: notes.length ? tr('Sổ tay của mình.\n{notes}', { notes: notes.join('\n') }) : tr('Sổ tay còn trống.') }]);
   }
 
   private getForestEdgeStep(): 'wake' | 'pickup' | 'light' | 'tablet' | 'pulse' | 'ring' | 'exit' {
@@ -2886,13 +2886,13 @@ export class CampaignScene extends Phaser.Scene {
       const step = this.getForestEdgeStep();
       if (this.forestEdgeHintStep !== step) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
       const hints: Record<string, string[]> = {
-        wake: ['Nhìn kỹ khu đất trước mặt.', 'Một chiếc đèn cũ nằm cạnh bia đá.', 'Đến gần chiếc đèn để xem ai đang ở bên trong.'],
-        pickup: ['Quan sát chiếc đèn cạnh bia đá.', 'Có lẽ Lumo muốn Nhinh nhấc chiếc đèn lên.', 'Đứng cạnh đèn và nhấn E.'],
-        light: ['Chiếc đèn đang ở trong tay Nhinh.', 'Dòng chữ trên quai nhắc đến ánh sáng.', 'Bật đèn bằng F.'],
-        tablet: ['Bia đá đứng ngay cạnh chiếc đèn.', 'Ánh đèn sẽ làm hiện chữ trên bia.', 'Đứng cạnh bia và nhấn E khi đèn đang bật.'],
-        pulse: ['Những dấu chân có thể ẩn dưới lớp sương.', this.lantern.lanternOn ? 'Dòng khắc bảo rằng ánh sáng đánh thức điều bị bỏ quên.' : 'Bật đèn bằng F trước khi dùng Pulse.', this.lantern.lanternOn ? 'Dùng SPACE để Pulse gần lối mòn.' : 'Giữ đèn bật bằng F, rồi nhấn SPACE gần lối mòn.'],
-        ring: ['Nhìn phần đất ngay trước cổng. Những dấu chân dừng ở đâu?', 'Mắt đá cần ánh sáng từ một người đứng đúng vị trí.', 'Dùng Pulse tìm vòng đá, đứng vào vòng rồi bật đèn bằng F.'],
-        exit: ['Cổng đã mở. Hãy bước tới lối đi.', 'Lối đi nằm giữa hai trụ cổng.', 'Đến cổng và nhấn E để đi tiếp.'],
+        wake: [tr('Nhìn kỹ khu đất trước mặt.'), tr('Một chiếc đèn cũ nằm cạnh bia đá.'), tr('Đến gần chiếc đèn để xem ai đang ở bên trong.')],
+        pickup: [tr('Quan sát chiếc đèn cạnh bia đá.'), tr('Có lẽ Lumo muốn Nhinh nhấc chiếc đèn lên.'), tr('Đứng cạnh đèn và nhấn E.')],
+        light: [tr('Chiếc đèn đang ở trong tay Nhinh.'), tr('Dòng chữ trên quai nhắc đến ánh sáng.'), tr('Bật đèn bằng F.')],
+        tablet: [tr('Bia đá đứng ngay cạnh chiếc đèn.'), tr('Ánh đèn sẽ làm hiện chữ trên bia.'), tr('Đứng cạnh bia và nhấn E khi đèn đang bật.')],
+        pulse: [tr('Những dấu chân có thể ẩn dưới lớp sương.'), this.lantern.lanternOn ? tr('Dòng khắc bảo rằng ánh sáng đánh thức điều bị bỏ quên.') : tr('Bật đèn bằng F trước khi dùng Pulse.'), this.lantern.lanternOn ? tr('Dùng SPACE để Pulse gần lối mòn.') : tr('Giữ đèn bật bằng F, rồi nhấn SPACE gần lối mòn.')],
+        ring: [tr('Nhìn phần đất ngay trước cổng. Những dấu chân dừng ở đâu?'), tr('Mắt đá cần ánh sáng từ một người đứng đúng vị trí.'), tr('Dùng Pulse tìm vòng đá, đứng vào vòng rồi bật đèn bằng F.')],
+        exit: [tr('Cổng đã mở. Hãy bước tới lối đi.'), tr('Lối đi nằm giữa hai trụ cổng.'), tr('Đến cổng và nhấn E để đi tiếp.')],
       };
       const stageHints = hints[step];
       const message = stageHints[Math.min(this.hintIndex, stageHints.length - 1)];
@@ -2906,12 +2906,12 @@ export class CampaignScene extends Phaser.Scene {
       const step=stage==='sequence' ? count===1?'next-leaf':'next-star' : stage;
       if(step!==this.woodsHintStep){this.woodsHintStep=step;this.hintIndex=0;}
       const hints:Record<string,string[]>={
-        poem:['Mẩu thơ ngay trước mặt. Đứng cạnh rồi nhấn E để đọc.','Bài thơ nằm ở hốc ngay lối vào.','Đọc mẩu thơ bằng E.'],
-        observe:['Đứng gần bia và nhấn SPACE để soi ký hiệu. Khi ký hiệu còn sáng, nhấn E để kích hoạt.','Đàn đom đóm dừng ở ba bia theo một đường cố định. Mẩu thơ ghi lại ba hình.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
-        sequence:['Đứng gần bia và nhấn SPACE để soi ký hiệu. Khi ký hiệu còn sáng, nhấn E để kích hoạt.','Đàn đom đóm dừng ở ba bia theo một đường cố định. Mẩu thơ ghi lại ba hình.','Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.'],
-        'next-leaf':['Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.','Bia kế tiếp nằm giữa phía trên. Dùng Pulse để đọc dấu trước khi chạm.','Bước tiếp theo là Lá ở giữa phía trên. Soi bia rồi kích hoạt khi nét còn sáng.'],
-        'next-star':['Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.','Bia cuối cùng nằm bên phải. Dùng Pulse để đọc dấu trước khi chạm.','Bước tiếp theo là Sao bên phải. Soi bia rồi kích hoạt khi nét còn sáng.'],
-        exit:['Cổng đã mở. Hãy bước tới lối đi giữa hai trụ đá.','Bậc thang dẫn xuống dưới cổng.','Đến lối đi và nhấn E để xuống Thư viện.'],
+        poem:[tr('Mẩu thơ ngay trước mặt. Đứng cạnh rồi nhấn E để đọc.'),tr('Bài thơ nằm ở hốc ngay lối vào.'),tr('Đọc mẩu thơ bằng E.')],
+        observe:[tr('Đứng gần bia và nhấn SPACE để soi ký hiệu. Khi ký hiệu còn sáng, nhấn E để kích hoạt.'),tr('Đàn đom đóm dừng ở ba bia theo một đường cố định. Mẩu thơ ghi lại ba hình.'),tr('Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.')],
+        sequence:[tr('Đứng gần bia và nhấn SPACE để soi ký hiệu. Khi ký hiệu còn sáng, nhấn E để kích hoạt.'),tr('Đàn đom đóm dừng ở ba bia theo một đường cố định. Mẩu thơ ghi lại ba hình.'),tr('Soi bia rồi kích hoạt theo thứ tự Trăng bên trái, Lá ở giữa phía trên, Sao bên phải.')],
+        'next-leaf':[tr('Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.'),tr('Bia kế tiếp nằm giữa phía trên. Dùng Pulse để đọc dấu trước khi chạm.'),tr('Bước tiếp theo là Lá ở giữa phía trên. Soi bia rồi kích hoạt khi nét còn sáng.')],
+        'next-star':[tr('Đom đom vẫn chỉ đường từ bia này sang bia kế tiếp.'),tr('Bia cuối cùng nằm bên phải. Dùng Pulse để đọc dấu trước khi chạm.'),tr('Bước tiếp theo là Sao bên phải. Soi bia rồi kích hoạt khi nét còn sáng.')],
+        exit:[tr('Cổng đã mở. Hãy bước tới lối đi giữa hai trụ đá.'),tr('Bậc thang dẫn xuống dưới cổng.'),tr('Đến lối đi và nhấn E để xuống Thư viện.')],
       };
       const choices=hints[step],message=choices[Math.min(this.hintIndex,choices.length-1)];this.hintIndex=Math.min(this.hintIndex+1,choices.length-1);this.say([{speaker:'Hệ thống',text:message}]);return;
     }
@@ -2948,7 +2948,7 @@ export class CampaignScene extends Phaser.Scene {
     } else if (index === 4 && this.pathForTwoLevel) {
       objective = this.pathForTwoLevel.getObjectiveText();
       status = this.pathForTwoLevel.getStatusText();
-      lumo = this.progress.flags['l4-reunited'] ? 'LUMO · đã trở lại' : 'LUMO · E gọi tới mốc / trở về';
+      lumo = this.progress.flags['l4-reunited'] ? tr('LUMO · đã trở lại') : tr('LUMO · E gọi tới mốc / trở về');
     } else if (index === 9 && this.heartLevel) {
       objective = this.heartLevel.getObjectiveText();
       status = this.heartLevel.getStatusText();
@@ -2957,25 +2957,33 @@ export class CampaignScene extends Phaser.Scene {
       const step = this.getForestEdgeStep();
       if (step !== this.forestEdgeHintStep) { this.forestEdgeHintStep = step; this.hintIndex = 0; }
       const objectives: Record<string, string> = {
-        wake: 'Tới gần chiếc đèn cũ và bia đá.', pickup: 'Gặp Lumo rồi nhận chiếc đèn bằng E.', light: 'Bật đèn bằng F để đọc bia đá.',
-        tablet: 'Đứng cạnh bia và đọc dòng chữ.', pulse: 'Bật đèn rồi dùng SPACE để tìm dấu chân.',
-        ring: 'Đứng trong vòng đá và giữ đèn bật.', exit: 'Cổng đã mở. Đi tới lối đi và nhấn E.',
+        wake: tr('Tới gần chiếc đèn cũ và bia đá.'), pickup: tr('Gặp Lumo rồi nhận chiếc đèn bằng E.'), light: tr('Bật đèn bằng F để đọc bia đá.'),
+        tablet: tr('Đứng cạnh bia và đọc dòng chữ.'), pulse: tr('Bật đèn rồi dùng SPACE để tìm dấu chân.'),
+        ring: tr('Đứng trong vòng đá và giữ đèn bật.'), exit: tr('Cổng đã mở. Đi tới lối đi và nhấn E.'),
       };
       objective = objectives[step];
-      status = `Bia: ${this.progress.flags['l0-tablet-read'] ? 'đã đọc' : 'chưa đọc'} · Dấu chân: ${this.progress.flags['l0-footprints-found'] ? 'đã thấy' : 'chưa thấy'} · Cổng: ${this.progress.flags['l0-gate-open'] ? 'mở' : 'đóng'}`;
+      status = tr('Bia: {tablet} · Dấu chân: {footprints} · Cổng: {gate}', {
+        tablet: this.progress.flags['l0-tablet-read'] ? tr('đã đọc') : tr('chưa đọc'),
+        footprints: this.progress.flags['l0-footprints-found'] ? tr('đã thấy') : tr('chưa thấy'),
+        gate: this.progress.flags['l0-gate-open'] ? tr('mở') : tr('đóng'),
+      });
       lumo = 'NHINH + LUMO';
     } else if (index === 1) {
       const count = this.value('rune-sequence');
       const stage = this.getWoodsTutorialStage();
       this.updateWoodsTutorialCue(stage);
       const objectives: Record<WoodsTutorialStage, string> = {
-        exit: 'Cổng đã mở. Đến bậc thang và nhấn E để xuống Thư viện.',
-        sequence: `Chuỗi cổ tự: ${count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.`,
-        poem: 'Mẩu thơ ngay trước mặt. Đọc bằng E.',
-        observe: 'Theo lối vào khoảng đất trống. Dùng SPACE để soi ba bia.',
+        exit: tr('Cổng đã mở. Đến bậc thang và nhấn E để xuống Thư viện.'),
+        sequence: tr('Chuỗi cổ tự: {count}/3. Soi bia kế tiếp rồi nhấn E khi nét còn sáng.', { count }),
+        poem: tr('Mẩu thơ ngay trước mặt. Đọc bằng E.'),
+        observe: tr('Theo lối vào khoảng đất trống. Dùng SPACE để soi ba bia.'),
       };
       objective = objectives[stage];
-      status = `Cổ tự: ${count}/3 · Bài thơ: ${this.progress.flags['l1-poem-read'] ? 'đã đọc' : 'chưa đọc'} · Cổng: ${this.progress.flags['l1-open'] ? 'mở' : 'đóng'} · J sổ tay`;
+      status = tr('Cổ tự: {count}/3 · Bài thơ: {poem} · Cổng: {gate} · J sổ tay', {
+        count,
+        poem: this.progress.flags['l1-poem-read'] ? tr('đã đọc') : tr('chưa đọc'),
+        gate: this.progress.flags['l1-open'] ? tr('mở') : tr('đóng'),
+      });
       lumo = 'NHINH + LUMO';
     } else if (index === 2 && this.libraryLevel) {
       objective = this.libraryLevel.getObjectiveText();
@@ -2984,10 +2992,10 @@ export class CampaignScene extends Phaser.Scene {
     } else if (index === 6 && this.gardenLevel) {
       objective = this.gardenLevel.getObjectiveText();
       status = this.gardenLevel.getStatusText();
-      lumo = 'LUMO · đi cùng Nhinh';
+      lumo = tr('LUMO · đi cùng Nhinh');
     }
     // Level names and chapter tags stay in English everywhere; only the body copy is Vietnamese.
-    this.hud.setTitle(index === 5 ? '06 · Ngọn Tháp Không Ngủ' : `${padded}  ${level.title}   ·   ${level.chapter}`);
+    this.hud.setTitle(index === 5 ? tr('06 · Ngọn Tháp Không Ngủ') : `${padded}  ${level.title}   ·   ${level.chapter}`);
     this.hud.setObjective(objective);
     this.hud.setStatus(status);
     this.hud.setLumo(lumo);

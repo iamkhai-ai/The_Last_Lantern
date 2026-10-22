@@ -83,6 +83,9 @@ const trKeys = [];
 const dialogueTexts = [];
 const dynamicSites = [];
 const speakers = new Set();
+const allLiteralTexts = new Set();
+const untranslatedCopy = [];
+const VIETNAMESE_COPY = /[àáảãạăắằẳẵặâấầẩẫậđèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ]/i;
 
 for (const file of sourceFiles) {
   const source = readFileSync(file, 'utf8');
@@ -104,7 +107,11 @@ for (const file of sourceFiles) {
         const speaker = text(speakerProp.initializer);
         if (speaker) speakers.add(speaker);
         const value = textProp.initializer;
+        // A line may be authored as a literal or wrapped as tr('literal'); both are the same catalogue key.
+        const wrapped = ts.isCallExpression(value) && ts.isIdentifier(value.expression) && value.expression.text === 'tr'
+          && isText(value.arguments[0]) ? value.arguments[0] : null;
         if (isText(value)) dialogueTexts.push({ key: value.text, where: `${rel}:${lineOf(textProp)}` });
+        else if (wrapped) dialogueTexts.push({ key: wrapped.text, where: `${rel}:${lineOf(textProp)}` });
         else if (ts.isTemplateExpression(value) || ts.isBinaryExpression(value)) {
           dynamicSites.push(`${rel}:${lineOf(textProp)} dialogue text is composed at runtime`);
         }
@@ -113,6 +120,25 @@ for (const file of sourceFiles) {
     node.forEachChild(visit);
   };
   visit(ast);
+
+  /** Every Vietnamese literal that can reach the screen must be a catalogue key or sit inside tr(). */
+  const scanCopy = (node, insideTr) => {
+    const callsTr = ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'tr';
+    const isPiece = isText(node) || ts.isTemplateHead(node) || ts.isTemplateMiddle(node) || ts.isTemplateTail(node);
+    if (isPiece) {
+      allLiteralTexts.add(node.text);
+      // Speaker ids and their conditional alternatives are labelled by speakerLabel(), not tr().
+      const speakerOwner = ts.isConditionalExpression(node.parent) ? node.parent.parent : node.parent;
+      const isSpeaker = ts.isPropertyAssignment(speakerOwner) && speakerOwner.name.getText(ast) === 'speaker';
+      // Type-level unions and object keys (e.g. a colour table keyed by speaker) are identifiers, not copy.
+      const isTypeOrKey = ts.isLiteralTypeNode(node.parent) || (ts.isPropertyAssignment(node.parent) && node.parent.name === node);
+      if (VIETNAMESE_COPY.test(node.text) && !insideTr && !isSpeaker && !isTypeOrKey && !byVi.has(node.text)) {
+        untranslatedCopy.push(`${rel}:${ast.getLineAndCharacterOfPosition(node.getStart(ast)).line + 1} "${node.text.slice(0, 80)}"`);
+      }
+    }
+    node.forEachChild((child) => scanCopy(child, insideTr || callsTr));
+  };
+  scanCopy(ast, false);
 }
 
 /** speakerLabel table, read from the catalogue module so the check cannot drift from the code. */
@@ -126,14 +152,15 @@ const missingTr = trKeys.filter((item) => !byVi.has(item.key));
 const missingDialogue = dialogueTexts.filter((item) => !byVi.has(item.key));
 const missingSpeaker = [...speakers].filter((speaker) => speaker !== 'Nhinh' && speaker !== 'Lumo' && !labeledSpeakers.has(speaker));
 
-const allKeys = new Set([...trKeys, ...dialogueTexts].map((item) => item.key));
-const orphans = entries.filter((item) => !allKeys.has(item.vi));
+/* A key is live when its Vietnamese text appears anywhere in src, including data tables that tr() reads at render. */
+const orphans = entries.filter((item) => !allLiteralTexts.has(item.vi));
 
 for (const problem of catalogueProblems) failures.push(problem);
 for (const item of missingTr) failures.push(`${item.where}: no entry for tr("${item.key}")`);
 if (STRICT) {
   for (const item of missingDialogue) failures.push(`${item.where}: no entry for dialogue "${item.key}"`);
   for (const item of orphans) failures.push(`${item.heading}: orphan entry (Vietnamese key not found in src/) "${item.vi}"`);
+  for (const site of untranslatedCopy) failures.push(`${site}: Vietnamese copy with no catalogue entry and no tr() wrapper`);
 }
 for (const speaker of missingSpeaker) failures.push(`speaker "${speaker}" has no speakerLabel() mapping`);
 
@@ -161,7 +188,7 @@ if (dynamicSites.length) {
 
 if (failures.length) {
   console.log(`\nFAIL (${failures.length})`);
-  for (const failure of failures.slice(0, 60)) console.log(`  ${failure}`);
+  for (const failure of failures.slice(0, Number(process.env.FAIL_LIMIT ?? 60))) console.log(`  ${failure}`);
   if (failures.length > 60) console.log(`  … ${failures.length - 60} more`);
   process.exit(1);
 }

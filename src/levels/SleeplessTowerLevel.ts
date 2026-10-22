@@ -251,11 +251,11 @@ export class SleeplessTowerLevel {
 
   public showJournal(): void {
     const entries: DialogueLine[] = [
-      { speaker: 'Nhinh', text: 'Bảng điều tiết ghi: ba mạch cùng ổn định, sau đó mới chuyển từ giữ sáng sang trả dòng.' },
+      { speaker: 'Nhinh', text: tr('Bảng điều tiết ghi: ba mạch cùng ổn định, sau đó mới chuyển từ giữ sáng sang trả dòng.') },
     ];
-    if (this.state.practiceDone) entries.push({ speaker: 'Nhinh', text: 'Lăng kính chia một tia thành hai; xoay gương đầu vào đi chỗ khác thì cả hai nhánh tắt.' });
-    if (this.state.waterReturned) entries.push({ speaker: 'Lumo', text: 'Ba vòng cùng sáng khi G0 vào lăng kính, G1 vào A, G2 vào B, và tôi giữ ấn C.' });
-    if (this.state.recordRead) entries.push({ speaker: 'Nhinh', text: 'Bản ghi: người cha giữ đèn sáng thêm một đêm, đợi con theo ánh sáng về.' });
+    if (this.state.practiceDone) entries.push({ speaker: 'Nhinh', text: tr('Lăng kính chia một tia thành hai; xoay gương đầu vào đi chỗ khác thì cả hai nhánh tắt.') });
+    if (this.state.waterReturned) entries.push({ speaker: 'Lumo', text: tr('Ba vòng cùng sáng khi G0 vào lăng kính, G1 vào A, G2 vào B, và tôi giữ ấn C.') });
+    if (this.state.recordRead) entries.push({ speaker: 'Nhinh', text: tr('Bản ghi: người cha giữ đèn sáng thêm một đêm, đợi con theo ánh sáng về.') });
     this.ctx.say(entries);
   }
 
@@ -353,28 +353,28 @@ export class SleeplessTowerLevel {
     };
     const o = TOWER.objects;
     add('bench-source', o.benchSource.stand, () => this.sourcePrompt('practice'), () => this.useSource('practice'), 'bench-source', undefined, o.benchSource.base);
-    add('bench-mirror', o.benchMirror.stand, () => 'E · Xoay gương đầu vào', () => this.rotateBench(), 'bench-mirror', undefined, o.benchMirror.base);
+    add('bench-mirror', o.benchMirror.stand, () => tr('E · Xoay gương đầu vào'), () => this.rotateBench(), 'bench-mirror', undefined, o.benchMirror.base);
     add('source', o.source.stand, () => this.sourcePrompt('main'), () => this.useSource('main'), 'source', undefined, o.source.base);
-    add('g0', o.g0.stand, () => 'E · Xoay gương chung G0', () => this.rotateG0(), 'g0', undefined, o.g0.base);
-    add('g1', o.g1.stand, () => 'E · Xoay gương nhánh G1', () => this.rotateBranch('g1'), 'g1', undefined, o.g1.base);
-    add('g2', o.g2.stand, () => 'E · Xoay gương nhánh G2', () => this.rotateBranch('g2'), 'g2', undefined, o.g2.base);
-    add('call', o.call.stand, () => (this.state.lumoAssign === 'follow' ? 'E · Gọi Lumo tới ấn C' : 'E · Gọi Lumo về'), () => this.useCall(), 'call', () => canUseCallMark(this.state), o.call.base);
-    add('lever', o.lever.stand, () => (this.state.waterReturned ? 'E · Cần đang giữ chế độ Trả dòng' : 'E · Gạt cần Trả dòng'), () => this.useLever(), 'lever', undefined, o.lever.base);
-    add('chamber', o.chamber.stand, () => (!this.state.waterReturned ? 'E · Buồng tinh thể còn khóa' : !this.state.crystal ? 'E · Nhận Tinh thể Hy Vọng' : 'E · Ngăn chứa đã trống'), () => this.useChamber(), 'chamber', undefined, o.chamber.solid);
-    add('record', o.record.stand, () => (this.state.recordRead ? 'E · Nghe lại bản ghi' : 'E · Nghe bản ghi bên cửa sổ'), () => this.useRecord(), 'record', () => this.state.crystal);
-    add('exit', TOWER.stairsStand, () => (canCompleteTower(this.state) ? 'E · Xuống khu vườn' : 'E · Kiểm tra lối xuống'), () => this.useExit(), 'exit');
+    add('g0', o.g0.stand, () => tr('E · Xoay gương chung G0'), () => this.rotateG0(), 'g0', undefined, o.g0.base);
+    add('g1', o.g1.stand, () => tr('E · Xoay gương nhánh G1'), () => this.rotateBranch('g1'), 'g1', undefined, o.g1.base);
+    add('g2', o.g2.stand, () => tr('E · Xoay gương nhánh G2'), () => this.rotateBranch('g2'), 'g2', undefined, o.g2.base);
+    add('call', o.call.stand, () => (this.state.lumoAssign === 'follow' ? tr('E · Gọi Lumo tới ấn C') : tr('E · Gọi Lumo về')), () => this.useCall(), 'call', () => canUseCallMark(this.state), o.call.base);
+    add('lever', o.lever.stand, () => (this.state.waterReturned ? tr('E · Cần đang giữ chế độ Trả dòng') : tr('E · Gạt cần Trả dòng')), () => this.useLever(), 'lever', undefined, o.lever.base);
+    add('chamber', o.chamber.stand, () => (!this.state.waterReturned ? tr('E · Buồng tinh thể còn khóa') : !this.state.crystal ? tr('E · Nhận Tinh thể Hy Vọng') : tr('E · Ngăn chứa đã trống')), () => this.useChamber(), 'chamber', undefined, o.chamber.solid);
+    add('record', o.record.stand, () => (this.state.recordRead ? tr('E · Nghe lại bản ghi') : tr('E · Nghe bản ghi bên cửa sổ')), () => this.useRecord(), 'record', () => this.state.crystal);
+    add('exit', TOWER.stairsStand, () => (canCompleteTower(this.state) ? tr('E · Xuống khu vườn') : tr('E · Kiểm tra lối xuống')), () => this.useExit(), 'exit');
   }
 
   private sourcePrompt(which: 'practice' | 'main'): string {
-    if (this.state.source && this.state.source !== which) return `E · Đèn đang ở bệ ${this.state.source === 'practice' ? 'thử' : 'chính'}`;
-    if (this.state.source === which) return 'E · Thu hồi đèn';
-    return 'E · Đặt đèn';
+    if (this.state.source && this.state.source !== which) return tr('E · Đèn đang ở bệ {source}', { source: this.state.source === 'practice' ? tr('thử') : tr('chính') });
+    if (this.state.source === which) return tr('E · Thu hồi đèn');
+    return tr('E · Đặt đèn');
   }
 
   private useSource(which: 'practice' | 'main'): void {
     const { lantern } = this.ctx;
     if (this.state.source && this.state.source !== which) {
-      this.ctx.say([{ speaker: 'Nhinh', text: tr('Đèn vẫn nằm trên bệ {stand}.', { stand: tr(this.state.source === 'practice' ? 'thử' : 'chính') }) }]);
+      this.ctx.say([{ speaker: 'Nhinh', text: tr('Đèn vẫn nằm trên bệ {stand}.', { stand: tr(this.state.source === 'practice' ? tr('thử') : tr('chính')) }) }]);
       return;
     }
     if (this.state.source === which) {
@@ -440,7 +440,7 @@ export class SleeplessTowerLevel {
 
   private useLever(): void {
     if (this.state.waterReturned) {
-      this.ctx.say([{ speaker: 'Nhinh', text: 'Máy đang tự giữ chế độ Trả dòng. Không cần chuyển lại.' }]);
+      this.ctx.say([{ speaker: 'Nhinh', text: tr('Máy đang tự giữ chế độ Trả dòng. Không cần chuyển lại.') }]);
       return;
     }
     const live = deriveTowerLive(this.state, this.lumoPoint());
@@ -467,11 +467,11 @@ export class SleeplessTowerLevel {
 
   private useChamber(): void {
     if (!this.state.waterReturned) {
-      this.ctx.say([{ speaker: 'Nhinh', text: 'Buồng tinh thể chỉ mở khi máy chuyển sang chế độ Trả dòng.' }]);
+      this.ctx.say([{ speaker: 'Nhinh', text: tr('Buồng tinh thể chỉ mở khi máy chuyển sang chế độ Trả dòng.') }]);
       return;
     }
     if (this.state.crystal) {
-      this.ctx.say([{ speaker: 'Nhinh', text: 'Ngăn chứa đã trống.' }]);
+      this.ctx.say([{ speaker: 'Nhinh', text: tr('Ngăn chứa đã trống.') }]);
       return;
     }
     this.state.crystal = true;
@@ -523,14 +523,14 @@ export class SleeplessTowerLevel {
 
   private objectiveFor(live: TowerLiveState): string {
     const placedPower = this.state.source !== null && ['practice', 'place', 'main', 'call', 'switch'].includes(live.step);
-    if (placedPower && !this.state.lanternOn) return 'Đèn tắt · Nhấn F để bật.';
-    if (live.step === 'recall' && this.state.lumoAssign === 'follow') return 'Lumo đang về. Đợi cậu ấy rồi xuống vườn.';
+    if (placedPower && !this.state.lanternOn) return tr('Đèn tắt · Nhấn F để bật.');
+    if (live.step === 'recall' && this.state.lumoAssign === 'follow') return tr('Lumo đang về. Đợi cậu ấy rồi xuống vườn.');
     return OBJECTIVE[live.step];
   }
 
   private statusFor(live: TowerLiveState): string {
     const glyph = (on: boolean): string => (on && !this.state.waterReturned ? '●' : '○');
-    return `A ${glyph(live.liveA)} · B ${glyph(live.liveB)} · C ${glyph(live.liveC)} · Nước ${this.state.waterReturned ? '↓' : '↑'}`;
+    return tr('A {a} · B {b} · C {c} · Nước {water}', { a: glyph(live.liveA), b: glyph(live.liveB), c: glyph(live.liveC), water: this.state.waterReturned ? '↓' : '↑' });
   }
 
   private drawBackdrop(): void {
@@ -588,7 +588,7 @@ export class SleeplessTowerLevel {
         this.keep(crystal);
       }
     }
-    this.addLabel('label-bench', 'Bàn thử', 140, 86);
+    this.addLabel('label-bench', tr('Bàn thử'), 140, 86);
     this.addLabel('label-g0', 'G0', 212, 190);
     this.addLabel('label-g1', 'G1', 251, 145);
     this.addLabel('label-g2', 'G2', 287, 238);

@@ -249,7 +249,10 @@ function controllerConstant(name) {
   return new Function(`"use strict";\n${js}\nreturn __value;`)();
 }
 /** Compile one extracted body into a method, closing over the layout symbols it uses. */
+const IDENTITY_TR = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text);
+
 function compile(name, parameters, symbols) {
+  symbols = { tr: IDENTITY_TR, ...symbols };
   const names = Object.keys(symbols);
   const js = ts.transpileModule(`const __unit = function (${parameters.join(', ')}) {\n${methodBody(name)}\n};`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;

@@ -179,13 +179,13 @@ export class EndingScene extends Phaser.Scene {
   private inputOptions(): Array<{ label: string; action: () => void }> {
     if (this.menuMode === 'confirm') {
       return [
-        { label: 'Hủy', action: () => this.cancelPlayAgain() },
-        { label: 'Chơi lại', action: () => this.confirmPlayAgain() },
+        { label: tr('Hủy'), action: () => this.cancelPlayAgain() },
+        { label: tr('Chơi lại'), action: () => this.confirmPlayAgain() },
       ];
     }
     return [
-      { label: 'PLAY AGAIN (CHƠI LẠI TỪ ĐẦU)', action: () => this.requestPlayAgain() },
-      { label: 'MAIN MENU (MÀN HÌNH CHÍNH)', action: () => this.goToMainMenu() },
+      { label: tr('PLAY AGAIN (CHƠI LẠI TỪ ĐẦU)'), action: () => this.requestPlayAgain() },
+      { label: tr('MAIN MENU (MÀN HÌNH CHÍNH)'), action: () => this.goToMainMenu() },
     ];
   }
 

@@ -19,6 +19,10 @@ import { TOWER_GARDEN_CREEK_ENTRIES } from './entries/towerGardenCreek.ts';
 import { RUINS_HEART_OBSERVATORY_ENTRIES } from './entries/ruinsHeartObservatory.ts';
 import { CAMPAIGN_LEVEL_ENTRIES } from './entries/campaignLevels.ts';
 import { FRAGMENT_ENTRIES } from './entries/fragments.ts';
+import { OBSERVATORY_TEXT_ENTRIES } from './entries/observatoryText.ts';
+import { HEART_AND_STATE_ENTRIES } from './entries/heartAndStates.ts';
+import { PUZZLE_AND_QUEST_ENTRIES } from './entries/puzzleAndQuestText.ts';
+import { COMPOSED_AND_TABLE_ENTRIES } from './entries/composedAndTables.ts';
 import type { CatalogEntry } from './entry.ts';
 
 export type { CatalogEntry } from './entry.ts';

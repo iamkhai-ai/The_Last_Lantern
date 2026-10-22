@@ -225,9 +225,9 @@ export class PauseMenu {
     if (action === 'levels') return this.levelLabel();
     if (action === 'language') return tr('Ngôn ngữ: Tiếng Việt');
     if (action === 'restart') {
-      return tr(this.confirmRestart ? 'XÁC NHẬN CHƠI LẠI? (NHẤN LẦN NỮA)' : 'CHƠI LẠI TỪ ĐẦU (RESTART)');
+      return tr(this.confirmRestart ? tr('XÁC NHẬN CHƠI LẠI? (NHẤN LẦN NỮA)') : tr('CHƠI LẠI TỪ ĐẦU (RESTART)'));
     }
-    if (action === 'sound') return tr(SoundSystem.isMuted() ? 'ÂM THANH: TẮT' : 'ÂM THANH: BẬT');
+    if (action === 'sound') return tr(SoundSystem.isMuted() ? tr('ÂM THANH: TẮT') : tr('ÂM THANH: BẬT'));
     return tr('MÀN HÌNH CHÍNH (MAIN MENU)');
   }
 

@@ -1,3 +1,4 @@
+import { tr } from '../i18n/catalog.ts';
 import Phaser from 'phaser';
 import { getLevelArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
@@ -162,43 +163,49 @@ export class PathForTwoLevel {
   public getProtectedPromptBounds():PromptRect[]{return this.protected.filter((o):o is Phaser.GameObjects.Image=>o instanceof Phaser.GameObjects.Image&&o.active&&o.visible).map(o=>o.getBounds());}
   public getObjectiveText():string{
     if(this.room==='entry'){
-      if(this.assignment==='practice'&&this.isTravelling())return'Nhấn E ở mốc gần cậu để gọi Lumo, rồi chờ cậu ấy tới ấn sau cửa thấp.';
-      if(this.assignment==='practice'&&this.hasPower('practice'))return'Cửa thử đã mở. Bước vào trong và nhấn E ở mốc trong để gọi Lumo về mốc.';
-      if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return'Nhấn E ở mốc đứng gần cậu để thử cách gọi. Mốc A trong sảnh mở đường đi tiếp khi cậu cần.';
-      if(this.isDoorOpen('a'))return'Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.';
-      return'Nhấn E ở mốc A trong sảnh để gọi Lumo tới ấn A, rồi qua cửa A.';
+      if(this.assignment==='practice'&&this.isTravelling())return tr('Nhấn E ở mốc gần cậu để gọi Lumo, rồi chờ cậu ấy tới ấn sau cửa thấp.');
+      if(this.assignment==='practice'&&this.hasPower('practice'))return tr('Cửa thử đã mở. Bước vào trong và nhấn E ở mốc trong để gọi Lumo về mốc.');
+      if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return tr('Nhấn E ở mốc đứng gần cậu để thử cách gọi. Mốc A trong sảnh mở đường đi tiếp khi cậu cần.');
+      if(this.isDoorOpen('a'))return tr('Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.');
+      return tr('Nhấn E ở mốc A trong sảnh để gọi Lumo tới ấn A, rồi qua cửa A.');
     }
-    if(this.room==='relay')return !this.progress.flags['l4-latch-a']?'Gài chốt A ở mặt bên kia trước khi gọi Lumo tới B.':this.isDoorOpen('b')?'Qua cửa B tới hành lang mực.':'Gọi Lumo tới ấn B.';
-    if(!this.progress.flags['l4-latch-b'])return 'Gài chốt B trước khi gọi Lumo tới cuối hành lang.';
+    if(this.room==='relay')return !this.progress.flags['l4-latch-a']?tr('Gài chốt A ở mặt bên kia trước khi gọi Lumo tới B.'):this.isDoorOpen('b')?tr('Qua cửa B tới hành lang mực.'):tr('Gọi Lumo tới ấn B.');
+    if(!this.progress.flags['l4-latch-b'])return tr('Gài chốt B trước khi gọi Lumo tới cuối hành lang.');
     if(this.progress.flags['l4-latch-c']){
       const blockedBy=getPathExitBlock({latchC:true,memoRead:this.progress.flags['l4-memo']===true,reunited:this.isActuallyReunited()});
-      if(blockedBy==='memo')return 'Đọc vết xoắn để giữ lại mảnh ký ức.';
+      if(blockedBy==='memo')return tr('Đọc vết xoắn để giữ lại mảnh ký ức.');
       if(blockedBy==='companion'){
-        if(this.assignment==='c')return 'Nhấn E ở tay gọi C để gọi Lumo về, rồi chờ cậu ấy tới gần.';
-        if(this.isTravelling())return 'Lumo đang về. Chờ cậu ấy tới gần Nhinh rồi lên tháp.';
-        return 'Lumo đã về tới nơi. Chờ cậu ấy tới gần Nhinh rồi lên tháp.';
+        if(this.assignment==='c')return tr('Nhấn E ở tay gọi C để gọi Lumo về, rồi chờ cậu ấy tới gần.');
+        if(this.isTravelling())return tr('Lumo đang về. Chờ cậu ấy tới gần Nhinh rồi lên tháp.');
+        return tr('Lumo đã về tới nơi. Chờ cậu ấy tới gần Nhinh rồi lên tháp.');
       }
-      return 'Tới bậc thang và nhấn E.';
+      return tr('Tới bậc thang và nhấn E.');
     }
     // C-before-ink is legal: once C is actually held, the instruction channel must stop asking for
     // a call that already happened. The key stays in the instruction channel, not in character speech.
     if(!this.progress.flags['l4-ink-revealed'])return this.hasPower('c')
-      ?'Tắt đèn bằng F rồi đi theo vạch mực tới cuối hành lang.'
-      :'Tắt đèn bằng F. Từ mốc bên trái, gọi Lumo tới ấn C rồi theo vạch mực.';
-    if(!this.hasPower('c'))return 'Từ mốc bên trái, gọi Lumo tới ấn C trước khi đi tới cuối hành lang.';
-    return 'Tới tay gài C và giữ cửa ra.';
+      ?tr('Tắt đèn bằng F rồi đi theo vạch mực tới cuối hành lang.')
+      :tr('Tắt đèn bằng F. Từ mốc bên trái, gọi Lumo tới ấn C rồi theo vạch mực.');
+    if(!this.hasPower('c'))return tr('Từ mốc bên trái, gọi Lumo tới ấn C trước khi đi tới cuối hành lang.');
+    return tr('Tới tay gài C và giữ cửa ra.');
   }
   public getStatusText():string{
     const arrival=(['practice','a','b','c'] as const).find(mark=>this.hasPower(mark));
-    const lumoState=this.isTravelling()?'đang đi':arrival?(arrival==='practice'?'đã tới ấn thử':`đã tới ${arrival.toUpperCase()}`):'theo Nhinh';
-    return `${PATH_ROOMS[this.room].title} · A ${this.progress.flags['l4-latch-a']?'giữ':'mở khi Lumo tới'} · B ${this.progress.flags['l4-latch-b']?'giữ':'chờ'} · C ${this.progress.flags['l4-latch-c']?'giữ':'chờ'} · Lumo: ${lumoState}`;
+    const lumoState=this.isTravelling()?tr('đang đi'):arrival?(arrival==='practice'?tr('đã tới ấn thử'):tr('đã tới {arrival}', { arrival: arrival.toUpperCase() })):tr('theo Nhinh');
+    return tr('{room} · A {a} · B {b} · C {c} · Lumo: {lumo}', {
+      room: tr(PATH_ROOMS[this.room].title),
+      a: this.progress.flags['l4-latch-a'] ? tr('giữ') : tr('mở khi Lumo tới'),
+      b: this.progress.flags['l4-latch-b'] ? tr('giữ') : tr('chờ'),
+      c: this.progress.flags['l4-latch-c'] ? tr('giữ') : tr('chờ'),
+      lumo: lumoState,
+    });
   }
   public showHint():void{
     const stage=this.room==='entry'?'practice':this.room==='relay'?this.progress.flags['l4-latch-a']?'b':'a':!this.progress.flags['l4-latch-b']?'latch-b':!this.progress.flags['l4-ink-revealed']?'ink':!this.hasPower('c')?'c':'exit';
-    if(stage!==this.hintStage){this.hintStage=stage;this.hintIndex=0;} const hints=['Nhấn E ở mốc gọi để đưa Lumo tới ấn bên kia cửa. Mỗi buồng đều có một tay chốt giữ cửa.','Tôi giữ ấn để cậu qua cửa. Cậu nhấn E ở tay chốt, rồi tôi mới sang được nơi khác.','Nhấn E ở mốc đang mở cửa trước mặt, đi qua và gài chốt. Tới hành lang cuối, nhấn F tắt đèn để đọc vạch nền.'];
+    if(stage!==this.hintStage){this.hintStage=stage;this.hintIndex=0;} const hints=[tr('Nhấn E ở mốc gọi để đưa Lumo tới ấn bên kia cửa. Mỗi buồng đều có một tay chốt giữ cửa.'),tr('Tôi giữ ấn để cậu qua cửa. Cậu nhấn E ở tay chốt, rồi tôi mới sang được nơi khác.'),tr('Nhấn E ở mốc đang mở cửa trước mặt, đi qua và gài chốt. Tới hành lang cuối, nhấn F tắt đèn để đọc vạch nền.')];
     this.say([{speaker:'Hệ thống',text:hints[Math.min(this.hintIndex++,2)]}]);
   }
-  public showJournal():void{const e:DialogueLine[]=[];if(this.progress.flags['l4-called-a'])e.push({speaker:'Nhinh',text:'Gọi Lumo tới ấn mở cửa, rồi qua cửa để gài chốt.'});if(this.progress.flags['l4-ink-revealed'])e.push({speaker:'Nhinh',text:'Đèn dịu xuống thì vạch mực trên nền hiện rõ.'});if(this.progress.flags['l4-memo'])e.push({speaker:'Lumo',text:'Vết xoắn trong đường ống gợi lại đêm bão và tiếng gọi ngoài kia.'});this.say([{speaker:'Nhinh',text:'Sổ tay giữ những điều hai đứa đã học.'},...(e.length?e:[{speaker:'Nhinh' as const,text:'Chưa ghi thêm manh mối nào.'}])]);}
+  public showJournal():void{const e:DialogueLine[]=[];if(this.progress.flags['l4-called-a'])e.push({speaker:'Nhinh',text:tr('Gọi Lumo tới ấn mở cửa, rồi qua cửa để gài chốt.')});if(this.progress.flags['l4-ink-revealed'])e.push({speaker:'Nhinh',text:tr('Đèn dịu xuống thì vạch mực trên nền hiện rõ.')});if(this.progress.flags['l4-memo'])e.push({speaker:'Lumo',text:tr('Vết xoắn trong đường ống gợi lại đêm bão và tiếng gọi ngoài kia.')});this.say([{speaker:'Nhinh',text:tr('Sổ tay giữ những điều hai đứa đã học.')},...(e.length?e:[{speaker:'Nhinh' as const,text:tr('Chưa ghi thêm manh mối nào.')}])]);}
   private normalizeProgress():void{
     if(this.progress.flags['l4-latch-c'])this.progress.flags['l4-latch-b']=true;
     if(this.progress.flags['l4-latch-b'])this.progress.flags['l4-latch-a']=true;
@@ -451,7 +458,7 @@ export class PathForTwoLevel {
       graphics.lineStyle(current?1.5:1,current?0xb08a52:0x75664e,0.9);graphics.strokeRect(frame.x,frame.y,frame.width,frame.height);
       graphics.fillStyle(current?0xe0b46a:0x93805c,0.95);
       for(const seal of room.seals)graphics.fillRect(originX+seal.x*scale-2,originY+seal.y*scale-2,4,4);
-      const name=this.scene.add.text(frame.x+frame.width/2,originY+18*scale+14,PATH_ROOMS[room.room].title,
+      const name=this.scene.add.text(frame.x+frame.width/2,originY+18*scale+14,tr(PATH_ROOMS[room.room].title),
         {fontFamily:'Segoe UI, sans-serif',fontSize:'11px',color:current?'#e0c080':'#a99b83'}).setOrigin(0.5,0.5);
       container.add(name);
       if(current){
@@ -531,7 +538,7 @@ export class PathForTwoLevel {
   private stationPlaqueBounds():PathRect{const slot=PATH_SCHEMATIC[this.room];return{x:slot.x-5,y:slot.y-5,width:slot.width+10,height:slot.height+10};}
   private atStationPlaque(x:number,y:number):boolean{return isFootInReach(pathActorBody({x,y}),{rect:this.stationPlaqueBounds(),face:'south',maxGap:10});}
   private stationMapEnabled():boolean{return this.canStartStory()&&!this.heldInteract()&&this.atStationPlaque(this.player.x,this.player.y);}
-  private stationMapPrompt():string|null{return this.stationMapEnabled()?'E · Xem sơ đồ':null;}
+  private stationMapPrompt():string|null{return this.stationMapEnabled()?tr('E · Xem sơ đồ'):null;}
   private heldInteract():boolean{return isPathInteractHeld(this.interactReleasePending,this.isInteractKeyDown());}
   private isInteractKeyDown():boolean{return this.interactKey?.isDown===true;}
   /** A room change arms the guard; E coming back up disarms it, so one held press cannot act twice. */
@@ -551,18 +558,18 @@ export class PathForTwoLevel {
   private doorApproach(id:string,x:number,y:number):boolean{return isPathDoorApproachAllowed(this.room,id,{x,y});}
   private doorPrompt(id:PathMark):string|null{
     if(this.heldInteract()||!this.doorApproach(id,this.player.x,this.player.y))return null;
-    return id==='practice'?'E · Thử cửa thấp':id==='c'?'E · Lên tháp':`E · Qua cửa ${id.toUpperCase()}`;
+    return id==='practice'?tr('E · Thử cửa thấp'):id==='c'?tr('E · Lên tháp'):tr('E · Qua cửa {door}', { door: id.toUpperCase() });
   }
   private doorEnabled(id:PathMark):boolean{return !this.heldInteract()&&this.doorApproach(id,this.player.x,this.player.y);}
   private prompt(id:string):string|null{
     if(this.heldInteract()||!this.elementApproach(id,this.player.x,this.player.y))return null;
     const mark=this.callMark(id);
-    if(mark)return choosePathCallAction(this.assignment,mark,this.callEligible(mark))==='recall'?'E · Gọi Lumo về mốc':PLATE_ROOMS[mark]===this.lumoRoom?'E · Gọi Lumo tới ấn':'E · Gọi Lumo qua ống';
-    if(id==='latch-a')return 'E · Gài chốt A';
-    if(id==='latch-b')return 'E · Gài chốt B';
-    if(id==='latch-c')return this.progress.flags['l4-latch-c']?'E · Gọi Lumo về':'E · Gài chốt cửa ra';
-    if(id==='spiral')return 'E · Đọc vết xoắn';
-    return 'E · Tương tác';
+    if(mark)return choosePathCallAction(this.assignment,mark,this.callEligible(mark))==='recall'?tr('E · Gọi Lumo về mốc'):PLATE_ROOMS[mark]===this.lumoRoom?tr('E · Gọi Lumo tới ấn'):tr('E · Gọi Lumo qua ống');
+    if(id==='latch-a')return tr('E · Gài chốt A');
+    if(id==='latch-b')return tr('E · Gài chốt B');
+    if(id==='latch-c')return this.progress.flags['l4-latch-c']?tr('E · Gọi Lumo về'):tr('E · Gài chốt cửa ra');
+    if(id==='spiral')return tr('E · Đọc vết xoắn');
+    return tr('E · Tương tác');
   }
   private callMark(id:string):'practice'|'a'|'b'|'c'|undefined{
     if(id==='inner-call'||id==='practice-call')return'practice';
@@ -592,7 +599,7 @@ export class PathForTwoLevel {
   }
   /** What still blocks the exit latch, in flow order; undefined means the handle may be used. */
   private latchCBlockReason():string|undefined{
-    if(!this.progress.flags['l4-latch-b'])return'Cửa B cần được gài trước.';
+    if(!this.progress.flags['l4-latch-b'])return tr('Cửa B cần được gài trước.');
     if(!this.progress.flags['l4-ink-revealed'])return INK_NOT_SEEN[0].text;
     if(!this.hasPower('c'))return MARK_NOT_CALLED[0].text;
     return undefined;
@@ -794,11 +801,11 @@ export class PathForTwoLevel {
     // Revalidate the very approach the prompt advertised, and refuse everything while the held-E
     // guard is armed (the room change has just happened).
     if(!this.doorEnabled(id as PathMark))return;
-    if(id==='practice'){if(!this.hasPower('practice'))this.say(this.assignment==='practice'&&this.isTravelling()?STILL_TRAVELLING:MARK_NOT_CALLED);else this.say([{speaker:'Nhinh',text:'Cửa thử đã mở. Mình có thể đi qua rồi gọi Lumo về.'}]);return;}
+    if(id==='practice'){if(!this.hasPower('practice'))this.say(this.assignment==='practice'&&this.isTravelling()?STILL_TRAVELLING:MARK_NOT_CALLED);else this.say([{speaker:'Nhinh',text:tr('Cửa thử đã mở. Mình có thể đi qua rồi gọi Lumo về.')}]);return;}
     if(id==='c'){
       const blockedBy=getPathExitBlock({latchC:this.progress.flags['l4-latch-c']===true,memoRead:this.progress.flags['l4-memo']===true,reunited:this.isActuallyReunited()});
-      if(blockedBy==='latch'){this.say([{speaker:'Nhinh',text:'Mình cần gài chốt C trước khi lên tháp.'}]);return;}
-      if(blockedBy==='memo'){this.say([{speaker:'Nhinh',text:'Mình còn phải đọc vết xoắn để giữ lại ký ức.'}]);return;}
+      if(blockedBy==='latch'){this.say([{speaker:'Nhinh',text:tr('Mình cần gài chốt C trước khi lên tháp.')}]);return;}
+      if(blockedBy==='memo'){this.say([{speaker:'Nhinh',text:tr('Mình còn phải đọc vết xoắn để giữ lại ký ức.')}]);return;}
       if(blockedBy==='companion'){this.say(TOWER_NEEDS_LUMO);return;}
       this.prepareLevelExit();
       return;

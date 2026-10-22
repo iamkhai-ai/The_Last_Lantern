@@ -1,3 +1,4 @@
+const IDENTITY_TR = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text);
 /**
  * Approved dialogue for campaign levels 01–02 (docs/scenario/01…, 02…).
  *
@@ -45,7 +46,8 @@ const STORY = (() => {
 function evaluate(node) {
   const js = ts.transpileModule(`const __value = (${nodeText(node)});`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
-  return new Function(...Object.keys(STORY), `"use strict";\n${js}\nreturn __value;`)(...Object.values(STORY));
+  const scope = { ...STORY, tr: IDENTITY_TR };
+  return new Function(...Object.keys(scope), `"use strict";\n${js}\nreturn __value;`)(...Object.values(scope));
 }
 function methodBody(name) {
   const method = findNode((node) => ts.isMethodDeclaration(node) && nodeText(node.name) === name);
@@ -53,6 +55,7 @@ function methodBody(name) {
   return nodeText(method.body);
 }
 function compileMethod(name, parameters = [], symbols = {}) {
+  symbols = { tr: IDENTITY_TR, ...symbols };
   const names = Object.keys(symbols);
   const js = ts.transpileModule(`const __unit = function (${parameters.join(', ')}) {\n${methodBody(name)}\n};`,
     { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;

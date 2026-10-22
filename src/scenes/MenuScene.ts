@@ -137,7 +137,7 @@ export class MenuScene extends Phaser.Scene {
     this.add.text(38, 337, tr('↑↓ Chọn · Enter Xác nhận'), {
       ...MENU_TEXT_STYLE, fontSize: '10px', color: '#efe6cf',
     }).setDepth(82);
-    this.add.text(620, 347, RELEASE_POLICY.buildTag, {
+    this.add.text(620, 347, tr(RELEASE_POLICY.buildTag), {
       ...MENU_TEXT_STYLE, fontSize: '9px', color: '#d2c4a6',
     }).setOrigin(1, 1).setDepth(82);
 
@@ -193,7 +193,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private soundLabel(): string {
-    return tr(SoundSystem.isMuted() ? 'Âm thanh: Tắt' : 'Âm thanh: Bật');
+    return tr(SoundSystem.isMuted() ? tr('Âm thanh: Tắt') : tr('Âm thanh: Bật'));
   }
 
   private languageLabel(): string {

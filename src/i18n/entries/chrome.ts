@@ -19,7 +19,6 @@ export const CHROME_ENTRIES: readonly CatalogEntry[] = [
   entry('menu.confirmBack', 'Quay lại', 'Back'),
   entry('menu.confirmStart', 'Bắt đầu lại', 'Start over'),
   entry('menu.languageVi', 'Ngôn ngữ: Tiếng Việt', 'Language: English'),
-  entry('menu.languageEn', 'Ngôn ngữ: English', 'Language: English'),
 
   // Pause menu.
   entry('pause.title', 'TẠM DỪNG (PAUSED)', 'PAUSED'),
