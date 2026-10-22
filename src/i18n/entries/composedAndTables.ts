@@ -93,8 +93,6 @@ export const COMPOSED_AND_TABLE_ENTRIES: readonly CatalogEntry[] = [
   entry('compose.path.arrived', 'đã tới {arrival}', 'reached {arrival}'),
   entry('compose.path.status', '{room} · A {a} · B {b} · C {c} · Lumo: {lumo}', '{room} · A {a} · B {b} · C {c} · Lumo: {lumo}'),
   entry('compose.path.door', 'E · Qua cửa {door}', 'E · Through door {door}'),
-  entry('compose.heart.hint', 'Đặt ba tinh thể vào ba hốc quanh Cây Mẹ ({placed}/3).', 'Set the three crystals into the three alcoves around the Mother Tree ({placed}/3).'),
-  entry('compose.heart.feedback', 'Chỉnh đường sáng và giữ Lumo ở ấn: còn {count} điều kiện chưa đúng.', 'Adjust the light path and keep Lumo at the seal: {count} conditions are still wrong.'),
   entry('compose.heart.status', 'Đèn: {lantern} · Tinh thể: {crystals}/3 · Rễ K/H/C: {roots} · G0 {g0} · Lumo: {lumo}', 'Lantern: {lantern} · Crystals: {crystals}/3 · Roots K/H/C: {roots} · G0 {g0} · Lumo: {lumo}'),
   entry('compose.heart.placedNote', 'Tinh thể đã đặt: {crystals}.', 'Crystals placed: {crystals}.'),
   entry('compose.heart.inspectSocket', 'E · Xem lại hốc {label}', 'E · Review the {label} alcove'),

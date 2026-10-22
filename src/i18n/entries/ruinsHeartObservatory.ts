@@ -213,8 +213,7 @@ export const RUINS_HEART_OBSERVATORY_ENTRIES: readonly CatalogEntry[] = [
   entry('l8.objective.confirm', 'Điều kiện đã đủ. Nhấn E ở bệ chính để gài điện thờ.',
     'The conditions are met. Press E at the main pedestal to latch the sanctuary.'),
   entry('l8.objective.retrieve', 'Thu hồi đèn ở bệ chính.', 'Take the lantern back from the main pedestal.'),
-  entry('l8.objective.shadow', 'Tới The Shadow ở phía đông bắc và nhấn E.',
-    'Go to The Shadow in the north-east and press E.'),
+  
   entry('l8.objective.exit', 'Tới cửa Bắc và nhấn E để đi tiếp.', 'Go to the north door and press E to go on.'),
 
   /* ------------------------------------------------------------ Ruins — journal */
@@ -323,22 +322,14 @@ export const RUINS_HEART_OBSERVATORY_ENTRIES: readonly CatalogEntry[] = [
   entry('l9.hint.done.3', 'Nhấn E để đi tiếp đoạn kết.', 'Press E to go on to the ending.'),
 
   /* ------------------------------------------------------------ Heart — objective line */
-  entry('l9.objective.teach', 'Đọc bàn rễ cạnh bệ đèn để nhắc lại ba quy tắc.',
-    'Read the root table beside the lamp stand to review the three rules.'),
-  entry('l9.objective.source', 'Đặt chiếc đèn đang bật lên bệ dẫn sáng ở phía tây.',
-    'Set the lit lantern on the light pedestal to the west.'),
-  entry('l9.objective.sealWait', 'Chờ Lumo tới ấn Hy Vọng và đứng giữ.',
-    'Wait for Lumo to reach the Hope seal and hold it.'),
-  entry('l9.objective.sealCall', 'Gọi Lumo tới ấn Hy Vọng rồi để cậu ấy giữ.',
-    'Call Lumo to the Hope seal, then let him hold it.'),
-  entry('l9.objective.routeReady', 'Ba nhánh đã sẵn sàng. Tới nút rễ trung tâm ở giữa nền đất.',
-    'All three branches are ready. Go to the central root node in the middle of the ground.'),
-  entry('l9.objective.confirm', 'Nhấn E ở nút rễ trung tâm để khóa cấu hình ba nhánh.',
-    'Press E at the central root node to lock the three-branch configuration.'),
-  entry('l9.objective.retrieve', 'Lấy lại chiếc đèn ở bệ dẫn sáng.',
-    'Take the lantern back from the light pedestal.'),
-  entry('l9.objective.overload', 'Nhấn F để tắt đèn — nguồn sáng đang quá tải.',
-    'Press F to put the lantern out — the light source is overloading.'),
+  
+  
+  
+  
+  
+  
+  
+  
   entry('l9.objective.done', 'Đêm đã đi hết. Nhấn E để đi tiếp đoạn kết.',
     'The night is over. Press E to go on to the ending.'),
 

@@ -254,36 +254,16 @@ export const TOWER_GARDEN_CREEK_ENTRIES: readonly CatalogEntry[] = [
   entry('l7.ending.4', 'Mình tới hỏi xem.', 'Let us go and ask.'),
 
   // Objective banner.
-  entry('l7.objective.canopy',
-    'Tới tay màn che trong khe tường phía tây bắc và nhấn E để đóng màn che bể tích quang.',
-    'Go to the shutter handle in the northwest wall gap and press E to close the reservoir shutter.'),
-  entry('l7.objective.practice',
-    'Hai chậu thử ở bãi cỏ phía nam cho thấy cây phản ứng thế nào với đèn. Bật hoặc tắt đèn (F) khi đứng gần chúng.',
-    'The two practice pots on the southern lawn show how the plants answer the lantern. Turn the lantern on or off (F) while standing near them.'),
-  entry('l7.objective.barRaised',
-    'Thanh chắn đang nâng. Vào khe tường phía tây và nhấn E ở tay chốt để giữ nó.',
-    'The bar is rising. Go into the western wall gap and press E at the latch handle to hold it.'),
-  entry('l7.objective.barDark',
-    'Bật đèn (F) cho Hoa Nhật mở, nâng thanh chắn, rồi gài chốt trong khe tường.',
-    'Turn the lantern on (F) so the Sun Flower opens and lifts the bar, then set the latch in the wall gap.'),
-  entry('l7.objective.bridgeLit',
-    'Tắt đèn (F) cho Rễ Nguyệt bắc cầu qua mương, rồi sang vườn ươm.',
-    'Turn the lantern off (F) so the Moon Roots bridge the ditch, then cross to the nursery.'),
-  entry('l7.objective.drain',
-    'Nhấn E ở cống vườn ươm để mở đường nước.',
-    'Press E at the nursery drain to open the waterway.'),
-  entry('l7.objective.crossDark',
-    'Bóng tối đang giữ. Qua cầu rễ giữa vườn tới vườn ươm và mở cống.',
-    'The dark is holding. Cross the root bridge in the middle of the garden to the nursery and open the drain.'),
-  entry('l7.objective.returnLatch',
-    'Gài chốt lối đá phụ cạnh cống để mở lối về không cần ánh sáng.',
-    'Set the side-path latch beside the drain to open a way back that needs no light.'),
-  entry('l7.objective.lumo',
-    'Nói chuyện với Lumo bên mầm cây trong vườn ươm (nhấn E ở mầm cây).',
-    'Talk to Lumo by the sprout in the nursery (press E at the sprout).'),
-  entry('l7.objective.gate',
-    'Tới cổng điện thờ ở góc đông bắc và nhấn E.',
-    'Go to the shrine gate in the northeast corner and press E.'),
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   // Hint ladder — the reservoir shutter.
   entry('l7.hint.canopy.1', 'Cả khu vườn đang được bể tích quang nuôi sáng.', 'The whole garden is being kept lit by the reservoir.'),

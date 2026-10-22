@@ -77,13 +77,12 @@
     }
   ],
   "transparency": "PASS seated cutout retains transparent pixels",
-  "visual_review": "PASS: source, native/2x contacts, root composition, final title/trail and scene overview inspected; limitations in README-task15.md",
-  "runtime": "NOT_RUN",
-  "animation": "NOT_RUN",
+  "visual_review": "See10-art-v2-report.md and runtime-v2; task15 previews are offline historical staging.",
+  "runtime_evidence": "previews/runtime-v2/capture-results.json binds final sprite hashes; regenerate capture after any change.",
+  "animation": "NOT_RUN: sit/stand and clip-to-belt animations do not exist.",
   "limitations": [
     "Single seated pose, no sit/stand or clip-to-belt animation.",
-    "Montage backgrounds preserve existing lighting; runtime dawn/motion treatment remains.",
-    "Daytime trail uses schematic native terrain and existing dawn vegetation.",
-    "Existing carry pose is one standing keyframe; continuous carry-walk animation remains."
+    "Historical montage/trail previews are offline staging; runtime-v2 captures show actual engine composition.",
+    "Existing carry pose remains a standing keyframe."
   ]
 }

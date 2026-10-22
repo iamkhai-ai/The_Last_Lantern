@@ -9,6 +9,67 @@ import { bell, noise, tone } from './synth.ts';
 export type Recipe = (ctx: BaseAudioContext, out: AudioNode, t: number) => void;
 export type EffectSurface = 'grass' | 'soil';
 
+/** A voice that is held until `release`: it fades out over the given time, then disconnects its nodes. */
+export interface HeldVoice { release(fadeSeconds: number): void; }
+export type HeldRecipe = (ctx: BaseAudioContext, out: AudioNode, t: number) => HeldVoice;
+
+/**
+ * Lock tones of Level 08 (scenario 08 §4 "Âm thanh của ba khóa"). The right Sun sits a perfect fourth (3:4) below the
+ * left one, so the three together read as one chord. The Moon voice is shared with the practice slab.
+ */
+export const LOCK_TONE_HZ = { sunLeft: 880, sunRight: 660, moon: 220 } as const;
+
+function heldTone(ctx: BaseAudioContext, out: AudioNode, t: number, o: {
+  freq: number; type: OscillatorType; peak: number; attack: number; lowpass?: number;
+}): HeldVoice {
+  const osc = ctx.createOscillator();
+  osc.type = o.type;
+  osc.frequency.setValueAtTime(o.freq, t);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.linearRampToValueAtTime(o.peak, t + o.attack);
+  const filter = o.lowpass ? ctx.createBiquadFilter() : null;
+  if (filter && o.lowpass) {
+    filter.type = 'lowpass';
+    filter.frequency.value = o.lowpass;
+    osc.connect(filter);
+    filter.connect(gain);
+  } else {
+    osc.connect(gain);
+  }
+  gain.connect(out);
+  osc.start(t);
+  let released = false;
+  return {
+    release(fadeSeconds: number): void {
+      if (released) return;
+      released = true;
+      const now = ctx.currentTime;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.linearRampToValueAtTime(0.0001, now + fadeSeconds);
+      osc.stop(now + fadeSeconds + 0.02);
+      osc.onended = () => {
+        osc.disconnect();
+        filter?.disconnect();
+        gain.disconnect();
+      };
+    },
+  };
+}
+
+/** Left Sun lit: a bright, high, held tone. */
+export const lockSunLeftVoice: HeldRecipe = (ctx, out, t) =>
+  heldTone(ctx, out, t, { freq: LOCK_TONE_HZ.sunLeft, type: 'triangle', peak: 0.05, attack: 0.15, lowpass: 3200 });
+
+/** Right Sun lit: the same bright voice, a perfect fourth lower. */
+export const lockSunRightVoice: HeldRecipe = (ctx, out, t) =>
+  heldTone(ctx, out, t, { freq: LOCK_TONE_HZ.sunRight, type: 'triangle', peak: 0.05, attack: 0.15, lowpass: 3200 });
+
+/** Moon covered (and the lamp lit): a low, held tone. The practice slab shadowed by its column uses this same voice. */
+export const lockMoonVoice: HeldRecipe = (ctx, out, t) =>
+  heldTone(ctx, out, t, { freq: LOCK_TONE_HZ.moon, type: 'triangle', peak: 0.08, attack: 0.2, lowpass: 700 });
+
 export const lanternOn: Recipe = (ctx, out, t) => {
   noise(ctx, out, { t, dur: 0.3, peak: 0.03, attack: 0.06, type: 'bandpass', freq: 500, endFreq: 2200, q: 0.9 });
   bell(ctx, out, t + 0.02, 659.25, { peak: 0.1, dur: 0.7 });

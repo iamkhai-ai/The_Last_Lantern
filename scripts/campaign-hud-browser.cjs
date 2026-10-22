@@ -23,7 +23,7 @@ const assert = require('node:assert/strict');
 const baseUrl = process.env.CAMPAIGN_HUD_BASE_URL || `http://127.0.0.1:${process.argv[2] || process.env.PORT || 5173}/`;
 const CAMPAIGN_KEY = 'last-lantern-campaign-save-v1';
 const LEGACY_KEY = 'last-lantern-save-v1';
-const PULSE_LEVELS = [0, 1, 8, 9];
+const PULSE_LEVELS = [0, 1, 7, 8, 9];
 const CANVAS = { width: 640, height: 360 };
 
 const campaignSave = (level) => ({

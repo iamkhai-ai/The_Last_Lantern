@@ -1,217 +1,97 @@
 {
+  "tool": "built-in image_gen for retained v2 masters; Pillow deterministic assembly",
+  "rights": "New masters generated for this task; project-owned art reused. No third-party stock added.",
+  "image_backend_model": "Not exposed",
   "requirements": [
     {
       "file": "docs/scenario/10-the-heart-of-elaria.md",
-      "sha256": "3537e1508e74e91e5e3258f9605a2a588b2239903ea50b9be5669fd8fe543c25"
+      "sha256": "13b281b3121995bb73d89414fbb267a87c906944b98baf74217378f36ce1f5e6"
     },
     {
-      "file": "tasks/plan.md",
-      "sha256": "d06adda7091d5e0134ad645456d413c31bed23a1380bd04c63858f50ca6b0c61"
+      "file": "docs/scenario-v2/10-the-heart-of-elaria.md",
+      "sha256": "27ce48210bf971d2e3d27f26fd3d438d18a74bbd068480b7114237a4b2ef82dc"
     },
     {
-      "file": "tasks/todo.md",
-      "sha256": "d634efccb50545c95f630f4f64706427f8067bbdef2ebcfffb28fd39971e1740"
+      "file": "docs/implementation/10-layout.md",
+      "sha256": "2d346128edf2a043efcf8271b85359ca0e0443dc55bca9b69587783323e5a492"
+    },
+    {
+      "file": "src/data/heartOfElariaLayout.ts",
+      "sha256": "a8f894a136b92efd6553d164e146f5647f8d15d3ec02a64e953abf8363719263"
+    },
+    {
+      "file": "src/levels/HeartOfElariaLevel.ts",
+      "sha256": "6a6f1f3c3e35d56c8fb704b757ce432de9435867299d3618d1427f044fafdcf5"
+    },
+    {
+      "file": "src/art/CampaignArt.ts",
+      "sha256": "7de050793142a04cc26af37b653e1bce9aa69832a21f81d00f42520a349ae4eb"
+    },
+    {
+      "file": "src/scenes/CampaignScene.ts",
+      "sha256": "955f6840785cfab154116fa28fd6f0df6aa1dd249fd6ed21a5814038ac683a44"
+    },
+    {
+      "file": "src/scenes/EndingScene.ts",
+      "sha256": "c83a205b60d08c03a6019da09895e1433f8c524727f4689dd78105957c2c2a7f"
+    },
+    {
+      "file": "src/systems/CampaignEndingSequence.ts",
+      "sha256": "df8a571db02a0e7ea772528c8d209b19d1b9a1052729edcb389d81de57428a0d"
+    },
+    {
+      "file": "src/data/campaignEnding.ts",
+      "sha256": "c16380f6c31dcdfdc151508938e3405afcd7b8974befe4b301d231c9f4ec769b"
     },
     {
       "file": "assets/levels/10-the-heart-of-elaria/generation-prompts.json",
-      "sha256": "4e8463dde0c05081c47343cdc193cc93306dcdad19b81642a51ef3e771a70134"
+      "sha256": "7d68c9b380d96cb8ecb09009dfea14802da49b525269447e46ad837851ff3569"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/capture_runtime.py",
+      "sha256": "fa600b2bc92eb7edbbb83eb3cc2006e573e97024f2a750ac7c0b0dd31ca4c767"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/prepare_ending.py",
+      "sha256": "164a078ee8b7835501d3db7b8dbcbc6ab6b9e8de22fe33c38d0e2e9c985417b2"
     },
     {
       "file": "assets/levels/10-the-heart-of-elaria/prepare_assets.py",
-      "sha256": "593624703e811f1336f7812b69a09b75164394430c14b5a756d85885f86aadbd"
+      "sha256": "a9ae0990f318d4aa67ec6d8425cfd6d2423e5bf3128c4cfdf36bf7917bf899dd"
     }
   ],
-  "source_crop_boxes": {
-    "trunk": [
-      220,
-      0,
-      420,
-      178
-    ],
-    "canopy": [
-      90,
-      0,
-      550,
-      91
-    ]
-  },
-  "source_normalization": "Original nearest resized to 640x360; scenic patches retain background and are not alpha-extracted sprites.",
   "sources": [
     {
-      "file": "assets/levels/shared/mechanisms/source-lit.png",
+      "file": "assets/levels/10-the-heart-of-elaria/sources/mother-tree-original.png",
       "size": [
-        32,
-        44
+        1672,
+        941
       ],
-      "sha256": "ddaa58151c32609745cc91029c9acdbdd83d9c04b7fb4fef102668f152e6a4c8"
+      "sha256": "e86e70ec82b098de904444056a155d8f0f7c5c3b240be5df289641330ae1b45a"
     },
     {
-      "file": "assets/levels/shared/mechanisms/source-off-source.png",
-      "size": [
-        32,
-        44
-      ],
-      "sha256": "62e4e5ababf526dbb96cb8c377986759d252e93330a4fd41aa009116d36d810d"
-    },
-    {
-      "file": "assets/levels/shared/mechanisms/source-empty.png",
-      "size": [
-        32,
-        44
-      ],
-      "sha256": "1b7867c9f1446b0d4b87a925e1fa55f6e9ae579c82eead23efd486bd2dcd8aed"
-    },
-    {
-      "file": "assets/levels/06-the-sleepless-tower/sprites/G0-to-B.png",
-      "size": [
-        40,
-        48
-      ],
-      "sha256": "db1ef431197417176ab0de01689a95a7ad3fadf670fb68ad65eb9f8397c285d9"
-    },
-    {
-      "file": "assets/levels/shared/mechanisms/mirror-1-slash.png",
-      "size": [
-        32,
-        40
-      ],
-      "sha256": "3f39b72e10a9af077e22b1525c335b92a367601504d6355a06640db81f2df395"
-    },
-    {
-      "file": "assets/levels/shared/beam-splitter/prism-receiving.png",
-      "size": [
-        48,
-        48
-      ],
-      "sha256": "df1eda1961f91bb0e8318624371da69865ad6bbb42c6bff8319631198dbffdef"
-    },
-    {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
-      "size": [
-        32,
-        40
-      ],
-      "sha256": "e6ceda2917d23b4890b02188f1a36f93c243486b63a971de57cfb7bc284f844d"
-    },
-    {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
-      "size": [
-        32,
-        40
-      ],
-      "sha256": "3214a56e79aafe58eb9d2dbfed61fb68abb186e940101ceab10afdd78a16e481"
-    },
-    {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-covered.png",
-      "size": [
-        32,
-        40
-      ],
-      "sha256": "09864457987a08ebdd8b9469d9b4661bc444760155da7dd05a6ea21b4c8b95bf"
-    },
-    {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-lit.png",
-      "size": [
-        32,
-        40
-      ],
-      "sha256": "865a8e3cd5a80b05c41733337f418e7fd1243a4e486b6e798da16221c8fba9d1"
-    },
-    {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
-      "size": [
-        64,
-        88
-      ],
-      "sha256": "229be9a551a4e94c4832a58731aa6596b335fdc938135637aadfe538ca9be1d8"
-    },
-    {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
-      "size": [
-        64,
-        88
-      ],
-      "sha256": "ad001a31d4cad40d41b8d48c010eefd8b5e1cd1b038abf61df0287de5c61f992"
-    },
-    {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-0.png",
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/sanctuary-layout-reference.png",
       "size": [
         640,
         360
       ],
-      "sha256": "6d139933c5593cfc82b7d5985e22241e37b9bcb71acf49042fcb0e2d63f31456"
+      "sha256": "3ce541b5ccb5ce579029117e97505dd4df93ca9a390e99d0c7967a563af1be84"
     },
     {
-      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-on.png",
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/sanctuary-depth-lighting.png",
       "size": [
-        48,
-        48
+        1672,
+        941
       ],
-      "sha256": "ad9ab6816768a3fb2b79905edc22cc94f955cb768afd72a383917e4b97bd71e5"
+      "sha256": "343bc6822116ef77d2edb07b58ef30113c5b3d6097ecdd342eece37249106373"
     },
     {
-      "file": "assets/levels/05-a-path-for-two/sprites/pressure-occupied.png",
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/socket.png",
       "size": [
-        44,
-        28
+        1421,
+        1107
       ],
-      "sha256": "8d2c4e3ea4dcc410e9421e7b00424fbe9f211bcd8ccde5e1098d06cff231f244"
-    },
-    {
-      "file": "assets/levels/05-a-path-for-two/sprites/pressure-empty.png",
-      "size": [
-        44,
-        28
-      ],
-      "sha256": "6a13708fa33ab1e45391de0c9dcd6249adc5122560f1274fe118a2ee6deb5c2c"
-    },
-    {
-      "file": "assets/levels/05-a-path-for-two/sprites/door-open.png",
-      "size": [
-        64,
-        88
-      ],
-      "sha256": "c730d190edcfe2b2873f136a6da444fa7eae28b380d2e59ba4c263a1cbbab7ce"
-    },
-    {
-      "file": "assets/levels/05-a-path-for-two/sprites/door-closed.png",
-      "size": [
-        64,
-        88
-      ],
-      "sha256": "e43e5dc45450cccba9bdda07a0a1712e5314dd4de089d313a3b729a79fd37ac8"
-    },
-    {
-      "file": "assets/levels/05-a-path-for-two/sprites/tube-straight.png",
-      "size": [
-        64,
-        32
-      ],
-      "sha256": "109977ff8fcfbdc10b226c8b1055bec6c24dd50de0816829185e081b399b4142"
-    },
-    {
-      "file": "src/assets/lumo_0.png",
-      "size": [
-        24,
-        24
-      ],
-      "sha256": "9608b0496ea8194e39a20a643f651370070f708382b2fb17e5782662f0f31829"
-    },
-    {
-      "file": "assets/character/nhinh_downright_lantern_on_0.png",
-      "size": [
-        36,
-        42
-      ],
-      "sha256": "e37ba7fc86318afb8582b29a2f9911e286c6fb603108d144914d03e7c9ce9732"
-    },
-    {
-      "file": "assets/character/nhinh_downright_lantern_off_0.png",
-      "size": [
-        36,
-        42
-      ],
-      "sha256": "b720c434ed3d9c33eb8af659f60f1d6f4ae9143fb26a1a7fe00f4fb2146373c5"
+      "sha256": "7b190f4041c3b30a591e0f09bd991753ac23e976195fb0152bed1f34674d5e47"
     },
     {
       "file": "src/assets/crystal_memory.png",
@@ -238,84 +118,104 @@
       "sha256": "9c10bb1bef31ecb11eb431c875456751e2360c9b3a9fd5ca42795bb02f01f7ce"
     },
     {
-      "file": "assets/levels/10-the-heart-of-elaria/sources/mother-tree-original.png",
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/mirrors.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "sha256": "5ddb286238b27edb3cb1562290726f3bf206f6215335c15944e14f1c59555887"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/statues.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "sha256": "8339f2260cb4ed8f6af60f949e20d2945fa0dc9c031f648591961405937d6de6"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/pedestal.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "sha256": "a4826b29889f2da95d5d07952c21c83bb2170ffd6b21d025d728b50d056247fd"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/prism.png",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "2dabb4b159d955b7cad0f2669412291e7338d4c1aea0e0ee2d3fbcd3fbfdc202"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/sun-locks.png",
+      "size": [
+        1954,
+        805
+      ],
+      "sha256": "58ccf2435442e1308227f80dd3891e6a894828e4ff439e45f55189d40e062166"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/moon-locks.png",
+      "size": [
+        1774,
+        887
+      ],
+      "sha256": "2211743a6a4857204aa58df03cdad8840f70c644c7137eea3b3e0b9f2727dfff"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/core-states.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "sha256": "3c424ff53c583b8d2595d8326150095768c917659cc313ae69b1f2c27a94ae83"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/confirmation.png",
+      "size": [
+        2103,
+        748
+      ],
+      "sha256": "e013e4c5d064cfc95ef118a6e880819492c51d3e0f91c6abe6911048f999e197"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/bark-material.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "372aaa5a7b7e210fe1577afbf2b0b8007b7b48634796ceecaf33d9b0dca6aad0"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/wheel.png",
+      "size": [
+        1374,
+        1145
+      ],
+      "sha256": "1557b932f45142782d9de92c00b727adf8dd4a61e16f8e6eee5219ccfd9bdda8"
+    },
+    {
+      "file": "assets/levels/10-the-heart-of-elaria/sources/v2/dawn-light.png",
       "size": [
         1672,
         941
       ],
-      "sha256": "e86e70ec82b098de904444056a155d8f0f7c5c3b240be5df289641330ae1b45a"
+      "sha256": "6ad540b28e30647e71be7aca9ac0e7b3fb81fc9fecaafcb33f03a8022a9206d4"
     },
     {
-      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-dawn-scene-base.png",
+      "file": "assets/levels/10-the-heart-of-elaria/sources/task15-nhinh-seated-original.png",
       "size": [
-        640,
-        360
+        1312,
+        1199
       ],
-      "sha256": "70679eaf38280540d3104475f7a97ac80aae109adb3ea7b1db46181bd29f2f96"
-    },
-    {
-      "file": "assets/levels/shared/characters/the-shadow/sprites/stillness.png",
-      "size": [
-        48,
-        64
-      ],
-      "sha256": "6411f867cb7435d3e3c8cd70c770006a552a26fbec2beaf583ea16d58bf22eda"
-    },
-    {
-      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png",
-      "size": [
-        48,
-        64
-      ],
-      "sha256": "259a365f6705ca9868e42b2aefde9a9985ef0c1d86aacf7da723fc781b865649"
-    },
-    {
-      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png",
-      "size": [
-        48,
-        64
-      ],
-      "sha256": "307c7d33a2a506e196da8b54277c5277f2fedf6537c84ecdc3db3c02fa2050d5"
-    },
-    {
-      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png",
-      "size": [
-        48,
-        64
-      ],
-      "sha256": "99223b9fdbaff1e4a8636d8334fd57e7f10859b5b77cd0576c7905c2f588aaea"
-    },
-    {
-      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png",
-      "size": [
-        48,
-        64
-      ],
-      "sha256": "e9bd74696f45da069b0ff079b0be177e0052fbb546bad1f11145ef240f3547e1"
-    },
-    {
-      "file": "assets/levels/07-the-sleeping-garden/sprites/garden-scene-base.png",
-      "size": [
-        640,
-        360
-      ],
-      "sha256": "ef0f3af17025009b23b5cf2dd09f150cfcac4d9f65a8565de0d1af3c8bb2db3c"
-    },
-    {
-      "file": "assets/levels/04-shattered-moonlit-creek/sprites/creek-scene-base.png",
-      "size": [
-        640,
-        360
-      ],
-      "sha256": "1226e8d2ec40e005cdbc9b5710fded7754712fe33d30394ad17040d517492602"
-    },
-    {
-      "file": "assets/levels/06-the-sleepless-tower/sprites/tower-scene-base.png",
-      "size": [
-        640,
-        360
-      ],
-      "sha256": "0622d77eb66231dc34c17cf8835aa07c43dc6faa5985590378203c21a2ed433d"
+      "sha256": "63c2156a0ce54fee7f424787181e7df96fae123bfc0d131230bdbe20ffc40827"
     }
-  ]
+  ],
+  "background_sha256": "c1658958d52cecd873742e766bf321954ca064f9c28d7f2fa8479967c2999875",
+  "retained_legacy": "Original sanctuary geometry, two unused scenic crops, unused border/beam and leaf come from task14 at base11a40eb. Historical prompt remains in generation-prompts.json.",
+  "depth_polish": "A generated lighting study supplies broad color ratios only; all original background geometry and pixel detail come from sanctuary-layout-reference.png.",
+  "seated_pose": "Original task15 source retained unchanged; low-alpha outliers removed before fitting native36x42."
 }

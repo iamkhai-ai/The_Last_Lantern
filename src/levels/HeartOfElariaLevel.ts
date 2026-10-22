@@ -8,6 +8,7 @@ import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
+import { SoundSystem } from '../systems/SoundSystem';
 import {
   auditHeartStands, canReachHeartElement, deriveHeartPuzzle, getHeartElement, getHeartPrerequisiteFeedback, getHeartSolid,
   getHeartStage, heartArtCandidates, heartArtNativeSize, heartFinalActionAlreadyDone, heartFinalActionSource, heartSealPlateArt, HEART_BEAM_NODES, HEART_BLOCKERS, HEART_BODY, HEART_CONFIRM_ID, HEART_CORE, HEART_ELEMENTS,
@@ -348,31 +349,34 @@ export class HeartOfElariaLevel {
 
   /* ---------------------------------------------------------------- HUD text */
 
+  /**
+   * Goal only (scenario v2 10 §8): "Đặt ba tinh thể." → "Nối ba mạch rễ thành một vòng." → "Lấy lại đèn." →
+   * empty during the overload, so the final F stays the player's own choice. The lamp source, the call, the
+   * mirrors and the confirm live in the H ladder; this row only adds facts (counts, ready).
+   */
   public getObjectiveText(): string {
     const state = this.state();
     const stage = this.stage();
     switch (stage) {
       case 'crystals': {
         const placed = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] === true).length;
-        return tr('Đặt ba tinh thể vào ba hốc quanh Cây Mẹ ({placed}/3).', { placed });
+        return tr('Đặt ba tinh thể ({placed}/3).', { placed });
       }
-      case 'teach': return tr('Đọc bàn rễ cạnh bệ đèn để nhắc lại ba quy tắc.');
-      case 'source': return tr('Đặt chiếc đèn đang bật lên bệ dẫn sáng ở phía tây.');
+      case 'teach':
+      case 'source':
       case 'seal':
-        return this.lumoMode === 'travelling'
-          ? tr('Chờ Lumo tới ấn Hy Vọng và đứng giữ.')
-          : tr('Gọi Lumo tới ấn Hy Vọng rồi để cậu ấy giữ.');
+        return tr('Nối ba mạch rễ thành một vòng.');
       case 'route': {
         // Never claim the branches are ready while any prerequisite is still unmet (including Lumo's
         // live position and the lantern state, which the old filter ignored).
         const missing = getHeartPrerequisiteFeedback(state);
         return missing.length
-          ? tr('Chỉnh đường sáng và giữ Lumo ở ấn: còn {count} điều kiện chưa đúng.', { count: missing.length })
-          : tr('Ba nhánh đã sẵn sàng. Tới nút rễ trung tâm ở giữa nền đất.');
+          ? tr('Nối ba mạch rễ thành một vòng (còn {count} điều kiện).', { count: missing.length })
+          : tr('Ba nhánh đã sẵn sàng.');
       }
-      case 'confirm': return tr('Nhấn E ở nút rễ trung tâm để khóa cấu hình ba nhánh.');
-      case 'retrieve': return tr('Lấy lại chiếc đèn ở bệ dẫn sáng.');
-      case 'overload': return tr('Nhấn F để tắt đèn — nguồn sáng đang quá tải.');
+      case 'confirm': return tr('Ba nhánh đã sẵn sàng.');
+      case 'retrieve': return tr('Lấy lại đèn.');
+      case 'overload': return '';
       default: return tr('Đêm đã đi hết. Nhấn E để đi tiếp đoạn kết.');
     }
   }
@@ -380,6 +384,8 @@ export class HeartOfElariaLevel {
   public getStatusText(): string {
     const state = this.state();
     const lantern = this.lantern.lanternPlaced ? (this.lantern.lanternOn ? tr('trên bệ') : tr('trên bệ (đã tắt)')) : this.lantern.lanternOn ? tr('trên tay') : tr('trên tay (đã tắt)');
+    // Scenario v2 10 §8: during the overload the status row shows the lamp only.
+    if (this.stage() === 'overload') return tr('Đèn: {lantern}', { lantern });
     const roots = ['memory', 'hope', 'balance'].map((id) => (state[id as HeartBranchId] ? '●' : '○')).join('');
     return tr('Đèn: {lantern} · Tinh thể: {crystals}/3 · Rễ K/H/C: {roots} · G0 {g0} · Lumo: {lumo}', {
       lantern,
@@ -391,6 +397,8 @@ export class HeartOfElariaLevel {
   }
 
   public getLumoStatusText(): string {
+    // The overload keeps the HUD to the lamp alone: no call prompt beside the final choice.
+    if (this.stage() === 'overload') return '';
     return this.lumoMode === 'holding' ? tr('LUMO · đang giữ ấn Hy Vọng')
       : this.lumoMode === 'travelling' ? tr('LUMO · đang tới ấn')
         : tr('LUMO · E gọi tới ấn');
@@ -450,6 +458,8 @@ export class HeartOfElariaLevel {
     const source = heartFinalActionSource(state, lamp, nearPedestal);
     if (source) {
       this.lanternKeyTime = now;
+      // The final F is the only commit that turns a lit lamp off, so it owns the click; restore never plays it.
+      SoundSystem.playLanternToggle(false);
       this.commitFinalExtinguish(source);
       return;
     }
@@ -513,6 +523,7 @@ export class HeartOfElariaLevel {
     // the seal powers exactly when the mode flips to holding, and never while he is still travelling.
     if (this.lumoMode === 'travelling' && distance <= HEART_SEAL_RADIUS) {
       this.lumoMode = 'holding';
+      SoundSystem.playLightPulse();
       this.progress.flags['l9-at-heart'] = true;
       this.save();
       this.say([
@@ -534,6 +545,7 @@ export class HeartOfElariaLevel {
       return;
     }
     this.lumoMode = 'travelling';
+    SoundSystem.playUiClick();
     this.progress.flags['l9-called-heart'] = true;
     this.save();
     this.say([
@@ -551,6 +563,7 @@ export class HeartOfElariaLevel {
     if (allLive && this.progress.flags['l9-branch-stable'] !== true) {
       this.progress.flags['l9-branch-stable'] = true;
       this.save();
+      SoundSystem.playPuzzleSolved();
       this.say(STABLE_LINES);
       return;
     }
@@ -670,7 +683,7 @@ export class HeartOfElariaLevel {
       if (standing || element.id === HEART_CONFIRM_ID || element.id === HEART_MAT_ID || element.id === HEART_SEAL_ID) this.protected.push(image);
     }
     // The prism is authored inside G0's mount: aiming G0 into it is the scenario's split route.
-    const prismKey = getSharedMechanismKey('prism-dark');
+    const prismKey = this.artKey('prism-dark') ?? getSharedMechanismKey('prism-dark');
     const prism = prismKey && this.scene.textures.exists(prismKey)
       ? this.track(this.scene.add.image(HEART_BEAM_NODES.prism.x, HEART_BEAM_NODES.prism.y, prismKey).setDepth(this.depthAt(260) + 0.2))
       : null;
@@ -780,6 +793,7 @@ export class HeartOfElariaLevel {
         }
         this.progress.flags[`l9-${branch}`] = true;
         this.save();
+        SoundSystem.playRuneActivate(['memory', 'hope', 'balance'].indexOf(branch) + 1);
         const remaining = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] !== true);
         this.refresh();
         if (remaining.length === 0) this.say(PLACED_LINES);
@@ -846,10 +860,12 @@ export class HeartOfElariaLevel {
           this.progress.flags['l9-at-heart'] = false;
           this.save();
           this.refresh();
+          SoundSystem.playMechanismLatch();
           this.say(LATCHED_LINES);
           return;
         }
         const missing = getHeartPrerequisiteFeedback(state);
+        SoundSystem.playPuzzleError();
         this.say([{
           speaker: 'Nhinh',
           text: missing.length ? tr('Còn thiếu: {missing}.', { missing: missing.join('; ') }) : tr('Ba nhánh chưa cùng giữ được cấu hình.'),
@@ -902,6 +918,7 @@ export class HeartOfElariaLevel {
           return;
         }
         this.progress.counters['heart-g0'] = (this.value('heart-g0') + 1) % 2;
+        SoundSystem.playMirrorRotate();
         this.save();
         this.refresh();
         this.say([{ speaker: 'Hệ thống', text: this.value('heart-g0') === 0
@@ -919,6 +936,7 @@ export class HeartOfElariaLevel {
         const counter = element.id === 'heart-memory-mirror' ? 'heart-memory'
           : element.id === 'heart-balance-mirror' ? 'heart-balance' : 'heart-statue';
         this.progress.counters[counter] = (this.value(counter) + 1) % 4;
+        SoundSystem.playMirrorRotate();
         this.save();
         this.refresh();
         if (element.id === 'heart-statue') {
@@ -956,8 +974,8 @@ export class HeartOfElariaLevel {
 
   /**
    * The core's art for a state, from the live state (also used for the first frame, so a restored save never flashes
-   * another state). `core-dawn` is byte-identical to `core-night`, so the dawn is read from the dawn lighting overlay
-   * (shown from the dawn transition on), not from a second picture.
+   * another state). The local dawn sprite has warm bark and a new leaf; the dawn lighting overlay provides the
+   * scene-wide transition without changing the core's authored size or anchor.
    */
   private coreArtName(state: HeartPuzzleState): string {
     return this.completed || this.progress.flags['l9-complete'] === true ? 'core-dawn'
@@ -1006,7 +1024,8 @@ export class HeartOfElariaLevel {
     if (g0Element) this.swapArt(HEART_G0_ID, `mirror_${state.g0Split ? 0 : 1}`, g0Element);
     const prism = this.images.get('heart-prism');
     if (prism) {
-      const prismKey = getSharedMechanismKey(state.light && state.g0Split ? 'prism-receiving' : 'prism-dark');
+      const prismName = state.light && state.g0Split ? 'prism-receiving' : 'prism-dark';
+      const prismKey = this.artKey(prismName) ?? getSharedMechanismKey(prismName);
       if (prismKey && this.scene.textures.exists(prismKey) && prism.texture.key !== prismKey) prism.setTexture(prismKey);
     }
     const memoryMirrorElement = getHeartElement('heart-memory-mirror');

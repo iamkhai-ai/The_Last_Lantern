@@ -18,6 +18,8 @@ export class SoundSystem {
   private static foot: 0 | 1 = 0;
   private static ambienceTheme: AmbienceTheme | null = null;
   private static ambience: AmbienceHandle | null = null;
+  /** Held voices by key (a lock tone, a practice slab tone). Each one sounds until its condition is released. */
+  private static held = new Map<string, effects.HeldVoice>();
 
   /**
    * The audio context, built on first use. Unlike `getContext`, it exists while muted so the ambience keeps running
@@ -226,5 +228,36 @@ export class SoundSystem {
 
   public static playWaterRelease(): void {
     this.play(effects.waterRelease);
+  }
+
+  /**
+   * Holds one voice under `key` while `on` is true and releases it with a short fade the moment `on` is false. Calling it
+   * again with the same state changes nothing. It starts nothing while muted or without an audio context, and it tries
+   * again on the next call, so a tone wanted during mute begins once the sound is back on.
+   */
+  public static setHeldTone(key: string, on: boolean, voice: effects.HeldRecipe, fadeSeconds = 0.15): void {
+    const current = this.held.get(key);
+    if (!on) {
+      if (!current) return;
+      this.held.delete(key);
+      try { current.release(fadeSeconds); } catch { /* audio teardown is never worth an error */ }
+      return;
+    }
+    if (current) return;
+    const ctx = this.getContext();
+    if (!ctx || !this.buses) return;
+    try {
+      this.held.set(key, voice(ctx, this.buses.sfx, ctx.currentTime + 0.005));
+    } catch {
+      // Audio is never worth an error in the game loop.
+    }
+  }
+
+  /** Releases every held voice (level teardown). */
+  public static releaseHeldTones(fadeSeconds = 0.15): void {
+    for (const voice of this.held.values()) {
+      try { voice.release(fadeSeconds); } catch { /* audio teardown is never worth an error */ }
+    }
+    this.held.clear();
   }
 }

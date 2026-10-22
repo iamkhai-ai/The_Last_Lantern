@@ -199,13 +199,21 @@ function runRegistered(registryId, scene, symbols = {}) {
   compiled.get(key)(scene);
 }
 
+/** Sound ports the shipped Level 10 bodies call. The checks prove state, not audio, so every port is a no-op. */
+const HEART_SOUND = {
+  SoundSystem: {
+    playUiClick() {}, playLightPulse() {}, playPuzzleSolved() {}, playRuneActivate() {},
+    playMirrorRotate() {}, playPuzzleError() {}, playMechanismLatch() {}, playLanternToggle() {},
+  },
+};
+
 let heartRecall = null;
 /**
  * Level 10's recall path — the shipped `callLumoToSeal()` body — run against a fake `this`. The recall
  * branch is the one the reload depends on, so this proves the real flag synchronisation, not a copy.
  */
 function runHeartRecall(scene) {
-  if (!heartRecall) heartRecall = bind(methodSource('callLumoToSeal', heartSourceFile, 'HeartOfElariaLevel'), NO_SYMBOLS, 'HeartOfElariaLevel.callLumoToSeal()');
+  if (!heartRecall) heartRecall = bind(methodSource('callLumoToSeal', heartSourceFile, 'HeartOfElariaLevel'), HEART_SOUND, 'HeartOfElariaLevel.callLumoToSeal()');
   return heartRecall(scene);
 }
 
@@ -216,7 +224,7 @@ let heartDrive = null;
  */
 function runHeartDrive(scene) {
   if (!heartDrive) {
-    heartDrive = bind(methodSource('driveLumo', heartSourceFile, 'HeartOfElariaLevel'), { Phaser: PHASER_PORTS, dt: 16, HEART_SEAL_RADIUS }, 'HeartOfElariaLevel.driveLumo()');
+    heartDrive = bind(methodSource('driveLumo', heartSourceFile, 'HeartOfElariaLevel'), { Phaser: PHASER_PORTS, dt: 16, HEART_SEAL_RADIUS, ...HEART_SOUND }, 'HeartOfElariaLevel.driveLumo()');
   }
   return heartDrive(scene);
 }
@@ -229,6 +237,7 @@ function runHeartDrive(scene) {
 const LATCH_SYMBOLS = {
   HEART_MAT_ID, HEART_SEAL_ID, HEART_CONFIRM_ID, LATCHED_LINES: [], getHeartPrerequisiteFeedback,
   element: { id: HEART_CONFIRM_ID },
+  ...HEART_SOUND,
 };
 
 let heartLatch = null;
@@ -675,6 +684,8 @@ function makeFrameScene(level, { controllers = [] } = {}) {
     scene[field] = {
       update: (dt) => calls.controller.push({ field, level, dt }),
       getProtectedPromptBounds: () => [],
+      // Mirrors the real controller API: the scene's input lock reads it every frame (Level 08's demonstration owns controls).
+      isControlLocked: () => false,
     };
   }
   return scene;
@@ -754,7 +765,7 @@ function makeHeartFinalScene({ inHand, placed, on = true, latched = true, x = 30
   return scene;
 }
 const pressHeartF = (scene) => bind(methodSource('handleLanternKey', heartSourceFile, 'HeartOfElariaLevel'),
-  { heartFinalActionSource, getHeartElement, canReachHeartElement }, 'HeartOfElariaLevel.handleLanternKey()')(scene);
+  { heartFinalActionSource, getHeartElement, canReachHeartElement, ...HEART_SOUND }, 'HeartOfElariaLevel.handleLanternKey()')(scene);
 
 /* ------------------------------------------------------------------ *
  * 4a. Hint ladder, level 7 -> 8 teardown, completed-save redirect, caption, Lumo clamp

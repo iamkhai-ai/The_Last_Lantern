@@ -14,7 +14,11 @@ import {
   RUINS_SHADOW, ruinsNextStep, ruinsShadowPhase, ruinsShadowPoseFor, ruinsShadowSpotFor,
   ruinsShadowFootprintAt, ruinsShadowSolidEnabled, ruinsShadowWalkResume,
   RUINS_SHADOW_SOLID_EPS, RUINS_SHADOW_WALK_COUNTER, RUINS_SHADOW_WALK_START,
+  RUINS_NAME, RUINS_SHADOW_DEMO, ruinsIsInsideFloor, ruinsPulseReachesName, ruinsShadowDemoEligible,
+  ruinsShadowNearStatue, ruinsMoonShadowed, ruinsNormalizeNotch, ruinsTurnPrompt, RUINS_LATCHED_TURN_PROMPT,
+  RUINS_STATUE_NOTCHES, RUINS_SHADOW_NEAR_STATUE_PX,
 } from '../src/data/ruinsOfTwoHalvesLayout.ts';
+import { LOCK_TONE_HZ, lockMoonVoice } from '../src/audio/effects.ts';
 
 /* -------------------------------------------------------------------------- */
 /* 1. body constants                                                          */
@@ -859,21 +863,430 @@ console.log('Level 08 Shadow state, spots, walk and exit-guidance checks passed.
   const showHint = new Function('HINT_LADDER', 'tr', `"use strict";\n${showHintJs}\nreturn __unit;`)(HINT_LADDER, (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text));
 
   const ALL_MET = { lightActive: true, leftAimed: true, rightAimed: true, moonCovered: true };
-  const presses = (stages, puzzle = ALL_MET) => {
+  // The fake level answers the two hooks showHint now calls: the shared demonstration eligibility and its start.
+  const runHints = (stages, puzzle = ALL_MET, eligible = false, lanternPlaced = true) => {
     const level = {
-      stage: '', puzzle, hintStage: '', hintIndex: 0, spoken: [],
+      stage: '', puzzle, hintStage: '', hintIndex: 0, spoken: [], demos: 0, lantern: { lanternPlaced },
       getStage() { return this.stage; }, getPuzzleState() { return this.puzzle; },
-      say(lines) { this.spoken.push(lines[0].text); },
+      isShadowDemoEligible() { return eligible; }, startShadowDemo() { this.demos += 1; },
+      say(lines, done) { this.spoken.push(lines[0].text); if (done) done(); },
     };
     for (const stage of stages) { level.stage = stage; showHint.call(level); }
-    return level.spoken;
+    return level;
   };
+  const presses = (stages, puzzle = ALL_MET) => runHints(stages, puzzle, false).spoken;
   assert.deepEqual(presses(['suns', 'suns', 'moon', 'moon']), [MUC[0], MUC[1], MUC[2], MUC[2]], 'suns then moon: Mức 1, 2, 3 verbatim, then holds Mức 3');
   assert.deepEqual(presses(['suns', 'moon', 'moon']), [MUC[0], MUC[1], MUC[2]], 'the moon step continues the suns ladder');
   const missingLeft = { ...ALL_MET, leftAimed: false };
   const named = presses(['suns', 'suns'], missingLeft);
   assert.equal(named[0], MUC[0], 'the first press is verbatim Mức 1');
   assert.ok(named[1].startsWith(`${MUC[1]} Còn thiếu:`), 'a later press keeps Mức 2 and names the missing condition');
+  console.log('Level 08 H ladder checks passed (suns and moon share the scenario Mức 1-3, verbatim and in order).');
+
+  /* ------------------------------------------------------------------------ */
+  /* 17. H ladder asks for the demonstration at Mức 2 or 3 (same eligibility) */
+  /* ------------------------------------------------------------------------ */
+  const ladderOf = (stages, eligible) => runHints(stages, ALL_MET, eligible);
+  const eligibleRun = ladderOf(['suns', 'suns'], true);
+  assert.equal(eligibleRun.demos, 1, 'an eligible Mức 2 request starts the demonstration once, after its hint line');
+  assert.equal(eligibleRun.spoken.length, 2, 'the Mức 2 line is still said before the demonstration begins');
+  const firstPressOnly = ladderOf(['suns'], true);
+  assert.equal(firstPressOnly.demos, 0, 'Mức 1 never starts the demonstration, even when eligible');
+  const ineligibleRun = ladderOf(['suns', 'suns', 'moon'], false);
+  assert.equal(ineligibleRun.demos, 0, 'an ineligible Mức 2 or 3 request starts nothing');
+  assert.equal(ineligibleRun.spoken.length, 3, 'an ineligible request keeps the existing hint line');
+
+  // Playtest fix 3: every open condition on the suns step is named, not only the first one that fails.
+  const bothMirrorsOpen = runHints(['suns', 'suns'], { ...ALL_MET, leftAimed: false, rightAimed: false });
+  assert.equal(bothMirrorsOpen.spoken[1],
+    `${MUC[1]} Còn thiếu: gương trái chưa hướng tia lên khóa Nhật trái, gương phải chưa hướng tia lên khóa Nhật phải.`,
+    'with both mirrors open the suns hint names both');
+  const everythingOpen = runHints(['suns', 'suns'], { ...ALL_MET, leftAimed: false, rightAimed: false, lightActive: false }, false, false);
+  assert.equal(everythingOpen.spoken[1],
+    `${MUC[1]} Còn thiếu: đèn chưa nằm trên bệ, gương trái chưa hướng tia lên khóa Nhật trái, gương phải chưa hướng tia lên khóa Nhật phải.`,
+    'with the lamp off the altar and both mirrors open the suns hint names all three');
+  const onlyLamp = runHints(['suns', 'suns'], { ...ALL_MET }, false, false);
+  assert.equal(onlyLamp.spoken[1], `${MUC[1]} Còn thiếu: đèn chưa nằm trên bệ.`, 'a lamp off the altar is named on its own');
+  const moonStep = runHints(['moon', 'moon'], { ...ALL_MET, moonCovered: false });
+  assert.equal(moonStep.spoken[1], `${MUC[1]} Còn thiếu: bóng tượng chưa phủ khóa Nguyệt.`, 'the moon step keeps its own single check');
 }
 
-console.log('Level 08 H ladder checks passed (suns and moon share the scenario Mức 1-3, verbatim and in order).');
+/* -------------------------------------------------------------------------- */
+/* 18. the optional demonstration: eligibility, stand and routes              */
+/* -------------------------------------------------------------------------- */
+
+const eligibleBase = { lanternPlaced: true, lanternOn: true, sunsLit: 2, moonCovered: false, latched: false, demoSeen: false };
+assert.equal(ruinsShadowDemoEligible(eligibleBase), true,
+  'the demonstration is eligible with the lamp lit on the altar, both Suns lit, the Moon free, no latch and no earlier view');
+assert.equal(ruinsShadowDemoEligible({ ...eligibleBase, lanternPlaced: false }), false, 'a lamp still in hand is not eligible');
+assert.equal(ruinsShadowDemoEligible({ ...eligibleBase, lanternOn: false }), false, 'a lamp switched off is not eligible');
+assert.equal(ruinsShadowDemoEligible({ ...eligibleBase, sunsLit: 1 }), false, 'one Sun lit is not enough');
+assert.equal(ruinsShadowDemoEligible({ ...eligibleBase, sunsLit: 0 }), false, 'no Sun lit is not enough');
+assert.equal(ruinsShadowDemoEligible({ ...eligibleBase, moonCovered: true }), false, 'a covered Moon means the puzzle is answered already');
+assert.equal(ruinsShadowDemoEligible({ ...eligibleBase, latched: true }), false, 'a latched temple never replays the demonstration');
+assert.equal(ruinsShadowDemoEligible({ ...eligibleBase, demoSeen: true }), false, 'the demonstration plays once per save');
+// The same answer from live puzzle input, with no stored flag involved.
+const liveEligible = (over) => {
+  const input = { lanternPlaced: true, lanternOn: true, statue: 1, leftMirror: 1, rightMirror: 0, ...over };
+  const puzzle = deriveRuinsPuzzleState(input);
+  return ruinsShadowDemoEligible({
+    lanternPlaced: input.lanternPlaced, lanternOn: input.lanternOn, sunsLit: puzzle.sunsLit,
+    moonCovered: puzzle.moonCovered, latched: false, demoSeen: false,
+  });
+};
+assert.equal(liveEligible({}), true, 'statue on notch 1 with both mirrors aimed: eligible');
+assert.equal(liveEligible({ statue: 0 }), false, 'the solving statue covers the Moon: not eligible');
+assert.equal(liveEligible({ leftMirror: 3 }), false, 'a missing Sun: not eligible');
+assert.equal(liveEligible({ lanternOn: false }), false, 'a lamp switched off in the live state: not eligible');
+
+const demoGround = RUINS_SHADOW_DEMO.ground;
+const flowSegment = RUINS_BEAMS.centreVisible[1];
+assert.equal(demoGround.x, flowSegment.from.x, 'the demonstration spot sits on the centre light flow');
+assert.ok(demoGround.y >= flowSegment.to.y && demoGround.y <= flowSegment.from.y,
+  'the demonstration spot lies on the flow segment between the statue and the Moon lock');
+const demoFootprint = ruinsShadowFootprintAt(demoGround);
+assert.ok(ruinsIsInsideFloor(demoFootprint), 'the demonstration footprint is inside the floor band');
+assert.deepEqual(RUINS_BLOCKERS.filter((blocker) => ruinsRectsOverlap(demoFootprint, blocker)).map((blocker) => blocker.id), [],
+  'the demonstration footprint overlaps no wall, prop or solid');
+for (const stand of RUINS_STANDS) {
+  // the nearest footprint point to the stand centre must lie outside the stand's circle
+  const nearestX = Math.max(demoFootprint.x, Math.min(stand.x, demoFootprint.x + demoFootprint.width));
+  const nearestY = Math.max(demoFootprint.y, Math.min(stand.y, demoFootprint.y + demoFootprint.height));
+  assert.ok(Math.hypot(stand.x - nearestX, stand.y - nearestY) > stand.radius,
+    `the demonstration footprint keeps the ${stand.id} stand clear`);
+  assert.ok(Math.hypot(stand.x - demoGround.x, stand.y - demoGround.y) >= 18 + stand.radius,
+    `the demonstration spot is apart from the ${stand.id} stand`);
+}
+// The statue's north passage stays open for the foot body while he stands on the flow.
+assert.equal(isRuinsPositionSafe({ x: 320, y: 72 }, [demoFootprint]), true,
+  'the passage north of the statue stays open for the foot body during the demonstration');
+
+assert.deepEqual(RUINS_SHADOW_DEMO.outRoute.at(-1), demoGround, 'the walk out ends on the demonstration spot');
+assert.deepEqual(RUINS_SHADOW_DEMO.backRoute.at(-1), RUINS_SHADOW.spots.guard.ground, 'the walk back ends on the guard spot');
+{
+  const legs = [
+    [RUINS_SHADOW.spots.guard.ground, ...RUINS_SHADOW_DEMO.outRoute],
+    [demoGround, ...RUINS_SHADOW_DEMO.backRoute],
+  ];
+  let sampled = 0;
+  for (const leg of legs) {
+    for (let index = 1; index < leg.length; index += 1) {
+      const from = leg[index - 1];
+      const to = leg[index];
+      const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 8);
+      for (let step = 0; step <= steps; step += 1) {
+        const ground = { x: from.x + ((to.x - from.x) * step) / steps, y: from.y + ((to.y - from.y) * step) / steps };
+        sampled += 1;
+        const footprint = ruinsShadowFootprintAt(ground);
+        const where = `${ground.x.toFixed(1)},${ground.y.toFixed(1)}`;
+        assert.deepEqual(RUINS_BLOCKERS.filter((blocker) => ruinsRectsOverlap(footprint, blocker)).map((blocker) => blocker.id), [],
+          `the Shadow at ${where} overlaps no solid on the demonstration route`);
+        const reached = floodFromSpawn([footprint]);
+        for (const target of openTargets) {
+          assert.equal(reached.some((point) => Math.hypot(point.x - target.x, point.y - target.y) <= 22), true,
+            `with the Shadow at ${where} on the demonstration route, ${target.id} stays reachable`);
+        }
+      }
+    }
+  }
+  assert.ok(sampled > 20, `the demonstration routes are sampled along their length (${sampled} samples)`);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 19. the carved name, its reveal and the lamp feedback                       */
+/* -------------------------------------------------------------------------- */
+
+assert.equal(RUINS_NAME.art, 'inscription-under-statue');
+assert.deepEqual(RUINS_NAME.centre, { x: 320, y: 222 }, 'the carved name sits under the statue base');
+assert.equal(ruinsPulseReachesName({ x: 320, y: 222 - 56 }), true, 'a Pulse exactly 56px above the name reveals it');
+assert.equal(ruinsPulseReachesName({ x: 320, y: 222 + 57 }), false, 'a Pulse 57px below the name does not');
+assert.equal(ruinsPulseReachesName({ x: 320 + 57, y: 222 }), false, 'a Pulse 57px beside the name does not');
+assert.equal(ruinsPulseReachesName({ x: 320, y: 241 }), true, 'the statue stand reaches the name');
+assert.equal(ruinsPulseReachesName({ x: 120, y: 288 }), false, 'the spawn is too far from the name');
+{
+  const sprite = readAlphaMask(new URL('../assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/inscription-under-statue.png', import.meta.url));
+  assert.equal(sprite.width, 48, 'the carved name decal is 48px wide');
+  assert.equal(sprite.height, 12, 'the carved name decal is 12px tall');
+  assert.ok(RUINS_NAME.centre.y - sprite.height / 2 >= RUINS_PROPS.statue.groundAnchor.y,
+    'the decal sits just under the statue base (its top edge is at or below the base)');
+}
+assert.equal(ruinsShadowNearStatue(RUINS_SHADOW.spots.guard.ground), true, 'the guard spot is inside the reveal stillness radius');
+assert.equal(ruinsShadowNearStatue({ x: 320 + RUINS_SHADOW_NEAR_STATUE_PX, y: 212 }), true,
+  `a spot exactly ${RUINS_SHADOW_NEAR_STATUE_PX}px from the statue base holds him still`);
+assert.equal(ruinsShadowNearStatue({ x: 320 + RUINS_SHADOW_NEAR_STATUE_PX + 1, y: 212 }), false,
+  `a spot ${RUINS_SHADOW_NEAR_STATUE_PX + 1}px away does not`);
+
+/* -------------------------------------------------------------------------- */
+/* 20. HUD and blocked-exit texts, read from the shipped methods              */
+/* -------------------------------------------------------------------------- */
+
+const methodNode = (name) => {
+  let found;
+  const visit = (node) => {
+    if (found) return;
+    if (ts.isMethodDeclaration(node) && node.name.getText(levelSourceFile) === name) { found = node; return; }
+    ts.forEachChild(node, visit);
+  };
+  visit(levelSourceFile);
+  assert.ok(found?.body, `the Ruins level still authors ${name}()`);
+  return found;
+};
+const levelText = readFileSync(new URL('../src/levels/RuinsOfTwoHalvesLevel.ts', import.meta.url), 'utf8');
+const levelSourceFile = ts.createSourceFile('RuinsOfTwoHalvesLevel.ts', levelText, ts.ScriptTarget.Latest, true);
+/** Compiles one shipped method into a callable; `injected` supplies the layout functions the body names. */
+const shippedMethod = (name, injected = {}) => {
+  const node = methodNode(name);
+  const params = node.parameters.map((parameter) => parameter.name.getText(levelSourceFile)).join(', ');
+  const js = ts.transpileModule(`const __unit = function (${params}) ${node.body.getText(levelSourceFile)};`,
+    { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
+  // Identity tr(): the assertions below check the authored Vietnamese copy, which is the catalogue key.
+  const bound = { tr: (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text), ...injected };
+  return new Function(...Object.keys(bound), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(bound));
+};
+
+const objectiveFor = (stage, puzzle = deriveRuinsPuzzleState(solved)) => shippedMethod('getObjectiveText').call({
+  getStage: () => stage, getPuzzleState: () => puzzle,
+});
+const shadowObjective = objectiveFor('shadow');
+assert.equal(shadowObjective, 'Tới The Shadow ở phía tây bắc và nhấn E.', 'the shadow objective names the north-west stand');
+assert.ok(!/đông bắc/.test(shadowObjective), 'the shadow objective no longer says north-east');
+assert.equal(objectiveFor('retrieve'), 'Thu hồi đèn ở bệ chính.', 'the retrieve objective keeps the scenario wording');
+assert.equal(objectiveFor('place'), 'Đặt đèn lên bệ chính ở phía đông nam sân.', 'the place objective names the south-east pedestal');
+
+// The direction words must agree with the stands the player walks to (measured from the statue base, the courtyard centre).
+{
+  const base = RUINS_PROPS.statue.groundAnchor;
+  const shadowStand = ruinsShadowSpotFor('relaxed').stand;
+  assert.ok(shadowStand.x < base.x && shadowStand.y < base.y, 'the Shadow stand the objective names is west and north of the statue base');
+  const pedestalStand = RUINS_PROPS.pedestal.stand;
+  assert.ok(pedestalStand.x > base.x && pedestalStand.y > base.y, 'the pedestal stand the objective names is east and south of the statue base');
+}
+
+const exitTexts = (input, puzzle) => {
+  const spoken = [];
+  const fake = {
+    getExitInput: () => input, getPuzzleState: () => puzzle,
+    say(lines) { spoken.push(lines[0]); },
+    progress: { counters: {} }, save() {}, lumo: { sprite: { x: 0, y: 0 } }, nextLevel() { spoken.push('NEXT'); },
+  };
+  shippedMethod('useExit', { getRuinsExitBlock, ruinsNextStep }).call(fake);
+  return spoken;
+};
+const notLatched = { latched: false, lanternRetrieved: false, metShadow: false };
+const lampOnAltar = { latched: true, lanternRetrieved: false, metShadow: false };
+const beforeShadow = { latched: true, lanternRetrieved: true, metShadow: false };
+assert.deepEqual(exitTexts(notLatched, deriveRuinsPuzzleState(solved)),
+  [{ speaker: 'Nhinh', text: 'Mọi khóa đã đúng. Nhấn E ở mép nam bệ chính để gài điện thờ.' }], 'the latch refusal names only the confirm step');
+assert.deepEqual(exitTexts(notLatched, deriveRuinsPuzzleState({ ...solved, lanternPlaced: false })),
+  [{ speaker: 'Nhinh', text: 'Cửa Bắc còn khóa. Bệ chính đang trống: đứng ở mép nam bệ và nhấn E để đặt đèn lên.' }],
+  'the latch refusal names the placing step when the pedestal is empty');
+assert.deepEqual(exitTexts(notLatched, deriveRuinsPuzzleState({ ...solved, leftMirror: 3 })),
+  [{ speaker: 'Nhinh', text: 'Cửa Bắc còn khóa. Hai khóa Nhật chưa cùng sáng: xoay các gương (E ở mép nam từng gương).' }],
+  'the latch refusal names the Sun step');
+assert.deepEqual(exitTexts(notLatched, deriveRuinsPuzzleState({ ...solved, statue: 1 })),
+  [{ speaker: 'Nhinh', text: 'Cửa Bắc còn khóa. Khóa Nguyệt chưa nằm trong bóng: xoay tượng giữa sân (E ở mép nam tượng).' }],
+  'the latch refusal names the Moon step');
+assert.deepEqual(exitTexts(lampOnAltar, deriveRuinsPuzzleState(solved)),
+  [{ speaker: 'Nhinh', text: 'Đèn vẫn nằm trên bệ chính. Đứng ở mép nam bệ và nhấn E để thu hồi trước khi lên cầu thang.' }],
+  'the lamp refusal is unchanged');
+const shadowRefusal = exitTexts(beforeShadow, deriveRuinsPuzzleState(solved));
+assert.equal(shadowRefusal.length, 1);
+assert.equal(shadowRefusal[0].speaker, 'Lumo');
+assert.equal(shadowRefusal[0].text, 'The Shadow đang đứng cạnh luống mầm, phía tây bắc sân. Mình nhấn E để nói chuyện với ông trước.',
+  'the Shadow refusal names the north-west stand in the same words');
+assert.ok(shadowRefusal[0].text.includes('tây bắc'), 'the Shadow refusal names the north-west side');
+
+/* -------------------------------------------------------------------------- */
+/* 21. lock tones and the demonstration's source-level guarantees              */
+/* -------------------------------------------------------------------------- */
+
+assert.equal(LOCK_TONE_HZ.sunRight * 4, LOCK_TONE_HZ.sunLeft * 3, 'the right Sun tone is a perfect fourth below the left Sun tone');
+assert.ok(LOCK_TONE_HZ.moon < LOCK_TONE_HZ.sunRight && LOCK_TONE_HZ.sunRight < LOCK_TONE_HZ.sunLeft, 'the Moon tone is the lowest of the three');
+{
+  const { SoundSystem } = await import('../src/systems/SoundSystem.ts');
+  // Headless: no AudioContext exists, so the held-tone calls must complete without a throw and without a voice.
+  assert.doesNotThrow(() => {
+    SoundSystem.setHeldTone('check-tone', true, lockMoonVoice);
+    SoundSystem.setHeldTone('check-tone', false, lockMoonVoice);
+    SoundSystem.releaseHeldTones();
+  }, 'held lock tones are a no-op without an audio context');
+}
+// The demonstration flag is written in exactly one place: after the walk back has finished.
+const flagWrites = levelText.match(/flags\['l7-shadow-demo'\] = true/g) ?? [];
+assert.equal(flagWrites.length, 1, 'the demonstration flag is written in one place only');
+assert.ok(methodNode('finishShadowDemo').body.getText(levelSourceFile).includes("flags['l7-shadow-demo'] = true"),
+  'the demonstration flag is written only when the walk back has finished');
+assert.ok(!methodNode('startShadowDemo').body.getText(levelSourceFile).includes('l7-shadow-demo'),
+  'starting the demonstration never writes or reads the flag');
+
+console.log('Level 08 optional demonstration, carved name, HUD and lock-tone checks passed.');
+
+/* -------------------------------------------------------------------------- */
+/* 22. playtest fixes: Moon display, statue turn message, turn prompts,        */
+/*     and the path a Pulse takes to the name                                  */
+/* -------------------------------------------------------------------------- */
+
+// 22a. The Moon reads shadowed only where the statue's shadow covers it. The dark flag is a puzzle input, not a display rule.
+assert.equal(ruinsMoonShadowed({ moonCovered: false, lightActive: true }, false), false, 'the Moon reads lit when no shadow covers it');
+assert.equal(ruinsMoonShadowed({ moonCovered: true, lightActive: true }, false), true, 'the Moon reads shadowed under the lit statue shadow');
+assert.equal(ruinsMoonShadowed({ moonCovered: false, lightActive: false }, true), true, 'the demonstration holds the Moon covered while it runs');
+const lampNotPlaced = deriveRuinsPuzzleState({ lanternPlaced: false, lanternOn: true, statue: 1, leftMirror: 1, rightMirror: 0 });
+assert.equal(lampNotPlaced.moonDark, true, 'the puzzle still reads the Moon as dark with the lamp off the altar');
+assert.equal(ruinsMoonShadowed(lampNotPlaced, false), false, 'with no shadow on the Moon the display does not read tối');
+// Lamp off, statue at notch 0: the statue's shadow is geometry only, so the display reads SÁNG until the lamp is lit.
+const lampOffSolvingStatue = deriveRuinsPuzzleState({ ...solved, lanternOn: false });
+assert.equal(lampOffSolvingStatue.moonCovered, true, 'the solving statue covers the Moon geometrically with the lamp off');
+assert.equal(ruinsMoonShadowed(lampOffSolvingStatue, false), false,
+  'with the lamp off the Moon reads SÁNG even when the statue is at notch 0');
+assert.equal(ruinsMoonShadowed({ moonCovered: true, lightActive: false }, false), false, 'a shadow with no lit lamp is not shadowing the Moon');
+assert.ok(!levelText.includes('moonDark'), 'the Level 08 controller never reads the dark flag for display');
+assert.ok(methodNode('refreshArt').body.getText(levelSourceFile).includes('ruinsMoonShadowed'), 'the Moon lock art and label use the shadow rule');
+{
+  const statusFor = (puzzle) => shippedMethod('getStatusText', { getRuinsExitBlock, ruinsMoonShadowed }).call({
+    getPuzzleState: () => puzzle, progress: { flags: {} }, shadowDemo: null,
+    getExitInput: () => ({ latched: false, lanternRetrieved: false, metShadow: false }),
+  });
+  assert.ok(statusFor(lampNotPlaced).includes('Nguyệt sáng'), `the status row reads sáng with no shadow on the Moon (${statusFor(lampNotPlaced)})`);
+  assert.ok(statusFor(deriveRuinsPuzzleState({ ...solved, statue: 0 })).includes('Nguyệt tối'),
+    `the status row reads tối under the statue shadow (${statusFor(deriveRuinsPuzzleState({ ...solved, statue: 0 }))})`);
+  assert.ok(statusFor(lampOffSolvingStatue).includes('Nguyệt sáng'),
+    `the status row reads sáng with the lamp off and the statue at notch 0 (${statusFor(lampOffSolvingStatue)})`);
+}
+// The Moon label itself (the NGUYỆT text on the lock) is read from the shipped method.
+{
+  const moonLabel = shippedMethod('moonLabel', { ruinsMoonShadowed });
+  assert.equal(moonLabel.call({ shadowDemo: null }, lampOffSolvingStatue), 'NGUYỆT · SÁNG',
+    'the NGUYỆT label reads SÁNG when the lamp is off and the statue is at notch 0');
+  assert.equal(moonLabel.call({ shadowDemo: null }, deriveRuinsPuzzleState(solved)), 'NGUYỆT · TỐI',
+    'the NGUYỆT label reads TỐI under the lit statue shadow');
+  assert.equal(moonLabel.call({ shadowDemo: {} }, lampOffSolvingStatue), 'NGUYỆT · TỐI',
+    'the NGUYỆT label reads TỐI while the demonstration holds the Moon covered');
+  assert.equal(moonLabel.call({ shadowDemo: null }, lampNotPlaced), 'NGUYỆT · SÁNG', 'the NGUYỆT label reads SÁNG with the Moon lit');
+}
+// The latch still requires the Moon in the statue's shadow (no display change reaches the latch rule).
+assert.equal(deriveRuinsPuzzleState({ ...solved, statue: 1 }).confirmReady, false, 'the latch still needs the Moon covered by the statue shadow');
+assert.equal(canLatchRuinsSanctuary(lampNotPlaced, false), false, 'no latch while the Moon is lit');
+
+// 22b. A turn that shadows a Sun's ray names the Sun that went out; every other turn keeps its line.
+{
+  const rotate = (counters, placed = true) => {
+    const said = [];
+    const fake = {
+      progress: { counters: { ...counters }, flags: {} },
+      save() {}, refresh() {}, say(lines) { said.push(lines[0]); },
+      getPuzzleState() {
+        const c = this.progress.counters;
+        return deriveRuinsPuzzleState({ lanternPlaced: placed, lanternOn: true, statue: c.statue, leftMirror: c['ruins-left'], rightMirror: c['ruins-right'] });
+      },
+    };
+    shippedMethod('rotateStatue', { SoundSystem: { playMirrorRotate() {} }, ruinsNormalizeNotch, RUINS_STATUE_NOTCHES }).call(fake);
+    return said[0];
+  };
+  assert.deepEqual(rotate({ statue: 1, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nhật trái đã tắt.' }, 'a turn that shadows the left branch names the left Sun');
+  assert.deepEqual(rotate({ statue: 2, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nhật phải đã tắt.' }, 'a turn that shadows the right branch names the right Sun');
+  assert.deepEqual(rotate({ statue: 0, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nguyệt vẫn nằm ngoài vùng tối.' }, 'a turn that loses only the Moon keeps the existing line');
+  assert.deepEqual(rotate({ statue: 3, 'ruins-left': 1, 'ruins-right': 0 }),
+    { speaker: 'Nhinh', text: 'Bóng của tượng phủ trọn khóa Nguyệt.' }, 'a turn that covers the Moon keeps its existing line');
+  assert.deepEqual(rotate({ statue: 1, 'ruins-left': 1, 'ruins-right': 0 }, false),
+    { speaker: 'Lumo', text: 'Bóng nghiêng đi. Khóa Nguyệt vẫn nằm ngoài vùng tối.' }, 'with the lamp off the altar no Sun is lit, so none is named');
+}
+
+// 22c. Statue and mirror prompts read the latched rule; the helper is the only source of the finished text.
+assert.equal(ruinsTurnPrompt('E · Xoay tượng', false), 'E · Xoay tượng', 'an open ring keeps the statue prompt');
+assert.equal(ruinsTurnPrompt('E · Xoay gương trái', true), 'E · Đã gài, không xoay nữa', 'a latched ring reads as finished');
+assert.equal(RUINS_LATCHED_TURN_PROMPT, 'E · Đã gài, không xoay nữa');
+{
+  const turn = shippedMethod('turnPrompt', { ruinsTurnPrompt });
+  assert.equal(turn.call({ progress: { flags: { 'l7-route-latched': true } } }, 'E · Xoay tượng'), 'E · Đã gài, không xoay nữa',
+    'the statue prompt reads Đã gài once latched');
+  assert.equal(turn.call({ progress: { flags: {} } }, 'E · Xoay gương phải'), 'E · Xoay gương phải', 'a mirror prompt is unchanged while open');
+}
+// One statue call plus one mirror call inside the loop over both sides: the two prompts it registers cover all three controls.
+assert.equal((levelText.match(/this\.turnPrompt\(/g) ?? []).length, 2, 'the statue and mirror prompts go through the latched rule');
+assert.ok(!levelText.includes("getPrompt: () => 'E · Xoay tượng'"), 'no literal statue prompt bypasses the latched rule');
+
+// 22d. A Pulse reaches the name only through the lantern's own Pulse, which runs after the lamp-in-hand guard.
+const lanternSource = readFileSync(new URL('../src/systems/LanternSystem.ts', import.meta.url), 'utf8');
+const campaignSource = readFileSync(new URL('../src/scenes/CampaignScene.ts', import.meta.url), 'utf8');
+{
+  const guardAt = lanternSource.indexOf('if (!this.lanternInHand || this.lanternPlaced || !this.lanternOn) return false;');
+  const notifyAt = lanternSource.indexOf('for (const cb of this.pulseListeners)');
+  assert.ok(guardAt > 0 && notifyAt > guardAt, 'the lantern notifies Pulse listeners only after the lamp-in-hand guard');
+  assert.equal((campaignSource.match(/ruinsLevel\?\.onPulse\(/g) ?? []).length, 1, 'the name reveal is called from one place');
+  assert.ok(campaignSource.indexOf('this.lantern.onPulse(') < campaignSource.indexOf('ruinsLevel?.onPulse('),
+    'the name reveal is called from inside the Pulse listener');
+  assert.ok(campaignSource.includes('if (this.lantern.triggerPulse(this.player.x, this.player.y))'),
+    'the Pulse key asks the lantern first, and the listener runs only when that returns true');
+}
+
+// 22e. The unused legacy beam helper is gone from the scene.
+assert.ok(!campaignSource.includes('isRuinsOuterBeamReady'), 'the unused legacy beam helper is removed from the scene');
+
+console.log('Level 08 playtest fixes (Moon display, Sun-off turn message, suns hint, turn prompts, Pulse path) checks passed.');
+
+/* -------------------------------------------------------------------------- */
+/* 23. the carved-name hold: reachable distances, and the walk holds still     */
+/* -------------------------------------------------------------------------- */
+
+assert.ok(methodNode('refreshArt').body.getText(levelSourceFile).includes('this.moonLabel(state)'), 'the Moon label is set through moonLabel');
+
+{
+  const statueBase = RUINS_PROPS.statue.groundAnchor;
+  const distanceToBase = (point) => Math.hypot(point.x - statueBase.x, point.y - statueBase.y);
+  // The comment on the constant gives the two distances; the numbers must match the spots they describe.
+  assert.ok(Math.abs(distanceToBase(RUINS_SHADOW.spots.guard.ground) - 95) < 1, 'the guard spot is 95px from the statue base, as documented');
+  assert.ok(Math.abs(distanceToBase(RUINS_SHADOW.spots.wait.ground) - 181) < 1, 'the wait spot is 181px from the statue base, as documented');
+  assert.equal(RUINS_SHADOW_NEAR_STATUE_PX, 110, 'the stillness radius is the documented 110px');
+  assert.equal(ruinsShadowNearStatue(RUINS_SHADOW.spots.guard.ground), true, 'the guard spot is near: the reveal holds him still there');
+  assert.equal(ruinsShadowNearStatue(RUINS_SHADOW.spots.wait.ground), false, 'the wait spot is not near: a reveal after the talk does not hold him');
+}
+
+// The story walk does not move while the hold is set: he stays on stillness, and the waypoint index is kept.
+{
+  const advance = shippedMethod('advanceShadowWalk', { RUINS_SHADOW, ruinsDepthAt });
+  const walkFake = ({ shadowStill, index = 0 }) => {
+    const image = {
+      active: true, x: RUINS_SHADOW.spots.guard.ground.x, y: RUINS_SHADOW.spots.guard.ground.y, texture: { key: 'shadow_shielding' },
+      setTexture(key) { this.texture = { key }; return this; }, setFlipX() { return this; },
+      setPosition(x, y) { this.x = x; this.y = y; return this; }, setDepth() { return this; },
+    };
+    return {
+      image,
+      fake: {
+        shadowWalk: { index }, shadowImage: image, shadowStill,
+        player: { x: RUINS_SHADOW.spots.guard.ground.x, y: RUINS_SHADOW.spots.guard.ground.y + 20 },
+        shadowKey: (pose) => `shadow_${pose.replace(/-/g, '_')}`,
+        placeShadowSolid() { this.solidCalls = (this.solidCalls ?? 0) + 1; },
+        persistShadowWalk() {},
+      },
+    };
+  };
+  const held = walkFake({ shadowStill: true });
+  const startAt = { x: held.image.x, y: held.image.y };
+  for (let frame = 0; frame < 60; frame += 1) advance.call(held.fake, 16);
+  assert.deepEqual({ x: held.image.x, y: held.image.y }, startAt, 'while the hold is set the walk does not move him');
+  assert.equal(held.image.texture.key, 'shadow_stillness', 'while the hold is set he stands on stillness');
+  assert.equal(held.fake.shadowWalk.index, 0, 'the waypoint index is kept during the hold');
+
+  // When the hold ends the walk resumes from the same point and moves toward the next waypoint.
+  held.fake.shadowStill = false;
+  advance.call(held.fake, 16);
+  const next = RUINS_SHADOW.path[0];
+  assert.ok(Math.hypot(held.image.x - next.x, held.image.y - next.y) < Math.hypot(startAt.x - next.x, startAt.y - next.y),
+    'once the hold ends the walk resumes toward the next waypoint');
+
+  // Without a hold he moves on the same frames (the guard against an always-true check).
+  const free = walkFake({ shadowStill: false });
+  advance.call(free.fake, 16);
+  assert.notDeepEqual({ x: free.image.x, y: free.image.y }, { x: startAt.x, y: startAt.y }, 'with no hold the walk moves him');
+}
+{
+  const walkSource = methodNode('advanceShadowWalk').body.getText(levelSourceFile);
+  assert.ok(walkSource.indexOf('this.shadowStill') > 0 && walkSource.indexOf('this.shadowStill') < walkSource.indexOf('const target = path[walk.index]'),
+    'the hold is checked before any movement toward a waypoint');
+}
+
+console.log('Level 08 carved-name hold checks passed (guard spot near, wait spot not, walk holds still and resumes).');

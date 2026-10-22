@@ -23,6 +23,7 @@ import { OBSERVATORY_TEXT_ENTRIES } from './entries/observatoryText.ts';
 import { HEART_AND_STATE_ENTRIES } from './entries/heartAndStates.ts';
 import { PUZZLE_AND_QUEST_ENTRIES } from './entries/puzzleAndQuestText.ts';
 import { COMPOSED_AND_TABLE_ENTRIES } from './entries/composedAndTables.ts';
+import { MERGED_LEVEL_COPY_ENTRIES } from './entries/mergedLevelCopy.ts';
 import type { CatalogEntry } from './entry.ts';
 
 export type { CatalogEntry } from './entry.ts';
@@ -41,6 +42,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   ...HEART_AND_STATE_ENTRIES,
   ...PUZZLE_AND_QUEST_ENTRIES,
   ...COMPOSED_AND_TABLE_ENTRIES,
+  ...MERGED_LEVEL_COPY_ENTRIES,
 ];
 
 const byVi = new Map<string, CatalogEntry>();

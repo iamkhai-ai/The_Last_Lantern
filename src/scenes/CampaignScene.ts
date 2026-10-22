@@ -281,6 +281,7 @@ export class CampaignScene extends Phaser.Scene {
         return;
       }
       if (this.pauseMenu.isOpen() || !PULSE_LEVELS.includes(this.progress.level)) return;
+      if (this.ruinsLevel?.isControlLocked()) return;
       if (this.progress.level === 0 && !canUseForestEdgePulse(this.progress.flags['l0-tablet-read'] === true)) return;
       if (this.lantern.triggerPulse(this.player.x, this.player.y)) {
         this.player.playPulseAction();
@@ -303,17 +304,20 @@ export class CampaignScene extends Phaser.Scene {
         if (!this.pauseMenu.isOpen()) this.heartLevel?.handleLanternKey();
         return;
       }
-      if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen()) {
+      if (!this.dialogue.isInputLocked(performance.now()) && !this.pauseMenu.isOpen() && !this.ruinsLevel?.isControlLocked()) {
         if (this.lantern.toggleLantern(performance.now())) {
           this.player.playLanternAction(this.lantern.lanternOn);
           this.progress.lanternOn = this.lantern.lanternOn;
           this.save();
+        } else if (this.progress.level === 7) {
+          // Scenario 08 §4: the lamp on the altar cannot be switched off; Lumo says so.
+          this.ruinsLevel?.handleLanternKey();
         }
       }
     });
-    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.progress.level === 6 ? this.gardenLevel?.showHint() : this.progress.level === 7 ? this.ruinsLevel?.showHint() : this.showHint(); });
+    keyboard.on('keydown-H', () => { if (!this.dialogue.isActive() && !this.pauseMenu.isOpen() && !this.ruinsLevel?.isControlLocked()) this.progress.level === 3 ? this.shatteredCreek?.showHint() : this.progress.level === 5 ? this.sleeplessTower?.showHint() : this.progress.level === 6 ? this.gardenLevel?.showHint() : this.progress.level === 7 ? this.ruinsLevel?.showHint() : this.showHint(); });
     keyboard.on('keydown-J', () => {
-      if (this.dialogue.isActive() || this.pauseMenu.isOpen()) return;
+      if (this.dialogue.isActive() || this.pauseMenu.isOpen() || this.ruinsLevel?.isControlLocked()) return;
       if (this.progress.level === 3) this.shatteredCreek?.showJournal();
       else if (this.progress.level === 5) this.sleeplessTower?.showJournal();
       else if (this.progress.level === 6) this.gardenLevel?.showJournal();
@@ -369,6 +373,9 @@ export class CampaignScene extends Phaser.Scene {
       } else if (this.progress.level === 9) {
         // Scenario §3: Pulse near the root-rule table reveals the moss-covered root lanes.
         this.heartLevel?.onPulse(x, y);
+      } else if (this.progress.level === 7) {
+        // Scenario 08 §5: a Pulse near the statue's base reveals the worn name.
+        this.ruinsLevel?.onPulse(x, y);
       }
       this.save();
       this.refreshHud();
@@ -378,6 +385,7 @@ export class CampaignScene extends Phaser.Scene {
       this.shatteredCreek?.destroy();
       this.sleeplessTower?.destroy();
       this.gardenLevel?.destroy();
+      this.ruinsLevel?.destroy();
       SoundSystem.stopFootsteps();
       SoundSystem.stopAmbient();
     });
@@ -386,7 +394,9 @@ export class CampaignScene extends Phaser.Scene {
   public update(_time: number, delta: number): void {
     if (this.redirecting) return;
     const dt = Math.min(delta, 50);
-    const locked = this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen() || this.heartEnd;
+    // The Level 08 Shadow demonstration owns the controls while it runs (scenario 08 §4); this is the same gate movement and prompts use.
+    const locked = this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen() || this.heartEnd
+      || this.ruinsLevel?.isControlLocked() === true;
     this.player.update(dt, !locked, this.lantern.lanternInHand, this.lantern.lanternOn);
     if (this.progress.level === 0 && this.progress.flags['l0-lumo-met']) {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 58, 305) };
@@ -2614,10 +2624,6 @@ export class CampaignScene extends Phaser.Scene {
     }
   }
 
-  private isRuinsOuterBeamReady(side: 'left' | 'right'): boolean {
-    const mirrorReady = side === 'left' ? this.value('ruins-left') === 2 : this.value('ruins-right') === 1;
-    return this.lantern.lanternPlaced && this.lantern.lanternOn && mirrorReady;
-  }
   private value(key: string): number { return this.progress.counters[key] ?? 0; }
   private save(): void { CampaignSaveSystem.save(this.progress); }
   private getRunePositions(): Record<string, { x: number; y: number }> { return { moon: { x: 180, y: 204 }, leaf: { x: 320, y: 125 }, star: { x: 460, y: 204 } }; }

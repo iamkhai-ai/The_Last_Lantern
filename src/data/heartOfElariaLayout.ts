@@ -94,9 +94,8 @@ export interface HeartArtCandidate {
  */
 export function heartArtCandidates(name: string): HeartArtCandidate[] {
   const reused = HEART_REUSED_ART[name];
-  const candidates: HeartArtCandidate[] = reused
-    ? [{ kind: 'level', level: reused.level, file: reused.file }]
-    : [{ kind: 'level', level: 9, file: name }];
+  const candidates: HeartArtCandidate[] = [{ kind: 'level', level: 9, file: name }];
+  if (reused) candidates.push({ kind: 'level', level: reused.level, file: reused.file });
   if (HEART_TEXTURE_NATIVE[name]) candidates.push({ kind: 'texture', level: -1, file: name });
   return candidates;
 }

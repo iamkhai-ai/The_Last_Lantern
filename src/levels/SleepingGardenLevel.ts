@@ -198,24 +198,16 @@ export class SleepingGardenLevel {
       .map((object) => object.getBounds());
   }
 
+  /**
+   * Goal only (scenario v2 07 §6): the row never names a control, the F key or the dark-feeds-the-roots
+   * rule. The concrete steps live in the H ladder of the same stage (see showHint).
+   */
   public getObjectiveText(): string {
     const state = this.state;
-    if (!state.canopyShut) return tr('Tới tay màn che trong khe tường phía tây bắc và nhấn E để đóng màn che bể tích quang.');
-    if (!state.sunLatched) {
-      if (this.progress.flags['l6-practice-observed'] !== true) return tr('Hai chậu thử ở bãi cỏ phía nam cho thấy cây phản ứng thế nào với đèn. Bật hoặc tắt đèn (F) khi đứng gần chúng.');
-      return this.lanternOn
-        ? tr('Thanh chắn đang nâng. Vào khe tường phía tây và nhấn E ở tay chốt để giữ nó.')
-        : tr('Bật đèn (F) cho Hoa Nhật mở, nâng thanh chắn, rồi gài chốt trong khe tường.');
-    }
-    if (!state.waterFlowing) {
-      if (this.lanternOn) return tr('Tắt đèn (F) cho Rễ Nguyệt bắc cầu qua mương, rồi sang vườn ươm.');
-      return this.player.x > 300
-        ? tr('Nhấn E ở cống vườn ươm để mở đường nước.')
-        : tr('Bóng tối đang giữ. Qua cầu rễ giữa vườn tới vườn ươm và mở cống.');
-    }
-    if (!state.returnLatched) return tr('Gài chốt lối đá phụ cạnh cống để mở lối về không cần ánh sáng.');
-    if (!state.lumoRealized) return tr('Nói chuyện với Lumo bên mầm cây trong vườn ươm (nhấn E ở mầm cây).');
-    return tr('Tới cổng điện thờ ở góc đông bắc và nhấn E.');
+    if (!state.waterFlowing) return tr('Đưa nước tới vườn ươm.');
+    if (!state.returnLatched) return tr('Giữ lối về từ vườn ươm.');
+    if (!state.lumoRealized) return tr('Lumo có điều muốn nói.');
+    return tr('Tới cổng điện thờ.');
   }
 
   public getStatusText(): string {
