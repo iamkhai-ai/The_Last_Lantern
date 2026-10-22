@@ -70,7 +70,7 @@ const gardenV2Modules = import.meta.glob('../../assets/levels/07-the-sleeping-ga
   eager: true, query: '?url', import: 'default',
 }) as Record<string, string>;
 
-const ruinsV2Modules = import.meta.glob('../../assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/*.png', {
+const ruinsLocalModules = import.meta.glob('../../assets/levels/08-ruins-of-two-halves/redesign-v4/sprites/*.png', {
   eager: true, query: '?url', import: 'default',
 }) as Record<string, string>;
 
@@ -207,8 +207,8 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
     key: `garden_v2_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
     url,
   })),
-  ...Object.entries(ruinsV2Modules).map(([path, url]) => ({
-    key: `ruins_v2_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
+  ...Object.entries(ruinsLocalModules).map(([path, url]) => ({
+    key: `ruins_v4_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
     url,
   })),
 ];
@@ -248,17 +248,17 @@ export function getGardenArtKey(filename: string, shared = false): string | null
 }
 
 /** Ruins-local art overrides keep every legacy Level 08 texture as a fallback. */
-export function getRuinsV2ArtKey(filename: string): string | null {
+export function getRuinsLocalArtKey(filename: string): string | null {
   const name = filename.replace(/\.png$/i, '');
-  const v2 = `ruins_v2_${normalize(name)}`;
-  if (CAMPAIGN_ART_FILES.some((asset) => asset.key === v2)) return v2;
+  const local = `ruins_v4_${normalize(name)}`;
+  if (CAMPAIGN_ART_FILES.some((asset) => asset.key === local)) return local;
   return null;
 }
 
 /** Ruins-local art overrides keep every legacy Level 08 texture as a fallback. */
 export function getRuinsArtKey(filename: string): string | null {
   const name = filename.replace(/\.png$/i, '');
-  return getRuinsV2ArtKey(name) ?? getLevelArtKey(7, name);
+  return getRuinsLocalArtKey(name) ?? getLevelArtKey(7, name);
 }
 
 export function getLevelBackgroundKey(levelIndex: number, roomId?: string): string | null {

@@ -8,7 +8,7 @@ const sharp = require('sharp');
 
 const ROOT = path.resolve(__dirname, '..');
 const LEVEL = path.join(ROOT, 'assets/levels/08-ruins-of-two-halves');
-const ART = path.join(LEVEL, 'redesign-v2');
+const ART = path.join(LEVEL, 'redesign-v4');
 const SPRITES = path.join(ART, 'sprites');
 const OUT = path.join(ART, 'previews');
 const URL = process.env.LEVEL08_ART_BASE_URL || 'http://127.0.0.1:5187/';
@@ -43,7 +43,7 @@ async function main() {
   assert.equal(spriteFiles.length, 32, 'the approved Level 08 art pack must contain 32 PNGs');
   const artSource = await fs.readFile(path.join(ROOT, 'src/art/CampaignArt.ts'), 'utf8');
   const levelSource = await fs.readFile(path.join(ROOT, 'src/levels/RuinsOfTwoHalvesLevel.ts'), 'utf8');
-  assert.match(artSource, /return getRuinsV2ArtKey\(name\) \?\? getLevelArtKey\(7, name\);/,
+  assert.match(artSource, /return getRuinsLocalArtKey\(name\) \?\? getLevelArtKey\(7, name\);/,
     'Level 08 local resolver must retain the legacy Level 08 art lookup');
   assert.match(levelSource, /if \(localKey\) return localKey;\s+return this\.scene\.textures\.exists\(name\) \? name : undefined;/,
     'local mirror/altar/beacon assets must preserve the old shared/raw texture fallback');
@@ -91,12 +91,13 @@ async function main() {
         const localBackdrop = modules.backdrop;
         return { player: { x: scene.player.x, y: scene.player.y }, lanternOn: scene.lantern.lanternOn,
           puzzle: { statue: puzzle.statue, lightActive: puzzle.lightActive, leftLit: puzzle.leftLit, rightLit: puzzle.rightLit,
-            moonDark: puzzle.moonDark, sunsLit: puzzle.sunsLit, confirmReady: puzzle.confirmReady },
+            moonDark: puzzle.moonDark, moonCovered: puzzle.moonCovered,
+            sunsLit: puzzle.sunsLit, confirmReady: puzzle.confirmReady },
           flags: { latched: scene.progress.flags['l7-route-latched'] === true,
             curtainShut: scene.progress.flags['l7-curtain-shut'] === true },
-          registered: game.textures.getTextureKeys().filter((key) => key.startsWith('ruins_v2_')).sort(),
+          registered: game.textures.getTextureKeys().filter((key) => key.startsWith('ruins_v4_')).sort(),
           decalAsset: (() => {
-            const source = game.textures.get('ruins_v2_inscription_under_statue').getSourceImage();
+            const source = game.textures.get('ruins_v4_inscription_under_statue').getSourceImage();
             return { size: [source.width, source.height] };
           })(),
           modules, images: imageDetails,
@@ -112,7 +113,7 @@ async function main() {
         `${study.id}: expected the complete local PNG pack to be registered`);
       assert.equal(state.dialogue, false, `${study.id}: dialogue blocks the inspection`);
       assert.ok(state.localBackdrop, `${study.id}: local temple backdrop is missing`);
-      assert.equal(state.localBackdrop.key, 'ruins_v2_temple_scene_base');
+      assert.equal(state.localBackdrop.key, 'ruins_v4_temple_scene_base');
       assert.deepEqual(state.localBackdrop.size, [640, 360]);
       assert.deepEqual(state.localBackdrop.bounds, { x: 0, y: 0, width: 640, height: 360 });
       assert.equal(state.localBackdrop.alpha, 1, 'redrawn backdrop must render opaque');
@@ -120,15 +121,15 @@ async function main() {
         'local opaque backdrop must skip the tiled floor');
       assert.equal(state.sceneObjects.some((object) => object.type === 'Graphics' && object.depth === 1), false,
         'local opaque backdrop must skip procedural masonry');
-      assert.equal(state.modules.statue.key, `ruins_v2_statue_notch_${study.expect?.statue ?? study.counters.statue}`);
-      assert.equal(state.modules['mirror-left'].key, `ruins_v2_mirror_${study.counters['ruins-left']}`);
-      assert.equal(state.modules['mirror-right'].key, `ruins_v2_mirror_${study.counters['ruins-right']}`);
-      assert.equal(state.modules.pedestal.key, 'ruins_v2_ruins_altar');
+      assert.equal(state.modules.statue.key, `ruins_v4_statue_notch_${study.expect?.statue ?? study.counters.statue}`);
+      assert.equal(state.modules['mirror-left'].key, `ruins_v4_mirror_${study.counters['ruins-left']}`);
+      assert.equal(state.modules['mirror-right'].key, `ruins_v4_mirror_${study.counters['ruins-right']}`);
+      assert.equal(state.modules.pedestal.key, 'ruins_v4_ruins_altar');
       assert.equal(state.modules['seedling-bed'].key,
-        `ruins_v2_seedling_curtain_${state.flags.curtainShut ? 'closed' : 'open'}`);
+        `ruins_v4_seedling_curtain_${state.flags.curtainShut ? 'closed' : 'open'}`);
       assert.equal(state.modules['north-door'].key,
-        `ruins_v2_sanctuary_door_${state.flags.latched ? 'open' : 'closed'}`);
-      assert.equal(state.modules.inscription.key, 'ruins_v2_beacon_stone');
+        `ruins_v4_sanctuary_door_${state.flags.latched ? 'open' : 'closed'}`);
+      assert.equal(state.modules.inscription.key, 'ruins_v4_beacon_stone');
       for (const [id, box] of Object.entries({
         statue: [288,132,64,88], 'mirror-left': [222,214,36,48], 'mirror-right': [382,214,36,48],
         pedestal: [428,210,104,52], 'seedling-bed': [136,104,88,48],
@@ -142,11 +143,13 @@ async function main() {
           {x:box[0],y:box[1],width:box[2],height:box[3]}, `${id}: fixed layout art box`);
       }
       assert.deepEqual(state.decalAsset.size, [48, 12], 'asset-only inscription decal keeps its approved size');
-      assert.equal(state.images.some((image) => image.id === 'inscription-under-statue'), false,
-        'the asset-only inscription decal must not be active in gameplay');
-      assert.equal(state.modules['lock-left'].key, `ruins_v2_lock_sun_${state.puzzle.leftLit ? 'on' : 'off'}`);
-      assert.equal(state.modules['lock-right'].key, `ruins_v2_lock_sun_${state.puzzle.rightLit ? 'on' : 'off'}`);
-      assert.equal(state.modules['lock-moon'].key, `ruins_v2_lock_moon_${state.puzzle.moonDark ? 'covered' : 'lit'}`);
+      assert.equal(state.modules['statue-name'].visible, false,
+        'the carved name stays hidden until its existing Pulse discovery flag');
+      assert.equal(state.modules['lock-left'].key, `ruins_v4_lock_sun_${state.puzzle.leftLit ? 'on' : 'off'}`);
+      assert.equal(state.modules['lock-right'].key, `ruins_v4_lock_sun_${state.puzzle.rightLit ? 'on' : 'off'}`);
+      assert.equal(state.modules['lock-moon'].key,
+        `ruins_v4_lock_moon_${state.puzzle.lightActive && state.puzzle.moonCovered ? 'covered' : 'lit'}`,
+        `${study.id}: Moon artwork indicates an actively cast shadow, not an unpowered circuit`);
       if (study.id === '06-lamp-off-locks-dark') {
         assert.equal(state.modules['placed-lamp'].visible, false);
         assert.equal(state.puzzle.lightActive, false);
@@ -159,7 +162,7 @@ async function main() {
         if ('latched' in study.expect) assert.equal(state.flags.latched, study.expect.latched);
       }
       assert.equal(state.modules.confirmation.key,
-        `ruins_v2_confirmation_${state.flags.latched ? 'latched' : state.puzzle.confirmReady ? 'ready' : 'waiting'}`);
+        `ruins_v4_confirmation_${state.flags.latched ? 'latched' : state.puzzle.confirmReady ? 'ready' : 'waiting'}`);
       assert.ok(state.shadow?.key.startsWith('shadow_'), `${study.id}: shared Shadow art must stay in use`);
       assert.deepEqual(errors, [], `${study.id}: browser or PNG errors`);
 
@@ -188,6 +191,7 @@ async function main() {
         }
       }
       let interaction = null;
+      const approaches = [];
       if (study.id === '01-entry-planks-waiting') {
         await page.evaluate(() => {
           const scene=window.__LAST_LANTERN_GAME__.scene.getScene('CampaignScene');
@@ -202,11 +206,34 @@ async function main() {
             practiceSlab:scene.ruinsLevel.artById.get('practice-slab').texture.key};
         });
         assert.equal(interaction.lanternOn,false,'actual F input turns carried lamp off');
-        assert.equal(interaction.practiceSlab,'ruins_v2_test_moon_lit','actual F input refreshes local practice Moon state');
+        assert.equal(interaction.practiceSlab,'ruins_v4_test_moon_lit','actual F input refreshes local practice Moon state');
+        for (const [side, x] of [['left', 240], ['right', 400]]) {
+          for (const [direction, px, py] of [['north', x, 194], ['west', x - 26, 221],
+            ['east', x + 26, 221], ['south', x, 286]]) {
+            const before = await page.evaluate(({ px, py, side }) => {
+              const scene = window.__LAST_LANTERN_GAME__.scene.getScene('CampaignScene');
+              scene.player.sprite.body.reset(px, py);
+              scene.player.sprite.body.setVelocity(0, 0);
+              return scene.progress.counters['ruins-' + side];
+            }, { px, py, side });
+            await page.waitForTimeout(200);
+            const target = await page.evaluate(() => window.__LAST_LANTERN_GAME__
+              .scene.getScene('CampaignScene').interactions.getActiveTarget()?.id ?? null);
+            if (direction === 'south') assert.equal(target, 'l7-mirror-' + side);
+            else assert.notEqual(target, 'l7-mirror-' + side, `${side}: no ${direction} prompt`);
+            await page.keyboard.press('e');
+            await page.waitForTimeout(200);
+            const after = await page.evaluate(side => window.__LAST_LANTERN_GAME__
+              .scene.getScene('CampaignScene').progress.counters['ruins-' + side], side);
+            assert.equal(after, direction === 'south' ? (before + 1) % 4 : before,
+              `${side}: E only rotates from the south`);
+            approaches.push({ side, direction, target, before, after });
+          }
+        }
       }
       assert.deepEqual(errors, [], `${study.id}: browser or PNG errors after inspection`);
       results.push({ id: study.id, fixture: study, status: 'PASS', ...state,
-        browser_errors: errors, screenshot_sha256: sha(image),interaction });
+        browser_errors: errors, screenshot_sha256: sha(image), interaction, approaches });
       await context.close();
     }
   } finally { await browser.close(); }
@@ -215,7 +242,7 @@ async function main() {
     'src/art/CampaignArt.ts', 'src/levels/RuinsOfTwoHalvesLevel.ts',
     'src/data/ruinsOfTwoHalvesLayout.ts', 'scripts/inspect-level08-art.cjs',
     'docs/scenario/08-ruins-of-two-halves.md', 'docs/scenario-v2/08-ruins-of-two-halves.md',
-    'assets/levels/08-ruins-of-two-halves/redesign-v2/art-redesign-brief.txt',
+    'assets/levels/08-ruins-of-two-halves/redesign-v4/art-direction.md',
     ...spriteFiles.map((file) => path.relative(ROOT, path.join(SPRITES, file)).replaceAll(path.sep, '/')),
   ];
   const checked = {};
@@ -240,7 +267,8 @@ async function main() {
     assertions: ['local opaque backdrop and no procedural floor/masonry overlay', 'all four statue orientations',
       'entry plank mirrors and solved diagonal mirrors', 'lamp on/off and Sun/Moon lock state derivation',
       'confirmation waiting/ready/latched', 'door and seedling curtain closed/open', 'shared Shadow texture keys',
-      'asset-only inscription decal size, 32-texture registration and inactive gameplay state; separate authoring placement composite at (320,222)',
+      '32-texture registration; carved name hidden until existing Pulse discovery; separate authoring placement composite at (320,222)',
+      'both mirrors tested from four sides with actual E presses; south-only rotation',
       'legacy local-first resolver fallbacks',
       'no browser/page/PNG load errors'], studies: results }, null, 2)}\n`);
   console.log(`PASS: ${results.length} real 640x360 Level 08 renders; local sprite pack ${spriteFiles.length} PNGs; no browser/PNG errors.`);

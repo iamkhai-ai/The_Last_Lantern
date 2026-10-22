@@ -1,0 +1,2507 @@
+{
+  "version": 1,
+  "date": "2026-10-22",
+  "base_revision": "92ccc9320fc7b81188bb65206cb9f35d136db333",
+  "approval": "User approved temple-depth-study-v2 and requested integration in the referenced chat.",
+  "provenance": "Built-in image_gen edits of project art; original outputs and prompts retained. Model/version not exposed.",
+  "pipeline": {
+    "filter": "nearest",
+    "alpha": "binary 0/255",
+    "max_family_colours": 128,
+    "silhouette": "Generated transparent silhouettes fitted to prior native bounds. Standalone mirror envelope 32x44; no stone surround.",
+    "pivot": "Existing native canvases and runtime image centres retained."
+  },
+  "authoring_sha256": {
+    "scripts/prepare-level08-art-v4.cjs": "04ec66d9fe70ebb4c71c3bda42e1765369b80b673512add6aca33fb5e37b1440",
+    "scripts/export-level08-art-v4.cjs": "a554c32c290666d98965f2daad7e9823712b36135288847114e31ab7c038c3c0",
+    "scripts/export-level08-art.cjs": "172a6c87bed8aab654c7712e5a020163c181c544cc75551472a01338c3704e70",
+    "assets/levels/08-ruins-of-two-halves/redesign-v4/art-direction.md": "6732643cc37747260ca5d1ef06fdd1a20678177a2b264d3b8530736cd83918f3"
+  },
+  "sources": [
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/confirmation-states-original.png",
+      "sha256": "a1182a6264f316a63872a217730c7f7ab18db8084ede728880d5bb560ff22da1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/crop-catalog.json",
+      "sha256": "20f0f6683b5d92727076cf47fc5c13903756208d0feb618465be3d86dea390b7"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/fixed-three-route-splitter-off-original.png",
+      "sha256": "5586a1ddf3344e76dec03de4d0838377f1c8190a0a0e82a52206551f5d0ae37c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/generation-log.json",
+      "sha256": "c9b9108103882cf3a87a98ea1e24686155892a715ef471a6f586bd230e84466d"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/lock-moon-lit-original.png",
+      "sha256": "7893fc91583ad9b210b0304fb33b22ff3a1b663de67966e758da400a405a950e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/lock-sun-off-original.png",
+      "sha256": "a8a1d44d7184639e27a20a8a97ccd6cfd71fb22222d2fc602ee2f3a3d6daf539"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/mirror-horizontal-original.png",
+      "sha256": "136180446a9496cff6b14e412c78466af139d72e06d11e2c24f292ff1e473205"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/mirror-states-original.png",
+      "sha256": "c8c64d1622acd9cca854b54090e34c548a236251f6b60a572b9df780e4b30907"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/beacon_stone.png",
+      "sha256": "2d7fc5a7e5df4051de1c29e6141dbabbcb4aca68b11cd92eaf7e77e44de35361"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/confirmation-latched.png",
+      "sha256": "fec95eb44f380107955d81a6e668422de4537449718bee8e8f0a5c81f8c3ee88"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/confirmation-ready.png",
+      "sha256": "d6dab8e49328ba0becf7d29e4694c010f2068d363db86a3120b32b4244adcd12"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/confirmation-waiting.png",
+      "sha256": "75b75e4f70a61234d841507d268d774753826bed8e61e72de78e7f742eb4e969"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/fixed-three-route-splitter-off.png",
+      "sha256": "daa5650c1d74d4493c2e01cbe8f1af8db20d5fc8d2aa974b770fb7b116ec72f8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/fixed-three-route-splitter-on.png",
+      "sha256": "ea3c31d9941ce333a704973f372b8f601be0f2ea070d49fce2d99ef0c53f0825"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/lock-moon-covered.png",
+      "sha256": "b933f009f514f0fead5250e26f92405fad6fe76c073fafde40d53200d7c29d29"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/lock-moon-lit.png",
+      "sha256": "4eb3aa2c4edbc3367d29caeec6c6d194bcb8faa7e897f1801346934e0b50d107"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/lock-sun-off.png",
+      "sha256": "3de29c604407ad33dfe68cf1f0da8d42bb8254c93d15ca1f2a0ef86424752197"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/lock-sun-on.png",
+      "sha256": "c8bc1402d82290f1a479a01360de1ae334f4ae462040f8228ac505a9c83a9514"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/mirror_0.png",
+      "sha256": "5ec80ca70bbdec6e8f3d9ec6356e9c867d8ed8c57a4b7899b1ecaea34781f5b3"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/mirror_1.png",
+      "sha256": "dac19bc1043ecbd0d83afbce0db281f9a22fc4475a70032366604e67785ac573"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/mirror_2.png",
+      "sha256": "b6c4d79bff0e06e3b67bbd55eb91a853c0209bab2c1001c70d83ddd1ba9e3d0a"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/mirror_3.png",
+      "sha256": "c532767c908c379b9984c3f8f5a60dffe7451606cdd42577637b14ab72910d79"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/practice-composite.png",
+      "sha256": "cb3a16489465ff3268fd1009ab5d83e40015881a4bc0064e14b7cecf2e8f6ef1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/ruins_altar.png",
+      "sha256": "919eeb7c9a56818538fca2dfa5f8f63c53bf31baa2f75037ab08c49f9db6e137"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/ruins-altar-with-ring.png",
+      "sha256": "4164b4a895b715dd268ae67f1429c6b6d5b9f1e8b698870f17733081e4acf3f8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/sanctuary-door-closed.png",
+      "sha256": "dfd820b42f7b4fb67fb0675ead6ac4e5ce35c13f803b476da50345f514f3a4b6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/sanctuary-door-open.png",
+      "sha256": "12af1d66d468560cee68bf66a8529ecb43b5c51b362904628939a0f8edf2d2cb"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/seedling-curtain-closed.png",
+      "sha256": "3dc918996a6cc032634b496bb49a022e04b004d33aabe0b014a540cc9f7ad46f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/seedling-curtain-open.png",
+      "sha256": "f12af5ce03ff57c4bec9544b262a635796bf8944fc4cb483f4e26da5e7882b2c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/statue-notch-0.png",
+      "sha256": "9f6d5ab1563b6672ae6f6e46b8c988994409ac67f9e2decd931a0847b1e3f3b8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/statue-notch-1.png",
+      "sha256": "dfce2297e83e138beced4e5d974c2301f8121782fc1977758e73674dcf9bf068"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/statue-notch-2.png",
+      "sha256": "0d3202ccbfb39dedfc1e3518f2362194679a7601fa771d1cc1f093a7893fbaf0"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/statue-notch-3.png",
+      "sha256": "054410112427abfd4612a30fe6c4cf670523a9972366765819c13bbe4d4c4bef"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/test-moon-covered.png",
+      "sha256": "496b34c41dc555583ecfdfcccf518eb8e0f6921cb600445228ecbdc10bce4f20"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/parts/test-pedestal.png",
+      "sha256": "6397b738334e62000b86a56bcc6dc1fd03551b246c445e7b40b39a5422c531e6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/prop-layer-original.png",
+      "sha256": "f88a2ae58e501d78940e4d46afffcaba5ac180c00f6402049829d162254af56b"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/beacon_stone.png",
+      "sha256": "2d7fc5a7e5df4051de1c29e6141dbabbcb4aca68b11cd92eaf7e77e44de35361"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/confirmation-ready.png",
+      "sha256": "b63ea1a416ac479d115338ede768fa185d358662addc1fa73636359aed1b131f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/fixed-three-route-splitter-on.png",
+      "sha256": "ea3c31d9941ce333a704973f372b8f601be0f2ea070d49fce2d99ef0c53f0825"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/lock-moon-covered.png",
+      "sha256": "b933f009f514f0fead5250e26f92405fad6fe76c073fafde40d53200d7c29d29"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/lock-sun-on.png",
+      "sha256": "c8bc1402d82290f1a479a01360de1ae334f4ae462040f8228ac505a9c83a9514"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/mirror_0.png",
+      "sha256": "8554b862823c6979f4cfbe2586f1a89bb92c6218b4b14e6214a6efa91aaaa736"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/mirror_1.png",
+      "sha256": "e55f161a12eccdc4125a7a116b0f1bdba62d8d5ff83eaa553c82165359ec2bb0"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/practice-composite.png",
+      "sha256": "cb3a16489465ff3268fd1009ab5d83e40015881a4bc0064e14b7cecf2e8f6ef1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/ruins-altar-with-ring.png",
+      "sha256": "4164b4a895b715dd268ae67f1429c6b6d5b9f1e8b698870f17733081e4acf3f8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/sanctuary-door-closed.png",
+      "sha256": "dfd820b42f7b4fb67fb0675ead6ac4e5ce35c13f803b476da50345f514f3a4b6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/seedling-curtain-open.png",
+      "sha256": "f12af5ce03ff57c4bec9544b262a635796bf8944fc4cb483f4e26da5e7882b2c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/statue-notch-0.png",
+      "sha256": "a05b8f0c0c8bc01354d9b277e1537bac389b9510a749184d54be082b6ac6f466"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/references/test-moon-covered.png",
+      "sha256": "496b34c41dc555583ecfdfcccf518eb8e0f6921cb600445228ecbdc10bce4f20"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/ruins_altar-original.png",
+      "sha256": "5d9a9d3ee08661a8efef1f15ffb6b1481be3b632b44cf996722ab26124503e20"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/sanctuary-door-open-original.png",
+      "sha256": "51ca29712fec5275f314f810eb7e8495f1ffca9593e813e5926d02671324a40d"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/scene-background-original.png",
+      "sha256": "c848feaae55c06e07f67417367f52d90efbc50a4a98975f8532ae20fac9df7c9"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/seedling-curtain-closed-original.png",
+      "sha256": "444969cecd0bf3feba3d09605501bee1e9c0ce1e4c929b590ce5a9910de5f965"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v4/sources/statue-states-original.png",
+      "sha256": "b72297b05a9b74699fb31ef7d5ba8c83a97720618e86a3652e371e21be6b0c36"
+    }
+  ],
+  "references": [
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sources/baseline-catalog.json",
+      "sha256": "767aa3a3b96a39fe21b234b2562096ce1d9dec19fde222dce11773f372f2a258"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/confirmation-latched.png",
+      "sha256": "f2f1fbfe1ae7f554e5e2425bb09e498d7abe638de9f8142b003db8ae07681c67"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/confirmation-ready.png",
+      "sha256": "c2240fb7916b19c9bd1ca6b32766df984dfea6306c809e500f699dd1402d4b8c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/confirmation-waiting.png",
+      "sha256": "3b6829fe34d882a6b5f1cce3c02f260e23f335a5d695b004bab66846869fbad6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/fixed-three-route-splitter-off.png",
+      "sha256": "d22b17c8cd526dcadd0137e7a4145d67d4ff4fba6fce5b6d4d4496641215fd43"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/fixed-three-route-splitter-on.png",
+      "sha256": "813468a126c29b319720f67ce0b03168e6af0c7b9c1474d2e6827ca0e9f4d17f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-moon-covered.png",
+      "sha256": "7ba0306fda953dfd34b39d18d012490ffe3e4588989d4bff52027ff73923cc0a"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-moon-lit.png",
+      "sha256": "541c3e91f7980963cc67c70fc296e94a701170feff1aec90418d07fce8bbeac1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-moon-covered.png",
+      "sha256": "0a608a9d4fa29a99144bb316fed2ac52897ec0ea91a38baa2ecd9cb9dc13eedc"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-moon-lit.png",
+      "sha256": "425220c313f7eefb1f1dfd4bd74f3677102ae2939ec6e746e8281a472c20b288"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-sun-off.png",
+      "sha256": "05c03a048f3cff5d4e648ae8736912a95467968bb9388a357c10de13593da047"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/lock-sun-on.png",
+      "sha256": "0e0264059e28652bea17be4c51782f5559cb68d5f34cd78ccb0c7960d2b3d84f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/sanctuary-door-closed.png",
+      "sha256": "9c3fcb13ad85180126d21be207ccac11b42e16ed1c442600bfc3fa07e08eddb6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/sanctuary-door-open.png",
+      "sha256": "a858a65d9c35acd1a0b7c9743307fb0ce2dc54c12013467c06d127980a8fd49e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/seedling-curtain-closed.png",
+      "sha256": "f8cc627c6fbf29adfb0c2d8c32497b1dec0e77d9f305b24713996194396c2cf7"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/seedling-curtain-open.png",
+      "sha256": "7fca240028d7bf0a4f53d8b1e7352cdbc49eb890dc2a42cec2c28ce02896e102"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-0.png",
+      "sha256": "33d3aa018db9043f3e8df9e9c132770b30c47f2f96cf327a1ffc6d58e482ab4c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-1.png",
+      "sha256": "567772286b150a5aa6ab3c0e0ac96b110ca4d532d29f2b092c88d65257b4438f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-2.png",
+      "sha256": "8cf8d9f7aad69b3b7bb2f22609c8608f42145f5337b69c66770cd8cb28b03f2b"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/statue-notch-3.png",
+      "sha256": "e93072743423c3779a100906ed5399eb48c5501246a2b9a8aaf52099d555eedc"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-0.png",
+      "sha256": "3960366d6e5264142ccba0a5dc7d460f18611fca45630bd247fdd535c401567f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-1.png",
+      "sha256": "87142e388b1a467fcc82ebb9ac4dc187881db83fe47e0f8fec4a3e6c81cf8ac0"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-2.png",
+      "sha256": "5ef5b2d3760be41da4e18b35e7b9bb614cd0a7ea0cc8fb85958bc3814c9a14b6"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-column-notch-3.png",
+      "sha256": "2d6e88d45c1a11a99df8d60799a7e18cacaf746e7d18ac0733d48bb00f559ae2"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/test-pedestal.png",
+      "sha256": "6147c1d1ce118b70612b3d4828df07fdf1ac715466e67fc3e578f50c3414be48"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_0.png",
+      "sha256": "f9a88bafb59ddafce4be84e6d715bf01d84a367d30d486c50b202599ea38f583"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_1.png",
+      "sha256": "09e552af25ac4de0686aef0fa0b00fac36a81ca3b39497a1263d7b8cfe1d2f86"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_2.png",
+      "sha256": "6d4f2677bbeded0c3aa0f6617362834ec233e40208bed6dcf3437bcff522c380"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/mirror_3.png",
+      "sha256": "0976c495b122c163026b3f58f4ad7cfc9a2b58ab0773f4b51da2883873c1ba41"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/ruins_altar.png",
+      "sha256": "e50e5b0a38c083fc526337c359e7683d97b5f68a664a4d747d4034f72d45eda7"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/beacon_stone.png",
+      "sha256": "e38846bd98af4163d9f3d2887125506d8cdb3d049bf22a93af151252bb7db17c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/temple-scene-base.png",
+      "sha256": "ea7a38df1ec562db71fa3c39ce7b75eede176db322a3763e6351c1f3b497fe2c"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/inscription-under-statue.png",
+      "sha256": "0e21e732f0d29278d46936359875402d49e21842b92d1d41f27a674b732c06e9"
+    }
+  ],
+  "protected": [
+    {
+      "file": "assets/levels/shared/characters/the-shadow/asset-map.json",
+      "sha256": "a865558b380a4c11bb25c87e92c4b8026826037e974ccc8c93972c2efb160444"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/prepare_assets.py",
+      "sha256": "5d7dcc9a728d920326b1c70dfd7073c06256df675ea8c7890e8623a9ef24d7bd"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/08-shadow-640x360.png",
+      "sha256": "f7269f8dac9d2abf86290415e21329a5dcf327115286aea2293a06d5c7dcf859"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-after-memory-640x360.png",
+      "sha256": "adab4f21409c62c6b6cdf9d03064792173fd40a05fad478cb5de052a4355b8b6"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-memory-640x360.png",
+      "sha256": "7d7da0841fafcb98e18d25085220d2634caf188ecdc58bb92882f1b627764e54"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-present-640x360.png",
+      "sha256": "edabafcd95f919a7a853831a7f2b5bf5a87a6d614260e81173b3147090b6b860"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/09-reveal-overlap-640x360.png",
+      "sha256": "011a4fbc3f40cf3586d010445d25c0afa128f6cee06c5738bf1cd8f85479ec66"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-0-640x360.png",
+      "sha256": "c05260c78f3ecf6dfb7b291cbed1dfff103f67a560ab6e4c6ffbc6a481df0d49"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-1-640x360.png",
+      "sha256": "1c2a247f456e548f448d50cb238285bfb45793fa4aadd1d0d58541822fab155f"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-2-640x360.png",
+      "sha256": "63e2b6793259cc48119c183fa2a596b2426d283a68d6807edcd9b2d70b4911e4"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-3-640x360.png",
+      "sha256": "05a9140b6f35e48786539e3c0726e0d7f6eb79cd97683a9de89cd161712aabf4"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/10-dawn-4-640x360.png",
+      "sha256": "a5d77895e7950096eb19a6d89a5f08fef6abe7f8ca5d6d14a9482ed8bac1c639"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-1x.png",
+      "sha256": "bd3d9c258a49c1bd5eeee6c482db4551343d41e09963507c6b4450a8d7b9898b"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/previews/contact-2x.png",
+      "sha256": "91e6e24507761606d8eb8dc518c2bb8f1b88e0bbcd3b94a4248819a534116ac6"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/README.md",
+      "sha256": "271716498016c277a2840b49f85ffce8fd89dded493f74722bb9a768d0c675c5"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/observatory-dawn-original.png",
+      "sha256": "0d7b13a8089a13cfb0bd2b6b6e6c9ffacc0bae4a6384d6668b6c18854f93bccc"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/observatory-original.png",
+      "sha256": "2ec2a9b86024481ae8c67a983329890d38501f364d305f20959b2f38d24eecf8"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/prompts.json",
+      "sha256": "350872faf1af64c0937ede334b1de829e4fdd944f911aa5d0d6b1cc49ae7f8e4"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sources/shadow-guardian-original.png",
+      "sha256": "3e29010bacc9c9240a2e2945a27a0025e8dcce25d822b6d65c3a46f63c599672"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-afterimage.png",
+      "sha256": "99223b9fdbaff1e4a8636d8334fd57e7f10859b5b77cd0576c7905c2f588aaea"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-1.png",
+      "sha256": "259a365f6705ca9868e42b2aefde9a9985ef0c1d86aacf7da723fc781b865649"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-dissolve-2.png",
+      "sha256": "307c7d33a2a506e196da8b54277c5277f2fedf6537c84ecdc3db3c02fa2050d5"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/dawn-empty.png",
+      "sha256": "e9bd74696f45da069b0ff079b0be177e0052fbb546bad1f11145ef240f3547e1"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/faded-red-scarf-reuse.png",
+      "sha256": "4d376c5c57df9f9aee651a71bce7eca5b95ae062bfac0e4c6ee288367fb0f863"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/guardian-waiting.png",
+      "sha256": "8de5cfae38cf3e842c58671a9fef8575c152b97769d629f9dfb03e7b6de734cc"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/memory-overlay.png",
+      "sha256": "36d9c6caa12f24ae804f5e61d5ca39f8d4672be61f1d99efd3da30d6a024b350"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-dawn-scene-base.png",
+      "sha256": "70679eaf38280540d3104475f7a97ac80aae109adb3ea7b1db46181bd29f2f96"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/observatory-memory-scene-base.png",
+      "sha256": "6e97f5716f1cde98f3fd7223ac633084d0ae4e1a183b44e95a923b3d55733533"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/shielding.png",
+      "sha256": "a585e485dd8e5e8ff0ac9ecd14242259acab707d5ce4a0d9a32e438e49477c68"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/stillness.png",
+      "sha256": "6411f867cb7435d3e3c8cd70c770006a552a26fbec2beaf583ea16d58bf22eda"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/turn.png",
+      "sha256": "cfd55acdef1eace74bc243687aa4cd7932eaa3ead91dea388e537d982aa71169"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/waiting.png",
+      "sha256": "e2204188559ce123791ad0520076dc42866523f4ad4fb9c350b259af2e6a0e75"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/sprites/walk-right.png",
+      "sha256": "0b37b3505135e9721382cdd9f8f41f5b0ff0e7324a4eb9afcd33b0871ed968c6"
+    },
+    {
+      "file": "assets/levels/shared/characters/the-shadow/validation.json",
+      "sha256": "f2ed08a7822962c3d1a94e8245eede13af57167bb27a90841a9fe625e2adcb47"
+    },
+    {
+      "file": "assets/character/body-scale-anchors.json",
+      "sha256": "e5557e12f747db98457f141f01a383528602130df2691f480abc750cb4d72b62"
+    },
+    {
+      "file": "assets/character/frames.json",
+      "sha256": "5976198f62f0f16507dbd31e709ae7262d60d47c1cfd9e03700cc38d0ddd4bc5"
+    },
+    {
+      "file": "assets/character/generation-prompts.json",
+      "sha256": "f9bc7a0fa2af79bf6194eceddcf76c606bff53a7df5aa86176735d7c248500c5"
+    },
+    {
+      "file": "assets/character/nhinh_all_poses_contact_sheet.png",
+      "sha256": "c4e1df1b3a9fce45219c42a55dcfc5f4901e7fdc191e657b6c211dabec2d3ff5"
+    },
+    {
+      "file": "assets/character/nhinh_contact_sheet.png",
+      "sha256": "9fec1e9cf4d922e978a0279f77b63e17297aab7460114efb7376e050f4f307d1"
+    },
+    {
+      "file": "assets/character/nhinh_down_idle_0.png",
+      "sha256": "49edf6492ff6b6acdd306f8c14608ff7fc1a7c9a5e5da9212b45c9dcb09e33ca"
+    },
+    {
+      "file": "assets/character/nhinh_down_idle_lit_0.png",
+      "sha256": "e93e001b30f5a049ce18852608a9bbaedf7707f371c1d5344fd923d735edb73b"
+    },
+    {
+      "file": "assets/character/nhinh_down_idle_nolamp_0.png",
+      "sha256": "d4f24131b02f29b17b20461e2697826a236a623f1a71c37447e392a83ccb22cd"
+    },
+    {
+      "file": "assets/character/nhinh_down_lantern_off_0.png",
+      "sha256": "e167648b2a6feb61dc41b70f949aa5263ccd3e6d413c9997c35ba6d2f975d165"
+    },
+    {
+      "file": "assets/character/nhinh_down_lantern_off_1.png",
+      "sha256": "40024b5ab7818bee8f17417d9f03b3bc05d732f953ab5c47ab20718c399cd937"
+    },
+    {
+      "file": "assets/character/nhinh_down_lantern_off_2.png",
+      "sha256": "36325c23beceb5233e71058d69ce8c80d03f78b79d43cc958bd45185c51d2eb9"
+    },
+    {
+      "file": "assets/character/nhinh_down_lantern_on_0.png",
+      "sha256": "4b2aa714f4172d3d9098db43335f2c363fbc19eb49374dca9826800311f380e7"
+    },
+    {
+      "file": "assets/character/nhinh_down_lantern_on_1.png",
+      "sha256": "53f5d6e3ab48369c883c83699c57b5694de4ca2d4c69035c73e0142a56be9aa4"
+    },
+    {
+      "file": "assets/character/nhinh_down_lantern_on_2.png",
+      "sha256": "768de1bb58bba17df37d218d5ff8f0d400bd63e13faf5b6af5e083ade6d4607d"
+    },
+    {
+      "file": "assets/character/nhinh_down_pulse_0.png",
+      "sha256": "2790c61ddfeb3215217161dd757c66767eb85b8b6073ec89736314d30b98f60e"
+    },
+    {
+      "file": "assets/character/nhinh_down_pulse_1.png",
+      "sha256": "f8c73d6c7e3452e90caf247588e817ff824a4d36239980ed07b90e7bb70871a9"
+    },
+    {
+      "file": "assets/character/nhinh_down_pulse_2.png",
+      "sha256": "2748005d86cb019d37a4a080141ec0fe0319fc2f5bb6cd986fe3042cb9819cf9"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_0.png",
+      "sha256": "6f64709c0ba11e185aa29209c86b7c31f01719b61759a486770c4f538978ff1e"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_1.png",
+      "sha256": "5ee2d63961b14db9ee2745e9fe8ea377a80567d439cad3065f5a78c6d4dee4bc"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_2.png",
+      "sha256": "3f7b164e897ce465d1b2a7a30ba79b5e651728832dc9d846725643a331fca8c7"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_lit_0.png",
+      "sha256": "3fa846084f20ec39e41e111860f96b1e4b3395655e945f5fc21f178f017227de"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_lit_1.png",
+      "sha256": "194c947e2eb5fcb28faa56cf7ee931f05f28d0783501a95f499b14cdb3f27faf"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_lit_2.png",
+      "sha256": "ff06d1c4d0e9e6e3ac1d979d109a150ce732a581f019fcaeaff9aeac59be21da"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_nolamp_0.png",
+      "sha256": "967ea7236b4604e5e63d2ced2824e80d32073f0e07700d491f259ad45dc86549"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_nolamp_1.png",
+      "sha256": "9e51d365711646e22bea8c390ac79f9a2611c0f367e1cc0866aa500d17acf8ef"
+    },
+    {
+      "file": "assets/character/nhinh_down_run_nolamp_2.png",
+      "sha256": "b0e51cc7d93ea00dd7ab670cc8994845a6f9aabde200d97597dfbe3252824a66"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_0.png",
+      "sha256": "aeb54f6cad4e4b27a855582ecc1b7ab08cf8b78efe9f8758f0dd6997a8ff638a"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_1.png",
+      "sha256": "2110ac8e799f78b456d51e9a8aa25b1d9d49af851f9404bfdf1f834a9ce7b172"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_2.png",
+      "sha256": "78696941cd567e33604584276343b0dbfe64288631e7f04bf1af834dd12d44eb"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_lit_0.png",
+      "sha256": "0f40ca1bf4f65e56a8ac6726eeab5ace12826fc9275f09088ffaa2293797b2be"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_lit_1.png",
+      "sha256": "6faa319139814702a6be6d354f2460f7516b4d046aa2c0baabb08abaff10333f"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_lit_2.png",
+      "sha256": "bb8a557428860f517a72c83cffd889fd2c1a82197f96148ea0e60b2e743e0fb9"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_nolamp_0.png",
+      "sha256": "ed1f726083752a650470afb715e56a7624c0f79099d63be4977a6a66972538e2"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_nolamp_1.png",
+      "sha256": "67e289e3021f52a71cf7c6af17a1583b1f421610aafbadb6e8f94c9d66ab1463"
+    },
+    {
+      "file": "assets/character/nhinh_down_walk_nolamp_2.png",
+      "sha256": "8028801a4182be8b170fb2e13f3d3873a2378838c6f8b6bf04c53cf35794409e"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_idle_0.png",
+      "sha256": "f765d85463bd7c9f9408c144348d09075565faa765af718c8966f053ff76f9bf"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_idle_lit_0.png",
+      "sha256": "d94f6a939b4ac6f328f0207ef70a8f1aeb9b24444fbe2da8a7ed2879431692d7"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_idle_nolamp_0.png",
+      "sha256": "7caa2844945dea63f0bff5e0290ee8ba778f65cb34a6e8b661d7d1bfe9852a52"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_lantern_off_0.png",
+      "sha256": "c3699a46ae95233581abc07eab138c815c28c52e0f4c3721b16b533d08e0c815"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_lantern_off_1.png",
+      "sha256": "e03fc6db7cd5f7eaa89e1d1f8a67704c07de3a6fddf59a32843d8c6f5284f11a"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_lantern_off_2.png",
+      "sha256": "bb3c900907fe73843d1ca0e6ce1df513644fe0a50c92ad96fcb55536842ec929"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_lantern_on_0.png",
+      "sha256": "086b6deea2b066ebe1df87febe59d17ac0de11782595f4f2c59795f8d5cfceda"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_lantern_on_1.png",
+      "sha256": "89c2f9bf19a21e542ea70d24c9ca116df43283e33bba7cbc27f8b87a09e4f970"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_lantern_on_2.png",
+      "sha256": "5e732316ff63bf20ef1f729a32a9b0f82b8dadceac40d0088b6c89b630e6d43e"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_pulse_0.png",
+      "sha256": "8ee4cbc3a71370b136f7083d6902d7e16130da51ec1ab30def546e0888370618"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_pulse_1.png",
+      "sha256": "17580f660a7c6a0f4affb73ead5f6dc076eeeb1e8953cb8b69267d9c78da9a63"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_pulse_2.png",
+      "sha256": "d9a197ccdd2f6a78743c7550441169316c47f494d514ef94e619a837de2386aa"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_0.png",
+      "sha256": "856a6952f11668e4b2980358ca83aee496c1ec1afbf0c8c01b511e67ca70632e"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_1.png",
+      "sha256": "33cb33962681fe6840530cd7b8982749ba2f8d5672e7dea31a9a993c39fa9606"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_2.png",
+      "sha256": "46379b13e71093b875c71030d3540a35cc8506f8504640089acd0678e009af87"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_lit_0.png",
+      "sha256": "f1a4dc785dece398877e4bdeebdc5981bd3f9395838cd1b1ca3f2e970e0e7831"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_lit_1.png",
+      "sha256": "62d817e758d7a9d882625db34f4627dc73364bec8b4e59158857e149af5f5efb"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_lit_2.png",
+      "sha256": "f99a3eda81fc50f7251885f6fffebbcb42bafe76300cc28f17346a21d09c4e7f"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_nolamp_0.png",
+      "sha256": "6a92f3ab65e5c10edb44a9d827b97ea4efbaa22e5bed6a040ed22e09e73e3061"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_nolamp_1.png",
+      "sha256": "db395e6884fd94b142022a44bf40a17791083cba902d943bc5483fe5c923fedd"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_run_nolamp_2.png",
+      "sha256": "49e32e43ff62726bb7d4fb2fbef0e72455e4994391135cd73cab073e760c402f"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_0.png",
+      "sha256": "260e6474443b06ca6cf856a5e7bb13fee93062f1d5a555571753b6d95802df6b"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_1.png",
+      "sha256": "eedf24114370d01cf8f3d7a834f359b6f024c611968d5e83b5fbcbbab3c5edfb"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_2.png",
+      "sha256": "bacd5e61f986ecdf73a561baecb330a91b2ef1dc663cf6178e80f715335616b1"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_lit_0.png",
+      "sha256": "17989bc7c63b61c399d9dbedfd098fd4dd9d86a1ac580f0b9a5e8596abf43bbc"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_lit_1.png",
+      "sha256": "86cfdf1c93aa6ac5a216aecc563565fb2b998f9aad4129eab5af57bdfcd908ce"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_lit_2.png",
+      "sha256": "f4c6d6f41668b113854283d6b877f6108eca3205695c781fbf7ec4dc6f7c85f1"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_nolamp_0.png",
+      "sha256": "fa98169051409a9e9d1cfeed98d37a60461d86c1a4f758a7c892dffa9d88ea68"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_nolamp_1.png",
+      "sha256": "f1cb7317f2c0ddf1f7a6fda501e96d76d6e2174b37639f5ee3765481ce3d7a8c"
+    },
+    {
+      "file": "assets/character/nhinh_downleft_walk_nolamp_2.png",
+      "sha256": "1a4a94962a09d22153121e5edec326da67b88cb422494f23bd15e89c617f61ec"
+    },
+    {
+      "file": "assets/character/nhinh_downright_idle_0.png",
+      "sha256": "8b9b44d5d9517968af153047f19d780c9984dbaec7993b6668971695a1936702"
+    },
+    {
+      "file": "assets/character/nhinh_downright_idle_lit_0.png",
+      "sha256": "75936d3c8e222bf43bbc19822797b47f5ab3d49e526e3a79e5f54f61e1e43b8b"
+    },
+    {
+      "file": "assets/character/nhinh_downright_idle_nolamp_0.png",
+      "sha256": "6744c4f686148db8a470022ba4de8084b468956db823b795a50b3b22051be5ff"
+    },
+    {
+      "file": "assets/character/nhinh_downright_lantern_off_0.png",
+      "sha256": "b720c434ed3d9c33eb8af659f60f1d6f4ae9143fb26a1a7fe00f4fb2146373c5"
+    },
+    {
+      "file": "assets/character/nhinh_downright_lantern_off_1.png",
+      "sha256": "9e64242350b435cebfaffcd830a910033c818294f0af65ddb58c479e8f8f70f4"
+    },
+    {
+      "file": "assets/character/nhinh_downright_lantern_off_2.png",
+      "sha256": "43099325e48f5cb17c7ef955846b82272ba2df6da7d84bf017fe97042f4ccf36"
+    },
+    {
+      "file": "assets/character/nhinh_downright_lantern_on_0.png",
+      "sha256": "e37ba7fc86318afb8582b29a2f9911e286c6fb603108d144914d03e7c9ce9732"
+    },
+    {
+      "file": "assets/character/nhinh_downright_lantern_on_1.png",
+      "sha256": "2d92aa54b34eaae96ec7d355dfc438eafd14de9a2209563d36582c625078057b"
+    },
+    {
+      "file": "assets/character/nhinh_downright_lantern_on_2.png",
+      "sha256": "90f1b83203a09d1eb3a55b8c1585f73e84f0533b23da280b0d19acfba6a2cb73"
+    },
+    {
+      "file": "assets/character/nhinh_downright_pulse_0.png",
+      "sha256": "41d706cb56121e6fa94e2dc1086f988704936b3dcf83502aec50e0afc1593096"
+    },
+    {
+      "file": "assets/character/nhinh_downright_pulse_1.png",
+      "sha256": "9387ec8b6c08d035e406eed92ec64c22b086072a9959431172d3157b16e0aa90"
+    },
+    {
+      "file": "assets/character/nhinh_downright_pulse_2.png",
+      "sha256": "652ee33478af3e1dea698b5be44fe9efe85c5e929ed03a50e521a61fd069e110"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_0.png",
+      "sha256": "2b3fc4f3294fe63c3c12792a9140cf38b1f98305facd7f6b743a7bdee9dd42b6"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_1.png",
+      "sha256": "e10781a42f9835eb4a9dc22c83361c380cb5998dc5364342e5ac1c33a03271de"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_2.png",
+      "sha256": "1486e44c47c8fa2e1f2820d9c49b9c2d7323e1e964527df0eaef820284ae3844"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_lit_0.png",
+      "sha256": "b8f8601c6010ccb2a61a0dc5c95d32dcfc2939a05c69c3af445f05b37697cdba"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_lit_1.png",
+      "sha256": "cb0c7a8c64427c370f3dc04b43a65b23bef9d8f0f319d1fa199d3c9cfe72e8aa"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_lit_2.png",
+      "sha256": "14347571df1abd36c5cb70de96dfb19a3b28cdd5864160c7b835981e1616a71f"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_nolamp_0.png",
+      "sha256": "d4c8d55064d2d4e7b3295fc1d070fa737628faef065388f5ef948551c2c64e7c"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_nolamp_1.png",
+      "sha256": "e250f00bf712c78e740baa30dd80c07ad7e7c345497118c3aadb54136af68727"
+    },
+    {
+      "file": "assets/character/nhinh_downright_run_nolamp_2.png",
+      "sha256": "8ad97bf8e4a4b1b0c2ed20955be6edbf8811f99fd4b1d711354ede0ad8f9fbc3"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_0.png",
+      "sha256": "e44c6fbca9c0a9ed0721591eac7da3c848c65aefc9d38f3ca03e08a89529b7ab"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_1.png",
+      "sha256": "79feffff365f19bdc4b582128e8b41f7f2e127fa8b54534d410e056a34e396d4"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_2.png",
+      "sha256": "76561dcfba2a2af3f12b91601b11bad274154273e6c08d8bcdc042564e3ddcad"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_lit_0.png",
+      "sha256": "642e74751da342c51d1ec444a9c7a7e2274cfab001e0eeb3b89f9bd1d863366a"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_lit_1.png",
+      "sha256": "8e84da12825cba5b71dead32a3fcc36c5c04a94d49c5fabe70fa5e37e7de28eb"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_lit_2.png",
+      "sha256": "54cccb7e3169f8eb5bdda83a1be5604095ba9320a61d8dd16c6976719393bdb8"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_nolamp_0.png",
+      "sha256": "d8b659919073b16964c524e22128f0a667566033606a273210f6d74513bec9a2"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_nolamp_1.png",
+      "sha256": "4f9f068c6ed315130440566bc2a88a1e031a565dced68b4e4aaf64edd3a8573f"
+    },
+    {
+      "file": "assets/character/nhinh_downright_walk_nolamp_2.png",
+      "sha256": "0993bb12abaac4ed01966de71de93bb1c2868d8e02e0a2a445c7577aef0aaf55"
+    },
+    {
+      "file": "assets/character/nhinh_left_idle_0.png",
+      "sha256": "7ebd710097f4eb5cbffc3d39364f0b466fb4fd09eeff9ff8ba07b8448ea67063"
+    },
+    {
+      "file": "assets/character/nhinh_left_idle_lit_0.png",
+      "sha256": "cd0fda8f792759b363835fc3b35c66b1a022e2a11d4ba12a0f87034361427657"
+    },
+    {
+      "file": "assets/character/nhinh_left_idle_nolamp_0.png",
+      "sha256": "b298e5739ea39de9d0da507f0eed33591af88e332e5de3c036594f8a9af8e0cd"
+    },
+    {
+      "file": "assets/character/nhinh_left_lantern_off_0.png",
+      "sha256": "9e6f57070d604f0053af3ca23013f13b26ab45fafd6a554d6b69317fb28af861"
+    },
+    {
+      "file": "assets/character/nhinh_left_lantern_off_1.png",
+      "sha256": "63068170418e24d47403cef3da23019682880304e975b893f0d17df777383217"
+    },
+    {
+      "file": "assets/character/nhinh_left_lantern_off_2.png",
+      "sha256": "02360fbdd778da07e13f948df158eaf3600e270bde9ce64ee5905346a7dd1ff7"
+    },
+    {
+      "file": "assets/character/nhinh_left_lantern_on_0.png",
+      "sha256": "f9f1417e38577c67c39657791cd54a47bc110933a2e3488af83d4120a23d19f4"
+    },
+    {
+      "file": "assets/character/nhinh_left_lantern_on_1.png",
+      "sha256": "de07f706bff0bbadbe6eb84ca2d438b3b3395cba5697468075cec9949dcb5d70"
+    },
+    {
+      "file": "assets/character/nhinh_left_lantern_on_2.png",
+      "sha256": "ca6760fe414ddcc8883f1befc6af4d34215ef3bca8cadeb226d649a651f31b46"
+    },
+    {
+      "file": "assets/character/nhinh_left_pulse_0.png",
+      "sha256": "f30b6c9181068cdd85cf3d379e47a00b6d0ca42cb9156b83c6b6094d5ddcfc2b"
+    },
+    {
+      "file": "assets/character/nhinh_left_pulse_1.png",
+      "sha256": "bd9116acdbe4ee1d121b0d2c348069039e41c20285fda27284b53b8932379c6e"
+    },
+    {
+      "file": "assets/character/nhinh_left_pulse_2.png",
+      "sha256": "6f1271c5678792b8fdc1f3bbc7a422c51d3ca15ddf724f9541131a2836a42b8f"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_0.png",
+      "sha256": "b65d4fe28af534eae707190aac38f0270e23b25a451df4055647c69fd1026594"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_1.png",
+      "sha256": "68f38b49ac79e8a7c554780590fb04f08dcf82665dd76d9ce41704413347e8cd"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_2.png",
+      "sha256": "c881ac35adda4d55b42322a11ac25c5408e0d35a47dafb7a98f46b8d248670d7"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_lit_0.png",
+      "sha256": "0e5515782070bbca6a00e97995800d71aa6150a063a64e2f9acec72b86a24995"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_lit_1.png",
+      "sha256": "a632f9c47c9b339e775a625b772746c8e5fdbcc69759638742944e17d49874b0"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_lit_2.png",
+      "sha256": "b0cd75e2cd39f68598db0ae8df351900a845340a6ed59d0e2d41d7e61c0c2f1d"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_nolamp_0.png",
+      "sha256": "73f1d7a666f3216f4d49c24216111ff57e6af0f694a7a4faec56d579e45bf4be"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_nolamp_1.png",
+      "sha256": "660dc7b59b59171f415f1a5a057943c9a1c1d2b1217064dde4f69c5b81021c6f"
+    },
+    {
+      "file": "assets/character/nhinh_left_run_nolamp_2.png",
+      "sha256": "0577057ad2f1787bb84e4cbc7ad48e548adbf5b494ed90be18b054ac5d7c08c0"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_0.png",
+      "sha256": "bc49fdb67e7c2647367a86204b0859744aabd3c0b3f44178183baf965f7f868c"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_1.png",
+      "sha256": "030c464e2c76b5dea93084963f9d646b1ec80d47f62221fe9e1fce3f790e952b"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_2.png",
+      "sha256": "3c88f6ea752eab6752263b1bc4c0fef394644f98f2d40d09585c621cd7f5edec"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_lit_0.png",
+      "sha256": "f45d3ae69f4a0fb756c0e24ed879c553f1a9d6a8bc5a9909ab69d52ffd249ead"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_lit_1.png",
+      "sha256": "74b48347eb891a093bb20508ea423233b3f6ddced265a63d354a42604c133d1d"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_lit_2.png",
+      "sha256": "83f3d0f28bf8148fe62aefee288f523b775599ce4393e89548a1cd4f2e92f361"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_nolamp_0.png",
+      "sha256": "0a42733be2053465cef48d8902e0c5f527b2e27f6c03e8e7dc8c8c095327df54"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_nolamp_1.png",
+      "sha256": "0c36f9d19e277f96d30814d4feef6303487cbf099f146d3ae3f12c4ad23d2138"
+    },
+    {
+      "file": "assets/character/nhinh_left_walk_nolamp_2.png",
+      "sha256": "8a4421b399ed0c37c5fd1b9994f469c803b2bc4f0212434fbc68cbe58750011b"
+    },
+    {
+      "file": "assets/character/nhinh_right_idle_0.png",
+      "sha256": "fc0303deb5c569d82fbca995601f95d5265f6bbe4a6caaf7d87243e2a0930f8f"
+    },
+    {
+      "file": "assets/character/nhinh_right_idle_lit_0.png",
+      "sha256": "1f3766e5c1fa654cc59526980137e04bc9ec0a942d2428265025784b45f17535"
+    },
+    {
+      "file": "assets/character/nhinh_right_idle_nolamp_0.png",
+      "sha256": "e55916e17779fd6ef0ebf8b5af3651fbabb8b1457de161eeb017456fa323dcf4"
+    },
+    {
+      "file": "assets/character/nhinh_right_lantern_off_0.png",
+      "sha256": "94babf49a568c39be59359165fbec6124b52eb824d7ce30be58384c6ee73d8fc"
+    },
+    {
+      "file": "assets/character/nhinh_right_lantern_off_1.png",
+      "sha256": "35d2681be75c10d863a486e1e9d11cd13498ae938120df8c02585c6fa538f839"
+    },
+    {
+      "file": "assets/character/nhinh_right_lantern_off_2.png",
+      "sha256": "3d062499b16ddfc6ae5a6a8eafb04e07a21c847af545ad1f3ab2f7782e3dc113"
+    },
+    {
+      "file": "assets/character/nhinh_right_lantern_on_0.png",
+      "sha256": "18249cb74046c5c309dbf187e595f7326b016e849844ed7be91531f721ba8c3e"
+    },
+    {
+      "file": "assets/character/nhinh_right_lantern_on_1.png",
+      "sha256": "e047045b146d7969bb524bc3c4ee90e470a139f7c582c76f3d03cdf534b48105"
+    },
+    {
+      "file": "assets/character/nhinh_right_lantern_on_2.png",
+      "sha256": "20b5fc708e820cc2a8721dd251635bdc2bb5a680f05c68de6a0f27e967860f4a"
+    },
+    {
+      "file": "assets/character/nhinh_right_pulse_0.png",
+      "sha256": "45d66dacd4bf8abb1511181de9e9006441f6a824e191e3d9c014caee780c37f5"
+    },
+    {
+      "file": "assets/character/nhinh_right_pulse_1.png",
+      "sha256": "00653c5c2f2a7c701f6ac22ec60719a79eaddc07c0f4dd1fc85a11fbc66b85e2"
+    },
+    {
+      "file": "assets/character/nhinh_right_pulse_2.png",
+      "sha256": "3db5b392362986ce3da8c482b7dd1b1da40854e539256699797799b2cfc812f2"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_0.png",
+      "sha256": "aa9b93f7bceb7ce4c9fe5f22f2f020c1bc29bc85aabb90d215626085060fdf75"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_1.png",
+      "sha256": "7d018221fb7b6c8100c43a1df0c2afec6b97d3e009e40b1acff9c30426a1aab8"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_2.png",
+      "sha256": "41bd0ce93c0f82e1dc38dddb861c9e09d2a63edf734bce07bd055c9be3b1ef09"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_lit_0.png",
+      "sha256": "36754c22eb3e6e909693840a10717456a57cf2da69134f2648e4d0cdf8fe983b"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_lit_1.png",
+      "sha256": "eb79374776a571c01cc650adace9f46a93aa7539c2e80ee229ebf9816ced2a91"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_lit_2.png",
+      "sha256": "d4a87428730d24c136296586acbb6c9ff24953562b8d234838d701c13a7dd3ff"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_nolamp_0.png",
+      "sha256": "70a760c7b7084f4177a877c45faf7d3acda74d916e0b302133290499a4f4dddb"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_nolamp_1.png",
+      "sha256": "b677f289a911e258b2c962cd3952de55f42f002129ed0a39fc64e15af98ae7e6"
+    },
+    {
+      "file": "assets/character/nhinh_right_run_nolamp_2.png",
+      "sha256": "a990d7f43fc63eac43610d038d3890995d7af991ef05bcef764fece0d00f3a52"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_0.png",
+      "sha256": "6c27343c37d5db3c9a5ca1a0a376d2665980353da3340e6e514a8c738d3f73f5"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_1.png",
+      "sha256": "6ecaf0c3d0ad81662caca34cd6d30f0a64e8079da17e448a953c6cbbbb37102e"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_2.png",
+      "sha256": "cf883c9712a0784a18615f147011402ab9fb5547586cd4741201f77e3725d094"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_lit_0.png",
+      "sha256": "22e7de10bb966b420fef7d2a5291fea4770ac74346462a2f4105bb5374baf2f8"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_lit_1.png",
+      "sha256": "4163651c86baa6deec39e74a9eebce22349cd686fdef922a8fbc5ae1b02d3161"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_lit_2.png",
+      "sha256": "decc330781581a8d5c145e63966021b89695317bf4f02af43211e979611caeac"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_nolamp_0.png",
+      "sha256": "309af47c2dc464246d767a4e2f6bef992ad0663a351a5daa9cdc95aabe8ce088"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_nolamp_1.png",
+      "sha256": "d49721fbb3f1ba158f946368b215a231bd797749771b9d3660f56243b4af4dc3"
+    },
+    {
+      "file": "assets/character/nhinh_right_walk_nolamp_2.png",
+      "sha256": "a773a05681ae2b80a96e57dc9ec45413962c12a44ad00528dc9d714d16fe99c0"
+    },
+    {
+      "file": "assets/character/nhinh_state_variants_contact_sheet.png",
+      "sha256": "0c527035ac0a44eb678feb9df3c6b6837e73395e119e99a5d270bebe63f3d1c3"
+    },
+    {
+      "file": "assets/character/nhinh_up_idle_0.png",
+      "sha256": "c533217fd4e4b818f709ffba03d20a19ac74c943ec7e0275673e4afa547e7c96"
+    },
+    {
+      "file": "assets/character/nhinh_up_idle_lit_0.png",
+      "sha256": "7f93e472e24fcfdb15de423d24a12659b1059b5f3fef24d66926f597c514c0b8"
+    },
+    {
+      "file": "assets/character/nhinh_up_idle_nolamp_0.png",
+      "sha256": "b1e5dfeb3ad356e035eb798de415a6de07a2be868278e9ff11bdb6c89cb5eeb1"
+    },
+    {
+      "file": "assets/character/nhinh_up_lantern_off_0.png",
+      "sha256": "f62f9a27e2cf2d9779c957574f9aa068c9088932117de3469023f4133aac28cb"
+    },
+    {
+      "file": "assets/character/nhinh_up_lantern_off_1.png",
+      "sha256": "ad43fd4b3608a00bd165edc940be8f012391a4be6f33d9e00a3be2b851b48fb2"
+    },
+    {
+      "file": "assets/character/nhinh_up_lantern_off_2.png",
+      "sha256": "d763e43edb43dd4ba01fae7810e12007e82348c36cf8575ea1c1c26d85786a17"
+    },
+    {
+      "file": "assets/character/nhinh_up_lantern_on_0.png",
+      "sha256": "5af97e9dbab091b2f4adc47b2028bff8e30fb25520de88f735c6ba64cc674cbe"
+    },
+    {
+      "file": "assets/character/nhinh_up_lantern_on_1.png",
+      "sha256": "c8a0fedcfa672b1467b22ec8ad08342d360c964d395090bb2dc38721eb274532"
+    },
+    {
+      "file": "assets/character/nhinh_up_lantern_on_2.png",
+      "sha256": "bd3e86e1ff4d9e2535d2f83f855304b13c87d34e72c842d8e2e0c0c67b6f9ef5"
+    },
+    {
+      "file": "assets/character/nhinh_up_pulse_0.png",
+      "sha256": "419e1730b9f54c67f5b8b1ba59394ae57bf8ab8f9a80b414bd61c75180ed24c0"
+    },
+    {
+      "file": "assets/character/nhinh_up_pulse_1.png",
+      "sha256": "99e37fe5a9b13d6acb5c51e643176fab71fb706e2a379cb1c6197da148dc3282"
+    },
+    {
+      "file": "assets/character/nhinh_up_pulse_2.png",
+      "sha256": "2c9e8b2a9639cda07ae253020385acf77e1f1bde56f155b611c6f22389b528a7"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_0.png",
+      "sha256": "0420a2c9ca267d4cb3782a70b3377ac1582e20504cfeecbb36627ba0fda4f8c2"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_1.png",
+      "sha256": "928f142af9c1753c98dccf270a8ec1fe709cb9b8c05d934750d21a83b884ade1"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_2.png",
+      "sha256": "003d2ba0161fe06cf9fcda09d49e7fafc4874226eca9fe36d8613d7e2dc5a212"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_lit_0.png",
+      "sha256": "0ad0a542e212848a8a03ada17a5a444a2f4be283fc77e0761d6ff8184b4774b0"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_lit_1.png",
+      "sha256": "5e962523d187dfa7fe073b7f4daac4971ba440e334e9d1096efec753955c3b94"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_lit_2.png",
+      "sha256": "80395ecbfaa6c118301f11bd145755fa76e43aeac0b7d629c14c37fb88924c04"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_nolamp_0.png",
+      "sha256": "63bce9797e9168347c9e52bf96539e9baa02271c59772cb239c09596dbea644a"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_nolamp_1.png",
+      "sha256": "8a4e899a6466b3bcc51c592b8a25bb4a9c940e90b2bd27c77c594848529bf82b"
+    },
+    {
+      "file": "assets/character/nhinh_up_run_nolamp_2.png",
+      "sha256": "91f5e8da745a6515ce6412865405f9328688af120ef5de1e2110d3cc8a070057"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_0.png",
+      "sha256": "3a90ccd895112fb32b7e2b68bb0682eeff77009023f81987050d1e32a7d657d1"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_1.png",
+      "sha256": "02cab2b23298e3534e53ca9e06704d2bb0c2202e485969a1e3ff7804bc608730"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_2.png",
+      "sha256": "033d74a3daba8568b854e4e29ffe7c4ece66f1cf19467473b06241eb43929c5b"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_lit_0.png",
+      "sha256": "e366db189df7ae5bd836014dea3e868214678364fa57fac2250b046ed0413338"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_lit_1.png",
+      "sha256": "a7bad81491d9ffb6ac00a425b57f40b7b456ea6763dffbc42e50df889af7c50d"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_lit_2.png",
+      "sha256": "54d2eb2f5fde3e48a82c8b17e451adb59dc583ed712b8fbc040f4241f5aaf7bc"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_nolamp_0.png",
+      "sha256": "0901ff806fab38e5d9bdb1b5f8cb6b7c099494c2cf5070f0eae70e5dbbb1e318"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_nolamp_1.png",
+      "sha256": "6ff2d4d9f48dcc2cb3dbf9eddeedeeed02fbb8e098dfc9f3c1a4de9d18437cf1"
+    },
+    {
+      "file": "assets/character/nhinh_up_walk_nolamp_2.png",
+      "sha256": "51c22558bdbba1988821873f4806a470e7af7090c76a3ec2d2180eb7d33bdefa"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_idle_0.png",
+      "sha256": "16533b5d96c5cd76b28fd722807e62d5264d8bba41c7840355458be9af5267ad"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_idle_lit_0.png",
+      "sha256": "61b0fe39ee1ca535d0ba4e4bb284427eea3b6fd071083ded6c2c5f97f6137d89"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_idle_nolamp_0.png",
+      "sha256": "ff8e4adddde69def2282181323955172cbce2b1b52380636c66ea0f12453acfa"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_lantern_off_0.png",
+      "sha256": "9ef31b451c93245f395c0a2d805b15e9526dcbc3456ee7184085d0353edd0157"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_lantern_off_1.png",
+      "sha256": "4a4d8ad3830d8f25e26ae9a31fe2bbb3f6876efb17de08a55c48db3b7f8227ca"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_lantern_off_2.png",
+      "sha256": "9c730cd9938ae97d7af4f4eca72f4716befebd93b04c52d122127b8159915843"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_lantern_on_0.png",
+      "sha256": "e31d4805338e55e5da6826cea911aa75da802f68bc0ccca3b3a048dc6cb6417a"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_lantern_on_1.png",
+      "sha256": "ae9ea1d9a4bb2274db6bbba1dc9e9ac4c557a15fc1fe32b27a0d181a6e149a8a"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_lantern_on_2.png",
+      "sha256": "870b9a4e55f729b6620221d2dc8bdef57db5ebb53874c5b05fffb09bc9181820"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_pulse_0.png",
+      "sha256": "6dde01aa62d7ed548621e6d8f686f8b16be6d8eb31a39d319dd4407482d4019e"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_pulse_1.png",
+      "sha256": "5ac879160be42235a04614962f4dedb47137bee774963ee92defe018741451ea"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_pulse_2.png",
+      "sha256": "45ed8a2dc7235cf9a69102371bf5256c786ae22f9857bd7a64c9225e1219a698"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_0.png",
+      "sha256": "d21bcd163ac90b6025bb91de26e843bc940c2194156fb1b2faff635fec0369d0"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_1.png",
+      "sha256": "cb1177d9ebb4db26452fb2aa6f4b2cb25f44a4f467cc749c3ce774652b0d1fc8"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_2.png",
+      "sha256": "d5a47a76f3dc068ed498f2dc77c66ad5719c302aeb72e1d1ffb043bfbc2539a9"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_lit_0.png",
+      "sha256": "64c3dd77cc76a0fdde8b70519c2c035daac15ab64b8d5530ce669023ff7120aa"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_lit_1.png",
+      "sha256": "92cb6aa30597580c0641dd7b79deedeec2604c6f9f1affcb93ca8859273f753d"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_lit_2.png",
+      "sha256": "87b3e28e3f9b19c931d227a157cef016ccdae19609d56383ede7d1e79a5fd9bc"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_nolamp_0.png",
+      "sha256": "68a4b3a3db3d36b9dea53b9e6e5fe923541aefd919a740541f013bb1831c10bb"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_nolamp_1.png",
+      "sha256": "43e09d010db67eff27e6fb5671ad293a04675aa1fee36b873dadd71c4ee5edff"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_run_nolamp_2.png",
+      "sha256": "86d64ed9174b04dd1de7a820146506e5c0a4ab7422f9bd76b70f235737760a97"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_0.png",
+      "sha256": "1feda7649bedbfd943bf7e9f4e5559134e9b0d30d0efd8ccd4d444a4a8857782"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_1.png",
+      "sha256": "ac4f24c24d9b6166335c1277e0b7abf09dcbdc129f95fa3995ae3a6c413ed4e0"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_2.png",
+      "sha256": "326ac74deeb5808fd6ddc6ad483247fdd1b453d7a9265084f7c7f80575f51d59"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_lit_0.png",
+      "sha256": "4a4f64c5c2923ec5d5dea199b4ca0809d02a9ef89bc9683e083c7d92150cc1d9"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_lit_1.png",
+      "sha256": "9f1c2423fbcf2e70e2bb204aaa842d37a99150cf0c5b3e7f2d738356ff093e62"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_lit_2.png",
+      "sha256": "62ce8ab0959335f91fd054a025bfb78f0d1653cd3dffeb6a4ad994fa76484da6"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_nolamp_0.png",
+      "sha256": "a402b57cc4f30f36bd130421e65c567914fe55a21087e1ac6a7148e284e325cd"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_nolamp_1.png",
+      "sha256": "89e033d3cecc050085e017c436137c5748c4c52b746091f2da1282062683bc23"
+    },
+    {
+      "file": "assets/character/nhinh_upleft_walk_nolamp_2.png",
+      "sha256": "b6aeabbf75fe895dae4c623ae974e23d7e3a1bba79533ce8740414a66a859095"
+    },
+    {
+      "file": "assets/character/nhinh_upright_idle_0.png",
+      "sha256": "843cbf672666cdef085008d1a3c890730b42ad1398020fa58d4016e0b9e57586"
+    },
+    {
+      "file": "assets/character/nhinh_upright_idle_lit_0.png",
+      "sha256": "0c4bb615809935efcef6ec1175392195f57285924a07bc9b235c6581775319d2"
+    },
+    {
+      "file": "assets/character/nhinh_upright_idle_nolamp_0.png",
+      "sha256": "9b07e1777bdb466e1862f4c5a887cad8082337337395b97688206ad476970a0c"
+    },
+    {
+      "file": "assets/character/nhinh_upright_lantern_off_0.png",
+      "sha256": "11b2bfc1404fc67653655e80d7d591febfe0622f5378fe17e12b116abc2da9fc"
+    },
+    {
+      "file": "assets/character/nhinh_upright_lantern_off_1.png",
+      "sha256": "5dec47555f4b03ec143c67c7f3e9e3f43c2bf186881e570ac98eb6759597eb99"
+    },
+    {
+      "file": "assets/character/nhinh_upright_lantern_off_2.png",
+      "sha256": "e0b1d86a2568761b43cbd43e555c2e55215f64f6c16c68fbfa1621bfcdf75a89"
+    },
+    {
+      "file": "assets/character/nhinh_upright_lantern_on_0.png",
+      "sha256": "92ea40ecd2baa111227d7e4d0b21bc362494396caa0cb04888c24b03e7f08cfe"
+    },
+    {
+      "file": "assets/character/nhinh_upright_lantern_on_1.png",
+      "sha256": "5941653101171ab9b75493667fea5c591ca515ffee2f1a141e026d49a5f099f4"
+    },
+    {
+      "file": "assets/character/nhinh_upright_lantern_on_2.png",
+      "sha256": "6e3f79f41ca9fb28f3329ddef0ba0ffedd99acd0e67ed8ec73e77d048789782d"
+    },
+    {
+      "file": "assets/character/nhinh_upright_pulse_0.png",
+      "sha256": "f8183aaa1ea79f32c304f63aa73f404fcd6f5ffd9968ccaacb502a1f8dcc85e7"
+    },
+    {
+      "file": "assets/character/nhinh_upright_pulse_1.png",
+      "sha256": "93e5b8d15c7639c13cf41159c7ae3ab39b0ee42986656006dadcba15195ff0aa"
+    },
+    {
+      "file": "assets/character/nhinh_upright_pulse_2.png",
+      "sha256": "3eb2cc71971c59f9e5ce39fcc9d05b518ed649f1209660c2b1a0a1b3a645c62e"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_0.png",
+      "sha256": "239ebc93a229ca9d50acdb138f8627cacfe6684a8ac3abf946e6d8cf7d728f8a"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_1.png",
+      "sha256": "99d160e799188f86c33913334b596c6143d5f93539637fc960034624a71f091c"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_2.png",
+      "sha256": "bf0f56929b378a231eee60b49ab4c87563d0ebd2d698ba617774b2ea758411ee"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_lit_0.png",
+      "sha256": "7c533056a64085728ed9c20fe6b8ec6cc39e01c542c696036864fb0a1f1209f9"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_lit_1.png",
+      "sha256": "bd8b5ea040baf7f65e91d8f7502a96a597795ed6a635b5237fddda1d4b8f9bf4"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_lit_2.png",
+      "sha256": "a75d46c95f81f8320f944f77476c6ae536de5d11e5761ceded2d2191cd509ec1"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_nolamp_0.png",
+      "sha256": "9e2fc4ae4c30b1b81494cd8c658cf28e8d55abb517d5893fc8c5869b1f43927c"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_nolamp_1.png",
+      "sha256": "2188f0b2f4527dda90d9c002f8fda7b153ecb3ca08ff3315fdda5bc2a8dd6271"
+    },
+    {
+      "file": "assets/character/nhinh_upright_run_nolamp_2.png",
+      "sha256": "03b04269e005b9738733fe37639d860c95f06f31e20ef254ecc48891a6b83e37"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_0.png",
+      "sha256": "49902e19a6df4a553c56a4bf0392425dd50c1ebe395c8112a7fe69be0c2b02fb"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_1.png",
+      "sha256": "ca9b8e4c5896edf6b88aa46491ea493b254ae726bd0fec58f7b37e74afbb5124"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_2.png",
+      "sha256": "8c7bb79feffb69c86d6418baed574486789085685b8ff7a2d0e6a04356e55609"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_lit_0.png",
+      "sha256": "c3e97e0ba2df3eda59d8594398ae5fe7a595bbef77c8c7c739dcb13eef3f5d35"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_lit_1.png",
+      "sha256": "f4f090c65a49f525b026aeb3c2140a94742a6cf19d7c637c7463562d4ba1533d"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_lit_2.png",
+      "sha256": "27ebce8445e3716d48be255f2c932c3c23c18c6e0b780c771c15d18dddde5581"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_nolamp_0.png",
+      "sha256": "dd44ad625e7875ec9b47b870554b7af82be13c99e93c4418b53f9ef933415d16"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_nolamp_1.png",
+      "sha256": "e6f8bfd9bbaf15349667bcb8768eded9ca360822ce6670e06180c4b807621e49"
+    },
+    {
+      "file": "assets/character/nhinh_upright_walk_nolamp_2.png",
+      "sha256": "e37bae6632f586244efce55267faf97260a98e5ed5868991b3a44d9454d00a1f"
+    },
+    {
+      "file": "assets/character/prepare_frames.py",
+      "sha256": "a870a22b9c33499594cee8a702d8356a70c5f8e14e219c528b673ecfab70011e"
+    },
+    {
+      "file": "assets/character/README.md",
+      "sha256": "8e2ae01c1a4158cd6848e9d49d993981d17128defaa53e0149f77daddb4968f4"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_down_generated.png",
+      "sha256": "93b41df006783e2b601a1337af7eb75c2b81183134f0ddbb5c9b8c4148511b69"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_downleft_generated.png",
+      "sha256": "f40c914f50b81438a369403f00bc7b847a3b5521283e106da6b5339b6509e128"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_downright_generated.png",
+      "sha256": "033fe77bbabab425c2ad0f4b99298c60dbdb814521534e862b1788eb7a867700"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_left_generated.png",
+      "sha256": "bf9cf22c5d2994c1ec8084241262c8d9088ec854f08e1a6901a1ccda49743292"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_right_generated.png",
+      "sha256": "45695972d1ba5c2ff3b6d870d7c539a3f7395232299a42ebcffd9c2db91e92fa"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_up_generated.png",
+      "sha256": "18a66b1c44a12700c60a066797b96514a9f5addb14f72047c1739b902bf52e19"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_upleft_generated.png",
+      "sha256": "3f6b3adba5d15beef7d3081f1ed2dd69ebc266eaf63ffa5654a0ddcba1d2e824"
+    },
+    {
+      "file": "assets/character/source_sheets/nhinh_upright_generated.png",
+      "sha256": "5da4afe13cea9f7c8fbfcca37590a450e1195b8bf977d001865b18fbc53d75e3"
+    },
+    {
+      "file": "assets/character/source_sheets/side-gait/build_side_gait_legs.py",
+      "sha256": "4d7133832496c9683977c93a2c04342248e2dc33183b740c20632b124c3e5f6e"
+    },
+    {
+      "file": "assets/character/source_sheets/side-gait/coordinates.json",
+      "sha256": "f97618fce5ccb5f7ad5a53aa6bc66aca85033eb1be56a71e50bbe94dde49c06b"
+    },
+    {
+      "file": "assets/character/source_sheets/side-gait/generated-reference.png",
+      "sha256": "b303db0f04e7471e02b8962ef14c74dcc085bb5599f01fab1fbb167e666ec361"
+    },
+    {
+      "file": "assets/character/source_sheets/side-gait/provenance.json",
+      "sha256": "71badfcdc96e045eef954c6b453ce204da9a0acad0b2775f7d3e0897a5ae6b43"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/nhinh_down_lit_sheet.png",
+      "sha256": "b119d08b4fee18794da6085b0df3b131bc76df18fe658a0a17e6004afb1ae58c"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_down/nhinh_down_nolamp_sheet.png",
+      "sha256": "93aface49c81f25a07131d61788528ac06fbaadb6116e8c8c75e6fe5dc0f74d8"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_down/nhinh_downleft_lit_sheet.png",
+      "sha256": "63c16cb12d83cdfd1aa1978e7747f76dc0146a44c628da373d2e452b6394f933"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_down/nhinh_downleft_nolamp_sheet.png",
+      "sha256": "ee5a960c58049907b7bd88ff731bc5a811b5c8d9b6c8d79dd57f9120c41499fd"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_down/state-variant-generation-prompts.json",
+      "sha256": "a2c517a87b746f03035888fb8051c9486731ebe0b76774b5cfffd6d81137fbd6"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/left_lit.provenance.json",
+      "sha256": "d4c016674ca1d8ae6fb94cfc84521ca35c86b182218f9f1034d7f35cba8e91c2"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/left_nolamp.provenance.json",
+      "sha256": "ae4e2e4c9efa3d320fe9fb62d3920334613300029fef9a0729c1eb424ad539a3"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_left_lit_sheet.png",
+      "sha256": "cca1c9e8cd05c9e80277e7871d7adaa00096e6cfe890c353e12b77a6668593c5"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_left_nolamp_sheet.png",
+      "sha256": "3b4d5cb0e29fd4ea395d19fc9fda7be0992c0d3261f639d95a62ea6cba1ee6ff"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_right_lit_sheet.png",
+      "sha256": "bb04ad62aea9ea585c57c5f428f1386d42529173c0be87ec90b8fd36be40b322"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_right_nolamp_sheet.png",
+      "sha256": "405ed53ec43ce10e726d666fe319983420672e0d1247e12355663b32e167c2fb"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_upleft_lit_sheet.png",
+      "sha256": "46f2c30b9395a45ac2f6d2bce709a6a5d25ee5a4060c9f51135ae8bbc89e1d7f"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_upleft_nolamp_sheet.png",
+      "sha256": "a0c1e3af4267510ccf1a7eb67354127c8b7561b66b4d408be6a9d8ce2723d8b2"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_upright_lit_sheet.png",
+      "sha256": "d4d618f7b8b17928edd36784bd84fa44c33f91834cf7b24641041fd00731d9bf"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/nhinh_upright_nolamp_sheet.png",
+      "sha256": "6c18ab06e275da5591e959cdd11465f09518ded619cb38b217822c311ac787b0"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/right_lit.provenance.json",
+      "sha256": "1226a42be963bdd0793f67c9b4f939d3df2e1d32fd64a7ee55d67efd094ce846"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/right_nolamp.provenance.json",
+      "sha256": "f4c0f5868a4864bed0b84d43353c7e02ce8579d47f7915ffc0a77ff87236941d"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/upleft_lit.provenance.json",
+      "sha256": "1dddaebd110ab98c45201f73e0dc287efc77afdd1fe7cb8a1325c4ccb617cba8"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/upleft_nolamp.provenance.json",
+      "sha256": "a5a4a266c6dafc85dacdf797de039441074f0bb46f4ff0257ef38f78148ad71b"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/upright_lit.provenance.json",
+      "sha256": "bebc86a40c68ef1c7ebaf71e932cebb53eb4dce3eb90068b4a2677ea8e3f5c29"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_lr/upright_nolamp.provenance.json",
+      "sha256": "a404c54d8a512f404fef80c90914e72ec37b1c85b5738c3090e18afda352daba"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/downright_lit.provenance.json",
+      "sha256": "9f03afd11a929ede90c15addcbdcee47d5c2b5327ff8df0e9062d411c929ac66"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/downright_nolamp.provenance.json",
+      "sha256": "3a32364073547706d002edb3f17e377afecd4e02634cf667b725c3001fe2721c"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/nhinh_downright_lit_sheet.png",
+      "sha256": "9bd9356eea60945a7dad6f37cd48fdae27e3eede109c0ca04c7157927f6944a7"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/nhinh_downright_nolamp_sheet.png",
+      "sha256": "29e847677564a9f9969d35be9e150d148ac2aa7398c500696e1d70f95340d486"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/nhinh_up_lit_sheet.png",
+      "sha256": "582a4b1575b230789647fa8622e4bebbad90a2636ba821b17211915aaeadd25c"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/nhinh_up_nolamp_sheet.png",
+      "sha256": "6b37a21e459b75204d1cd45900b783336247cf7aed4fbabb5386045526f9ac33"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/up_lit.provenance.json",
+      "sha256": "0cdcbdb2d0a79a3ade9c2e5ae8909bc7f2cfcdbf6f97d1511503bdf2f5108ebf"
+    },
+    {
+      "file": "assets/character/source_sheets/state_variants/worker_udr/up_nolamp.provenance.json",
+      "sha256": "7c45743d4b5c2a17e81da4c66412947fe1d7ef612086c23b7dfc448b0f9ba831"
+    },
+    {
+      "file": "assets/character/validation.json",
+      "sha256": "4f55f3d3304300f1d91ada0522f65e34e7346cd9281a3337a39a105f5028bd48"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-latched.png",
+      "sha256": "7670443c53e31493db44716900e2b4baea5c365032dfe63591c6f4e05267a0e5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-ready.png",
+      "sha256": "b356e663f2cdff5cf72d36d5172d10f58101ec04efa1c20c119f07f186201a5e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/confirmation-waiting.png",
+      "sha256": "b05ff90199e6a2b5eff8a439cb6dc19a142d7221f169c440bc51ec9f07b01e9a"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-off.png",
+      "sha256": "5a6e2ff75d41101e776fa31fc959cad489c3a43c1e8ee4a1611ea31120822128"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/fixed-three-route-splitter-on.png",
+      "sha256": "ad9ab6816768a3fb2b79905edc22cc94f955cb768afd72a383917e4b97bd71e5"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-covered.png",
+      "sha256": "09864457987a08ebdd8b9469d9b4661bc444760155da7dd05a6ea21b4c8b95bf"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-moon-lit.png",
+      "sha256": "865a8e3cd5a80b05c41733337f418e7fd1243a4e486b6e798da16221c8fba9d1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-off.png",
+      "sha256": "3214a56e79aafe58eb9d2dbfed61fb68abb186e940101ceab10afdd78a16e481"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/lock-sun-on.png",
+      "sha256": "e6ceda2917d23b4890b02188f1a36f93c243486b63a971de57cfb7bc284f844d"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-closed.png",
+      "sha256": "6b19186008d7d42358b72238058562afe17fc286861365e2fb08cb319f73e6ad"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/sanctuary-door-open.png",
+      "sha256": "b81b4b9e992b1ea7bbfc8219ef4f3ddcef2b458d48477f81b466f431f45a7402"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-closed.png",
+      "sha256": "ecf2dfbaeb3960c53e163b378c6cd688dab754b5b1a54a4dd56652675748a876"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/seedling-curtain-open.png",
+      "sha256": "51aae6373aefd1c64770cdab713e3e18335c4cb4b1aad283e2833ab9b90750a1"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-0.png",
+      "sha256": "6d139933c5593cfc82b7d5985e22241e37b9bcb71acf49042fcb0e2d63f31456"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-1.png",
+      "sha256": "d98d47335ec75467c9be683ce0cbc454ddf2ea793c473c4f4f1aa44498651b37"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-2.png",
+      "sha256": "dba6b1d3bcc27366a81473fe13a02c00fea50e8bca607d2326fb5d0aca27b5ea"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/shadow-notch-3.png",
+      "sha256": "89045e43815e5d7922516d28eba31e1b0f54d3379ba826eac2068ae600e37ed9"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-0.png",
+      "sha256": "229be9a551a4e94c4832a58731aa6596b335fdc938135637aadfe538ca9be1d8"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-1.png",
+      "sha256": "ad001a31d4cad40d41b8d48c010eefd8b5e1cd1b038abf61df0287de5c61f992"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-2.png",
+      "sha256": "3c479b27ab1236a551449507041e8f593446012150bf80aee358b1b3bc544926"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/statue-notch-3.png",
+      "sha256": "836152dfbbc29c7e8f641703751d7bad4447e106000d1aba4fd946add9cdcd1e"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/temple-scene-base.png",
+      "sha256": "e9b323496e34d375704af6e976570ce57faa72f2d89a6d953ff8a7bf02d9e560"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-0.png",
+      "sha256": "c8685271b93b9ef448ad661d3caa3f8b26ba7b7e714d049e7586117cde3c09ce"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-1.png",
+      "sha256": "18bde51c199abc6df8ad7f2e5e43b1eba05916312ba7d21a7045209052c411d9"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-2.png",
+      "sha256": "462e2806fdb1d4bb5f2803c92c3615165c4aba86f3ad3cd215c7b7445431dd19"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-column-notch-3.png",
+      "sha256": "6d0aa4f057d66aed3b8c8e31e98a97c1962f1a6251e955a46301b2f616a0109f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-covered.png",
+      "sha256": "fa19a86fb1993b499299c0ceb494660b74ab6b8f303d443d8d922c33ae6fed7f"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-moon-lit.png",
+      "sha256": "880955807e450f67d9645facf5786ffc7e95c65d94af4aea1ac4f82e401f4cfb"
+    },
+    {
+      "file": "assets/levels/08-ruins-of-two-halves/sprites/test-pedestal.png",
+      "sha256": "35307f6e285871fde31db885f27c8aeb91c887e4387861e07955a6811f9022f2"
+    },
+    {
+      "file": "src/assets/mirror_0.png",
+      "sha256": "1d4f33118d247a909f937b5147c37037f721a09649a98a6776533fb5d71bd0e6"
+    },
+    {
+      "file": "src/assets/mirror_1.png",
+      "sha256": "5297eefc7a127ce11af9845185aed6dfabcd27d4d3ffcb418b590d785470f29f"
+    },
+    {
+      "file": "src/assets/mirror_2.png",
+      "sha256": "91662f3642c291761a668d95101e844839bc6a91a6c41da8b35aaa645dd532b3"
+    },
+    {
+      "file": "src/assets/mirror_3.png",
+      "sha256": "f17fab0c9fe5998179bf53a17f0318e61db413de77d7db5d0488331245304416"
+    }
+  ],
+  "exports": [
+    {
+      "file": "sprites/confirmation-latched.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "family": "confirmation",
+      "colours": 105,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 3,
+        "top": 7,
+        "width": 43,
+        "height": 27
+      },
+      "source": "sources/parts/confirmation-latched.png",
+      "sha256": "a79f07c8edb4d06f4a9eef5eff6916aa9973732635a77b483f136597acc2f85a"
+    },
+    {
+      "file": "sprites/confirmation-ready.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "family": "confirmation",
+      "colours": 107,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 3,
+        "top": 7,
+        "width": 43,
+        "height": 27
+      },
+      "source": "sources/parts/confirmation-ready.png",
+      "sha256": "2381ec6116af53ff5852a0bd0215aba5e95e1e8635b21a8eba9200d2443541c4"
+    },
+    {
+      "file": "sprites/confirmation-waiting.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "family": "confirmation",
+      "colours": 75,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 3,
+        "top": 7,
+        "width": 43,
+        "height": 27
+      },
+      "source": "sources/parts/confirmation-waiting.png",
+      "sha256": "bb804000e0d3833a24d0b02a1841dfc92983353b6041a3e92d3df5a8487d665d"
+    },
+    {
+      "file": "sprites/fixed-three-route-splitter-off.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "family": "fixed-three-route-splitter",
+      "colours": 112,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 5,
+        "top": 1,
+        "width": 38,
+        "height": 44
+      },
+      "source": "sources/parts/fixed-three-route-splitter-off.png",
+      "sha256": "2cd5f4b722bae9f013c23e3604a9aebcf9942f2604f9792f419255bef29fe5e2"
+    },
+    {
+      "file": "sprites/fixed-three-route-splitter-on.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "family": "fixed-three-route-splitter",
+      "colours": 112,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 5,
+        "top": 1,
+        "width": 38,
+        "height": 44
+      },
+      "source": "sources/parts/fixed-three-route-splitter-on.png",
+      "sha256": "fcc47010cf918600200c47eab0188252bc5871bc0e8700ad07ef76c793ec396e"
+    },
+    {
+      "file": "sprites/lock-moon-covered.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "family": "lock-moon",
+      "colours": 102,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "source": "sources/parts/lock-moon-covered.png",
+      "sha256": "f5b7a2d2b70650a08578d2200caa3df63de64fa50d83b60b6692bd88425619d8"
+    },
+    {
+      "file": "sprites/lock-moon-lit.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "family": "lock-moon",
+      "colours": 96,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "source": "sources/parts/lock-moon-lit.png",
+      "sha256": "84683fcf28cd4cca0df48db72ea7611f9abd413cf67791023b2e42abf4108a93"
+    },
+    {
+      "file": "sprites/test-moon-covered.png",
+      "canvas": [
+        16,
+        20
+      ],
+      "family": "lock-moon",
+      "colours": 77,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 1,
+        "top": 2,
+        "width": 14,
+        "height": 17
+      },
+      "source": "sources/parts/lock-moon-covered.png",
+      "sha256": "7ba493e6a9b79ce7a6c2be4510892a2eb0d3fcef3bff1489e2994bf7614d1e34"
+    },
+    {
+      "file": "sprites/test-moon-lit.png",
+      "canvas": [
+        16,
+        20
+      ],
+      "family": "lock-moon",
+      "colours": 73,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 1,
+        "top": 2,
+        "width": 14,
+        "height": 17
+      },
+      "source": "sources/parts/lock-moon-lit.png",
+      "sha256": "6eb4e374cf43860f1815fc2c0f1219ce8dfe8dd908b41ac79ebfa3735498bc52"
+    },
+    {
+      "file": "sprites/lock-sun-off.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "family": "lock-sun",
+      "colours": 102,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "source": "sources/parts/lock-sun-off.png",
+      "sha256": "4d19bbfe0b7b6796657fbd13db7b983cd4088b6895a3c033a16a42905a5d9c92"
+    },
+    {
+      "file": "sprites/lock-sun-on.png",
+      "canvas": [
+        32,
+        40
+      ],
+      "family": "lock-sun",
+      "colours": 123,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 29,
+        "height": 34
+      },
+      "source": "sources/parts/lock-sun-on.png",
+      "sha256": "33537637d1c19ca4091b4345df8f2d3d3c72cd3c3ff175912624b24989a87619"
+    },
+    {
+      "file": "sprites/sanctuary-door-closed.png",
+      "canvas": [
+        104,
+        76
+      ],
+      "family": "sanctuary-door",
+      "colours": 119,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 102,
+        "height": 74
+      },
+      "source": "sources/parts/sanctuary-door-closed.png",
+      "sha256": "b4d603bb4a9731f4ca1ab13d818a3f4393b75fa4573318326b5365b7087007ad"
+    },
+    {
+      "file": "sprites/sanctuary-door-open.png",
+      "canvas": [
+        104,
+        76
+      ],
+      "family": "sanctuary-door",
+      "colours": 126,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 102,
+        "height": 74
+      },
+      "source": "sources/parts/sanctuary-door-open.png",
+      "sha256": "6a767041e362096f33d0539c80ef6328b86b2ec487732014105a4d93ad245a99"
+    },
+    {
+      "file": "sprites/seedling-curtain-closed.png",
+      "canvas": [
+        88,
+        48
+      ],
+      "family": "seedling-curtain",
+      "colours": 120,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 86,
+        "height": 46
+      },
+      "source": "sources/parts/seedling-curtain-closed.png",
+      "sha256": "6960843e1b0bf321a89b2f9832e08a50313ed6d113b645e414e1c3d62d787007"
+    },
+    {
+      "file": "sprites/seedling-curtain-open.png",
+      "canvas": [
+        88,
+        48
+      ],
+      "family": "seedling-curtain",
+      "colours": 125,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 1,
+        "top": 1,
+        "width": 86,
+        "height": 46
+      },
+      "source": "sources/parts/seedling-curtain-open.png",
+      "sha256": "18abdeea2e5cf5a0311f463bee6d9f38a024e8b1df1a31474bb475f89d7586ac"
+    },
+    {
+      "file": "sprites/statue-notch-0.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "family": "statue-notch",
+      "colours": 128,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "source": "sources/parts/statue-notch-0.png",
+      "sha256": "b2182d88e967edda32cf081870be5476dae85b9cb39aca1059127660352eefaf"
+    },
+    {
+      "file": "sprites/statue-notch-1.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "family": "statue-notch",
+      "colours": 122,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "source": "sources/parts/statue-notch-1.png",
+      "sha256": "ac0b363e7820fdb85e051348f29411dce96751718230dbcec65a26e73216103a"
+    },
+    {
+      "file": "sprites/statue-notch-2.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "family": "statue-notch",
+      "colours": 128,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "source": "sources/parts/statue-notch-2.png",
+      "sha256": "d2fd4e4ecfe29f194242f5379d38f0dd630f07ccaec0ab6fe85b63b81f32bf94"
+    },
+    {
+      "file": "sprites/statue-notch-3.png",
+      "canvas": [
+        64,
+        88
+      ],
+      "family": "statue-notch",
+      "colours": 126,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 5,
+        "top": 8,
+        "width": 55,
+        "height": 76
+      },
+      "source": "sources/parts/statue-notch-3.png",
+      "sha256": "3b7bb44183467447b1354d1401e10ad5bf840751826e9afd6a02b01b9cdd5f69"
+    },
+    {
+      "file": "sprites/test-column-notch-0.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "family": "statue-notch",
+      "colours": 113,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "source": "sources/parts/statue-notch-0.png",
+      "sha256": "756bf215b6ede3a1e1bb250763a6b9773e2ad058a9e31637e3e101640a5ec470"
+    },
+    {
+      "file": "sprites/test-column-notch-1.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "family": "statue-notch",
+      "colours": 96,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "source": "sources/parts/statue-notch-1.png",
+      "sha256": "851c9aa32ef28e564d3eba5d55255ec5d9e3e6ac3b5feee71335a28f90042eb1"
+    },
+    {
+      "file": "sprites/test-column-notch-2.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "family": "statue-notch",
+      "colours": 111,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "source": "sources/parts/statue-notch-2.png",
+      "sha256": "afb0e66b6d64c80c7acb98a1aadf69fd04353d37d4cb5dd4ef5f1767385f8abc"
+    },
+    {
+      "file": "sprites/test-column-notch-3.png",
+      "canvas": [
+        32,
+        44
+      ],
+      "family": "statue-notch",
+      "colours": 110,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 4,
+        "width": 28,
+        "height": 38
+      },
+      "source": "sources/parts/statue-notch-3.png",
+      "sha256": "371793da904a2f1ba0f8ad073256653f011a604cab00eee24b274297b7320580"
+    },
+    {
+      "file": "sprites/test-pedestal.png",
+      "canvas": [
+        48,
+        36
+      ],
+      "family": "test-pedestal",
+      "colours": 128,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 3,
+        "top": 6,
+        "width": 43,
+        "height": 27
+      },
+      "source": "sources/parts/test-pedestal.png",
+      "sha256": "f137c22a12e92b92c0c2a18379bdf980abcb7d92609d0fd9badab221c96d4bc5"
+    },
+    {
+      "file": "sprites/mirror_0.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "family": "mirror",
+      "colours": 108,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 6,
+        "width": 32,
+        "height": 42
+      },
+      "source": "sources/parts/mirror_0.png",
+      "sha256": "2f5d684842510469856a068cea6f7825ab1cc1212f8eb191475fdfcbfe895035"
+    },
+    {
+      "file": "sprites/mirror_1.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "family": "mirror",
+      "colours": 113,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 6,
+        "width": 32,
+        "height": 42
+      },
+      "source": "sources/parts/mirror_1.png",
+      "sha256": "362356dffb57e2c5aaed81e09cfcc1fc7bb0cc934207614545ec7131a7689a68"
+    },
+    {
+      "file": "sprites/mirror_2.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "family": "mirror",
+      "colours": 86,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 8,
+        "width": 32,
+        "height": 40
+      },
+      "source": "sources/parts/mirror_2.png",
+      "sha256": "83f68b7bb24fd797e40f7def2c5ca4fe33ce63ad00539444faa726f4566d4598"
+    },
+    {
+      "file": "sprites/mirror_3.png",
+      "canvas": [
+        36,
+        48
+      ],
+      "family": "mirror",
+      "colours": 95,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 8,
+        "top": 4,
+        "width": 20,
+        "height": 44
+      },
+      "source": "sources/parts/mirror_3.png",
+      "sha256": "63f7bc30fb9c259029283c8b9b497ca1c73674f03fcb5ebbd48106266faeb407"
+    },
+    {
+      "file": "sprites/ruins_altar.png",
+      "canvas": [
+        104,
+        52
+      ],
+      "family": "ruins_altar",
+      "colours": 128,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 8,
+        "top": 6,
+        "width": 88,
+        "height": 42
+      },
+      "source": "sources/parts/ruins_altar.png",
+      "sha256": "4278bb202d5d5ef56969cc7fa5253e9b4337caed4d0d0d2a08be251f9f27072e"
+    },
+    {
+      "file": "sprites/beacon_stone.png",
+      "canvas": [
+        34,
+        46
+      ],
+      "family": "beacon_stone",
+      "colours": 128,
+      "family_colours": 128,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 6,
+        "top": 4,
+        "width": 18,
+        "height": 38
+      },
+      "source": "sources/parts/beacon_stone.png",
+      "sha256": "8227cf7a37ca70a73589cbabe37f35c5d4d16aa4cac69715a8754045cbc36313"
+    },
+    {
+      "file": "sprites/temple-scene-base.png",
+      "canvas": [
+        640,
+        360
+      ],
+      "family": "temple",
+      "colours": 128,
+      "family_colours": 128,
+      "alpha": [
+        255
+      ],
+      "opaque_box": {
+        "left": 0,
+        "top": 0,
+        "width": 640,
+        "height": 360
+      },
+      "source": "sources/scene-background-original.png",
+      "sha256": "15b39fd8927272010a55c1bf1afab739dafb5a299647d8a0ad6d076412befcf2"
+    },
+    {
+      "file": "sprites/inscription-under-statue.png",
+      "canvas": [
+        48,
+        12
+      ],
+      "family": "inscription",
+      "colours": 1,
+      "family_colours": 1,
+      "alpha": [
+        0,
+        255
+      ],
+      "opaque_box": {
+        "left": 2,
+        "top": 5,
+        "width": 44,
+        "height": 4
+      },
+      "source": "assets/levels/08-ruins-of-two-halves/redesign-v2/sprites/inscription-under-statue.png",
+      "sha256": "0e21e732f0d29278d46936359875402d49e21842b92d1d41f27a674b732c06e9"
+    }
+  ]
+}

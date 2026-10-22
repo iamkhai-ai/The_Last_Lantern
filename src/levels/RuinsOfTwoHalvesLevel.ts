@@ -1,6 +1,6 @@
 ﻿import Phaser from 'phaser';
 import { tr } from '../i18n/catalog.ts';
-import { getRuinsArtKey, getRuinsV2ArtKey, getShadowArtKey } from '../art/CampaignArt';
+import { getRuinsArtKey, getRuinsLocalArtKey, getShadowArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
@@ -355,7 +355,7 @@ export class RuinsOfTwoHalvesLevel {
 
   private artKey(name: string): string | undefined {
     if (name.startsWith('mirror_') || BASE_TEXTURES.has(name)) {
-      const localKey = getRuinsV2ArtKey(name);
+      const localKey = getRuinsLocalArtKey(name);
       if (localKey) return localKey;
       return this.scene.textures.exists(name) ? name : undefined;
     }
@@ -377,7 +377,7 @@ export class RuinsOfTwoHalvesLevel {
     this.interactions.clear();
 
     const backdrop = this.addImage('backdrop', 'temple-scene-base', 320, 180, RUINS_DEPTH.backdrop);
-    const hasLocalBackdrop = backdrop?.texture.key.startsWith('ruins_v2_') === true;
+    const hasLocalBackdrop = backdrop?.texture.key.startsWith('ruins_v4_') === true;
     if (!hasLocalBackdrop) {
       backdrop?.setAlpha(0.72);
 
@@ -416,7 +416,7 @@ export class RuinsOfTwoHalvesLevel {
       RUINS_SHADOW_OVERLAY.center.x, RUINS_SHADOW_OVERLAY.center.y, RUINS_SHADOW_OVERLAY.depth);
 
     // Scenario 08 §5: the worn name under the statue. Hidden until a Pulse reveals it; the saved flag drives visibility.
-    const nameKey = getRuinsV2ArtKey(RUINS_NAME.art);
+    const nameKey = getRuinsLocalArtKey(RUINS_NAME.art);
     if (nameKey) {
       const decal = this.scene.add.image(RUINS_NAME.centre.x, RUINS_NAME.centre.y, nameKey).setDepth(RUINS_DEPTH.groundStamp);
       decal.setData('ruins-id', 'statue-name');

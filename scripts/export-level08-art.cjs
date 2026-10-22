@@ -99,7 +99,8 @@ async function writeManifest(exports){
   const lines=['# Level 08 native asset report','','Generated from decoded PNG pixels, not declared dimensions.','','| File | Size | Colours | Opaque bounds x,y,w,h | Inside canvas | Family colours |','|---|---|---:|---|---|---:|',...exports.map(e=>`| ${e.file.split('/').pop()} | ${e.canvas.join('×')} | ${e.colours} | ${[e.opaque_box.left,e.opaque_box.top,e.opaque_box.width,e.opaque_box.height].join(', ')} | PASS | ${e.family_colours} |`),'','All props preserve the documented binary baseline mask exactly. Legacy mirror canvases are almost opaque throughout; only their four outside corner pixels are cleared, preserving rectangular extents and state orientation. The beacon baseline reproduces its physical stone body only, excluding the legacy decorative lamp. New decal uses its own authored alpha. Background is opaque; every other output has transparent pixels.'];
   await fs.writeFile(path.join(ART,'asset-report.md'),lines.join('\n')+'\n');
 }
-async function previews(){
+async function previews(artRoot = ART){
+  const OUT = path.join(artRoot, 'sprites'), PRE = path.join(artRoot, 'previews');
   const read=n=>fs.readFile(path.join(OUT,n+'.png'));
   for(let n=0;n<4;n++){
     const solved=n===0, latched=n===2, active=n!==1;
@@ -158,5 +159,5 @@ async function main(){
   await record({name:'inscription-under-statue',family:'inscription',size:[48,12],source:'sources/inscription-under-statue-original.png'},await blank(48,12).composite([{input:await image(decal,44,5).png().toBuffer(),left:2,top:4}]).png().toBuffer());
   assert.equal(records.length,32);await writeManifest(records);await previews();console.log('PASS: 32 RGBA native exports, exact baseline masks, binary alpha, <=128 colours per family and 4 native/2x composites.');
 }
-module.exports={fit};
+module.exports={fit,quantize,bounds,raw,previews};
 if(require.main===module)main().catch(e=>{console.error(e);process.exitCode=1});

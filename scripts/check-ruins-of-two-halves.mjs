@@ -616,10 +616,20 @@ for (const [id, file] of Object.entries(artFiles)) {
   const prop = RUINS_PROPS[id];
   const solid = getRuinsSolid(id);
   if (!file) {
-    // The mirrors are the shared 36x48 cards from `src/assets`; each state is fully opaque.
-    const shared = readAlphaMask(new URL(`../src/assets/mirror_${RUINS_MIRROR_SOLUTION[id === 'mirror-left' ? 'left' : 'right']}.png`, import.meta.url));
-    assert.equal(shared.width, prop.artWidth, `${id}: shared mirror art width matches the declared art`);
-    assert.equal(shared.height, prop.artHeight, `${id}: shared mirror art height matches the declared art`);
+    // Collision covers the freestanding instrument across all four rotations.
+    const union = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+    for (let notch = 0; notch < 4; notch++) {
+      const mirror = readAlphaMask(new URL(`../assets/levels/08-ruins-of-two-halves/redesign-v4/sprites/mirror_${notch}.png`, import.meta.url));
+      assert.equal(mirror.width, prop.artWidth, `${id}: native mirror width`);
+      assert.equal(mirror.height, prop.artHeight, `${id}: native mirror height`);
+      union.minX = Math.min(union.minX, mirror.minX); union.minY = Math.min(union.minY, mirror.minY);
+      union.maxX = Math.max(union.maxX, mirror.maxX); union.maxY = Math.max(union.maxY, mirror.maxY);
+    }
+    const left = prop.artCenter.x - prop.artWidth / 2;
+    const top = prop.artCenter.y - prop.artHeight / 2;
+    assert.deepEqual(solid, { id, prop: true, x: left + union.minX, y: top + union.minY,
+      width: union.maxX - union.minX + 1, height: union.maxY - union.minY + 1 },
+    `${id}: collision matches the rotating instrument envelope`);
     continue;
   }
   const mask = readAlphaMask(new URL(file, SPRITES));

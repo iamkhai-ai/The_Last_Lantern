@@ -1,0 +1,210 @@
+[
+  {
+    "name": "sanctuary-door-closed",
+    "source": "prop-layer-original.png",
+    "crop": [
+      1260,
+      50,
+      370,
+      275
+    ],
+    "visible": {
+      "left": 9,
+      "top": 16,
+      "width": 345,
+      "height": 246
+    }
+  },
+  {
+    "name": "beacon_stone",
+    "source": "prop-layer-original.png",
+    "crop": [
+      1105,
+      160,
+      95,
+      155
+    ],
+    "visible": {
+      "left": 18,
+      "top": 16,
+      "width": 59,
+      "height": 123
+    }
+  },
+  {
+    "name": "seedling-curtain-open",
+    "source": "prop-layer-original.png",
+    "crop": [
+      275,
+      365,
+      285,
+      165
+    ],
+    "visible": {
+      "left": 16,
+      "top": 8,
+      "width": 264,
+      "height": 146
+    }
+  },
+  {
+    "name": "lock-sun-on",
+    "source": "prop-layer-original.png",
+    "crop": [
+      560,
+      335,
+      110,
+      120
+    ],
+    "visible": {
+      "left": 9,
+      "top": 14,
+      "width": 88,
+      "height": 94
+    }
+  },
+  {
+    "name": "lock-moon-covered",
+    "source": "prop-layer-original.png",
+    "crop": [
+      780,
+      335,
+      120,
+      120
+    ],
+    "visible": {
+      "left": 15,
+      "top": 12,
+      "width": 89,
+      "height": 94
+    }
+  },
+  {
+    "name": "statue-notch-0",
+    "source": "prop-layer-original.png",
+    "crop": [
+      735,
+      450,
+      205,
+      270
+    ],
+    "visible": {
+      "left": 17,
+      "top": 15,
+      "width": 172,
+      "height": 247
+    }
+  },
+  {
+    "name": "practice-composite",
+    "source": "prop-layer-original.png",
+    "crop": [
+      215,
+      650,
+      165,
+      180
+    ],
+    "visible": {
+      "left": 14,
+      "top": 16,
+      "width": 134,
+      "height": 146
+    }
+  },
+  {
+    "name": "test-moon-covered",
+    "source": "prop-layer-original.png",
+    "crop": [
+      435,
+      675,
+      85,
+      90
+    ],
+    "visible": {
+      "left": 16,
+      "top": 16,
+      "width": 55,
+      "height": 57
+    }
+  },
+  {
+    "name": "mirror_1",
+    "source": "prop-layer-original.png",
+    "crop": [
+      525,
+      675,
+      145,
+      185
+    ],
+    "visible": {
+      "left": 15,
+      "top": 15,
+      "width": 113,
+      "height": 159
+    }
+  },
+  {
+    "name": "mirror_0",
+    "source": "prop-layer-original.png",
+    "crop": [
+      1025,
+      675,
+      140,
+      185
+    ],
+    "visible": {
+      "left": 15,
+      "top": 15,
+      "width": 111,
+      "height": 159
+    }
+  },
+  {
+    "name": "fixed-three-route-splitter-on",
+    "source": "prop-layer-original.png",
+    "crop": [
+      755,
+      720,
+      160,
+      145
+    ],
+    "visible": {
+      "left": 17,
+      "top": 0,
+      "width": 132,
+      "height": 129
+    }
+  },
+  {
+    "name": "ruins-altar-with-ring",
+    "source": "prop-layer-original.png",
+    "crop": [
+      1200,
+      670,
+      355,
+      185
+    ],
+    "visible": {
+      "left": 13,
+      "top": 19,
+      "width": 327,
+      "height": 152
+    }
+  },
+  {
+    "name": "confirmation-ready",
+    "source": "prop-layer-original.png",
+    "crop": [
+      1280,
+      725,
+      190,
+      100
+    ],
+    "visible": {
+      "left": 0,
+      "top": 0,
+      "width": 190,
+      "height": 100
+    }
+  }
+]

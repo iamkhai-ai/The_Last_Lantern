@@ -72,13 +72,14 @@ export const RUINS_PROPS: Record<string, RuinsStandingProp> = {
   'mirror-left': {
     id: 'mirror-left', art: 'mirror_{n}', artWidth: 36, artHeight: 48,
     artCenter: { x: 240, y: 238 }, groundAnchor: { x: 240, y: 262 },
-    footprint: { x: 222, y: 214, width: 36, height: 48 },
+    // Standalone instrument envelope; transparent stone-card margins are walkable.
+    footprint: { x: 224, y: 218, width: 32, height: 44 },
     stand: { id: 'mirror-left', x: 240, y: 254, radius: 22 },
   },
   'mirror-right': {
     id: 'mirror-right', art: 'mirror_{n}', artWidth: 36, artHeight: 48,
     artCenter: { x: 400, y: 238 }, groundAnchor: { x: 400, y: 262 },
-    footprint: { x: 382, y: 214, width: 36, height: 48 },
+    footprint: { x: 384, y: 218, width: 32, height: 44 },
     stand: { id: 'mirror-right', x: 400, y: 254, radius: 22 },
   },
   pedestal: {

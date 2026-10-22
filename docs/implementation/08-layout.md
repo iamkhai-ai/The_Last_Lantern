@@ -35,8 +35,8 @@ body.x >= 24 && body.x + 14 <= 616 && body.y >= 80 && body.y + 6 <= 310
 | id | art | image centre | ground anchor | footprint (x, y, w, h) | depth | reach stand (RULE_GAMES 1: every side within 8px of the footprint; wall fixtures keep r22 or r24) |
 | --- | --- | --- | --- | --- | --- | --- |
 | `statue` | `statue-notch-{0..3}` 64×88 | `320, 176` | `320, 212` | `292, 148, 56, 64` | 31.2 | `320, 204` |
-| `mirror-left` | `mirror_{0..3}` 36×48 | `240, 238` | `240, 262` | `222, 214, 36, 48` | 36.2 | `240, 254` |
-| `mirror-right` | `mirror_{0..3}` 36×48 | `400, 238` | `400, 262` | `382, 214, 36, 48` | 36.2 | `400, 254` |
+| `mirror-left` | `mirror_{0..3}` 36×48 | `240, 238` | `240, 262` | `224, 218, 32, 44` | 36.2 | `240, 254` |
+| `mirror-right` | `mirror_{0..3}` 36×48 | `400, 238` | `400, 262` | `384, 218, 32, 44` | 36.2 | `400, 254` |
 | `pedestal` | `ruins_altar` 104×52 | `480, 236` | `480, 262` | `428, 210, 104, 52` | 36.2 | `480, 254` |
 | `practice-column` | `test-column-notch-{0..3}` 32×44 over `test-pedestal` 48×36 | column `150, 223`, pedestal `150, 234` | `150, 250` | `126, 216, 48, 36` (the composite base) | 35.0 base / 35.1 column (`overlay.depthOffset` 0.1) | `150, 244` |
 | `seedling-bed` | `seedling-curtain-{open,closed}` 88×48 | `180, 128` | `180, 152` | `136, 104, 88, 48` | 25.2 | `180, 144` |
