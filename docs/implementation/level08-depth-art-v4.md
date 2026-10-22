@@ -41,4 +41,11 @@ An initial browser run failed because the old inspection script expected `moonDa
 
 ## Independent review
 
-Pending two separate read-only GPT reviews of the same frozen code/art revision. Their read-only briefs do not provide a technical filesystem sandbox.
+Frozen code/art revision: `15371ef53f0e2a02c9e1fe8a1d46e289f62341cf`, reviewed against base `92ccc9320fc7b81188bb65206cb9f35d136db333`. Root also reran the decoded art/hash audit and geometry/state checks after freezing; both passed.
+
+The active Codex tool metadata lists `gpt-6-luna` with `high` effort. Both independent dispatches accepted that pair with fresh, bounded contexts. The runtime did not expose resolved model/effort, so those remain unknown. Their read-only briefs did not provide a technical filesystem sandbox. Current-round findings were kept separate until both reviewers completed; reviewers sharing one model may have correlated blind spots.
+
+- **Reviewer A — `review_level08_depth_a`: PASS**, no actionable findings. Checked the full source diff, approved concept, native/2× contacts/composites and all seven Phaser captures, mirror collision union and eight input-side tests. Independently ran Level 08 geometry/state, art v4/hash audit, campaign art and whitespace checks. No files changed.
+- **Reviewer B — `review_level08_depth_b`: PASS**, no actionable findings. Independently checked runtime, authoring, inspection changes, retained generation hashes, sprite/state directions, transparency, collision and recorded Phaser captures. Ran art v4/hash audit, Level 08 geometry/state and campaign art checks. No files changed.
+
+Build/browser regeneration by reviewers, full human playthrough and remote CI remain **NOT_RUN**. Root's actual build and browser results are above. This follow-up records evidence only; all reviewed runtime, art, requirements and test bytes remain identical to the frozen revision. No merge or deployment approval is implied.
