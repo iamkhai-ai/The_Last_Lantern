@@ -26,6 +26,8 @@ export interface ObservatoryPuzzleInput {
     destinationWaypointId: ObservatoryWaypointId | null;
     arrivedAtWaypointId: ObservatoryWaypointId | null;
   };
+  /** Durable: Lumo has reached the seal at least once (the tube and seal remember him). */
+  sealRemembered: boolean;
 }
 
 export interface ObservatoryActiveBeamPath {
@@ -34,6 +36,15 @@ export interface ObservatoryActiveBeamPath {
   branches?: readonly (readonly ObservatoryWaypointId[])[];
 }
 
+/**
+ * The root bed's four authored states (scenario v2 §4, art families `root-bed`):
+ * - dormant: no light reaches it;
+ * - lit: amber light falls on it (direct Sun route, or the split route with the statue not shadowing it); no bridge;
+ * - bridge: supply live, statue shadows the bed and Lumo holds the seal, so the bridge has grown;
+ * - retracted-dark: Lumo has left the seal; the roots have drawn back and stay dark.
+ */
+export type ObservatoryRootState = 'dormant' | 'lit' | 'bridge' | 'retracted-dark';
+
 export interface ObservatoryDerivedState {
   activeBeamPath: ObservatoryActiveBeamPath;
   doorAUnlocked: boolean;
@@ -41,6 +52,9 @@ export interface ObservatoryDerivedState {
   rootBedShadowed: boolean;
   bridgeEligible: boolean;
   lumoAtSeal: boolean;
+  /** The supply strip (pipe-run / pipe-drop) is live: lamp placed and lit, and Lumo holds the seal. */
+  supplyLive: boolean;
+  rootState: ObservatoryRootState;
 }
 
 const ROTATION_COUNT = 4;
@@ -106,13 +120,24 @@ export function deriveObservatoryState(input: ObservatoryPuzzleInput): Observato
   const splitRoute = activeBeamPath.routeId === 'g2-split';
   const sunDoorUnlocked = directSunRoute || splitRoute;
   const rootBedShadowed = splitRoute && normalizeRotation(input.statueOrientation) === 2;
+  const bridgeEligible = sunDoorUnlocked && rootBedShadowed && lumoAtSeal;
+  // Light reaches the roots through the direct route, or through the split route's middle branch when the statue
+  // does not shadow it. Both routes already require Lumo at the seal, so this never lights the roots by itself.
+  const rootLit = directSunRoute || (splitRoute && !rootBedShadowed);
+
+  let rootState: ObservatoryRootState = 'dormant';
+  if (bridgeEligible) rootState = 'bridge';
+  else if (rootLit) rootState = 'lit';
+  else if (input.sealRemembered && !lumoAtSeal) rootState = 'retracted-dark';
 
   return {
     activeBeamPath,
     doorAUnlocked: input.doorALatched || activeBeamPath.routeId === 'door-a',
     sunDoorUnlocked,
     rootBedShadowed,
-    bridgeEligible: sunDoorUnlocked && rootBedShadowed && lumoAtSeal,
+    bridgeEligible,
     lumoAtSeal,
+    supplyLive: lightAvailable && lumoAtSeal,
+    rootState,
   };
 }

@@ -28,6 +28,24 @@ export const OBSERVATORY_BEAT_ROOTS_LIT: readonly ObservatoryLine[] = [
   { speaker: 'Lumo', text: 'Có đường qua khung tượng. Ở điện thờ mình từng giữ được một vùng tối như thế.' },
 ];
 
+/** Scenario v2 §2 "Ấn nhớ ra Lumo": the first time Lumo reaches the seal in the corridor. Two lines, no lock. */
+export const OBSERVATORY_SEAL_REMEMBERED: readonly ObservatoryLine[] = [
+  { speaker: 'Lumo', text: 'Ở đây lạnh quá… Nhưng tôi giữ được.' },
+  { speaker: 'Nhinh', text: 'Cần thì cứ nói. Tôi gọi cậu về ngay.' },
+];
+
+/** Scenario v2 §4: Lumo is called off the seal. The line is spoken as he leaves, before the supply drops. */
+export const OBSERVATORY_LUMO_LEAVES_SEAL: readonly ObservatoryLine[] = [
+  { speaker: 'Lumo', text: 'Rời chỗ này… nhẹ hơn tôi tưởng.' },
+];
+
+/** Scenario v2 side path: the margin ink on the star chart, shown once when the lamp is carried unlit. */
+export const OBSERVATORY_MARGIN_INK_TEXT = 'Đêm nay con sẽ thấy đèn.';
+export const OBSERVATORY_MARGIN_INK: readonly ObservatoryLine[] = [
+  { speaker: 'Nhinh', text: 'Có chữ bên lề bản đồ: ‘Đêm nay con sẽ thấy đèn.’' },
+  { speaker: 'Lumo', text: 'Chữ của ông ấy.' },
+];
+
 /** Section 4: G0 was turned away while Lumo still holds the seal. */
 export const OBSERVATORY_BEAT_NO_BEAM: readonly ObservatoryLine[] = [
   { speaker: 'Lumo', text: 'Tôi vẫn giữ ấn. Đường sáng từ tiền sảnh đang hướng đi chỗ khác.' },
@@ -57,7 +75,7 @@ export const OBSERVATORY_MEMORY_SHADOW: readonly ObservatoryLine[] = [
   { speaker: 'Nhinh', text: 'Ông là Người Bảo Vệ.' },
   { speaker: 'The Shadow', text: 'Ta là phần ký ức còn mắc lại trong đêm ấy. Ta đã đợi lâu đến mức quên cả việc cho khu rừng nghỉ.' },
   { speaker: 'Lumo', text: 'Và tôi đã giúp ông. Nếu tôi làm sai lần nữa thì sao?' },
-  { speaker: 'Nhinh', text: 'Ở khu vườn, cậu đã giúp tôi tắt đèn. Ở điện thờ, cậu đã giữ bóng cho những mầm cây.' },
+  { speaker: 'Nhinh', text: 'Ở khu vườn, cậu đã giúp tôi tắt đèn. Ở điện thờ, cậu đã giúp tôi hiểu cách bảo vệ những mầm cây.' },
   { speaker: 'Nhinh', text: 'Lần này mình biết nhiều hơn. Mình cũng có thể dừng lại khi thấy điều gì không đúng.' },
   { speaker: 'The Shadow', text: 'Ta muốn dẫn một người về nhà. Rồi giữ cả khu rừng ở lại cùng nỗi chờ của mình.' },
   { speaker: 'Nhinh', text: 'Con gái ông đã trở về chưa?' },

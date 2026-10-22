@@ -38,6 +38,10 @@ import {
   observatoryDoorBlockReason,
   observatoryDoorOpen,
   observatoryElement,
+  observatoryLumoBeside,
+  observatoryRecordMissing,
+  OBSERVATORY_MARGIN_TRIGGER,
+  OBSERVATORY_RECORD_NEEDS_LUMO,
   observatoryElements,
   observatoryFinalDoorBlockReason,
   observatoryGuidance,
@@ -61,7 +65,8 @@ import { deriveObservatoryState, type ObservatoryDerivedState } from '../systems
 import {
   OBSERVATORY_BEAT_NO_BEAM, OBSERVATORY_BEAT_ROOTS_LIT, OBSERVATORY_CRYSTAL_LINES, OBSERVATORY_EXIT_LINES,
   OBSERVATORY_MEMORY_CAPTION, OBSERVATORY_MEMORY_LUMO, OBSERVATORY_MEMORY_MERGE_CAPTION, OBSERVATORY_MEMORY_RECORDING,
-  OBSERVATORY_MEMORY_SHADOW, OBSERVATORY_OPENING_CORRIDOR, OBSERVATORY_OPENING_ENTRANCE, type ObservatoryLine,
+  OBSERVATORY_LUMO_LEAVES_SEAL, OBSERVATORY_MARGIN_INK, OBSERVATORY_MEMORY_SHADOW, OBSERVATORY_OPENING_CORRIDOR,
+  OBSERVATORY_OPENING_ENTRANCE, OBSERVATORY_SEAL_REMEMBERED, type ObservatoryLine,
 } from '../data/observatoryStory';
 import { SoundSystem, type AmbienceTheme } from '../systems/SoundSystem';
 import { DialogueLine } from '../types/gameTypes';
@@ -120,6 +125,14 @@ const OPENING: DialogueLine[][] = [
   [{ speaker: 'Nhinh', text: 'Ba tinh thể đã tìm được đường về đây.' }, { speaker: 'Lumo', text: 'Trái tim Cây Mẹ cần chúng ta cùng giữ ánh sáng và bóng tối cân bằng.' }],
 ];
 
+/** Root bed colours per art state (scenario v2 §4): dormant, lit amber, bridge (grown), retracted and dark. */
+const OBSERVATORY_ROOT_PALETTE: Record<ObsWorldState['rootState'], { fill: number; line: number; alpha: number }> = {
+  dormant: { fill: 0x385044, line: 0x83a65f, alpha: 0.85 },
+  lit: { fill: 0x8a6a2e, line: 0xf0b463, alpha: 1 },
+  bridge: { fill: 0x385044, line: 0x83a65f, alpha: 1 },
+  'retracted-dark': { fill: 0x1d2a2b, line: 0x2f4a3f, alpha: 0.45 },
+};
+
 export class CampaignScene extends Phaser.Scene {
   private progress!: CampaignProgress;
   private player!: Player;
@@ -154,6 +167,7 @@ export class CampaignScene extends Phaser.Scene {
   /** The opened return loop's floor strip: exactly one per room, never a collider. */
   private observatoryReturnLoopVisual?: Phaser.GameObjects.TileSprite;
   private observatoryBridgeStones: Phaser.GameObjects.Image[] = [];
+  private observatoryPipeSupply: Phaser.GameObjects.Graphics[] = [];
   private footprintTrail?: Phaser.GameObjects.Graphics;
   private forestEdgeGuide?: Phaser.GameObjects.Graphics;
   /** Level 01 accent glows. Each is rebuilt by buildLevel(); visibility follows progress or the live eye/tablet art. */
@@ -397,7 +411,10 @@ export class CampaignScene extends Phaser.Scene {
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
     if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 300) };
     if (this.progress.level === 7) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 30, 610), y: Phaser.Math.Clamp(this.player.y - 22, 84, 302) };
-    if (this.progress.level === 8) this.updateObservatoryLumo(dt);
+    if (this.progress.level === 8) {
+      this.updateObservatoryLumo(dt);
+      if (this.activeObservatoryRoom) this.updateObservatoryBeatTriggers();
+    }
     else if (this.progress.level !== 4 && this.progress.level !== 5 && this.progress.level !== 9) this.lumo.update(dt, this.lumoTarget.x, this.lumoTarget.y);
     if (this.progress.level !== 4 && this.progress.level !== 9 && this.time.now - this.lastLumoSave >= 600) {
       this.lastLumoSave = this.time.now;
@@ -911,6 +928,14 @@ export class CampaignScene extends Phaser.Scene {
       graphic.fillStyle(stamp.id.startsWith('pipe') ? 0x7a6a49 : 0x8fa8b5, 1);
       graphic.fillRoundedRect(stamp.x, stamp.y, stamp.width, stamp.height, 4);
       this.roomObjects.push(graphic);
+      if (stamp.id.startsWith('pipe')) {
+        // The live supply strip is painted over the pipe only while the lamp is lit and Lumo holds the seal.
+        const supply = this.add.graphics().setDepth((stamp.depth ?? 2) + 0.1).setVisible(false);
+        supply.fillStyle(0x9fe7ff, 0.85);
+        supply.fillRoundedRect(stamp.x, stamp.y, stamp.width, stamp.height, 4);
+        this.roomObjects.push(supply);
+        this.observatoryPipeSupply.push(supply);
+      }
     }
   }
 
@@ -925,7 +950,7 @@ export class CampaignScene extends Phaser.Scene {
         .setDepth(element.mount === 'ground' ? 3 : 10 + element.anchor.y / 10);
       this.roomObjects.push(image);
       this.observatoryElementVisuals.set(element.id, image);
-      if (['g0', 'g1', 'g2', 'sun-lock', 'lantern-pedestal', 'statue', 'splitter', 'lumo-seal', 'final-door'].includes(element.id)) {
+      if (['g0', 'g1', 'g2', 'sun-lock', 'lantern-pedestal', 'statue', 'splitter', 'lumo-tube', 'lumo-seal', 'final-door'].includes(element.id)) {
         this.observatoryPuzzleVisuals.set(element.id, image);
       }
     }
@@ -1084,14 +1109,7 @@ export class CampaignScene extends Phaser.Scene {
       { ...OBSERVATORY_ROOT_BED, y: laneBottom, height: bedBottom - laneBottom },
     ];
     const visual = this.add.graphics();
-    for (const mass of masses) {
-      visual.fillStyle(0x385044, 1);
-      visual.fillRoundedRect(mass.x, mass.y, mass.width, mass.height, 6);
-      visual.lineStyle(2, 0x83a65f, 0.85);
-      for (let y = mass.y + 10; y < mass.y + mass.height; y += 18) {
-        visual.lineBetween(mass.x + 3, y, mass.x + mass.width - 3, y + 7);
-      }
-    }
+    this.paintObservatoryRoots(visual, masses, this.getObservatoryWorldState().rootState);
     visual.setDepth(10 + bedBottom / 10);
     this.roomObjects.push(visual);
     this.observatoryPuzzleVisuals.set('root-bed', visual);
@@ -1182,6 +1200,7 @@ export class CampaignScene extends Phaser.Scene {
       register(
         () => {
           const lines = captions[this.observatoryMiniatureIndex % captions.length];
+          this.progress.flags[`l8-mark-${this.observatoryMiniatureIndex % captions.length}`] = true;
           this.observatoryMiniatureIndex = (this.observatoryMiniatureIndex + 1) % captions.length;
           if (this.progress.flags['l8-miniature-viewed'] !== true && this.observatoryMiniatureIndex === 0) {
             this.progress.flags['l8-miniature-viewed'] = true;
@@ -1312,13 +1331,14 @@ export class CampaignScene extends Phaser.Scene {
             return;
           }
           const state = this.getObservatoryWorldState();
-          const missing: string[] = [];
-          if (this.lantern.lanternPlaced || !this.lantern.lanternInHand) missing.push('thu hồi đèn về tay');
-          if (!state.lumoRecalled || state.lumoAtSeal) missing.push('gọi Lumo về bên đèn');
-          if (!state.returnLoopOpen) missing.push('mở lối đá vòng');
+          const missing = observatoryRecordMissing(state);
           if (missing.length) {
             this.say([{ speaker: 'Nhinh', text: `Bản ghi chưa mở. Còn cần: ${missing.join(' và ')}.` },
               { speaker: 'Lumo', text: 'Tôi sẽ ở cạnh cậu khi mọi thứ đã sẵn sàng.' }]);
+            return;
+          }
+          if (!state.lumoBeside) {
+            this.say([{ speaker: 'Nhinh', text: OBSERVATORY_RECORD_NEEDS_LUMO }]);
             return;
           }
           this.progress.flags['l8-record-read'] = true;
@@ -1438,7 +1458,8 @@ export class CampaignScene extends Phaser.Scene {
     this.progress.counters['l8-lumo-route-index'] = 0;
     this.progress.flags['l8-lumo-recalled'] = false;
     this.save();
-    this.say([{ speaker: 'Nhinh', text: destination === 'seal' ? 'Lumo, đi theo ống sáng tới ấn giúp mình nhé.' : 'Lumo, trở về bên bệ đèn nhé.' }, { speaker: 'Lumo', text: 'Tôi sẽ đi theo đường đã mở.' }]);
+    if (destination === 'seal') this.say([{ speaker: 'Nhinh', text: 'Lumo, đi theo ống sáng tới ấn giúp mình nhé.' }, { speaker: 'Lumo', text: 'Tôi sẽ đi theo đường đã mở.' }]);
+    else this.say([{ speaker: 'Nhinh', text: 'Lumo, trở về bên bệ đèn nhé.' }, ...OBSERVATORY_LUMO_LEAVES_SEAL]);
   }
 
   public transitionObservatory(exitId: string): void {
@@ -1459,6 +1480,7 @@ export class CampaignScene extends Phaser.Scene {
       this.progress.counters['l8-lumo-y'] = destination.position.y - 18;
     }
     this.progress.roomId = exit.toRoom;
+    if (exit.toRoom === 'observatory') this.progress.flags['l8-observatory-reached'] = true;
     this.progress.roomSpawn = { ...destination.position };
     this.progress.counters['player-level'] = 8;
     this.progress.counters['player-x'] = destination.position.x;
@@ -1666,6 +1688,14 @@ export class CampaignScene extends Phaser.Scene {
       miniatureViewed: flags['l8-miniature-viewed'] === true,
       mirrors: { g0: this.value('l8-g0'), g1: this.value('l8-g1'), g2: this.value('l8-g2') },
       statue: this.value('l8-statue'),
+      supplyLive: puzzle.supplyLive,
+      rootState: puzzle.rootState,
+      sealRemembered: flags['l8-seal-remembered'] === true,
+      // A save taken inside the observatory counts as reached even before the flag existed.
+      observatoryReached: flags['l8-observatory-reached'] === true || this.activeObservatoryRoom === 'observatory' || flags['l8-bridge-crossed'] === true,
+      marginSeen: flags['l8-margin-seen'] === true,
+      lumoBeside: this.isObservatoryLumoBesideNhinh(),
+      marksSeen: [0, 1, 2, 3, 4].filter((index) => flags[`l8-mark-${index}`] === true).length,
     };
   }
 
@@ -1677,6 +1707,7 @@ export class CampaignScene extends Phaser.Scene {
       mirrorRotations: { g0: this.value('l8-g0'), g1: this.value('l8-g1'), g2: this.value('l8-g2') },
       statueOrientation: this.value('l8-statue'), lanternOn: this.lantern.lanternOn, lanternPlaced: this.lantern.lanternPlaced,
       doorALatched: this.progress.flags['l8-door-a-latched'] === true,
+      sealRemembered: this.progress.flags['l8-seal-remembered'] === true,
       lumoPosition: this.getObservatoryLumoRoom() ? { roomId: this.getObservatoryLumoRoom()!, x: this.lumo.sprite.x, y: this.lumo.sprite.y } : null,
       lumoRoute: {
         destinationWaypointId: typeof routeTarget === 'string' && waypointIds.includes(routeTarget as ObservatoryWaypointId) ? routeTarget as ObservatoryWaypointId : null,
@@ -1732,6 +1763,7 @@ export class CampaignScene extends Phaser.Scene {
         if (routeIndex + 1 >= steps.length) {
           const destination = this.progress.flags['l8-lumo-destination'];
           this.progress.flags['l8-lumo-arrived'] = destination === 'lumo-seal' ? 'lumo-seal' : 'lantern-source';
+          if (destination === 'lumo-seal') this.progress.flags['l8-seal-remembered'] = true;
           this.progress.flags['l8-lumo-recalled'] = destination === 'lantern-source';
           this.progress.flags['l8-lumo-route-json'] = '';
           this.progress.counters['l8-lumo-route-index'] = 0;
@@ -1783,11 +1815,68 @@ export class CampaignScene extends Phaser.Scene {
     return observatoryCompletionReady(this.getObservatoryWorldState());
   }
 
+  /** The root bed's two authored masses: the full-depth divider cut by the bridge lane. */
+  private observatoryRootMasses(): ObsRect[] {
+    const laneTop = OBSERVATORY_BRIDGE_LANE.y;
+    const laneBottom = OBSERVATORY_BRIDGE_LANE.y + OBSERVATORY_BRIDGE_LANE.height;
+    const bedBottom = OBSERVATORY_ROOT_BED.y + OBSERVATORY_ROOT_BED.height;
+    return [
+      { ...OBSERVATORY_ROOT_BED, height: laneTop - OBSERVATORY_ROOT_BED.y },
+      { ...OBSERVATORY_ROOT_BED, y: laneBottom, height: bedBottom - laneBottom },
+    ];
+  }
+
+  /** Paints the root bed in its state: amber when lit, dark and drawn back when retracted (scenario v2 §4). */
+  private paintObservatoryRoots(visual: Phaser.GameObjects.Graphics, masses: readonly ObsRect[], rootState: ObsWorldState['rootState']): void {
+    const palette = OBSERVATORY_ROOT_PALETTE[rootState];
+    visual.clear();
+    visual.setAlpha(palette.alpha);
+    for (const mass of masses) {
+      visual.fillStyle(palette.fill, 1);
+      visual.fillRoundedRect(mass.x, mass.y, mass.width, mass.height, 6);
+      visual.lineStyle(2, palette.line, 0.85);
+      for (let y = mass.y + 10; y < mass.y + mass.height; y += 18) {
+        visual.lineBetween(mass.x + 3, y, mass.x + mass.width - 3, y + 7);
+      }
+    }
+  }
+
+  /** Lumo counts as beside Nhinh only when his route is finished, he is free, and he stands in her room within reach. */
+  private isObservatoryLumoBesideNhinh(): boolean {
+    if (!this.activeObservatoryRoom || !this.isObservatoryLumoFree()) return false;
+    return observatoryLumoBeside(
+      { roomId: this.getObservatoryLumoRoom(), x: this.lumo.sprite.x, y: this.lumo.sprite.y },
+      { roomId: this.activeObservatoryRoom, x: this.player.x, y: this.player.y },
+    );
+  }
+
+  /**
+   * Passive beats in the corridor: Lumo's first arrival at the seal (scenario v2 §2), and the margin ink on the star
+   * chart when the lamp is carried unlit (scenario v2 side path). Each plays once and waits for a free dialogue.
+   */
+  private updateObservatoryBeatTriggers(): void {
+    if (this.activeObservatoryRoom !== 'corridor' || this.dialogue.isActive()) return;
+    const flags = this.progress.flags;
+    if (flags['l8-seal-remembered'] === true && flags['l8-seal-said'] !== true) {
+      flags['l8-seal-said'] = true;
+      this.save();
+      this.queueObservatoryBeat(OBSERVATORY_SEAL_REMEMBERED);
+    }
+    const nearTable = Math.hypot(this.player.x - OBSERVATORY_MARGIN_TRIGGER.x, this.player.y - OBSERVATORY_MARGIN_TRIGGER.y) <= OBSERVATORY_MARGIN_TRIGGER.radius;
+    if (nearTable && flags['l8-margin-seen'] !== true && this.lantern.lanternInHand && !this.lantern.lanternOn) {
+      flags['l8-margin-seen'] = true;
+      this.save();
+      this.queueObservatoryBeat(OBSERVATORY_MARGIN_INK);
+    }
+  }
+
   private showObservatoryJournal(): void {
     const state = this.getObservatoryWorldState();
     const room = this.activeObservatoryRoom ? OBSERVATORY_ROOMS[this.activeObservatoryRoom].title : 'tiền sảnh';
     const facts: string[] = [`Nơi đang đứng: ${room}.`, 'Một nguồn sáng ở tiền sảnh chạy qua cả ba phòng nhờ các gương.'];
     if (state.miniatureViewed) facts.push('Mô hình ở tiền sảnh: gương đổi hướng tia, chốt giữ cửa, ấn cần Lumo đứng thật, tượng che được nhánh giữa, rễ cần bóng.');
+    facts.push(`Những dấu nhỏ: ${state.marksSeen}/5.`);
+    if (state.marginSeen) facts.push('Mép bản đồ sao: ‘Đêm nay con sẽ thấy đèn.’');
     facts.push(state.lumoAtSeal ? 'Lumo đang giữ ấn ở hành lang phòng sao.' : 'Ấn chỉ hoạt động khi Lumo thật sự đứng ở đó.');
     if (state.doorALatched) facts.push('Cửa A đã gài chốt từ bên trong nên giữ mở dù G0 đổi hướng.');
     facts.push(state.rootBedShadowed
@@ -1879,7 +1968,10 @@ export class CampaignScene extends Phaser.Scene {
     }
 
     const roots = this.observatoryPuzzleVisuals.get('root-bed');
-    if (roots instanceof Phaser.GameObjects.Graphics) roots.setAlpha(state.rootBedShadowed ? 0.5 : 1);
+    if (roots instanceof Phaser.GameObjects.Graphics) this.paintObservatoryRoots(roots, this.observatoryRootMasses(), world.rootState);
+    for (const supply of this.observatoryPipeSupply) supply.setVisible(world.supplyLive);
+    const tube = this.observatoryPuzzleVisuals.get('lumo-tube');
+    if (tube instanceof Phaser.GameObjects.Image) tube.setTint(world.sealRemembered ? 0xbfe6ff : 0xffffff);
     const bridge = this.observatoryPuzzleVisuals.get('root-bridge');
     if (bridge instanceof Phaser.GameObjects.Graphics) {
       const body = this.player.sprite.body as Phaser.Physics.Arcade.Body;
