@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-22",
+  "mode": "built-in image_gen",
+  "backend_model": "unknown (not exposed by tool)",
+  "transparent_background": true,
+  "referenced_image": "observatory-art-target.png",
+  "results": [
+    {
+      "id": "mirror-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-db99a394-2b00-4349-8068-78eef0d7b795.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\mirror-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. FOUR frames in an exact2columns x2rows grid. The SAME small circular cold blue glass mirror, old articulated brass mount on squat carved slate pedestal; final canvas36x48 each. Different FOUR rotational settings in reading order: mirror faces northeast, southeast, southwest, northwest, with joint angle, glass facet/slant and small handle position visibly changing. Body/pedestal/feet fixed; no beam. Clear cold reflective plane, brass dark except rim catches. Fill each cell with one complete standing mirror.",
+      "size": [
+        1086,
+        1448
+      ],
+      "mode": "RGBA",
+      "sha256": "955aa743f0008ae0f1e110adff7d240a95d94329e4f95b32bed42b0c9f728564",
+      "status": "PASS"
+    },
+    {
+      "id": "pedestal-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-6020455a-0945-4666-afa5-2d0cfe71b64d.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\pedestal-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. TWO frames side by side: same squat round36x39 carved slate lantern pedestal with recessed tarnished brass cradle, LEFT EMPTY, RIGHT holding a tiny lit enclosed warm lantern. Both use identical stone body, top rim, carved south face, scale and foot baseline. Reserve top half for the small lantern or empty space; no tall pillar. Lit lantern has amber glass with tiny ivory core, no ground halo.",
+      "size": [
+        1697,
+        927
+      ],
+      "mode": "RGBA",
+      "sha256": "ddfafad91530d911aa742a6d9c2adebc7acef819849a442d6d40841e859fa2b9",
+      "status": "PASS"
+    },
+    {
+      "id": "statue-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-dc8a77cd-37a2-40e4-8326-34a442e77d47.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\statue-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. FOUR rotation frames of ONE hooded carved STONE statue,64x88 each, in2columns x2rows, same foot baseline and plinth. It is a pivoting light blocker on a low polygonal worn stone base with a narrow aged-brass rotational ring. Direction0 upperleft: thin edge of cloak, narrow silhouette; direction1 upperright: three-quarter profile; direction2 bottomleft: wide back face of stone cloak (broad shoulders and carved vertical drapery) fully blocks central light branch; direction3 bottomright: opposite three-quarter. NO living person, face detail, staff, weapon, wings, new ornament or motion blur. Convincing deep hewn cloak folds, chipped shoulders, dark blue slate planes, subtle cold highlight on upper-right. Fixed plinth identical across4frames.",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "sha256": "e82c58e55f66a62dd6069c5aa2e8c243b702556d5d53fd986b1bee1c6dfbcf53",
+      "status": "PASS"
+    },
+    {
+      "id": "tube-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-8427ec4a-552b-4116-ba80-b6108fd05e13.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\tube-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. TWO frames side by side of ONE horizontal64x32 wall pipe mouth for tiny Lumo. Dark oval opening at left in thick carved slate surround; short existing old brass sleeve behind it, a single carved SPIRAL scratch at right. LEFT scratch dark; RIGHT same scratch softly amber-lit. Same silhouette and stone/metal body, no new pipe extension or control. Recessed circular lip shows depth, damp old patina, subtle blue moonlight.",
+      "size": [
+        1774,
+        887
+      ],
+      "mode": "RGBA",
+      "sha256": "46fcc537d9caf284b23ee0e0af37456d55db848f2c1da9b54ff6b59f03adfec6",
+      "status": "PASS"
+    },
+    {
+      "id": "seal-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-67f19420-6fb7-4b55-8f5f-aedbe134e772.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\seal-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. TWO frames side by side of ONE32x40 wall seal: small rectangular chipped slate plaque with round tarnished brass inset. LEFT spiral covered by a dark sliding stone cover; RIGHT cover recessed, existing SPIRAL exposed glowing softly amber as it recognizes Lumo. Same plaque silhouette/body and framing across both. No Lumo drawn. Deep inset and modeled bevel. No letters or geometric letter forms.",
+      "size": [
+        1586,
+        992
+      ],
+      "mode": "RGBA",
+      "sha256": "1440720171a932c0422c4126e1c4328eaf3ffa33ae9e920f3c32f0922e9dfd7f",
+      "status": "PASS"
+    },
+    {
+      "id": "sun-lock-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-880259df-e4fc-4eab-a7da-009c6a3a0f4b.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\sun-lock-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. TWO frames side by side of ONE32x40 solar optical lock plaque: carved slate small block with recessed brass SUN medallion (simple central disk and eight rays). LEFT dormant dark blue glass; RIGHT same disk pale blue-white light. Same plaque silhouette/body/rays exactly, active light remains local, no beam or ground halo. Squat beveled relief, old brass patina.",
+      "size": [
+        1586,
+        992
+      ],
+      "mode": "RGBA",
+      "sha256": "49d717e34eae1fe3c9757381da990ec93853cdc1d80f7e92eeb7a849d72f7af5",
+      "status": "PASS"
+    },
+    {
+      "id": "latch-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-df0e6111-b4b3-40d1-8e65-c8b33169d3a6.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\latch-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. TWO side-by-side frames of ONE small28x32 mechanical door latch mounted on a chipped dark slate plate. LEFT vertical brass handle in unlocked/ungailed position; RIGHT same handle rotated into horizontal latch slot and held mechanically. Broad heavy cast brass joint, small rivets, worn touch highlights. Same plate silhouette, no additional buttons/lights/lettering.",
+      "size": [
+        1659,
+        948
+      ],
+      "mode": "RGBA",
+      "sha256": "3531059d03d65c86e49f69522168cef2ae4c4a1031b38b7db8a30cc5702a977a",
+      "status": "PASS"
+    },
+    {
+      "id": "splitter-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-75b6398f-7a1f-4015-bf76-87c87b3e24ab.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\splitter-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. TWO side-by-side frames of ONE48x48 beam splitting FRAME, a compact squat carved slate support carrying an old brass rectangle frame and a triangular clear-glass prism inset. LEFT OFF dark blue glass, RIGHT ON pale cold reflective facets. Same silhouette and fixed branching emblem on the bottom frame: one incoming notch forks into two shallow lines, no arrowheads or letters. Dark patina between metal brackets; no emitted beams or free floating magic.",
+      "size": [
+        1774,
+        887
+      ],
+      "mode": "RGBA",
+      "sha256": "7896419442ef9a4b483fe1a9867b73b3e0074bbba6ef7b14607b64123c39868a",
+      "status": "PASS"
+    },
+    {
+      "id": "root-family",
+      "original_path": "C:\\Users\\Admin\\.codex\\generated_images\\01a1622d-d0df-7d13-a5dc-078242d5d203\\exec-35c39d78-d07f-4801-956d-d6908b418c07.png",
+      "path": "D:\\Z_PROJECT\\The_Last_Lantern\\the-last-lantern\\assets\\levels\\09-dark-moon-observatory\\sources\\v3\\root-family.png",
+      "tool": "image_gen",
+      "prompt": "Use case: stylized-concept. Create a production PIXEL ART SPRITE SHEET for one mechanism family in The Last Lantern, matching the supplied observatory reference's finely crafted dark slate, aged brass, material depth and fixed elevated three-quarter camera. The reference is STYLE ONLY; extract NO scene. Actual transparent RGBA background. Isolated complete objects with generous transparent gutters; no floor/backdrop, cast-shadow rectangle, checkerboard, text, labels, titles, numbers, writing, arrows, UI, border or watermark. Distinct deliberately stepped pixel clusters, rich modeled top and south faces, recessed patina, tiny worn metal edges, convincing carved stone. Cool upper-right moon rim, no diffuse bright outline. Make the sprites intricate and weighty, never flat pictograms or simple polygons. Small gameplay objects will be normalized to their listed native aspect ratios: keep readable silhouettes and don't add superfluous projections. Stable bottom-center feet, same camera/light/scale across all frames. FOUR tall narrow44x148 vertical root-bed frames in a single horizontal row, separated by large transparent gutters. Each final frame has two sculptural masses of huge twisted organic roots constrained inside x0..44: north bank y0..50 and south bank y98..148, the only central crossing lane y50..98 is44x48. Identical thin slate retaining edges along both sides, no root may extend beyond this rectangle. LEFT1: dormant cold-dark tangled roots and central black unwalkable gap, no bridge. LEFT2: same roots receiving amber direct light, amber veins, NO bridge. LEFT3: cold DARK SHADOWED roots with a thick interwoven horizontal woven-root deck spanning the central crossing y50..98; bridge solid and readable, no amber glow. LEFT4: cold-dark roots with central bridge retracted and short curled ends at banks, no bridge and no amber even though shadowed. Thick bark raised rounded bodies, deep recesses, sparse desaturated moss; NOT thin spaghetti or line diagrams. Fixed overhead-three-quarter view. Canvas height148aspect exact, use entire narrow frame.",
+      "size": [
+        1366,
+        1152
+      ],
+      "mode": "RGBA",
+      "sha256": "93ee138ea6e896f66e9fb341c0680cef4338705d9c4a23cfed2859915beb017d",
+      "status": "PASS"
+    }
+  ]
+}

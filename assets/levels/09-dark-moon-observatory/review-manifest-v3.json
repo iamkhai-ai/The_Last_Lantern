@@ -1,0 +1,3813 @@
+{
+  "scope": "offline composites; dynamic beams omitted and left to the runtime; state cues use separate art layers",
+  "display_fit": "Native exports are unchanged. Reviews use only the existing authored display dimensions from 09-layout, nearest sampling. Half-pixel origins are rounded once, ties toward positive, for the raster preview only.",
+  "memory_sequence": [
+    "06-memory-record-guardian",
+    "07-memory-white-flash",
+    "08-memory-overlap-1",
+    "08-memory-overlap-2",
+    "08-memory-overlap-3",
+    "09-after-memory-shadow-remains-crystal-revealed"
+  ],
+  "states": [
+    {
+      "id": "01-door-a-powered",
+      "door_a": true,
+      "sun": false,
+      "final": false,
+      "loop": false,
+      "power": false,
+      "lantern": true,
+      "g0": 0,
+      "g1": 0,
+      "g2": 0,
+      "statue": 0,
+      "root": "dark",
+      "lumo": false
+    },
+    {
+      "id": "02-shadowed-bed-grown-bridge",
+      "door_a": true,
+      "sun": true,
+      "final": false,
+      "loop": false,
+      "power": true,
+      "lantern": true,
+      "g0": 1,
+      "g1": 2,
+      "g2": 1,
+      "statue": 2,
+      "root": "bridge",
+      "lumo": true
+    },
+    {
+      "id": "03-lumo-recalled-dark-retracted-roots",
+      "door_a": true,
+      "sun": true,
+      "final": true,
+      "loop": true,
+      "power": false,
+      "lantern": true,
+      "g0": 1,
+      "g1": 2,
+      "g2": 1,
+      "statue": 2,
+      "root": "retracted-dark",
+      "lumo": false
+    },
+    {
+      "id": "04-direct-light-amber-roots-no-bridge",
+      "door_a": true,
+      "sun": true,
+      "final": false,
+      "loop": false,
+      "power": true,
+      "lantern": true,
+      "g0": 1,
+      "g1": 2,
+      "g2": 0,
+      "statue": 0,
+      "root": "lit",
+      "lumo": true
+    }
+  ],
+  "reviews": [
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-entrance.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "55ef4a53c249790f4fc2020141d1fe4b2cd7d473303f615feededfd7d46963d0",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "entrance",
+      "state": "01-door-a-powered"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-corridor.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "25e13555252f06d27549e1d3f5952b0bd9b539179cf7abcf1191a60ae4298a7f",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "corridor",
+      "state": "01-door-a-powered"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-observatory.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "a6f777cb0064bfdace6e0c9d88c50134d7059e4fd50d714acae7331daf0cde29",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "01-door-a-powered"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-three-rooms.png",
+      "size": [
+        1920,
+        360
+      ],
+      "sha256": "75554f495870198cb91b95f583359caa20f896d619910dba219803115bf6d9e1",
+      "kind": "three-room",
+      "contains_text": false,
+      "engine_capture": false,
+      "state": "01-door-a-powered"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-entrance.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "e6f20c9258a1e6f24f44e448344d54ce3886b4f27074a6d6cf3b4025ad77a3c5",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "entrance",
+      "state": "02-shadowed-bed-grown-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-corridor.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "3844c6e9f6cf7da30a9651af6fb80a64ef6e963b72c25a758a2cfff4b28304d2",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "corridor",
+      "state": "02-shadowed-bed-grown-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-observatory.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "6b20363977e83f7c3a64d81f074a1871deb5fb397043d1edd92c26c07cbc6006",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "02-shadowed-bed-grown-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-three-rooms.png",
+      "size": [
+        1920,
+        360
+      ],
+      "sha256": "77044635f86d1c0e323914d39892bca3307f3fe83f46477b944524fbf36f6d04",
+      "kind": "three-room",
+      "contains_text": false,
+      "engine_capture": false,
+      "state": "02-shadowed-bed-grown-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-entrance.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "d72660c9b1d74902e8fcce5f19ebba34c2dc7e31efd3732578cb898baf1fc9f7",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "entrance",
+      "state": "03-lumo-recalled-dark-retracted-roots"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-corridor.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "5f65e59210bb5178d143e73c659a2fc0871672b49835b2bb3fd09b8e12949fc2",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "corridor",
+      "state": "03-lumo-recalled-dark-retracted-roots"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-observatory.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "48e8f2630217803692aeaa3cb2223b2187fe1c232d0e8f6e64f08bd0e27787a0",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "03-lumo-recalled-dark-retracted-roots"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-three-rooms.png",
+      "size": [
+        1920,
+        360
+      ],
+      "sha256": "a7d37a15fbe94a3756a59130a921dd5613f5360e92b32aca0e1f49894b4d0a3f",
+      "kind": "three-room",
+      "contains_text": false,
+      "engine_capture": false,
+      "state": "03-lumo-recalled-dark-retracted-roots"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-entrance.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "e6f20c9258a1e6f24f44e448344d54ce3886b4f27074a6d6cf3b4025ad77a3c5",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "entrance",
+      "state": "04-direct-light-amber-roots-no-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-corridor.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "3844c6e9f6cf7da30a9651af6fb80a64ef6e963b72c25a758a2cfff4b28304d2",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "corridor",
+      "state": "04-direct-light-amber-roots-no-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-observatory.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "b848f551060ac66632eac7a674413bc623be06dfe3c87612310989f6f690f8bf",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "04-direct-light-amber-roots-no-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/04-direct-light-amber-roots-no-bridge-three-rooms.png",
+      "size": [
+        1920,
+        360
+      ],
+      "sha256": "ae7d0578ef0026891fee91acfc7eb13c44af12883bb804071810753bf70cf194",
+      "kind": "three-room",
+      "contains_text": false,
+      "engine_capture": false,
+      "state": "04-direct-light-amber-roots-no-bridge"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/05-margin-ink-blank-for-runtime-text.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "922da8ef8cca4d51187944ceb14f82b494ea99b9f5f97623ca6c9df8d32d933b",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "corridor",
+      "state": "margin-ink"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-1.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "e10d129f8f11264e54f0f071a14bbda9485713951e9106215af717af255e4d7e",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "memory-overlap-1",
+      "guardian_ground": [
+        466,
+        190
+      ],
+      "shadow_ground": [
+        466,
+        190
+      ]
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-2.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "2bf2d1cdff6e1a0d365b4123473605804ff6885a990431d097bd7bff6205ec2c",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "memory-overlap-2",
+      "guardian_ground": [
+        466,
+        190
+      ],
+      "shadow_ground": [
+        466,
+        190
+      ]
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-3.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "aa9581699bfeccf46de7eda5cc6644d62cf821703f458f14282e6a3760a2b754",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "memory-overlap-3",
+      "guardian_ground": [
+        466,
+        190
+      ],
+      "shadow_ground": [
+        466,
+        190
+      ]
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/07-memory-white-flash.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "d1c625083c6ae00d49785d0ca4456a6ac0e48f5d630757b1fdfd55eee5491955",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "white-flash"
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/09-after-memory-shadow-remains-crystal-revealed.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "1beeaf9fb8ed9f487511dcbf100a15f06e277e6c9b662b7d3194e5b7e61344cf",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "after-memory",
+      "shadow_ground": [
+        424,
+        190
+      ]
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/06-memory-record-guardian.png",
+      "size": [
+        640,
+        360
+      ],
+      "sha256": "2911cb8a06b77769fe92672270cc36c094913bb188a25332eb2627191191a17c",
+      "kind": "room",
+      "contains_text": false,
+      "engine_capture": false,
+      "room": "observatory",
+      "state": "memory-before-overlap",
+      "guardian_ground": [
+        466,
+        190
+      ],
+      "shadow_ground": [
+        424,
+        190
+      ]
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/three-required-states-native.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "c26f891c7ff71a2473385b3741a77d4a54a87984662eaf099ca6551e48e65986",
+      "kind": "state-contact",
+      "contains_text": false,
+      "engine_capture": false
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/memory-sequence-native.png",
+      "size": [
+        1280,
+        1080
+      ],
+      "sha256": "74386cc5fefce541bc0bb390dbb314eb49aac050fdcc58e8c5f091fdd94837e9",
+      "kind": "memory-contact",
+      "contains_text": false,
+      "engine_capture": false
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/native-sprite-contact.png",
+      "size": [
+        1408,
+        1968
+      ],
+      "sha256": "8e35633a3da25663cbce2daa07dd5c1be2567de1c2b712629907644507a70ebb",
+      "kind": "contact",
+      "contains_text": false,
+      "engine_capture": false
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/native-sprite-contact-nearest-2x.png",
+      "size": [
+        2816,
+        3936
+      ],
+      "sha256": "dd8b19211108a70f4315eb4f781a7ebf9450307956b9ba590a28747f04e76955",
+      "kind": "contact-2x",
+      "contains_text": false,
+      "engine_capture": false,
+      "scale": 2
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/01-door-a-powered-entrance-nearest-2x.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "8c0a4e926b9a91998df48aaff107b8022cc02f3d0be014c6d4892a532f80f464",
+      "kind": "review-2x",
+      "contains_text": false,
+      "engine_capture": false,
+      "scale": 2
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/02-shadowed-bed-grown-bridge-observatory-nearest-2x.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "61fac0405454465ef4ab51c84bd8eb97bad833871f46c476c4502406b9fc6b94",
+      "kind": "review-2x",
+      "contains_text": false,
+      "engine_capture": false,
+      "scale": 2
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/03-lumo-recalled-dark-retracted-roots-observatory-nearest-2x.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "242a815cab839657af7f805e3626e12cb7c7e76692aaddae445eda3fd32c8f0b",
+      "kind": "review-2x",
+      "contains_text": false,
+      "engine_capture": false,
+      "scale": 2
+    },
+    {
+      "path": "assets/levels/09-dark-moon-observatory/previews/v3/08-memory-overlap-1-nearest-2x.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "e14390e40563985e46ec5ae5a716251241748e858b6f22f10e2b8cf17cce7311",
+      "kind": "review-2x",
+      "contains_text": false,
+      "engine_capture": false,
+      "scale": 2
+    }
+  ],
+  "placements": [
+    {
+      "review": "01-door-a-powered",
+      "room": "entrance",
+      "module_id": "stamp:source-ring",
+      "asset": "entrance-source-ring",
+      "rect": [
+        156,
+        214,
+        64,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "entrance",
+      "module_id": "arch:door-a-entrance",
+      "asset": "door-a-entrance-open",
+      "rect": [
+        576,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "entrance",
+      "module_id": "threshold:return-loop-entrance",
+      "asset": "return-loop-entrance-threshold-closed",
+      "rect": [
+        24,
+        196,
+        104,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "entrance",
+      "module_id": "arch:return-loop-entrance",
+      "asset": "return-loop-entrance-closed",
+      "rect": [
+        72,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "entrance",
+      "module_id": "learned-marks",
+      "asset": "learned-marks",
+      "rect": [
+        240,
+        104,
+        160,
+        80
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "entrance",
+      "module_id": "lantern-pedestal",
+      "asset": "lantern-pedestal-lit",
+      "rect": [
+        170,
+        193,
+        36,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "entrance",
+      "module_id": "g0",
+      "asset": "g0-0",
+      "rect": [
+        416,
+        193,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "stamp:pipe-run",
+      "asset": "corridor-pipe-run-off",
+      "rect": [
+        73,
+        74,
+        215,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "stamp:latch-grille",
+      "asset": "corridor-latch-grille",
+      "rect": [
+        28,
+        236,
+        56,
+        28
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "arch:door-a-corridor",
+      "asset": "door-a-corridor-open",
+      "rect": [
+        72,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "threshold:sun-door-corridor",
+      "asset": "sun-door-corridor-threshold-closed",
+      "rect": [
+        536,
+        196,
+        104,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "arch:sun-door-corridor",
+      "asset": "sun-door-corridor-closed",
+      "rect": [
+        576,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "lumo-tube",
+      "asset": "lumo-tube-dark",
+      "rect": [
+        73,
+        56,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "lumo-seal",
+      "asset": "lumo-seal-covered",
+      "rect": [
+        304,
+        48,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "door-a-control",
+      "asset": "door-a-control-locked",
+      "rect": [
+        42,
+        172,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "g1",
+      "asset": "g1-0",
+      "rect": [
+        224,
+        173,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "sun-door-control",
+      "asset": "sun-door-control-off",
+      "rect": [
+        484,
+        220,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "corridor",
+      "module_id": "star-map-table",
+      "asset": "star-map-table",
+      "rect": [
+        279,
+        238,
+        83,
+        42
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "stamp:pipe-run",
+      "asset": "observatory-pipe-run-off",
+      "rect": [
+        344,
+        60,
+        264,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "stamp:pipe-drop",
+      "asset": "pipe-drop-off",
+      "rect": [
+        592,
+        76,
+        18,
+        180
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "stamp:final-door-sill",
+      "asset": "observatory-final-door-sill",
+      "rect": [
+        468,
+        140,
+        64,
+        14
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "scenery-wheel",
+      "asset": "wheel-stopped-sun-among-stars",
+      "rect": [
+        186,
+        59,
+        144,
+        88
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "threshold:sun-door-observatory",
+      "asset": "sun-door-observatory-threshold-closed",
+      "rect": [
+        24,
+        190,
+        80,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "arch:sun-door-observatory",
+      "asset": "sun-door-observatory-closed",
+      "rect": [
+        56,
+        186,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "threshold:return-loop-observatory",
+      "asset": "return-loop-observatory-threshold-closed",
+      "rect": [
+        496,
+        300,
+        48,
+        20
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "arch:return-loop-observatory",
+      "asset": "return-loop-observatory-closed",
+      "rect": [
+        496,
+        284,
+        48,
+        36
+      ],
+      "crop": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "sun-lock",
+      "asset": "sun-lock-off",
+      "rect": [
+        163,
+        118,
+        27,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "final-door-control",
+      "asset": "final-door-control-locked",
+      "rect": [
+        486,
+        120,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "final-door",
+      "asset": "final-door-closed",
+      "rect": [
+        468,
+        105,
+        64,
+        47
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "splitter",
+      "asset": "splitter-off",
+      "rect": [
+        221,
+        202,
+        38,
+        38
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "statue",
+      "asset": "statue-0",
+      "rect": [
+        271,
+        182,
+        51,
+        70
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "stone-return-loop",
+      "asset": "stone-return-loop-closed",
+      "rect": [
+        452,
+        226,
+        28,
+        26
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "final-record",
+      "asset": "final-record",
+      "rect": [
+        386,
+        224,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "g2",
+      "asset": "g2-0",
+      "rect": [
+        152,
+        215,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "01-door-a-powered",
+      "room": "observatory",
+      "module_id": "root-bed",
+      "asset": "root-bed-dark",
+      "rect": [
+        340,
+        152,
+        44,
+        148
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "entrance",
+      "module_id": "stamp:source-ring",
+      "asset": "entrance-source-ring",
+      "rect": [
+        156,
+        214,
+        64,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "entrance",
+      "module_id": "arch:door-a-entrance",
+      "asset": "door-a-entrance-open",
+      "rect": [
+        576,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "entrance",
+      "module_id": "threshold:return-loop-entrance",
+      "asset": "return-loop-entrance-threshold-closed",
+      "rect": [
+        24,
+        196,
+        104,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "entrance",
+      "module_id": "arch:return-loop-entrance",
+      "asset": "return-loop-entrance-closed",
+      "rect": [
+        72,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "entrance",
+      "module_id": "learned-marks",
+      "asset": "learned-marks",
+      "rect": [
+        240,
+        104,
+        160,
+        80
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "entrance",
+      "module_id": "lantern-pedestal",
+      "asset": "lantern-pedestal-lit",
+      "rect": [
+        170,
+        193,
+        36,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "entrance",
+      "module_id": "g0",
+      "asset": "g0-1",
+      "rect": [
+        416,
+        193,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "stamp:pipe-run",
+      "asset": "corridor-pipe-run-on",
+      "rect": [
+        73,
+        74,
+        215,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "stamp:latch-grille",
+      "asset": "corridor-latch-grille",
+      "rect": [
+        28,
+        236,
+        56,
+        28
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "arch:door-a-corridor",
+      "asset": "door-a-corridor-open",
+      "rect": [
+        72,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "arch:sun-door-corridor",
+      "asset": "sun-door-corridor-open",
+      "rect": [
+        576,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "lumo-tube",
+      "asset": "lumo-tube-remembered",
+      "rect": [
+        73,
+        56,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "lumo-seal",
+      "asset": "lumo-seal-revealed",
+      "rect": [
+        304,
+        48,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "door-a-control",
+      "asset": "door-a-control-latched",
+      "rect": [
+        42,
+        172,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "g1",
+      "asset": "g1-2",
+      "rect": [
+        224,
+        173,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "sun-door-control",
+      "asset": "sun-door-control-on",
+      "rect": [
+        484,
+        220,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "corridor",
+      "module_id": "star-map-table",
+      "asset": "star-map-table",
+      "rect": [
+        279,
+        238,
+        83,
+        42
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "stamp:pipe-run",
+      "asset": "observatory-pipe-run-on",
+      "rect": [
+        344,
+        60,
+        264,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "stamp:pipe-drop",
+      "asset": "pipe-drop-on",
+      "rect": [
+        592,
+        76,
+        18,
+        180
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "stamp:final-door-sill",
+      "asset": "observatory-final-door-sill",
+      "rect": [
+        468,
+        140,
+        64,
+        14
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "scenery-wheel",
+      "asset": "wheel-stopped-sun-among-stars",
+      "rect": [
+        186,
+        59,
+        144,
+        88
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "arch:sun-door-observatory",
+      "asset": "sun-door-observatory-open",
+      "rect": [
+        56,
+        186,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "threshold:return-loop-observatory",
+      "asset": "return-loop-observatory-threshold-closed",
+      "rect": [
+        496,
+        300,
+        48,
+        20
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "arch:return-loop-observatory",
+      "asset": "return-loop-observatory-closed",
+      "rect": [
+        496,
+        284,
+        48,
+        36
+      ],
+      "crop": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "sun-lock",
+      "asset": "sun-lock-on",
+      "rect": [
+        163,
+        118,
+        27,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "final-door-control",
+      "asset": "final-door-control-locked",
+      "rect": [
+        486,
+        120,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "final-door",
+      "asset": "final-door-open",
+      "rect": [
+        468,
+        105,
+        64,
+        47
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "splitter",
+      "asset": "splitter-on",
+      "rect": [
+        221,
+        202,
+        38,
+        38
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "statue",
+      "asset": "statue-2",
+      "rect": [
+        271,
+        182,
+        51,
+        70
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "stone-return-loop",
+      "asset": "stone-return-loop-closed",
+      "rect": [
+        452,
+        226,
+        28,
+        26
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "final-record",
+      "asset": "final-record",
+      "rect": [
+        386,
+        224,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "g2",
+      "asset": "g2-1",
+      "rect": [
+        152,
+        215,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "02-shadowed-bed-grown-bridge",
+      "room": "observatory",
+      "module_id": "root-bed",
+      "asset": "root-bed-bridge",
+      "rect": [
+        340,
+        152,
+        44,
+        148
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:loop-path",
+      "asset": "entrance-loop-path",
+      "rect": [
+        128,
+        210,
+        60,
+        24
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:source-ring",
+      "asset": "entrance-source-ring",
+      "rect": [
+        156,
+        214,
+        64,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:door-a-entrance",
+      "asset": "door-a-entrance-open",
+      "rect": [
+        576,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:return-loop-entrance",
+      "asset": "return-loop-entrance-open",
+      "rect": [
+        72,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "learned-marks",
+      "asset": "learned-marks",
+      "rect": [
+        240,
+        104,
+        160,
+        80
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "lantern-pedestal",
+      "asset": "lantern-pedestal-lit",
+      "rect": [
+        170,
+        193,
+        36,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "g0",
+      "asset": "g0-1",
+      "rect": [
+        416,
+        193,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:pipe-run",
+      "asset": "corridor-pipe-run-off",
+      "rect": [
+        73,
+        74,
+        215,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:latch-grille",
+      "asset": "corridor-latch-grille",
+      "rect": [
+        28,
+        236,
+        56,
+        28
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:door-a-corridor",
+      "asset": "door-a-corridor-open",
+      "rect": [
+        72,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:sun-door-corridor",
+      "asset": "sun-door-corridor-open",
+      "rect": [
+        576,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-tube",
+      "asset": "lumo-tube-dark",
+      "rect": [
+        73,
+        56,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-seal",
+      "asset": "lumo-seal-covered",
+      "rect": [
+        304,
+        48,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "door-a-control",
+      "asset": "door-a-control-latched",
+      "rect": [
+        42,
+        172,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "g1",
+      "asset": "g1-2",
+      "rect": [
+        224,
+        173,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "sun-door-control",
+      "asset": "sun-door-control-off",
+      "rect": [
+        484,
+        220,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "star-map-table",
+      "asset": "star-map-table",
+      "rect": [
+        279,
+        238,
+        83,
+        42
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-run",
+      "asset": "observatory-pipe-run-off",
+      "rect": [
+        344,
+        60,
+        264,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-drop",
+      "asset": "pipe-drop-off",
+      "rect": [
+        592,
+        76,
+        18,
+        180
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:loop-path",
+      "asset": "observatory-loop-path",
+      "rect": [
+        472,
+        266,
+        96,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:final-door-sill",
+      "asset": "observatory-final-door-sill",
+      "rect": [
+        468,
+        140,
+        64,
+        14
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "scenery-wheel",
+      "asset": "wheel-stopped-sun-among-stars",
+      "rect": [
+        186,
+        59,
+        144,
+        88
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:sun-door-observatory",
+      "asset": "sun-door-observatory-open",
+      "rect": [
+        56,
+        186,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:return-loop-observatory",
+      "asset": "return-loop-observatory-open",
+      "rect": [
+        496,
+        284,
+        48,
+        36
+      ],
+      "crop": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "sun-lock",
+      "asset": "sun-lock-off",
+      "rect": [
+        163,
+        118,
+        27,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door-control",
+      "asset": "final-door-control-latched",
+      "rect": [
+        486,
+        120,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door",
+      "asset": "final-door-open",
+      "rect": [
+        468,
+        105,
+        64,
+        47
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "splitter",
+      "asset": "splitter-off",
+      "rect": [
+        221,
+        202,
+        38,
+        38
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "statue",
+      "asset": "statue-2",
+      "rect": [
+        271,
+        182,
+        51,
+        70
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stone-return-loop",
+      "asset": "stone-return-loop-open",
+      "rect": [
+        452,
+        226,
+        28,
+        26
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-record",
+      "asset": "final-record",
+      "rect": [
+        386,
+        224,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "g2",
+      "asset": "g2-1",
+      "rect": [
+        152,
+        215,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "root-bed",
+      "asset": "root-bed-retracted-dark",
+      "rect": [
+        340,
+        152,
+        44,
+        148
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "entrance",
+      "module_id": "stamp:source-ring",
+      "asset": "entrance-source-ring",
+      "rect": [
+        156,
+        214,
+        64,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "entrance",
+      "module_id": "arch:door-a-entrance",
+      "asset": "door-a-entrance-open",
+      "rect": [
+        576,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "entrance",
+      "module_id": "threshold:return-loop-entrance",
+      "asset": "return-loop-entrance-threshold-closed",
+      "rect": [
+        24,
+        196,
+        104,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "entrance",
+      "module_id": "arch:return-loop-entrance",
+      "asset": "return-loop-entrance-closed",
+      "rect": [
+        72,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "entrance",
+      "module_id": "learned-marks",
+      "asset": "learned-marks",
+      "rect": [
+        240,
+        104,
+        160,
+        80
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "entrance",
+      "module_id": "lantern-pedestal",
+      "asset": "lantern-pedestal-lit",
+      "rect": [
+        170,
+        193,
+        36,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "entrance",
+      "module_id": "g0",
+      "asset": "g0-1",
+      "rect": [
+        416,
+        193,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "stamp:pipe-run",
+      "asset": "corridor-pipe-run-on",
+      "rect": [
+        73,
+        74,
+        215,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "stamp:latch-grille",
+      "asset": "corridor-latch-grille",
+      "rect": [
+        28,
+        236,
+        56,
+        28
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "arch:door-a-corridor",
+      "asset": "door-a-corridor-open",
+      "rect": [
+        72,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "arch:sun-door-corridor",
+      "asset": "sun-door-corridor-open",
+      "rect": [
+        576,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "lumo-tube",
+      "asset": "lumo-tube-remembered",
+      "rect": [
+        73,
+        56,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "lumo-seal",
+      "asset": "lumo-seal-revealed",
+      "rect": [
+        304,
+        48,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "door-a-control",
+      "asset": "door-a-control-latched",
+      "rect": [
+        42,
+        172,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "g1",
+      "asset": "g1-2",
+      "rect": [
+        224,
+        173,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "sun-door-control",
+      "asset": "sun-door-control-on",
+      "rect": [
+        484,
+        220,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "corridor",
+      "module_id": "star-map-table",
+      "asset": "star-map-table",
+      "rect": [
+        279,
+        238,
+        83,
+        42
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "stamp:pipe-run",
+      "asset": "observatory-pipe-run-on",
+      "rect": [
+        344,
+        60,
+        264,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "stamp:pipe-drop",
+      "asset": "pipe-drop-on",
+      "rect": [
+        592,
+        76,
+        18,
+        180
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "stamp:final-door-sill",
+      "asset": "observatory-final-door-sill",
+      "rect": [
+        468,
+        140,
+        64,
+        14
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "scenery-wheel",
+      "asset": "wheel-stopped-sun-among-stars",
+      "rect": [
+        186,
+        59,
+        144,
+        88
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "arch:sun-door-observatory",
+      "asset": "sun-door-observatory-open",
+      "rect": [
+        56,
+        186,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "threshold:return-loop-observatory",
+      "asset": "return-loop-observatory-threshold-closed",
+      "rect": [
+        496,
+        300,
+        48,
+        20
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "arch:return-loop-observatory",
+      "asset": "return-loop-observatory-closed",
+      "rect": [
+        496,
+        284,
+        48,
+        36
+      ],
+      "crop": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "sun-lock",
+      "asset": "sun-lock-on",
+      "rect": [
+        163,
+        118,
+        27,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "final-door-control",
+      "asset": "final-door-control-locked",
+      "rect": [
+        486,
+        120,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "final-door",
+      "asset": "final-door-open",
+      "rect": [
+        468,
+        105,
+        64,
+        47
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "splitter",
+      "asset": "splitter-off",
+      "rect": [
+        221,
+        202,
+        38,
+        38
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "statue",
+      "asset": "statue-0",
+      "rect": [
+        271,
+        182,
+        51,
+        70
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "stone-return-loop",
+      "asset": "stone-return-loop-closed",
+      "rect": [
+        452,
+        226,
+        28,
+        26
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "final-record",
+      "asset": "final-record",
+      "rect": [
+        386,
+        224,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "g2",
+      "asset": "g2-0",
+      "rect": [
+        152,
+        215,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "04-direct-light-amber-roots-no-bridge",
+      "room": "observatory",
+      "module_id": "root-bed",
+      "asset": "root-bed-lit",
+      "rect": [
+        340,
+        152,
+        44,
+        148
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:loop-path",
+      "asset": "entrance-loop-path",
+      "rect": [
+        128,
+        210,
+        60,
+        24
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:source-ring",
+      "asset": "entrance-source-ring",
+      "rect": [
+        156,
+        214,
+        64,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:door-a-entrance",
+      "asset": "door-a-entrance-open",
+      "rect": [
+        576,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:return-loop-entrance",
+      "asset": "return-loop-entrance-open",
+      "rect": [
+        72,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "learned-marks",
+      "asset": "learned-marks",
+      "rect": [
+        240,
+        104,
+        160,
+        80
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "lantern-pedestal",
+      "asset": "lantern-pedestal-lit",
+      "rect": [
+        170,
+        193,
+        36,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "g0",
+      "asset": "g0-1",
+      "rect": [
+        416,
+        193,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:pipe-run",
+      "asset": "corridor-pipe-run-off",
+      "rect": [
+        73,
+        74,
+        215,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:latch-grille",
+      "asset": "corridor-latch-grille",
+      "rect": [
+        28,
+        236,
+        56,
+        28
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:door-a-corridor",
+      "asset": "door-a-corridor-open",
+      "rect": [
+        72,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:sun-door-corridor",
+      "asset": "sun-door-corridor-open",
+      "rect": [
+        576,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-tube",
+      "asset": "lumo-tube-dark",
+      "rect": [
+        73,
+        56,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-seal",
+      "asset": "lumo-seal-covered",
+      "rect": [
+        304,
+        48,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "door-a-control",
+      "asset": "door-a-control-latched",
+      "rect": [
+        42,
+        172,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "g1",
+      "asset": "g1-2",
+      "rect": [
+        224,
+        173,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "sun-door-control",
+      "asset": "sun-door-control-off",
+      "rect": [
+        484,
+        220,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "star-map-table",
+      "asset": "star-map-table",
+      "rect": [
+        279,
+        238,
+        83,
+        42
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-run",
+      "asset": "observatory-pipe-run-off",
+      "rect": [
+        344,
+        60,
+        264,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-drop",
+      "asset": "pipe-drop-off",
+      "rect": [
+        592,
+        76,
+        18,
+        180
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:loop-path",
+      "asset": "observatory-loop-path",
+      "rect": [
+        472,
+        266,
+        96,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:final-door-sill",
+      "asset": "observatory-final-door-sill",
+      "rect": [
+        468,
+        140,
+        64,
+        14
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "scenery-wheel",
+      "asset": "wheel-stopped-sun-among-stars",
+      "rect": [
+        186,
+        59,
+        144,
+        88
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:sun-door-observatory",
+      "asset": "sun-door-observatory-open",
+      "rect": [
+        56,
+        186,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:return-loop-observatory",
+      "asset": "return-loop-observatory-open",
+      "rect": [
+        496,
+        284,
+        48,
+        36
+      ],
+      "crop": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "sun-lock",
+      "asset": "sun-lock-off",
+      "rect": [
+        163,
+        118,
+        27,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door-control",
+      "asset": "final-door-control-latched",
+      "rect": [
+        486,
+        120,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door",
+      "asset": "final-door-open",
+      "rect": [
+        468,
+        105,
+        64,
+        47
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "splitter",
+      "asset": "splitter-off",
+      "rect": [
+        221,
+        202,
+        38,
+        38
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "statue",
+      "asset": "statue-2",
+      "rect": [
+        271,
+        182,
+        51,
+        70
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stone-return-loop",
+      "asset": "stone-return-loop-open",
+      "rect": [
+        452,
+        226,
+        28,
+        26
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-record",
+      "asset": "final-record",
+      "rect": [
+        386,
+        224,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "g2",
+      "asset": "g2-1",
+      "rect": [
+        152,
+        215,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "root-bed",
+      "asset": "root-bed-retracted-dark",
+      "rect": [
+        340,
+        152,
+        44,
+        148
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:loop-path",
+      "asset": "entrance-loop-path",
+      "rect": [
+        128,
+        210,
+        60,
+        24
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:source-ring",
+      "asset": "entrance-source-ring",
+      "rect": [
+        156,
+        214,
+        64,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:door-a-entrance",
+      "asset": "door-a-entrance-open",
+      "rect": [
+        576,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:return-loop-entrance",
+      "asset": "return-loop-entrance-open",
+      "rect": [
+        72,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "learned-marks",
+      "asset": "learned-marks",
+      "rect": [
+        240,
+        104,
+        160,
+        80
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "lantern-pedestal",
+      "asset": "lantern-pedestal-lit",
+      "rect": [
+        170,
+        193,
+        36,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "g0",
+      "asset": "g0-1",
+      "rect": [
+        416,
+        193,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:pipe-run",
+      "asset": "corridor-pipe-run-off",
+      "rect": [
+        73,
+        74,
+        215,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:latch-grille",
+      "asset": "corridor-latch-grille",
+      "rect": [
+        28,
+        236,
+        56,
+        28
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:door-a-corridor",
+      "asset": "door-a-corridor-open",
+      "rect": [
+        72,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:sun-door-corridor",
+      "asset": "sun-door-corridor-open",
+      "rect": [
+        576,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-tube",
+      "asset": "lumo-tube-dark",
+      "rect": [
+        73,
+        56,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-seal",
+      "asset": "lumo-seal-covered",
+      "rect": [
+        304,
+        48,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "door-a-control",
+      "asset": "door-a-control-latched",
+      "rect": [
+        42,
+        172,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "g1",
+      "asset": "g1-2",
+      "rect": [
+        224,
+        173,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "sun-door-control",
+      "asset": "sun-door-control-off",
+      "rect": [
+        484,
+        220,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "star-map-table",
+      "asset": "star-map-table",
+      "rect": [
+        279,
+        238,
+        83,
+        42
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-run",
+      "asset": "observatory-pipe-run-off",
+      "rect": [
+        344,
+        60,
+        264,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-drop",
+      "asset": "pipe-drop-off",
+      "rect": [
+        592,
+        76,
+        18,
+        180
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:loop-path",
+      "asset": "observatory-loop-path",
+      "rect": [
+        472,
+        266,
+        96,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:final-door-sill",
+      "asset": "observatory-final-door-sill",
+      "rect": [
+        468,
+        140,
+        64,
+        14
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "scenery-wheel",
+      "asset": "wheel-stopped-sun-among-stars",
+      "rect": [
+        186,
+        59,
+        144,
+        88
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:sun-door-observatory",
+      "asset": "sun-door-observatory-open",
+      "rect": [
+        56,
+        186,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:return-loop-observatory",
+      "asset": "return-loop-observatory-open",
+      "rect": [
+        496,
+        284,
+        48,
+        36
+      ],
+      "crop": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "sun-lock",
+      "asset": "sun-lock-off",
+      "rect": [
+        163,
+        118,
+        27,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door-control",
+      "asset": "final-door-control-latched",
+      "rect": [
+        486,
+        120,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door",
+      "asset": "final-door-open",
+      "rect": [
+        468,
+        105,
+        64,
+        47
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "splitter",
+      "asset": "splitter-off",
+      "rect": [
+        221,
+        202,
+        38,
+        38
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "statue",
+      "asset": "statue-2",
+      "rect": [
+        271,
+        182,
+        51,
+        70
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stone-return-loop",
+      "asset": "stone-return-loop-open",
+      "rect": [
+        452,
+        226,
+        28,
+        26
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-record",
+      "asset": "final-record",
+      "rect": [
+        386,
+        224,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "g2",
+      "asset": "g2-1",
+      "rect": [
+        152,
+        215,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "root-bed",
+      "asset": "root-bed-retracted-dark",
+      "rect": [
+        340,
+        152,
+        44,
+        148
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:loop-path",
+      "asset": "entrance-loop-path",
+      "rect": [
+        128,
+        210,
+        60,
+        24
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "stamp:source-ring",
+      "asset": "entrance-source-ring",
+      "rect": [
+        156,
+        214,
+        64,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:door-a-entrance",
+      "asset": "door-a-entrance-open",
+      "rect": [
+        576,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "arch:return-loop-entrance",
+      "asset": "return-loop-entrance-open",
+      "rect": [
+        72,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "learned-marks",
+      "asset": "learned-marks",
+      "rect": [
+        240,
+        104,
+        160,
+        80
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "lantern-pedestal",
+      "asset": "lantern-pedestal-lit",
+      "rect": [
+        170,
+        193,
+        36,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "entrance",
+      "module_id": "g0",
+      "asset": "g0-1",
+      "rect": [
+        416,
+        193,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:pipe-run",
+      "asset": "corridor-pipe-run-off",
+      "rect": [
+        73,
+        74,
+        215,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "stamp:latch-grille",
+      "asset": "corridor-latch-grille",
+      "rect": [
+        28,
+        236,
+        56,
+        28
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:door-a-corridor",
+      "asset": "door-a-corridor-open",
+      "rect": [
+        72,
+        152,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "arch:sun-door-corridor",
+      "asset": "sun-door-corridor-open",
+      "rect": [
+        576,
+        192,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-tube",
+      "asset": "lumo-tube-dark",
+      "rect": [
+        73,
+        56,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "lumo-seal",
+      "asset": "lumo-seal-covered",
+      "rect": [
+        304,
+        48,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "door-a-control",
+      "asset": "door-a-control-latched",
+      "rect": [
+        42,
+        172,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "g1",
+      "asset": "g1-2",
+      "rect": [
+        224,
+        173,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "sun-door-control",
+      "asset": "sun-door-control-off",
+      "rect": [
+        484,
+        220,
+        32,
+        40
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "corridor",
+      "module_id": "star-map-table",
+      "asset": "star-map-table",
+      "rect": [
+        279,
+        238,
+        83,
+        42
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-run",
+      "asset": "observatory-pipe-run-off",
+      "rect": [
+        344,
+        60,
+        264,
+        18
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:pipe-drop",
+      "asset": "pipe-drop-off",
+      "rect": [
+        592,
+        76,
+        18,
+        180
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:loop-path",
+      "asset": "observatory-loop-path",
+      "rect": [
+        472,
+        266,
+        96,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stamp:final-door-sill",
+      "asset": "observatory-final-door-sill",
+      "rect": [
+        468,
+        140,
+        64,
+        14
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "scenery-wheel",
+      "asset": "wheel-stopped-sun-among-stars",
+      "rect": [
+        186,
+        59,
+        144,
+        88
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:sun-door-observatory",
+      "asset": "sun-door-observatory-open",
+      "rect": [
+        56,
+        186,
+        48,
+        48
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "arch:return-loop-observatory",
+      "asset": "return-loop-observatory-open",
+      "rect": [
+        496,
+        284,
+        48,
+        36
+      ],
+      "crop": [
+        0,
+        6,
+        48,
+        42
+      ],
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "sun-lock",
+      "asset": "sun-lock-off",
+      "rect": [
+        163,
+        118,
+        27,
+        34
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door-control",
+      "asset": "final-door-control-latched",
+      "rect": [
+        486,
+        120,
+        28,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-door",
+      "asset": "final-door-open",
+      "rect": [
+        468,
+        105,
+        64,
+        47
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "splitter",
+      "asset": "splitter-off",
+      "rect": [
+        221,
+        202,
+        38,
+        38
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "statue",
+      "asset": "statue-2",
+      "rect": [
+        271,
+        182,
+        51,
+        70
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "stone-return-loop",
+      "asset": "stone-return-loop-open",
+      "rect": [
+        452,
+        226,
+        28,
+        26
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "final-record",
+      "asset": "final-record",
+      "rect": [
+        386,
+        224,
+        64,
+        32
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "g2",
+      "asset": "g2-1",
+      "rect": [
+        152,
+        215,
+        32,
+        43
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "03-lumo-recalled-dark-retracted-roots",
+      "room": "observatory",
+      "module_id": "root-bed",
+      "asset": "root-bed-retracted-dark",
+      "rect": [
+        340,
+        152,
+        44,
+        148
+      ],
+      "crop": null,
+      "display_fit_only": true
+    },
+    {
+      "review": "after-memory",
+      "room": "observatory",
+      "module_id": "balance-crystal",
+      "asset": "balance-crystal",
+      "rect": [
+        558,
+        213,
+        21,
+        39
+      ],
+      "crop": null,
+      "display_fit_only": true
+    }
+  ]
+}
