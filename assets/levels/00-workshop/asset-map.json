@@ -1,0 +1,328 @@
+{
+  "scale": 2,
+  "nhinh_visible_height": 28,
+  "assets": {
+    "illustrations/01-ben-suong.png": {
+      "kind": "illustration",
+      "source": "assets/prologue/story-v4-art-v1/illustrations/01-ben-suong.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/02-leaving-ben-suong.png": {
+      "kind": "illustration",
+      "source": "assets/prologue/story-v4-art-v1/illustrations/02-leaving-ben-suong.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/03-maintenance-station.png": {
+      "kind": "illustration",
+      "source": "assets/prologue/story-v4-art-v1/illustrations/03-maintenance-station.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/04-waiting-for-morning.png": {
+      "kind": "illustration",
+      "source": "assets/prologue/story-v4-art-v1/illustrations/04-waiting-for-morning.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/05-morning-without-dawn.png": {
+      "kind": "illustration",
+      "source": "assets/prologue/story-v4-art-v1/illustrations/05-morning-without-dawn.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "sprites/bench.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 0,
+      "output_size": [
+        116,
+        90
+      ],
+      "in_game_size": [
+        58.0,
+        45.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-back.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/03-boatman-poses.png",
+      "source_cell": 1,
+      "output_size": [
+        27,
+        58
+      ],
+      "in_game_size": [
+        13.5,
+        29.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-front.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/03-boatman-poses.png",
+      "source_cell": 0,
+      "output_size": [
+        28,
+        58
+      ],
+      "in_game_size": [
+        14.0,
+        29.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-lamp.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/03-boatman-poses.png",
+      "source_cell": 2,
+      "output_size": [
+        28,
+        58
+      ],
+      "in_game_size": [
+        14.0,
+        29.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-walk.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/03-boatman-poses.png",
+      "source_cell": 3,
+      "output_size": [
+        32,
+        58
+      ],
+      "in_game_size": [
+        16.0,
+        29.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/customer-lamp-closed.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 5,
+      "output_size": [
+        17,
+        28
+      ],
+      "in_game_size": [
+        8.5,
+        14.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/customer-lamp-lit.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 6,
+      "output_size": [
+        18,
+        28
+      ],
+      "in_game_size": [
+        9.0,
+        14.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/customer-lamp-open.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 4,
+      "output_size": [
+        24,
+        28
+      ],
+      "in_game_size": [
+        12.0,
+        14.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/map.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 8,
+      "output_size": [
+        40,
+        33
+      ],
+      "in_game_size": [
+        20.0,
+        16.5
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/mother-back.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 1,
+      "output_size": [
+        27,
+        60
+      ],
+      "in_game_size": [
+        13.5,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/mother-front.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 0,
+      "output_size": [
+        26,
+        60
+      ],
+      "in_game_size": [
+        13.0,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/mother-map.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 2,
+      "output_size": [
+        35,
+        60
+      ],
+      "in_game_size": [
+        17.5,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/mother-work.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 3,
+      "output_size": [
+        30,
+        60
+      ],
+      "in_game_size": [
+        15.0,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/panel-fault.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 3,
+      "output_size": [
+        44,
+        44
+      ],
+      "in_game_size": [
+        22.0,
+        22.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/panel-off.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 2,
+      "output_size": [
+        44,
+        45
+      ],
+      "in_game_size": [
+        22.0,
+        22.5
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/parts-tray.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 1,
+      "output_size": [
+        68,
+        38
+      ],
+      "in_game_size": [
+        34.0,
+        19.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/retaining-ring.png": {
+      "kind": "sprite",
+      "source": "assets/prologue/story-v4-art-v1/workshop/04-repair-props.png",
+      "source_cell": 7,
+      "output_size": [
+        20,
+        14
+      ],
+      "in_game_size": [
+        10.0,
+        7.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/workshop-bg.png": {
+      "kind": "background",
+      "source": "assets/prologue/story-v4-art-v1/workshop/01-background.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    }
+  }
+}
