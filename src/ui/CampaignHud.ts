@@ -1,15 +1,32 @@
 import type Phaser from 'phaser';
 import { tr } from '../i18n/catalog.ts';
+import {
+  CHIP_HEIGHT,
+  CHIP_ORDER,
+  KEYS_Y,
+  PULSE_ARC_RADIUS,
+  PULSE_ARC_STROKE,
+  PULSE_BADGE_RADIUS,
+  PULSE_FLASH_RADIUS,
+  PULSE_FLASH_STROKE,
+  ROW_LEFT,
+  ROW_RIGHT,
+  TOAST_Y,
+  TOP_MAX_HEIGHT,
+  TOP_WIDTH,
+  TOP_X,
+  TOP_Y,
+  centerKeyRow,
+} from './hudLayout';
+import type { HudKeyId } from './hudLayout';
 
-export type HudKeyId = 'move' | 'run' | 'interact' | 'lantern' | 'pulse' | 'journal' | 'hint' | 'pause';
+export type { HudKeyId } from './hudLayout';
+export { HUD_LAYOUT, HUD_BANDS, centerKeyRow } from './hudLayout';
 
 /** Anything that can surface a transient line of text; puzzles depend on this, not on the whole HUD. */
 export interface ToastSink {
   showToast(message: string, durationMs?: number): void;
 }
-
-/** Campaign levels where SPACE really fires a lantern pulse. Level 06 (index 5) reveals the tally marks by the window (scenario 06 §5); Level 07 (index 6) reveals the handprint on the wet stone (scenario v2 07 §8); Level 08 (index 7) reveals the carved name under the statue (scenario 08 §5). */
-export const PULSE_LEVELS: readonly number[] = [0, 1, 5, 6, 7, 8, 9];
 
 const FONT = 'Segoe UI, sans-serif';
 const PANEL_FILL = 0x0c1d24;
@@ -30,33 +47,17 @@ const PULSE_COOLING_CSS = '#d8b869';
 
 const PANEL_RADIUS = 5;
 // One fixed-width mission plate holds chapter, objective and progress; there is no second card.
-const TOP_X = 12;
-const TOP_Y = 8;
-const TOP_WIDTH = 248;
-const TOP_MAX_HEIGHT = 78;
 const TOP_PAD_X = 8;
 const TOP_PAD_Y = 6;
 const TOP_LINE_GAP = 2;
 const STATUS_ALPHA = 0.72;
 const LUMO_X = 628;
 const LUMO_Y = 9;
-const ROW_LEFT = 12;
-const ROW_RIGHT = 628;
-const KEYS_X = 320;
-const KEYS_Y = 347;
-const CHIP_HEIGHT = 14;
 const CHIP_GAP = 12;
 const CHIP_KEY_PAD = 4;
 const CHIP_KEY_GAP = 5;
 const ESC_X = 628;
 const ESC_SIZE = 8;
-// The pulse badge lives in the 24px band between the status row (bottom 333)
-// and the canvas edge, so its arc and ready ring must stay inside it.
-const PULSE_BADGE_RADIUS = 8;
-const PULSE_ARC_RADIUS = 10;
-const PULSE_ARC_STROKE = 2;
-const PULSE_FLASH_RADIUS = 11;
-const PULSE_FLASH_STROKE = 1;
 const PULSE_OUTER = PULSE_FLASH_RADIUS + PULSE_FLASH_STROKE / 2;
 const PULSE_BADGE_X = PULSE_OUTER;
 const PULSE_LABEL_X = PULSE_OUTER * 2 + CHIP_KEY_GAP;
@@ -64,7 +65,6 @@ const PULSE_FLASH_MS = 600;
 const PULSE_SHAKE_MS = 320;
 const PULSE_COOLDOWN_MS = 3000;
 const TOAST_X = 320;
-const TOAST_Y = 64;
 const TOAST_GAP = 4;
 const TOAST_PAD_X = 10;
 const TOAST_PAD_Y = 4;
@@ -75,35 +75,6 @@ const CRYSTAL_GUTTER = 54;
 const CRYSTAL_INSET = 12;
 const CRYSTAL_SPACING = 16;
 const CRYSTAL_RADIUS = 7;
-
-/** The only keys that get a chip: the always-on trio plus whichever lantern action the level allows. */
-const CHIP_ORDER: readonly HudKeyId[] = ['move', 'run', 'interact', 'lantern', 'pulse'];
-
-/**
- * Fixed HUD geometry, exported so the source-only checks can prove the pulse
- * badge, its ready ring and the whole key row stay on the 640x360 canvas.
- */
-export const HUD_LAYOUT = {
-  chipOrder: CHIP_ORDER,
-  rowLeft: ROW_LEFT,
-  rowRight: ROW_RIGHT,
-  rowCenter: KEYS_X,
-  keysY: KEYS_Y,
-  chipHeight: CHIP_HEIGHT,
-  badgeRadius: PULSE_BADGE_RADIUS,
-  arcRadius: PULSE_ARC_RADIUS,
-  arcStroke: PULSE_ARC_STROKE,
-  flashRadius: PULSE_FLASH_RADIUS,
-  flashStroke: PULSE_FLASH_STROKE,
-  topBottom: TOP_Y + TOP_MAX_HEIGHT,
-  toastY: TOAST_Y,
-} as const;
-
-/** Left edge of the key row: centred on KEYS_X but never outside [ROW_LEFT, ROW_RIGHT]. */
-export function centerKeyRow(totalWidth: number): number {
-  const centred = Math.round(KEYS_X - totalWidth / 2);
-  return Math.max(ROW_LEFT, Math.min(ROW_RIGHT - totalWidth, centred));
-}
 
 const KEY_ORDER: readonly HudKeyId[] = ['move', 'run', 'interact', 'lantern', 'pulse', 'journal', 'hint', 'pause'];
 const KEY_DEFS: Record<HudKeyId, { key: string; label: string }> = {
