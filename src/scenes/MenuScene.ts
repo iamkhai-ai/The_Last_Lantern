@@ -4,6 +4,8 @@ import { tr } from '../i18n/catalog.ts';
 import { getLocale, otherLocale, setLocale } from '../i18n/locale.ts';
 import { SoundSystem } from '../systems/SoundSystem';
 import { RELEASE_POLICY } from '../config/releaseConfig';
+import { V4SaveStore } from '../v4/core/save';
+import { safeLocalStorage } from '../v4/scene/browserStorage';
 
 type MenuMode = 'menu' | 'confirm-new-game';
 
@@ -99,8 +101,9 @@ export class MenuScene extends Phaser.Scene {
       ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf',
     }).setDepth(81);
 
-    // Continue is not offered until the V4 save is wired (Task 6).
+    // Continue is offered only when a V4 save exists, and it is the default row then.
     const items: Array<{ label: () => string; action: () => void }> = [];
+    if (this.hasAnySave()) items.push({ label: () => tr('Tiếp tục'), action: () => this.continueGame() });
     items.push({ label: () => tr('Hành trình mới'), action: () => this.startNewGame() });
     items.push({
       label: () => this.soundLabel(),
@@ -266,12 +269,11 @@ export class MenuScene extends Phaser.Scene {
   }
 
   /**
-   * Whether a V4 save exists. Always false until the V4 save is wired.
-   * The destructive action re-queries it, so a save written after create() is still seen.
+   * Whether a readable V4 save exists. The destructive action re-queries it, so a save written after create() is still seen.
+   * Old V2 save keys are neither read nor deleted.
    */
   private hasAnySave(): boolean {
-    // Task 6 wires the V4 save
-    return false;
+    return new V4SaveStore(safeLocalStorage()).hasSave();
   }
 
   public startNewGame(): void {
@@ -284,10 +286,11 @@ export class MenuScene extends Phaser.Scene {
     this.beginNewGame();
   }
 
-  /** The only place New Game starts a new run in V4. */
+  /** The only place New Game starts a new run in V4. It clears the V4 save once, then starts the scene fresh. */
   private beginNewGame(): void {
     if (this.starting) return;
     this.starting = true;
+    new V4SaveStore(safeLocalStorage()).clear();
     SoundSystem.playLanternToggle(true);
     this.scene.start('V4Scene', { newGame: true });
   }
@@ -323,7 +326,7 @@ export class MenuScene extends Phaser.Scene {
     this.beginNewGame();
   }
 
-  /** Stub: Continue is hidden for now; resumes the V4 scene from its save once Task 6 lands. */
+  /** Resumes the V4 scene from its save. Offered only when a save exists. */
   public continueGame(): void {
     if (this.menuMode === 'confirm-new-game' || this.starting) return;
     this.starting = true;

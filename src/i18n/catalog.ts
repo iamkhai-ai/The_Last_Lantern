@@ -49,6 +49,8 @@ export function tr(vi: string, params?: Readonly<Record<string, string | number>
 const SPEAKER_LABELS_EN: Readonly<Record<string, string>> = {
   'Nhinh': 'Nhinh',
   'Lumo': 'Lumo',
+  'Mẹ': 'Mother',
+  'Lái đò': 'The boatman',
   'Shadow': 'The Shadow',
   'The Shadow': 'The Shadow',
   'Hệ thống': 'System',

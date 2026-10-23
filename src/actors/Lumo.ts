@@ -34,6 +34,31 @@ export class Lumo {
     this.sprite.x += (desiredX - this.sprite.x) * Math.min(1, dt * 0.008);
     this.sprite.y += (desiredY - this.sprite.y) * Math.min(1, dt * 0.008);
 
+    this.animate(dt);
+  }
+
+  /**
+   * Flies at a constant `speed` (px/s) toward (x, y), with no hover offset, so a seal can be reached exactly.
+   * Returns true once Lumo is within 3px of the point; he then sits on it.
+   */
+  public flyTo(dt: number, x: number, y: number, speed: number): boolean {
+    this.timeElapsed += dt * 0.004;
+    const dx = x - this.sprite.x;
+    const dy = y - this.sprite.y;
+    const distance = Math.hypot(dx, dy);
+    const step = (speed * dt) / 1000;
+    if (distance <= step) {
+      this.sprite.setPosition(x, y);
+    } else {
+      this.sprite.x += (dx / distance) * step;
+      this.sprite.y += (dy / distance) * step;
+    }
+    this.animate(dt);
+    return Math.hypot(x - this.sprite.x, y - this.sprite.y) <= 3;
+  }
+
+  /** Wing frame and dust trail; shared by hovering and flying. */
+  private animate(dt: number): void {
     const frame = Math.floor(this.timeElapsed * 2) % this.frameCount;
     this.sprite.setTexture(`lumo_${frame}`);
 

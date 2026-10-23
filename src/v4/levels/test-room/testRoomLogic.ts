@@ -75,12 +75,19 @@ export function deriveTestRoom(s: TestRoomState, lantern: LanternState, lumo: Lu
 /**
  * The HUD lines. The status names the lantern and Lumo, and shows that door A is latched.
  * "Latched" is read from the stage: every stage after 'door' has latch A engaged.
+ * `translate` localizes each word of the status at the render boundary; the default keeps the Vietnamese.
  */
-export function testRoomHud(v: TestRoomView, lantern: LanternState, lumo: LumoMode): HudText {
-  const lamp = `Đèn: ${lantern.location.at === 'hand' ? 'trong tay' : 'trên bệ'} ${lantern.on ? 'bật' : 'tắt'}`;
-  const latched = v.stage !== 'door' ? ', đã gài' : '';
-  const door = `Cửa A: ${v.doorAOpen ? 'mở' : 'đóng'}${latched}`;
-  const companion = `Lumo: ${lumo.mode === 'follow' ? 'theo Nhinh' : lumo.mode === 'travelling' ? 'đang bay' : 'giữ ấn'}`;
+export function testRoomHud(
+  v: TestRoomView,
+  lantern: LanternState,
+  lumo: LumoMode,
+  translate: (text: string) => string = (text) => text,
+): HudText {
+  const t = translate;
+  const lamp = `${t('Đèn')}: ${t(lantern.location.at === 'hand' ? 'trong tay' : 'trên bệ')} ${t(lantern.on ? 'bật' : 'tắt')}`;
+  const latched = v.stage !== 'door' ? t(', đã gài') : '';
+  const door = `${t('Cửa A')}: ${t(v.doorAOpen ? 'mở' : 'đóng')}${latched}`;
+  const companion = `${t('Lumo')}: ${t(lumo.mode === 'follow' ? 'theo Nhinh' : lumo.mode === 'travelling' ? 'đang bay' : 'giữ ấn')}`;
   return { objective: OBJECTIVES[v.stage], status: `${lamp} · ${door} · ${companion}` };
 }
 
