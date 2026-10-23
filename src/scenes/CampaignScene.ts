@@ -403,6 +403,9 @@ export class CampaignScene extends Phaser.Scene {
       } else if (this.progress.level === 6) {
         // Scenario v2 07 §8: a Pulse near the wet stone reveals the handprint, once the water flows.
         this.gardenLevel?.onPulse(x, y);
+      } else if (this.progress.level === 5) {
+        // Scenario 06 §5: a Pulse near the window reveals the tally marks.
+        this.sleeplessTower?.onPulse(x, y);
       }
       this.save();
       this.refreshHud();

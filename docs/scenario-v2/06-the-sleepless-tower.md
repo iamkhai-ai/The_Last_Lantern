@@ -7,7 +7,7 @@
 **Mục tiêu:** Giải phóng dòng nước, nhận Tinh thể Hy Vọng.\
 **Kỹ năng mới:** Đồng thời. Ba điều kiện phải đúng cùng một lúc, và lần này **không có chốt nào giữ thay Lumo**.
 
-**Trạng thái:** hướng diễn giải số đo và chơi thử đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/06-the-sleepless-tower.md](../scenario/06-the-sleepless-tower.md), vẫn là nguồn chuẩn hiện tại. Màn này đang làm tranh v2 ([kế hoạch](../superpowers/plans/2026-10-21-level06-art-v2-production.md)), và kế hoạch đó yêu cầu giữ bảng chân trị A/B/C, khóa lưu, lời thoại và thang gợi ý. Bản v2 không đổi bố cục, câu đố hay thoại đã có; các dòng *(mới)* là đề xuất.
+**Trạng thái:** đã triển khai trên nhánh `feat/level06-scenario-v2` (chưa gộp vào `test-develop`, chưa chơi thử). Triển khai: lớp âm máy, ba dòng thoại mới và hai dòng mạch phụ, vạch đếm bằng Pulse với cờ `l5-tally-seen` (decal tạm vẽ lúc chạy, chờ art), bật Pulse cho màn này. Không đổi bố cục, câu đố, khóa lưu `l5-*` hay thang H. Bản gốc [docs/scenario/06-the-sleepless-tower.md](../scenario/06-the-sleepless-tower.md) được giữ nguyên làm nguồn của bản v1.
 
 > **Thay đổi so với bản hiện tại**
 >

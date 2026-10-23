@@ -155,9 +155,9 @@ console.log('  ending        : EndingScene reachable, completed campaigns resume
     assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
     return hits.map((m) => m[2].normalize('NFC'));
   };
-  // Level 07 reads the v2 document (scenario v2 §6 Mức 3 goes straight to the shrine); the others still read v1.
+  // Levels 06 and 07 read their v2 documents (07: scenario v2 §6 Mức 3 goes straight to the shrine); the others still read v1.
   const FALLBACK = {
-    5: ['scenario', '06-the-sleepless-tower.md'],
+    5: ['scenario-v2', '06-the-sleepless-tower.md'],
     6: ['scenario-v2', '07-the-sleeping-garden.md'],
     7: ['scenario', '08-ruins-of-two-halves.md'],
     8: ['scenario', '09-dark-moon-observatory.md'],

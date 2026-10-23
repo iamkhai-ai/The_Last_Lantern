@@ -102,6 +102,40 @@ export const heartOverloadLayer: HeldRecipe = heldChord([
   { freq: 1864.66, type: 'triangle', peak: 0.02, attack: HEART_OVERLOAD_RISE_SECONDS, lowpass: 4200 },
 ]);
 
+/**
+ * Machine layers of Level 06 (scenario 06 §4 "Âm thanh của máy"). One voice per circuit; the three together are a C-major
+ * chord: circuit A a high bell (C6), circuit B a middle bell (E5) half a beat behind A, circuit C a short soft motif in
+ * the band of Lumo's voice (680-760 Hz). The hum is the machine's base while the water is still held up.
+ */
+export const TOWER_TONE_HZ = { hum: 110, bellA: 1046.5, bellB: 659.25, motif: [680, 760, 680] } as const;
+const TOWER_BEAT_S = 2.4;
+
+/** Plays `play(when)` on a shared grid of `period` seconds offset by `phase`, so layers on one grid stay in step. */
+function gridVoice(ctx: BaseAudioContext, period: number, phase: number, play: (when: number) => void): HeldVoice {
+  let next = Math.ceil((ctx.currentTime - phase) / period) * period + phase;
+  const timer = setInterval(() => {
+    const horizon = ctx.currentTime + 0.3;
+    while (next < horizon) {
+      if (next >= ctx.currentTime + 0.01) play(next);
+      next += period;
+    }
+  }, 80);
+  return { release(): void { clearInterval(timer); } };
+}
+
+export const towerHumVoice: HeldRecipe = (ctx, out, t) =>
+  heldTone(ctx, out, t, { freq: TOWER_TONE_HZ.hum, type: 'triangle', peak: 0.03, attack: 1.2, lowpass: 320 });
+
+export const towerBellAVoice: HeldRecipe = (ctx, out) =>
+  gridVoice(ctx, TOWER_BEAT_S, 0, (when) => bell(ctx, out, when, TOWER_TONE_HZ.bellA, { peak: 0.04, dur: 1.8 }));
+
+export const towerBellBVoice: HeldRecipe = (ctx, out) =>
+  gridVoice(ctx, TOWER_BEAT_S, TOWER_BEAT_S / 2, (when) => bell(ctx, out, when, TOWER_TONE_HZ.bellB, { peak: 0.03, dur: 1.5 }));
+
+export const towerMotifVoice: HeldRecipe = (ctx, out) =>
+  gridVoice(ctx, TOWER_BEAT_S * 2, 0, (when) => TOWER_TONE_HZ.motif.forEach((freq, i) =>
+    tone(ctx, out, { t: when + i * 0.28, freq, dur: 0.22, peak: 0.022, attack: 0.03 })));
+
 export const lanternOn: Recipe = (ctx, out, t) => {
   noise(ctx, out, { t, dur: 0.3, peak: 0.03, attack: 0.06, type: 'bandpass', freq: 500, endFreq: 2200, q: 0.9 });
   bell(ctx, out, t + 0.02, 659.25, { peak: 0.1, dur: 0.7 });
