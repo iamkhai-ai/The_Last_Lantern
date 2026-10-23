@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { getNhinhTexture } from '../art/CampaignArt';
 import { SoundSystem } from '../systems/SoundSystem';
-import type { ReachRect } from '../systems/interactionReach';
+import { FOOT_BODY, FOOT_DEPTH_OFFSET, footRectAt } from '../v4/core/body';
+import type { Rect } from '../v4/core/geometry';
 
 export type FacingDirection =
   | 'down'
@@ -20,8 +21,6 @@ export class Player {
   private shadow: Phaser.GameObjects.Image;
   private walkSpeed = 105;
   private runSpeed = 150;
-  private footDepthOffset = 0;
-  private footBodyOffsetY = 27;
   private animTimer = 0;
   private animStep = 0;
   /** Footsteps: true while the body is really moving, and the animation phases since the last step. */
@@ -53,11 +52,11 @@ export class Player {
     this.shadow = scene.add.image(x, y + 17, 'shadow_blob');
     this.shadow.setDepth(9);
 
-    // Compact foot hitbox for smooth top-down navigation around trees & rocks
+    // The one foot body (RULE_GAMES.md §1): the collision body is the foot, and reach is measured from it.
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     if (body) {
-      body.setSize(14, 10);
-      body.setOffset(9, 27);
+      body.setSize(FOOT_BODY.width, FOOT_BODY.height);
+      body.setOffset(this.sprite.width / 2 + FOOT_BODY.offsetX, this.sprite.height / 2 + FOOT_BODY.offsetY);
     }
 
     if (scene.input.keyboard) {
@@ -167,10 +166,9 @@ export class Player {
     this.updateGroundDepth();
   }
 
-  /** The foot collision body in world space: the rect interaction reach is measured from (RULE_GAMES.md §1). */
-  public getFootBody(): ReachRect {
-    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
-    return { x: body.x, y: body.y, width: body.width, height: body.height };
+  /** The foot body in world space: the rect interaction reach is measured from (RULE_GAMES.md §1). */
+  public getFootBody(): Rect {
+    return footRectAt({ x: this.sprite.x, y: this.sprite.y });
   }
 
   public playLanternAction(isOn: boolean): void {
@@ -217,22 +215,10 @@ export class Player {
     }
   }
 
-  /** Configure foot collision and depth for a scene while preserving center-based public coordinates. */
-  public setFootPlacement(depthOffsetY: number, bodyOffsetY: number, bodyOffsetX = 9, bodyWidth = 14, bodyHeight = 10): void {
-    this.footDepthOffset = depthOffsetY;
-    this.footBodyOffsetY = bodyOffsetY;
-    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
-    if (body) {
-      body.setSize(bodyWidth, bodyHeight);
-      body.setOffset(bodyOffsetX, bodyOffsetY);
-    }
-    this.updateGroundDepth();
-  }
-
   private updateGroundDepth(): void {
-    const groundY = this.sprite.y + this.footDepthOffset;
-    this.sprite.setDepth(this.footDepthOffset === 0 ? 10 + Math.floor(groundY / 10) : 10 + groundY / 10);
-    this.shadow.setPosition(this.sprite.x, this.footDepthOffset === 0 ? this.sprite.y + 17 : groundY - 2);
+    const groundY = this.sprite.y + FOOT_DEPTH_OFFSET;
+    this.sprite.setDepth(10 + groundY / 10);
+    this.shadow.setPosition(this.sprite.x, groundY - 2);
     this.shadow.setDepth(this.sprite.depth - 1);
   }
 

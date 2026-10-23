@@ -20,6 +20,14 @@ new Function('require', 'module', 'exports', outputText)(name => {
     },
   };
   if (name.endsWith('/SoundSystem')) return { SoundSystem: { playFootstep() {} } };
+  if (name.endsWith('/v4/core/body')) {
+    // The real foot body module: pure, so it is transpiled and loaded as is.
+    const body = { exports: {} };
+    const bodySource = fs.readFileSync(new URL('../src/v4/core/body.ts', import.meta.url), 'utf8');
+    const bodyJs = ts.transpileModule(bodySource, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+    new Function('require', 'module', 'exports', bodyJs)(() => ({}), body, body.exports);
+    return body.exports;
+  }
   throw new Error(`Unexpected dependency ${name}`);
 }, mod, mod.exports);
 const { Player } = mod.exports;

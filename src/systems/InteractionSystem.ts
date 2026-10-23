@@ -1,39 +1,20 @@
 import Phaser from 'phaser';
 import { tr } from '../i18n/catalog.ts';
-import { InteractableConfig } from '../types/gameTypes';
+import type { Interactable } from '../types/gameTypes';
+import type { Rect } from '../v4/core/geometry';
+import { isInReach, pickTarget } from '../v4/core/reach';
 import { layoutInteractionPrompt } from './interactionPromptLayout';
 import type { PromptRect } from './interactionPromptLayout';
-import { isFootInReach } from './interactionReach';
-import type { ReachRect } from './interactionReach';
-
-/** A small world-space cushion; no meter-to-pixel scale is defined by the game. */
-const INTERACTION_RADIUS_PADDING = 8;
-
-function effectiveRadius(item: InteractableConfig): number {
-  return item.radius + INTERACTION_RADIUS_PADDING;
-}
-
-/**
- * Range test shared by `update()` and `tryInteract()`. Order: the control's own predicate, then the
- * foot-to-footprint test when the control opts in and a foot body is known, then the padded radius
- * (the path every control without `reach` keeps, and every caller that passes no foot body).
- */
-function isInRange(item: InteractableConfig, playerX: number, playerY: number, footBody: ReachRect | undefined): boolean {
-  if (item.isInReach) return item.isInReach(playerX, playerY) === true;
-  if (item.reach && footBody) return isFootInReach(footBody, item.reach);
-  return Math.hypot(playerX - item.x, playerY - item.y) <= effectiveRadius(item);
-}
 
 export class InteractionSystem {
   private scene: Phaser.Scene;
-  private interactables: InteractableConfig[] = [];
-  private activeTarget: InteractableConfig | null = null;
+  private interactables: Interactable[] = [];
+  private activeTarget: Interactable | null = null;
   private promptContainer: Phaser.GameObjects.Container;
   private promptBg: Phaser.GameObjects.Graphics;
   private promptText: Phaser.GameObjects.Text;
   private lastInteractTime = 0;
-  private lastPlayerPosition = { x: 0, y: 0 };
-  private lastFootBody: ReachRect | undefined;
+  private lastFoot: Rect | null = null;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -59,56 +40,26 @@ export class InteractionSystem {
     this.promptContainer.setVisible(false);
   }
 
-  public register(config: InteractableConfig): void {
-    this.interactables.push(config);
+  public register(item: Interactable): void {
+    this.interactables.push(item);
   }
 
-  public update(
-    playerX: number,
-    playerY: number,
-    canInteract: boolean,
-    playerBounds?: PromptRect,
-    protectedBounds: PromptRect[] = [],
-    footBody?: ReachRect,
-  ): void {
-    this.lastPlayerPosition = { x: playerX, y: playerY };
-    this.lastFootBody = footBody;
+  /**
+   * Picks the target for this frame and shows its prompt. `foot` is the player's foot body (RULE_GAMES §1);
+   * `actorBounds` is the actor's rectangle the prompt must keep clear of.
+   */
+  public update(foot: Rect, canInteract: boolean, actorBounds: PromptRect, protectedBounds: PromptRect[] = []): void {
+    this.lastFoot = foot;
     if (!canInteract) {
       this.activeTarget = null;
       this.promptContainer.setVisible(false);
       return;
     }
 
-    let best: InteractableConfig | null = null;
-    let bestDist = Infinity;
-    let bestOwns = false;
-
-    for (const item of this.interactables) {
-      if (item.isEnabled && !item.isEnabled()) continue;
-      const label = item.getPrompt();
-      if (!label) continue;
-
-      const dist = Math.hypot(playerX - item.x, playerY - item.y);
-      // A control that owns its own approach shape (a stone answered from all four sides) replaces the
-      // radial test with its predicate; a control that opts in with `reach` is measured from the foot body;
-      // every other control keeps the padded radius exactly as before.
-      // `dist` is still measured: it orders candidates that are both in reach.
-      if (!isInRange(item, playerX, playerY, footBody)) continue;
-
-      // Among the candidates that already pass the gates above, a control that owns the standing
-      // position keeps it even when a neighbouring prop is nearer. Controls that do not opt in are
-      // untouched: nearest wins, ties go to the first registered.
-      const owns = item.ownsPosition ? item.ownsPosition(playerX, playerY) === true : false;
-      if (best) {
-        if (bestOwns && !owns) continue;
-        if (owns === bestOwns && dist >= bestDist) continue;
-      }
-
-      best = item;
-      bestDist = dist;
-      bestOwns = owns;
-    }
-
+    // Only controls that are there right now (a non-null prompt) take part in the choice.
+    const candidates = this.interactables.filter(item => item.getPrompt() !== null);
+    const index = pickTarget(foot, candidates);
+    const best = index >= 0 ? candidates[index] : null;
     this.activeTarget = best;
 
     if (best) {
@@ -124,8 +75,7 @@ export class InteractionSystem {
       this.promptBg.fillRoundedRect(-w / 2, -h / 2, w, h, 5);
       this.promptBg.strokeRoundedRect(-w / 2, -h / 2, w, h, 5);
 
-      const actorBounds = playerBounds ?? { x: playerX - 18, y: playerY - 21, width: 36, height: 42 };
-      const promptBounds = layoutInteractionPrompt(best.getPromptBounds?.() ?? null, actorBounds, w, h, undefined, protectedBounds);
+      const promptBounds = layoutInteractionPrompt(best.reach.rect, actorBounds, w, h, undefined, protectedBounds);
       this.promptContainer.setPosition(promptBounds.x + w / 2, promptBounds.y + h / 2);
       this.promptContainer.setVisible(true);
     } else {
@@ -134,19 +84,15 @@ export class InteractionSystem {
   }
 
   public tryInteract(now: number): boolean {
-    if (!this.activeTarget) return false;
     const target = this.activeTarget;
-    // The press re-validates the whole approach condition the prompt and the selection agreed on:
-    // enabled, a live prompt, the range (the control's own `isInReach`, else the foot body against `reach`,
-    // else the padded radius), and — for a control that owns the standing position — that the feet are still inside it.
-    // A state change between update() and E can never fire a control the player has already left or that
-    // has since gone quiet.
-    const disabled = target.isEnabled ? !target.isEnabled() : false;
-    const outOfRange = !isInRange(target, this.lastPlayerPosition.x, this.lastPlayerPosition.y, this.lastFootBody);
-    const lostOwnership = target.ownsPosition
-      ? target.ownsPosition(this.lastPlayerPosition.x, this.lastPlayerPosition.y) !== true
-      : false;
-    if (disabled || !target.getPrompt() || outOfRange || lostOwnership) {
+    if (!target) return false;
+    // The press re-validates what the prompt and the selection agreed on: a live prompt and the foot
+    // still in reach of the target. A state change between update() and E can never fire a control the
+    // player has already left or that has since gone quiet.
+    const stillValid = this.lastFoot !== null
+      && target.getPrompt() !== null
+      && isInReach(this.lastFoot, target.reach, target.exception);
+    if (!stillValid) {
       this.activeTarget = null;
       this.promptContainer.setVisible(false);
       return false;
@@ -157,7 +103,7 @@ export class InteractionSystem {
     return true;
   }
 
-  public getActiveTarget(): InteractableConfig | null {
+  public getActiveTarget(): Interactable | null {
     return this.activeTarget;
   }
 }
