@@ -278,16 +278,11 @@ export const TOWER_GARDEN_CREEK_ENTRIES: readonly CatalogEntry[] = [
     'Giữ thanh chắn bằng chốt, rồi tắt đèn để rễ làm cầu. Một phần đường phải tự giữ trước khi phần kia xuất hiện.',
     'Hold the bar with the latch, then put the lantern out so the roots make a bridge. One part of the way must hold itself before the next appears.'),
   entry('l7.hint.main.3',
-    'Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi gài lối đá phụ.',
-    'Light the lantern, pass the bar and set the latch. Put it out, cross the root bridge, open the drain, then set the side path.'),
+    'Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi tới điện thờ.',
+    'Light the lantern, pass the bar and set the latch. Put it out, cross the root bridge, open the drain, then go to the shrine.'),
 
-  // Hint ladder — after the water.
-  entry('l7.hint.side.1', 'Nước đã chảy tới vườn ươm. Cổng điện thờ nằm ở góc đông bắc.', 'Water has reached the nursery. The shrine gate is in the northeast corner.'),
-  entry('l7.hint.side.2', 'Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm.', 'There is a stone latch on the side path beside the drain, southeast of the nursery.'),
-  entry('l7.hint.side.3', 'Nhấn E ở chốt để mở lối về không cần ánh sáng.', 'Press E at the latch to open a way back that needs no light.'),
-
-  // Hint ladder — Lumo by the sprout.
-  entry('l7.hint.story.1', 'Lối về đã được giữ. Lumo có điều muốn nói.', 'The way back is held. Lumo has something to say.'),
+  // Hint ladder — Lumo by the sprout (after the water).
+  entry('l7.hint.story.1', 'Nước đã chảy tới vườn ươm. Lumo có điều muốn nói.', 'Water has reached the nursery. Lumo has something to say.'),
   entry('l7.hint.story.2', 'Lumo đang ở gần mầm cây trong vườn ươm.', 'Lumo is near the sprout in the nursery.'),
   entry('l7.hint.story.3', 'Nhấn E ở mầm cây để nghe Lumo.', 'Press E at the sprout to hear Lumo.'),
 
@@ -311,6 +306,18 @@ export const TOWER_GARDEN_CREEK_ENTRIES: readonly CatalogEntry[] = [
   entry('l7.journal.6',
     'Không phải chỗ nào cũng cần sáng hơn. Có nơi cần được ngủ.',
     'Not every place needs more light. Some places need to sleep.'),
+  entry('l7.journal.7',
+    'Những dấu nhỏ: một bàn tay nhỏ in trên đá ướt. Không ai nói đó là tay của ai.',
+    'Small marks: a small handprint on wet stone. No one says whose hand it was.'),
+
+  // Scenario v2 07 §4/§5: Lumo's guide on the root bridge and the handprint on the wet stone.
+  entry('l7.bridgeGuide.1', 'Đi theo ánh của tôi. Nó không làm rễ co lại đâu.', "Follow my light. It won't make the roots pull back."),
+  entry('l7.handprint.1', 'Có một bàn tay nhỏ in trên đá. Nước vừa làm nó hiện lên.', 'There is a small handprint on the stone. The water has just brought it up.'),
+  entry('l7.handprint.2', 'Ai đó từng chơi ở đây, lúc đá còn ướt.', 'Someone once played here, back when the stone was still wet.'),
+
+  // Status row: root bridge state.
+  entry('l7.state.bridgeYes', 'có', 'yes'),
+  entry('l7.state.bridgeNo', 'không', 'no'),
 
   // Setting the bar latch.
   entry('l7.latchWest.1', 'Chốt đá đã giữ thanh chắn.', 'The stone latch holds the bar.'),
@@ -326,7 +333,6 @@ export const TOWER_GARDEN_CREEK_ENTRIES: readonly CatalogEntry[] = [
   entry('l7.exitBlock.canopy', 'Cổng còn khép. Mình phải che bể tích quang trước đã.', 'The gate is still shut. I need to cover the reservoir first.'),
   entry('l7.exitBlock.bar', 'Thanh chắn chưa được giữ. Cần gài chốt trước khi cổng mở.', 'The bar is not held. I need to set the latch before the gate opens.'),
   entry('l7.exitBlock.drain', 'Vườn ươm còn thiếu nước. Mở cống rồi quay lại.', 'The nursery still lacks water. Open the drain and come back.'),
-  entry('l7.exitBlock.side', 'Chưa gài chốt lối đá phụ. Lối về cần được giữ.', 'The side-path latch is not set. The way back needs holding.'),
   entry('l7.exitBlock.lumo', 'Lumo vẫn đang đợi bên mầm cây.', 'Lumo is still waiting by the sprout.'),
 
   // Interaction prompts.

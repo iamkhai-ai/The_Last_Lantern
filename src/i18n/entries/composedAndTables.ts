@@ -108,7 +108,7 @@ export const COMPOSED_AND_TABLE_ENTRIES: readonly CatalogEntry[] = [
   entry('compose.ruins.lockRight', 'NHẬT PHẢI · {state}', 'RIGHT SUN · {state}'),
   entry('compose.ruins.lockMoon', 'NGUYỆT · {state}', 'MOON · {state}'),
   entry('compose.ruins.status', 'Nhật {suns}/2 · Nguyệt {moon} · Bệ {ring} · Cửa Bắc {north}', 'Sun {suns}/2 · Moon {moon} · Pedestal {ring} · North door {north}'),
-  entry('compose.garden.status', 'Màn che: {canopy} · Hoa Nhật: {sun} · Chốt: {latch} · Nước: {water} · Lối phụ: {side} · {light}', 'Canopy: {canopy} · Sun flower: {sun} · Latch: {latch} · Water: {water} · Side path: {side} · {light}'),
+  entry('compose.garden.status', 'Màn che: {canopy} · Hoa Nhật: {sun} · Chốt: {latch} · Cầu rễ: {bridge} · Nước: {water} · {light}', 'Canopy: {canopy} · Sun flower: {sun} · Latch: {latch} · Root bridge: {bridge} · Water: {water} · {light}'),
   entry('compose.tower.sourcePrompt', 'E · Đèn đang ở bệ {source}', 'E · Lantern is on the {source} pedestal'),
   entry('compose.tower.status', 'A {a} · B {b} · C {c} · Nước {water}', 'A {a} · B {b} · C {c} · Water {water}'),
   entry('compose.creek.mirror', '{id} · Xoay gương', '{id} · Turn mirror'),

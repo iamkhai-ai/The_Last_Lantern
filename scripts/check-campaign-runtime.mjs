@@ -726,6 +726,8 @@ function makeFrameScene(level, { controllers = [] } = {}) {
       getProtectedPromptBounds: () => [],
       // Mirrors the real controller API: the scene's input lock reads it every frame (Level 08's demonstration owns controls).
       isControlLocked: () => false,
+      // Scenario v2 07 §8: only the garden controller answers Lumo's guide target; null keeps the usual trail.
+      ...(field === 'gardenLevel' ? { lumoGuideTarget: () => null } : {}),
     };
   }
   return scene;
@@ -1645,6 +1647,19 @@ const CASES = [
           assert.ok(call.y <= limit, `level ${level}, player y ${playerY}: Lumo's target y ${call.y} must stay at or above ${limit}`);
         }
       }
+    },
+  },
+  {
+    name: 'garden_lumo_guide_target_replaces_the_trail_only_when_present',
+    run: () => {
+      // Scenario v2 07 §8: the garden's guide point (on the bridge) becomes Lumo's target; null falls back to the trail.
+      const guided = makeFrameScene(6, { controllers: ['gardenLevel'] });
+      guided.gardenLevel.lumoGuideTarget = () => ({ x: 350, y: 238 });
+      stepFrame(guided);
+      assert.deepEqual(guided.calls.lumo.at(-1), { x: 350, y: 238 }, 'a guide point on the bridge is Lumo\'s flight target');
+      const trail = makeFrameScene(6, { controllers: ['gardenLevel'] });
+      stepFrame(trail);
+      assert.ok(trail.calls.lumo.at(-1).y <= 300, 'without a guide point Lumo keeps the usual trail target');
     },
   },
   {

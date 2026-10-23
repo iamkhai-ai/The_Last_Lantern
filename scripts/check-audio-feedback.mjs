@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { deriveTowerLive, migrateTowerProgress, resolveTowerSpawn, TOWER } from '../src/data/towerLayout.ts';
-import { GARDEN_ACTOR, nearestSafeGardenSpawn, NO_HELD_SPANS, readGardenState } from '../src/data/sleepingGardenLayout.ts';
+import { GARDEN_ACTOR, GARDEN_BRIDGE, gardenActorBody, nearestSafeGardenSpawn, NO_HELD_SPANS, onGardenBridge, practiceLessonArmed,
+  readGardenState, rectsOverlap, rootsDeployed } from '../src/data/sleepingGardenLayout.ts';
 import { observatoryAudioChanges, observatoryAudioState } from '../src/systems/ObservatoryAudio.ts';
 import { OBSERVATORY_SHADOW } from '../src/data/observatoryLayout.ts';
 import { OBSERVATORY_MEMORY_RECORDING, OBSERVATORY_MEMORY_LUMO, OBSERVATORY_MEMORY_SHADOW,
@@ -198,8 +199,38 @@ test('garden save restore chooses dry or living ambience without replaying story
       drawStatic: noop, createSolids: noop, registerInteractions: noop, updateLightState: noop, refresh: noop,
       readState: method(gardenFile, 'readState', { readGardenState }),
     });
-    method(gardenFile, 'build', { SoundSystem, GARDEN_ACTOR, nearestSafeGardenSpawn }).call(level);
+    method(gardenFile, 'build', { SoundSystem, GARDEN_ACTOR, nearestSafeGardenSpawn, rootsDeployed }).call(level);
     assert.deepEqual(calls, [['startAmbient', expected]]);
+  }
+});
+
+test('the root cue (scenario v2 07 beat 2) plays once on a live deploy and never when a save restores deployed roots', () => {
+  const noop = () => {};
+  const symbols = { rootsDeployed, practiceLessonArmed, gardenActorBody, onGardenBridge, rectsOverlap, GARDEN_BRIDGE };
+  // Live deploy: the canopy is shut and the lantern goes off while the level runs.
+  {
+    const { level, calls, SoundSystem } = gardenHarness();
+    Object.assign(level, {
+      lantern: {}, lanternOn: false, lastLanternOn: false, lessonPending: false, pulsePlants: noop,
+      state: { canopyShut: true, sunLatched: false, waterFlowing: false, returnLatched: false, lumoRealized: false, bridgeCrossed: false, crossingSide: null },
+      player: { x: 100, y: 100 }, lastRootsDeployed: false,
+    });
+    const live = method(gardenFile, 'updateLightState', { ...symbols, SoundSystem });
+    live.call(level);
+    assert.deepEqual(calls, [['playEndingCue', 'water']], 'a live deploy plays the water cue once');
+    live.call(level);
+    assert.equal(calls.length, 1, 'the cue does not repeat while the roots stay deployed');
+  }
+  // Restore: the save already has deployed roots, so build() records them silently before the first frame.
+  {
+    const { level, calls, SoundSystem } = gardenHarness();
+    Object.assign(level, {
+      lantern: {}, lanternOn: false, lastLanternOn: false, lessonPending: false, pulsePlants: noop,
+      state: { canopyShut: true, sunLatched: false, waterFlowing: false, returnLatched: false, lumoRealized: false, bridgeCrossed: false, crossingSide: null },
+      player: { x: 100, y: 100 }, lastRootsDeployed: true,
+    });
+    method(gardenFile, 'updateLightState', { ...symbols, SoundSystem }).call(level);
+    assert.deepEqual(calls, [], 'a restored deploy is silent');
   }
 });
 

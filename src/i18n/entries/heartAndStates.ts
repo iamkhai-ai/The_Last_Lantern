@@ -57,7 +57,6 @@ export const HEART_AND_STATE_ENTRIES: readonly CatalogEntry[] = [
   entry('state.178', 'gập', 'folded'),
   entry('state.179', 'chưa', 'not yet'),
   entry('state.180', 'chảy', 'flowing'),
-  entry('state.181', 'kín', 'sealed'),
   entry('state.182', 'có sáng', 'has light'),
   entry('state.183', 'trong tối', 'in darkness'),
   entry('state.184', 'bể còn sáng', 'basin still lit'),

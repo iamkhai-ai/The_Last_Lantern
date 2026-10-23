@@ -29,7 +29,5 @@ export const MERGED_LEVEL_COPY_ENTRIES: readonly CatalogEntry[] = [
 
   // Sleeping Garden hints.
   entry('garden.hint.water', 'Đưa nước tới vườn ươm.', 'Bring water to the nursery.'),
-  entry('garden.hint.returnLatch', 'Giữ lối về từ vườn ươm.', 'Keep the way back from the nursery.'),
-  entry('garden.hint.lumo', 'Lumo có điều muốn nói.', 'Lumo has something to say.'),
   entry('garden.hint.shrine', 'Tới cổng điện thờ.', 'Go to the shrine gate.'),
 ];
