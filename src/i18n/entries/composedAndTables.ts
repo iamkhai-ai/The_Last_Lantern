@@ -89,8 +89,6 @@ export const COMPOSED_AND_TABLE_ENTRIES: readonly CatalogEntry[] = [
   entry('compose.library.placed', 'Đã đặt phiến vào hốc {seat}', 'Placed the stone in the {seat} seat'),
   entry('compose.library.readStone', 'E · Đọc phiến {stone}', 'E · Read the {stone} stone'),
   entry('compose.library.chooseStone', 'E · Chọn phiến {stone}', 'E · Select the {stone} stone'),
-  entry('compose.path.arrived', 'đã tới {arrival}', 'reached {arrival}'),
-  entry('compose.path.status', '{room} · A {a} · B {b} · C {c} · Lumo: {lumo}', '{room} · A {a} · B {b} · C {c} · Lumo: {lumo}'),
   entry('compose.path.door', 'E · Qua cửa {door}', 'E · Through door {door}'),
   entry('compose.heart.status', 'Đèn: {lantern} · Tinh thể: {crystals}/3 · Rễ K/H/C: {roots} · G0 {g0} · Lumo: {lumo}', 'Lantern: {lantern} · Crystals: {crystals}/3 · Roots K/H/C: {roots} · G0 {g0} · Lumo: {lumo}'),
   entry('compose.heart.placedNote', 'Tinh thể đã đặt: {crystals}.', 'Crystals placed: {crystals}.'),

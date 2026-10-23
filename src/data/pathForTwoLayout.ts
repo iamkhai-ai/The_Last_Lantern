@@ -15,54 +15,20 @@ export const PATH_BODY = { feetY: 19, x: -7, y: 16, width: 14, height: 6 } as co
 export const PATH_FLOOR_BOUNDS = { x: 24, y: 80, width: 592, height: 230 } as const;
 /**
  * The ink corridor's own walkable band: the gap between the two 348px masonry slabs that flank it in
- * `PATH_ROOMS.ink.walls`, which are derived from this rect. One definition, so the drawn 348×48 mark,
- * the corridor overlap test that reveals the ink and the masonry that frames the corridor cannot drift
- * apart; `scripts/check-path-for-two.mjs` measures the tile against it.
+ * `PATH_ROOMS.ink.walls`, which are derived from this rect. One definition, so the corridor clue art (460×72,
+ * drawn at (72,218), covering this band), the masonry that frames the corridor and the walk cannot drift
+ * apart; `scripts/check-path-for-two.mjs` measures the art against it.
  */
 export const PATH_INK_CORRIDOR: PathRect = { x: 184, y: 218, width: 348, height: 48 };
-/** The three ink glyphs of the corridor. A glyph is the FOOT position: `pathFeet(center)` must come close to it. */
-export type PathInkGlyphId = 'ring' | 'triangle' | 'square';
 /**
- * The glyphs sit in two lanes of the 48px corridor: ring and square in the upper lane (foot y 228), triangle in
- * the lower lane (foot y 256). The corridor's centre line (foot y 242) is 14px from every glyph, outside the hit
- * radius, so walking straight along the corridor never lights or resets anything by accident: a glyph is only
- * stepped on by choosing its lane.
+ * Scenario v2 (docs/scenario-v2/05-a-path-for-two.md §3–§4): the corridor's ink is information, not a puzzle.
+ * Its three-dot mark and the stroke that bends toward the west pipe are the clue art (`ink-route-*`, 460×72 at
+ * (72,218)); nothing in the corridor is walked on or stepped on, so the old ring/triangle/square sequence is gone.
  */
-export const PATH_INK_GLYPHS: readonly { id: PathInkGlyphId; x: number; y: number }[] = [
-  { id: 'ring', x: 440, y: 228 },
-  { id: 'triangle', x: 250, y: 256 },
-  { id: 'square', x: 340, y: 228 },
-];
-/** The order the glyphs must be stepped on in. Deliberately not left to right: going from ring to triangle means passing the square's x in the lower lane. */
-export const PATH_INK_ORDER: readonly PathInkGlyphId[] = ['ring', 'triangle', 'square'];
-/** A foot position within this many px of a glyph stands on it. Smaller than half the lane gap (28px), so a lane can be avoided. */
-export const PATH_INK_HIT_RADIUS = 10;
-/** The glyph whose foot position is within `PATH_INK_HIT_RADIUS` of this body's feet (the nearest when several are). */
-export function pathInkGlyphAt(center: PathPoint): PathInkGlyphId | undefined {
-  const feet = pathFeet(center);
-  let best: PathInkGlyphId | undefined;
-  let bestDistance = Infinity;
-  for (const glyph of PATH_INK_GLYPHS) {
-    const distance = Math.hypot(glyph.x - feet.x, glyph.y - feet.y);
-    if (distance <= PATH_INK_HIT_RADIUS && distance < bestDistance) { best = glyph.id; bestDistance = distance; }
-  }
-  return best;
-}
-/**
- * One step of the glyph sequence. `step` counts the glyphs already lit (0..3). Standing on the glyph just lit
- * is `none`, so a foot that stays on it cannot reset the sequence. A wrong glyph after at least one is lit resets
- * it to 0; before anything is lit a wrong glyph is `none`, because there is nothing to lose.
- */
-export function advancePathInkSequence(step: number, hit: PathInkGlyphId | undefined): { step: number; event: 'none' | 'progress' | 'reset' | 'done' } {
-  if (step >= PATH_INK_ORDER.length) return { step: PATH_INK_ORDER.length, event: 'none' };
-  if (hit === undefined) return { step, event: 'none' };
-  if (hit === PATH_INK_ORDER[step]) {
-    return step + 1 === PATH_INK_ORDER.length ? { step: step + 1, event: 'done' } : { step: step + 1, event: 'progress' };
-  }
-  if (step === 0) return { step, event: 'none' };
-  if (hit === PATH_INK_ORDER[step - 1]) return { step, event: 'none' };
-  return { step: 0, event: 'reset' };
-}
+/** The v2 chalk firefly on the relay partition: visible only while the lantern is off (`l4-chalk-seen`). Centre and native 64×40 art. */
+export const PATH_CHALK_FIREFLY = { x: 410, y: 195, width: 64, height: 40 } as const;
+/** Where Nhinh stands to read the chalk firefly: her body inside this rect while the lantern is off in the relay room. */
+export const PATH_CHALK_VIEW: PathRect = { x: 350, y: 190, width: 120, height: 60 };
 export const PATH_DOORS = {
   practice: { room: 'entry' as const, x: 156, base: 210, target: 'entry' as const },
   a: { room: 'entry' as const, x: 480, base: 210, target: 'relay' as const },
@@ -235,9 +201,10 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
       ...doorWalls(156, 210), ...doorWalls(480, 210),
     ],
     solids: [
-      standingSolid('practice-call',76,254,40,48), standingSolid('inner-call',244,140,40,48), standingSolid('call-a',384,232,40,48), ...doorPosts(156,210), ...doorPosts(480,210),
+      standingSolid('practice-call',76,254,40,48), standingSolid('inner-call',244,140,40,48), standingSolid('call-a',384,232,40,48), standingSolid('call-b',230,248,40,48), ...doorPosts(156,210), ...doorPosts(480,210),
     ],
-    elements: [element('practice-call','call-idle',76,254,40,48,76,268), element('practice-plate','pressure-empty',212,114,44,28,212,146), element('inner-call','call-idle',244,140,40,48,244,150), element('call-a','call-idle',384,232,40,48,384,256), element('plate-a','pressure-empty',546,114,44,28,546,146)],
+    // v2 `··` in the hall: anchor (230,248) keeps its solid 60px below the practice alcove's call (one-station spacing).
+    elements: [element('practice-call','call-idle',76,254,40,48,76,268), element('practice-plate','pressure-empty',212,114,44,28,212,146), element('inner-call','call-idle',244,140,40,48,244,150), element('call-a','call-idle',384,232,40,48,384,256), element('call-b','call-idle',230,248,40,48,230,272), element('plate-a','pressure-empty',546,114,44,28,546,146)],
   },
   relay: {
     id: 'relay', title: 'Buồng Chuyển Dòng', spawn: { x: 152, y: 251 }, entrySpawn: { x: 152, y: 251 },
@@ -250,10 +217,12 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
       ...reversePortalWalls(110), { x: 24, y: 300, width: 54, height: 10 }, { x: 142, y: 300, width: 474, height: 10 },
       ...doorWalls(110,318), ...doorWalls(480,210),
     ],
-    // ONE DOOR, ONE STATION: door A is worked from its latch alone. The latch sends Lumo to plate A when he is
-    // not there, and latches the door when he is. There is no second post on the far side (it only recalled Lumo).
-    solids: [standingSolid('latch-a',180,240,28,32),standingSolid('call-b',360,232,40,48), ...doorPosts(110,318), ...doorPosts(480,210)],
-    elements: [element('latch-a','latch-unlatched',180,240,28,32,180,264),element('call-b','call-idle',360,232,40,48,360,256),element('plate-b','pressure-empty',546,114,44,28,546,146)],
+    // v2 recovery post `·` for door A, reachable from this room's hall: with door A shut behind Nhinh it is the only
+    // call that brings Lumo back to plate A from here (docs/scenario-v2 §4 buồng 2; puzzle-model.mjs R calls).
+    // The doc's (56,228) pocket is sealed by the reverse frame and the partition, so the post stands at (560,260)
+    // instead: 60px+ from latch A and call C (PATH_STANDING_SPACING). `call-c` is the relay's `···`; latch A stays.
+    solids: [standingSolid('latch-a',180,240,28,32), standingSolid('call-a-far',560,260,40,48), standingSolid('call-c',360,232,40,48), ...doorPosts(110,318), ...doorPosts(480,210)],
+    elements: [element('latch-a','latch-unlatched',180,240,28,32,180,264), element('call-a-far','call-idle',560,260,40,48,560,276), element('call-c','call-idle',360,232,40,48,360,256), element('plate-b','pressure-empty',546,114,44,28,546,146)],
   },
   ink: {
     id: 'ink', title: 'Hành Lang Mực', spawn: { x: 82, y: 246 }, entrySpawn: { x: 82, y: 246 },
@@ -266,9 +235,10 @@ export const PATH_ROOMS: Record<PathRoomId, PathRoom> = {
       {x:24,y:150,width:10,height:30},{x:130,y:150,width:54,height:30}, {x:532,y:150,width:10,height:30},{x:606,y:150,width:10,height:30},
       ...doorWalls(82,318), ...doorWalls(574,180),
     ],
-    // Latch B is the only station for door B. Call C sits 64px from it (PATH_STANDING_SPACING is 60) and stays in the west foyer.
-    solids: [standingSolid('latch-b',150,270,28,32),standingSolid('call-c',100,176,40,48),standingSolid('latch-c',540,192,28,32),...doorPosts(82,318),...doorPosts(574,180)],
-    elements: [element('latch-b','latch-unlatched',150,270,28,32,150,280),element('call-c','call-idle',100,176,40,48,100,196),element('plate-c','pressure-empty',558,244,44,28,558,276),element('latch-c','latch-unlatched',540,192,28,32,550,218),{...element('spiral','swirl-memory-scratch',622,282,30,30,596,262),approach:'side'}],
+    // Latch B is the only station for door B. The v2 recovery post `··` (far side of door B, (68,176)) sits in the west
+    // foyer, 78px from latch B's solid. The old final call mark (100,176) is gone with its solid (scenario v2 §8).
+    solids: [standingSolid('latch-b',150,270,28,32),standingSolid('call-b-far',68,176,40,48),standingSolid('latch-c',540,192,28,32),...doorPosts(82,318),...doorPosts(574,180)],
+    elements: [element('latch-b','latch-unlatched',150,270,28,32,150,280),element('call-b-far','call-idle',68,176,40,48,68,200),element('plate-c','pressure-empty',558,244,44,28,558,276),element('latch-c','latch-unlatched',540,192,28,32,550,218),{...element('spiral','swirl-memory-scratch',622,282,30,30,596,262),approach:'side'}],
   },
 };
 
@@ -426,9 +396,17 @@ export function pathRoutePoints(line: PathRouteLine): readonly PathPoint[] { ret
 export const PATH_ROUTE_LINES: readonly PathRouteLine[] = [
   { mark: 'practice', room: 'entry', lead: [{x:76,y:268}], plate: [{x:110,y:220},{x:156,y:186},{x:156,y:110},{x:212,y:114}] },
   { mark: 'a', room: 'entry', lead: [{x:384,y:256}], plate: [{x:440,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}] },
-  { mark: 'b', room: 'relay', lead: [{x:360,y:256}], plate: [{x:420,y:232},{x:480,y:190},{x:520,y:150},{x:546,y:114}] },
-  { mark: 'a', room: 'relay', lead: [{x:110,y:280}], plate: [{x:140,y:280},{x:220,y:280},{x:320,y:250},{x:420,y:220},{x:480,y:190}] },
+  // v2 `··` (hall call B): its cable runs hall → pipe A → relay, and the walk into relay follows the `b` relay line.
+  { mark: 'b', room: 'entry', lead: [{x:230,y:272}], plate: [{x:300,y:262},{x:420,y:262},{x:440,y:232},{x:480,y:190}] },
+  // Far-side recovery post `·` in relay: its cable meets pipe A's relay mouth.
+  { mark: 'a', room: 'relay', lead: [{x:560,y:276}], plate: [{x:300,y:284},{x:140,y:280},{x:110,y:280}] },
+  // `··` plate B (relay NE alcove): lead is the whole pipe-A walk through relay, plate is the last leg behind door B.
+  { mark: 'b', room: 'relay', lead: [{x:110,y:280},{x:140,y:280},{x:220,y:280},{x:320,y:250},{x:420,y:220}], plate: [{x:480,y:190},{x:520,y:150},{x:546,y:114}] },
+  // v2 `···` (relay call C): its cable runs relay → pipe B.
+  { mark: 'c', room: 'relay', lead: [{x:360,y:256}], plate: [{x:420,y:232},{x:480,y:190}] },
   { mark: 'c', room: 'ink', lead: [{x:82,y:280},{x:122,y:242},{x:122,y:210}], plate: [{x:180,y:200},{x:360,y:200},{x:520,y:200},{x:558,y:244}] },
+  // Far-side recovery post `··` in the ink foyer: its cable meets pipe B's ink mouth.
+  { mark: 'b', room: 'ink', lead: [{x:68,y:200}], plate: [{x:82,y:280}] },
 ];
 export function getPathRouteLine(room: PathRoomId, mark: PathMark): PathRouteLine | undefined {
   return PATH_ROUTE_LINES.find((line) => line.room === room && line.mark === mark);
@@ -592,35 +570,3 @@ export function resolvePathRoom(saved:unknown,visitedRelay:boolean,visitedInk:bo
 }
 export function pathDoorShouldClose(powered:boolean,occupied:boolean,latched:boolean):boolean{return !powered&&!occupied&&!latched;}
 
-/** The booleans and numbers the ink objective reads, passed in so the guide and the objective cannot disagree. */
-export interface PathInkGuideState {
-  latchB: boolean; hasPowerC: boolean; inkRevealed: boolean; orderKnown: boolean; seals: boolean; step: number;
-  latchC: boolean; memo: boolean; lanternOn: boolean; reunited: boolean;
-}
-/**
- * The point the ink room's guide ring highlights for the current objective step (the same numbering as
- * `PathForTwoLevel.getObjectiveText`). Undefined when the step has no single place to point at.
- */
-export function pathInkGuideTarget(state: PathInkGuideState): PathPoint | undefined {
-  const artCentre = (id: string): PathPoint | undefined => {
-    const element = PATH_ROOMS.ink.elements.find((item) => item.id === id);
-    if (!element) return undefined;
-    const art = getPathElementArtRect(element);
-    return { x: art.x + art.width / 2, y: art.y + art.height / 2 };
-  };
-  if (!state.latchB) return artCentre('latch-b');
-  if (state.latchC) {
-    if (!state.memo) return artCentre('spiral');
-    if (!state.reunited) return artCentre('latch-c');
-    const stand = getPathControlStand('c', 'ink');
-    return stand ? { x: stand.x, y: stand.y } : undefined;
-  }
-  if (!state.orderKnown && !state.hasPowerC) return artCentre('call-c');
-  if (!state.inkRevealed) return { x: 192, y: 242 };
-  if (!state.seals) {
-    if (!state.orderKnown || state.lanternOn || state.step >= PATH_INK_ORDER.length) return undefined;
-    const glyph = PATH_INK_GLYPHS.find((item) => item.id === PATH_INK_ORDER[state.step]);
-    return glyph ? { x: glyph.x, y: glyph.y } : undefined;
-  }
-  return state.hasPowerC ? artCentre('latch-c') : artCentre('call-c');
-}

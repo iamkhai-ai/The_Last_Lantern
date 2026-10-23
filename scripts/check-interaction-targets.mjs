@@ -276,7 +276,6 @@ function makePathForTwoInkRoom(flags, room = 'ink') {
     { PLATE_ROOMS: localConstant(PATH_SOURCE, 'PLATE_ROOMS'), choosePathCallAction });
   scene.interactionEnabled = compile(PATH_SOURCE, 'interactionEnabled', 'PathForTwoLevel', ['id'], { isPathCallSpent });
   scene.callMark = compile(PATH_SOURCE, 'callMark', 'PathForTwoLevel', ['id'], {});
-  scene.callEligible = compile(PATH_SOURCE, 'callEligible', 'PathForTwoLevel', ['mark'], {});
   // The station plaque reads the same dialogue-free state the shipped scene does; no story is pending here.
   scene.canStartStory = () => true;
   scene.stationPlaqueBounds = compile(PATH_SOURCE, 'stationPlaqueBounds', 'PathForTwoLevel', [], { PATH_SCHEMATIC });
