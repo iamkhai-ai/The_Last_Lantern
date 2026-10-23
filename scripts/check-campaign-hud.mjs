@@ -32,8 +32,10 @@ const sources = Object.fromEntries(Object.entries(FILES).map(([key, file]) => [k
 
 /* --------------------------------------------------- one authored pulse-level set */
 
-assert.deepEqual([...PULSE_LEVELS], [0, 1, 7, 8, 9],
-  'SPACE pulses only on campaign indices 0, 1, 7 (Level 08 name reveal), 8 and 9');
+assert.deepEqual([...PULSE_LEVELS], [0, 1, 5, 6, 7, 8, 9],
+  'SPACE pulses only on campaign indices 0, 1, 5 (Level 06 tally reveal), 6 (Level 07 handprint reveal), 7 (Level 08 name reveal), 8 and 9');
+assert.match(sources.scene, /this\.gardenLevel\?\.onPulse\(x, y\)/,
+  'the Level 07 Pulse reveal is wired from CampaignScene into SleepingGardenLevel.onPulse');
 assert.match(sources.scene, /PULSE_LEVELS\.includes\(this\.progress\.level\)/,
   'the Space handler gates on the shared pulse-level set');
 assert.match(sources.scene, /PULSE_LEVELS\.includes\(index\)/,

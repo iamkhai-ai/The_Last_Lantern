@@ -20,6 +20,7 @@ import {
   GARDEN_SHADOW_PATH, inGardenObservationZone, practiceLessonArmed, practiceLessonDue,
   GARDEN_ACTOR, GARDEN_HUD_BAND, gardenActiveSolids,
   GARDEN_REACH_GAP, GARDEN_REACH_RECTS, gardenStandingOwner, gardenStandingReach,
+  GARDEN_HANDPRINT, GARDEN_GUIDE_MIDSPAN, GARDEN_GUIDE_FAR_BANK, gardenHandprintReaches, gardenLumoGuideTarget,
 } from '../src/data/sleepingGardenLayout.ts';
 import { isFootInReach } from '../src/systems/interactionReach.ts';
 
@@ -86,8 +87,10 @@ assert.equal(crossingSideFor({ x: 360, y: 220 }), 'east');
 assert.equal(gardenCompletionBlock(fresh), 'canopy');
 assert.equal(gardenCompletionBlock(shut), 'bar');
 assert.equal(gardenCompletionBlock(stateOf({ canopyShut: true, sunLatched: true })), 'drain');
-assert.equal(gardenCompletionBlock(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true })), 'side');
+// Scenario v2 07 §8: the side path is optional, so completion never asks for l6-return-latched.
+assert.equal(gardenCompletionBlock(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true })), 'scene');
 assert.equal(gardenCompletionBlock(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true })), 'scene');
+assert.equal(gardenCompletionBlock(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, lumoRealized: true })), null, 'completion without the side latch');
 assert.equal(gardenCompletionBlock(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true })), null);
 
 assert.ok(gardenPropDepth(300) < gardenPropDepth(310));
@@ -368,9 +371,10 @@ assert.equal(region(fresh, true).has(`${gardenCellOf(southRestore).i}:${gardenCe
 assert.equal(gardenExitReady(fresh), false, 'exit locked before the garden is touched');
 assert.equal(gardenExitReady(shut), false, 'exit locked before the bar is latched');
 assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true })), false, 'exit locked before the nursery is watered');
-assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true })), false, 'exit locked before the side path is latched');
-assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true })), false, 'exit locked before Lumo realizes');
-assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true })), true, 'exit opens only on full completion');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true })), false, 'exit locked before Lumo realizes');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true })), false, 'a side latch alone does not open the exit before Lumo realizes');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, lumoRealized: true })), true, 'exit opens without the side path (v2 07 §8)');
+assert.equal(gardenExitReady(stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true, returnLatched: true, lumoRealized: true })), true, 'exit opens with the side path too');
 assert.equal(gardenExitReady(latched), false, 'a latched bar alone never opens the exit');
 assert.equal(near(region(stateOf({ canopyShut: true, sunLatched: true }), true), GARDEN_STANDS.exit, GARDEN_STANDS.exit.radius), false, 'the shrine gate stand is unreachable while both canal crossings are closed in the light');
 
@@ -901,13 +905,16 @@ console.log('Sleeping Garden shadow beat checks passed (gate-deferred ending, pa
 // The main puzzle (sun, latch, dark, cross) is one stage with one ladder: the scenario's Mức 1-3, verbatim and in
 // order. Lantern toggles inside it do not restart the ladder. Canopy and post-drain stages keep their own lines.
 {
+  // Scenario v2 07 §6 is the source of truth for the ladder (v1 in docs/scenario/ still lists the old Mức 3).
   const scenarioLadderOf = (file) => {
-    const md = fs.readFileSync(path.join(ROOT, 'docs/scenario', file), 'utf8');
+    const md = fs.readFileSync(path.join(ROOT, 'docs/scenario-v2', file), 'utf8');
     const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
     assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
     return hits.map((m) => m[2].normalize('NFC'));
   };
   const MUC = scenarioLadderOf('07-the-sleeping-garden.md');
+  assert.equal(MUC[2], 'Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi tới điện thờ.', 'Mức 3 goes straight to the shrine (v2 07 §6)');
+  assert.equal(MUC[2].includes('lối đá phụ'), false, 'Mức 3 does not require the side latch');
   const showHintMethod = compileLevelMethod('showHint');
   // Presses on a fake level; `lanterns` is the lantern state before each press.
   const presses = (fields, lanterns) => {
@@ -926,3 +933,116 @@ console.log('Sleeping Garden shadow beat checks passed (gate-deferred ending, pa
 }
 
 console.log('Sleeping Garden H ladder checks passed (main puzzle is the scenario Mức 1-3 verbatim, in order).');
+
+// ---------------------------------------------------------------- scenario v2 07: side path optional, handprint, Lumo guide, status, sound
+{
+  // Post-drain guidance points at the shrine; the side path is never a requirement of any line.
+  const showHintMethod = compileLevelMethod('showHint');
+  const ladderAfter = (fields) => {
+    const level = { state: stateOf(fields), lanternOn: true, hintStage: '', hintIndex: 0, spoken: [], say(lines) { this.spoken.push(lines[0].text); } };
+    for (let i = 0; i < 3; i += 1) showHintMethod.call(level);
+    return level.spoken;
+  };
+  const exitLines = ladderAfter({ canopyShut: true, sunLatched: true, waterFlowing: true, lumoRealized: true });
+  assert.equal(exitLines.at(-1), 'Tới cổng và nhấn E.', 'after the water and Lumo, H ends at the shrine gate');
+  const storyLines = ladderAfter({ canopyShut: true, sunLatched: true, waterFlowing: true });
+  for (const line of [...exitLines, ...storyLines]) assert.equal(/lối đá phụ|chốt đá|lối về/u.test(line), false, `post-drain H does not require the side path: "${line}"`);
+  assert.ok(storyLines[0].includes('Nước đã chảy'), 'the story hint names the water, not the side path');
+
+  // Objective row: only the goal (v2 07 §6).
+  const objectiveText = compileLevelMethod('getObjectiveText');
+  assert.equal(objectiveText.call({ state: stateOf({}) }), 'Đưa nước tới vườn ươm.', 'objective before the water');
+  assert.equal(objectiveText.call({ state: stateOf({ canopyShut: true, sunLatched: true, waterFlowing: true }) }), 'Tới cổng điện thờ.', 'objective after the water is the shrine');
+
+  // Status row: sun, latch, root bridge, water and light; no side-path field.
+  const statusText = compileLevelMethod('getStatusText', { effectiveLight, sunOpen, rootsDeployed });
+  const statusOf = (fields, lanternOn) => statusText.call({ state: stateOf(fields), lanternOn, held: NO_HELD_SPANS });
+  assert.ok(statusOf({}, true).includes('Cầu rễ: không'), 'status: no root bridge while the canopy is open');
+  assert.ok(statusOf({ canopyShut: true }, false).includes('Cầu rễ: có'), 'status: root bridge while the lantern is off and the canopy shut');
+  assert.equal(statusOf({ canopyShut: true }, true).includes('Cầu rễ: có'), false, 'status: the bridge retracts with the lantern on');
+  assert.equal(statusOf({ canopyShut: true, sunLatched: true }, true).includes('Chốt: giữ'), true, 'status: the bar latch is named');
+  assert.equal(statusOf({}, true).includes('Lối phụ'), false, 'status: the side-path field is gone');
+
+  // Journal: the handprint line appears only after the reveal.
+  const journal = compileLevelMethod('showJournal');
+  const journalWith = (flags) => { const level = { state: stateOf({}), progress: { flags }, say(lines) { this.lines = lines; } }; journal.call(level); return level.lines.map((l) => l.text); };
+  assert.equal(journalWith({}).some((t) => t.includes('Những dấu nhỏ')), false, 'journal: no handprint line before the reveal');
+  assert.equal(journalWith({ 'l6-handprint-seen': true }).some((t) => t.includes('bàn tay nhỏ')), true, 'journal: the handprint line is written after the reveal');
+}
+
+// Handprint: flag, reach and placement. Drawn at runtime (placeholder art, see docs/implementation/07-layout.md).
+{
+  const HANDPRINT_LINES = levelConstant('HANDPRINT_LINES');
+  const onPulse = compileLevelMethod('onPulse', { gardenHandprintReaches, HANDPRINT_LINES });
+  const pulseLevel = (flags, waterFlowing) => ({
+    destroyed: false, progress: { flags }, state: stateOf({ waterFlowing }), saves: 0, beats: [],
+    save() { this.saves += 1; }, queueBeat(lines) { this.beats.push(lines); },
+  });
+  const { centre, pulseRadius } = GARDEN_HANDPRINT;
+  assert.equal(gardenHandprintReaches(centre), true, 'a Pulse on the stone reaches it');
+  assert.equal(gardenHandprintReaches({ x: centre.x + pulseRadius, y: centre.y }), true, 'the reach edge is inclusive');
+  assert.equal(gardenHandprintReaches({ x: centre.x + pulseRadius + 1, y: centre.y }), false, 'one px past the reach is silent');
+  assert.equal(gardenHandprintReaches({ x: 300, y: 100 }), false, 'a far Pulse does not reveal it');
+  const sluice = GARDEN_ZONES.find((z) => z.id === 'sluice-crossing').rect;
+  assert.ok(centre.x >= sluice.x && centre.x <= sluice.x + sluice.width && centre.y >= sluice.y && centre.y <= sluice.y + sluice.height,
+    'the handprint stone lies on the walkable sluice crossing beside the practice lawn');
+  const decal = { x: centre.x - 8, y: centre.y - 8, width: 16, height: 16 };
+  assert.equal(GARDEN_STATIC_SOLIDS.some((s) => rectsOverlap(decal, s.rect)) || GARDEN_WATER.some((w) => rectsOverlap(decal, w)), false, 'the handprint sits on open floor, not in a solid or the water');
+  assert.equal(gardenRegionReaches(region(stateOf({}), true), centre, pulseRadius), true, 'the stone is reachable on foot from the entry');
+
+  const reveal = pulseLevel({}, true);
+  onPulse.call(reveal, centre.x + 6, centre.y);
+  assert.equal(reveal.progress.flags['l6-handprint-seen'], true, 'the reveal sets l6-handprint-seen');
+  assert.equal(reveal.saves, 1, 'the reveal is saved once');
+  assert.deepEqual(reveal.beats, [HANDPRINT_LINES], 'the reveal plays the two handprint lines once');
+  onPulse.call(reveal, centre.x, centre.y);
+  assert.equal(reveal.beats.length, 1, 'a second Pulse does not replay the reveal');
+  const dry = pulseLevel({}, false);
+  onPulse.call(dry, centre.x, centre.y);
+  assert.equal(dry.progress.flags['l6-handprint-seen'], undefined, 'no reveal before the water flows (l6-water-flowing)');
+  const far = pulseLevel({}, true);
+  onPulse.call(far, 300, 100);
+  assert.equal(far.progress.flags['l6-handprint-seen'], undefined, 'a Pulse away from the stone does not reveal it');
+  assert.equal(/'l6-handprint-seen'/.test(fs.readFileSync(LEVEL_FILE, 'utf8')), true, 'the level writes the exact flag name Level 10 reads');
+}
+
+// Lumo guide: a flight-target change only, while the bridge exists and the lantern is off.
+{
+  const guideTarget = compileLevelMethod('lumoGuideTarget', { readGardenState, gardenLumoGuideTarget });
+  const guideOf = (flags, lanternOn, x, y) => guideTarget.call({ progress: { flags }, lanternOn, player: { x, y } });
+  const shutFlags = { 'l6-canopy-shut': true };
+  assert.equal(guideOf({}, false, 330, 228), null, 'no guide while the canopy is open (no bridge)');
+  assert.equal(guideOf(shutFlags, true, 330, 228), null, 'no guide with the lantern on (the bridge has retracted)');
+  assert.equal(guideOf(shutFlags, false, 200, 240), null, 'no guide off the bridge: Lumo keeps its usual trail');
+  assert.deepEqual(guideOf(shutFlags, false, 330, 228), GARDEN_GUIDE_MIDSPAN, 'west half of the bridge: Lumo waits at midspan');
+  assert.deepEqual(guideOf(shutFlags, false, 380, 228), GARDEN_GUIDE_FAR_BANK, 'east half of the bridge: Lumo flies to the far bank');
+  assert.ok(GARDEN_GUIDE_MIDSPAN.x > GARDEN_BRIDGE.x && GARDEN_GUIDE_MIDSPAN.x < GARDEN_BRIDGE.x + GARDEN_BRIDGE.width, 'midspan lies over the bridge');
+  assert.ok(GARDEN_GUIDE_FAR_BANK.x > GARDEN_BRIDGE.x + GARDEN_BRIDGE.width, 'the far bank lies past the east end of the bridge');
+  const flags = { ...shutFlags, 'l6-sun-latched': true };
+  const before = JSON.stringify(flags);
+  guideOf(flags, false, 330, 228);
+  assert.equal(JSON.stringify(flags), before, 'the guide never writes a flag (plant rules and saves untouched)');
+  // the target calc only reads the lantern and the bridge: nothing in the plant state changes
+  const state = readGardenState(flags);
+  assert.equal(state.sunLatched, true, 'the bar latch is unaffected by the guide');
+}
+
+// Sound beats (v2 07 §1) reuse the shipped endingCue recipes and stay behind the SoundSystem gate.
+{
+  const levelSource = fs.readFileSync(LEVEL_FILE, 'utf8');
+  const sceneSource = fs.readFileSync(SCENE_FILE, 'utf8');
+  assert.match(levelSource, /playEndingCue\('cricket'\)/, 'beat 1: the canopy closes with a short cricket');
+  assert.match(levelSource, /lastRootsDeployed[\s\S]*playEndingCue\('water'\)/, 'beat 2: a live root-bridge deploy plays the water cue');
+  assert.match(levelSource, /playEndingCue\('answer'\)/, 'beat 4: the second cricket answers at the nursery scene');
+  assert.match(levelSource, /playWaterRelease\(\)/, 'beat 3: the drain keeps its existing water release');
+  assert.equal(/\bnew AudioContext\b|\bwebkitAudioContext\b/.test(levelSource), false, 'the level never builds its own audio context');
+  assert.match(sceneSource, /this\.gardenLevel\?\.lumoGuideTarget\(\)/, 'CampaignScene reads the guide target for Lumo on level 6');
+  assert.match(sceneSource, /this\.gardenLevel\?\.onPulse\(x, y\)/, 'CampaignScene routes a Pulse on level 6 to the garden');
+  assert.match(levelSource, /this\.progress\.flags\['l6-bridge-guide'\] !== true[\s\S]*queueBeat\(BRIDGE_GUIDE\)/, 'the bridge guide line plays once');
+  assert.match(levelSource, /this\.handprint\?\.setVisible\(this\.progress\.flags\['l6-handprint-seen'\] === true\)/, 'the handprint is visible only with its flag');
+}
+
+// Placeholder art is documented in the layout doc.
+assert.match(fs.readFileSync(path.join(ROOT, 'docs/implementation/07-layout.md'), 'utf8'), /handprint[\s\S]*placeholder/i, 'the layout doc marks the handprint as a placeholder awaiting art');
+
+console.log('Sleeping Garden v2 checks passed (side path optional, H 3 to shrine, status/objective/journal, handprint flag and reach, Lumo guide target, sound wiring).');

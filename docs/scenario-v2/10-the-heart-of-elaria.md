@@ -7,7 +7,7 @@
 **Mục tiêu:** Khôi phục ba nhánh rễ và để chu kỳ ngày đêm tiếp tục.\
 **Kỹ năng mới:** Buông. Hành động cuối của trò chơi là bớt đi, không phải làm thêm.
 
-**Trạng thái:** hướng sửa về kết thúc và điều kiện F đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/10-the-heart-of-elaria.md](../scenario/10-the-heart-of-elaria.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* thuộc đề xuất v2.
+**Trạng thái:** đã triển khai trên nhánh `feat/level10-scenario-v2` (chưa merge, chưa push). Kiểm chứng bằng `node scripts/check-heart-of-elaria.mjs` và `node scripts/check-campaign-ending.mjs`; chưa chơi thử trên trình duyệt. Bản v1 [docs/scenario/10-the-heart-of-elaria.md](../scenario/10-the-heart-of-elaria.md) được giữ nguyên làm lịch sử. Các dòng *(mới)* là nội dung đã triển khai trên nhánh này.
 
 > **Thay đổi so với bản hiện tại**
 >

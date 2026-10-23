@@ -80,6 +80,13 @@ const OVERLOAD_LINES: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Cây Mẹ đã có đủ rồi.' },
 ];
 
+/** Scenario 10 v2 §4: the first time Lumo sits on the Hope seal by his own choice. */
+const LUMO_CHOSE_LINES: DialogueLine[] = [
+  { speaker: 'Lumo', text: '…Lần trước tôi cũng đứng thế này.' },
+  { speaker: 'Nhinh', text: 'Lần này mình biết khi nào cần buông. Tôi sẽ gọi cậu về.' },
+  { speaker: 'Lumo', text: 'Ừ. Lần này là tôi tự chọn giữ.' },
+];
+
 const MAT_MODELS: readonly string[] = [
   'Mô hình gương: một mạch chỉ sáng khi tia từ bệ đèn đi đúng tới tinh thể.',
   'Mô hình chiếc ấn: màn Hy Vọng chỉ mở khi Lumo còn đang đứng giữ.',
@@ -266,6 +273,7 @@ export class HeartOfElariaLevel {
   public destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    SoundSystem.stopHeartLayers(0.2);
     for (const collider of this.colliders) if (collider.active) collider.destroy();
     this.colliders = [];
     for (const object of this.objects) if (object.active) object.destroy();
@@ -352,28 +360,16 @@ export class HeartOfElariaLevel {
   /**
    * Goal only (scenario v2 10 §8): "Đặt ba tinh thể." → "Nối ba mạch rễ thành một vòng." → "Lấy lại đèn." →
    * empty during the overload, so the final F stays the player's own choice. The lamp source, the call, the
-   * mirrors and the confirm live in the H ladder; this row only adds facts (counts, ready).
+   * mirrors and the confirm live in the H ladder; the row names only the next goal.
    */
   public getObjectiveText(): string {
-    const state = this.state();
-    const stage = this.stage();
-    switch (stage) {
-      case 'crystals': {
-        const placed = (['memory', 'hope', 'balance'] as HeartBranchId[]).filter((id) => this.progress.flags[`l9-${id}`] === true).length;
-        return tr('Đặt ba tinh thể ({placed}/3).', { placed });
-      }
+    switch (this.stage()) {
+      case 'crystals': return tr('Đặt ba tinh thể.');
       case 'teach':
       case 'source':
       case 'seal':
+      case 'route':
         return tr('Nối ba mạch rễ thành một vòng.');
-      case 'route': {
-        // Never claim the branches are ready while any prerequisite is still unmet (including Lumo's
-        // live position and the lantern state, which the old filter ignored).
-        const missing = getHeartPrerequisiteFeedback(state);
-        return missing.length
-          ? tr('Nối ba mạch rễ thành một vòng (còn {count} điều kiện).', { count: missing.length })
-          : tr('Ba nhánh đã sẵn sàng.');
-      }
       case 'confirm': return tr('Ba nhánh đã sẵn sàng.');
       case 'retrieve': return tr('Lấy lại đèn.');
       case 'overload': return '';
@@ -493,6 +489,9 @@ export class HeartOfElariaLevel {
     this.completed = true;
     // An overload line may still be on screen or queued: it must never play after the ending has started.
     this.stopDialogue();
+    // Scenario 10 v2 §9: the layers stop first; the night sounds belong to EndingScene, after the silence.
+    SoundSystem.stopHeartLayers(0.25);
+    this.recordLumoHome();
     const flags = this.progress.flags;
     flags['l9-complete'] = true;
     flags['l9-overload'] = false;
@@ -510,6 +509,29 @@ export class HeartOfElariaLevel {
 
   /* ---------------------------------------------------------------- Lumo */
 
+  /**
+   * Lumo leaves the seal exactly once. A Lumo still assigned to it is released to Nhinh here (never teleported back);
+   * a Lumo already released is only recorded. `l9-lumo-home` marks the record, so repeated calls change nothing.
+   */
+  private recordLumoHome(): void {
+    if (this.progress.flags['l9-lumo-home'] === true) return;
+    if (this.lumoMode !== 'follow' || this.progress.flags['l9-called-heart'] === true || this.progress.flags['l9-at-heart'] === true) {
+      this.lumoMode = 'follow';
+      this.progress.flags['l9-called-heart'] = false;
+      this.progress.flags['l9-at-heart'] = false;
+    }
+    this.progress.flags['l9-lumo-home'] = true;
+  }
+
+  /** The Level 10 layers follow the living branches and the overload; nothing plays once the ending is committed. */
+  private syncLayers(state: HeartPuzzleState): void {
+    if (this.completed) return;
+    SoundSystem.setHeartLayer('memory', state.memory);
+    SoundSystem.setHeartLayer('hope', state.hope);
+    SoundSystem.setHeartLayer('balance', state.balance);
+    SoundSystem.setHeartLayer('overload', this.progress.flags['l9-overload'] === true);
+  }
+
   private driveLumo(dt: number): void {
     if (this.lumoMode === 'follow') {
       const targetX = Phaser.Math.Clamp(this.player.x - 20, 62, 580);
@@ -525,8 +547,11 @@ export class HeartOfElariaLevel {
       this.lumoMode = 'holding';
       SoundSystem.playLightPulse();
       this.progress.flags['l9-at-heart'] = true;
+      // The first arrival is Lumo's own choice (v2 §4); later arrivals keep the short reply.
+      const firstChoice = this.progress.flags['l9-lumo-chose'] !== true;
+      this.progress.flags['l9-lumo-chose'] = true;
       this.save();
-      this.say([
+      this.say(firstChoice ? LUMO_CHOSE_LINES : [
         { speaker: 'Lumo', text: tr('Tôi tới rồi. Ấn này giữ được.') },
         { speaker: 'Nhinh', text: tr('Cậu đứng yên ở đó nhé. Mình sẽ điều chỉnh đường sáng.') },
       ]);
@@ -867,6 +892,7 @@ export class HeartOfElariaLevel {
           this.lumoMode = 'follow';
           this.progress.flags['l9-called-heart'] = false;
           this.progress.flags['l9-at-heart'] = false;
+          this.recordLumoHome();
           this.save();
           this.refresh();
           SoundSystem.playMechanismLatch();
@@ -974,6 +1000,7 @@ export class HeartOfElariaLevel {
     this.refreshBranchArt(state);
     this.refreshLanternArt(state);
     this.refreshBeams(state);
+    this.syncLayers(state);
     this.refreshHudText();
   }
 

@@ -100,3 +100,12 @@ All runtime registrations and geometry checks consume `TOWER` and `towerBodyRect
 After Return Flow, `useCall()` is idempotent while Lumo is already following: it does not send him back to C, clear reunion, alter his route, or replay dialogue. If he is still travelling to C or holding C, the same call still recalls him. Before Return Flow the send/recall behavior and approved dialogue remain unchanged. The call pedestal retains the south-face rule.
 
 **New UI labels for user review (not spoken dialogue):** `Lumo đang ở bên Nhinh` when the following Lumo has reunited; `Lumo đang bay về` while following but not yet reunited. These labels omit the E action marker because pressing E in either state has no effect. The existing `E · Gọi Lumo về` remains while Lumo can actually be recalled. No approved dialogue line is changed.
+
+## Scenario v2 — branch `feat/level06-scenario-v2`
+
+Layout, the truth table, the `l5-*` save keys and the H ladder are unchanged; `towerLayout.ts` only gains pure helpers (`TOWER_TALLY`, `towerPulseReachesTally`, `towerMachineLayers`) outside `TOWER`.
+
+- **Machine sound layers:** a hum until Return Flow, plus one voice per live circuit (A high bell C6, B middle bell E5 half a beat behind A, C a short soft motif in Lumo's voice band). Driven from `deriveTowerLive` every frame by `setHeldTone`, which changes nothing while a layer already matches. A dropped circuit goes quiet at once (0.15 s); Return Flow fades the machine over 1.6 s. Silent when muted or with no audio context. No error or buzz cue.
+- **New dialogue:** two lines added to the call-to-C exchange, one line when Lumo is recalled off the plate before the switch, and the two side-path lines.
+- **Tally decal (placeholder, awaiting art):** drawn at runtime with Phaser Graphics at `TOWER_TALLY.centre` (552,131), under the window sill and above the record panel. Groups of five and a partial group, in ink brown `0x5b4630`, depth 8.25. Hidden until a Pulse whose origin lies within 80px of the centre (the lower-left of the reachable lane at x≈520, y≥165 qualifies). It sets `l5-tally-seen`, which Level 10 reads. The strokes are not from the window art and should be re-placed when real art lands.
+- **Pulse:** level index 5 added to `PULSE_LEVELS`; `CampaignScene` routes the Pulse to `sleeplessTower.onPulse`.

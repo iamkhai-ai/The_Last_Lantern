@@ -145,27 +145,31 @@ console.log('  gating        : full build keeps all ten levels; the only coming-
 console.log('  frame owners  : each controller, Lumo and the lantern system has one update() call site');
 console.log('  ending        : EndingScene reachable, completed campaigns resume at the ending');
 
-// ---------------------------------------------------------------- generic H fallback is the scenario text (06-10)
-// CAMPAIGN_LEVELS[i].hint is the fallback ladder. For levels 06-10 it is that level's scenario Mức 1-3, verbatim.
-// Level 10 uses the three-branch ladder (its primary ladder in scenario §8, not the overload set).
+// ---------------------------------------------------------------- generic H fallback is the scenario text (05-10)
+// CAMPAIGN_LEVELS[i].hint is the fallback ladder. For levels 05-10 it is that level's main Mức 1-3, verbatim
+// (levels 05-07, 09 and 10 from their scenario v2 documents, 08 from its scenario document). Level 10 uses the three-branch
+// ladder (its primary ladder in scenario §8, not the overload set).
 {
-  const scenarioLadderOf = (file) => {
-    const md = read(`docs/scenario/${file}`);
+  const scenarioLadderOf = (dir, file) => {
+    const md = read(`docs/${dir}/${file}`);
     const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
-    assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
+    assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `docs/${dir}/${file} lists Mức 1, 2, 3 in order`);
     return hits.map((m) => m[2].normalize('NFC'));
   };
+  // Levels 05, 06, 07, 09 and 10 read their v2 documents (07: scenario v2 §6 Mức 3 goes straight to the shrine; 09: Mức 3
+  // keeps the root bed in shadow while the lamp circuit still runs through the door). Level 08's ladder is the same in v1 and v2.
   const FALLBACK = {
-    5: '06-the-sleepless-tower.md',
-    6: '07-the-sleeping-garden.md',
-    7: '08-ruins-of-two-halves.md',
-    8: '09-dark-moon-observatory.md',
-    9: '10-the-heart-of-elaria.md',
+    4: ['scenario-v2', '05-a-path-for-two.md'],
+    5: ['scenario-v2', '06-the-sleepless-tower.md'],
+    6: ['scenario-v2', '07-the-sleeping-garden.md'],
+    7: ['scenario', '08-ruins-of-two-halves.md'],
+    8: ['scenario-v2', '09-dark-moon-observatory.md'],
+    9: ['scenario-v2', '10-the-heart-of-elaria.md'],
   };
-  for (const [index, file] of Object.entries(FALLBACK)) {
-    assert.deepEqual(CAMPAIGN_LEVELS[Number(index)].hint, scenarioLadderOf(file),
-      `CAMPAIGN_LEVELS[${index}] fallback hints are the ${file} Mức 1-3 verbatim`);
+  for (const [index, [dir, file]] of Object.entries(FALLBACK)) {
+    assert.deepEqual(CAMPAIGN_LEVELS[Number(index)].hint, scenarioLadderOf(dir, file),
+      `CAMPAIGN_LEVELS[${index}] fallback hints are the docs/${dir}/${file} Mức 1-3 verbatim`);
   }
 }
 
-console.log('  H fallback    : levels 06-10 hint ladders are the scenario Mức 1-3 verbatim');
+console.log('  H fallback    : levels 05-10 hint ladders are the scenario Mức 1-3 verbatim');

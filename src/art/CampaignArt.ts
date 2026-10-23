@@ -62,6 +62,11 @@ const levelArtModules = import.meta.glob([
   import: 'default',
 }) as Record<string, string>;
 
+/** Level 05 scenario-v2 clue overlays (brass plaques, seal ink, corridor route, chalk). Drawn over the host art at runtime. */
+const pathClueModules = import.meta.glob('../../assets/levels/05-a-path-for-two/scenario-v2-clues/sprites/*.png', {
+  eager: true, query: '?url', import: 'default',
+}) as Record<string, string>;
+
 const towerV2Modules = import.meta.glob('../../assets/levels/06-the-sleepless-tower/redesign-v2/sprites/*.png', {
   eager: true, query: '?url', import: 'default',
 }) as Record<string, string>;
@@ -199,6 +204,10 @@ export const CAMPAIGN_ART_FILES: CampaignArtFile[] = [
     key: `forest_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
     url,
   })),
+  ...Object.entries(pathClueModules).map(([path, url]) => ({
+    key: `path_v2_clue_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
+    url,
+  })),
   ...Object.entries(towerV2Modules).map(([path, url]) => ({
     key: `tower_v2_${normalize(path.slice(path.lastIndexOf('/') + 1, -4))}`,
     url,
@@ -221,6 +230,12 @@ export function getShadowArtKey(frame: ShadowPose): string | null {
 
 export function getSharedMechanismKey(filename: string): string | null {
   const key = `shared_${normalize(filename.replace(/\.png$/i, ''))}`;
+  return CAMPAIGN_ART_FILES.some((asset) => asset.key === key) ? key : null;
+}
+
+/** A Level 05 scenario-v2 clue overlay by its file name (`plaque-1dot`, `ink-route-dark`, ...), or null when the pack is absent. */
+export function getPathClueArtKey(filename: string): string | null {
+  const key = `path_v2_clue_${normalize(filename.replace(/\.png$/i, ''))}`;
   return CAMPAIGN_ART_FILES.some((asset) => asset.key === key) ? key : null;
 }
 

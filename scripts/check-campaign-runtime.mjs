@@ -229,6 +229,7 @@ const HEART_SOUND = {
   SoundSystem: {
     playUiClick() {}, playLightPulse() {}, playPuzzleSolved() {}, playRuneActivate() {},
     playMirrorRotate() {}, playPuzzleError() {}, playMechanismLatch() {}, playLanternToggle() {},
+    setHeartLayer() {}, stopHeartLayers() {},
   },
 };
 
@@ -249,7 +250,9 @@ let heartDrive = null;
  */
 function runHeartDrive(scene) {
   if (!heartDrive) {
-    heartDrive = bind(methodSource('driveLumo', heartSourceFile, 'HeartOfElariaLevel'), { Phaser: PHASER_PORTS, dt: 16, HEART_SEAL_RADIUS, ...HEART_SOUND }, 'HeartOfElariaLevel.driveLumo()');
+    heartDrive = bind(methodSource('driveLumo', heartSourceFile, 'HeartOfElariaLevel'),
+      { Phaser: PHASER_PORTS, dt: 16, HEART_SEAL_RADIUS, LUMO_CHOSE_LINES: heartConstant('LUMO_CHOSE_LINES'), ...HEART_SOUND },
+      'HeartOfElariaLevel.driveLumo()');
   }
   return heartDrive(scene);
 }
@@ -582,6 +585,7 @@ function makeHeartLatchScene({ lumoMode = 'holding', flags = {}, ready = true, l
     save() { calls.save += 1; calls.savedFlags = { ...scene.progress.flags }; },
     say(lines) { calls.say.push(lines); },
     refresh() { calls.refresh += 1; },
+    recordLumoHome: () => recordHeartLumoHome(scene),
   };
   return scene;
 }
@@ -726,6 +730,8 @@ function makeFrameScene(level, { controllers = [] } = {}) {
       getProtectedPromptBounds: () => [],
       // Mirrors the real controller API: the scene's input lock reads it every frame (Level 08's demonstration owns controls).
       isControlLocked: () => false,
+      // Scenario v2 07 §8: only the garden controller answers Lumo's guide target; null keeps the usual trail.
+      ...(field === 'gardenLevel' ? { lumoGuideTarget: () => null } : {}),
     };
   }
   return scene;
@@ -801,8 +807,32 @@ function makeHeartFinalScene({ inHand, placed, on = true, latched = true, x = 30
     stopDialogue() { calls.stopDialogue += 1; },
     finish() { calls.finish += 1; },
   };
-  scene.commitFinalExtinguish = (source) => bind(methodSource('commitFinalExtinguish', heartSourceFile, 'HeartOfElariaLevel'), { source }, 'HeartOfElariaLevel.commitFinalExtinguish()')(scene);
+  scene.commitFinalExtinguish = (source) => bind(methodSource('commitFinalExtinguish', heartSourceFile, 'HeartOfElariaLevel'), { source, ...HEART_SOUND }, 'HeartOfElariaLevel.commitFinalExtinguish()')(scene);
+  scene.recordLumoHome = () => recordHeartLumoHome(scene);
   return scene;
+}
+
+let heartRecordLumoHome = null;
+/** The shipped `recordLumoHome()` body, run with the given scene as `this`. */
+function recordHeartLumoHome(scene) {
+  if (!heartRecordLumoHome) heartRecordLumoHome = bind(methodSource('recordLumoHome', heartSourceFile, 'HeartOfElariaLevel'), HEART_SOUND, 'HeartOfElariaLevel.recordLumoHome()');
+  return heartRecordLumoHome(scene);
+}
+
+/** A module-level constant of HeartOfElariaLevel.ts, read from its initializer (the level file imports Phaser and cannot load here). */
+function heartConstant(name) {
+  let initializer = null;
+  const visit = (node) => {
+    if (initializer) return;
+    if (ts.isVariableDeclaration(node) && nodeText(node.name) === name) { initializer = node.initializer; return; }
+    ts.forEachChild(node, visit);
+  };
+  visit(heartSourceFile);
+  assert.ok(initializer, `HeartOfElariaLevel still authors ${name}`);
+  const js = ts.transpileModule(`const __value = (${nodeText(initializer)});`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext },
+  }).outputText;
+  return new Function(`"use strict";\n${js}\nreturn __value;`)();
 }
 const pressHeartF = (scene) => bind(methodSource('handleLanternKey', heartSourceFile, 'HeartOfElariaLevel'),
   { heartFinalActionSource, getHeartElement, canReachHeartElement, ...HEART_SOUND }, 'HeartOfElariaLevel.handleLanternKey()')(scene);
@@ -1645,6 +1675,19 @@ const CASES = [
           assert.ok(call.y <= limit, `level ${level}, player y ${playerY}: Lumo's target y ${call.y} must stay at or above ${limit}`);
         }
       }
+    },
+  },
+  {
+    name: 'garden_lumo_guide_target_replaces_the_trail_only_when_present',
+    run: () => {
+      // Scenario v2 07 §8: the garden's guide point (on the bridge) becomes Lumo's target; null falls back to the trail.
+      const guided = makeFrameScene(6, { controllers: ['gardenLevel'] });
+      guided.gardenLevel.lumoGuideTarget = () => ({ x: 350, y: 238 });
+      stepFrame(guided);
+      assert.deepEqual(guided.calls.lumo.at(-1), { x: 350, y: 238 }, 'a guide point on the bridge is Lumo\'s flight target');
+      const trail = makeFrameScene(6, { controllers: ['gardenLevel'] });
+      stepFrame(trail);
+      assert.ok(trail.calls.lumo.at(-1).y <= 300, 'without a guide point Lumo keeps the usual trail target');
     },
   },
   {

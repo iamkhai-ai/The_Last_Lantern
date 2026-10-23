@@ -4,6 +4,14 @@ import * as effects from '../audio/effects.ts';
 export type FootstepSurface = effects.EffectSurface;
 export type { AmbienceTheme };
 
+export type HeartLayer = 'memory' | 'hope' | 'balance' | 'overload';
+const HEART_LAYERS: Readonly<Record<HeartLayer, { key: string; recipe: effects.HeldRecipe }>> = {
+  memory: { key: 'heart-layer-memory', recipe: effects.heartMemoryLayer },
+  hope: { key: 'heart-layer-hope', recipe: effects.heartHopeLayer },
+  balance: { key: 'heart-layer-balance', recipe: effects.heartBalanceLayer },
+  overload: { key: 'heart-layer-overload', recipe: effects.heartOverloadLayer },
+};
+
 /**
  * The game's whole soundscape is generated with Web Audio: there are no audio files. Effects are the recipes in
  * `audio/effects`, the level ambience is built in `audio/ambience`, and everything goes through three buses (effects,
@@ -265,6 +273,20 @@ export class SoundSystem {
 
   public static setMusicLevel(level: number, fadeSeconds = 0.2): void {
     this.ambience?.setMusicLevel(level, fadeSeconds);
+  }
+
+  /**
+   * Level 10 layers (scenario 10 v2 §9): `on` holds the layer, `off` releases it. Silent without an audio context or while
+   * muted (setHeldTone starts nothing then and tries again on the next call).
+   */
+  public static setHeartLayer(layer: HeartLayer, on: boolean): void {
+    const { key, recipe } = HEART_LAYERS[layer];
+    this.setHeldTone(key, on, recipe, 0.6);
+  }
+
+  /** Releases all four Level 10 layers together (the final action, or leaving the level). */
+  public static stopHeartLayers(fadeSeconds = 0.25): void {
+    for (const layer of Object.keys(HEART_LAYERS) as HeartLayer[]) this.setHeldTone(HEART_LAYERS[layer].key, false, HEART_LAYERS[layer].recipe, fadeSeconds);
   }
 
   /** Finite cues on the ordinary effects bus; no timers or recordings survive a cue's envelope. */

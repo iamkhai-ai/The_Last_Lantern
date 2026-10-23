@@ -110,7 +110,7 @@ Depth = `10 + groundAnchorY/10` for standing props and actor feet; ground stamps
 - `sidePathOpen = flags['l6-return-latched']`; `drainOpen = flags['l6-water-flowing']`; `realized = flags['l6-lumo-realized']`.
 - Sanitize on load: `returnLatched ⇒ waterFlowing`; `waterFlowing && returnLatched ⇒ bridgeCrossed`; `sunLatched || returnLatched ⇒ canopyShut`; `crossingSide` is dropped unless `bridgeCrossed`. Compat: `l6-sun-open` / `l6-moon-open` are still written for older readers.
 - Crossing bookkeeping: entering the bridge strip records `l6-crossing-side` = west/east by body center (x<334); leaving at the far bank sets `l6-bridge-crossed`; clearing the strip deletes the side flag (legacy-compatible).
-- `completionBlock`: canopy → bar(latch) → drain → side → scene; `gardenExitReady = completionBlock === null` gates the shrine arch. The archive never advances until every committed state is present, and the locked prompt names the missing step.
+- `completionBlock` (scenario v2 §8): canopy → bar(latch) → drain → scene. The side latch is no longer a completion step; `l6-return-latched` is still written by the east latch and the side plank still opens. `gardenExitReady = completionBlock === null` gates the shrine arch. The archive never advances until every committed state is present, and the locked prompt names the missing step.
 
 ## Prompt rules (RULE_GAMES audit)
 
@@ -145,3 +145,15 @@ Depth = `10 + groundAnchorY/10` for standing props and actor feet; ground stamps
 - Ending hand-off: `finish()` only marks the ENDING pending; `update()` calls `nextLevel` once `canStartStory()` is true (no dialogue, pause menu closed). While the pause menu is open (`isPaused`) the running silhouette tween or stop timer is paused and resumes on close; an open dialogue does not freeze it.
 - Drain: the nursery scene only describes what is visible (water, the new leaf); it does not reset a folded sunflower. Pot bases under the HUD were not raised: NOT_RUN, no render evidence that meaning is lost.
 - NOT_RUN: browser/visual check of bar front/back, bridge retracted/extended, nursery status row and the silhouette beat.
+
+## Scenario v2 (branch feat/level07-scenario-v2)
+
+Source: `docs/scenario-v2/07-the-sleeping-garden.md` §1, §4, §6, §8. Runtime changes only; the v1 layout above still holds.
+
+- **Completion:** the side latch is optional. `gardenCompletionBlock` returns `canopy | bar | drain | scene`. The side path, east latch and `l6-return-latched` are unchanged.
+- **H ladder:** Mức 3 reads "…mở cống rồi tới điện thờ." After the water the ladder points at the shrine gate; the side-latch stage is gone. Objective after the water: "Tới cổng điện thờ."
+- **Status row:** `Màn che · Hoa Nhật · Chốt · Cầu rễ (có/không) · Nước · light`. The "Lối phụ" field is removed.
+- **Night sounds (§1):** cricket on canopy shut (existing); water cue on a live root-bridge deploy (`endingCue('water')`); water release on the drain (existing `playWaterRelease` plus the restored ambience); second cricket (`endingCue('answer')`) when the nursery scene ends. All go through `SoundSystem`, so they are silent without an audio context or while muted.
+- **Lumo guide (§8):** `gardenLumoGuideTarget` changes only Lumo's flight target. It applies while the roots form a bridge (canopy shut, lantern off) and Nhinh stands on the strip: midspan (350,238) in the west half, far bank (404,238) in the east half. Otherwise `CampaignScene` keeps its usual trail target. Plant rules are untouched. The guide line plays once (`l6-bridge-guide`).
+- **Handprint placeholder (§8, optional "Những dấu nhỏ"):** a placeholder decal on the west-bank wet stone at the sluice crossing, centre (168,256). It is drawn at runtime with Phaser Graphics (depth 4.5, dark teal print with a pale rim, about 12×14 px) because no art exists. It is hidden until `l6-water-flowing` and a Pulse within 40 px of the stone set `l6-handprint-seen`, which Level 10 reads. The reveal plays two lines and the journal gains one line. Pulse is enabled for this level (`PULSE_LEVELS` in `src/ui/CampaignHud.ts` includes 6). This is a placeholder awaiting art: replace it with the final art asset and remove this note.
+- **Known gaps:** the reservoir hum fading on canopy shut is not implemented (no reservoir hum exists in the mixer). The optional H line for the side latch (east bank, lamp on, bridge retracted) is not implemented; v2 allows it but does not require it. Beat 3 uses the existing water release rather than a new cue. Browser playtest of the v2 beats and the handprint: NOT_RUN.

@@ -8,8 +8,8 @@ export interface ToastSink {
   showToast(message: string, durationMs?: number): void;
 }
 
-/** Campaign levels where SPACE really fires a lantern pulse. Level 08 (index 7) reveals the carved name under the statue (scenario 08 §5). */
-export const PULSE_LEVELS: readonly number[] = [0, 1, 7, 8, 9];
+/** Campaign levels where SPACE really fires a lantern pulse. Level 06 (index 5) reveals the tally marks by the window (scenario 06 §5); Level 07 (index 6) reveals the handprint on the wet stone (scenario v2 07 §8); Level 08 (index 7) reveals the carved name under the statue (scenario 08 §5). */
+export const PULSE_LEVELS: readonly number[] = [0, 1, 5, 6, 7, 8, 9];
 
 const FONT = 'Segoe UI, sans-serif';
 const PANEL_FILL = 0x0c1d24;

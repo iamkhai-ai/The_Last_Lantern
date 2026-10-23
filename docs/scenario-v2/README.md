@@ -1,6 +1,6 @@
 # Kịch bản v2 — Màn 05–10
 
-**Trạng thái:** sáu hướng chỉnh sửa trong đợt góp ý đã được duyệt. Các kịch bản v2 trong thư mục này vẫn là bản nháp thiết kế; chưa có màn nào được duyệt thay thế hoặc triển khai vào game. Bản gốc trong [docs/scenario/](../scenario/) giữ nguyên và vẫn là nguồn chuẩn của gameplay hiện tại. Các script `scripts/check-*.mjs` đọc thoại và thang gợi ý H trực tiếp từ đó. Mỗi thay đổi v2 cần được triển khai và kiểm chứng riêng trước khi thay nguồn hiện hành.
+**Trạng thái:** sáu hướng chỉnh sửa trong đợt góp ý đã được duyệt, và cả sáu màn 05–10 đã triển khai theo v2 trên nhánh `integrate/scenario-v2-05-10` (2026-10-23): 08 và 09 có từ trước trên `test-develop`, 05, 06, 07 và 10 mỗi màn một commit. Với các màn này, bản v2 là nguồn chuẩn; `scripts/check-*.mjs` của từng màn và thang H dự phòng trong `check-campaign-levels` đọc từ đây (riêng 08 vẫn đọc bản gốc vì thang H không đổi). Bản gốc trong [docs/scenario/](../scenario/) được giữ làm lịch sử. Chưa chơi thử thật; các số đo ở §3 và quy trình chơi thử ở §7 vẫn là việc còn lại. Vạch đếm (06) và bàn tay (07) đang là decal vẽ tạm lúc chạy, chờ art.
 
 | Màn | File | Mức thay đổi |
 | --- | --- | --- |

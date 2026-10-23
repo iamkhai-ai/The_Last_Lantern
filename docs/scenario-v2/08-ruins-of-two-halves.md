@@ -7,7 +7,7 @@
 **Mục tiêu:** Mở điện thờ Nhật–Nguyệt, tiếp cận The Shadow.\
 **Kỹ năng mới:** Bóng như một công cụ, đặt đúng chỗ. Màn 7 dạy tắt đèn; màn này dạy **không tắt hết**.
 
-**Trạng thái:** hướng sửa về nhịp trợ giúp đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/08-ruins-of-two-halves.md](../scenario/08-ruins-of-two-halves.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* hoặc *(sửa)* thuộc đề xuất v2.
+**Trạng thái:** đã triển khai vào game trên `test-develop` (`883d589`: tên dưới tượng, The Shadow làm mẫu theo yêu cầu, giọng ba khóa). Bản này là nguồn chuẩn của Màn 08; [docs/scenario/08-ruins-of-two-halves.md](../scenario/08-ruins-of-two-halves.md) được giữ làm lịch sử. Chưa chơi thử thật.
 
 > **Thay đổi so với bản hiện tại**
 >

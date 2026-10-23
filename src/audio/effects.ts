@@ -70,6 +70,72 @@ export const lockSunRightVoice: HeldRecipe = (ctx, out, t) =>
 export const lockMoonVoice: HeldRecipe = (ctx, out, t) =>
   heldTone(ctx, out, t, { freq: LOCK_TONE_HZ.moon, type: 'triangle', peak: 0.08, attack: 0.2, lowpass: 700 });
 
+/** Seconds the overload layer takes to climb to its ceiling; the ceiling itself is the voices' peak, never exceeded. */
+export const HEART_OVERLOAD_RISE_SECONDS = 6;
+
+/** A held layer made of several voices that start and stop together. */
+function heldChord(voices: ReadonlyArray<{ freq: number; type: OscillatorType; peak: number; attack: number; lowpass?: number }>): HeldRecipe {
+  return (ctx, out, t) => {
+    const held = voices.map((voice) => heldTone(ctx, out, t, voice));
+    return { release: (fadeSeconds: number) => held.forEach((voice) => voice.release(fadeSeconds)) };
+  };
+}
+
+/**
+ * Level 10 layers (scenario 10 v2 §9). One per living branch: the high chime of level 6 for Memory, the soft Lumo motif
+ * for Hope, and the two bright sun tones with the deep moon tone of level 8 for Balance. The fourth, Overload, is a
+ * bright, slightly out-of-tune pair that rises to a fixed ceiling and never escapes it.
+ */
+export const heartMemoryLayer: HeldRecipe = heldChord([
+  { freq: 1318.51, type: 'sine', peak: 0.03, attack: 1.2 },
+]);
+export const heartHopeLayer: HeldRecipe = heldChord([
+  { freq: 523.25, type: 'triangle', peak: 0.035, attack: 1.8, lowpass: 1600 },
+]);
+export const heartBalanceLayer: HeldRecipe = heldChord([
+  { freq: LOCK_TONE_HZ.sunLeft, type: 'triangle', peak: 0.02, attack: 1.5, lowpass: 3200 },
+  { freq: LOCK_TONE_HZ.sunRight, type: 'triangle', peak: 0.02, attack: 1.5, lowpass: 3200 },
+  { freq: LOCK_TONE_HZ.moon, type: 'triangle', peak: 0.025, attack: 1.5, lowpass: 700 },
+]);
+export const heartOverloadLayer: HeldRecipe = heldChord([
+  { freq: 1760, type: 'triangle', peak: 0.02, attack: HEART_OVERLOAD_RISE_SECONDS, lowpass: 4200 },
+  { freq: 1864.66, type: 'triangle', peak: 0.02, attack: HEART_OVERLOAD_RISE_SECONDS, lowpass: 4200 },
+]);
+
+/**
+ * Machine layers of Level 06 (scenario 06 §4 "Âm thanh của máy"). One voice per circuit; the three together are a C-major
+ * chord: circuit A a high bell (C6), circuit B a middle bell (E5) half a beat behind A, circuit C a short soft motif in
+ * the band of Lumo's voice (680-760 Hz). The hum is the machine's base while the water is still held up.
+ */
+export const TOWER_TONE_HZ = { hum: 110, bellA: 1046.5, bellB: 659.25, motif: [680, 760, 680] } as const;
+const TOWER_BEAT_S = 2.4;
+
+/** Plays `play(when)` on a shared grid of `period` seconds offset by `phase`, so layers on one grid stay in step. */
+function gridVoice(ctx: BaseAudioContext, period: number, phase: number, play: (when: number) => void): HeldVoice {
+  let next = Math.ceil((ctx.currentTime - phase) / period) * period + phase;
+  const timer = setInterval(() => {
+    const horizon = ctx.currentTime + 0.3;
+    while (next < horizon) {
+      if (next >= ctx.currentTime + 0.01) play(next);
+      next += period;
+    }
+  }, 80);
+  return { release(): void { clearInterval(timer); } };
+}
+
+export const towerHumVoice: HeldRecipe = (ctx, out, t) =>
+  heldTone(ctx, out, t, { freq: TOWER_TONE_HZ.hum, type: 'triangle', peak: 0.03, attack: 1.2, lowpass: 320 });
+
+export const towerBellAVoice: HeldRecipe = (ctx, out) =>
+  gridVoice(ctx, TOWER_BEAT_S, 0, (when) => bell(ctx, out, when, TOWER_TONE_HZ.bellA, { peak: 0.04, dur: 1.8 }));
+
+export const towerBellBVoice: HeldRecipe = (ctx, out) =>
+  gridVoice(ctx, TOWER_BEAT_S, TOWER_BEAT_S / 2, (when) => bell(ctx, out, when, TOWER_TONE_HZ.bellB, { peak: 0.03, dur: 1.5 }));
+
+export const towerMotifVoice: HeldRecipe = (ctx, out) =>
+  gridVoice(ctx, TOWER_BEAT_S * 2, 0, (when) => TOWER_TONE_HZ.motif.forEach((freq, i) =>
+    tone(ctx, out, { t: when + i * 0.28, freq, dur: 0.22, peak: 0.022, attack: 0.03 })));
+
 export const lanternOn: Recipe = (ctx, out, t) => {
   noise(ctx, out, { t, dur: 0.3, peak: 0.03, attack: 0.06, type: 'bandpass', freq: 500, endFreq: 2200, q: 0.9 });
   bell(ctx, out, t + 0.02, 659.25, { peak: 0.1, dur: 0.7 });

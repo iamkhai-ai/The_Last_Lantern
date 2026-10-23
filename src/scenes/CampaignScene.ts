@@ -400,6 +400,12 @@ export class CampaignScene extends Phaser.Scene {
       } else if (this.progress.level === 7) {
         // Scenario 08 §5: a Pulse near the statue's base reveals the worn name.
         this.ruinsLevel?.onPulse(x, y);
+      } else if (this.progress.level === 6) {
+        // Scenario v2 07 §8: a Pulse near the wet stone reveals the handprint, once the water flows.
+        this.gardenLevel?.onPulse(x, y);
+      } else if (this.progress.level === 5) {
+        // Scenario 06 §5: a Pulse near the window reveals the tally marks.
+        this.sleeplessTower?.onPulse(x, y);
       }
       this.save();
       this.refreshHud();
@@ -441,7 +447,10 @@ export class CampaignScene extends Phaser.Scene {
       this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 88, 300) };
     }
     if (this.progress.level === 3) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 18, 24, 616), y: Phaser.Math.Clamp(this.player.y - 20, 88, 305) };
-    if (this.progress.level === 6) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 300) };
+    if (this.progress.level === 6) {
+      // Scenario v2 07 §8: on a deployed root bridge in the dark Lumo flies ahead; otherwise the usual trail target applies.
+      this.lumoTarget = this.gardenLevel?.lumoGuideTarget() ?? { x: Phaser.Math.Clamp(this.player.x - 22, 36, 600), y: Phaser.Math.Clamp(this.player.y - 18, 80, 300) };
+    }
     if (this.progress.level === 7) this.lumoTarget = { x: Phaser.Math.Clamp(this.player.x - 20, 30, 610), y: Phaser.Math.Clamp(this.player.y - 22, 84, 302) };
     if (this.progress.level === 8) {
       this.updateObservatoryLumo(dt);

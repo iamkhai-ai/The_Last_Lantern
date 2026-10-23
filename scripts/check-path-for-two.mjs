@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { createRequire } from 'node:module';
-import { advancePathInkSequence, buildPathSchematic, choosePathCallAction, pathInkGlyphAt, pathInkGuideTarget, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathDoorPassage, getPathElementArtRect, getPathElementSolid, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, getPathThresholdBand, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathApproachAllowed, isPathCallSpent, isPathDoorApproachAllowed, isPathElementInReach, isPathGateWalkIn, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathCallLabel, pathDoorShouldClose, pathPolylineLength, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, pathStandingOwner, PATH_BACK_ARRIVAL_OFFSET, PATH_BODY, PATH_CHECKPOINTS, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_DOORS, PATH_ELEMENT_RADIUS, PATH_FLOOR_BOUNDS, PATH_INK_CORRIDOR, PATH_INK_GLYPHS, PATH_INK_HIT_RADIUS, PATH_INK_ORDER, PATH_REACH_GAP, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_ORDER, PATH_SCHEMATIC_SIZE, PATH_PIPE_ENDPOINTS, PATH_STANDING_SPACING, PATH_TUBE_MOUTHS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
+import { PATH_CHALK_FIREFLY, buildPathSchematic, choosePathCallAction, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathDoorPassage, getPathElementArtRect, getPathElementSolid, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, getPathThresholdBand, hasDoorPower, isActuallyReunited, isInsidePracticeAlcove, isNearPathPipeEndpoint, isPathApproachAllowed, isPathCallSpent, isPathDoorApproachAllowed, isPathElementInReach, isPathGateWalkIn, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathActorBody, pathCallLabel, pathDoorShouldClose, pathPolylineLength, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, pathStandingOwner, PATH_BACK_ARRIVAL_OFFSET, PATH_BODY, PATH_CHECKPOINTS, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_DOORS, PATH_ELEMENT_RADIUS, PATH_FLOOR_BOUNDS, PATH_INK_CORRIDOR, PATH_REACH_GAP, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_ORDER, PATH_SCHEMATIC_SIZE, PATH_PIPE_ENDPOINTS, PATH_STANDING_SPACING, PATH_TUBE_MOUTHS, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRestorePathFollower, shouldRoutePathFollower } from '../src/data/pathForTwoLayout.ts';
 
 const allOpen = { a: true, b: true, c: true, practice: true };
 const actor = (room, point, open = allOpen) => isPathPositionSafe(room, point, { latches: open });
@@ -170,16 +170,19 @@ assert.equal(hasDoorPower('c',{assignment:'follow',lumoRoom:'ink',lumoX:558,lumo
 assert.equal(reach('entry',PATH_ROOMS.entry.spawn,PATH_ROOMS.entry.elements.find(e=>e.id==='call-a').stand,{a:false,b:false,c:false,practice:false}),true,'spawn reaches A call on the near side');
 assert.equal(reach('entry',PATH_ROOMS.entry.spawn,PATH_ROOMS.entry.elements.find(e=>e.id==='inner-call').stand,{a:false,b:false,c:false,practice:true}),true,'live practice threshold reaches inside recovery call');
 assert.equal(reach('relay',PATH_ROOMS.relay.spawn,PATH_ROOMS.relay.elements.find(e=>e.id==='latch-a').stand),true,'A entrance reaches far-side latch');
-assert.equal(reach('relay',PATH_ROOMS.relay.spawn,PATH_ROOMS.relay.elements.find(e=>e.id==='call-b').stand),true,'relay reaches B call');
+assert.equal(reach('relay',PATH_ROOMS.relay.spawn,PATH_ROOMS.relay.elements.find(e=>e.id==='call-c').stand),true,'relay reaches the C call (`···`)');
+assert.equal(reach('entry',PATH_ROOMS.entry.spawn,PATH_ROOMS.entry.elements.find(e=>e.id==='call-b').stand),true,'the hall reaches the `··` call');
 assert.equal(reach('ink',PATH_ROOMS.ink.spawn,PATH_ROOMS.ink.elements.find(e=>e.id==='latch-b').stand),true,'B entrance reaches far-side latch');
-// ONE DOOR, ONE STATION: the far-side posts that only recalled Lumo are gone from every room and every solid list.
-for (const roomId of Object.keys(PATH_ROOMS)) {
-  for (const id of ['call-a-far', 'call-b-far']) {
-    assert.equal(PATH_ROOMS[roomId].elements.some((e) => e.id === id), false, `${roomId} no longer registers the far-side post ${id}`);
-    assert.equal(PATH_ROOMS[roomId].solids.some((s) => s.elementId === id), false, `${roomId} no longer blocks for the far-side post ${id}`);
-  }
+// Scenario v2 recovery posts: one far `·` in relay (door A's way back to plate A) and one far `··` in the ink foyer
+// (door B's way back to plate B). No other room registers one, and each is a standing solid of its own room.
+const farPosts = Object.entries(PATH_ROOMS).flatMap(([roomId, room]) => room.elements.filter((e) => /-far$/.test(e.id)).map((e) => `${roomId}/${e.id}`));
+assert.deepEqual(farPosts.sort(), ['ink/call-b-far', 'relay/call-a-far'], 'the only far-side recovery posts are relay A and ink B');
+for (const [roomId, id] of [['relay', 'call-a-far'], ['ink', 'call-b-far']]) {
+  assert.equal(PATH_ROOMS[roomId].solids.some((s) => s.elementId === id), true, `${roomId}/${id} blocks as a standing prop`);
+  assert.equal(reach(roomId, PATH_ROOMS[roomId].spawn, PATH_ROOMS[roomId].elements.find((e) => e.id === id).stand), true,
+    `${roomId}/${id} is reachable from the room's own spawn with every door shut`);
 }
-assert.equal(reach('ink',PATH_ROOMS.ink.spawn,PATH_ROOMS.ink.elements.find(e=>e.id==='call-c').stand),true,'ink room reaches C call');
+assert.equal(reach('ink',PATH_ROOMS.ink.spawn,PATH_ROOMS.ink.elements.find(e=>e.id==='latch-c').stand),true,'ink room reaches the exit latch stand');
 assert.equal(reach('ink',PATH_ROOMS.ink.spawn,PATH_ROOMS.ink.elements.find(e=>e.id==='latch-c').stand),true,'corridor reaches final side latch');
 assert.equal(reach('entry',PATH_ROOMS.entry.spawn,PATH_ROOMS.entry.elements.find(e=>e.id==='inner-call').stand,{a:false,b:false,c:false,practice:true}),true,'open practice doorway connects the lower hall to its inside recovery call');
 assert.equal(isValidPathPipeHop({room:'entry',x:480,y:190,pipe:'a',end:'out'},{room:'relay',x:110,y:280,pipe:'a',end:'in'}),true,'A tube pairs its authored entry and relay endpoints');
@@ -348,15 +351,14 @@ function makePathScene(room, flags, extra = {}) {
   scene.doorPrompt = compile('doorPrompt', ['id'], {});
   scene.doorEnabled = compile('doorEnabled', ['id'], {});
   scene.callMark = compile('callMark', ['id'], {});
-  scene.callEligible = compile('callEligible', ['mark'], {});
   scene.latchCBlockReason = compile('latchCBlockReason', [], {
-    INK_NOT_SEEN: controllerConstant('INK_NOT_SEEN'), MARK_NOT_CALLED: controllerConstant('MARK_NOT_CALLED'),
+    STILL_TRAVELLING: controllerConstant('STILL_TRAVELLING'), LATCH_SHUT_LINE: controllerConstant('LATCH_SHUT_LINE'),
   });
   scene.interactionEnabled = compile('interactionEnabled', ['id'], { isPathCallSpent });
   scene.prompt = compile('prompt', ['id'], { PLATE_ROOMS: controllerConstant('PLATE_ROOMS'), choosePathCallAction });
   scene.interact = compile('interact', ['id'], {
     MEMORY: controllerConstant('MEMORY'), choosePathCallAction,
-    LATCH_A_LINES: controllerConstant('LATCH_A_LINES'), NEXT_MARK_UNLATCHED: controllerConstant('NEXT_MARK_UNLATCHED'),
+    LATCH_A_LINES: controllerConstant('LATCH_A_LINES'), LATCH_SHUT_LINE: controllerConstant('LATCH_SHUT_LINE'),
     STILL_TRAVELLING: controllerConstant('STILL_TRAVELLING'),
   });
   scene.getObjectiveText = compile('getObjectiveText', [], { PATH_ROOMS, getPathExitBlock, isInsidePracticeAlcove, pathDoorShouldClose });
@@ -384,15 +386,25 @@ function bindTravelPipeline(scene) {
   scene.localRoute = compile('localRoute', ['mark'], { PLATE_ROOMS: plateRooms, getPathLocalLeg });
   scene.pipeRoute = compile('pipeRoute', ['from', 'to'], { getPathPipePoint });
   scene.buildAssignmentRoute = compile('buildAssignmentRoute', ['mark', 'playerPoint'], { PLATE_ROOMS: plateRooms });
+  scene.queuedFlags = new Set();
+  scene.leavesUnlatchedSeal = compile('leavesUnlatchedSeal', [], {});
+  scene.queueFlagBeat = compile('queueFlagBeat', ['flag', 'lines', 'guard'], {});
+  scene.replyToRequest = compile('replyToRequest', ['leaving', 'lines'], {
+    LEAVE_UNLATCHED_WARNING: controllerConstant('LEAVE_UNLATCHED_WARNING'), DOOR_SHUT_LINE: controllerConstant('DOOR_SHUT_LINE'),
+    PATH_DOOR_FACES,
+  });
   scene.send = compile('send', ['mark'], {
-    SEND_LINES: controllerConstant('SEND_LINES'), LATCHED_CALL_LINES: controllerConstant('LATCHED_CALL_LINES'),
+    SEND_LINES: controllerConstant('SEND_LINES'), SEND_UNSEEN_C: controllerConstant('SEND_UNSEEN_C'),
+    LATCHED_CALL_LINES: controllerConstant('LATCHED_CALL_LINES'),
   });
   scene.recallToCall = compile('recallToCall', ['id'], {
     RECALL_LINES: controllerConstant('RECALL_LINES'), FINAL_RECALL_LINES: controllerConstant('FINAL_RECALL_LINES'),
   });
   scene.isPairedPipeHop = compile('isPairedPipeHop', ['target'], { isValidPathPipeHop, isNearPathPipeEndpoint });
   scene.cancelInvalidRoute = compile('cancelInvalidRoute', [], {});
-  scene.completeRoute = compile('completeRoute', ['room'], { PRACTICE_ARRIVAL: controllerConstant('PRACTICE_ARRIVAL') });
+  scene.completeRoute = compile('completeRoute', ['room'], {
+    PRACTICE_ARRIVAL: controllerConstant('PRACTICE_ARRIVAL'), ECHO_LINES: controllerConstant('ECHO_LINES'),
+  });
   scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete', 'guard', 'onStale'], {});
   scene.flushPendingStoryBeat = compile('flushPendingStoryBeat', [], {});
   scene.advanceLumo = compile('advanceLumo', ['dt'], {});
@@ -564,7 +576,6 @@ controllerCase('the_whole_lesson_still_teaches_send_travel_arrival_and_recall', 
 
 controllerCase('skipping_the_lesson_still_lets_the_player_call_A', () => {
   const scene = makePathScene('entry', {}, { player: inReachPoint('entry', elementOf('entry', 'call-a')) });
-  assert.equal(scene.callEligible('a'), true, 'calling A never requires the optional lesson');
   assert.equal(scene.interactionEnabled('call-a'), true, 'the A call is enabled without any lesson flag');
   assert.equal(scene.prompt('call-a'), 'E · Gọi Lumo tới ấn', 'the A call advertises sending Lumo to the plate');
   scene.interact('call-a');
@@ -601,8 +612,10 @@ controllerCase('a_latched_call_post_is_disabled_and_silent_while_the_useful_post
   // Once its own door is latched a call post has nothing left to do: no prompt, no E, no line, no Lumo.
   const spent = [
     { room: 'entry', id: 'call-a', flags: { 'l4-latch-a': true } },
-    { room: 'relay', id: 'call-b', flags: { 'l4-latch-a': true, 'l4-latch-b': true } },
-    { room: 'ink', id: 'call-c', flags: { 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true } },
+    { room: 'entry', id: 'call-b', flags: { 'l4-latch-a': true, 'l4-latch-b': true } },
+    { room: 'relay', id: 'call-a-far', flags: { 'l4-latch-a': true } },
+    { room: 'relay', id: 'call-c', flags: { 'l4-latch-a': true, 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true } },
+    { room: 'ink', id: 'call-b-far', flags: { 'l4-latch-a': true, 'l4-latch-b': true } },
   ];
   for (const { room, id, flags } of spent) {
     const label = `${room}/${id} with ${JSON.stringify(flags)}`;
@@ -615,9 +628,9 @@ controllerCase('a_latched_call_post_is_disabled_and_silent_while_the_useful_post
       `${label}: E changes no flag, sends nothing, says nothing and recalls nothing`);
   }
   // The posts that still do something stay enabled, and the same post is live again before its latch.
-  const ink = makePathScene('ink', { 'l4-latch-b': true }, { player: inReachPoint('ink', elementOf('ink', 'call-c')) });
-  assert.equal(ink.interactionEnabled('call-c'), true, 'the C post stays enabled while C is not latched');
-  assert.equal(ink.prompt('call-c'), 'E · Gọi Lumo tới ấn', 'the C post still advertises its call');
+  const relay = makePathScene('relay', { 'l4-latch-a': true }, { player: inReachPoint('relay', elementOf('relay', 'call-c')), lumoRoom: 'ink' });
+  assert.equal(relay.interactionEnabled('call-c'), true, 'the relay C post stays enabled while C is not latched');
+  assert.equal(relay.prompt('call-c'), 'E · Gọi Lumo tới ấn', 'the relay C post still advertises its call');
   // Latch C keeps recalling Lumo through its own handle, latched or not.
   const exit = makePathScene('ink', { 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true },
     { player: inReachPoint('ink', elementOf('ink', 'latch-c')) });
@@ -646,7 +659,7 @@ function reloadPathScene(scene, room) {
     player: { x: scene.player.x, y: scene.player.y },
     progress: { flags: saved.flags, counters: saved.counters },
   }));
-  fresh.normalizeProgress = compile('normalizeProgress', [], { PATH_INK_ORDER });
+  fresh.normalizeProgress = compile('normalizeProgress', [], {});
   fresh.readRoute = compile('readRoute', [], { parsePathRoute, isPathRouteValid });
   fresh.getAssignment = compile('getAssignment', [], {});
   fresh.readLumoRoom = compile('readLumoRoom', [], {});
@@ -670,12 +683,14 @@ function reloadPathScene(scene, room) {
 }
 
 controllerCase('each_latch_is_the_one_station_for_its_door', () => {
-  // Relay A: no Lumo at plate A yet, so E sends him there. A call post is never a station, so the latch never recalls.
+  // Relay A with Lumo away: the shut door is only named, never opened by a request. A station never sends or recalls
+  // (scenario v2 §4: "Chốt chỉ gài được khi cửa đang mở"); the far post `·` is the way to bring Lumo back to plate A.
   const idle = makePathScene('relay', { 'l4-visited-relay': true }, { player: standAt('relay', 'latch-a') });
-  assert.equal(idle.prompt('latch-a'), 'E · Gọi Lumo tới ấn A', 'an unlatched A station offers to call Lumo to plate A');
+  assert.equal(idle.prompt('latch-a'), 'E · Gài chốt A', 'an unlatched A station offers its latch');
   assert.equal(idle.interactionEnabled('latch-a'), true, 'and answers');
   idle.interact('latch-a');
-  assert.deepEqual(idle.sent, ['a'], 'E at the A station sends Lumo to plate A');
+  assert.deepEqual(idle.said.at(-1), controllerConstant('LATCH_SHUT_LINE'), 'with the shut-door line');
+  assert.deepEqual(idle.sent, [], 'and it sends nothing');
   assert.equal(idle.recalled, 0, 'the station never recalls Lumo');
   assert.equal(idle.progress.flags['l4-latch-a'], undefined, 'and latches nothing while Lumo is away');
 
@@ -701,7 +716,7 @@ controllerCase('each_latch_is_the_one_station_for_its_door', () => {
   // Lumo travelling to B does not silence the A station.
   const towardsB = makePathScene('relay', { 'l4-visited-relay': true },
     { player: standAt('relay', 'latch-a'), assignment: 'b', travelling: true });
-  assert.equal(towardsB.prompt('latch-a'), 'E · Gọi Lumo tới ấn A', 'a trip to B is not a trip to A');
+  assert.equal(towardsB.prompt('latch-a'), 'E · Gài chốt A', 'a trip to B is not a trip to A');
 
   // Latched: silent and disabled, as before.
   const latched = makePathScene('relay', { 'l4-visited-relay': true, 'l4-latch-a': true }, { player: standAt('relay', 'latch-a') });
@@ -711,9 +726,10 @@ controllerCase('each_latch_is_the_one_station_for_its_door', () => {
 
   // Ink B: the same station, with the latch in the ink room and plate B in the relay room.
   const inkIdle = makePathScene('ink', { 'l4-visited-ink': true, 'l4-latch-a': true }, { player: standAt('ink', 'latch-b') });
-  assert.equal(inkIdle.prompt('latch-b'), 'E · Gọi Lumo tới ấn B', 'an unlatched B station offers to call Lumo to plate B');
+  assert.equal(inkIdle.prompt('latch-b'), 'E · Gài chốt B', 'an unlatched B station offers its latch');
   inkIdle.interact('latch-b');
-  assert.deepEqual(inkIdle.sent, ['b'], 'E at the B station sends Lumo to plate B');
+  assert.deepEqual(inkIdle.said.at(-1), controllerConstant('LATCH_SHUT_LINE'), 'with the shut-door line while Lumo is away');
+  assert.deepEqual(inkIdle.sent, [], 'and it sends nothing');
   assert.equal(inkIdle.recalled, 0, 'the B station never recalls Lumo');
   const inkHeld = makePathScene('ink', { 'l4-visited-ink': true, 'l4-latch-a': true },
     { player: standAt('ink', 'latch-b'), power: { b: true }, assignment: 'b', lumoRoom: 'relay' });
@@ -731,32 +747,16 @@ controllerCase('each_latch_is_the_one_station_for_its_door', () => {
   assert.equal(makePathScene('ink', { 'l4-latch-a': true }).interactionEnabled('latch-a'), false, 'the A latch is not an ink control');
 });
 
-controllerCase('the_station_objectives_say_what_to_do_about_the_latch', () => {
-  const relayIdle = makePathScene('relay', {}, { player: { x: 300, y: 240 } });
-  assert.equal(relayIdle.getObjectiveText(), 'Gọi Lumo tới ấn A: nhấn E ở chốt A, rồi gài chốt.', 'relay without Lumo on plate A names the latch station');
-  const relayHeld = makePathScene('relay', {}, { player: { x: 300, y: 240 }, power: { a: true }, assignment: 'a', lumoRoom: 'entry' });
-  assert.equal(relayHeld.getObjectiveText(), 'Gài chốt A ở mặt bên kia trước khi gọi Lumo tới B.', 'with Lumo on plate A the latch is the step');
-  const relayLatched = makePathScene('relay', { 'l4-latch-a': true }, { player: { x: 300, y: 240 } });
-  assert.equal(relayLatched.getObjectiveText(), 'Gọi Lumo tới ấn B.', 'once A is latched the next step is B');
-  const inkIdle = makePathScene('ink', { 'l4-latch-a': true }, { player: { x: 300, y: 240 } });
-  assert.equal(inkIdle.getObjectiveText(), '1/6 Gọi Lumo tới ấn B: nhấn E ở chốt B, rồi gài chốt.', 'ink without Lumo on plate B names the latch station');
-  const inkHeld = makePathScene('ink', { 'l4-latch-a': true }, { player: { x: 300, y: 240 }, power: { b: true }, assignment: 'b', lumoRoom: 'relay' });
-  assert.equal(inkHeld.getObjectiveText(), '1/6 Gài chốt B: nhấn E ở chốt cạnh cửa B.', 'with Lumo on plate B the latch is the step');
-  // While Lumo walks there E is disabled at the latch, so the objective must not ask for it.
-  const relayMoving = makePathScene('relay', {}, { player: { x: 300, y: 240 }, assignment: 'a', travelling: true, lumoRoom: 'entry' });
-  assert.equal(relayMoving.getObjectiveText(), 'Lumo đang tới ấn A. Chờ cậu ấy tới nơi rồi gài chốt.', 'while Lumo travels to A the objective waits for him');
-  const inkMoving = makePathScene('ink', { 'l4-latch-a': true }, { player: { x: 300, y: 240 }, assignment: 'b', travelling: true, lumoRoom: 'relay' });
-  assert.equal(inkMoving.getObjectiveText(), '1/6 Lumo đang tới ấn B. Chờ cậu ấy tới nơi rồi gài chốt.', 'while Lumo travels to B the objective waits for him');
-});
-
 controllerCase('a_lost_relay_station_recovers_lumo_and_latches_after_a_reload', () => {
-  // Lumo is following in the relay hall, door A is shut and latch A is unset. The only control needed is the latch.
-  const player = standAt('relay', 'latch-a');
-  const scene = bindTravelPipeline(makePathScene('relay', { 'l4-visited-relay': true, 'l4-room': 'relay' }, { player }));
+  // Nhinh is in the relay hall, door A is shut behind her (Lumo left plate A unlatched) and latch A is unset.
+  // Scenario v2 recovery: the relay's far post `·` sends Lumo back to plate A, and the latch closes the loop.
+  const player = inReachPoint('relay', elementOf('relay', 'call-a-far'));
+  const scene = bindTravelPipeline(makePathScene('relay', { 'l4-visited-relay': true, 'l4-room': 'relay' }, { player, lumoRoom: 'relay' }));
   scene.route = []; scene.routeIndex = 0;
-  assert.equal(scene.prompt('latch-a'), 'E · Gọi Lumo tới ấn A', 'the station offers the call');
-  scene.interact('latch-a');
-  assert.equal(scene.progress.flags['l4-assignment'], 'a', 'E sends Lumo to plate A (not a recall to follow)');
+  assert.equal(scene.interactionEnabled('call-a-far'), true, 'the far post answers from the relay hall');
+  assert.equal(scene.prompt('call-a-far'), 'E · Gọi Lumo qua ống', 'and offers the call through the pipe');
+  scene.interact('call-a-far');
+  assert.equal(scene.progress.flags['l4-assignment'], 'a', 'E sends Lumo back to plate A (not a recall to follow)');
   assert.ok(scene.isTravelling(), 'Lumo is on his way');
   for (let frame = 0; frame < 40; frame += 1) scene.advanceLumo(16);
   assert.ok(scene.isTravelling(), 'Lumo is still part-way along his route');
@@ -766,7 +766,7 @@ controllerCase('a_lost_relay_station_recovers_lumo_and_latches_after_a_reload', 
   assert.equal(midway.recovered, false, 'a reload keeps a travelling Lumo on his route');
   assert.equal(midway.assignment, 'a', 'and his assignment');
   assert.ok(midway.isTravelling(), 'and the travel still runs');
-  assert.equal(midway.prompt('latch-a'), null, 'so the station is still silent after the reload');
+  assert.equal(midway.prompt('latch-a'), null, 'so the A station is still silent after the reload');
   assert.equal(midway.interactionEnabled('latch-a'), false, 'and disabled');
 
   let frames = 0;
@@ -778,20 +778,23 @@ controllerCase('a_lost_relay_station_recovers_lumo_and_latches_after_a_reload', 
   const arrived = reloadPathScene(midway, 'relay');
   assert.equal(arrived.recovered, false, 'an arrived Lumo is not reset by a reload');
   assert.equal(arrived.hasPower('a'), true, 'Lumo still holds plate A after the reload');
+  arrived.stand(standAt('relay', 'latch-a').x, standAt('relay', 'latch-a').y);
   assert.equal(arrived.prompt('latch-a'), 'E · Gài chốt A', 'the station now offers the latch');
   arrived.interact('latch-a');
   assert.equal(arrived.progress.flags['l4-latch-a'], true, 'E latches door A from the relay side');
-  assert.equal(arrived.callEligible('b'), true, 'and that makes B callable');
+  arrived.stand(standAt('relay', 'call-a-far').x, standAt('relay', 'call-a-far').y);
+  assert.equal(arrived.interactionEnabled('call-a-far'), false, 'and the far post is spent once A is latched');
 });
 
 controllerCase('a_lost_ink_station_recovers_lumo_and_latches_then_unlocks_C', () => {
-  // Lumo is following in the ink corridor, door B is shut and latch B is unset.
+  // Nhinh is in the ink corridor, door B is shut behind her (Lumo left plate B unlatched) and latch B is unset.
+  // Scenario v2 recovery: the ink foyer's far post `··` sends Lumo back to plate B.
   const scene = bindTravelPipeline(makePathScene('ink',
     { 'l4-visited-ink': true, 'l4-visited-relay': true, 'l4-latch-a': true, 'l4-room': 'ink', 'l4-ink-revealed': true },
-    { player: standAt('ink', 'latch-b') }));
+    { player: inReachPoint('ink', elementOf('ink', 'call-b-far')), lumoRoom: 'relay' }));
   scene.route = []; scene.routeIndex = 0;
-  assert.equal(scene.prompt('latch-b'), 'E · Gọi Lumo tới ấn B', 'the B station offers the call');
-  scene.interact('latch-b');
+  assert.equal(scene.interactionEnabled('call-b-far'), true, 'the far B post answers from the ink foyer');
+  scene.interact('call-b-far');
   assert.equal(scene.progress.flags['l4-assignment'], 'b', 'E sends Lumo to plate B through the B pipe');
   for (let frame = 0; frame < 40; frame += 1) scene.advanceLumo(16);
   assert.ok(scene.isTravelling(), 'Lumo is still part-way along his route');
@@ -808,15 +811,16 @@ controllerCase('a_lost_ink_station_recovers_lumo_and_latches_then_unlocks_C', ()
   const arrived = reloadPathScene(midway, 'ink');
   assert.equal(arrived.recovered, false, 'an arrived Lumo is not reset by a reload');
   assert.equal(arrived.hasPower('b'), true, 'Lumo holds plate B after the reload');
+  arrived.stand(standAt('ink', 'latch-b').x, standAt('ink', 'latch-b').y);
   assert.equal(arrived.prompt('latch-b'), 'E · Gài chốt B', 'the ink station now offers the latch');
   arrived.interact('latch-b');
   assert.equal(arrived.progress.flags['l4-latch-b'], true, 'E latches door B from the ink side');
+  arrived.stand(standAt('ink', 'call-b-far').x, standAt('ink', 'call-b-far').y);
+  assert.equal(arrived.interactionEnabled('call-b-far'), false, 'and the far B post is spent once B is latched');
 
-  // The C call post is then the next step, and it answers in the ink corridor.
-  const next = makePathScene('ink', { ...arrived.progress.flags }, { player: standAt('ink', 'call-c') });
-  assert.equal(next.callEligible('c'), true, 'the C call is eligible once B is latched');
-  assert.equal(next.interactionEnabled('call-c'), true, 'and the C post answers');
-  assert.equal(next.prompt('call-c'), 'E · Gọi Lumo tới ấn', 'it advertises the call');
+  // The `···` post in the relay hall is the next step, and it answers once B is latched.
+  const next = makePathScene('relay', { ...arrived.progress.flags }, { player: standAt('relay', 'call-c') });
+  assert.equal(next.interactionEnabled('call-c'), true, 'the relay C post answers once B is latched');
 });
 
 controllerCase('relay_overlap_owner_rule_is_kept_on_a_sandbox_room', () => {
@@ -954,8 +958,12 @@ controllerCase('every_call_post_in_every_room_gets_one_tracked_letter_label', ()
     };
     scene.callMark = compile('callMark', ['id'], {});
     scene.depthAt = compile('depthAt', ['y'], {});
+    scene.sealMark = compile('sealMark', ['id'], {});
+    scene.sealInks = [];
+    scene.addClueImage = compile('addClueImage', ['file', 'x', 'y', 'depth'], { getPathClueArtKey: (name) => (name ? `clue:${name}` : null) });
     scene.drawRoom = compile('drawRoom', [], {
-      PATH_ROOMS, PATH_TUBE_MOUTHS, PATH_INK_CORRIDOR, getPathElementArtRect, pathCallLabel,
+      PATH_ROOMS, PATH_TUBE_MOUTHS, getPathElementArtRect, pathCallLabel, isPathSeal, PATH_CHALK_FIREFLY,
+      CALL_PLAQUES: controllerConstant('CALL_PLAQUES'), SEAL_INKS: controllerConstant('SEAL_INKS'),
       getLevelArtKey: (_level, key) => key,
     });
     scene.drawRoom();
@@ -982,7 +990,7 @@ controllerCase('every_call_post_in_every_room_gets_one_tracked_letter_label', ()
         `${roomId}/${post.id}: label sits just above its art in depth`);
     }
   }
-  assert.deepEqual([...postIds].sort(), ['call-a', 'call-b', 'call-c', 'inner-call', 'practice-call'],
+  assert.deepEqual([...postIds].sort(), ['call-a', 'call-a-far', 'call-b', 'call-b-far', 'call-c', 'inner-call', 'practice-call'],
     'every standing call post in the three rooms is labelled');
 });
 
@@ -1000,7 +1008,8 @@ controllerCase('refreshArt_dims_a_spent_post_and_ticks_its_label_as_the_latch_is
     setAlpha(value) { this.alpha = value; return this; }
   }
   const refreshArt = compile('refreshArt', [], {
-    getLevelArtKey: (_level, key) => key, isPathSeal, isPathCallSpent, pathCallLabel, Phaser: { GameObjects: { Image: SpentImage } },
+    getLevelArtKey: (_level, key) => key, getPathClueArtKey: () => null, isPathSeal, isPathCallSpent, pathCallLabel,
+    Phaser: { GameObjects: { Image: SpentImage } },
   });
   const post = (scene, id) => {
     const image = new SpentImage(id);
@@ -1011,7 +1020,7 @@ controllerCase('refreshArt_dims_a_spent_post_and_ticks_its_label_as_the_latch_is
     return { image, label };
   };
   const scene = {
-    objects: [], progress: { flags: { 'l4-latch-b': true } }, assignment: 'b',
+    objects: [], progress: { flags: { 'l4-latch-b': true } }, assignment: 'b', sealInks: [], lanternOn: false,
     power: { b: true }, hasPower(mark) { return this.power[mark] === true; }, elementFor: () => undefined, refreshArt,
   };
   const bPost = post(scene, 'call-b');
@@ -1034,54 +1043,47 @@ controllerCase('refreshArt_dims_a_spent_post_and_ticks_its_label_as_the_latch_is
 });
 
 controllerCase('the_C_handle_answers_before_the_ink_is_found', () => {
+  // Scenario v2 §4: the exit handle answers before the ink, and while `···` is not on its seal it names only the state.
   const scene = makePathScene('ink', { 'l4-latch-b': true }, { player: inReachPoint('ink', elementOf('ink', 'latch-c')) });
   assert.equal(scene.interactionEnabled('latch-c'), true, 'the exit handle answers in its own room before the ink');
   assert.equal(scene.prompt('latch-c'), 'E · Gài chốt cửa ra', 'the handle advertises its action');
   scene.interact('latch-c');
   assert.equal(scene.progress.flags['l4-latch-c'], undefined, 'an early E never latches the exit');
-  assert.equal(scene.said.length, 1, 'an early E gives exactly one inspection line');
-  const text = saidText(scene);
-  // The approved §7 line is character speech and no longer carries the key name; the lantern key
-  // stays in the existing instruction channel (objective), which this controller still writes.
-  assert.equal(text, 'Những vệt trên nền còn mờ quá. Mình thử tắt đèn để xem chúng dẫn tới đâu.',
-    `the early handle uses the approved missing-observation line (${text})`);
-  // Step 2 (call Lumo to C) comes first in the numbered list; the lantern key appears once step 3 is current.
-  assert.equal(scene.getObjectiveText(), '2/6 Gọi Lumo tới ấn C: nhấn E ở mốc có nhãn C (bên trái).',
-    `before C is held the instruction is the call (${scene.getObjectiveText()})`);
-  scene.power.c = true;
-  assert.ok(scene.getObjectiveText().includes('F'),
-    `the separate instruction channel names the lantern key once C is held (${scene.getObjectiveText()})`);
+  assert.equal(scene.said.length, 1, 'an early E gives exactly one line');
+  assert.deepEqual(scene.said[0], controllerConstant('LATCH_SHUT_LINE'), 'and that line names only the state (the door is shut)');
+  assert.equal(scene.getObjectiveText(), 'Đưa cả hai người tới chân tháp.', 'the objective names the goal, not the step');
 });
 
-controllerCase('the_objective_stops_asking_for_a_C_call_once_C_is_held', () => {
-  const scene = makePathScene('ink', { 'l4-latch-b': true, 'l4-called-c': true }, { player: { x: 300, y: 240 } });
-  scene.power.c = true;
-  const text = scene.getObjectiveText();
-  assert.ok(text.includes('F'), `the instruction channel still names the lantern key (${text})`);
-  assert.equal(text.includes('gọi Lumo tới ấn C'), false,
-    `a legal C-before-ink call is not advertised again (${text})`);
-  assert.ok(text.includes('vệt mực'), `the remaining ink instruction is still truthful (${text})`);
+controllerCase('the_objective_names_goals_only_outside_the_teaching_room', () => {
+  // HUD names goals only (scenario v2 §6): no key, no latch step, no lantern instruction after the entry hall.
+  const texts = [
+    makePathScene('relay', {}, { player: { x: 300, y: 240 } }).getObjectiveText(),
+    makePathScene('relay', { 'l4-latch-a': true }, { player: { x: 300, y: 240 }, power: { b: true }, assignment: 'b', lumoRoom: 'relay' }).getObjectiveText(),
+    makePathScene('ink', { 'l4-latch-b': true }, { player: { x: 300, y: 240 } }).getObjectiveText(),
+    makePathScene('ink', { 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true }, { player: { x: 300, y: 240 }, assignment: 'c' }).getObjectiveText(),
+  ];
+  assert.deepEqual(texts, ['Đưa cả hai người tới chân tháp.', 'Đưa cả hai người tới chân tháp.', 'Đưa cả hai người tới chân tháp.', 'Đi cùng Lumo lên tháp.'],
+    'every station room names the goal');
+  for (const text of texts) assert.equal(/\b[EF]\b/.test(text), false, `no key name in the HUD goal (${text})`);
 });
 
 controllerCase('the_objective_follows_the_main_progress_once_A_has_started', () => {
   const fresh = makePathScene('entry', {});
-  assert.ok(fresh.getObjectiveText().includes('Mốc A'),
-    `the opening line names A as a way on, so a skipped lesson is not a dead end (${fresh.getObjectiveText()})`);
+  assert.equal(fresh.getObjectiveText(), 'Nhờ Lumo mở cửa: nhấn E ở một mốc gọi.', 'the teaching hall names the first way on');
   const started = makePathScene('entry', { 'l4-called-a': true });
-  const startedText = started.getObjectiveText();
-  assert.notEqual(startedText, fresh.getObjectiveText(), 'the lesson line is replaced once A has started');
-  assert.equal(startedText.includes('mốc đứng gần cậu'), false, `the lesson marker stops being named (${startedText})`);
-  assert.ok(startedText.includes('mốc A'), `the objective follows A instead (${startedText})`);
+  assert.equal(started.getObjectiveText(), 'Nhờ Lumo mở cửa: nhấn E ở một mốc gọi.', 'with A started and shut, the same goal stays');
+  const open = makePathScene('entry', { 'l4-called-a': true }, { power: { a: true } });
+  assert.equal(open.getObjectiveText(), 'Qua cửa.', 'an open door A is the next step');
 });
 
-controllerCase('the_reunion_objective_names_the_C_handle_and_lumos_travel', () => {
+controllerCase('the_reunion_objective_names_the_goal_while_lumo_travels', () => {
   const exitReady = { 'l4-latch-b': true, 'l4-latch-c': true, 'l4-memo': true };
   const held = makePathScene('ink', exitReady, { assignment: 'c' });
-  assert.ok(held.getObjectiveText().includes('tay gọi C'), `the handle is named (${held.getObjectiveText()})`);
+  assert.equal(held.getObjectiveText(), 'Đi cùng Lumo lên tháp.', 'the goal is named while Lumo is on the seal');
   const back = makePathScene('ink', exitReady, { travelling: true });
-  assert.ok(back.getObjectiveText().includes('đang về'), `a travelling Lumo is reported (${back.getObjectiveText()})`);
+  assert.equal(back.getObjectiveText(), 'Đi cùng Lumo lên tháp.', 'and while he travels back');
   const near = makePathScene('ink', exitReady);
-  assert.ok(near.getObjectiveText().includes('đã về'), `an arrived Lumo is reported (${near.getObjectiveText()})`);
+  assert.equal(near.getObjectiveText(), 'Đi cùng Lumo lên tháp.', 'and once he is back');
 });
 
 controllerCase('the_lesson_door_never_closes_on_the_players_feet', () => {
@@ -1464,7 +1466,7 @@ function walkInScene(room, flags, prev, now, extra = {}) {
   scene.prevPlayer = { x: prev.x, y: prev.y };
   scene.canStartStory = () => true;
   scene.releaseInteractGuard = compile('releaseInteractGuard', [], { isPathInteractHeld });
-  for (const name of ['advanceLumo', 'updateDoors', 'updateInkProgress', 'updateInkOrder', 'updateInkSequence', 'updateInkGuide', 'updateReunion', 'flushPendingStoryBeat', 'refreshArt']) {
+  for (const name of ['advanceLumo', 'updateDoors', 'updateObservations', 'updateReunion', 'flushPendingStoryBeat', 'refreshArt']) {
     scene[name] = () => {};
   }
   scene.scene = { time: { now: 0 } };
@@ -1579,7 +1581,7 @@ controllerCase('a_room_change_arms_the_walk_in_edge_at_the_arrival', () => {
 
 controllerCase('route_cables_reach_both_ends_and_bend_at_real_corners', () => {
   const expected = [
-    ['entry', 'practice', 205, 2], ['entry', 'a', 215, 0], ['relay', 'b', 234, 0], ['relay', 'a', 380, 0], ['ink', 'c', 477, 3],
+    ['entry', 'practice', 205, 2], ['entry', 'a', 215, 0], ['relay', 'b', 466.5, 0], ['relay', 'a', 450, 0], ['ink', 'c', 477, 3],
   ];
   for (const [room, mark, chord, corners] of expected) {
     const line = getPathRouteLine(room, mark);
@@ -1639,9 +1641,12 @@ controllerCase('rendered_route_stamps_stay_inside_each_run_after_texture_swaps',
     objects: [], scene: { add: { image: (x, y, key) => new RouteImage(x, y, key) } },
     track(image) { this.objects.push(image); return image; },
     progress: { flags: {} }, elementFor: () => undefined, hasPower: () => false, assignment: 'follow',
+    sealInks: [], lanternOn: false,
     addTubeModules: compile('addTubeModules', ['points'], symbols),
     addCable: compile('addCable', ['mark', 'points'], symbols),
-    refreshArt: compile('refreshArt', [], { ...symbols, isPathSeal, isPathCallSpent, pathCallLabel, Phaser: { GameObjects: { Image: RouteImage } } }),
+    refreshArt: compile('refreshArt', [], {
+      ...symbols, getPathClueArtKey: () => null, isPathSeal, isPathCallSpent, pathCallLabel, Phaser: { GameObjects: { Image: RouteImage } },
+    }),
   };
   const extent = (image, from, angle) => {
     const crop = image.isCropped ? image._crop : { x: 0, width: image.width };
@@ -1766,14 +1771,18 @@ controllerCase('the_ink_mark_is_one_continuous_run_and_the_mouths_leave_the_pass
   // measured against the layout's own corridor rect rather than against a literal the case restates, so
   // a mark that no longer covers the walkable band — or masonry that no longer frames it — fails here.
   assert.equal(CONTROLLER_SOURCE.includes("for(const x of [304,412])"), false, 'the two out-of-phase ink stamps are gone');
-  // The mark is the one floor-sized tile that covers the whole band. A stamp drawn smaller than the
-  // corridor — the 240×48 pair this replaced — leaves nothing here and fails on the count; the room's
-  // own background tile is not floor-sized, so it cannot stand in for the mark.
-  const drawn = tileSpriteRects(CONTROLLER_SOURCE)
-    .filter((rect) => rectCovers(rect, PATH_INK_CORRIDOR) && rectInside(rect, PATH_FLOOR_BOUNDS));
-  assert.equal(drawn.length, 1, `exactly one floor-sized tile covers the whole ink corridor band (got ${drawn.length})`);
-  assert.ok(rectCovers(drawn[0], PATH_INK_CORRIDOR),
-    `the drawn ink mark ${JSON.stringify(drawn[0])} covers the layout corridor band ${JSON.stringify(PATH_INK_CORRIDOR)}`);
+  // Scenario v2: the corridor is one non-tiled 460×72 clue image drawn at top-left (72,218), centre (302,254).
+  // It must cover the whole band, and it must not be a tile sprite (the v1 tile pattern).
+  const draws = [...CONTROLLER_SOURCE.matchAll(/addClueImage\('ink-route-dark',(\d+),(\d+),\d+\)/g)];
+  assert.equal(draws.length, 1, `exactly one corridor clue image is drawn (got ${draws.length})`);
+  const [, centreX, centreY] = draws[0];
+  const drawn = { x: Number(centreX) - 230, y: Number(centreY) - 36, width: 460, height: 72 };
+  assert.deepEqual(drawn, { x: 72, y: 218, width: 460, height: 72 }, 'the corridor image is the 460×72 native art at (72,218)');
+  assert.ok(rectCovers(drawn, PATH_INK_CORRIDOR),
+    `the drawn ink mark ${JSON.stringify(drawn)} covers the layout corridor band ${JSON.stringify(PATH_INK_CORRIDOR)}`);
+  assert.equal(/inkRoute\s*=\s*this\.scene\.add\.tileSprite/.test(CONTROLLER_SOURCE), false, 'the corridor is not a tile sprite');
+  assert.equal(tileSpriteRects(CONTROLLER_SOURCE).some((rect) => rectCovers(rect, PATH_INK_CORRIDOR)), false,
+    'and no tile sprite covers the corridor band');
   const slabs = PATH_ROOMS.ink.walls.filter((wall) => wall.x === PATH_INK_CORRIDOR.x && wall.width === PATH_INK_CORRIDOR.width);
   assert.equal(slabs.length, 2, 'the corridor band is flanked by exactly its two authored 348px masonry slabs');
   assert.ok(slabs.some((wall) => wall.y + wall.height === PATH_INK_CORRIDOR.y), 'the north slab ends on the corridor band');
@@ -1988,215 +1997,8 @@ controllerCase('saved_positions_restore_safely_in_every_room_and_state', () => {
 });
 
 /* ------------------------------------------------------------------ *
- * The ink glyph puzzle and its objective (Level 05 ink room)
+ * The scenario-v2 corridor is information, not a puzzle: the glyph sequence and its cases were retired.
  * ------------------------------------------------------------------ */
-
-/** A recording stand-in for a Phaser Graphics object: each draw call is kept, and `clear()` starts a new picture. */
-function recordingGraphics() {
-  const graphics = { calls: [], visible: true, active: true };
-  const record = (name) => (...args) => { graphics.calls.push([name, ...args]); return graphics; };
-  for (const name of ['lineStyle', 'fillStyle', 'strokeCircle', 'fillCircle', 'strokeTriangle', 'fillTriangle', 'strokeRect', 'fillRect', 'setDepth']) {
-    graphics[name] = record(name);
-  }
-  graphics.clear = () => { graphics.calls.length = 0; return graphics; };
-  graphics.setVisible = (value) => { graphics.visible = value; return graphics; };
-  return graphics;
-}
-
-/**
- * The shipped ink-puzzle methods (`updateInkOrder`, `updateInkSequence`, `updateInkGuide`, `drawInkPuzzle`,
- * `refreshInkGlyphs`, `floatInkText`, `queueStoryBeat`) bound for real, inside the shipped `update()` through
- * `walkInScene`. The room's other per-frame systems stay stubbed. `inkFrame` is one frame with the foot on a point.
- */
-function inkPuzzleScene(flags, { at = { x: 300, y: 242 }, lantern = false, power = {}, now = 0, counters = {}, ...extra } = {}) {
-  const scene = walkInScene('ink', flags, at, at, { lanternOn: lantern, power, progress: { flags: { ...flags }, counters }, ...extra });
-  const texts = [];
-  const tweens = [];
-  scene.objects = [];
-  scene.track = (object) => { scene.objects.push(object); return object; };
-  scene.scene = {
-    time: { now },
-    add: {
-      text(x, y, value) {
-        const text = { x, y, value, destroyed: false, setOrigin() { return this; }, setDepth() { return this; }, destroy() { this.destroyed = true; } };
-        texts.push(text);
-        return text;
-      },
-      graphics: () => recordingGraphics(),
-    },
-    tweens: { add(options) { tweens.push(options); return { stop() {} }; } },
-  };
-  scene.pendingStoryBeats = [];
-  scene.canStartStory = () => true;
-  // The class fields the controller initialises in its constructor.
-  scene.lastInkHintAt = -Infinity;
-  scene.inkHitLast = undefined;
-  scene.drawInkPuzzle = compile('drawInkPuzzle', [], {});
-  scene.refreshInkGlyphs = compile('refreshInkGlyphs', [], { PATH_INK_GLYPHS, PATH_INK_ORDER });
-  scene.floatInkText = compile('floatInkText', ['x', 'y', 'value'], {});
-  scene.updateInkOrder = compile('updateInkOrder', [], { INK_ORDER_LINES: controllerConstant('INK_ORDER_LINES') });
-  scene.updateInkSequence = compile('updateInkSequence', [], {
-    PATH_INK_GLYPHS, pathInkGlyphAt, advancePathInkSequence, INK_SEALED_LINES: controllerConstant('INK_SEALED_LINES'),
-  });
-  scene.updateInkGuide = compile('updateInkGuide', [], { pathInkGuideTarget });
-  scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete', 'guard', 'onStale'], {});
-  scene.flushPendingStoryBeat = compile('flushPendingStoryBeat', [], {});
-  scene.drawInkPuzzle();
-  return { scene, texts, tweens };
-}
-/** One shipped frame with the foot body standing on `foot` at time `now` (ms). */
-function inkFrame(scene, foot, now) {
-  scene.stand(foot.x, foot.y - PATH_BODY.feetY);
-  scene.scene.time.now = now;
-  scene.update(16);
-}
-const glyphFoot = (id) => PATH_INK_GLYPHS.find((glyph) => glyph.id === id);
-const CLEAR_FOOT = { x: 300, y: 242 };
-
-controllerCase('ink_sequence_rules_are_pure_and_table_checked', () => {
-  const [ring, triangle, square] = PATH_INK_ORDER;
-  const step = (current, hit) => advancePathInkSequence(current, hit);
-  assert.deepEqual(step(0, ring), { step: 1, event: 'progress' }, 'the first glyph lights');
-  assert.deepEqual(step(1, triangle), { step: 2, event: 'progress' }, 'the second glyph lights');
-  assert.deepEqual(step(2, square), { step: 3, event: 'done' }, 'the last glyph completes the sequence');
-  assert.deepEqual(step(0, undefined), { step: 0, event: 'none' }, 'no glyph under the feet changes nothing');
-  assert.deepEqual(step(2, undefined), { step: 2, event: 'none' }, 'a half-lit sequence stays lit');
-  assert.deepEqual(step(1, ring), { step: 1, event: 'none' }, 'standing on the glyph just lit does not reset');
-  assert.deepEqual(step(2, triangle), { step: 2, event: 'none' }, 'nor does standing on the second one');
-  assert.deepEqual(step(1, square), { step: 0, event: 'reset' }, 'a wrong glyph resets to the start');
-  assert.deepEqual(step(0, triangle), { step: 0, event: 'none' }, 'a wrong glyph before anything is lit is harmless: nothing to lose, no message');
-  assert.deepEqual(step(0, square), { step: 0, event: 'none' }, 'the same for the other out-of-order glyph at the start');
-  assert.deepEqual(step(2, ring), { step: 0, event: 'reset' }, 'an earlier glyph after two are lit resets too');
-  for (const hit of [undefined, ring, triangle, square]) {
-    assert.deepEqual(step(3, hit), { step: 3, event: 'none' }, `step 3 stays complete (hit ${hit})`);
-  }
-  const events = [];
-  let current = 0;
-  for (const hit of [ring, ring, triangle, triangle, square, square]) {
-    const result = step(current, hit);
-    events.push(result.event);
-    current = result.step;
-  }
-  assert.deepEqual(events, ['progress', 'none', 'progress', 'none', 'done', 'none'],
-    'a full run stands on each glyph for several frames and only the entries count');
-});
-
-controllerCase('ink_glyphs_hit_their_feet_and_sit_on_walkable_corridor_floor', () => {
-  assert.deepEqual(PATH_INK_ORDER, ['ring', 'triangle', 'square'], 'the order is ring, triangle, square');
-  assert.deepEqual(PATH_INK_GLYPHS.map((glyph) => glyph.id).sort(), [...PATH_INK_ORDER].sort(),
-    'every glyph has exactly one place in the order');
-  const leftToRight = [...PATH_INK_GLYPHS].sort((a, b) => a.x - b.x).map((glyph) => glyph.id);
-  assert.notDeepEqual(leftToRight, [...PATH_INK_ORDER], 'the order is deliberately not left to right');
-  for (const glyph of PATH_INK_GLYPHS) {
-    const label = `${glyph.id} (${glyph.x},${glyph.y})`;
-    assert.equal(pointInRect(glyph, PATH_INK_CORRIDOR), true, `${label} lies inside the ink corridor`);
-    const center = { x: glyph.x, y: glyph.y - PATH_BODY.feetY };
-    assert.equal(isPathPositionSafe('ink', center), true, `${label}: the foot position is walkable floor`);
-    assert.equal(pathInkGlyphAt(center), glyph.id, `${label}: standing on it hits it`);
-    assert.equal(pathInkGlyphAt({ x: center.x, y: center.y + PATH_INK_HIT_RADIUS }), glyph.id, `${label}: a foot ${PATH_INK_HIT_RADIUS}px away still hits`);
-    assert.equal(pathInkGlyphAt({ x: center.x, y: center.y + PATH_INK_HIT_RADIUS + 1 }), undefined, `${label}: a foot 13px away misses`);
-    assert.equal(pathInkGlyphAt({ x: center.x + PATH_INK_HIT_RADIUS + 1, y: center.y }), undefined, `${label}: sideways 13px misses`);
-  }
-  for (const a of PATH_INK_GLYPHS) {
-    for (const b of PATH_INK_GLYPHS) {
-      if (a === b) continue;
-      assert.ok(Math.hypot(a.x - b.x, a.y - b.y) >= 24, `${a.id} and ${b.id} are at least 24px apart`);
-    }
-  }
-  assert.equal(pathInkGlyphAt({ x: 0, y: 0 }), undefined, 'a point far from every glyph hits nothing');
-});
-
-controllerCase('ink_glyphs_are_avoidable_and_the_straight_walk_never_hits_one', () => {
-  const centreOf = (foot) => ({ x: foot.x, y: foot.y - PATH_BODY.feetY });
-  const walkable = (foot) => isPathPositionSafe('ink', centreOf(foot));
-  // Straight along the corridor centre line (foot y 242), end to end: no glyph is ever touched.
-  for (let x = PATH_INK_CORRIDOR.x + 8; x <= PATH_INK_CORRIDOR.x + PATH_INK_CORRIDOR.width - 8; x += 2) {
-    assert.equal(walkable({ x, y: 242 }), true, `the centre line is walkable at x=${x}`);
-    assert.equal(pathInkGlyphAt(centreOf({ x, y: 242 })), undefined, `walking the centre line at x=${x} touches no glyph`);
-  }
-  // Lanes: the upper lane (foot y 228) holds ring and square, the lower lane (foot y 256) the triangle, so
-  // each glyph can be stepped on or avoided by choosing a lane. Both lanes must be walkable end to end.
-  const laneHits = (y) => {
-    const hits = [];
-    for (let x = PATH_INK_CORRIDOR.x + 8; x <= PATH_INK_CORRIDOR.x + PATH_INK_CORRIDOR.width - 8; x += 2) {
-      assert.equal(walkable({ x, y }), true, `lane y=${y} is walkable at x=${x}`);
-      const hit = pathInkGlyphAt(centreOf({ x, y }));
-      if (hit && hits[hits.length - 1] !== hit) hits.push(hit);
-    }
-    return hits;
-  };
-  assert.deepEqual(laneHits(228), ['square', 'ring'], 'the upper lane crosses square then ring, in that order along the corridor');
-  assert.deepEqual(laneHits(256), ['triangle'], 'the lower lane crosses only the triangle');
-  // The route that solves the puzzle exists without stepping on a wrong glyph: ring (upper lane), then the
-  // lower lane west to the triangle, then up to the square.
-  let step = 0;
-  const route = [{ x: 440, y: 228 }, { x: 440, y: 242 }, { x: 400, y: 252 }, { x: 340, y: 252 }, { x: 290, y: 252 }, { x: 250, y: 256 },
-    { x: 270, y: 242 }, { x: 320, y: 236 }, { x: 340, y: 228 }];
-  const events = [];
-  for (const foot of route) {
-    assert.equal(walkable(foot), true, `route point (${foot.x},${foot.y}) is walkable`);
-    const result = advancePathInkSequence(step, pathInkGlyphAt(centreOf(foot)));
-    step = result.step;
-    if (result.event !== 'none') events.push(result.event);
-  }
-  assert.deepEqual(events, ['progress', 'progress', 'done'], 'the lane route lights ring, triangle, square with no reset');
-});
-
-controllerCase('ink_guide_points_at_what_the_current_step_needs', () => {
-  const artCentre = (id) => {
-    const art = getPathElementArtRect(elementOf('ink', id));
-    return { x: art.x + art.width / 2, y: art.y + art.height / 2 };
-  };
-  const base = { latchB: false, hasPowerC: false, inkRevealed: false, orderKnown: false, seals: false, step: 0,
-    latchC: false, memo: false, lanternOn: false, reunited: false };
-  const at = (overrides) => pathInkGuideTarget({ ...base, ...overrides });
-  assert.deepEqual(at({}), artCentre('latch-b'), 'step 1 points at latch B');
-  assert.deepEqual(at({ latchB: true }), artCentre('call-c'), 'step 2 points at the left call post');
-  assert.deepEqual(at({ latchB: true, orderKnown: true }), { x: 192, y: 242 },
-    'once Lumo has held C the call is done: the next step is the corridor, even with Lumo away');
-  assert.deepEqual(at({ latchB: true, hasPowerC: true }), { x: 192, y: 242 }, 'step 3 points at the corridor entrance');
-  const lit = { latchB: true, hasPowerC: true, inkRevealed: true, orderKnown: true };
-  assert.deepEqual(at({ ...lit, step: 0 }), { x: 440, y: 228 }, 'step 4 points at the ring first');
-  assert.deepEqual(at({ ...lit, step: 1 }), { x: 250, y: 256 }, 'then at the triangle');
-  assert.deepEqual(at({ ...lit, step: 2 }), { x: 340, y: 228 }, 'then at the square');
-  assert.equal(at({ ...lit, lanternOn: true }), undefined, 'with the lantern on the glyphs are hidden, so nothing is pointed at');
-  assert.equal(at({ latchB: true, hasPowerC: true, inkRevealed: true, orderKnown: false }), undefined, 'an unknown order has no glyph to point at');
-  assert.deepEqual(at({ ...lit, seals: true, latchC: false, hasPowerC: true }), artCentre('latch-c'), 'step 5 points at latch C');
-  assert.deepEqual(at({ ...lit, seals: true, latchC: false, hasPowerC: false }), artCentre('call-c'), 'step 5 calls Lumo back to C first when he is away');
-  assert.deepEqual(at({ ...lit, seals: true, latchC: true, memo: false }), artCentre('spiral'), 'step 5 then points at the spiral');
-  assert.deepEqual(at({ ...lit, seals: true, latchC: true, memo: true, reunited: false }), artCentre('latch-c'), 'step 6 points at latch C to recall Lumo');
-  assert.deepEqual(at({ ...lit, seals: true, latchC: true, memo: true, reunited: true }), { x: 574, y: 188 }, 'step 6 then points at the door C stand');
-});
-
-controllerCase('ink_objective_names_the_current_step_out_of_six', () => {
-  const at = { x: 300, y: 240 };
-  const SEALED = { 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-order-known': true, 'l4-ink-seals': true };
-  const LIT = { 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-order-known': true };
-  const EXIT = { ...SEALED, 'l4-latch-c': true, 'l4-memo': true };
-  const cases = [
-    ['1/6 Gọi Lumo tới ấn B: nhấn E ở chốt B, rồi gài chốt.', {}, {}],
-    ['1/6 Gài chốt B: nhấn E ở chốt cạnh cửa B.', {}, { power: { b: true }, assignment: 'b', lumoRoom: 'relay' }],
-    ['2/6 Gọi Lumo tới ấn C: nhấn E ở mốc có nhãn C (bên trái).', { 'l4-latch-b': true }, {}],
-    ['2/6 Lumo đang tới ấn C. Chờ cậu ấy tới nơi.', { 'l4-latch-b': true }, { assignment: 'c', travelling: true }],
-    ['3/6 Tắt đèn bằng F rồi bước vào hành lang để thấy vệt mực.', { 'l4-latch-b': true }, { power: { c: true } }],
-    ['4/6 Chờ Lumo tới ấn C: cậu ấy sẽ cho biết thứ tự dấu mực.', { 'l4-latch-b': true, 'l4-ink-revealed': true }, { power: { c: true } }],
-    ['4/6 Bước lên ba dấu mực theo thứ tự: vòng → tam giác → vuông (đã sáng 0/3).', LIT, {}],
-    ['4/6 Bước lên ba dấu mực theo thứ tự: vòng → tam giác → vuông (đã sáng 2/3).', LIT, { counters: { 'l4-ink-step': 2 } }],
-    ['4/6 Tắt đèn (F) để thấy ba dấu mực.', LIT, { lanternOn: true }],
-    ['5/6 Gài chốt cửa ra ở đầu hành lang (nhấn E), rồi đọc vết xoắn.', SEALED, { power: { c: true } }],
-    ['5/6 Gọi Lumo tới ấn C lại, rồi gài chốt cửa ra.', SEALED, {}],
-    ['5/6 Đọc vết xoắn trên tường để giữ lại mảnh ký ức.', { ...SEALED, 'l4-latch-c': true }, {}],
-    ['6/6 Nhấn E ở tay gọi C để gọi Lumo về, rồi chờ cậu ấy tới gần.', EXIT, { assignment: 'c' }],
-    ['6/6 Lumo đã về tới nơi. Chờ cậu ấy tới gần Nhinh rồi lên tháp.', EXIT, {}],
-    ['6/6 Tới bậc thang và nhấn E.', EXIT, { reunited: true }],
-  ];
-  for (const [expected, flags, options] of cases) {
-    const { counters = {}, ...rest } = options;
-    const scene = makePathScene('ink', flags, { player: at, ...rest, progress: { flags: { ...flags }, counters } });
-    assert.equal(scene.getObjectiveText(), expected, `objective for ${JSON.stringify(flags)} ${JSON.stringify(options)}`);
-    assert.match(scene.getObjectiveText(), /^[1-6]\/6 /, 'every ink objective leads with its step number');
-  }
-});
 
 controllerCase('the_C_threshold_answers_the_door_prompt_only_while_latched', () => {
   // RULE_GAMES §1/§3: inside door C's open threshold the door prompt answers once C is latched, and is silent and
@@ -2216,164 +2018,78 @@ controllerCase('the_C_threshold_answers_the_door_prompt_only_while_latched', () 
   assert.equal(closed.said.length, 0, 'E there speaks nothing and runs nothing');
 });
 
-controllerCase('the_exit_latch_waits_for_the_lit_glyphs_then_latches', () => {
-  const reach = inReachPoint('ink', elementOf('ink', 'latch-c'));
-  const scene = makePathScene('ink', { 'l4-latch-b': true, 'l4-ink-revealed': true }, { player: reach, power: { c: true } });
-  scene.interact('latch-c');
-  assert.equal(scene.progress.flags['l4-latch-c'], undefined, 'the exit stays shut before the glyphs are lit');
-  assert.equal(saidText(scene), 'Chốt này còn khóa. Ba dấu mực trong hành lang phải sáng theo đúng thứ tự.',
-    'the exit names the glyphs as the missing step');
-  scene.progress.flags['l4-ink-seals'] = true;
-  scene.interact('latch-c');
-  assert.equal(scene.progress.flags['l4-latch-c'], true, 'the same handle latches once the glyphs are lit');
-  assert.deepEqual(scene.said.at(-1), controllerConstant('MEMORY'), 'and the memory plays at the hold, as before');
-});
-
-controllerCase('an_old_save_with_the_exit_latch_normalizes_to_solved_glyphs', () => {
-  const normalize = (flags, counters) => {
-    const scene = makePathScene('ink', flags, { progress: { flags: { ...flags }, counters: { ...counters } } });
-    scene.normalizeProgress = compile('normalizeProgress', [], { PATH_INK_ORDER });
-    scene.normalizeProgress();
-    return scene.progress;
+/* ------------------------------------------------------------------ *
+ * The scenario-v2 state model (docs/scenario-v2/puzzle-model.mjs, L05_V2), proven against the shipped rules: the call
+ * decision is choosePathCallAction, a door's openness is pathDoorShouldClose and hasDoorPower, and the posts are the
+ * layout's own elements. The model's states are the game's (room, Lumo's seal, three latches); the walk is
+ * exhaustive, so the count and the stuck test are exact.
+ * ------------------------------------------------------------------ */
+controllerCase('the_v2_state_model_has_32_reachable_states_no_stuck_state_and_a_14_action_solution', () => {
+  // The model's calls are the layout's posts: E holds `·` (A) and `··` (B); R holds the far `·` (A) and `···` (C);
+  // K holds the far `··` (B). Each one must be a registered standing post of its room.
+  const posts = {
+    E: [['call-a', 'A'], ['call-b', 'B']],
+    R: [['call-a-far', 'A'], ['call-c', 'C']],
+    K: [['call-b-far', 'B']],
   };
-  const exitHeld = normalize({ 'l4-latch-b': true, 'l4-latch-c': true }, { 'l4-ink-step': 1.6 });
-  assert.equal(exitHeld.flags['l4-ink-revealed'], true, 'an old exit latch implies the corridor was seen');
-  assert.equal(exitHeld.flags['l4-ink-order-known'], true, 'and the order was learned');
-  assert.equal(exitHeld.flags['l4-ink-seals'], true, 'and the seals are set, so the exit is never stuck');
-  assert.equal(exitHeld.counters['l4-ink-step'], 3, 'the step is 3 whatever the old counter said');
-  assert.equal(normalize({ 'l4-latch-b': true, 'l4-ink-seals': true }, { 'l4-ink-step': 1 }).counters['l4-ink-step'], 3,
-    'seals alone force step 3');
-  assert.equal(normalize({ 'l4-latch-b': true }, { 'l4-ink-step': 9 }).counters['l4-ink-step'], 3, 'a counter above 3 clamps to 3');
-  assert.equal(normalize({ 'l4-latch-b': true }, { 'l4-ink-step': -2 }).counters['l4-ink-step'], 0, 'a negative counter clamps to 0');
-  assert.equal(normalize({ 'l4-latch-b': true }, { 'l4-ink-step': 1.9 }).counters['l4-ink-step'], 1, 'a fraction floors to a whole step');
-  assert.equal(normalize({ 'l4-latch-b': true }, { 'l4-ink-step': Number.NaN }).counters['l4-ink-step'], 0, 'NaN reads as no progress');
-  assert.equal(normalize({ 'l4-latch-b': true }, {}).counters['l4-ink-step'], 0, 'a save with no glyph counter starts at 0');
-});
-
-controllerCase('the_glyph_order_is_learned_from_plate_C_in_any_room', () => {
-  // Lumo holds plate C while Nhinh is elsewhere: the flag is set, and no beat plays outside the ink room.
-  const elsewhere = inkPuzzleScene({ 'l4-latch-b': true }, { power: { c: true } });
-  elsewhere.scene.room = 'entry';
-  inkFrame(elsewhere.scene, CLEAR_FOOT, 0);
-  assert.equal(elsewhere.scene.progress.flags['l4-ink-order-known'], true, 'Lumo on plate C teaches the order from another room');
-  assert.equal(elsewhere.scene.said.length, 0, 'the order beat is not spoken outside the ink room');
-
-  // In the ink room with dialogue busy: the flag is set at once and does not wait for the beat.
-  const busy = inkPuzzleScene({ 'l4-latch-b': true }, { power: { c: true } });
-  busy.scene.canStartStory = () => false;
-  inkFrame(busy.scene, CLEAR_FOOT, 0);
-  assert.equal(busy.scene.progress.flags['l4-ink-order-known'], true, 'the flag never waits for the beat to finish');
-  assert.equal(busy.scene.pendingStoryBeats.length, 1, 'the order beat waits while dialogue is busy');
-  busy.scene.canStartStory = () => true;
-  busy.scene.flushPendingStoryBeat();
-  assert.deepEqual(busy.scene.said.at(-1), controllerConstant('INK_ORDER_LINES'), `the approved-in-spirit order beat plays once (${saidText(busy.scene)})`);
-  inkFrame(busy.scene, CLEAR_FOOT, 100);
-  assert.equal(busy.scene.said.length, 1, 'and it is not repeated');
-});
-
-controllerCase('unknown_order_ignores_the_glyphs_and_hints_at_most_once_per_4s', () => {
-  const ring = glyphFoot('ring');
-  const s = inkPuzzleScene({ 'l4-latch-b': true, 'l4-ink-revealed': true }, { now: 10000 });
-  inkFrame(s.scene, ring, 10000);
-  assert.equal(s.scene.progress.counters['l4-ink-step'] ?? 0, 0, 'no step is recorded before the order is known');
-  assert.equal(s.texts.length, 1, 'stepping on a glyph in the dark shows one hint');
-  assert.equal(s.texts[0].value, 'Chưa biết thứ tự. Nhờ Lumo tới ấn C xem.', 'the hint names the missing step');
-  inkFrame(s.scene, CLEAR_FOOT, 10500);
-  inkFrame(s.scene, ring, 11000);
-  assert.equal(s.texts.length, 1, 'a re-entry within 4 seconds shows nothing new');
-  inkFrame(s.scene, CLEAR_FOOT, 14000);
-  inkFrame(s.scene, ring, 15000);
-  assert.equal(s.texts.length, 2, 'after 4 seconds the hint can show again');
-  assert.equal(s.scene.progress.counters['l4-ink-step'] ?? 0, 0, 'and still no progress');
-});
-
-controllerCase('the_three_glyphs_seal_the_exit_in_order_with_the_lantern_off', () => {
-  const s = inkPuzzleScene({ 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-order-known': true }, { lantern: true });
-  const { scene } = s;
-  inkFrame(scene, glyphFoot('ring'), 100);
-  assert.equal(scene.progress.counters['l4-ink-step'] ?? 0, 0, 'with the lantern on the glyphs do not count');
-  assert.equal(s.texts.length, 0, 'and show nothing');
-  scene.lanternOn = false;
-  inkFrame(scene, CLEAR_FOOT, 200);
-  inkFrame(scene, glyphFoot('ring'), 300);
-  assert.equal(scene.progress.counters['l4-ink-step'], 1, 'the ring lights in the dark');
-  inkFrame(scene, glyphFoot('ring'), 400);
-  assert.equal(scene.progress.counters['l4-ink-step'], 1, 'standing on it does not light or reset again');
-  inkFrame(scene, glyphFoot('triangle'), 500);
-  assert.equal(scene.progress.counters['l4-ink-step'], 2, 'the triangle is next');
-  inkFrame(scene, glyphFoot('square'), 600);
-  assert.equal(scene.progress.counters['l4-ink-step'], 3, 'the square completes the sequence');
-  assert.equal(scene.progress.flags['l4-ink-seals'], true, 'the seals are set');
-  assert.deepEqual(scene.said.at(-1), controllerConstant('INK_SEALED_LINES'), 'and Nhinh says the one line');
-  assert.deepEqual(s.texts.map((text) => text.value), ['Sáng lên!', 'Sáng lên!', 'Sáng lên!'], 'each light pops a floating line');
-  inkFrame(scene, glyphFoot('ring'), 700);
-  assert.equal(scene.progress.counters['l4-ink-step'], 3, 'a finished sequence stays finished');
-
-  // Saved and loaded again: the normalised progress keeps the solved state.
-  const reloaded = makePathScene('ink', {}, { progress: JSON.parse(JSON.stringify(scene.progress)) });
-  reloaded.normalizeProgress = compile('normalizeProgress', [], { PATH_INK_ORDER });
-  reloaded.normalizeProgress();
-  assert.equal(reloaded.progress.flags['l4-ink-seals'], true, 'the seals survive a save and load');
-  assert.equal(reloaded.progress.counters['l4-ink-step'], 3, 'and so does the completed step');
-});
-
-controllerCase('a_wrong_glyph_resets_the_sequence_and_says_so', () => {
-  const s = inkPuzzleScene({ 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-order-known': true },
-    { counters: { 'l4-ink-step': 1 } });
-  const { scene } = s;
-  const lit = () => scene.inkGlyphs.calls.filter((call) => call[0] === 'fillCircle' || call[0] === 'fillTriangle' || call[0] === 'fillRect');
-  assert.equal(lit().length, 1, 'the ring is drawn filled from the saved step');
-  inkFrame(scene, glyphFoot('square'), 100);
-  assert.equal(scene.progress.counters['l4-ink-step'], 0, 'the square out of order resets the sequence');
-  assert.equal(s.texts.at(-1).value, 'Vết mực nhòe đi. Thử lại từ đầu.', 'the reset says so, without a dialogue box');
-  assert.equal(scene.said.length, 0, 'no dialogue opens for a reset');
-  assert.equal(lit().length, 0, 'every glyph is drawn un-filled again');
-});
-
-controllerCase('ink_glyphs_fill_only_when_lit_and_show_only_in_the_dark', () => {
-  const s = inkPuzzleScene({ 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-order-known': true }, { counters: { 'l4-ink-step': 1 } });
-  const { scene } = s;
-  assert.equal(scene.inkGlyphs.visible, true, 'the glyphs show while the lantern is off');
-  const fills = scene.inkGlyphs.calls.filter((call) => ['fillCircle', 'fillTriangle', 'fillRect'].includes(call[0]));
-  assert.deepEqual(fills.map((call) => call.slice(0, 2)), [['fillCircle', 440]], 'only the ring, the first glyph, is filled');
-  scene.lanternOn = true;
-  scene.refreshInkGlyphs();
-  assert.equal(scene.inkGlyphs.visible, false, 'the glyphs are hidden while the lantern is on');
-  scene.lanternOn = false;
-  scene.refreshInkGlyphs();
-  assert.equal(scene.inkGlyphs.visible, true, 'and shown again when it goes off');
-});
-
-controllerCase('the_guide_ring_follows_the_step_and_only_draws_in_the_ink_room', () => {
-  const s = inkPuzzleScene({}, {});
-  const ringAt = () => {
-    const last = s.scene.inkGuide.calls.filter((call) => call[0] === 'strokeCircle').at(-1);
-    return s.scene.inkGuide.visible && last ? last.slice(1) : null;
+  const roomOf = { E: 'entry', R: 'relay', K: 'ink' };
+  for (const [room, list] of Object.entries(posts)) {
+    for (const [id] of list) assert.ok(PATH_ROOMS[roomOf[room]].elements.some((e) => e.id === id), `${roomOf[room]}/${id} is a layout post`);
+  }
+  const key = (s) => `${s.room}|${s.lumo}|${+s.lA}${+s.lB}${+s.lC}|${+s.done}`;
+  const start = { room: 'E', lumo: 'F', lA: false, lB: false, lC: false, done: false };
+  const next = (s) => {
+    if (s.done) return [];
+    const out = [];
+    const push = (label, patch) => out.push([label, { ...s, ...patch }]);
+    const latched = { A: s.lA, B: s.lB, C: s.lC };
+    // A post: a latched door's post is spent; otherwise the shipped decision picks recall (on the same plate) or send.
+    for (const [, mark] of posts[s.room]) {
+      if (latched[mark]) continue;
+      const action = choosePathCallAction(s.lumo === 'F' ? 'follow' : s.lumo, mark, true);
+      push(`E ${mark}`, action === 'recall' ? { lumo: 'F' } : { lumo: mark });
+    }
+    // A latch answers only from its own room with Lumo on its seal (hasDoorPower), and a shut latch says so and changes nothing.
+    if (s.room === 'R' && !s.lA && s.lumo === 'A') push('E chốt A', { lA: true });
+    if (s.room === 'K' && !s.lB && s.lumo === 'B') push('E chốt B', { lB: true });
+    if (s.room === 'K' && !s.lC && s.lumo === 'C') push('E chốt C', { lC: true });
+    if (s.room === 'K' && s.lC && s.lumo !== 'F') push('E tay C: gọi Lumo về', { lumo: 'F' });
+    // Doors: a door is open while Lumo holds its seal or it is latched (pathDoorShouldClose is the shipped rule).
+    const openA = !pathDoorShouldClose(s.lumo === 'A', false, s.lA);
+    const openB = !pathDoorShouldClose(s.lumo === 'B', false, s.lB);
+    if (s.room === 'E' && openA) push('qua cửa A → R', { room: 'R' });
+    if (s.room === 'R' && openA) push('qua cửa A → E', { room: 'E' });
+    if (s.room === 'R' && openB) push('qua cửa B → K', { room: 'K' });
+    if (s.room === 'K' && openB) push('qua cửa B → R', { room: 'R' });
+    if (s.room === 'K' && s.lC && s.lumo === 'F') push('E cầu thang', { done: true });
+    return out.filter(([, n]) => key(n) !== key(s));
   };
-  const centreOf = (id) => {
-    const art = getPathElementArtRect(elementOf('ink', id));
-    return [art.x + art.width / 2, art.y + art.height / 2, 14];
-  };
-  inkFrame(s.scene, CLEAR_FOOT, 0);
-  assert.deepEqual(ringAt(), centreOf('latch-b'), 'step 1: the ring is round latch B');
-  s.scene.progress.flags['l4-latch-b'] = true;
-  inkFrame(s.scene, CLEAR_FOOT, 10);
-  assert.deepEqual(ringAt(), centreOf('call-c'), 'step 2: the ring moves to the call post for C');
-  s.scene.power.c = true;
-  inkFrame(s.scene, CLEAR_FOOT, 20);
-  assert.deepEqual(ringAt(), [192, 242, 14], 'step 3: the ring is at the corridor entrance');
-  s.scene.progress.flags['l4-ink-revealed'] = true;
-  s.scene.progress.flags['l4-ink-order-known'] = true;
-  inkFrame(s.scene, CLEAR_FOOT, 30);
-  assert.deepEqual(ringAt(), [440, 228, 14], 'step 4: the ring is on the first glyph');
-  s.scene.lanternOn = true;
-  inkFrame(s.scene, CLEAR_FOOT, 40);
-  assert.equal(ringAt(), null, 'with the lantern on there is no glyph to show, so the ring is hidden');
-  assert.equal(s.tweens.length, 1, 'the guide pulses on one tween, created by the ink room build');
-  assert.equal(s.tweens[0].targets, s.scene.inkGuide, 'and that tween belongs to the guide object');
+  const nodes = new Map([[key(start), start]]);
+  const edges = new Map();
+  const queue = [start];
+  while (queue.length) {
+    const s = queue.shift();
+    const list = next(s);
+    edges.set(key(s), list.map(([label, n]) => [label, key(n)]));
+    for (const [, n] of list) if (!nodes.has(key(n))) { nodes.set(key(n), n); queue.push(n); }
+  }
+  // Distance to the stair (reverse search): a state with no path to `done` is stuck.
+  const reverse = new Map([...nodes.keys()].map((k) => [k, []]));
+  for (const [from, list] of edges) for (const [, to] of list) reverse.get(to).push(from);
+  const dist = new Map();
+  const goal = [];
+  for (const [k, s] of nodes) if (s.done) { dist.set(k, 0); goal.push(k); }
+  for (let i = 0; i < goal.length; i += 1) {
+    for (const from of reverse.get(goal[i])) if (!dist.has(from)) { dist.set(from, dist.get(goal[i]) + 1); goal.push(from); }
+  }
+  const stuck = [...nodes.keys()].filter((k) => !dist.has(k));
+  assert.equal(nodes.size, 32, `the reachable states (${nodes.size})`);
+  assert.deepEqual(stuck, [], 'no reachable state is stuck');
+  assert.equal(dist.get(key(start)), 14, `the shortest solution is 14 actions (${dist.get(key(start))})`);
+  console.log(`      L05 v2 state model: ${nodes.size} reachable states, ${stuck.length} stuck, ${dist.get(key(start))}-action solution`);
 });
 
-// One summary, one exit code. A failing case is named here and turns the run red: `14/15 passed`
+// One summary, one exit code.
 // followed by exit 0 would gate nothing.
 console.log(`\nlevel 05 cases: ${controllerCaseCount - controllerFailures.length}/${controllerCaseCount} passed`);
 if (controllerFailures.length) {

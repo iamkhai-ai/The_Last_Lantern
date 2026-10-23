@@ -7,7 +7,7 @@
 **Mục tiêu:** Đưa cả hai người qua trạm dẫn nước tới chân tháp.\
 **Kỹ năng mới:** Ủy thác. Lumo chỉ ở được một nơi; mốc gọi không luôn nằm cạnh ấn của nó; phải giữ đường về trước khi để bạn đi.
 
-**Trạng thái:** hướng sửa về nhận diện dấu và nhịp di chuyển đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy trong game là [docs/scenario/05-a-path-for-two.md](../scenario/05-a-path-for-two.md) cùng [bản thoại đã chốt](../scenario/05-a-path-for-two-dialogue-approved.md), vẫn là nguồn chuẩn hiện tại. Các dòng *(mới)* hoặc *(sửa)* thuộc đề xuất v2.
+**Trạng thái:** đã triển khai trên nhánh `feat/level05-scenario-v2` (commit “feat(level05): implement scenario v2”, chưa gộp vào `test-develop`). Bản v1 [docs/scenario/05-a-path-for-two.md](../scenario/05-a-path-for-two.md) và [bản thoại đã chốt](../scenario/05-a-path-for-two-dialogue-approved.md) được giữ nguyên để đối chiếu. Các sai khác so với §8 và lý do ghi trong [docs/implementation/05-layout.md](../implementation/05-layout.md#scenario-v2-marks-featlevel05-scenario-v2-2026-10-23). Các dòng *(mới)* hoặc *(sửa)* thuộc bản triển khai này.
 
 > **Thay đổi so với bản hiện tại**
 >
