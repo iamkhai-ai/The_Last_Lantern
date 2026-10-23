@@ -4,6 +4,24 @@ Source: `docs/scenario/05-a-path-for-two.md`. Scope: Level 05 only (campaign ind
 
 The user has delegated routine design decisions and asked for careful planning followed by Luna high implementation. This document records those decisions without another approval round.
 
+## Scenario v2 marks (feat/level05-scenario-v2, 2026-10-23)
+
+Source: `docs/scenario-v2/05-a-path-for-two.md` §4 and §8. Walls, doors, thresholds, recesses and the pipe mouths are unchanged. The rows below supersede the call and plate rows of the sections that follow where they differ.
+
+| Room | Mark | Art anchor → stand | Reaches | Notes |
+| --- | --- | --- | --- | --- |
+| Hall (entry) | `·` call A | (384,232) → (384,256) | plate A, through door A | unchanged |
+| Hall (entry) | `··` call B | (230,248) → (230,272) | plate B in relay, through pipe A | new; anchor 248 keeps its solid 60px below the practice alcove's call |
+| Relay | `·` far post A | (560,260) → (560,276) | plate A, through pipe A | recovery for door A when it shut behind Nhinh; the doc's (56,228) pocket is sealed by the reverse frame and the partition |
+| Relay | `···` call C | (360,232) → (360,256) | plate C in ink, through pipe B | was the B call (`call-b`); the id is now `call-c` |
+| Ink foyer | `··` far post B | (68,176) → (68,200) | plate B in relay, through pipe B | recovery for door B; the final call mark (100,176) and its solid are removed |
+
+**Deviations from `docs/scenario-v2/05-a-path-for-two.md` §4 and §8:**
+- Far recovery posts are added. §8's list omits them, but without them the relay has two stuck states (measured by the v2 state model in `check-path-for-two.mjs`). The doc's §4 positions are not used as drawn: the relay `·` post at (56,228) sits in a pocket that no walkable route reaches, so it is at (560,260) instead, 60px+ from latch A and call C. The ink `··` post sits at the doc's (68,176).
+- The relay `···` post keeps the old B position (360,232) and changes its id to `call-c`.
+
+Plates: `plate-a` (546,114) in entry, `plate-b` (546,114) in relay (the `··` seal), `plate-c` (558,244) in ink (the `···` seal), practice ring (212,114). Route lines: `PATH_ROUTE_LINES` (`b` entry leads into pipe A; `b` relay runs from pipe A's relay mouth to plate B; `c` relay runs to pipe B; `c` ink runs from pipe B's ink mouth to plate C; `a` relay and `b` ink are the far posts' cables). The ink corridor is one 460×72 clue image at (72,218). Clue art (plaques, seal inks, corridor, chalk) is drawn at runtime from `assets/levels/05-a-path-for-two/scenario-v2-clues/`.
+
 ## Experience and choice
 
 Use three 640×360 rooms inside the existing CampaignScene, owned by a focused `PathForTwoLevel` controller. A single packed view would make the practice door, two relay doors and ink route compete for space; a scrolling map would require wider camera and UI changes. Local room transitions preserve the existing scene, save format and ten-level sequence. No general room engine is needed.

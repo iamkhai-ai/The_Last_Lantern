@@ -3,24 +3,24 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { choosePathCallAction, getPathExitBlock, hasDoorPower, isActuallyReunited, isPathApproachAllowed, isPathCallSpent, isPathInteractHeld, pathActorBody, PATH_INK_CORRIDOR, PATH_ROOMS, rectsOverlap } from '../src/data/pathForTwoLayout.ts';
+import { PATH_CHALK_VIEW, PATH_DOOR_FACES, PATH_ROOMS, hasDoorPower, isPathCallSpent, isPathInteractHeld, pathActorBody, rectsOverlap } from '../src/data/pathForTwoLayout.ts';
+import { CAMPAIGN_LEVELS } from '../src/data/campaignLevels.ts';
 
 /**
- * Level 05 approved-dialogue regression.
+ * Level 05 dialogue regression, bound to the scenario v2 document.
  *
- * Source of truth: docs/scenario/05-a-path-for-two-dialogue-approved.md. This check binds the
- * *shipped* PathForTwoLevel method bodies (the same TypeScript-API extraction used by
- * check-path-for-two.mjs) and asserts two things separately:
- *   1. the copy is verbatim, and
- *   2. a line is only spoken when its local truth condition holds at playback time.
- *
- * It is deliberately narrower than check-path-for-two.mjs: geometry, interaction faces and save
- * restoration stay covered there.
+ * Source of truth: docs/scenario-v2/05-a-path-for-two.md (§2–§8). The v1 approved copy in docs/scenario/ stays in the
+ * repository for diffing and is no longer the reference. This check:
+ *   1. finds every line of speech the v2 document writes (`**Speaker:** “…”`), every quoted H, HUD and journal line
+ *      of its §6 tables, and asserts each one is shipped verbatim in PathForTwoLevel.ts;
+ *   2. asserts the v1 lines that v2 removes are gone;
+ *   3. binds the shipped methods that decide when a line may speak (send, the first leave from an unlatched seal, the
+ *      pipe echo, the observations, the chalk, the exit latch, the H stage) and checks each against its condition.
  */
 const rootDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTROLLER_FILE = join(rootDir, 'src/levels/PathForTwoLevel.ts');
 const CONTROLLER_SOURCE = readFileSync(CONTROLLER_FILE, 'utf8');
-const APPROVED_DOC = readFileSync(join(rootDir, 'docs/scenario/05-a-path-for-two-dialogue-approved.md'), 'utf8');
+const V2_DOC = readFileSync(join(rootDir, 'docs/scenario-v2/05-a-path-for-two.md'), 'utf8');
 const controllerAst = ts.createSourceFile(CONTROLLER_FILE, CONTROLLER_SOURCE, ts.ScriptTarget.Latest, true);
 
 const nodeText = (node) => node.getText(node.getSourceFile());
@@ -32,10 +32,10 @@ function findNode(root, predicate) {
 }
 function methodBody(name) {
   const method = findNode(controllerAst, (node) => ts.isMethodDeclaration(node) && nodeText(node.name) === name);
-  assert.ok(method, `PathForTwoLevel still declares ${name}()`);
-  assert.ok(method.body, `${name}() still has a body`);
+  assert.ok(method?.body, `PathForTwoLevel still declares ${name}() with a body`);
   return nodeText(method.body);
 }
+/** A module-level constant of the controller, evaluated from its own source. */
 function constant(name) {
   const declaration = findNode(controllerAst, (node) => ts.isVariableDeclaration(node) && nodeText(node.name) === name);
   assert.ok(declaration?.initializer, `PathForTwoLevel still authors ${name}`);
@@ -44,7 +44,14 @@ function constant(name) {
   return new Function(`"use strict";\n${js}\nreturn __value;`)();
 }
 const IDENTITY_TR = (text, params) => (params ? text.replace(/\{(\w+)\}/g, (match, key) => (key in params ? String(params[key]) : match)) : text);
-
+/** A module-level function of the controller, evaluated from its own source (its `tr` is the identity table). */
+function functionDecl(name) {
+  const declaration = findNode(controllerAst, (node) => ts.isFunctionDeclaration(node) && node.name?.text === name);
+  assert.ok(declaration, `PathForTwoLevel still declares ${name}()`);
+  const js = ts.transpileModule(`const __fn = (${nodeText(declaration).replace(/^function\s+\w+/, 'function')});`,
+    { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } }).outputText;
+  return new Function('tr', `"use strict";\n${js}\nreturn __fn;`)(IDENTITY_TR);
+}
 function compile(name, parameters, symbols) {
   symbols = { tr: IDENTITY_TR, ...symbols };
   const names = Object.keys(symbols);
@@ -59,205 +66,26 @@ function compile(name, parameters, symbols) {
 const show = (lines) => lines.map((line) => `${line.speaker}: ${line.text}`).join(' | ');
 
 /* ------------------------------------------------------------------ *
- * Approved copy — one literal list per approved beat
+ * 1. The v2 document's copy, verbatim in the shipped controller
  * ------------------------------------------------------------------ */
-const INTRO = [
-  { speaker: 'Nhinh', text: 'Cửa đóng rồi. Phía này không có tay mở.' },
-  { speaker: 'Lumo', text: 'Có một đường ống nhỏ bên cạnh. Tôi chui qua được.' },
-  { speaker: 'Nhinh', text: 'Dấu cạnh đường ống trông giống cánh của cậu.' },
-  { speaker: 'Lumo', text: 'Để tôi đi theo đường này xem bên kia có gì nhé?' },
-  { speaker: 'Nhinh', text: 'Ừ. Tôi chờ ở đây.' },
-];
-const ENDING = [
-  { speaker: 'Nhinh', text: 'Nước đang bị hút lên tháp.' },
-  { speaker: 'Lumo', text: 'Ngọn đèn trên đó vẫn sáng…' },
-  { speaker: 'Nhinh', text: 'Mình lên xem có cách trả nước về suối không.' },
-];
-const MEMORY = [
-  { speaker: 'Lumo', text: 'Vết xoắn kia… Tôi đã thấy nó rồi.' },
-  { speaker: 'Nhinh', text: 'Trong đêm bão à?' },
-  { speaker: 'Lumo', text: 'Ừ. Tôi đã bay qua đường ống này. Có người gọi bên ngoài, nhưng tôi không nhớ họ gọi tên ai.' },
-  { speaker: 'Nhinh', text: 'Cậu có muốn nghỉ một lát không?' },
-  { speaker: 'Lumo', text: 'Tôi sợ lát nữa lại quên mất.' },
-  { speaker: 'Nhinh', text: 'Vậy tôi ghi lại ngay. Cậu nhớ thêm gì thì cứ nói, tôi sẽ chép.' },
-  { speaker: 'Lumo', text: 'Ghi cả vết xoắn này nhé.' },
-];
-const SEND = {
-  practice: [
-    { speaker: 'Nhinh', text: 'Lumo, cậu tới dấu kia rồi chờ tôi một chút được không?' },
-    { speaker: 'Lumo', text: 'Được. Tôi đi đây!' },
-  ],
-  a: [
-    { speaker: 'Nhinh', text: 'Cậu tới dấu bên kia giúp tôi nhé. Tôi sẽ tìm cách giữ cửa mở.' },
-    { speaker: 'Lumo', text: 'Được. Cậu cứ từ từ.' },
-  ],
-  b: [
-    { speaker: 'Nhinh', text: 'Bên này còn một dấu nữa. Cậu tới đó giúp tôi nhé?' },
-    { speaker: 'Lumo', text: 'Được. Tôi đi đây.' },
-  ],
-  c: [
-    { speaker: 'Nhinh', text: 'Cậu tới đầu bên kia nhé. Tôi sẽ theo những vạch trên nền.' },
-    { speaker: 'Lumo', text: 'Được. Tôi sẽ chờ cậu ở đó.' },
-  ],
-};
-const PRACTICE_ARRIVAL = [
-  { speaker: 'Lumo', text: 'Tôi tới rồi. Cửa có mở không?' },
-  { speaker: 'Nhinh', text: 'Mở rồi! May mà cậu lọt qua được khe đó.' },
-  { speaker: 'Lumo', text: 'Nhỏ cũng có ích chứ. Tôi chờ ở đây, cậu cứ đi đi.' },
-];
-const RECALL = [
-  { speaker: 'Nhinh', text: 'Xong rồi, Lumo. Cậu trở lại đây nhé.' },
-  { speaker: 'Lumo', text: 'Tôi về ngay.' },
-];
-const FINAL_RECALL = [
-  { speaker: 'Nhinh', text: 'Cửa đã có chốt giữ rồi. Lumo, cậu về đây nhé.' },
-  { speaker: 'Lumo', text: 'Tôi về ngay.' },
-];
-const RETURN = [
-  { speaker: 'Lumo', text: 'Tôi về rồi.' },
-  { speaker: 'Nhinh', text: 'Được rồi. Mình cùng lên nhé.' },
-];
-const LATCH_A = [
-  { speaker: 'Nhinh', text: 'Chốt đã giữ cửa rồi. Cậu có thể rời dấu đó.' },
-  { speaker: 'Lumo', text: 'Vậy tôi không phải đứng đây mãi nữa!' },
-];
-const LATCHED_CALL = [{ speaker: 'Lumo', text: 'Cửa này đã có chốt giữ rồi. Tôi không cần đứng ở dấu nữa.' }];
-const FIRST_LIT = [
-  { speaker: 'Nhinh', text: 'Trên nền có những vệt mực, nhưng mờ quá.' },
-  { speaker: 'Lumo', text: 'Thử tắt đèn xem. Giống trang sách trong thư viện ấy.' },
-  { speaker: 'Nhinh', text: 'Ừ. Có lẽ chúng chỉ đường qua hành lang.' },
-];
-const DARK = [{ speaker: 'Nhinh', text: 'Hiện rõ rồi! Những vạch này dẫn tới cuối hành lang.' }];
-const RELIT = [{ speaker: 'Nhinh', text: 'Ánh đèn lại làm những vạch trên nền mờ đi rồi.' }];
-const BECKON = [
-  { speaker: 'Lumo', text: 'Ở đây, Nhinh! Cậu sắp tới rồi.' },
-  { speaker: 'Nhinh', text: 'Thấy cậu rồi!' },
-];
-const NEXT_MARK_UNLATCHED = [{ speaker: 'Nhinh', text: 'Khoan đã. Tôi chưa gài chốt cửa này. Cậu chờ thêm một chút nhé.' }];
-const STILL_TRAVELLING = [{ speaker: 'Nhinh', text: 'Lumo vẫn đang trên đường tới. Mình đợi cậu ấy một chút.' }];
-const MARK_NOT_CALLED = [{ speaker: 'Nhinh', text: 'Có một dấu ở bên kia cửa. Mình thử nhờ Lumo tới đó xem.' }];
-const INK_NOT_SEEN = [{ speaker: 'Nhinh', text: 'Những vệt trên nền còn mờ quá. Mình thử tắt đèn để xem chúng dẫn tới đâu.' }];
-const TOWER_NEEDS_LUMO = [{ speaker: 'Nhinh', text: 'Mình chưa thể đi mà bỏ Lumo ở lại. Phải gọi cậu ấy về đã.' }];
 
-/* ------------------------------------------------------------------ *
- * Scene stand-in
- * ------------------------------------------------------------------ */
-function makeScene(room, flags, extra = {}) {
-  const scene = {
-    room,
-    progress: { flags: { ...flags }, counters: {} },
-    player: { x: PATH_ROOMS[room].spawn.x, y: PATH_ROOMS[room].spawn.y },
-    assignment: 'follow',
-    lumoRoom: room,
-    lantern: { lanternOn: false },
-    said: [],
-    saved: 0,
-    nextLevels: [],
-    sent: [],
-    recalled: 0,
-    pendingStoryBeats: [],
-    canStartStory: () => true,
-    lastLantern: false,
-    beckoningQueued: false,
-    litObservationQueued: false,
-    darkObservationQueued: false,
-    relitQueued: false,
-    reunionQueued: false,
-    ...extra,
-  };
-  Object.defineProperty(scene, 'lanternOn', { get() { return this.lantern.lanternOn; } });
-  scene.say = (lines, onComplete) => { scene.said.push(lines); onComplete?.(); };
-  scene.save = () => { scene.saved += 1; };
-  scene.nextLevel = (lines) => scene.nextLevels.push(lines);
-  scene.isTravelling = () => false;
-  scene.hasPower = (mark) => hasDoorPower(mark, {
-    assignment: scene.assignment, lumoRoom: scene.lumoRoom, lumoX: scene.lumo.sprite.x, lumoY: scene.lumo.sprite.y,
-  });
-  scene.lumo = {
-    sprite: {
-      x: PATH_ROOMS[room].spawn.x - 22,
-      y: PATH_ROOMS[room].spawn.y - 18,
-      setPosition(x, y) { this.x = x; this.y = y; },
-    },
-    update() {},
-    setVisible() {},
-  };
-  scene.persistRoute = () => {};
-  scene.pipeRoute = () => [];
-  scene.buildAssignmentRoute = () => [{ room, x: scene.player.x + 1, y: scene.player.y + 1 }];
-  scene.isAtInkCorridor = compile('isAtInkCorridor', [], { PATH_INK_CORRIDOR, pathActorBody, rectsOverlap });
-  scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete', 'guard', 'onStale'], {});
-  scene.flushPendingStoryBeat = compile('flushPendingStoryBeat', [], {});
-  scene.isActuallyReunited = compile('isActuallyReunited', [], { isActuallyReunited });
-  // The lantern toggle also redraws the ink glyphs (check-path-for-two.mjs owns their behaviour); this copy check only needs the call to exist.
-  scene.refreshInkGlyphs = () => {};
-  return scene;
+/** Speech in the document: `**Speaker:** “text”`. The H ladder labels (`**Mức N …:**`) are not speech and are skipped. */
+const speech = [...V2_DOC.matchAll(/\*\*([^*\n]+?):\*\*\s*“([^”\n]+)”/g)]
+  .map(([, speaker, text]) => ({ speaker, text }))
+  .filter(({ speaker }) => !speaker.startsWith('Mức'));
+/**
+ * The §6 tables and journal bullets: each quoted line of the step ladder, the HUD and the J notes. Excluded: the
+ * general ladder ("Thang gợi ý chính", the step table replaces it) and the two lines the document marks as removed (**bỏ**).
+ */
+const section6Lines = [];
+let inGeneralLadder = false;
+for (const line of V2_DOC.slice(V2_DOC.indexOf('## 6. '), V2_DOC.indexOf('## 7. ')).split('\n')) {
+  if (line.startsWith('### ')) inGeneralLadder = line.startsWith('### Thang gợi ý chính');
+  if (!inGeneralLadder && !line.includes('**bỏ**')) section6Lines.push(line);
 }
-const saidText = (scene) => scene.said.flat().map((line) => line.text).join(' | ');
-
-/* ------------------------------------------------------------------ *
- * Bindings used by the cases
- * ------------------------------------------------------------------ */
-const CONSTANTS = () => ({
-  INTRO: constant('INTRO'), ENDING: constant('ENDING'), MEMORY: constant('MEMORY'), SEND_LINES: constant('SEND_LINES'),
-  PRACTICE_ARRIVAL: constant('PRACTICE_ARRIVAL'), RECALL_LINES: constant('RECALL_LINES'),
-  FINAL_RECALL_LINES: constant('FINAL_RECALL_LINES'), RETURN_LINES: constant('RETURN_LINES'),
-  LATCH_A_LINES: constant('LATCH_A_LINES'), LATCHED_CALL_LINES: constant('LATCHED_CALL_LINES'),
-  FIRST_LIT_LINES: constant('FIRST_LIT_LINES'), DARK_LINES: constant('DARK_LINES'), RELIT_LINES: constant('RELIT_LINES'),
-  BECKON_LINES: constant('BECKON_LINES'), NEXT_MARK_UNLATCHED: constant('NEXT_MARK_UNLATCHED'),
-  STILL_TRAVELLING: constant('STILL_TRAVELLING'), MARK_NOT_CALLED: constant('MARK_NOT_CALLED'),
-  INK_NOT_SEEN: constant('INK_NOT_SEEN'), TOWER_NEEDS_LUMO: constant('TOWER_NEEDS_LUMO'),
-});
-function bindSend(scene) {
-  scene.send = compile('send', ['mark'], { SEND_LINES: constant('SEND_LINES'), LATCHED_CALL_LINES: constant('LATCHED_CALL_LINES') });
-}
-function bindRecall(scene) {
-  scene.recallToCall = compile('recallToCall', ['id'], {
-    RECALL_LINES: constant('RECALL_LINES'), FINAL_RECALL_LINES: constant('FINAL_RECALL_LINES'),
-  });
-}
-function bindInk(scene) {
-  scene.updateInkProgress = compile('updateInkProgress', [], {
-    PATH_INK_CORRIDOR, pathActorBody, rectsOverlap, getLevelArtKey: () => null,
-    FIRST_LIT_LINES: constant('FIRST_LIT_LINES'), DARK_LINES: constant('DARK_LINES'),
-    RELIT_LINES: constant('RELIT_LINES'), BECKON_LINES: constant('BECKON_LINES'),
-  });
-}
-function bindReunion(scene) {
-  scene.updateReunion = compile('updateReunion', [], { RETURN_LINES: constant('RETURN_LINES') });
-}
-function bindInteract(scene) {
-  scene.callMark = compile('callMark', ['id'], {});
-  scene.callEligible = compile('callEligible', ['mark'], {});
-  scene.latchCBlockReason = compile('latchCBlockReason', [], {
-    INK_NOT_SEEN: constant('INK_NOT_SEEN'), MARK_NOT_CALLED: constant('MARK_NOT_CALLED'),
-  });
-  scene.interact = compile('interact', ['id'], {
-    MEMORY: constant('MEMORY'), choosePathCallAction,
-    LATCH_A_LINES: constant('LATCH_A_LINES'), NEXT_MARK_UNLATCHED: constant('NEXT_MARK_UNLATCHED'),
-    STILL_TRAVELLING: constant('STILL_TRAVELLING'),
-  });
-  scene.send = (mark) => scene.sent.push(mark);
-  scene.recallToCall = () => { scene.recalled += 1; };
-}
-/** The shipped E gate in front of interact(): held-E, the approach predicate and the spent-post check. */
-function bindLivePress(scene) {
-  scene.isInteractKeyDown = compile('isInteractKeyDown', [], {});
-  scene.heldInteract = compile('heldInteract', [], { isPathInteractHeld });
-  scene.elementFor = compile('elementFor', ['id'], { PATH_ROOMS });
-  scene.pathReachOptions = compile('pathReachOptions', [], {});
-  scene.elementApproach = compile('elementApproach', ['id', 'x', 'y'], { PATH_ROOMS, isPathApproachAllowed });
-  scene.interactionEnabled = compile('interactionEnabled', ['id'], { isPathCallSpent });
-}
-function bindDoor(scene) {
-  // E at a door is `useDoor` (the gate), which hands an accepted press to `runDoor` (the same path a walk-in takes).
-  scene.useDoor = compile('useDoor', ['id'], {});
-  scene.runDoor = compile('runDoor', ['id'], {
-    PATH_ROOMS, getPathExitBlock, getPathBackArrival: () => ({ x: 0, y: 0 }),
-    STILL_TRAVELLING: constant('STILL_TRAVELLING'), MARK_NOT_CALLED: constant('MARK_NOT_CALLED'),
-    TOWER_NEEDS_LUMO: constant('TOWER_NEEDS_LUMO'),
-  });
-}
+const quotedInSection6 = section6Lines.flatMap((line) => [...line.matchAll(/“([^”\n]+)”/g)].map(([, text]) => text));
+const missingVerbatim = [...new Set([...speech.map((line) => line.text), ...quotedInSection6])]
+  .filter((text) => !CONTROLLER_SOURCE.includes(text));
 
 const failures = [];
 let count = 0;
@@ -273,393 +101,266 @@ function dialogueCase(name, run) {
   }
 }
 
-/* ------------------------------------------------------------------ *
- * 1. Verbatim approved copy
- * ------------------------------------------------------------------ */
-dialogueCase('approved_copy_is_verbatim', () => {
-  assert.deepEqual(constant('INTRO'), INTRO, 'intro is the approved §1 copy');
-  assert.deepEqual(constant('ENDING'), ENDING, 'tower-base copy is the approved §8 copy');
-  assert.deepEqual(constant('MEMORY'), MEMORY, 'memory is the approved §5 copy');
-  assert.deepEqual(constant('SEND_LINES'), SEND, 'every call request is the approved §2/§3/§4 copy');
-  assert.deepEqual(constant('PRACTICE_ARRIVAL'), PRACTICE_ARRIVAL, 'practice arrival is the approved §2 copy');
-  assert.deepEqual(constant('RECALL_LINES'), RECALL, 'recall is the approved §2 copy');
-  assert.deepEqual(constant('FINAL_RECALL_LINES'), FINAL_RECALL, 'final recall is the approved §6 copy');
-  assert.deepEqual(constant('RETURN_LINES'), RETURN, 'actual return is the approved §6 copy');
-  assert.deepEqual(constant('LATCH_A_LINES'), LATCH_A, 'latch A uses the approved §3 copy');
-  assert.deepEqual(constant('LATCHED_CALL_LINES'), LATCHED_CALL, 'a held mark uses the approved §7 copy');
-  assert.deepEqual(constant('FIRST_LIT_LINES'), FIRST_LIT, 'first lit look uses the approved §4 copy');
-  assert.deepEqual(constant('DARK_LINES'), DARK, 'dark observation uses the approved §4 copy');
-  assert.deepEqual(constant('RELIT_LINES'), RELIT, 'relit look uses the approved §4 copy');
-  assert.deepEqual(constant('BECKON_LINES'), BECKON, 'near-end beckon uses the approved §4 copy');
-  assert.deepEqual(constant('NEXT_MARK_UNLATCHED'), NEXT_MARK_UNLATCHED, 'next-mark refusal uses the approved §7 copy');
-  assert.deepEqual(constant('STILL_TRAVELLING'), STILL_TRAVELLING, 'not-yet-arrived feedback uses the approved §7 copy');
-  assert.deepEqual(constant('MARK_NOT_CALLED'), MARK_NOT_CALLED, 'uncalled mark feedback uses the approved §7 copy');
-  assert.deepEqual(constant('INK_NOT_SEEN'), INK_NOT_SEEN, 'unobserved ink feedback uses the approved §7 copy');
-  assert.deepEqual(constant('TOWER_NEEDS_LUMO'), TOWER_NEEDS_LUMO, 'tower refusal uses the approved §7 copy');
-  for (const retired of [
-    'Đường vạch lại biến mất', 'Cửa không có tay mở', 'Cậu vừa chui qua đó thật à', 'Tháp vẫn đang lấy nước',
-    'Tôi đã đi qua đây.', 'Mình nên giữ cửa A trước khi Lumo rời ấn.', 'Lần này cậu giữ đường cho tôi.',
-    'Đường này đã giữ rồi.', 'Cửa thử chỉ mở khi Lumo đã tới ấn bên kia.', 'Cần Lumo ở ấn',
-  ]) {
-    assert.equal(CONTROLLER_SOURCE.includes(retired), false, `retired unapproved line is gone: ${retired}`);
+dialogueCase('every_line_of_speech_in_the_v2_document_is_shipped_verbatim', () => {
+  assert.ok(speech.length >= 40, `the document has its speech (${speech.length} lines found)`);
+  assert.ok(quotedInSection6.length >= 20, `the §6 tables are read (${quotedInSection6.length} quoted lines)`);
+  assert.deepEqual(missingVerbatim, [], 'no line of the v2 speech or §6 tables is missing from PathForTwoLevel.ts');
+});
+
+dialogueCase('the_main_h_ladder_is_the_v2_thang_goi_y_chinh_and_the_fallback_for_no_step_row', () => {
+  // §6 "Thang gợi ý chính": the three generic levels are the campaign ladder (CAMPAIGN_LEVELS[4].hint) verbatim, and the
+  // controller answers from that ladder whenever no per-step row applies.
+  const start = V2_DOC.indexOf('### Thang gợi ý chính');
+  const main = [...V2_DOC.slice(start, V2_DOC.indexOf('### Thang theo bước')).matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)]
+    .map(([, level, text]) => ({ level: Number(level), text }));
+  assert.deepEqual(main.map((line) => line.level), [1, 2, 3], 'the main ladder lists Mức 1, 2, 3');
+  const campaign = readFileSync(join(rootDir, 'src/data/campaignLevels.ts'), 'utf8');
+  for (const { text } of main) assert.equal(campaign.includes(text), true, `the campaign ladder ships "${text.slice(0, 40)}…" verbatim`);
+  assert.equal(CONTROLLER_SOURCE.includes('CAMPAIGN_LEVELS[4].hint'), true, 'the controller falls back to the campaign ladder');
+  // Behaviour: during the practice lesson no step row applies, so H answers from the main ladder, one level per press.
+  const showHint = compile('showHint', [], { CAMPAIGN_LEVELS, hintText: functionDecl('hintText') });
+  const scene = makeScene('entry', {}, { assignment: 'practice', hintStage: '', hintIndex: 0 });
+  scene.hintStageKey = compile('hintStageKey', [], {});
+  scene.showHint = showHint;
+  for (const expected of main.map((line) => line.text)) {
+    scene.showHint();
+    assert.equal(scene.said.at(-1)[0].text, expected, 'H answers from the main ladder while no step row applies');
   }
-  // Independent of the lists above: every production line must occur verbatim inside the approved
-  // document's curly quotes, so a paraphrased or invented line cannot pass by mirroring the test.
-  const productionLines = [INTRO, ENDING, MEMORY, ...Object.values(SEND), PRACTICE_ARRIVAL, RECALL, FINAL_RECALL,
-    RETURN, LATCH_A, LATCHED_CALL, FIRST_LIT, DARK, RELIT, BECKON, NEXT_MARK_UNLATCHED, STILL_TRAVELLING,
-    MARK_NOT_CALLED, INK_NOT_SEEN, TOWER_NEEDS_LUMO].flat();
-  for (const line of productionLines) {
-    assert.ok(APPROVED_DOC.includes(`“${line.text}”`), `production line is verbatim in the approved doc: ${line.text}`);
-  }
-});
-
-/* ------------------------------------------------------------------ *
- * 2. Request vs arrival vs reunion
- * ------------------------------------------------------------------ */
-dialogueCase('a_call_is_a_request_not_an_arrival', () => {
-  const scene = makeScene('entry', {});
-  bindSend(scene);
-  scene.send('a');
-  assert.deepEqual(scene.said.at(-1), SEND.a, `the A call speaks the approved request (${saidText(scene)})`);
-  assert.equal(scene.progress.flags['l4-at-a'], false, 'sending has not recorded an arrival');
-  assert.equal(scene.progress.flags['l4-called-a'], true, 'the request is recorded');
-  assert.equal(scene.progress.flags['l4-assignment'], 'a', 'Lumo is assigned to travel');
-  assert.equal(/tới rồi|cửa có mở không/i.test(saidText(scene)), false, `the request never claims arrival (${saidText(scene)})`);
-});
-
-dialogueCase('practice_arrival_speech_waits_for_the_real_route_and_revalidates', () => {
-  const scene = makeScene('entry', {});
-  scene.assignment = 'practice';
-  scene.lumoRoom = 'entry';
-  scene.lumo.sprite.setPosition(212, 114); // the authored practice plate
-  scene.completeRoute = compile('completeRoute', ['room'], { PRACTICE_ARRIVAL: constant('PRACTICE_ARRIVAL') });
-  scene.completeRoute('entry');
-  assert.equal(scene.progress.flags['l4-at-practice'], true, 'the shipped route completion records the real arrival');
-  assert.deepEqual(scene.said.at(-1), PRACTICE_ARRIVAL, `the approved arrival beat follows the real arrival (${saidText(scene)})`);
-
-  const stale = makeScene('entry', {});
-  stale.canStartStory = () => false;
-  stale.assignment = 'practice';
-  stale.lumo.sprite.setPosition(212, 114);
-  stale.completeRoute = compile('completeRoute', ['room'], { PRACTICE_ARRIVAL: constant('PRACTICE_ARRIVAL') });
-  stale.completeRoute('entry');
-  assert.equal(stale.pendingStoryBeats.length, 1, 'the arrival beat queues while the dialogue channel is busy');
-  stale.assignment = 'follow'; // a recall before playback: the plate is no longer held
-  stale.canStartStory = () => true;
-  stale.flushPendingStoryBeat();
-  assert.equal(stale.said.length, 0, `a stale arrival beat is dropped, not spoken (${saidText(stale)})`);
-  assert.equal(stale.pendingStoryBeats.length, 0, 'the stale beat is removed');
-});
-
-dialogueCase('recall_is_not_the_reunion_and_reunion_needs_a_real_return', () => {
-  const scene = makeScene('ink', { 'l4-latch-c': true }, { assignment: 'c' });
-  scene.player.x = 500; scene.player.y = 250;
-  scene.lumoRoom = 'ink';
-  scene.lumo.sprite.setPosition(558, 244); // the C plate
-  bindRecall(scene);
-  const before = scene.said.length;
-  scene.recallToCall('latch-c');
-  assert.deepEqual(scene.said.at(-1), FINAL_RECALL, `the final recall speaks the approved request (${saidText(scene)})`);
-  assert.equal(scene.progress.flags['l4-return-called'], true, 'the final recall is recorded');
-  assert.equal(scene.progress.flags['l4-reunited'], false, 'initiating a recall is not yet a reunion');
-  assert.equal(scene.said.slice(before).some((lines) => JSON.stringify(lines) === JSON.stringify(RETURN)), false,
-    'the reunion beat is not played at recall initiation');
-
-  // The shipped reunion predicate now reports a real same-room return; only then may §6 speak.
+  // Once the lesson is over, the hall's step row answers instead, starting again at level 1.
   scene.assignment = 'follow';
-  scene.route = [];
-  scene.routeIndex = 0;
-  scene.lumo.sprite.setPosition(scene.player.x - 12, scene.player.y);
-  bindReunion(scene);
-  scene.updateReunion();
-  assert.deepEqual(scene.said.at(-1), RETURN, `the real return speaks the approved reunion (${saidText(scene)})`);
-  assert.equal(scene.progress.flags['l4-reunion-said'], true, 'the reunion speech is recorded once');
+  scene.showHint();
+  assert.equal(scene.said.at(-1)[0].text, 'Hai mốc gọi đều nối vào ống trên cửa.', 'the hall row applies after the lesson');
+});
 
-  const stale = makeScene('ink', { 'l4-return-called': true });
-  stale.canStartStory = () => false;
-  bindReunion(stale);
-  stale.assignment = 'follow';
-  stale.lumo.sprite.setPosition(stale.player.x - 12, stale.player.y);
-  stale.updateReunion();
-  assert.equal(stale.pendingStoryBeats.length, 1, 'the reunion beat queues while dialogue is busy');
-  stale.lumo.sprite.setPosition(stale.player.x + 500, stale.player.y); // player walked away / recall state changed
-  stale.canStartStory = () => true;
-  stale.flushPendingStoryBeat();
-  assert.equal(stale.said.length, 0, `a stale reunion beat is dropped (${saidText(stale)})`);
+dialogueCase('the_v1_lines_that_v2_removes_are_gone', () => {
+  for (const text of [
+    'Khoan đã. Tôi chưa gài chốt cửa này.',
+    'Những vệt trên nền còn mờ quá.',
+    'Thử tắt đèn xem.',
+    'Bên này còn một dấu nữa.',
+    'Ừ. Có lẽ chúng chỉ đường qua hành lang.',
+    'Từ chỗ tôi đứng, tôi thấy vết mực kể thứ tự',
+    'NEXT_MARK_UNLATCHED',
+    'INK_NOT_SEEN',
+    'l4-ink-seals',
+    'PATH_INK_ORDER',
+  ]) assert.equal(CONTROLLER_SOURCE.includes(text), false, `"${text}" is not in the controller`);
+});
+
+dialogueCase('every_speaker_is_nhinh_lumo_or_the_system_hint', () => {
+  const speakers = new Set([...CONTROLLER_SOURCE.matchAll(/speaker:\s*'([^']+)'/g)].map(([, speaker]) => speaker));
+  assert.deepEqual([...speakers].sort(), ['Hệ thống', 'Lumo', 'Nhinh'], 'only the two characters and the system hint speak');
 });
 
 /* ------------------------------------------------------------------ *
- * 3. Ink observations: lit, dark, relit are distinct states
+ * 2. The shipped rules that decide when a line may speak
  * ------------------------------------------------------------------ */
-const inkScene = (lampOn, flags = {}) => {
-  const scene = makeScene('ink', flags);
-  scene.lantern.lanternOn = lampOn;
-  scene.player.x = 300; scene.player.y = 240; // standing on the authored corridor band
-  bindInk(scene);
-  return scene;
-};
 
-const BOOK_BOTH = { 'l2-book-lit': true, 'l2-book-dark': true };
-
-dialogueCase('first_lit_observation_does_not_claim_a_previous_trail', () => {
-  const scene = inkScene(true, BOOK_BOTH);
-  scene.updateInkProgress();
-  assert.deepEqual(scene.said.at(-1), FIRST_LIT, `the first lit look is the approved faint-marks line (${saidText(scene)})`);
-  assert.equal(scene.progress.flags['l4-ink-revealed'], undefined, 'the dark trail is not recorded by the lit look');
-  assert.equal(scene.progress.flags['l4-ink-observed-lit'], true, 'the lit observation is recorded only after playback');
-  assert.equal(/biến mất|Ánh đèn lại/.test(saidText(scene)), false, `it never claims a vanished/relit trail (${saidText(scene)})`);
-});
-
-dialogueCase('first_lit_without_both_library_book_layers_speaks_only_the_factual_first_line', () => {
-  // The Library exit only needs l2-crystal + l2-fifth-viewed, so a legal save can enter Level 05
-  // without ever reading both book layers. The §4 Lumo analogy and Nhinh's "Ừ" reply would then
-  // cite a library experience that never happened.
-  for (const [name, flags] of [
-    ['no book layers', {}],
-    ['only the lit layer', { 'l2-book-lit': true }],
-    ['only the dark layer', { 'l2-book-dark': true }],
-  ]) {
-    const scene = inkScene(true, flags);
-    scene.updateInkProgress();
-    assert.deepEqual(scene.said.at(-1), [FIRST_LIT[0]],
-      `${name}: only the approved factual first Nhinh line is spoken (${saidText(scene)})`);
-    assert.equal(scene.said.at(-1).length, 1, `${name}: no dangling "Ừ" reply is left behind`);
-    assert.equal(saidText(scene).includes('Giống trang sách'), false,
-      `${name}: the unsupported library analogy is not spoken`);
-  }
-
-  const both = inkScene(true, BOOK_BOTH);
-  both.updateInkProgress();
-  assert.deepEqual(both.said.at(-1), FIRST_LIT,
-    `both real book layers still allow the full approved exchange (${saidText(both)})`);
-});
-
-dialogueCase('ink_observations_require_the_corridor_and_the_right_light', () => {
-  const litOutside = makeScene('ink', {});
-  litOutside.lantern.lanternOn = true;
-  litOutside.player.x = 82; litOutside.player.y = 251; // outside the authored corridor
-  bindInk(litOutside);
-  litOutside.updateInkProgress();
-  assert.equal(litOutside.said.length, 0, 'a lit look off the corridor is not an observation');
-
-  const darkOutside = makeScene('ink', {});
-  darkOutside.player.x = 82; darkOutside.player.y = 251;
-  bindInk(darkOutside);
-  darkOutside.updateInkProgress();
-  assert.equal(darkOutside.progress.flags['l4-ink-revealed'], undefined, 'a dark look off the corridor does not reveal the trail');
-
-  const litAtCorridor = inkScene(true);
-  litAtCorridor.updateInkProgress();
-  assert.equal(litAtCorridor.progress.flags['l4-ink-revealed'], undefined, 'lamp-on in the corridor still does not reveal the trail');
-
-  const darkAtCorridor = inkScene(false);
-  darkAtCorridor.updateInkProgress();
-  assert.equal(darkAtCorridor.progress.flags['l4-ink-revealed'], true, 'the real dark corridor look records the trail');
-  assert.deepEqual(darkAtCorridor.said.at(-1), DARK, `and speaks only the approved dark line (${saidText(darkAtCorridor)})`);
-});
-
-dialogueCase('relit_line_requires_an_actually_observed_dark_trail', () => {
-  const neverDark = inkScene(true, { 'l4-ink-observed-lit': true });
-  neverDark.updateInkProgress();
-  assert.equal(neverDark.said.length, 0, 'lamps on before any dark observation never speak the relit line');
-
-  const observed = inkScene(false);
-  observed.updateInkProgress();
-  observed.lantern.lanternOn = true;
-  observed.updateInkProgress();
-  assert.deepEqual(observed.said.at(-1), RELIT, `relighting after the dark observation speaks the approved line (${saidText(observed)})`);
-  observed.updateInkProgress();
-  assert.equal(observed.said.filter((lines) => JSON.stringify(lines) === JSON.stringify(RELIT)).length, 1,
-    'the relit observation is spoken once');
-});
-
-dialogueCase('queued_lit_and_dark_beats_are_revalidated_at_playback', () => {
-  const litThenDark = inkScene(true, BOOK_BOTH);
-  litThenDark.canStartStory = () => false;
-  litThenDark.updateInkProgress(); // first lit queues
-  assert.equal(litThenDark.pendingStoryBeats.length, 1, 'the first lit beat is queued');
-  litThenDark.lantern.lanternOn = false;
-  litThenDark.updateInkProgress(); // real dark observation queues behind it
-  assert.equal(litThenDark.progress.flags['l4-ink-revealed'], true, 'the dark observation is still recorded');
-  litThenDark.canStartStory = () => true;
-  litThenDark.flushPendingStoryBeat();
-  assert.equal(litThenDark.said.some((lines) => JSON.stringify(lines) === JSON.stringify(FIRST_LIT)), false,
-    `the stale lit beat is dropped rather than spoken after darkness (${saidText(litThenDark)})`);
-  assert.equal(litThenDark.litObservationQueued, false, 'the dropped beat can be reconsidered later');
-  litThenDark.flushPendingStoryBeat();
-  assert.deepEqual(litThenDark.said.at(-1), DARK, `the still-true dark beat then speaks (${saidText(litThenDark)})`);
-
-  const darkThenLit = inkScene(false);
-  darkThenLit.canStartStory = () => false;
-  darkThenLit.updateInkProgress();
-  assert.equal(darkThenLit.pendingStoryBeats.length, 1, 'the dark beat is queued');
-  darkThenLit.lantern.lanternOn = true;
-  darkThenLit.canStartStory = () => true;
-  darkThenLit.flushPendingStoryBeat();
-  assert.equal(darkThenLit.said.some((lines) => JSON.stringify(lines) === JSON.stringify(DARK)), false,
-    'a dark line is not spoken once the lamp is back on');
-  darkThenLit.darkObservationQueued = false;
-  darkThenLit.lantern.lanternOn = false;
-  darkThenLit.updateInkProgress();
-  assert.deepEqual(darkThenLit.said.at(-1), DARK, 'returning to darkness lets the still-true line speak');
-});
-
-dialogueCase('near_end_beckon_needs_lumo_actually_holding_C', () => {
-  const scene = makeScene('ink', { 'l4-ink-revealed': true, 'l4-ink-dark-said': true }, { assignment: 'c' });
-  scene.lantern.lanternOn = false;
-  scene.player.x = 520; scene.player.y = 250;
-  scene.lumoRoom = 'ink';
-  scene.lumo.sprite.setPosition(558, 244);
-  bindInk(scene);
-  scene.updateInkProgress();
-  assert.deepEqual(scene.said.at(-1), BECKON, `the near-end beckon follows the actual C arrival (${saidText(scene)})`);
-
-  const stale = makeScene('ink', { 'l4-ink-revealed': true, 'l4-ink-dark-said': true }, { assignment: 'c' });
-  stale.lantern.lanternOn = false;
-  stale.player.x = 520; stale.player.y = 250;
-  stale.lumoRoom = 'ink';
-  stale.lumo.sprite.setPosition(558, 244);
-  stale.canStartStory = () => false;
-  bindInk(stale);
-  stale.updateInkProgress();
-  assert.equal(stale.pendingStoryBeats.length, 1, 'the beckon queues');
-  stale.assignment = 'follow'; // recalled before playback
-  stale.canStartStory = () => true;
-  stale.flushPendingStoryBeat();
-  assert.equal(stale.said.length, 0, `a beckon after a recall is dropped (${saidText(stale)})`);
-  assert.equal(stale.beckoningQueued, false, 'the stale beckon does not block a later true one');
-});
-
-/* ------------------------------------------------------------------ *
- * 4. C-before-ink is legal; the unsupported premise is suppressed
- * ------------------------------------------------------------------ */
-dialogueCase('c_before_ink_sends_without_the_unsupported_follow_the_lines_premise', () => {
-  const scene = makeScene('ink', { 'l4-latch-b': true });
-  bindSend(scene);
-  scene.send('c');
-  assert.equal(scene.progress.flags['l4-called-c'], true, 'calling C before the ink still records the legal request');
-  assert.equal(scene.progress.flags['l4-assignment'], 'c', 'Lumo is still sent; no gameplay gate was added');
-  assert.equal(scene.said.length, 0,
-    'the approved §4 request is suppressed because its "theo những vạch" premise has not happened; the gap is reported');
-
-  const seen = makeScene('ink', { 'l4-latch-b': true, 'l4-ink-revealed': true });
-  bindSend(seen);
-  seen.send('c');
-  assert.deepEqual(seen.said.at(-1), SEND.c, `after the real observation the approved request is spoken (${saidText(seen)})`);
-});
-
-dialogueCase('ink_observation_is_not_a_requirement_for_C_or_the_exit_flow', () => {
-  const scene = makeScene('ink', { 'l4-latch-b': true });
-  const eligible = compile('callEligible', ['mark'], {});
-  assert.equal(eligible.call(scene, 'c'), true, 'C is eligible after B without any ink flag');
-  const blocked = getPathExitBlock({ latchC: false, memoRead: false, reunited: false });
-  assert.equal(blocked, 'latch', 'the exit block order remains the shipped one');
-});
-
-/* ------------------------------------------------------------------ *
- * 5. Latch C memory, latch A copy, held-mark and door feedback
- * ------------------------------------------------------------------ */
-dialogueCase('memory_is_spoken_at_the_latch_C_hold_not_at_reunion', () => {
-  // The exit latch now also needs the three glyphs lit (l4-ink-seals), so the scene carries that step.
-  const scene = makeScene('ink', { 'l4-latch-b': true, 'l4-ink-revealed': true, 'l4-ink-seals': true }, { assignment: 'c' });
-  scene.lumoRoom = 'ink';
-  scene.lumo.sprite.setPosition(558, 244);
-  scene.interactionEnabled = () => true;
-  bindInteract(scene);
-  scene.interact('latch-c');
-  assert.equal(scene.progress.flags['l4-latch-c'], true, 'the exit latch is still held by E at the latch');
-  assert.deepEqual(scene.said.at(-1), MEMORY, `the approved memory plays at latch C (${saidText(scene)})`);
-  assert.equal(scene.progress.flags['l4-memo'], true, 'the notebook clue is still written by the memory');
-  assert.equal(scene.recalled, 0, 'the memory did not move to a recall beat');
-
-  const reunion = makeScene('ink', { 'l4-return-called': true });
-  reunion.assignment = 'follow';
-  reunion.lumo.sprite.setPosition(reunion.player.x - 12, reunion.player.y);
-  bindReunion(reunion);
-  reunion.updateReunion();
-  assert.deepEqual(reunion.said.at(-1), RETURN, 'reunion uses its own approved two-line beat');
-  assert.equal(reunion.progress.flags['l4-memo'], undefined, 'reunion does not write or replay the latch-C memory');
-});
-
-dialogueCase('latch_C_missing_step_feedback_uses_approved_copy_where_it_exists', () => {
-  const reason = compile('latchCBlockReason', [], {
-    INK_NOT_SEEN: constant('INK_NOT_SEEN'), MARK_NOT_CALLED: constant('MARK_NOT_CALLED'),
+function makeScene(room, flags, extra = {}) {
+  const scene = {
+    room,
+    progress: { flags: { ...flags }, counters: {} },
+    player: { x: PATH_ROOMS[room].spawn.x, y: PATH_ROOMS[room].spawn.y },
+    assignment: 'follow',
+    lumoRoom: room,
+    lantern: { lanternOn: false },
+    said: [], saved: 0, sent: [], recalled: 0,
+    pendingStoryBeats: [], queuedFlags: new Set(), route: [], routeIndex: 0,
+    canStartStory: () => true,
+    travelling: false,
+    power: {},
+    ...extra,
+  };
+  Object.defineProperty(scene, 'lanternOn', { get() { return this.lantern.lanternOn; } });
+  scene.say = (lines, onComplete) => { scene.said.push(lines); onComplete?.(); };
+  scene.save = () => { scene.saved += 1; };
+  scene.isTravelling = () => scene.travelling;
+  // Lumo holds a seal only while he is the assignment and the scene says he is on it (a departure changes the assignment).
+  scene.hasPower = (mark) => scene.assignment === mark && scene.power[mark] === true;
+  scene.lumo = { sprite: { x: 0, y: 0, setPosition(x, y) { this.x = x; this.y = y; } }, update() {}, setVisible() {} };
+  scene.persistRoute = () => {};
+  scene.buildAssignmentRoute = () => [];
+  scene.isDoorOpen = compile('isDoorOpen', ['mark'], {});
+  scene.queueStoryBeat = compile('queueStoryBeat', ['lines', 'onComplete', 'guard', 'onStale'], {});
+  scene.flushPendingStoryBeat = compile('flushPendingStoryBeat', [], {});
+  scene.queueFlagBeat = compile('queueFlagBeat', ['flag', 'lines', 'guard'], {});
+  scene.leavesUnlatchedSeal = compile('leavesUnlatchedSeal', [], {});
+  scene.replyToRequest = compile('replyToRequest', ['leaving', 'lines'], {
+    LEAVE_UNLATCHED_WARNING: constant('LEAVE_UNLATCHED_WARNING'), DOOR_SHUT_LINE: constant('DOOR_SHUT_LINE'), PATH_DOOR_FACES,
   });
-  const scene = makeScene('ink', { 'l4-latch-b': true });
-  assert.equal(reason.call(scene), INK_NOT_SEEN[0].text,
-    'a latch-C press before the dark observation uses the approved §7 line');
-  scene.progress.flags['l4-ink-revealed'] = true;
-  assert.equal(reason.call(scene), MARK_NOT_CALLED[0].text,
-    'a latch-C press before C is called uses the approved §7 line');
-  // No approved variant covers a totally absent B latch at this handle; the existing truthful
-  // helper is retained and reported rather than replaced with invented copy.
-  scene.progress.flags['l4-latch-b'] = false;
-  assert.equal(reason.call(scene), 'Cửa B cần được gài trước.', 'the uncovered B-latch helper is retained');
+  scene.send = compile('send', ['mark'], {
+    SEND_LINES: constant('SEND_LINES'), SEND_UNSEEN_C: constant('SEND_UNSEEN_C'), LATCHED_CALL_LINES: constant('LATCHED_CALL_LINES'),
+  });
+  return scene;
+}
+const saidText = (scene) => scene.said.flat().map((line) => line.text).join(' | ');
+
+dialogueCase('a_request_speaks_the_request_and_is_not_an_arrival', () => {
+  const scene = makeScene('entry', {});
+  scene.send('b');
+  assert.equal(show(scene.said[0]), show(constant('SEND_LINES').b), 'the hall request for `··` is the v2 line');
+  assert.notEqual(scene.progress.flags['l4-at-b'], true, 'a request never writes an arrival');
+  assert.equal(scene.progress.flags['l4-called-b'], true, 'it records that B was called');
 });
 
-dialogueCase('latch_and_mark_feedback_use_the_approved_lines', () => {
-  const latchA = makeScene('relay', { 'l4-visited-relay': true }, { assignment: 'a' });
-  latchA.lumoRoom = 'entry';
-  latchA.lumo.sprite.setPosition(546, 114);
-  latchA.interactionEnabled = () => true;
-  bindInteract(latchA);
-  latchA.interact('latch-a');
-  assert.deepEqual(latchA.said.at(-1), LATCH_A, `latch A uses the approved first-door copy (${saidText(latchA)})`);
-  assert.equal(latchA.progress.flags['l4-latch-a'], true, 'latch A is still recorded');
-
-  // send() keeps its own guard for a held mark, and that guard speaks the approved §7 copy.
-  const held = makeScene('entry', { 'l4-latch-a': true }, { player: { x: 384, y: 256 } });
-  bindSend(held);
-  held.send('a');
-  assert.deepEqual(held.said.at(-1), LATCHED_CALL, `send's guard for a held mark uses the approved §7 copy (${saidText(held)})`);
-  // The press itself is silent now: a latched call post is disabled, so E never reaches send() or that copy.
-  const press = makeScene('entry', { 'l4-latch-a': true }, { player: { x: 384, y: 218 } });
-  press.interactReleasePending = false;
-  press.interactKey = { isDown: false };
-  bindInteract(press);
-  bindLivePress(press);
-  assert.equal(press.interactionEnabled('call-a'), false, 'the latched A post is disabled');
-  press.interact('call-a');
-  assert.equal(press.said.length, 0, 'E at the latched A post says nothing');
-  assert.equal(press.sent.length, 0, 'and sends Lumo nowhere');
-
-  const unlatched = makeScene('entry', {}, { player: { x: 384, y: 256 } });
-  unlatched.interactionEnabled = () => true;
-  bindInteract(unlatched);
-  unlatched.interact('call-b');
-  assert.deepEqual(unlatched.said.at(-1), NEXT_MARK_UNLATCHED, `next mark before A's latch uses the approved §7 copy (${saidText(unlatched)})`);
+dialogueCase('the_c_request_before_the_trail_is_seen_promises_nothing_about_the_trail', () => {
+  const unseen = makeScene('relay', {});
+  unseen.send('c');
+  assert.equal(show(unseen.said[0]), show(constant('SEND_UNSEEN_C')), 'an unseen trail gets the neutral request');
+  assert.equal(CONTROLLER_SOURCE.includes('Tôi sẽ theo những vạch trên nền.'), true, 'the trail promise is still shipped for the seen case');
+  const seen = makeScene('relay', { 'l4-ink-revealed': true });
+  seen.send('c');
+  assert.equal(show(seen.said[0]), show(constant('SEND_LINES').c), 'a seen trail gets the v2 request that follows it');
 });
 
-dialogueCase('door_feedback_is_truthful_about_travel_and_reunion_state', () => {
-  const travelling = makeScene('entry', {}, { assignment: 'a' });
-  travelling.isTravelling = () => true;
-  travelling.doorEnabled = () => true;
-  travelling.isDoorOpen = () => false;
-  bindDoor(travelling);
-  travelling.useDoor('a');
-  assert.deepEqual(travelling.said.at(-1), STILL_TRAVELLING, `a door used while Lumo travels reports travel (${saidText(travelling)})`);
-
-  const idle = makeScene('entry', {});
-  idle.doorEnabled = () => true;
-  idle.isDoorOpen = () => false;
-  bindDoor(idle);
-  idle.useDoor('a');
-  assert.deepEqual(idle.said.at(-1), MARK_NOT_CALLED, `a door used before any call points at the mark (${saidText(idle)})`);
-
-  const tower = makeScene('ink', { 'l4-latch-c': true, 'l4-memo': true });
-  tower.doorEnabled = () => true;
-  tower.isActuallyReunited = () => false;
-  bindDoor(tower);
-  tower.useDoor('c');
-  assert.deepEqual(tower.said.at(-1), TOWER_NEEDS_LUMO, `the tower refuses while Lumo is away with the approved line (${saidText(tower)})`);
+dialogueCase('the_first_leave_from_an_unlatched_seal_warns_then_the_door_shuts_behind_nhinh', () => {
+  // Scenario v2 Bẫy 1: Lumo on plate A (unlatched) while Nhinh asks for `··` from the hall.
+  const scene = makeScene('entry', { 'l4-called-a': true }, { assignment: 'a', power: { a: true }, lumoRoom: 'entry' });
+  scene.send('b');
+  assert.equal(show(scene.said[0]), show(constant('LEAVE_UNLATCHED_WARNING')), 'the first leave is warned, in place of the request line');
+  assert.equal(scene.progress.flags['l4-leave-warned'], true, 'and the warning is recorded once spoken');
+  assert.equal(scene.said.length, 2, 'the door-shut line is queued behind it');
+  assert.equal(show(scene.said[1]), show(constant('DOOR_SHUT_LINE')), 'and it waits for the door to shut');
+  // Second departure: the normal request, no second warning.
+  const again = makeScene('entry', { 'l4-called-a': true, 'l4-leave-warned': true }, { assignment: 'a', power: { a: true }, lumoRoom: 'entry' });
+  again.send('b');
+  assert.equal(show(again.said[0]), show(constant('SEND_LINES').b), 'later departures use the ordinary request');
 });
 
-dialogueCase('ending_copy_is_the_shipped_exit_argument', () => {
+dialogueCase('a_latched_door_never_triggers_the_leave_warning', () => {
+  const scene = makeScene('entry', { 'l4-latch-a': true }, { assignment: 'a', power: { a: true }, lumoRoom: 'entry' });
+  assert.equal(scene.leavesUnlatchedSeal(), undefined, 'a latched seal is not an unlatched departure');
+  scene.send('b');
+  assert.equal(scene.progress.flags['l4-leave-warned'], undefined, 'and no warning is recorded');
+});
+
+dialogueCase('the_pipe_echo_speaks_only_when_lumo_reaches_a_seal_in_another_room', () => {
+  const echo = compile('completeRoute', ['room'], { PRACTICE_ARRIVAL: constant('PRACTICE_ARRIVAL'), ECHO_LINES: constant('ECHO_LINES') });
+  // Nhinh in the hall, Lumo reaches `··` in the relay: the echo plays with the seal still held.
+  const away = makeScene('entry', {}, { assignment: 'b', power: { b: true }, lumoRoom: 'relay' });
+  away.completeRoute = echo;
+  away.completeRoute('relay');
+  assert.equal(show(away.said[0]), show(constant('ECHO_LINES').b), 'the `··` echo is the v2 detour line');
+  // Nhinh in the same room: Lumo arrives without a line.
+  const here = makeScene('relay', {}, { assignment: 'b', power: { b: true }, lumoRoom: 'relay' });
+  here.completeRoute = echo;
+  here.completeRoute('relay');
+  assert.equal(here.said.length, 0, 'the same room needs no echo');
+  // The `···` echo is the far-trail line, and it waits if Nhinh walks into the room meanwhile.
+  const late = makeScene('entry', {}, { assignment: 'c', power: { c: true }, lumoRoom: 'ink' });
+  late.completeRoute = echo;
+  late.completeRoute('ink');
+  assert.equal(show(late.said[0]), show(constant('ECHO_LINES').c), 'the `···` echo is the far-away line');
+  const stale = makeScene('ink', {}, { assignment: 'c', power: { c: true }, lumoRoom: 'ink' });
+  stale.completeRoute = echo;
+  stale.completeRoute('ink');
+  assert.equal(stale.said.length, 0, 'an echo is never spoken from the room the seal is in');
+});
+
+dialogueCase('the_relay_seal_is_read_lit_first_then_dark_and_the_book_comparison_needs_both_layers', () => {
+  const observe = compile('updateObservations', [], {
+    RELAY_LIT_LINES: constant('RELAY_LIT_LINES'), RELAY_LIT_BOOK_LINE: constant('RELAY_LIT_BOOK_LINE'),
+    RELAY_DARK_LINES: constant('RELAY_DARK_LINES'), INK_LIT_LINES: constant('INK_LIT_LINES'),
+    DARK_LINES: constant('DARK_LINES'), RELIT_LINES: constant('RELIT_LINES'), BECKON_LINES: constant('BECKON_LINES'),
+  });
+  const lit = makeScene('relay', {});
+  lit.lantern.lanternOn = true;
+  lit.updateObservations = observe;
+  lit.updateObservations();
+  assert.equal(show(lit.said[0]), 'Nhinh: Trên ấn kia có vệt gì đó, nhưng mờ quá.', 'the first lit look names the faint seal');
+  assert.equal(lit.said.length, 1, 'without both book layers only the first line plays');
+  const bothBooks = makeScene('relay', { 'l2-book-lit': true, 'l2-book-dark': true });
+  bothBooks.lantern.lanternOn = true;
+  bothBooks.updateObservations = observe;
+  bothBooks.updateObservations();
+  assert.equal(bothBooks.said[0].length, 2, 'with both book layers the comparison line follows');
+  assert.equal(show(bothBooks.said[0]).includes('trang sách trong thư viện'), true, 'and it is the library comparison');
+  const dark = makeScene('relay', { 'l4-relay-lit-said': true });
+  dark.updateObservations = observe;
+  dark.updateObservations();
+  assert.equal(show(dark.said[0]), show(constant('RELAY_DARK_LINES')), 'in the dark the seal reads as two dots');
+  dark.updateObservations();
+  assert.equal(dark.said.length, 1, 'and the line is said once');
+});
+
+dialogueCase('the_corridor_trail_is_seen_in_the_dark_and_relit_only_after_that', () => {
+  const observe = compile('updateObservations', [], {
+    RELAY_LIT_LINES: constant('RELAY_LIT_LINES'), RELAY_LIT_BOOK_LINE: constant('RELAY_LIT_BOOK_LINE'),
+    RELAY_DARK_LINES: constant('RELAY_DARK_LINES'), INK_LIT_LINES: constant('INK_LIT_LINES'),
+    DARK_LINES: constant('DARK_LINES'), RELIT_LINES: constant('RELIT_LINES'), BECKON_LINES: constant('BECKON_LINES'),
+  });
   const scene = makeScene('ink', {});
-  scene.getLumoPosition = () => ({ x: 320, y: 240 });
-  scene.prepareLevelExit = compile('prepareLevelExit', [], { ENDING: constant('ENDING') });
-  scene.prepareLevelExit();
-  assert.deepEqual(scene.nextLevels, [ENDING], 'the level hands the approved §8 copy to the next level');
+  scene.updateObservations = observe;
+  scene.lantern.lanternOn = true;
+  scene.updateObservations();
+  assert.equal(show(scene.said[0]), show(constant('INK_LIT_LINES')), 'the first corridor look, lamp on, is the faint trail');
+  assert.equal(scene.progress.flags['l4-ink-revealed'], undefined, 'and the trail is not revealed by a lit look');
+  scene.lantern.lanternOn = false;
+  scene.updateObservations();
+  assert.equal(scene.progress.flags['l4-ink-revealed'], true, 'the lamp-off look reveals the trail');
+  assert.equal(show(scene.said[1]), show(constant('DARK_LINES')), 'and names the three dots and the stroke toward the pipe');
+  scene.lantern.lanternOn = true;
+  scene.updateObservations();
+  assert.equal(show(scene.said[2]), show(constant('RELIT_LINES')), 'relighting after the trail was seen gets the relit line');
+});
+
+dialogueCase('the_chalk_firefly_is_read_once_in_the_dark_in_view_of_the_wall', () => {
+  const chalk = compile('updateChalk', [], { PATH_CHALK_VIEW, rectsOverlap, pathActorBody, CHALK_LINES: constant('CHALK_LINES') });
+  const inView = makeScene('relay', {}, { player: { x: 400, y: 226 } });
+  inView.updateChalk = chalk;
+  inView.lantern.lanternOn = false;
+  inView.updateChalk();
+  assert.equal(inView.progress.flags['l4-chalk-seen'], true, 'standing in view in the dark sets the v2 flag');
+  assert.equal(show(inView.said[0]), show(constant('CHALK_LINES')), 'and speaks the two lines');
+  inView.updateChalk();
+  assert.equal(inView.said.length, 1, 'once only');
+  const lit = makeScene('relay', {}, { player: { x: 400, y: 226 } });
+  lit.updateChalk = chalk;
+  lit.lantern.lanternOn = true;
+  lit.updateChalk();
+  assert.equal(lit.progress.flags['l4-chalk-seen'], undefined, 'with the lamp on the chalk is not there to see');
+  const away = makeScene('relay', {}, { player: { x: 200, y: 226 } });
+  away.updateChalk = chalk;
+  away.updateChalk();
+  assert.equal(away.progress.flags['l4-chalk-seen'], undefined, 'and it is not seen from the far end of the hall');
+});
+
+dialogueCase('the_exit_latch_says_only_whether_lumo_is_on_its_seal', () => {
+  const block = compile('latchCBlockReason', [], { STILL_TRAVELLING: constant('STILL_TRAVELLING'), LATCH_SHUT_LINE: constant('LATCH_SHUT_LINE') });
+  const shut = makeScene('ink', { 'l4-latch-b': true }, { assignment: 'c', lumoRoom: 'relay' });
+  shut.latchCBlockReason = block;
+  assert.deepEqual(shut.latchCBlockReason(), constant('LATCH_SHUT_LINE'), 'with Lumo away the exit names only the shut door');
+  const travelling = makeScene('ink', { 'l4-latch-b': true }, { assignment: 'c', travelling: true, lumoRoom: 'relay' });
+  travelling.latchCBlockReason = block;
+  assert.deepEqual(travelling.latchCBlockReason(), constant('STILL_TRAVELLING'), 'on the way it says he is still travelling');
+  const ready = makeScene('ink', { 'l4-latch-b': true }, { assignment: 'c', power: { c: true }, lumoRoom: 'ink' });
+  ready.latchCBlockReason = block;
+  assert.equal(ready.latchCBlockReason(), undefined, 'with Lumo on the seal the handle may latch');
+});
+
+dialogueCase('the_h_ladder_is_one_stage_per_row_of_the_v2_table', () => {
+  const stage = compile('hintStageKey', [], {});
+  const at = (room, flags) => stage.call(makeScene(room, flags));
+  assert.equal(at('entry', {}), 'hall', 'the hall row');
+  assert.equal(at('relay', {}), 'relay-open', 'the relay row before A is latched');
+  assert.equal(at('relay', { 'l4-latch-a': true }), 'relay-latched', 'the relay row after A is latched');
+  assert.equal(at('ink', { 'l4-latch-b': true }), 'ink-latched', 'the ink row after B is latched');
+  assert.equal(at('ink', {}), 'ink-open', 'the ink row before B is latched');
+  assert.equal(at('ink', { 'l4-latch-b': true, 'l4-latch-c': true }), 'exit', 'the exit row once C is latched');
+});
+
+dialogueCase('the_status_line_states_lumo_and_the_latches_and_nothing_else', () => {
+  // The v2 status line (§6): `Lumo: giữ ấn ·· · Chốt: · ✓  ·· —  ··· —`, composed from the shipped method.
+  const status = compile('getStatusText', [], { tr: IDENTITY_TR, sealGlyph: functionDecl('sealGlyph') });
+  const holding = makeScene('relay', { 'l4-latch-a': true }, { assignment: 'b', power: { b: true }, lumoRoom: 'relay' });
+  holding.getStatusText = status;
+  assert.equal(holding.getStatusText(), 'Lumo: giữ ấn ·· · Chốt: · ✓  ·· —  ··· —', 'Lumo on plate B, A latched, B and C not');
+  const flying = makeScene('ink', {}, { assignment: 'c', travelling: true, lumoRoom: 'relay' });
+  flying.getStatusText = status;
+  assert.equal(flying.getStatusText(), 'Lumo: đang bay · Chốt: · —  ·· —  ··· —', 'Lumo in flight, nothing latched');
+  const withNhinh = makeScene('entry', {});
+  withNhinh.getStatusText = status;
+  assert.equal(withNhinh.getStatusText(), 'Lumo: đi cùng Nhinh · Chốt: · —  ·· —  ··· —', 'Lumo with Nhinh');
 });
 
 console.log(`\nlevel 05 dialogue cases: ${count - failures.length}/${count} passed`);

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
-import { PATH_INK_CORRIDOR, PATH_ROOMS, PATH_TUBE_MOUTHS, getPathElementArtRect, pathCallLabel } from '../src/data/pathForTwoLayout.ts';
+import { PATH_CHALK_FIREFLY, PATH_INK_CORRIDOR, PATH_ROOMS, PATH_TUBE_MOUTHS, getPathElementArtRect, isPathSeal, pathCallLabel } from '../src/data/pathForTwoLayout.ts';
 
 // Like check-path-for-two.mjs, execute shipped methods without importing browser-only Phaser.
 const file = new URL('../src/levels/PathForTwoLevel.ts', import.meta.url);
@@ -15,6 +15,18 @@ function compile(name, symbols = {}) {
   return new Function(...Object.keys(symbols), `${js}\nreturn unit;`)(...Object.values(symbols));
 }
 
+/** A module-level constant of the shipped controller, read from its source (never hand-copied). */
+function constant(name) {
+  for (const statement of ast.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    const declaration = statement.declarationList.declarations.find((item) => item.name.getText(ast) === name);
+    if (declaration?.initializer) {
+      const js = ts.transpileModule(`const __value = (${declaration.initializer.getText(ast)});`, { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;
+      return new Function(`${js}\nreturn __value;`)();
+    }
+  }
+  throw new Error(`the shipped controller declares no constant ${name}`);
+}
 const ENVIRONMENT_KEYS = {
   entry: 'art_05_a_path_for_two_entry_environment_base',
   relay: 'art_05_a_path_for_two_relay_environment_base',
@@ -42,7 +54,8 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
   };
   const symbols = {
     tr: (text) => text,
-    PATH_ROOMS, PATH_INK_CORRIDOR, PATH_TUBE_MOUTHS, getPathElementArtRect, pathCallLabel,
+    PATH_ROOMS, PATH_INK_CORRIDOR, PATH_TUBE_MOUTHS, getPathElementArtRect, pathCallLabel, isPathSeal, PATH_CHALK_FIREFLY,
+    CALL_PLAQUES: constant('CALL_PLAQUES'), SEAL_INKS: constant('SEAL_INKS'), getPathClueArtKey: (name) => name,
     getLevelArtKey(level, filename) {
       assert.equal(level, 4, 'Level 05 uses its existing zero-based art index');
       return filename === `${room}-environment-base` ? key : filename;
@@ -68,12 +81,11 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
     },
     drawTubeRoutes() { overlays.push('routes'); },
     drawStationSchematic() { overlays.push('schematic'); },
-    drawInkPuzzle() { overlays.push('ink-puzzle'); },
     addDoors() { overlays.push('doors'); },
     registerRoomInteractions() { overlays.push('interactions'); },
     refreshArt() { overlays.push('state-art'); },
   };
-  for (const name of ['drawRoom', 'addCollider', 'addNativeArt', 'depthAt', 'track', 'callMark']) level[name] = compile(name, symbols);
+  for (const name of ['drawRoom', 'addCollider', 'addNativeArt', 'depthAt', 'track', 'callMark', 'addClueImage', 'sealMark']) level[name] = compile(name, symbols);
   const layoutBefore = structuredClone(PATH_ROOMS);
   const gameplayBefore = JSON.stringify([level.progress, level.route, level.routeIndex, level.player]);
   level.drawRoom();
@@ -82,10 +94,8 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
   assert.deepEqual(collisionRects, [...PATH_ROOMS[room].walls, ...PATH_ROOMS[room].solids].map(({ x, y, width, height }) => ({ x, y, width, height })), 'all original walls and solids still create identical colliders');
   assert.equal(level.colliders.length, collisionRects.length);
   assert.equal(level.bodies.length, collisionRects.length);
-  // The ink glyph puzzle draws only in the ink room, right after the schematic; no other room gets it.
-  const expectedOverlays = room === 'ink'
-    ? ['routes', 'schematic', 'ink-puzzle', 'doors', 'interactions', 'state-art']
-    : ['routes', 'schematic', 'doors', 'interactions', 'state-art'];
+  // The dynamic overlays (routes, schematic, doors, controls, state art) run after the environment in every room.
+  const expectedOverlays = ['routes', 'schematic', 'doors', 'interactions', 'state-art'];
   assert.deepEqual(overlays, expectedOverlays, 'dynamic overlays and controls still run after the environment');
   for (const element of PATH_ROOMS[room].elements) {
     const image = drawn.find(object => object.data.get('path-id') === element.id);
@@ -94,7 +104,9 @@ function render(room, key = ENVIRONMENT_KEYS[room], textureExists = true) {
     assert.ok(image.depth > 1, 'object sprites stay above the environment');
   }
   if (room === 'ink') {
-    assert.ok(drawn.some(object => object.kind === 'tileSprite' && object.args[4] === 'ink-route-bright' && object.depth === 4), 'the state-specific ink overlay is still drawn');
+    // Scenario v2: the corridor route is the clue image `ink-route-dark` (lantern off) at the corridor's own centre.
+    assert.ok(drawn.some(object => object.kind === 'image' && object.args[2] === 'ink-route-dark' && object.args[0] === 302 && object.args[1] === 254 && object.depth === 4),
+      'the state-specific ink overlay is still drawn (scenario v2 clue art)');
   }
   return { drawn, level, textureLookups };
 }

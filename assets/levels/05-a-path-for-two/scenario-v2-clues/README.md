@@ -30,10 +30,14 @@ The approved target is `docs/scenario-v2/05-a-path-for-two.md`, sections 3, 4, a
 | --- | --- | --- |
 | Entry: `practice-call` and `inner-call` | `plaque-practice-ring.png` | Entry `practice-plate` at (212,114): `ink-practice-ring-*` |
 | Entry: `call-a` | `plaque-1dot.png` | Entry `plate-a` at (546,114): `ink-1dot-*` |
-| No host yet: `call-a-far` (relay) and `call-b-far` (ink) were removed 2026-10-22 under one door, one station. Art must choose a new host for this plaque; latch B at (150,270) is one option | `plaque-2dots.png` | Relay `plate-b` at (546,114): `ink-2dots-*` |
-| Relay: current `call-b`, reassigned to the final seal | `plaque-3dots.png` | Ink `plate-c` at (558,244): `ink-3dots-*` |
+| Hall (entry): new `call-b`, the `··` post at (230,248) | `plaque-2dots.png` | Relay `plate-b` at (546,114): `ink-2dots-*` |
+| Relay: far post `call-a-far` (recovery for door A) at (560,260) | `plaque-1dot.png` | Entry `plate-a` at (546,114): `ink-1dot-*` |
+| Relay: `call-c`, the `···` post (was `call-b`) at (360,232) | `plaque-3dots.png` | Ink `plate-c` at (558,244): `ink-3dots-*` |
+| Ink foyer: far post `call-b-far` (recovery for door B) at (68,176) | `plaque-2dots.png` | Relay `plate-b` at (546,114): `ink-2dots-*` |
 
-The new entry marker position is a scenario proposal; its collision and southern approach must be validated during layout integration. Ink-room `call-c` stays at (122,190) under the one door, one station layout (2026-10-22); the earlier plan to remove it no longer applies.
+The relay far post is at (560,260), not the scenario doc's (56,228): the doc's position is a pocket sealed by the reverse frame and the partition, so no walkable route reaches it. (560,260) keeps 60px+ from latch A and call C.
+
+The hall's `··` post is at (230,248), validated by the layout's collision and spacing checks. The ink room's old final call mark (100,176) is removed with its solid; the ink foyer's recovery post `call-b-far` is at (68,176) instead.
 
 Align each 40x48 plaque with the full host call image. The current renderer uses the center of `getPathElementArtRect(element)`: for a standing call marker this is `(element.x, element.y - 24)`. Align each 44x28 seal overlay with its floor seal at `(element.x, element.y)`. Use nearest-neighbor rendering at native size.
 

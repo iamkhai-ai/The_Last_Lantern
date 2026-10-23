@@ -1,15 +1,16 @@
 import { tr } from '../i18n/catalog.ts';
 import Phaser from 'phaser';
-import { getLevelArtKey } from '../art/CampaignArt';
+import { getLevelArtKey, getPathClueArtKey } from '../art/CampaignArt';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
 import type { CampaignProgress } from '../systems/CampaignSaveSystem';
 import type { InteractionSystem } from '../systems/InteractionSystem';
 import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine, InteractableConfig } from '../types/gameTypes';
+import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import { isFootInReach } from '../systems/interactionReach';
-import { advancePathInkSequence, choosePathCallAction, buildPathSchematic, getPathBackArrival, getPathControlStand, getPathDoorFace, getPathElementArtRect, getPathExitBlock, getPathLocalLeg, getPathPipePoint, getPathRouteLine, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathApproachAllowed, isPathCallSpent, isPathDoorApproachAllowed, isPathGateWalkIn, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, pathInkGlyphAt, pathInkGuideTarget, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, pathStandingOwner, PATH_BODY, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_INK_CORRIDOR, PATH_INK_GLYPHS, PATH_INK_ORDER, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_SIZE, PATH_TUBE_MOUTHS, pathActorBody, pathCallLabel, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathElement, type PathInkGlyphId, type PathMark, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
+import { choosePathCallAction, buildPathSchematic, getPathBackArrival, getPathDoorFace, getPathElementArtRect, getPathExitBlock, getPathLocalLeg, getPathPipePoint, hasDoorPower, isActuallyReunited, isNearPathPipeEndpoint, isPathApproachAllowed, isPathCallSpent, isPathDoorApproachAllowed, isPathGateWalkIn, isPathInteractHeld, isPathPositionSafe, isPathRouteValid, isPathSeal, isPathThresholdOccupied, isValidPathPipeHop, nearestSafePathSpawn, parsePathRoute, pathDoorShouldClose, pathRouteCableSegments, pathRouteCorners, pathRoutePoints, pathStandingOwner, PATH_BODY, PATH_CHALK_FIREFLY, PATH_CHALK_VIEW, PATH_CONTROL_STANDS, PATH_DOOR_FACES, PATH_ELEMENT_RADIUS, PATH_ROOMS, PATH_ROUTE_LINES, PATH_SCHEMATIC, PATH_SCHEMATIC_SIZE, PATH_TUBE_MOUTHS, pathActorBody, pathCallLabel, rectsOverlap, resolvePathRoom, shouldRebuildLegacyPathAssignment, shouldRecoverPathFollower, shouldRoutePathFollower, type PathElement, type PathMark, type PathPoint, type PathRect, type PathRoomId, type PathRoutePoint } from '../data/pathForTwoLayout';
 
 export interface PathForTwoLevelOptions {
   scene: Phaser.Scene; progress: CampaignProgress; player: Player; lumo: Lumo; interactions: InteractionSystem; lantern: LanternSystem;
@@ -45,41 +46,72 @@ const MEMORY: DialogueLine[] = [
 const SEND_LINES: Record<'practice'|'a'|'b'|'c',DialogueLine[]> = {
   practice:[{speaker:'Nhinh',text:'Lumo, cậu tới dấu kia rồi chờ tôi một chút được không?'},{speaker:'Lumo',text:'Được. Tôi đi đây!'}],
   a:[{speaker:'Nhinh',text:'Cậu tới dấu bên kia giúp tôi nhé. Tôi sẽ tìm cách giữ cửa mở.'},{speaker:'Lumo',text:'Được. Cậu cứ từ từ.'}],
-  b:[{speaker:'Nhinh',text:'Bên này còn một dấu nữa. Cậu tới đó giúp tôi nhé?'},{speaker:'Lumo',text:'Được. Tôi đi đây.'}],
+  b:[{speaker:'Nhinh',text:'Dấu hai chấm ở buồng bên kia. Cậu tới đó giúp tôi nhé?'},{speaker:'Lumo',text:'Được. Tôi đi đây.'}],
   c:[{speaker:'Nhinh',text:'Cậu tới đầu bên kia nhé. Tôi sẽ theo những vạch trên nền.'},{speaker:'Lumo',text:'Được. Tôi sẽ chờ cậu ở đó.'}],
 };
+/** The `···` request before the corridor's trail has been seen: it promises nothing about the trail (scenario v2 §4 buồng 2). */
+const SEND_UNSEEN_C: DialogueLine[] = [{speaker:'Nhinh',text:'Cậu tới dấu ở đầu bên kia giúp tôi nhé?'},{speaker:'Lumo',text:'Được. Tôi đi đây.'}];
 /** Approved §2 arrival: only queued when the shipped route actually reaches the practice plate. */
 const PRACTICE_ARRIVAL: DialogueLine[] = [
   {speaker:'Lumo',text:'Tôi tới rồi. Cửa có mở không?'},
   {speaker:'Nhinh',text:'Mở rồi! May mà cậu lọt qua được khe đó.'},
   {speaker:'Lumo',text:'Nhỏ cũng có ích chứ. Tôi chờ ở đây, cậu cứ đi đi.'},
+  {speaker:'Nhinh',text:'Dưới chân cậu có một vòng mực. Giống dấu trên mốc ngoài kia.'},
 ];
+/** Scenario v2 Bẫy 1: the first time Lumo leaves an unlatched plate. The door shuts behind Nhinh right after. */
+const LEAVE_UNLATCHED_WARNING: DialogueLine[] = [{speaker:'Lumo',text:'Tôi đi đây. Tôi rời ấn bên kia thì cửa của nó sẽ đóng đấy.'}];
+const DOOR_SHUT_LINE: DialogueLine[] = [{speaker:'Nhinh',text:'Cửa đóng mất rồi.'}];
+/** Lumo's voice through the pipe when he reaches a plate in another room (scenario v2 §4, the detour lines). */
+const ECHO_LINES: Record<'a'|'b'|'c',DialogueLine[]> = {
+  a:[{speaker:'Lumo',text:'Tôi tới một dấu rồi! Có cánh cửa vừa mở, nhưng không phải cửa trước mặt cậu.'}],
+  b:[{speaker:'Lumo',text:'Tôi tới một dấu rồi! Có cánh cửa vừa mở, nhưng không phải cửa trước mặt cậu.'}],
+  c:[{speaker:'Lumo',text:'Tôi tới một dấu ở xa lắm. Có cửa nào đó mở, nhưng không phải ở chỗ cậu.'}],
+};
+/** Scenario v2 §3–§4 chalk firefly on the relay wall, read once while the lantern is off. */
+const CHALK_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Ai đó từng vẽ một con đom đóm ở đây. Nét vẽ thấp, như của một đứa trẻ.'},{speaker:'Lumo',text:'…Tôi không nhớ.'}];
+/** Scenario v2 §4: a latch or exit handle used while its door is shut. Only the state is named, never the step. */
+const LATCH_SHUT_LINE: DialogueLine[] = [{speaker:'Nhinh',text:'Chốt chỉ gài được khi cửa đang mở.'}];
 const RECALL_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Xong rồi, Lumo. Cậu trở lại đây nhé.'},{speaker:'Lumo',text:'Tôi về ngay.'}];
 const FINAL_RECALL_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Cửa đã có chốt giữ rồi. Lumo, cậu về đây nhé.'},{speaker:'Lumo',text:'Tôi về ngay.'}];
 /** Approved §6: only after `isActuallyReunited()` reports a real return, never on recall initiation. */
 const RETURN_LINES: DialogueLine[] = [{speaker:'Lumo',text:'Tôi về rồi.'},{speaker:'Nhinh',text:'Được rồi. Mình cùng lên nhé.'}];
 const LATCH_A_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Chốt đã giữ cửa rồi. Cậu có thể rời dấu đó.'},{speaker:'Lumo',text:'Vậy tôi không phải đứng đây mãi nữa!'}];
 const LATCHED_CALL_LINES: DialogueLine[] = [{speaker:'Lumo',text:'Cửa này đã có chốt giữ rồi. Tôi không cần đứng ở dấu nữa.'}];
-const FIRST_LIT_LINES: DialogueLine[] = [
-  {speaker:'Nhinh',text:'Trên nền có những vệt mực, nhưng mờ quá.'},
-  {speaker:'Lumo',text:'Thử tắt đèn xem. Giống trang sách trong thư viện ấy.'},
-  {speaker:'Nhinh',text:'Ừ. Có lẽ chúng chỉ đường qua hành lang.'},
-];
-const DARK_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Hiện rõ rồi! Những vạch này dẫn tới cuối hành lang.'}];
+/** Scenario v2 buồng 2: the first lit look at the `··` seal behind door B. The Lumo line only plays when both book layers were seen. */
+const RELAY_LIT_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Trên ấn kia có vệt gì đó, nhưng mờ quá.'}];
+const RELAY_LIT_BOOK_LINE: DialogueLine = {speaker:'Lumo',text:'Giống trang sách trong thư viện ấy.'};
+const RELAY_DARK_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Hai chấm mực.'},{speaker:'Lumo',text:'Giống dấu trên một mốc ngoài sảnh.'}];
+/** Scenario v2 buồng 3: the corridor's first look (lamp on), the trail seen in the dark, and the relight. */
+const INK_LIT_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Trên nền có những vệt mực, nhưng mờ quá.'}];
+const DARK_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Hiện rõ rồi! Những vạch này dẫn tới cuối hành lang.'},{speaker:'Nhinh',text:'Ba chấm. Còn nét này chạy ngược về phía ống.'}];
 const RELIT_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Ánh đèn lại làm những vạch trên nền mờ đi rồi.'}];
 const BECKON_LINES: DialogueLine[] = [{speaker:'Lumo',text:'Ở đây, Nhinh! Cậu sắp tới rồi.'},{speaker:'Nhinh',text:'Thấy cậu rồi!'}];
-/** Ink glyph puzzle beats. Instruction-level copy for the new puzzle; not part of the approved §1-§8 document. */
-const INK_ORDER_LINES: DialogueLine[] = [
-  {speaker:'Lumo',text:'Từ chỗ tôi đứng, tôi thấy vết mực kể thứ tự: vòng, rồi tam giác, rồi vuông.'},
-  {speaker:'Nhinh',text:'Mình sẽ bước lên từng dấu theo đúng thứ tự đó. Phải tắt đèn mới thấy chúng.'},
-];
-const INK_SEALED_LINES: DialogueLine[] = [{speaker:'Nhinh',text:'Ba dấu mực đã sáng. Chốt cuối cùng nhả ra rồi.'}];
-const NEXT_MARK_UNLATCHED: DialogueLine[] = [{speaker:'Nhinh',text:'Khoan đã. Tôi chưa gài chốt cửa này. Cậu chờ thêm một chút nhé.'}];
 const STILL_TRAVELLING: DialogueLine[] = [{speaker:'Nhinh',text:'Lumo vẫn đang trên đường tới. Mình đợi cậu ấy một chút.'}];
 const MARK_NOT_CALLED: DialogueLine[] = [{speaker:'Nhinh',text:'Có một dấu ở bên kia cửa. Mình thử nhờ Lumo tới đó xem.'}];
-const INK_NOT_SEEN: DialogueLine[] = [{speaker:'Nhinh',text:'Những vệt trên nền còn mờ quá. Mình thử tắt đèn để xem chúng dẫn tới đâu.'}];
 const TOWER_NEEDS_LUMO: DialogueLine[] = [{speaker:'Nhinh',text:'Mình chưa thể đi mà bỏ Lumo ở lại. Phải gọi cậu ấy về đã.'}];
 const PLATE_ROOMS: Record<'practice'|'a'|'b'|'c',PathRoomId> = {practice:'entry',a:'entry',b:'relay',c:'ink'};
+/** Scenario v2 clue art: the brass plaque on each call post, and the seal ink under each floor seal (`-dark` = vivid, `-bright` = the dim lantern-on variant). */
+const CALL_PLAQUES:Record<string,string>={'practice-call':'plaque-practice-ring','inner-call':'plaque-practice-ring','call-a':'plaque-1dot','call-a-far':'plaque-1dot','call-b':'plaque-2dots','call-b-far':'plaque-2dots','call-c':'plaque-3dots'};
+const SEAL_INKS:Record<string,string>={'practice-plate':'ink-practice-ring','plate-a':'ink-1dot','plate-b':'ink-2dots','plate-c':'ink-3dots'};
+/** The H ladder stages of scenario v2 §6 ("Thang theo bước"): one stage per row of the table. */
+type HintStage='hall'|'relay-open'|'relay-latched'|'ink-open'|'ink-latched'|'exit';
+/** The text of one H level (0 = observe, 1 = relation, 2 = next press) for a stage. */
+function hintText(stage:HintStage,level:number):string{
+  const ladder:Record<HintStage,readonly string[]>={
+    'hall':[tr('Hai mốc gọi đều nối vào ống trên cửa.'),tr('Khi tôi đậu trên ấn, cậu sẽ thấy dấu của nó.'),tr('Nhấn E ở mốc một chấm.')],
+    'relay-open':[tr('Cửa sau lưng đang mở vì tôi giữ ấn.'),tr('Tôi rời ấn thì cửa đóng. Có chốt ở phía này.'),tr('Gài chốt A trước khi nhờ tôi đi nơi khác.')],
+    'relay-latched':[tr('Ấn trên cửa phía trước đang trống.'),tr('Tắt đèn để đọc dấu trên ấn. Mốc cùng dấu có thể ở buồng trước.'),tr('Về sảnh, nhấn E ở mốc hai chấm.')],
+    'ink-open':[tr('Cửa sau lưng đang mở vì tôi giữ ấn.'),tr('Cậu sẽ còn phải quay lại buồng chuyển.'),tr('Gài chốt B trước khi nhờ tôi đi.')],
+    'ink-latched':[tr('Ấn cạnh cửa lên tháp đang trống.'),tr('Tắt đèn và đi dọc hành lang. Vạch mực cho biết ấn ấy nối về đâu.'),tr('Về buồng chuyển, nhấn E ở mốc ba chấm.')],
+    'exit':[tr('Cửa đã giữ chắc.'),tr('Mình chưa thể đi mà bỏ tôi ở lại.'),tr('Nhấn E ở tay chốt để gọi tôi về, chờ tôi tới gần rồi lên cầu thang.')],
+  };
+  return ladder[stage][level];
+}
+/** The mark a call or seal is printed with in the status line: dots for A, B, C; the practice ring reads 'thử'. */
+function sealGlyph(mark:'practice'|'a'|'b'|'c'):string{
+  if(mark==='practice')return tr('thử');
+  return mark==='a'?'·':mark==='b'?'··':'···';
+}
 const STATION_MAP_TITLE='SƠ ĐỒ TRẠM';
 const STATION_MAP_CURRENT='Bạn đang ở đây';
 const STATION_MAP_EXPLANATION='Các đường nối thể hiện đường ống giữa những buồng của trạm.';
@@ -97,25 +129,23 @@ export class PathForTwoLevel {
   private route: PathRoutePoint[]=[]; private routeIndex=0; private assignment='follow'; private lumoRoom:PathRoomId='entry';
   private routeGraphics?:Phaser.GameObjects.Graphics; private stationMap?:Phaser.GameObjects.Container;
   private gateMask?:Phaser.Display.Masks.GeometryMask; private gateMaskSource?:Phaser.GameObjects.Graphics;
-  private inkTrail?:Phaser.GameObjects.TileSprite;
+  /** Scenario v2 clue overlays: the corridor route, the chalk firefly and the seal inks (each re-picked per frame by `refreshArt`). */
+  private inkRoute?:Phaser.GameObjects.Image; private chalkImage?:Phaser.GameObjects.Image;
+  private sealInks:Array<{mark:PathMark;image:Phaser.GameObjects.Image;base:string}>=[];
   /** Held-E guard: armed by a room change, cleared by the E key coming back up (see update()). */
   private interactReleasePending=false; private interactKey?:Phaser.Input.Keyboard.Key;
   /** Foot position at the previous update(). A walk-in is the single step from a threshold into its arch (`walkedGate`). */
   private prevPlayer:PathPoint={x:0,y:0};
-  /** Ink glyph puzzle: the glyph under the feet at the previous frame (an entry is one event), the last hint time and the drawn objects. */
-  private inkHitLast?:PathInkGlyphId; private lastInkHintAt=-Infinity;
-  private inkGlyphs?:Phaser.GameObjects.Graphics; private inkGuide?:Phaser.GameObjects.Graphics;
-  private inkGuideKey?:string; private inkGuideTween?:Phaser.Tweens.Tween;
-  private hintIndex=0; private hintStage=''; private destroyed=false; private lastLantern=false;
+  private hintIndex=0; private hintStage:HintStage|'main'|''=''; private destroyed=false;
   /**
    * A queued beat carries the condition that made it true. `flushPendingStoryBeat()` re-checks that
    * condition at playback time, so an observation recorded before a light toggle, a recall, or a
    * room change cannot speak later as if the current state were the old one.
    */
   private pendingStoryBeats:Array<{lines:DialogueLine[];onComplete?:()=>void;guard?:()=>boolean;onStale?:()=>void}>=[];
-  private lastCheckpoint=0; private beckoningQueued=false; private litObservationQueued=false;
-  private darkObservationQueued=false; private relitQueued=false; private reunionQueued=false;
-  constructor(o:PathForTwoLevelOptions){this.scene=o.scene;this.progress=o.progress;this.player=o.player;this.lumo=o.lumo;this.interactions=o.interactions;this.lantern=o.lantern;this.save=o.save;this.say=o.say;this.nextLevel=o.nextLevel;this.canStartStory=o.canStartStory;this.lastLantern=this.lantern.lanternOn;}
+  private lastCheckpoint=0; private beckoningQueued=false; private queuedFlags=new Set<string>();
+  private reunionQueued=false;
+  constructor(o:PathForTwoLevelOptions){this.scene=o.scene;this.progress=o.progress;this.player=o.player;this.lumo=o.lumo;this.interactions=o.interactions;this.lantern=o.lantern;this.save=o.save;this.say=o.say;this.nextLevel=o.nextLevel;this.canStartStory=o.canStartStory;}
   private get lanternOn(){return this.lantern.lanternOn;}
   public build():void{
     this.normalizeProgress();
@@ -165,14 +195,13 @@ export class PathForTwoLevel {
     this.refresh();
   }
   public startOpeningDialogue():void{this.say(INTRO);}
-  public destroy():void{if(this.destroyed)return;this.destroyed=true;this.inkGuideTween?.stop();this.inkGuideTween=undefined;this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.gateMask?.destroy();this.gateMaskSource?.destroy();this.gateMask=undefined;this.gateMaskSource=undefined;this.stationMap?.destroy();this.stationMap=undefined;this.interactions.clear();this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();}
+  public destroy():void{if(this.destroyed)return;this.destroyed=true;this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.gateMask?.destroy();this.gateMaskSource?.destroy();this.gateMask=undefined;this.gateMaskSource=undefined;this.stationMap?.destroy();this.stationMap=undefined;this.interactions.clear();this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();}
   public update(dt:number):void{
     if(this.destroyed)return; this.releaseInteractGuard();
-    this.advanceLumo(dt); this.updateDoors(); this.updateInkProgress(); this.updateInkOrder(); this.updateInkSequence(); this.updateReunion();
+    this.advanceLumo(dt); this.updateDoors(); this.updateObservations(); this.updateReunion();
     this.flushPendingStoryBeat();
     if(this.scene.time.now-this.lastCheckpoint>=600){this.lastCheckpoint=this.scene.time.now;if(this.isSafe(this.room,{x:this.player.x,y:this.player.y})){this.progress.flags['l4-room']=this.room;this.progress.counters['player-level']=4;this.progress.counters['player-x']=Math.round(this.player.x);this.progress.counters['player-y']=Math.round(this.player.y);this.save();}}
     this.refreshArt();
-    this.updateInkGuide();
     // Walking into an open arch is E at its door (RULE_GAMES §3 gate exception). The edge is the single step
     // from the threshold into the passage, so it fires once per entry. Like E, it waits for any dialogue to
     // finish and is ignored while the held-E guard is armed. `runDoor` then applies the same refusals and
@@ -195,82 +224,66 @@ export class PathForTwoLevel {
     if(this.room==='entry'){
       if(this.assignment==='practice'&&this.isTravelling())return tr('Nhấn E ở mốc gần cậu để gọi Lumo, rồi chờ cậu ấy tới ấn sau cửa thấp.');
       if(this.assignment==='practice'&&this.hasPower('practice'))return tr('Cửa thử đã mở. Bước vào trong và nhấn E ở mốc trong để gọi Lumo về mốc.');
-      if(!this.progress.flags['l4-practice-complete']&&!this.progress.flags['l4-called-a'])return tr('Nhấn E ở mốc đứng gần cậu để thử cách gọi. Mốc A trong sảnh mở đường đi tiếp khi cậu cần.');
-      if(this.isDoorOpen('a'))return tr('Qua cửa A. Gài chốt ở mặt bên kia trước khi gọi Lumo tới B.');
-      return tr('Nhấn E ở mốc A trong sảnh để gọi Lumo tới ấn A, rồi qua cửa A.');
+      if(!this.progress.flags['l4-called-a'])return tr('Nhờ Lumo mở cửa: nhấn E ở một mốc gọi.');
+      return this.isDoorOpen('a')?tr('Qua cửa.'):tr('Nhờ Lumo mở cửa: nhấn E ở một mốc gọi.');
     }
-    if(this.room==='relay'){
-      if(!this.progress.flags['l4-latch-a']){
-        if(this.hasPower('a'))return tr('Gài chốt A ở mặt bên kia trước khi gọi Lumo tới B.');
-        // While Lumo walks to plate A, E is disabled at the latch, so the objective must not ask for it.
-        if(this.assignment==='a'&&this.isTravelling())return tr('Lumo đang tới ấn A. Chờ cậu ấy tới nơi rồi gài chốt.');
-        return tr('Gọi Lumo tới ấn A: nhấn E ở chốt A, rồi gài chốt.');
-      }
-      return this.isDoorOpen('b')?tr('Qua cửa B tới hành lang mực.'):tr('Gọi Lumo tới ấn B.');
-    }
-    // Six numbered steps, always the current one. The instruction channel names the lantern key (F) and
-    // the call (E) itself; character speech stays in the approved beats. C-before-ink is legal: once C is
-    // actually held, step 2 stops asking for a call that already happened.
-    if(!this.progress.flags['l4-latch-b']){
-      if(this.hasPower('b'))return tr('1/6 Gài chốt B: nhấn E ở chốt cạnh cửa B.');
-      if(this.assignment==='b'&&this.isTravelling())return tr('1/6 Lumo đang tới ấn B. Chờ cậu ấy tới nơi rồi gài chốt.');
-      return tr('1/6 Gọi Lumo tới ấn B: nhấn E ở chốt B, rồi gài chốt.');
-    }
-    if(this.progress.flags['l4-latch-c']){
-      const memoRead=this.progress.flags['l4-memo']===true;
-      if(!memoRead)return tr('5/6 Đọc vết xoắn trên tường để giữ lại mảnh ký ức.');
-      const blockedBy=getPathExitBlock({latchC:true,memoRead,reunited:this.isActuallyReunited()});
-      if(blockedBy==='companion'){
-        if(this.assignment==='c')return tr('6/6 Nhấn E ở tay gọi C để gọi Lumo về, rồi chờ cậu ấy tới gần.');
-        if(this.isTravelling())return tr('6/6 Lumo đang về. Chờ cậu ấy tới gần Nhinh rồi lên tháp.');
-        return tr('6/6 Lumo đã về tới nơi. Chờ cậu ấy tới gần Nhinh rồi lên tháp.');
-      }
-      return tr('6/6 Tới bậc thang và nhấn E.');
-    }
-    const known=this.progress.flags['l4-ink-order-known']===true;
-    if(!known&&!this.hasPower('c')){
-      return this.assignment==='c'&&this.isTravelling()
-        ?tr('2/6 Lumo đang tới ấn C. Chờ cậu ấy tới nơi.')
-        :tr('2/6 Gọi Lumo tới ấn C: nhấn E ở mốc có nhãn C (bên trái).');
-    }
-    if(!this.progress.flags['l4-ink-revealed'])return tr('3/6 Tắt đèn bằng F rồi bước vào hành lang để thấy vệt mực.');
-    if(this.progress.flags['l4-ink-seals']!==true){
-      if(!known)return tr('4/6 Chờ Lumo tới ấn C: cậu ấy sẽ cho biết thứ tự dấu mực.');
-      if(this.lanternOn)return tr('4/6 Tắt đèn (F) để thấy ba dấu mực.');
-      const lit=this.progress.counters['l4-ink-step']??0;
-      return tr('4/6 Bước lên ba dấu mực theo thứ tự: vòng → tam giác → vuông (đã sáng {lit}/3).', { lit });
-    }
-    if(!this.hasPower('c'))return tr('5/6 Gọi Lumo tới ấn C lại, rồi gài chốt cửa ra.');
-    return tr('5/6 Gài chốt cửa ra ở đầu hành lang (nhấn E), rồi đọc vết xoắn.');
+    // Scenario v2: the rest of the station names goals only (no keys, no latch steps).
+    if(this.progress.flags['l4-latch-c'])return tr('Đi cùng Lumo lên tháp.');
+    return tr('Đưa cả hai người tới chân tháp.');
   }
+  /**
+   * The HUD status line states only what is true now (scenario v2 §6): where Lumo is and which latches hold.
+   * `Lumo: giữ ấn ·· · Chốt: · ✓  ·· —  ··· —`
+   */
   public getStatusText():string{
-    const arrival=(['practice','a','b','c'] as const).find(mark=>this.hasPower(mark));
-    const lumoState=this.isTravelling()?tr('đang đi'):arrival?(arrival==='practice'?tr('đã tới ấn thử'):tr('đã tới {arrival}', { arrival: arrival.toUpperCase() })):tr('theo Nhinh');
-    return tr('{room} · A {a} · B {b} · C {c} · Lumo: {lumo}', {
-      room: tr(PATH_ROOMS[this.room].title),
-      a: this.progress.flags['l4-latch-a'] ? tr('giữ') : tr('mở khi Lumo tới'),
-      b: this.progress.flags['l4-latch-b'] ? tr('giữ') : tr('chờ'),
-      c: this.progress.flags['l4-latch-c'] ? tr('giữ') : tr('chờ'),
-      lumo: lumoState,
+    const seal=(['practice','a','b','c'] as const).find(mark=>this.hasPower(mark));
+    const lumo=this.isTravelling()?tr('đang bay'):seal?tr('giữ ấn {mark}', { mark: sealGlyph(seal) }):tr('đi cùng Nhinh');
+    const latch=(id:'a'|'b'|'c',glyph:string)=>`${glyph} ${this.progress.flags[`l4-latch-${id}`]?'✓':'—'}`;
+    return tr('Lumo: {lumo} · Chốt: {chot}', {
+      lumo,
+      chot:`${latch('a','·')}  ${latch('b','··')}  ${latch('c','···')}`,
     });
   }
+  /**
+   * The H ladder, one stage per row of scenario v2 §6 ("Thang theo bước"). Level 1 observes, 2 names the relation,
+   * 3 names the next press. Each stage keeps its own count; a new stage starts again at level 1.
+   */
+  /**
+   * H: the per-step row of scenario v2 §6 when one applies; otherwise the level's main ladder (`CAMPAIGN_LEVELS[4].hint`,
+   * the v2 "Thang gợi ý chính"). Each stage keeps its own count, and a new stage starts again at level 1.
+   */
   public showHint():void{
-    const stage=this.room==='entry'?'practice':this.room==='relay'?this.progress.flags['l4-latch-a']?'b':'a':!this.progress.flags['l4-latch-b']?'latch-b':!this.progress.flags['l4-ink-revealed']?'ink':!this.hasPower('c')?'c':'exit';
-    if(stage!==this.hintStage){this.hintStage=stage;this.hintIndex=0;} const hints=[tr('Nhấn E ở mốc gọi để đưa Lumo tới ấn bên kia cửa. Mỗi buồng đều có một tay chốt giữ cửa.'),tr('Tôi giữ ấn để cậu qua cửa. Cậu nhấn E ở tay chốt, rồi tôi mới sang được nơi khác.'),tr('Nhấn E ở mốc đang mở cửa trước mặt, đi qua và gài chốt. Tới hành lang cuối, nhấn F tắt đèn để đọc vạch nền.')];
-    this.say([{speaker:'Hệ thống',text:hints[Math.min(this.hintIndex++,2)]}]);
+    const stage=this.hintStageKey();
+    const key=stage??'main';
+    if(key!==this.hintStage){this.hintStage=key;this.hintIndex=0;}
+    const level=Math.min(this.hintIndex++,2);
+    const text=stage?hintText(stage,level):tr(CAMPAIGN_LEVELS[4].hint?.[level]??'');
+    this.say([{speaker:'Hệ thống',text}]);
   }
-  public showJournal():void{const e:DialogueLine[]=[];if(this.progress.flags['l4-called-a'])e.push({speaker:'Nhinh',text:tr('Gọi Lumo tới ấn mở cửa, rồi qua cửa để gài chốt.')});if(this.progress.flags['l4-ink-revealed'])e.push({speaker:'Nhinh',text:tr('Đèn dịu xuống thì vạch mực trên nền hiện rõ.')});if(this.progress.flags['l4-memo'])e.push({speaker:'Lumo',text:tr('Vết xoắn trong đường ống gợi lại đêm bão và tiếng gọi ngoài kia.')});this.say([{speaker:'Nhinh',text:tr('Sổ tay giữ những điều hai đứa đã học.')},...(e.length?e:[{speaker:'Nhinh' as const,text:tr('Chưa ghi thêm manh mối nào.')}])]);}
+  /** The row of the per-step ladder that applies now; undefined when none does (the practice lesson in the hall). */
+  private hintStageKey():HintStage|undefined{
+    if(this.progress.flags['l4-latch-c'])return'exit';
+    if(this.room==='entry')return this.assignment==='practice'?undefined:'hall';
+    if(this.room==='relay')return this.progress.flags['l4-latch-a']?'relay-latched':'relay-open';
+    return this.progress.flags['l4-latch-b']?'ink-latched':'ink-open';
+  }
+  /** The journal: what Nhinh and Lumo have learned, in the order the scenario gives it (scenario v2 §6 J). */
+  public showJournal():void{
+    const e:DialogueLine[]=[];
+    if(this.progress.flags['l4-called-a'])e.push({speaker:'Nhinh',text:tr('Mốc và ấn cùng số chấm thì nối với nhau. Dấu trên ấn là mực.')});
+    if(this.progress.flags['l4-leave-warned'])e.push({speaker:'Nhinh',text:tr('Lumo rời ấn thì cửa đóng. Muốn giữ đường, phải gài chốt trước.')});
+    if(this.progress.flags['l4-ink-revealed'])e.push({speaker:'Nhinh',text:tr('Đèn dịu xuống thì vạch mực trên nền hiện rõ.')});
+    if(this.progress.flags['l4-chalk-seen'])e.push({speaker:'Nhinh',text:tr('Một con đom đóm vẽ bằng phấn trên tường buồng chuyển, chỉ hiện khi tắt đèn.')});
+    if(this.progress.flags['l4-memo'])e.push({speaker:'Lumo',text:tr('Vết xoắn trong đường ống gợi lại đêm bão và tiếng gọi ngoài kia.')});
+    this.say([{speaker:'Nhinh',text:tr('Sổ tay giữ những điều hai đứa đã học.')},...(e.length?e:[{speaker:'Nhinh' as const,text:tr('Chưa ghi thêm manh mối nào.')}])]);
+  }
   private normalizeProgress():void{
     if(this.progress.flags['l4-latch-c'])this.progress.flags['l4-latch-b']=true;
     if(this.progress.flags['l4-latch-b'])this.progress.flags['l4-latch-a']=true;
     if(this.progress.flags['l4-latch-a'])this.progress.flags['l4-visited-relay']=true;
     if(this.progress.flags['l4-latch-b']||this.progress.flags['l4-latch-c'])this.progress.flags['l4-visited-ink']=true;
-    // An old save that already held the exit latch predates the glyph puzzle: it counts as solved, never stuck.
-    if(this.progress.flags['l4-latch-c']){this.progress.flags['l4-ink-revealed']=true;this.progress.flags['l4-ink-order-known']=true;this.progress.flags['l4-ink-seals']=true;}
-    const rawInkStep=this.progress.counters['l4-ink-step']??0;
-    let inkStep=Number.isFinite(rawInkStep)?Math.min(PATH_INK_ORDER.length,Math.max(0,Math.floor(rawInkStep))):0;
-    if(this.progress.flags['l4-ink-seals']===true)inkStep=PATH_INK_ORDER.length;
-    this.progress.counters['l4-ink-step']=inkStep;
+    // An old save that already held the exit latch has seen the corridor by definition (the v2 trail needs no sequence).
+    if(this.progress.flags['l4-latch-c'])this.progress.flags['l4-ink-revealed']=true;
     if(this.progress.flags['l4-at-a']!==true)this.progress.flags['l4-at-a']=false;
     if(this.progress.flags['l4-at-b']!==true)this.progress.flags['l4-at-b']=false;
     if(this.progress.flags['l4-at-c']!==true)this.progress.flags['l4-at-c']=false;
@@ -324,8 +337,7 @@ export class PathForTwoLevel {
   /** The latch state every layout predicate reads: a latched or powered arch is open floor for walking and for reach. */
   private pathReachOptions():{latches:Partial<Record<'a'|'b'|'c'|'practice',boolean>>}{return{latches:{a:this.progress.flags['l4-latch-a']===true||this.hasPower('a'),b:this.progress.flags['l4-latch-b']===true||this.hasPower('b'),c:this.progress.flags['l4-latch-c']===true||this.hasPower('c'),practice:this.hasPower('practice')}};}
   private drawRoom():void{
-    this.interactions.clear();this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.colliders=[];this.bodies=[];this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();this.protected=[];this.inkTrail=undefined;
-    this.inkGuideTween?.stop();this.inkGuideTween=undefined;this.inkGlyphs=undefined;this.inkGuide=undefined;this.inkGuideKey=undefined;this.inkHitLast=undefined;
+    this.interactions.clear();this.colliders.forEach(c=>{if(c.active)c.destroy();});this.bodies.forEach(b=>{if(b.gameObject?.active)b.gameObject.destroy();});this.objects.forEach(o=>{if(o.active)o.destroy();});this.objects=[];this.colliders=[];this.bodies=[];this.doorImages.clear();this.doorBraceImages.clear();this.doorHeaderImages.clear();this.doorPostImages.clear();this.doorBodies.clear();this.protected=[];this.inkRoute=undefined;this.chalkImage=undefined;this.sealInks=[];
     this.gateMask?.destroy();this.gateMaskSource?.destroy();this.gateMask=undefined;this.gateMaskSource=undefined;
     const def=PATH_ROOMS[this.room];
     const environmentKey=getLevelArtKey(4,`${this.room}-environment-base`);
@@ -339,16 +351,10 @@ export class PathForTwoLevel {
     for(const solid of def.solids)this.addCollider(solid);
     this.routeGraphics=this.scene.add.graphics().setDepth(5);this.track(this.routeGraphics);this.drawTubeRoutes();
     this.drawStationSchematic();
-    if(this.room==='ink'){
-      // One continuous mark over the whole corridor, sized and placed from the layout's own corridor
-      // rect: the two native 240×48 stamps used to be 132px out of phase, so the middle third showed two
-      // offset dash patterns. The native texture is tiled at its own size (no scaling), so aspect and
-      // dash spacing stay as authored.
-      const key=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');
-      if(key){this.inkTrail=this.scene.add.tileSprite(PATH_INK_CORRIDOR.x+PATH_INK_CORRIDOR.width/2,
-        PATH_INK_CORRIDOR.y+PATH_INK_CORRIDOR.height/2,PATH_INK_CORRIDOR.width,PATH_INK_CORRIDOR.height,key).setDepth(4);this.track(this.inkTrail);}
-      this.drawInkPuzzle();
-    }
+    // Scenario v2 clue overlays: one non-tiled 460×72 corridor route at (72,218), the chalk firefly on the relay
+    // partition. Both are native size; `refreshArt` picks the lantern state and the chalk's visibility.
+    if(this.room==='ink')this.inkRoute=this.addClueImage('ink-route-dark',302,254,4);
+    if(this.room==='relay')this.chalkImage=this.addClueImage('chalk-firefly',PATH_CHALK_FIREFLY.x,PATH_CHALK_FIREFLY.y,4.5);
     for(const mouth of PATH_TUBE_MOUTHS){
       if(mouth.room!==this.room)continue;
       this.addNativeArt('tube-mouth',mouth.x,mouth.y,mouth.rotation);
@@ -360,6 +366,11 @@ export class PathForTwoLevel {
       this.track(image);
       if(e.art.startsWith('call')||e.art.startsWith('latch')||e.id==='spiral')this.protected.push(image);
       image.setData('path-id',e.id);
+      // Brass plaque on a call post (the same 40×48 box as the host art), and the seal ink on a floor seal.
+      const plaque=CALL_PLAQUES[e.id];
+      if(plaque)this.addClueImage(plaque,e.x,e.y-24,this.depthAt(e.y)+0.1);
+      const sealInk=SEAL_INKS[e.id];
+      if(sealInk&&isPathSeal(e)){const sealImage=this.addClueImage(`${sealInk}-dark`,e.x,e.y,5.5);if(sealImage)this.sealInks.push({mark:this.sealMark(e.id),image:sealImage,base:sealInk});}
       // Every standing call post carries a small letter just above its art, so the two posts in the
       // ink foyer can be told apart. The label is tracked like the art and refreshed by refreshArt().
       const callMark=this.callMark(e.id);
@@ -643,14 +654,13 @@ export class PathForTwoLevel {
   private prompt(id:string):string|null{
     if(this.heldInteract()||!this.elementApproach(id,this.player.x,this.player.y))return null;
     const mark=this.callMark(id);
-    if(mark)return choosePathCallAction(this.assignment,mark,this.callEligible(mark))==='recall'?tr('E · Gọi Lumo về mốc'):PLATE_ROOMS[mark]===this.lumoRoom?tr('E · Gọi Lumo tới ấn'):tr('E · Gọi Lumo qua ống');
-    // The latch is the station for its own door: with Lumo on the plate it latches, while Lumo is still on his way
-    // there it says nothing, and otherwise E sends him to that plate (never a recall).
+    if(mark)return choosePathCallAction(this.assignment,mark,true)==='recall'?tr('E · Gọi Lumo về mốc'):PLATE_ROOMS[mark]===this.lumoRoom?tr('E · Gọi Lumo tới ấn'):tr('E · Gọi Lumo qua ống');
+    // The latch is the station for its own door (scenario v2 §4). While Lumo is still on his way it says nothing;
+    // otherwise E latches when he is on the plate and says the door is shut when he is not.
     if(id==='latch-a'||id==='latch-b'){
       const plate=id==='latch-a'?'a':'b';
-      if(this.hasPower(plate))return plate==='a'?tr('E · Gài chốt A'):tr('E · Gài chốt B');
-      if(this.assignment===plate&&this.isTravelling())return null;
-      return plate==='a'?tr('E · Gọi Lumo tới ấn A'):tr('E · Gọi Lumo tới ấn B');
+      if(this.assignment===plate&&this.isTravelling()&&!this.hasPower(plate))return null;
+      return plate==='a'?tr('E · Gài chốt A'):tr('E · Gài chốt B');
     }
     if(id==='latch-c')return this.progress.flags['l4-latch-c']?tr('E · Gọi Lumo về'):tr('E · Gài chốt cửa ra');
     if(id==='spiral')return tr('E · Đọc vết xoắn');
@@ -662,15 +672,6 @@ export class PathForTwoLevel {
     if(id.includes('call-b'))return'b';
     if(id.includes('call-c'))return'c';
     return undefined;
-  }
-  /**
-   * The lesson is an optional practice door (D1): A only needs the latch before it, and neither A nor
-   * the lesson waits for `l4-practice-complete`, which one full practice recall writes.
-   */
-  private callEligible(mark:'practice'|'a'|'b'|'c'):boolean{
-    if(mark==='b')return this.progress.flags['l4-latch-a']===true;
-    if(mark==='c')return this.progress.flags['l4-latch-b']===true;
-    return true;
   }
   private interactionEnabled(id:string):boolean{
     if(this.heldInteract()||!this.elementApproach(id,this.player.x,this.player.y))return false;
@@ -686,23 +687,18 @@ export class PathForTwoLevel {
     if(id==='spiral')return this.progress.flags['l4-latch-c']===true;
     return true;
   }
-  /** What still blocks the exit latch, in flow order; undefined means the handle may be used. */
-  private latchCBlockReason():string|undefined{
-    if(!this.progress.flags['l4-latch-b'])return tr('Cửa B cần được gài trước.');
-    if(!this.progress.flags['l4-ink-revealed'])return INK_NOT_SEEN[0].text;
-    if(!this.hasPower('c'))return MARK_NOT_CALLED[0].text;
-    if(this.progress.flags['l4-ink-seals']!==true)return tr('Chốt này còn khóa. Ba dấu mực trong hành lang phải sáng theo đúng thứ tự.');
-    return undefined;
+  /** What still blocks the exit latch: Lumo must be resting on the `···` seal (scenario v2 §4). Undefined means the handle may be used. */
+  private latchCBlockReason():DialogueLine[]|undefined{
+    if(this.hasPower('c'))return undefined;
+    return this.assignment==='c'&&this.isTravelling()?STILL_TRAVELLING:LATCH_SHUT_LINE;
   }
   private interact(id:string):void{
     if(!this.interactionEnabled(id))return;
     const mark=this.callMark(id);
     if(mark){
       if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]===true){this.send(mark);return;}
-      const action=choosePathCallAction(this.assignment,mark,this.callEligible(mark));
+      const action=choosePathCallAction(this.assignment,mark,true);
       if(action==='recall'){this.recallToCall(id);return;}
-      if(mark==='b'&&!this.progress.flags['l4-latch-a']){this.say(NEXT_MARK_UNLATCHED);return;}
-      if(mark==='c'&&!this.progress.flags['l4-latch-b']){this.say(NEXT_MARK_UNLATCHED);return;}
       this.send(mark);
       return;
     }
@@ -715,13 +711,14 @@ export class PathForTwoLevel {
         if(plate==='b'&&this.room==='ink'&&this.progress.flags['l4-visited-ink']){this.progress.flags['l4-latch-b']=true;this.progress.flags['l4-at-b']=false;this.save();}
         return;
       }
-      this.send(plate);
+      // Scenario v2: a latch only latches a door that is open (Lumo on its plate). It never sends him away.
+      this.say(this.assignment===plate&&this.isTravelling()?STILL_TRAVELLING:LATCH_SHUT_LINE);
       return;
     }
     if(id==='latch-c'){
       if(this.progress.flags['l4-latch-c']){this.recallToCall(id);return;}
       const blocked=this.latchCBlockReason();
-      if(blocked){this.say([{speaker:'Nhinh',text:blocked}]);return;}
+      if(blocked){this.say(blocked);return;}
       this.progress.flags['l4-latch-c']=true;this.save();
       if(!this.progress.flags['l4-memo'])this.say(MEMORY,()=>{this.progress.flags['l4-memo']=true;this.save();});
       return;
@@ -731,8 +728,28 @@ export class PathForTwoLevel {
       this.say(MEMORY,()=>{this.progress.flags['l4-memo']=true;this.save();});
     }
   }
+  /**
+   * The seal Lumo rests on right now when its door is not latched. Leaving it shuts that door behind Nhinh
+   * (scenario v2 Bẫy 1 and Bẫy 2), so the first such departure is warned about.
+   */
+  private leavesUnlatchedSeal():'a'|'b'|'c'|undefined{
+    const mark=this.assignment;
+    if((mark==='a'||mark==='b'||mark==='c')&&this.hasPower(mark)&&this.progress.flags[`l4-latch-${mark}`]!==true)return mark;
+    return undefined;
+  }
+  /**
+   * Lumo's reply to a request or a recall. The first time he leaves an unlatched seal he names the consequence
+   * (`LEAVE_UNLATCHED_WARNING`) instead of the usual line, and once the door has shut Nhinh says so (`DOOR_SHUT_LINE`).
+   * Later departures from an unlatched seal use the usual line: the warning is said once.
+   */
+  private replyToRequest(leaving:'a'|'b'|'c'|undefined,lines:DialogueLine[]):void{
+    if(leaving===undefined||this.progress.flags['l4-leave-warned']===true){this.say(lines);return;}
+    this.queueFlagBeat('l4-leave-warned',LEAVE_UNLATCHED_WARNING,()=>true);
+    this.queueStoryBeat(DOOR_SHUT_LINE,undefined,()=>!this.isDoorOpen(leaving)&&PATH_DOOR_FACES.some(face=>face.id===leaving&&face.room===this.room));
+  }
   private send(mark:'practice'|'a'|'b'|'c'):void{
     if(mark!=='practice'&&this.progress.flags[`l4-latch-${mark}`]){this.say(LATCHED_CALL_LINES);return;}
+    const leaving=this.leavesUnlatchedSeal();
     this.assignment=mark;
     this.progress.flags['l4-assignment']=mark;
     this.progress.flags['l4-reunited']=false;
@@ -741,13 +758,10 @@ export class PathForTwoLevel {
     this.route=this.buildAssignmentRoute(mark,{x:this.player.x,y:this.player.y});
     this.routeIndex=0;
     this.persistRoute();
-    // C-before-ink is a legal path with no approved variant: §4's request promises to follow the
-    // floor lines, a premise that has not happened yet. Suppress that unsupported speech (and report
-    // the gap) instead of inventing copy or making the ink a requirement to call.
+    // The `···` request promises to follow the trail only once the trail has been seen (scenario v2 §4).
     const cBeforeInk=mark==='c'&&this.progress.flags['l4-ink-revealed']!==true;
     this.save();
-    if(cBeforeInk)return;
-    this.say(SEND_LINES[mark]);
+    this.replyToRequest(leaving,cBeforeInk?SEND_UNSEEN_C:SEND_LINES[mark]);
   }
   private buildAssignmentRoute(mark:'a'|'b'|'c'|'practice',playerPoint:PathPoint):PathRoutePoint[]{
     const targetRoom=PLATE_ROOMS[mark];
@@ -777,12 +791,13 @@ export class PathForTwoLevel {
     const route:PathRoutePoint[]=[];let current=from;
     while(current!==to){
       if(current==='entry'){
+        // The relay leg runs on to (420,220), where the `··` plate's own leg (480,190) begins (PATH_ROUTE_LINES).
         route.push({room:'entry',x:440,y:232},getPathPipePoint('a','entry','out'),
-          getPathPipePoint('a','relay','in'),{room:'relay',x:140,y:280});current='relay';
+          getPathPipePoint('a','relay','in'),{room:'relay',x:140,y:280},{room:'relay',x:220,y:280},{room:'relay',x:320,y:250},{room:'relay',x:420,y:220});current='relay';
       }else if(current==='ink'){
         route.push({room:'ink',x:558,y:244},{room:'ink',x:520,y:200},{room:'ink',x:360,y:200},{room:'ink',x:180,y:200},
           {room:'ink',x:122,y:210},{room:'ink',x:122,y:242},getPathPipePoint('b','ink','out'),
-          getPathPipePoint('b','relay','in'),{room:'relay',x:420,y:220});current='relay';
+          getPathPipePoint('b','relay','in'));current='relay';
       }else if(to==='entry'){
         route.push({room:'relay',x:320,y:250},{room:'relay',x:220,y:280},{room:'relay',x:140,y:280},getPathPipePoint('a','relay','out'),
           getPathPipePoint('a','entry','in'),{room:'entry',x:440,y:232});current='entry';
@@ -795,6 +810,7 @@ export class PathForTwoLevel {
   }
   private recallToCall(id:string):void{
     const finalRecall=id==='latch-c'&&this.progress.flags['l4-latch-c'];
+    const leaving=this.leavesUnlatchedSeal();
     const previousAssignment=this.assignment;
     const point={x:this.player.x,y:this.player.y};
     this.assignment='follow';this.progress.flags['l4-assignment']='follow';
@@ -806,7 +822,7 @@ export class PathForTwoLevel {
     this.routeIndex=0;this.persistRoute();this.save();
     // The final recall has its own approved request (§6); every other recall uses §2's. Neither line
     // is the reunion: §6's "Tôi về rồi." waits for a real return in updateReunion().
-    this.say(finalRecall?FINAL_RECALL_LINES:RECALL_LINES);
+    this.replyToRequest(leaving,finalRecall?FINAL_RECALL_LINES:RECALL_LINES);
   }
   private persistRoute():void{this.progress.flags['l4-route']=JSON.stringify(this.route);this.progress.counters['l4-route-index']=this.routeIndex;this.progress.flags['l4-lumo-room']=this.lumoRoom;}
   private advanceLumo(dt:number):void{
@@ -875,6 +891,12 @@ export class PathForTwoLevel {
         PRACTICE_ARRIVAL,
         undefined,
         ()=>this.room==='entry'&&this.hasPower('practice'),
+      );
+      // Scenario v2 §4: Lumo reaching a seal in another room calls out through the pipe. Same room: no line.
+      if(mark!=='practice'&&room!==this.room)this.queueStoryBeat(
+        ECHO_LINES[mark],
+        undefined,
+        ()=>this.room!==room&&this.hasPower(mark),
       );
     }
   }
@@ -996,59 +1018,37 @@ export class PathForTwoLevel {
       this.doorBraceImages.get(id)?.setVisible(latched);
     }
   }
-  private updateInkProgress():void{
-    // The layout's own corridor rect: the band the 348×48 mark is drawn over and the masonry leaves
-    // open. Every ink observation needs the player actually standing on that band.
-    const atCorridor=this.isAtInkCorridor();
-    if(this.room==='ink'&&!this.lanternOn&&!this.progress.flags['l4-ink-revealed']&&atCorridor){
-      this.progress.flags['l4-ink-revealed']=true;
-      this.save();
+  /**
+   * Scenario v2 observations. Each line is queued once when its state is true and re-checked at playback
+   * (`queueFlagBeat`), so an observation never speaks about a light or a room that has already changed.
+   *  - buồng 2: the `··` seal behind door B, read with the lamp on, then with it off;
+   *  - buồng 3: the corridor trail, first with the lamp on, then in the dark, then relit.
+   * The lamp-off reveal of the trail sets `l4-ink-revealed` at once (the trail is on screen), and the chalk firefly
+   * sets `l4-chalk-seen` the moment Nhinh reads it in the dark (`updateChalk`).
+   */
+  private updateObservations():void{
+    const lamp=this.lanternOn;
+    const room=this.room;
+    if(room==='relay'){
+      if(lamp){
+        const bothBookLayers=this.progress.flags['l2-book-lit']===true&&this.progress.flags['l2-book-dark']===true;
+        this.queueFlagBeat('l4-relay-lit-said',bothBookLayers?[...RELAY_LIT_LINES,RELAY_LIT_BOOK_LINE]:RELAY_LIT_LINES,()=>this.room==='relay'&&this.lanternOn);
+      }else{
+        this.queueFlagBeat('l4-relay-dark-said',RELAY_DARK_LINES,()=>this.room==='relay'&&!this.lanternOn);
+      }
     }
-    // First lit look (approved §4): only before the dark observation exists. It never claims the
-    // trail was visible before; it says the marks are faint.
-    //
-    // The Lumo analogy ("Giống trang sách trong thư viện ấy.") and Nhinh's "Ừ" reply presuppose that
-    // both book layers were actually observed in Library Level. The Library exit only requires
-    // l2-crystal + l2-fifth-viewed, so a legal save can arrive with neither book layer. Keep the full
-    // approved exchange only when the premise is real; otherwise speak the approved factual first
-    // line alone (never invent a replacement, never leave the dangling reply, never add a gate).
-    const bothBookLayers=this.progress.flags['l2-book-lit']===true&&this.progress.flags['l2-book-dark']===true;
-    if(this.room==='ink'&&this.lanternOn&&atCorridor&&!this.progress.flags['l4-ink-revealed']
-      &&!this.progress.flags['l4-ink-observed-lit']&&!this.litObservationQueued){
-      this.litObservationQueued=true;
-      this.queueStoryBeat(
-        bothBookLayers?FIRST_LIT_LINES:[FIRST_LIT_LINES[0]],
-        ()=>{this.progress.flags['l4-ink-observed-lit']=true;this.litObservationQueued=false;this.save();},
-        ()=>this.room==='ink'&&this.lanternOn&&this.isAtInkCorridor()&&this.progress.flags['l4-ink-revealed']!==true,
-        ()=>{this.litObservationQueued=false;},
-      );
-    }
-    // Dark look (approved §4): recorded at the real corridor observation, and spoken only while the
-    // corridor is still unlit and already revealed.
-    if(this.room==='ink'&&!this.lanternOn&&atCorridor&&this.progress.flags['l4-ink-revealed']===true
-      &&!this.progress.flags['l4-ink-dark-said']&&!this.darkObservationQueued){
-      this.darkObservationQueued=true;
-      this.queueStoryBeat(
-        DARK_LINES,
-        ()=>{this.progress.flags['l4-ink-dark-said']=true;this.darkObservationQueued=false;this.save();},
-        ()=>this.room==='ink'&&!this.lanternOn&&this.isAtInkCorridor()&&this.progress.flags['l4-ink-revealed']===true,
-        ()=>{this.darkObservationQueued=false;},
-      );
-    }
-    // Relit look (approved §4): only once the dark trail has actually been observed.
-    if(this.room==='ink'&&this.lanternOn&&atCorridor&&this.progress.flags['l4-ink-revealed']===true
-      &&!this.progress.flags['l4-ink-relit-said']&&!this.relitQueued){
-      this.relitQueued=true;
-      this.queueStoryBeat(
-        RELIT_LINES,
-        ()=>{this.progress.flags['l4-ink-relit-said']=true;this.relitQueued=false;this.save();},
-        ()=>this.room==='ink'&&this.lanternOn&&this.isAtInkCorridor()&&this.progress.flags['l4-ink-revealed']===true,
-        ()=>{this.relitQueued=false;},
-      );
+    if(room==='ink'){
+      if(!lamp&&this.progress.flags['l4-ink-revealed']!==true){
+        this.progress.flags['l4-ink-revealed']=true;
+        this.save();
+      }
+      if(lamp)this.queueFlagBeat('l4-ink-lit-said',INK_LIT_LINES,()=>this.room==='ink'&&this.lanternOn);
+      else this.queueFlagBeat('l4-ink-dark-said',DARK_LINES,()=>this.room==='ink'&&!this.lanternOn);
+      if(lamp&&this.progress.flags['l4-ink-revealed']===true)this.queueFlagBeat('l4-ink-relit-said',RELIT_LINES,()=>this.room==='ink'&&this.lanternOn);
     }
     // The near-end beckon needs a plate holder who is actually there; a recall before playback makes
     // the queued line stale and it is dropped instead of pretending Lumo is still waiting.
-    if(this.room==='ink'&&this.player.x>=500&&this.hasPower('c')&&!this.progress.flags['l4-beckoned']&&!this.beckoningQueued){
+    if(room==='ink'&&this.player.x>=500&&this.hasPower('c')&&!this.progress.flags['l4-beckoned']&&!this.beckoningQueued){
       this.beckoningQueued=true;
       this.queueStoryBeat(
         BECKON_LINES,
@@ -1057,112 +1057,20 @@ export class PathForTwoLevel {
         ()=>{this.beckoningQueued=false;},
       );
     }
-    if(this.lastLantern!==this.lanternOn){
-      this.lastLantern=this.lanternOn;
-      const ink=this.inkTrail;
-      if(ink&&ink.active){
-        const key=getLevelArtKey(4,this.lanternOn?'ink-route-bright':'ink-route-dark');
-        if(key)ink.setTexture(key);
-      }
-      this.refreshInkGlyphs();
-    }
   }
-  /**
-   * The glyph order is learned the first time Lumo actually holds plate C, wherever Nhinh is. The flag is set
-   * at once; the spoken beat only plays when she is in the ink room, and never gates the flag.
-   */
-  private updateInkOrder():void{
-    if(this.progress.flags['l4-ink-order-known']===true||!this.hasPower('c'))return;
-    this.progress.flags['l4-ink-order-known']=true;
+  /** A line that plays once: queued while its flag is unset, the flag is set when the line has been spoken. */
+  private queueFlagBeat(flag:string,lines:DialogueLine[],guard:()=>boolean):void{
+    if(this.progress.flags[flag]===true||this.queuedFlags.has(flag))return;
+    this.queuedFlags.add(flag);
+    this.queueStoryBeat(lines,()=>{this.progress.flags[flag]=true;this.queuedFlags.delete(flag);this.save();},guard,()=>{this.queuedFlags.delete(flag);});
+  }
+  /** Chalk firefly (scenario v2 §3–§4): visible only with the lamp off, and read the first time Nhinh stands in view of it in the dark. */
+  private updateChalk():void{
+    if(this.room!=='relay'||this.lanternOn||this.progress.flags['l4-chalk-seen']===true)return;
+    if(!rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),PATH_CHALK_VIEW))return;
+    this.progress.flags['l4-chalk-seen']=true;
     this.save();
-    if(this.room==='ink')this.queueStoryBeat(INK_ORDER_LINES,undefined,()=>this.room==='ink');
-  }
-  /**
-   * The glyph sequence: only in the dark corridor, once the order is known and until the seals are set. One
-   * entry onto a glyph is one event, so standing on it does not repeat a reset or a light.
-   */
-  private updateInkSequence():void{
-    if(this.room!=='ink')return;
-    const hit=pathInkGlyphAt({x:this.player.x,y:this.player.y});
-    const entered=hit!==undefined&&hit!==this.inkHitLast;
-    this.inkHitLast=hit;
-    if(!entered||this.lanternOn||this.progress.flags['l4-ink-seals']===true)return;
-    const glyph=PATH_INK_GLYPHS.find((item)=>item.id===hit);
-    if(!glyph)return;
-    if(this.progress.flags['l4-ink-order-known']!==true){
-      const now=this.scene.time.now;
-      if(now-this.lastInkHintAt>=4000){this.lastInkHintAt=now;this.floatInkText(glyph.x,glyph.y,tr('Chưa biết thứ tự. Nhờ Lumo tới ấn C xem.'));}
-      return;
-    }
-    const step=this.progress.counters['l4-ink-step']??0;
-    const result=advancePathInkSequence(step,hit);
-    if(result.event==='none')return;
-    this.progress.counters['l4-ink-step']=result.step;
-    this.refreshInkGlyphs();
-    this.floatInkText(glyph.x,glyph.y,result.event==='reset'?tr('Vết mực nhòe đi. Thử lại từ đầu.'):tr('Sáng lên!'));
-    if(result.event==='done'){
-      this.progress.flags['l4-ink-seals']=true;
-      this.queueStoryBeat(INK_SEALED_LINES,undefined,()=>this.room==='ink');
-    }
-    this.save();
-  }
-  /** The glyphs' drawn state: lit ones are filled, and all of them show only while the lantern is off. */
-  private refreshInkGlyphs():void{
-    const graphics=this.inkGlyphs;
-    if(!graphics)return;
-    graphics.clear();
-    const lit=this.progress.counters['l4-ink-step']??0;
-    const ink=0x2b1b3d,teal=0x9bd8c6;
-    for(const glyph of PATH_INK_GLYPHS){
-      const done=PATH_INK_ORDER.indexOf(glyph.id)<lit;
-      const {x,y}=glyph;
-      if(glyph.id==='ring'){
-        if(done){graphics.fillStyle(teal,0.95);graphics.fillCircle(x,y,9);}
-        graphics.lineStyle(2,ink,0.9);graphics.strokeCircle(x,y,9);
-      }else if(glyph.id==='triangle'){
-        if(done){graphics.fillStyle(teal,0.95);graphics.fillTriangle(x,y-10,x-9,y+8,x+9,y+8);}
-        graphics.lineStyle(2,ink,0.9);graphics.strokeTriangle(x,y-10,x-9,y+8,x+9,y+8);
-      }else{
-        if(done){graphics.fillStyle(teal,0.95);graphics.fillRect(x-8,y-8,16,16);}
-        graphics.lineStyle(2,ink,0.9);graphics.strokeRect(x-8,y-8,16,16);
-      }
-    }
-    graphics.setVisible(!this.lanternOn);
-  }
-  /** Ink-room only: the glyphs and the pulsing guide ring, drawn with the room and destroyed with it (`track`). */
-  private drawInkPuzzle():void{
-    this.inkGlyphs=this.scene.add.graphics().setDepth(4.2);this.track(this.inkGlyphs);
-    this.inkGuide=this.scene.add.graphics().setDepth(60).setVisible(false);this.track(this.inkGuide);
-    this.inkGuideTween=this.scene.tweens.add({targets:this.inkGuide,alpha:{from:0.35,to:1},duration:700,yoyo:true,repeat:-1});
-    this.refreshInkGlyphs();
-  }
-  /** One small ring at the point the current ink step needs. It only redraws when that point changes. */
-  private updateInkGuide():void{
-    const guide=this.inkGuide;
-    if(!guide)return;
-    const target=pathInkGuideTarget({
-      latchB:this.progress.flags['l4-latch-b']===true,hasPowerC:this.hasPower('c'),
-      inkRevealed:this.progress.flags['l4-ink-revealed']===true,orderKnown:this.progress.flags['l4-ink-order-known']===true,
-      seals:this.progress.flags['l4-ink-seals']===true,step:this.progress.counters['l4-ink-step']??0,
-      latchC:this.progress.flags['l4-latch-c']===true,memo:this.progress.flags['l4-memo']===true,
-      lanternOn:this.lanternOn,reunited:this.isActuallyReunited(),
-    });
-    const key=target?`${target.x},${target.y}`:'';
-    if(key===this.inkGuideKey)return;
-    this.inkGuideKey=key;
-    guide.clear();
-    if(!target){guide.setVisible(false);return;}
-    guide.lineStyle(2,0xe0c080,0.95);guide.strokeCircle(target.x,target.y,14);
-    guide.setVisible(true);
-  }
-  /** A short, non-blocking line above a glyph: tracked, faded out and destroyed. */
-  private floatInkText(x:number,y:number,value:string):void{
-    const text=this.scene.add.text(x,y-22,value,{fontFamily:'Segoe UI, sans-serif',fontSize:'12px',color:'#e0c080',stroke:'#1b1915',strokeThickness:3}).setOrigin(0.5).setDepth(61);
-    this.track(text);
-    this.scene.tweens.add({targets:text,y:y-36,alpha:0,duration:1400,onComplete:()=>text.destroy()});
-  }
-  private isAtInkCorridor():boolean{
-    return rectsOverlap(pathActorBody({x:this.player.x,y:this.player.y}),PATH_INK_CORRIDOR);
+    this.queueStoryBeat(CHALK_LINES,undefined,()=>this.room==='relay');
   }
   private isActuallyReunited():boolean{
     return isActuallyReunited({assignment:this.assignment,travelling:this.isTravelling(),playerRoom:this.room,lumoRoom:this.lumoRoom,
@@ -1217,6 +1125,22 @@ export class PathForTwoLevel {
       }
       if(texture)object.setTexture(texture);
     }
+    // Scenario v2 clue overlays. The seal ink is vivid with the lamp off or Lumo resting on that seal, and the dim
+    // `-bright` variant otherwise; the corridor route follows the lamp the same way; the chalk shows only in the dark.
+    for(const ink of this.sealInks){
+      const key=getPathClueArtKey(`${ink.base}-${!this.lanternOn||this.hasPower(ink.mark)?'dark':'bright'}`);
+      if(key&&ink.image.texture.key!==key)ink.image.setTexture(key);
+    }
+    if(this.inkRoute){const key=getPathClueArtKey(this.lanternOn?'ink-route-bright':'ink-route-dark');if(key&&this.inkRoute.texture.key!==key)this.inkRoute.setTexture(key);}
+    this.chalkImage?.setVisible(!this.lanternOn);
+  }
+  /** A runtime clue overlay at native size, tracked with the room (destroyed with it). Undefined when the clue pack is absent. */
+  private addClueImage(file:string,x:number,y:number,depth:number):Phaser.GameObjects.Image|undefined{
+    const key=getPathClueArtKey(file);
+    if(!key)return undefined;
+    const image=this.scene.add.image(x,y,key).setDepth(depth);
+    this.track(image);
+    return image;
   }
   private prepareLevelExit():void{
     const position=this.getLumoPosition();

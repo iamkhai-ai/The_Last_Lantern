@@ -146,21 +146,23 @@ console.log('  frame owners  : each controller, Lumo and the lantern system has 
 console.log('  ending        : EndingScene reachable, completed campaigns resume at the ending');
 
 // ---------------------------------------------------------------- generic H fallback is the scenario text (06-10)
-// CAMPAIGN_LEVELS[i].hint is the fallback ladder. For levels 06-10 it is that level's scenario Mức 1-3, verbatim.
-// Level 10 uses the three-branch ladder (its primary ladder in scenario §8, not the overload set).
+// CAMPAIGN_LEVELS[i].hint is the fallback ladder. For levels 05-10 it is that level's main Mức 1-3, verbatim
+// (level 05 from the scenario v2 document, the others from their scenario document). Level 10 uses the three-branch
+// ladder (its primary ladder in scenario §8, not the overload set).
 {
-  const scenarioLadderOf = (file) => {
-    const md = read(`docs/scenario/${file}`);
+  const scenarioLadderOf = (relative) => {
+    const md = read(relative);
     const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
-    assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
+    assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${relative} lists Mức 1, 2, 3 in order`);
     return hits.map((m) => m[2].normalize('NFC'));
   };
   const FALLBACK = {
-    5: '06-the-sleepless-tower.md',
-    6: '07-the-sleeping-garden.md',
-    7: '08-ruins-of-two-halves.md',
-    8: '09-dark-moon-observatory.md',
-    9: '10-the-heart-of-elaria.md',
+    4: 'docs/scenario-v2/05-a-path-for-two.md',
+    5: 'docs/scenario/06-the-sleepless-tower.md',
+    6: 'docs/scenario/07-the-sleeping-garden.md',
+    7: 'docs/scenario/08-ruins-of-two-halves.md',
+    8: 'docs/scenario/09-dark-moon-observatory.md',
+    9: 'docs/scenario/10-the-heart-of-elaria.md',
   };
   for (const [index, file] of Object.entries(FALLBACK)) {
     assert.deepEqual(CAMPAIGN_LEVELS[Number(index)].hint, scenarioLadderOf(file),
@@ -168,4 +170,4 @@ console.log('  ending        : EndingScene reachable, completed campaigns resume
   }
 }
 
-console.log('  H fallback    : levels 06-10 hint ladders are the scenario Mức 1-3 verbatim');
+console.log('  H fallback    : levels 05-10 hint ladders are the scenario Mức 1-3 verbatim');
