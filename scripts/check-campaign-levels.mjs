@@ -150,13 +150,14 @@ console.log('  ending        : EndingScene reachable, completed campaigns resume
 // Level 10 uses the three-branch ladder (its primary ladder in scenario §8, not the overload set).
 {
   const scenarioLadderOf = (file) => {
-    const md = read(`docs/scenario/${file}`);
+    // Level 06 reads its v2 document (the Mức lines are unchanged there); the other levels still read docs/scenario/.
+    const md = read(file.startsWith('scenario-v2/') ? `docs/${file}` : `docs/scenario/${file}`);
     const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
     assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
     return hits.map((m) => m[2].normalize('NFC'));
   };
   const FALLBACK = {
-    5: '06-the-sleepless-tower.md',
+    5: 'scenario-v2/06-the-sleepless-tower.md',
     6: '07-the-sleeping-garden.md',
     7: '08-ruins-of-two-halves.md',
     8: '09-dark-moon-observatory.md',

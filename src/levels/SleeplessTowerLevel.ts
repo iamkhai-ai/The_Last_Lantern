@@ -3,7 +3,8 @@ import { SoundSystem } from '../systems/SoundSystem';
 import Phaser from 'phaser';
 import { tr } from '../i18n/catalog.ts';
 import { getLevelArtKey, getSharedMechanismKey, getTowerArtKey } from '../art/CampaignArt';
-import { TOWER, TOWER_SOLIDS, canCompleteTower, canUseCallMark, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanApproachFront, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
+import { TOWER, TOWER_SOLIDS, TOWER_TALLY, canCompleteTower, canUseCallMark, deriveTowerLive, getTowerExitBlock, migrateTowerProgress, resolveTowerSpawn, towerCanApproach, towerCanApproachFront, towerMachineLayers, towerPulseReachesTally, type G0Pose, type MirrorPose, type Point, type Rect, type TowerLiveState, type TowerState, type TowerStep } from '../data/towerLayout';
+import { towerBellAVoice, towerBellBVoice, towerHumVoice, towerMotifVoice } from '../audio/effects';
 import { CAMPAIGN_LEVELS } from '../data/campaignLevels';
 import type { Player } from '../actors/Player';
 import type { Lumo } from '../actors/Lumo';
@@ -48,6 +49,14 @@ const ONE_CIRCUIT: DialogueLine[] = [
 const CALL_C: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Cậu giữ ấn cuối nhé. Tôi chỉnh hai nhánh này.' },
   { speaker: 'Lumo', text: 'Tôi ở đây. Cậu cứ thử từng gương.' },
+  // Scenario 06 §4 (mới): no latch holds the plate, so Lumo has to hold it until the machine switches.
+  { speaker: 'Lumo', text: 'Ở đây không có chốt nào giữ thay tôi, đúng không?' },
+  { speaker: 'Nhinh', text: 'Ừ. Cậu giữ tới khi máy chuyển chế độ.' },
+];
+
+/** Scenario 06 §4 (mới): Lumo steps off the plate before the switch; the third circuit goes quiet. */
+const LEFT_SEAL: DialogueLine[] = [
+  { speaker: 'Lumo', text: 'Tôi rời ấn rồi. Vòng thứ ba vừa dừng.' },
 ];
 
 const THREE_CIRCUITS: DialogueLine[] = [
@@ -79,6 +88,12 @@ const RECORD: DialogueLine[] = [
 
 const RECORD_REPEAT: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Ông đã đứng ở đây qua bao nhiêu đêm?' },
+];
+
+/** Scenario 06 §5 "Mạch phụ" (mới): the tally marks, revealed by a Pulse near the window. Optional; no progress depends on it. */
+const TALLY_LINES: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Những vạch đếm… nhiều quá.' },
+  { speaker: 'Lumo', text: 'Mỗi vạch là một đêm?' },
 ];
 
 const ENDING: DialogueLine[] = [
@@ -156,6 +171,8 @@ export class SleeplessTowerLevel {
   private bodies: Phaser.Physics.Arcade.StaticBody[] = [];
   private visuals = new Map<string, Phaser.GameObjects.Image>();
   private beams?: Phaser.GameObjects.Graphics;
+  /** Scenario 06 §5 tally marks: a runtime-drawn placeholder until art exists; hidden until a Pulse reveals them. */
+  private tally?: Phaser.GameObjects.Graphics;
   private panel?: Phaser.GameObjects.Image;
   private state!: TowerState;
   private route: Point[] = [];
@@ -208,6 +225,7 @@ export class SleeplessTowerLevel {
     this.advanceLumo(dt);
     const live = deriveTowerLive(this.state, this.lumoPoint());
     this.updateVisuals(live);
+    this.updateMachineLayers(live);
     this.updateProgress(live);
     this.flushPendingStoryBeat();
     this.updateHud(live);
@@ -256,12 +274,24 @@ export class SleeplessTowerLevel {
     if (this.state.practiceDone) entries.push({ speaker: 'Nhinh', text: tr('Lăng kính chia một tia thành hai; xoay gương đầu vào đi chỗ khác thì cả hai nhánh tắt.') });
     if (this.state.waterReturned) entries.push({ speaker: 'Lumo', text: tr('Ba vòng cùng sáng khi G0 vào lăng kính, G1 vào A, G2 vào B, và tôi giữ ấn C.') });
     if (this.state.recordRead) entries.push({ speaker: 'Nhinh', text: tr('Bản ghi: người cha giữ đèn sáng thêm một đêm, đợi con theo ánh sáng về.') });
+    if (this.ctx.progress.flags['l5-tally-seen'] === true) entries.push({ speaker: 'Nhinh', text: tr('Những dấu nhỏ (2/5): vạch đếm trên khung cửa sổ, mỗi vạch có thể là một đêm.') });
     this.ctx.say(entries);
+  }
+
+  /** Scenario 06 §5 "Mạch phụ": a Pulse near the window reveals the tally marks, once. Level 10 reads `l5-tally-seen`. */
+  public onPulse(x: number, y: number): void {
+    if (this.cleaned || this.ctx.progress.flags['l5-tally-seen'] === true) return;
+    if (!towerPulseReachesTally({ x, y })) return;
+    this.ctx.progress.flags['l5-tally-seen'] = true;
+    this.ctx.save();
+    this.tally?.setVisible(true);
+    this.queueStoryBeat(TALLY_LINES);
   }
 
   public destroy(): void {
     if (this.cleaned) return;
     this.cleaned = true;
+    SoundSystem.releaseHeldTones();
     this.ownedTweens.splice(0).forEach((tween) => { if (tween.isPlaying()) tween.stop(); });
     this.colliders.forEach((collider) => { if (collider.active) collider.destroy(); });
     this.objects.forEach((object) => { if (object.active) object.destroy(); });
@@ -438,12 +468,15 @@ export class SleeplessTowerLevel {
       this.ctx.say(CALL_C);
       return;
     }
+    // Scenario 06 §4 (mới): recalling Lumo off the plate before the switch takes the third circuit down, and he says so.
+    const leavingPlate = this.state.lumoAssign === 'at-c' && !this.state.waterReturned;
     this.state.lumoAssign = 'follow';
     this.state.reunited = false;
     this.ctx.progress.flags['l5-return-called'] = true;
     this.route = [];
     this.routeIndex = 0;
     this.saveState();
+    if (leavingPlate) this.ctx.say(LEFT_SEAL);
   }
 
   private useLever(): void {
@@ -562,6 +595,7 @@ export class SleeplessTowerLevel {
     this.addImage('ring-c', art5('ring-C-off'), TOWER.objects.rings.c.x, TOWER.objects.rings.c.y, 24, 24, 8.4, 0.5);
     this.addImage('window', art5('window-faded-red-scarf'), o.window.center.x, o.window.center.y, 112, 112, 8.2, 0.5);
     this.addImage('record', art5('record-compartment-closed'), o.record.center.x, o.record.center.y, 88, 32, 8.3, 0.5);
+    this.drawTally();
     this.addImage('intake', art5('tower-intake'), 66, 200, 112, 32, 6, 0.5);
     this.addImage('outflow', art5('tower-outflow'), 150, 302, 112, 32, 6, 0.5);
     this.visuals.get('outflow')?.setVisible(false);
@@ -670,6 +704,38 @@ export class SleeplessTowerLevel {
         if (!beam.live && !this.state.waterReturned) { this.beams.fillStyle(0x8ca7a8, 0.45); this.beams.fillCircle(beam.to.x, beam.to.y, 2); }
       }
     }
+  }
+
+  /**
+   * Scenario 06 §4: the machine's layers follow the live circuits every frame. setHeldTone changes nothing while a layer
+   * already matches, so a layer only starts or stops when its circuit changes. A dropped circuit goes quiet at once;
+   * Return Flow lets the whole machine fade gently, leaving the water's sound.
+   */
+  private updateMachineLayers(live: TowerLiveState): void {
+    const layers = towerMachineLayers(live, this.state.waterReturned);
+    const fade = this.state.waterReturned ? 1.6 : 0.15;
+    SoundSystem.setHeldTone('tower-hum', layers.hum, towerHumVoice, fade);
+    SoundSystem.setHeldTone('tower-circuit-a', layers.circuitA, towerBellAVoice, fade);
+    SoundSystem.setHeldTone('tower-circuit-b', layers.circuitB, towerBellBVoice, fade);
+    SoundSystem.setHeldTone('tower-circuit-c', layers.circuitC, towerMotifVoice, fade);
+  }
+
+  /**
+   * Scenario 06 §5 placeholder decal: the tally marks are drawn with Phaser Graphics until the window art includes them.
+   * Ink-brown strokes on the stone under the sill: groups of five (four uprights and a slash), then a partial group.
+   */
+  private drawTally(): void {
+    const graphics = this.ctx.scene.add.graphics().setDepth(8.25);
+    graphics.lineStyle(1.2, 0x5b4630, 0.9);
+    const { x, y } = TOWER_TALLY.centre;
+    let groupX = x - 26;
+    for (const count of TOWER_TALLY.groups) {
+      for (let i = 0; i < Math.min(count, 4); i++) graphics.lineBetween(groupX + i * 3, y - 5, groupX + i * 3, y + 5);
+      if (count === 5) graphics.lineBetween(groupX - 2, y + 4, groupX + 10, y - 4);
+      groupX += 24;
+    }
+    graphics.setVisible(this.ctx.progress.flags['l5-tally-seen'] === true);
+    this.tally = this.keep(graphics);
   }
 
   private updateHud(live: TowerLiveState): void {

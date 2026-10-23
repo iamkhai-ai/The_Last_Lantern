@@ -400,6 +400,9 @@ export class CampaignScene extends Phaser.Scene {
       } else if (this.progress.level === 7) {
         // Scenario 08 §5: a Pulse near the statue's base reveals the worn name.
         this.ruinsLevel?.onPulse(x, y);
+      } else if (this.progress.level === 5) {
+        // Scenario 06 §5: a Pulse near the window reveals the tally marks.
+        this.sleeplessTower?.onPulse(x, y);
       }
       this.save();
       this.refreshHud();

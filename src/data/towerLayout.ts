@@ -195,6 +195,31 @@ export function canUseCallMark(state: TowerState): boolean {
   return !(state.waterReturned && state.lumoAssign === 'follow');
 }
 
+/**
+ * Scenario 06 §5 "Những dấu nhỏ": tally marks under the window sill, between the sill and the record panel. They are
+ * placeholder decals drawn at runtime (no art yet). A Pulse whose origin is within `pulseRadius` reveals them.
+ */
+export const TOWER_TALLY = { centre: p(552, 131), pulseRadius: 80, groups: [5, 5, 3] as const } as const;
+
+export function towerPulseReachesTally(origin: Point): boolean {
+  return Math.hypot(origin.x - TOWER_TALLY.centre.x, origin.y - TOWER_TALLY.centre.y) <= TOWER_TALLY.pulseRadius;
+}
+
+export interface TowerMachineLayers { hum: boolean; circuitA: boolean; circuitB: boolean; circuitC: boolean; }
+
+/**
+ * Scenario 06 §4 "Âm thanh của máy": the machine's hum is present until Return Flow. Each live circuit adds its own
+ * voice; a circuit that is not live adds nothing. After Return Flow every layer is off, so nothing buzzes or errors.
+ */
+export function towerMachineLayers(live: TowerLiveState, waterReturned: boolean): TowerMachineLayers {
+  return {
+    hum: !waterReturned,
+    circuitA: !waterReturned && live.liveA,
+    circuitB: !waterReturned && live.liveB,
+    circuitC: !waterReturned && live.liveC,
+  };
+}
+
 export function resolveTowerSpawn(saved: Point | undefined): Point {
   return saved && towerCenterWalkable(saved) ? saved : TOWER.spawn;
 }

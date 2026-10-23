@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { tr } from '../src/i18n/catalog.ts';
-import { canCompleteTower, canUseCallMark, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCanApproachFront, towerCenterWalkable, TOWER, TOWER_SOLIDS } from '../src/data/towerLayout.ts';
+import { canCompleteTower, canUseCallMark, deriveTowerLive, getTowerExitBlock, isLumoAtSeal, migrateTowerProgress, overlaps, resolveTowerSpawn, towerBodyRect, towerCanApproach, towerCanApproachFront, towerCenterWalkable, towerMachineLayers, towerPulseReachesTally, TOWER, TOWER_SOLIDS, TOWER_TALLY } from '../src/data/towerLayout.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const seal = { x: 350, y: 290 };
@@ -255,7 +255,8 @@ console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn
 // order; repeated presses hold Mức 3. The bench (practice) keeps its own optional-bench ladder. The level file imports
 // Phaser, so its authored constants and methods are read from the TypeScript source and bound to a fake level.
 {
-  const scenario = readFileSync(path.join(ROOT, 'docs/scenario/06-the-sleepless-tower.md'), 'utf8');
+  // The v2 ladder is the source of truth now; its Mức 1-3 lines are the v1 lines verbatim (v2 §5: the ladder is kept).
+  const scenario = readFileSync(path.join(ROOT, 'docs/scenario-v2/06-the-sleepless-tower.md'), 'utf8');
   const hits = [...scenario.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
   assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], '06 §6 lists Mức 1, 2, 3 in order');
   const MUC = hits.map((m) => m[2].normalize('NFC'));
@@ -284,7 +285,8 @@ console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn
   };
   // Exercise the actual registered call action and prompt, not a copy of its rule.
   const CALL_C = constantOf('CALL_C');
-  const useCall = methodOf('useCall', { TOWER, CALL_C, canUseCallMark });
+  const LEFT_SEAL = constantOf('LEFT_SEAL');
+  const useCall = methodOf('useCall', { TOWER, CALL_C, LEFT_SEAL, canUseCallMark });
   const registerActions = methodOf('registerActions', { TOWER, towerCanApproach, towerCanApproachFront, canCompleteTower });
   const callPrompt = methodOf('callPrompt', { tr });
   const callFixture = (waterReturned, lumoAssign, reunited = false) => {
@@ -325,6 +327,20 @@ console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn
   assert.equal(beforeSwitch.level.state.lumoAssign, 'to-c', 'pre-switch send is preserved');
   assert.equal(beforeSwitch.level.route.length, TOWER.lumo.route.length + 1);
   assert.deepEqual(beforeSwitch.spoken, [CALL_C], 'pre-switch approved dialogue is unchanged');
+  // v2 §4 (mới): the plate has no latch, so the call dialogue says so; recalling Lumo off the plate before the switch says he left.
+  assert.equal(CALL_C.length, 4, 'the call dialogue is the two v1 lines plus the two v2 lines');
+  assert.deepEqual(beforeSwitch.spoken, [CALL_C]);
+  const fromPlate = callFixture(false, 'at-c');
+  fromPlate.call.onInteract();
+  assert.deepEqual(fromPlate.spoken, [LEFT_SEAL], 'recalling Lumo off the plate before the switch speaks the v2 line');
+  assert.equal(fromPlate.level.state.lumoAssign, 'follow');
+  assert.equal(fromPlate.level.ctx.progress.flags['l5-return-called'], true);
+  const travelling = callFixture(false, 'to-c');
+  travelling.call.onInteract();
+  assert.deepEqual(travelling.spoken, [], 'recalling Lumo while he is still travelling is silent');
+  const afterSwitch = callFixture(true, 'at-c');
+  afterSwitch.call.onInteract();
+  assert.deepEqual(afterSwitch.spoken, [], 'after the switch the recall is silent');
   console.log('Sleepless Tower call regression passed (pre-switch send/recall; post-switch recall/follow/reunion).');
   const PUZZLE_HINTS = constantOf('PUZZLE_HINTS');
   const PUZZLE_STEPS = constantOf('PUZZLE_STEPS');
@@ -354,6 +370,92 @@ console.log('Sleepless Tower optics, seal, steps, gates, geometry, routes, spawn
   assert.equal(HINTS.practice.some((line) => MUC.includes(line.text.normalize('NFC'))), false, 'the bench keeps its own optional-bench ladder');
   assert.deepEqual(presses(['retrieve']), [HINTS.retrieve[0].text.normalize('NFC')], 'after the switch the lines are the stage-specific guidance');
   assert.deepEqual(presses(['recall'], 'follow'), [RECALL_FOLLOWING[0].text.normalize('NFC')], 'a following Lumo keeps the recall guidance');
-}
 
-console.log('Sleepless Tower H ladder checks passed (place, main, call, switch are the scenario Mức 1-3 verbatim, in order).');
+  console.log('Sleepless Tower H ladder checks passed (place, main, call, switch are the scenario Mức 1-3 verbatim, in order).');
+
+// ---------------------------------------------------------------- v2 §4-§6: sound layers, tally decal, new lines
+{
+  const levelFile = path.join(ROOT, 'src/levels/SleeplessTowerLevel.ts');
+  const levelSource = readFileSync(levelFile, 'utf8');
+  const v2 = readFileSync(path.join(ROOT, 'docs/scenario-v2/06-the-sleepless-tower.md'), 'utf8');
+  const layersOf = (liveA, liveB, liveC, waterReturned = false) => towerMachineLayers({ liveA, liveB, liveC }, waterReturned);
+
+  // Sound layers: one voice per circuit, the hum until Return Flow, and nothing after it.
+  assert.deepEqual(layersOf(false, false, false), { hum: true, circuitA: false, circuitB: false, circuitC: false }, 'no circuit live: the hum only');
+  assert.deepEqual(layersOf(true, false, false), { hum: true, circuitA: true, circuitB: false, circuitC: false }, 'one circuit adds one voice');
+  assert.deepEqual(layersOf(false, true, false), { hum: true, circuitA: false, circuitB: true, circuitC: false });
+  assert.deepEqual(layersOf(false, false, true), { hum: true, circuitA: false, circuitB: false, circuitC: true });
+  assert.deepEqual(layersOf(true, true, true), { hum: true, circuitA: true, circuitB: true, circuitC: true }, 'three circuits: the full chord');
+  assert.deepEqual(layersOf(true, true, false), { hum: true, circuitA: true, circuitB: true, circuitC: false }, 'a dropped circuit goes silent alone');
+  assert.deepEqual(layersOf(true, true, true, true), { hum: false, circuitA: false, circuitB: false, circuitC: false }, 'after Return Flow every layer is off');
+  // The mapping consumes the real derived state, not hand-built flags.
+  const layersFromState = (state) => { const live = deriveTowerLive(state, seal); return towerMachineLayers(live, state.waterReturned); };
+  assert.deepEqual(layersFromState(base), { hum: true, circuitA: true, circuitB: true, circuitC: true }, 'the authored three-circuit state');
+  assert.equal(layersFromState({ ...base, lumoAssign: 'follow' }).circuitC, false, 'Lumo leaving the plate silences only the third layer');
+  assert.equal(layersFromState({ ...base, lanternOn: false }).circuitA, false, 'a dark lantern silences circuit A');
+  assert.equal(layersFromState({ ...base, g1: 0 }).circuitA, false, 'a misaimed G1 silences circuit A');
+  assert.equal(layersFromState({ ...base, waterReturned: true }).hum, false, 'Return Flow ends the hum');
+  // Level wiring: one held voice per layer, released through SoundSystem, and no error or buzz cue anywhere in the level.
+  for (const [key, voice] of [['tower-hum', 'towerHumVoice'], ['tower-circuit-a', 'towerBellAVoice'], ['tower-circuit-b', 'towerBellBVoice'], ['tower-circuit-c', 'towerMotifVoice']]) {
+    assert.ok(levelSource.includes(`SoundSystem.setHeldTone('${key}'`) && levelSource.includes(voice), `${key} is driven by ${voice}`);
+  }
+  assert.doesNotMatch(levelSource, /playPuzzleError|buzz/i, 'the machine never sounds an error');
+  assert.match(levelSource, /updateMachineLayers\(live\);/, 'update() drives the layers from deriveTowerLive every frame');
+
+  // Tally decal: reachable from a standing cell (with the 1px clearance the other checks use), out of reach from far away.
+  const tallyStands = [];
+  for (let y = TOWER.bounds.y; y < TOWER.bounds.y + TOWER.bounds.height; y++) {
+    for (let x = TOWER.bounds.x; x < TOWER.bounds.x + TOWER.bounds.width; x++) {
+      if (reachable[keyOf({ x, y })] && towerPulseReachesTally({ x, y })) tallyStands.push({ x, y });
+    }
+  }
+  assert.ok(tallyStands.length >= 20, `the tally can be pulsed from ${tallyStands.length} flood-fill reachable cells`);
+  assert.equal(towerPulseReachesTally(TOWER.objects.chamber.stand), false, 'the chamber stand is out of tally reach');
+  assert.equal(towerPulseReachesTally(TOWER.spawn), false, 'the spawn is out of tally reach');
+  assert.equal(towerPulseReachesTally(TOWER_TALLY.centre), true, 'the tally centre reaches itself');
+  assert.ok(TOWER_TALLY.centre.y > TOWER.objects.window.center.y, 'the tally sits in the lower half of the window frame');
+  assert.ok(TOWER_TALLY.centre.y + 5 < TOWER.objects.record.center.y - 16, 'the tally strokes stay above the record panel');
+
+  // onPulse: a Pulse near the window sets l5-tally-seen once, shows the decal and queues the two side-path lines.
+  const TALLY_LINES = constantOf('TALLY_LINES');
+  const onPulse = methodOf('onPulse', { towerPulseReachesTally, TALLY_LINES });
+  const pulseFixture = (flags = {}) => {
+    const calls = [];
+    const level = {
+      cleaned: false,
+      tally: { setVisible: (visible) => calls.push(['visible', visible]) },
+      queueStoryBeat: (lines) => calls.push(['beat', lines.map((line) => line.text)]),
+      ctx: { progress: { flags }, save: () => calls.push(['save']) },
+    };
+    return { level, calls };
+  };
+  const far = pulseFixture();
+  onPulse.call(far.level, TOWER.objects.chamber.stand.x, TOWER.objects.chamber.stand.y);
+  assert.equal(far.level.ctx.progress.flags['l5-tally-seen'], undefined, 'a far Pulse reveals nothing');
+  assert.deepEqual(far.calls, []);
+  const near = pulseFixture();
+  onPulse.call(near.level, 520, 165);
+  assert.equal(near.level.ctx.progress.flags['l5-tally-seen'], true, 'a near Pulse sets the flag Level 10 reads');
+  assert.deepEqual(near.calls, [['save'], ['visible', true], ['beat', ['Những vạch đếm… nhiều quá.', 'Mỗi vạch là một đêm?']]]);
+  onPulse.call(near.level, 520, 165);
+  assert.equal(near.calls.length, 3, 'the reveal happens once');
+  const cleaned = pulseFixture();
+  cleaned.level.cleaned = true;
+  onPulse.call(cleaned.level, 520, 165);
+  assert.deepEqual(cleaned.calls, [], 'a destroyed level ignores the Pulse');
+  assert.match(levelSource, /'l5-tally-seen'/, 'the level writes the exact flag name Level 10 reads');
+
+  // Journal: the tally line appears only after the reveal.
+  const showJournal = methodOf('showJournal', { tr });
+  const journal = (flags) => { const spoken = []; showJournal.call({ state: { practiceDone: false, waterReturned: false, recordRead: false }, ctx: { progress: { flags }, say: (lines) => spoken.push(...lines) } }); return spoken.map((line) => line.text); };
+  assert.equal(journal({}).some((text) => text.includes('Những dấu nhỏ')), false, 'no tally line before the Pulse');
+  assert.ok(journal({ 'l5-tally-seen': true }).at(-1).startsWith('Những dấu nhỏ (2/5)'), 'the journal records the tally after the Pulse');
+
+  // v2 §4 (mới) lines: the three in the call and leave steps and the two side-path lines, verbatim from the design doc.
+  const newLines = [...v2.matchAll(/\*\*(Lumo|Nhinh):\*\* “([^”\n]+)” \*\(mới\)/gu)].map((m) => m[2].normalize('NFC'));
+  assert.equal(newLines.length, 5, 'the v2 design doc marks five new lines (three in §4, two in the side path)');
+  const shipped = [...CALL_C, ...LEFT_SEAL, ...TALLY_LINES].map((line) => line.text.normalize('NFC'));
+  for (const text of newLines) assert.ok(shipped.includes(text), `shipped copy contains the v2 line "${text}"`);
+  console.log(`Sleepless Tower v2 checks passed (machine layers, tally reach ${tallyStands.length} cells, one-time flag l5-tally-seen, 5 new lines).`);
+  }
+}

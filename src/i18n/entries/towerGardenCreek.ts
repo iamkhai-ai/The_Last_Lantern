@@ -45,6 +45,9 @@ export const TOWER_GARDEN_CREEK_ENTRIES: readonly CatalogEntry[] = [
     'And the first one stopped when I changed the beam. They need to run together.'),
   entry('l6.callC.1', 'Cậu giữ ấn cuối nhé. Tôi chỉnh hai nhánh này.', 'You hold the last plate. I will adjust these two branches.'),
   entry('l6.callC.2', 'Tôi ở đây. Cậu cứ thử từng gương.', "I'm here. Just try the mirrors one at a time."),
+  entry('l6.callC.3', 'Ở đây không có chốt nào giữ thay tôi, đúng không?', 'There is no latch here to hold for me instead, is there?'),
+  entry('l6.callC.4', 'Ừ. Cậu giữ tới khi máy chuyển chế độ.', 'Yes. You hold on until the machine changes mode.'),
+  entry('l6.leftSeal.1', 'Tôi rời ấn rồi. Vòng thứ ba vừa dừng.', 'I have left the plate. The third circuit just stopped.'),
   entry('l6.threeCircuits.1', 'Cả ba vòng đều đang quay!', 'All three circuits are turning!'),
   entry('l6.threeCircuits.2', 'Tôi sẽ chuyển cần. Cậu giữ nguyên một chút.', 'I will move the lever. Hold still a moment.'),
 
@@ -171,6 +174,13 @@ export const TOWER_GARDEN_CREEK_ENTRIES: readonly CatalogEntry[] = [
   entry('l6.journal.4',
     'Bản ghi: người cha giữ đèn sáng thêm một đêm, đợi con theo ánh sáng về.',
     'The record: a father kept the lamp lit one more night, waiting for his child to follow the light home.'),
+  entry('l6.journal.tally',
+    'Những dấu nhỏ (2/5): vạch đếm trên khung cửa sổ, mỗi vạch có thể là một đêm.',
+    'Small marks (2/5): tally marks on the window frame; each one may be a night.'),
+
+  // Optional side path: the tally marks by the window (scenario 06 §5).
+  entry('l6.tally.1', 'Những vạch đếm… nhiều quá.', 'So many tally marks…'),
+  entry('l6.tally.2', 'Mỗi vạch là một đêm?', 'Is each mark one night?'),
 
   // Answers at the lever and the chamber.
   entry('l6.lever.alreadyReturned',
