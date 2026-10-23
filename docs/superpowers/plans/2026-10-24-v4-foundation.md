@@ -293,7 +293,7 @@ puzzle-contracts §4: save the configuration (mirrors, valves, latches, lantern 
   ```ts
   /** Screen bands no interactable, standing spot or prompt may occupy (RULE_GAMES §6). */
   export const HUD_BANDS: readonly Rect[] = [
-    { x: 0, y: 0, width: 640, height: HUD_LAYOUT.topBottom },
+    { x: TOP_X, y: TOP_Y, width: TOP_WIDTH, height: TOP_MAX_HEIGHT },   // the mission plate only (top-left), not the full width
     { x: 0, y: HUD_LAYOUT.keysY - 14, width: 640, height: 360 - (HUD_LAYOUT.keysY - 14) },
   ];
   ```
