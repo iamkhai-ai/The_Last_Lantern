@@ -19,6 +19,18 @@ export const NIGHT_CALL_LINES: readonly EndingLine[] = [{ speaker: 'Nhinh', text
 /** The silence is real time: it is not skipped by E or Space, and it does not count while the scene is paused. */
 export const NIGHT_WAIT_MS = 1400;
 
+/**
+ * Scenario 10 v2 §6: the night returns only after the silence. From the start of the reassurance, the cricket, the water
+ * and the answering cricket play one by one, then the dawn chord; Lumo's light and the fireflies ramp over `NIGHT_RETURN_MS`.
+ */
+export const NIGHT_SOUND_STEPS: ReadonlyArray<{ at: number; cue: 'cricket' | 'water' | 'answer' | 'dawn' }> = [
+  { at: 0, cue: 'cricket' },
+  { at: 450, cue: 'water' },
+  { at: 900, cue: 'answer' },
+  { at: 1400, cue: 'dawn' },
+];
+export const NIGHT_RETURN_MS = 1400;
+
 export const REASSURE_LINES: readonly EndingLine[] = [
   { speaker: 'Lumo', text: 'Tôi đây.' },
   { speaker: 'Nhinh', text: 'Tôi vẫn thấy cậu.' },
@@ -40,6 +52,20 @@ export const TREE_RETURN_LINES: readonly EndingLine[] = [
   { speaker: 'Nhinh', text: 'Và bình minh tự tìm được đường về.' },
 ];
 
+/** Scenario 10 v2 §7: the five small marks of the "Những dấu nhỏ" side thread, each set by its own level. */
+export const SMALL_MARK_FLAGS = ['l4-chalk-seen', 'l5-tally-seen', 'l6-handprint-seen', 'l7-name-seen', 'l8-margin-seen'] as const;
+
+/** Scenario 10 v2 §7: two lines before the seated lines, spoken only when every small mark was found. */
+export const SMALL_MARK_LINES: readonly EndingLine[] = [
+  { speaker: 'Nhinh', text: 'Một người đếm từng đêm. Một người từng vẽ đom đóm lên tường. Mình không biết họ có gặp lại nhau không.' },
+  { speaker: 'Lumo', text: 'Nhưng cả hai đều đã chờ.' },
+];
+
+/** True only when all five small-mark flags are set (read by exact name; other levels write them). */
+export function hasAllSmallMarks(flags: Readonly<Record<string, unknown>>): boolean {
+  return SMALL_MARK_FLAGS.every((flag) => flags[flag] === true);
+}
+
 /** Section 7, in order. The girl's fate is not mentioned anywhere in the ending. */
 export const SEATED_LINES: readonly EndingLine[] = [
   { speaker: 'Lumo', text: 'Cậu vẫn mang nó theo chứ?' },
@@ -58,14 +84,14 @@ export const TRAIL_TITLE_MS = 3600;
 export const ENDING_PROMPT_CONTINUE = 'E / Space · Tiếp tục';
 export const ENDING_PROMPT_CREDITS = 'E · Xem credits';
 
-/** Dialogue shown on entering a beat, or null. */
-export function endingBeatLines(beat: CampaignEndingBeat): readonly EndingLine[] | null {
+/** Dialogue shown on entering a beat, or null. `smallMarks` adds the two side-thread lines before the seated scene. */
+export function endingBeatLines(beat: CampaignEndingBeat, options: { smallMarks?: boolean } = {}): readonly EndingLine[] | null {
   switch (beat) {
     case 'night-call': return NIGHT_CALL_LINES;
     case 'reassure': return REASSURE_LINES;
     case 'shadow-dawn': return SHADOW_DAWN_LINES;
     case 'tree-return': return TREE_RETURN_LINES;
-    case 'seated': return SEATED_LINES;
+    case 'seated': return options.smallMarks === true ? [...SMALL_MARK_LINES, ...SEATED_LINES] : SEATED_LINES;
     default: return null;
   }
 }
@@ -90,7 +116,8 @@ export type EndingEffect =
   | { type: 'shot'; index: number }
   | { type: 'pose'; index: number }
   | { type: 'title' }
-  | { type: 'ambient'; progress: number };
+  | { type: 'ambient'; progress: number }
+  | { type: 'cue'; cue: 'cricket' | 'water' | 'answer' | 'dawn' };
 
 /**
  * The beat machine. It owns time and input rules only. `tick` is driven by the scene's update; `press` by a fresh key
@@ -105,15 +132,19 @@ export class EndingMachine {
   public poseIndex = 0;
   public poseElapsed = 0;
   public titleShown = false;
+  /** Set by the scene from the save: all five small marks found, so the seated scene opens with the two side lines. */
+  public smallMarks = false;
+  private readonly cuesPlayed = new Set<string>();
 
   public begin(beat: CampaignEndingBeat): EndingEffect[] {
     this.beat = beat;
     this.elapsed = 0;
-    const lines = endingBeatLines(beat);
+    const lines = endingBeatLines(beat, { smallMarks: this.smallMarks });
     this.dialogueDone = lines === null;
     this.shot = 0; this.shotElapsed = 0;
     this.poseIndex = 0; this.poseElapsed = 0;
     this.titleShown = false;
+    this.cuesPlayed.clear();
     return [{ type: 'enter', beat, lines }];
   }
 
@@ -151,8 +182,17 @@ export class EndingMachine {
     const effects: EndingEffect[] = [];
     switch (this.beat) {
       case 'night-wait':
-        effects.push({ type: 'ambient', progress: Math.min(1, this.elapsed / NIGHT_WAIT_MS) });
+        // The silence is quiet and dark: nothing returns until it ends.
         if (this.elapsed >= NIGHT_WAIT_MS) effects.push(...this.begin('reassure'));
+        break;
+      case 'reassure':
+        for (const step of NIGHT_SOUND_STEPS) {
+          if (this.elapsed >= step.at && !this.cuesPlayed.has(step.cue)) {
+            this.cuesPlayed.add(step.cue);
+            effects.push({ type: 'cue', cue: step.cue });
+          }
+        }
+        effects.push({ type: 'ambient', progress: Math.min(1, this.elapsed / NIGHT_RETURN_MS) });
         break;
       case 'montage':
         this.shotElapsed += deltaMs;

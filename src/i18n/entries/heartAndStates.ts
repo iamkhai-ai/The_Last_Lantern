@@ -61,4 +61,11 @@ export const HEART_AND_STATE_ENTRIES: readonly CatalogEntry[] = [
   entry('state.182', 'có sáng', 'has light'),
   entry('state.183', 'trong tối', 'in darkness'),
   entry('state.184', 'bể còn sáng', 'basin still lit'),
+  // Scenario 10 v2: Lumo chooses to hold the seal; the side-thread lines of the seated scene.
+  entry('heart.v2.lumoChose.1', '…Lần trước tôi cũng đứng thế này.', '…I stood just like this last time.'),
+  entry('heart.v2.lumoChose.2', 'Lần này mình biết khi nào cần buông. Tôi sẽ gọi cậu về.', 'This time I know when to let go. I will call you back.'),
+  entry('heart.v2.lumoChose.3', 'Ừ. Lần này là tôi tự chọn giữ.', 'Yes. This time I choose to hold it myself.'),
+  entry('end.smallMarks.1', 'Một người đếm từng đêm. Một người từng vẽ đom đóm lên tường. Mình không biết họ có gặp lại nhau không.',
+    'One person counted the nights. One person once drew fireflies on a wall. I do not know whether they will meet again.'),
+  entry('end.smallMarks.2', 'Nhưng cả hai đều đã chờ.', 'But both of them waited.'),
 ];

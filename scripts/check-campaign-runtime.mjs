@@ -229,6 +229,7 @@ const HEART_SOUND = {
   SoundSystem: {
     playUiClick() {}, playLightPulse() {}, playPuzzleSolved() {}, playRuneActivate() {},
     playMirrorRotate() {}, playPuzzleError() {}, playMechanismLatch() {}, playLanternToggle() {},
+    setHeartLayer() {}, stopHeartLayers() {},
   },
 };
 
@@ -249,7 +250,9 @@ let heartDrive = null;
  */
 function runHeartDrive(scene) {
   if (!heartDrive) {
-    heartDrive = bind(methodSource('driveLumo', heartSourceFile, 'HeartOfElariaLevel'), { Phaser: PHASER_PORTS, dt: 16, HEART_SEAL_RADIUS, ...HEART_SOUND }, 'HeartOfElariaLevel.driveLumo()');
+    heartDrive = bind(methodSource('driveLumo', heartSourceFile, 'HeartOfElariaLevel'),
+      { Phaser: PHASER_PORTS, dt: 16, HEART_SEAL_RADIUS, LUMO_CHOSE_LINES: heartConstant('LUMO_CHOSE_LINES'), ...HEART_SOUND },
+      'HeartOfElariaLevel.driveLumo()');
   }
   return heartDrive(scene);
 }
@@ -582,6 +585,7 @@ function makeHeartLatchScene({ lumoMode = 'holding', flags = {}, ready = true, l
     save() { calls.save += 1; calls.savedFlags = { ...scene.progress.flags }; },
     say(lines) { calls.say.push(lines); },
     refresh() { calls.refresh += 1; },
+    recordLumoHome: () => recordHeartLumoHome(scene),
   };
   return scene;
 }
@@ -801,8 +805,32 @@ function makeHeartFinalScene({ inHand, placed, on = true, latched = true, x = 30
     stopDialogue() { calls.stopDialogue += 1; },
     finish() { calls.finish += 1; },
   };
-  scene.commitFinalExtinguish = (source) => bind(methodSource('commitFinalExtinguish', heartSourceFile, 'HeartOfElariaLevel'), { source }, 'HeartOfElariaLevel.commitFinalExtinguish()')(scene);
+  scene.commitFinalExtinguish = (source) => bind(methodSource('commitFinalExtinguish', heartSourceFile, 'HeartOfElariaLevel'), { source, ...HEART_SOUND }, 'HeartOfElariaLevel.commitFinalExtinguish()')(scene);
+  scene.recordLumoHome = () => recordHeartLumoHome(scene);
   return scene;
+}
+
+let heartRecordLumoHome = null;
+/** The shipped `recordLumoHome()` body, run with the given scene as `this`. */
+function recordHeartLumoHome(scene) {
+  if (!heartRecordLumoHome) heartRecordLumoHome = bind(methodSource('recordLumoHome', heartSourceFile, 'HeartOfElariaLevel'), HEART_SOUND, 'HeartOfElariaLevel.recordLumoHome()');
+  return heartRecordLumoHome(scene);
+}
+
+/** A module-level constant of HeartOfElariaLevel.ts, read from its initializer (the level file imports Phaser and cannot load here). */
+function heartConstant(name) {
+  let initializer = null;
+  const visit = (node) => {
+    if (initializer) return;
+    if (ts.isVariableDeclaration(node) && nodeText(node.name) === name) { initializer = node.initializer; return; }
+    ts.forEachChild(node, visit);
+  };
+  visit(heartSourceFile);
+  assert.ok(initializer, `HeartOfElariaLevel still authors ${name}`);
+  const js = ts.transpileModule(`const __value = (${nodeText(initializer)});`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext },
+  }).outputText;
+  return new Function(`"use strict";\n${js}\nreturn __value;`)();
 }
 const pressHeartF = (scene) => bind(methodSource('handleLanternKey', heartSourceFile, 'HeartOfElariaLevel'),
   { heartFinalActionSource, getHeartElement, canReachHeartElement, ...HEART_SOUND }, 'HeartOfElariaLevel.handleLanternKey()')(scene);

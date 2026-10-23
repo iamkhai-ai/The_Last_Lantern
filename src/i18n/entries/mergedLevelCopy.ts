@@ -6,9 +6,8 @@ import { entry, type CatalogEntry } from '../entry.ts';
 
 export const MERGED_LEVEL_COPY_ENTRIES: readonly CatalogEntry[] = [
   // Heart of Elaria hints and status.
-  entry('heart.hint.crystals', 'Đặt ba tinh thể ({placed}/3).', 'Place the three crystals into the three alcoves ({placed}/3).'),
+  entry('heart.hint.crystals', 'Đặt ba tinh thể.', 'Place the three crystals.'),
   entry('heart.hint.teach', 'Nối ba mạch rễ thành một vòng.', 'Join the three root branches into one ring.'),
-  entry('heart.hint.routeOpen', 'Nối ba mạch rễ thành một vòng (còn {count} điều kiện).', 'Join the three root branches into one ring ({count} conditions still open).'),
   entry('heart.hint.ready', 'Ba nhánh đã sẵn sàng.', 'The three branches are ready.'),
   entry('heart.hint.retrieve', 'Lấy lại đèn.', 'Take the lantern back.'),
   entry('heart.status.overload', 'Đèn: {lantern}', 'Lantern: {lantern}'),

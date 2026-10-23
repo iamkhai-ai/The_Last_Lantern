@@ -681,14 +681,14 @@ console.log(`Level 10 geometry/state checks passed (${HEART_ELEMENTS.length} con
 }
 
 
-// ---------------------------------------------------------------- H ladders are the scenario text (scenario 10 §8)
+// ---------------------------------------------------------------- H ladders are the scenario text (scenario v2 10 §8)
 // The three-branch puzzle (source, seal, route, confirm) shares the primary ladder (§8 first three Mức lines); the
 // overload stage keeps its own set (§8 last three). Both are verbatim and in order; repeated presses hold Mức 3.
 // The level file imports Phaser, so its constants and showHint() are read from the TypeScript source and bound to a fake level.
 {
-  const scenario = readFileSync(path.join(ROOT, 'docs/scenario/10-the-heart-of-elaria.md'), 'utf8');
+  const scenario = readFileSync(path.join(ROOT, 'docs/scenario-v2/10-the-heart-of-elaria.md'), 'utf8');
   const hits = [...scenario.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)];
-  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3, 1, 2, 3], '10 §8 lists the primary Mức 1-3 and then the overload Mức 1-3');
+  assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3, 1, 2, 3], 'v2 10 §8 lists the primary Mức 1-3 and then the overload Mức 1-3');
   const PRIMARY = hits.slice(0, 3).map((m) => m[2].normalize('NFC'));
   const OVERLOAD = hits.slice(3, 6).map((m) => m[2].normalize('NFC'));
 
@@ -743,3 +743,258 @@ console.log(`Level 10 geometry/state checks passed (${HEART_ELEMENTS.length} con
 }
 
 console.log('  H ladders    : primary (source, seal, route, confirm) and overload are the scenario Mức 1-3 verbatim, in order');
+
+// ---------------------------------------------------------------- scenario v2 (feat/level10-scenario-v2)
+// The v2 rules that live in HeartOfElariaLevel are proved on the shipped method bodies, extracted with the TypeScript
+// compiler API and bound to a fake level whose every side effect is logged. Pure rules are imported directly.
+{
+  const layout = await import('../src/data/heartOfElariaLayout.ts');
+  const v2Doc = readFileSync(path.join(ROOT, 'docs/scenario-v2/10-the-heart-of-elaria.md'), 'utf8');
+  assert.ok(v2Doc.includes('feat/level10-scenario-v2'), 'the v2 document status line names the implementing branch');
+
+  const levelFile = path.join(ROOT, 'src/levels/HeartOfElariaLevel.ts');
+  const levelAst = ts.createSourceFile(levelFile, readFileSync(levelFile, 'utf8'), ts.ScriptTarget.Latest, true);
+  const COMPILER = { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.ESNext } };
+  const findIn = (root, predicate) => {
+    let found;
+    const visit = (node) => { if (found) return; if (predicate(node)) { found = node; return; } ts.forEachChild(node, visit); };
+    visit(root);
+    return found;
+  };
+  const methodUnit = (name) => {
+    const method = findIn(levelAst, (node) => ts.isMethodDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(method?.body, `HeartOfElariaLevel still authors ${name}()`);
+    const params = method.parameters.map((p) => p.name.getText(levelAst));
+    const body = method.body.getText(levelAst);
+    return {
+      source: body,
+      bind(self, symbols = {}) {
+        const js = ts.transpileModule(`const __unit = function (${params.join(', ')}) ${body};`, COMPILER).outputText;
+        const unit = new Function(...Object.keys(symbols), `"use strict";\n${js}\nreturn __unit;`)(...Object.values(symbols));
+        return (...args) => unit.apply(self, args);
+      },
+    };
+  };
+  const constantValue = (name) => {
+    const decl = findIn(levelAst, (node) => ts.isVariableDeclaration(node) && node.name.getText(levelAst) === name);
+    assert.ok(decl?.initializer, `HeartOfElariaLevel still authors ${name}`);
+    const js = ts.transpileModule(`const __value = (${decl.initializer.getText(levelAst)});`, COMPILER).outputText;
+    return new Function(`"use strict";\n${js}\nreturn __value;`)();
+  };
+  const identityTr = (text) => text;
+  const commitSource = methodUnit('commitFinalExtinguish').source;
+  const recordSource = methodUnit('recordLumoHome').source;
+
+  /** A fake level: every side effect is appended to `log` in the order the shipped code makes it. */
+  const makeLevel = (flags = {}, lumoMode = 'follow', lantern = {}) => {
+    const log = [];
+    const sound = {
+      stopHeartLayers: (fade) => log.push(`stopHeartLayers:${fade}`),
+      setHeartLayer: (layer, on) => log.push(`layer:${layer}:${on}`),
+    };
+    const level = {
+      destroyed: false,
+      completed: false,
+      lumoMode,
+      progress: { flags: { ...flags }, lanternOn: true, counters: {} },
+      lantern: { lanternOn: true, lanternInHand: false, lanternPlaced: true, isOverloadMode: false, isDawnMode: false, ...lantern },
+      log,
+      save: () => log.push('save'),
+      refresh: () => log.push('refresh'),
+      finish: () => log.push('finish'),
+      stopDialogue: () => log.push('stopDialogue'),
+    };
+    level.recordLumoHome = methodUnit('recordLumoHome').bind(level, { SoundSystem: sound });
+    level.commitFinalExtinguish = methodUnit('commitFinalExtinguish').bind(level, { SoundSystem: sound });
+    level.syncLayers = methodUnit('syncLayers').bind(level, { SoundSystem: sound });
+    return level;
+  };
+
+  // ---- F: valid only after the roots lock, with the lamp lit, held or within pedestal reach
+  const pedestal = getHeartElement('heart-pedestal');
+  const latchedOnly = { latched: true };
+  assert.equal(canReachHeartElement(pedestal, { x: 85, y: 252 }), true, 'the pedestal answers F from its reach point');
+  assert.equal(canReachHeartElement(pedestal, { x: 200, y: 252 }), false, 'the pedestal does not answer F from across the room');
+  assert.equal(layout.heartFinalActionSource({ latched: false }, { inHand: true, placed: false, on: true }, false), null,
+    'F does nothing before the roots lock, even with the lamp in hand');
+  assert.equal(layout.heartFinalActionSource(latchedOnly, { inHand: true, placed: false, on: false }, false), null,
+    'F does nothing once the lamp is dark');
+  assert.equal(layout.heartFinalActionSource(latchedOnly, { inHand: false, placed: true, on: true },
+    canReachHeartElement(pedestal, { x: 85, y: 252 })), 'pedestal', 'a lit lamp on the pedestal finishes from its reach point');
+  assert.equal(layout.heartFinalActionSource(latchedOnly, { inHand: false, placed: true, on: true },
+    canReachHeartElement(pedestal, { x: 200, y: 252 })), null, 'a lit lamp on the pedestal does not finish from across the room');
+  assert.equal(layout.heartFinalActionSource(latchedOnly, { inHand: true, placed: false, on: true }, false), 'hand',
+    'a lit lamp in Nhinh\'s hand finishes from anywhere');
+
+  // ---- the commit: pending lines stop, layers off, one save and one finish, Lumo released once, no overload when early
+  {
+    const early = makeLevel({ 'l9-roots': true, 'l9-lantern-placed': true }, 'follow', { lanternPlaced: true, lanternInHand: false });
+    early.commitFinalExtinguish('pedestal');
+    assert.deepEqual(early.log, ['stopDialogue', 'stopHeartLayers:0.25', 'save', 'refresh', 'finish'],
+      'early F drops the pending lines, stops the layers, saves and finishes, in that order');
+    assert.equal(early.progress.flags['l9-overload'], false, 'early F never raises the overload');
+    assert.equal(early.progress.flags['l9-complete'], true, 'early F completes the campaign');
+    assert.equal(early.progress.flags['l9-ending-beat'], 'night-call', 'early F starts the ending at its first beat');
+    assert.equal(early.progress.flags['l9-lumo-home'], true, 'early F records that Lumo is back with Nhinh');
+    early.commitFinalExtinguish('pedestal');
+    assert.equal(early.log.filter((line) => line === 'finish').length, 1, 'a second F never finishes again');
+    assert.equal(early.log.filter((line) => line === 'stopDialogue').length, 1, 'a second F never repeats the commit');
+  }
+  {
+    // Lumo still assigned to the seal when F lands: released to Nhinh once, never teleported back to the seal.
+    const holding = makeLevel({
+      'l9-roots': true, 'l9-lantern-placed': false, 'l9-lantern-retrieved': true, 'l9-overload': true,
+      'l9-called-heart': true, 'l9-at-heart': true,
+    }, 'holding', { lanternPlaced: false, lanternInHand: true, lanternOn: true, isOverloadMode: true });
+    holding.commitFinalExtinguish('hand');
+    assert.equal(holding.lumoMode, 'follow', 'Lumo is released from the seal by the final action');
+    assert.equal(holding.progress.flags['l9-called-heart'], false, 'the assignment is cleared once');
+    assert.equal(holding.progress.flags['l9-at-heart'], false, 'the arrival mark is cleared once');
+    assert.equal(holding.progress.flags['l9-lumo-home'], true, 'the release is recorded');
+    assert.equal(holding.progress.flags['l9-overload'], false, 'the overload flag is cleared with the commit');
+    assert.equal(holding.lantern.isOverloadMode, false, 'the overload ends with the commit');
+    assert.deepEqual(holding.log.slice(0, 2), ['stopDialogue', 'stopHeartLayers:0.25'],
+      'after an overload F the pending lines and the layers stop before anything else');
+    assert.equal(holding.log.filter((line) => line === 'finish').length, 1, 'the ending is started exactly once');
+    assert.equal(/setPosition|sprite\.x\s*=|sprite\.y\s*=/.test(recordSource + commitSource), false,
+      'the final action never moves Lumo (no teleport-back to the seal)');
+    holding.recordLumoHome();
+    assert.equal(holding.progress.flags['l9-called-heart'], false, 'a repeated release never re-assigns Lumo');
+  }
+  {
+    // Already back (released at the root lock): the final action only records it, nothing else changes.
+    const back = makeLevel({ 'l9-roots': true, 'l9-called-heart': false, 'l9-at-heart': false }, 'follow');
+    back.recordLumoHome();
+    back.recordLumoHome();
+    assert.equal(back.lumoMode, 'follow');
+    assert.equal(back.progress.flags['l9-lumo-home'], true, 'a Lumo already back is recorded');
+    assert.deepEqual(back.log, [], 'recording a return touches no sound, save or ending');
+  }
+
+  // ---- the layers follow the living branches; the overload layer exists only with the overload flag
+  {
+    const live = makeLevel({ 'l9-overload': false });
+    live.syncLayers({ memory: true, hope: false, balance: true });
+    assert.deepEqual(live.log, ['layer:memory:true', 'layer:hope:false', 'layer:balance:true', 'layer:overload:false'],
+      'three layers follow the three living branches; the overload layer stays off on the early branch');
+    const overloaded = makeLevel({ 'l9-overload': true });
+    overloaded.syncLayers({ memory: true, hope: true, balance: true });
+    assert.equal(overloaded.log.at(-1), 'layer:overload:true', 'the fourth layer runs only while the overload is on');
+    const done = makeLevel({ 'l9-overload': true });
+    done.completed = true;
+    done.syncLayers({ memory: true, hope: true, balance: true });
+    assert.deepEqual(done.log, [], 'once the ending is committed no layer is started again');
+  }
+  {
+    // The overload layer rises to a fixed ceiling over six seconds and never goes above it (fake Web Audio nodes).
+    const effects = await import('../src/audio/effects.ts');
+    const events = [];
+    const param = (value) => ({
+      value,
+      setValueAtTime(v, t) { events.push({ kind: 'set', v, t }); return this; },
+      linearRampToValueAtTime(v, t) { events.push({ kind: 'ramp', v, t }); return this; },
+      cancelScheduledValues() {},
+    });
+    const node = () => ({ connect() {}, disconnect() {} });
+    const ctx = {
+      currentTime: 0,
+      createOscillator: () => ({ ...node(), type: 'sine', frequency: param(0), start() {}, stop() {}, onended: null }),
+      createGain: () => ({ ...node(), gain: param(0) }),
+      createBiquadFilter: () => ({ ...node(), type: 'lowpass', frequency: param(0) }),
+    };
+    effects.heartOverloadLayer(ctx, node(), 0);
+    const ramps = events.filter((e) => e.kind === 'ramp');
+    assert.ok(ramps.length >= 2, 'the overload layer has its voices');
+    for (const ramp of ramps) {
+      assert.equal(ramp.t, effects.HEART_OVERLOAD_RISE_SECONDS, 'the overload climbs over the fixed rise time');
+      assert.ok(ramp.v > 0 && ramp.v <= 0.02, 'each overload voice tops out at its fixed ceiling');
+    }
+    assert.equal(effects.HEART_OVERLOAD_RISE_SECONDS, 6);
+    for (const name of ['heartMemoryLayer', 'heartHopeLayer', 'heartBalanceLayer']) assert.equal(typeof effects[name], 'function', `${name} exists`);
+  }
+
+  // ---- the Lumo-chooses beat: the first arrival on the seal plays the v2 lines once and sets the flag
+  {
+    const LUMO_CHOSE = constantValue('LUMO_CHOSE_LINES');
+    assert.deepEqual(LUMO_CHOSE.map((line) => line.speaker), ['Lumo', 'Nhinh', 'Lumo'], 'the Lumo-chooses beat is three lines, Lumo first');
+    assert.equal(LUMO_CHOSE[2].text, 'Ừ. Lần này là tôi tự chọn giữ.', 'the closing line is the v2 line');
+    const said = [];
+    const fake = {
+      sealPoint: { x: 320, y: 244 },
+      lumoMode: 'travelling',
+      progress: { flags: { 'l9-called-heart': true } },
+      lumo: { sprite: { x: 200, y: 200 }, update() { this.sprite.x = 311; this.sprite.y = 250; } },
+      save() {},
+      say: (lines) => said.push(lines),
+    };
+    const drive = methodUnit('driveLumo').bind(fake, {
+      SoundSystem: { playLightPulse() {} },
+      tr: identityTr,
+      Phaser: { Math: { Clamp: (v, a, b) => Math.min(Math.max(v, a), b) } },
+      HEART_SEAL_RADIUS: 20,
+      LUMO_CHOSE_LINES: LUMO_CHOSE,
+    });
+    drive(0.016);
+    assert.equal(fake.lumoMode, 'holding', 'Lumo holds the seal on arrival');
+    assert.equal(fake.progress.flags['l9-lumo-chose'], true, 'the first arrival sets l9-lumo-chose');
+    assert.deepEqual(said[0].map((line) => line.text), LUMO_CHOSE.map((line) => line.text), 'the first arrival speaks the v2 lines');
+    fake.lumoMode = 'travelling';
+    drive(0.016);
+    assert.equal(said.length, 2, 'a later arrival still answers, once');
+    assert.notDeepEqual(said[1].map((line) => line.text), LUMO_CHOSE.map((line) => line.text), 'the choice lines play only the first time');
+  }
+
+  // ---- HUD goal rows follow the v2 sequence (§8)
+  {
+    const objective = methodUnit('getObjectiveText');
+    const at = (stage) => objective.bind({ stage: () => stage }, { tr: identityTr })();
+    assert.equal(at('crystals'), 'Đặt ba tinh thể.', 'HUD: place the crystals');
+    assert.equal(at('route'), 'Nối ba mạch rễ thành một vòng.', 'HUD: join the three root branches');
+    assert.equal(at('retrieve'), 'Lấy lại đèn.', 'HUD: take the lantern back');
+    assert.equal(at('overload'), '', 'HUD goal stays empty during the overload');
+  }
+
+  // ---- the night: the silence is quiet, the sounds come after it, the dawn chord last
+  {
+    const { EndingMachine, NIGHT_WAIT_MS, NIGHT_SOUND_STEPS } = await import('../src/data/campaignEnding.ts');
+    const machine = new EndingMachine();
+    machine.begin('night-call');
+    machine.dialogueFinished();
+    machine.press();
+    assert.deepEqual(machine.tick(NIGHT_WAIT_MS - 1, false), [], 'during the silence no sound or light returns');
+    assert.equal(machine.beat, 'night-wait');
+    machine.tick(1, false);
+    assert.equal(machine.beat, 'reassure', 'the silence ends after 1.4 seconds');
+    const cues = [];
+    for (let t = 0; t < 2000; t += 100) for (const effect of machine.tick(100, false)) if (effect.type === 'cue') cues.push(effect.cue);
+    assert.deepEqual(cues, NIGHT_SOUND_STEPS.map((step) => step.cue), 'cricket, water, answer, then the dawn chord, each once');
+    assert.equal(NIGHT_SOUND_STEPS.at(-1).cue, 'dawn', 'the dawn chord is the last night step');
+    assert.ok(NIGHT_WAIT_MS >= 1400, 'the silence is at least 1.4 seconds');
+  }
+
+  // ---- the conditional ending: two lines only when all five small marks are set
+  {
+    const endingPure = await import('../src/data/campaignEnding.ts');
+    const { SMALL_MARK_FLAGS, SMALL_MARK_LINES, SEATED_LINES, hasAllSmallMarks, endingBeatLines, EndingMachine } = endingPure;
+    assert.deepEqual([...SMALL_MARK_FLAGS], ['l4-chalk-seen', 'l5-tally-seen', 'l6-handprint-seen', 'l7-name-seen', 'l8-margin-seen'],
+      'the five small-mark flags are read by these exact names');
+    const all = Object.fromEntries(SMALL_MARK_FLAGS.map((flag) => [flag, true]));
+    assert.equal(hasAllSmallMarks(all), true, 'all five marks set: the lines are shown');
+    for (const flag of SMALL_MARK_FLAGS) {
+      assert.equal(hasAllSmallMarks({ ...all, [flag]: false }), false, `${flag} missing: the lines are hidden`);
+      assert.equal(hasAllSmallMarks({ ...all, [flag]: 'true' }), false, `${flag} must be the boolean true, not a string`);
+    }
+    assert.equal(hasAllSmallMarks({}), false, 'no marks: the lines are hidden');
+    assert.equal(endingBeatLines('seated').length, SEATED_LINES.length, 'without the marks the seated scene is the authored lines');
+    const withMarks = endingBeatLines('seated', { smallMarks: true });
+    assert.equal(withMarks.length, SEATED_LINES.length + SMALL_MARK_LINES.length, 'with the marks the two lines come first');
+    assert.deepEqual(withMarks.slice(0, 2), SMALL_MARK_LINES, 'the two side-thread lines open the seated scene');
+    const machine = new EndingMachine();
+    machine.smallMarks = true;
+    assert.equal(machine.begin('seated')[0].lines.length, SEATED_LINES.length + 2, 'the machine carries the marks into the seated beat');
+    const sequence = readFileSync(path.join(ROOT, 'src/systems/CampaignEndingSequence.ts'), 'utf8');
+    assert.ok(sequence.includes('hasAllSmallMarks(this.progress.flags)'), 'the ending reads the marks from the save');
+  }
+
+  console.log('  scenario v2  : F rule, one-time seal release, early and overload commits, layers, Lumo choice, HUD rows, night timing, conditional ending');
+}
