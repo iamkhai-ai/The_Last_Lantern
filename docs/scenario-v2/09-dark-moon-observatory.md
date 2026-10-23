@@ -7,7 +7,7 @@
 **Mục tiêu:** Mở phòng thiên văn, hiểu tai họa và nhận Tinh thể Cân Bằng.\
 **Kỹ năng mới:** Không có. Đây là bài kiểm tra tổng hợp: một nguồn sáng dùng chung cho ba phòng, giữ đường bằng chốt trước khi đổi cấu hình, và giữ một đường về cho cả hai người.
 
-**Trạng thái:** hướng sửa về mạch cầu đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/09-dark-moon-observatory.md](../scenario/09-dark-moon-observatory.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* thuộc đề xuất v2.
+**Trạng thái:** đã triển khai vào game (merge `3e9c12f` trên `test-develop`; thang H dự phòng sửa trên `integrate/scenario-v2-05-10`). Bản này là nguồn chuẩn của Màn 09; [docs/scenario/09-dark-moon-observatory.md](../scenario/09-dark-moon-observatory.md) được giữ làm lịch sử. Chưa chơi thử thật.
 
 > **Thay đổi so với bản hiện tại**
 >
