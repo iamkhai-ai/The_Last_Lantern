@@ -1,4 +1,7 @@
 import Phaser from 'phaser';
+import type { Point } from '../v4/core/geometry';
+import { canPulse } from '../v4/core/lantern';
+import type { LanternState } from '../v4/core/lantern';
 import { SoundSystem } from './SoundSystem';
 
 export type PulseCallback = (x: number, y: number, maxRadius: number) => void;
@@ -29,6 +32,10 @@ export const LIBRARY_LIGHTING: LanternLightingProfile = {
   darkShadeSize: 170, darkDarkness: 0.74, darkHaloScale: 0.30, darkHaloAlpha: 0.12,
 };
 
+/**
+ * Render-only lantern light. The lantern's state (in hand or on a pedestal, lit or not) is owned by the
+ * caller and passed into `update()`; this class only draws it and keeps the Pulse wave and its cooldown.
+ */
 export class LanternSystem {
   private scene: Phaser.Scene;
   private darknessOverlay: Phaser.GameObjects.Graphics;
@@ -36,18 +43,8 @@ export class LanternSystem {
   private pulseGraphics: Phaser.GameObjects.Graphics;
   private vignetteImage: Phaser.GameObjects.Image;
   private forestEdgeShade?: Phaser.GameObjects.Image;
-  /** Set when the shaded box recipe is active (forest levels or an explicit profile); null for generic lighting. */
+  /** Set when the shaded box recipe is active (an explicit profile); null for generic lighting. */
   private readonly shadedLighting: LanternLightingProfile | null;
-
-  public lanternOn = true;
-  public lanternInHand = true;
-  public lanternPlaced = false;
-  public placedX = 0;
-  public placedY = 0;
-  public isDawnMode = false;
-  public isOverloadMode = false;
-  /** Paint the halo of a lamp parked on its pedestal. Logic never changes; only the render of the placed light. */
-  private placedLightVisible = true;
 
   private flickerTime = 0;
   private pulseCooldownRemaining = 0; // ms
@@ -55,15 +52,15 @@ export class LanternSystem {
   private pulseOriginX = 0;
   private pulseOriginY = 0;
   private pulseListeners: PulseCallback[] = [];
-  private lastToggleTime = 0;
 
   public static readonly PULSE_COOLDOWN_MS = 3000;
   public static readonly PULSE_DURATION_MS = 1000;
   public static readonly PULSE_MAX_RADIUS = 195;
 
-  constructor(scene: Phaser.Scene, forestEdgeLighting = false, woodsLighting = false, profile?: LanternLightingProfile) {
+  /** @param profile shaded falloff box numbers; omit for the generic lighting branch. */
+  constructor(scene: Phaser.Scene, profile?: LanternLightingProfile) {
     this.scene = scene;
-    this.shadedLighting = profile ?? (forestEdgeLighting || woodsLighting ? FOREST_LIGHTING : null);
+    this.shadedLighting = profile ?? null;
 
     this.darknessOverlay = scene.add.graphics();
     this.darknessOverlay.setDepth(68);
@@ -80,15 +77,10 @@ export class LanternSystem {
     if (this.shadedLighting) {
       this.vignetteImage.setVisible(false);
       if (!scene.textures.exists('level01_darkness_falloff')) {
-        throw new Error(profile ? 'Missing darkness falloff texture for Level 03'
-          : forestEdgeLighting ? 'Missing Level 01 darkness falloff texture' : 'Missing darkness falloff texture for Level 02');
+        throw new Error('Missing darkness falloff texture');
       }
       this.forestEdgeShade = scene.add.image(0, 0, 'level01_darkness_falloff').setDepth(68.5);
     }
-  }
-
-  public setPlacedLightVisible(visible: boolean): void {
-    this.placedLightVisible = visible;
   }
 
   public onPulse(cb: PulseCallback): void {
@@ -99,91 +91,62 @@ export class LanternSystem {
     this.pulseListeners = [];
   }
 
-  public toggleLantern(now: number): boolean {
-    if (!this.lanternInHand || this.lanternPlaced) return false;
-    if (now - this.lastToggleTime < 140) return false;
-    this.lastToggleTime = now;
-    this.lanternOn = !this.lanternOn;
-    SoundSystem.playLanternToggle(this.lanternOn);
-    return true;
-  }
-
-  public placeLanternAt(x: number, y: number): void {
-    this.lanternPlaced = true;
-    this.lanternInHand = false;
-    this.lanternOn = true;
-    this.placedX = x;
-    this.placedY = y;
-    SoundSystem.playLanternToggle(true);
-  }
-
-  public retrieveLantern(): void {
-    this.lanternPlaced = false;
-    this.lanternInHand = true;
-    this.lanternOn = true;
-    SoundSystem.playLanternToggle(true);
-  }
-
-  public triggerPulse(originX: number, originY: number): boolean {
-    if (!this.lanternInHand || this.lanternPlaced || !this.lanternOn) return false;
+  /**
+   * Starts a Pulse from `origin` when the lantern allows it (in hand and lit, see `canPulse`) and the cooldown
+   * has run out. Refused returns false. The toggle sound is the caller's job; the Pulse sound plays here.
+   */
+  public triggerPulse(origin: Point, lantern: LanternState): boolean {
+    if (!canPulse(lantern)) return false;
     if (this.pulseCooldownRemaining > 0) return false;
 
     this.pulseCooldownRemaining = LanternSystem.PULSE_COOLDOWN_MS;
     this.pulseActiveTime = 1;
-    this.pulseOriginX = originX;
-    this.pulseOriginY = originY;
+    this.pulseOriginX = origin.x;
+    this.pulseOriginY = origin.y;
 
     SoundSystem.playLightPulse();
     for (const cb of this.pulseListeners) {
-      cb(originX, originY, LanternSystem.PULSE_MAX_RADIUS);
+      cb(origin.x, origin.y, LanternSystem.PULSE_MAX_RADIUS);
     }
     return true;
   }
 
   /** Where the carried lamp's light sits relative to the player; the halo and every beam from the carried lamp share it. */
-  public getCarriedLightPosition(playerX: number, playerY: number): { x: number; y: number } {
-    return { x: playerX + 6, y: playerY + 2 };
+  public getCarriedLightPosition(player: Point): Point {
+    return { x: player.x + 6, y: player.y + 2 };
   }
 
   public getCooldownRatio(): number {
     return Math.max(0, Math.min(1, this.pulseCooldownRemaining / LanternSystem.PULSE_COOLDOWN_MS));
   }
 
-  public update(dt: number, playerX: number, playerY: number): void {
+  /**
+   * Draws the lantern light for this frame.
+   * @param player the player's centre, used for the carried light and the lamp-off halo
+   * @param lantern the lantern's state; lit when `lantern.on`
+   * @param placedAt where the placed lantern's light sits (the pedestal point), or null when it is not placed
+   */
+  public update(dt: number, player: Point, lantern: LanternState, placedAt: Point | null): void {
     this.flickerTime += dt * 0.005;
 
     if (this.pulseCooldownRemaining > 0) {
       this.pulseCooldownRemaining = Math.max(0, this.pulseCooldownRemaining - dt);
     }
 
-    const carried = this.getCarriedLightPosition(playerX, playerY);
-    const lightX = this.lanternPlaced ? this.placedX : carried.x;
-    const lightY = this.lanternPlaced ? this.placedY - 6 : carried.y;
+    const carried = this.getCarriedLightPosition(player);
+    const placed = lantern.location.at === 'pedestal' ? placedAt : null;
+    const lightX = placed ? placed.x : carried.x;
+    const lightY = placed ? placed.y : carried.y;
 
     // Gentle 2-4% organic flicker
     const flicker = 1 + Math.sin(this.flickerTime * 2.3) * 0.025 + Math.cos(this.flickerTime * 5.7) * 0.012;
 
     this.darknessOverlay.clear();
 
-    if (this.isDawnMode) {
-      // Warm golden morning wash instead of night darkness
-      this.haloSprite.setVisible(false);
-      this.darknessOverlay.fillStyle(0xffe6a3, 0.08);
-      this.darknessOverlay.fillRect(0, 0, 640, 360);
-    } else if (this.isOverloadMode) {
-      // Blinding white-gold light overload waiting for F
-      this.haloSprite.setVisible(true);
-      this.haloSprite.setPosition(320, 165);
-      this.haloSprite.setScale(2.3 * flicker);
-      this.haloSprite.setAlpha(0.95);
-      const pulseAlpha = 0.36 + Math.sin(this.flickerTime * 4) * 0.12;
-      this.darknessOverlay.fillStyle(0xfff5cc, pulseAlpha);
-      this.darknessOverlay.fillRect(0, 0, 640, 360);
-    } else if (this.shadedLighting) {
-      // Forest levels (01 and 02) share the forest profile; Level 03 passes its own. The flags only pick the profile
-      // and the missing-texture message, so the box and halo code below is shared.
+    if (this.shadedLighting) {
+      // The shaded falloff box: the profile picks the numbers, the box and halo code below is shared.
       const profile = this.shadedLighting;
-      const activeLantern = this.lanternOn && (this.lanternInHand || this.lanternPlaced);
+      const activeLantern = lantern.on;
       this.haloSprite.setVisible(true);
       this.haloSprite.setPosition(lightX, lightY);
       this.haloSprite.setScale((activeLantern ? profile.litHaloScale : profile.darkHaloScale) * flicker);
@@ -194,7 +157,7 @@ export class LanternSystem {
       const shadeY = Math.round(lightY);
       this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);
       this.fillForestEdgeDarknessOutside(shadeX, shadeY, size, darknessAlpha);
-    } else if (this.lanternOn && (this.lanternInHand || (this.lanternPlaced && this.placedLightVisible))) {
+    } else if (lantern.on) {
       // Night mode with warm lantern light active (radius ~115 world px)
       this.haloSprite.setVisible(true);
       this.haloSprite.setPosition(lightX, lightY);
@@ -207,7 +170,7 @@ export class LanternSystem {
     } else {
       // Lantern OFF: dim atmosphere (0.46 alpha) so player, paths, and locks remain clearly visible
       this.haloSprite.setVisible(true);
-      this.haloSprite.setPosition(playerX, playerY);
+      this.haloSprite.setPosition(player.x, player.y);
       this.haloSprite.setScale(0.38);
       this.haloSprite.setAlpha(0.32);
 
