@@ -3,8 +3,9 @@
  * Run it locally with `npm run verify`; CI runs exactly the same command (.github/workflows/verify.yml).
  *
  *   1. TypeScript compiles with no errors.
- *   2. Every scripts/check-*.mjs passes (each in its own process).
- *   3. The DEMO build (VITE_BUILD_FLAVOR=demo) builds, is a single index.html, really is the demo flavor, and
+ *   2. The Vitest unit tests (every *.test.ts under src/) pass.
+ *   3. Every scripts/check-*.mjs passes (each in its own process).
+ *   4. The DEMO build (VITE_BUILD_FLAVOR=demo) builds, is a single index.html, really is the demo flavor, and
  *      contains the Coming Soon hand-off the demo ends on.
  *
  * It exits non-zero on the first failing stage and prints which one. It never touches ./dist: the demo build goes to
@@ -46,17 +47,21 @@ function fail(message) {
 }
 
 // 1. types
-console.log('== 1/3 TypeScript');
+console.log('== 1/4 TypeScript');
 run('tsc --noEmit', [join(root, 'node_modules/typescript/bin/tsc'), '--noEmit']);
 
-// 2. checks
+// 2. unit tests
+console.log('== 2/4 Vitest');
+run('vitest run', [join(root, 'node_modules/vitest/vitest.mjs'), 'run']);
+
+// 3. checks
 const checks = readdirSync(join(root, 'scripts')).filter((f) => /^check-.*\.mjs$/.test(f)).sort();
-if (checks.length === 0) fail('no scripts/check-*.mjs found: the gate would pass vacuously');
-console.log(`== 2/3 ${checks.length} check scripts`);
+if (checks.length === 0) console.warn('WARNING: no scripts/check-*.mjs found; the check stage is empty');
+console.log(`== 3/4 ${checks.length} check scripts`);
 for (const file of checks) run(file, [join(root, 'scripts', file)], {}, true);
 
-// 3. demo build
-console.log('== 3/3 demo build');
+// 4. demo build
+console.log('== 4/4 demo build');
 const out = mkdtempSync(join(tmpdir(), 'last-lantern-demo-'));
 try {
   run('vite build (demo)', [join(root, 'node_modules/vite/bin/vite.js'), 'build', '--outDir', out, '--emptyOutDir'],

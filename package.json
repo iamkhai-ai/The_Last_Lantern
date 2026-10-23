@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "verify": "node scripts/verify-release.mjs"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
   "devDependencies": {
     "typescript": "^5.4.5",
     "vite": "^5.2.11",
-    "vite-plugin-singlefile": "^2.3.3"
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^2.1.9"
   }
 }
