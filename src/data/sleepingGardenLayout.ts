@@ -436,11 +436,14 @@ export function gardenStandingOwner(id: GardenReachId, center: GardenPoint): boo
   return owner === id;
 }
 
-export function gardenCompletionBlock(state: GardenState): 'canopy' | 'bar' | 'drain' | 'side' | 'scene' | null {
+/**
+ * Scenario v2 07 §8: the side path (`l6-return-latched`) is optional. Completion is canopy → bar(latch) → drain → scene.
+ * The side latch still works and still writes its flag; it is simply not a step of the exit gate.
+ */
+export function gardenCompletionBlock(state: GardenState): 'canopy' | 'bar' | 'drain' | 'scene' | null {
   if (!state.canopyShut) return 'canopy';
   if (!state.sunLatched) return 'bar';
   if (!state.waterFlowing) return 'drain';
-  if (!state.returnLatched) return 'side';
   if (!state.lumoRealized) return 'scene';
   return null;
 }
@@ -456,6 +459,28 @@ export function crossingSideFor(center: GardenPoint): GardenCrossingSide {
 
 export function onGardenBridge(center: GardenPoint): boolean {
   return rectsOverlap(gardenActorBody(center), GARDEN_BRIDGE);
+}
+
+/** Lumo's flight points while the roots form a bridge in the dark (scenario v2 07 §4): midspan, then the far bank. */
+export const GARDEN_GUIDE_MIDSPAN: GardenPoint = { x: GARDEN_BRIDGE.x + GARDEN_BRIDGE.width / 2, y: GARDEN_BRIDGE.y + GARDEN_BRIDGE.height / 2 };
+export const GARDEN_GUIDE_FAR_BANK: GardenPoint = { x: 404, y: GARDEN_GUIDE_MIDSPAN.y };
+
+/**
+ * Scenario v2 07 §8: Lumo's flight target changes only while the bridge exists (roots deployed, lantern off) and Nhinh
+ * stands on it. Returns null otherwise, so the usual trail target applies. It never touches the plant rules.
+ */
+export function gardenLumoGuideTarget(state: GardenState, lanternOn: boolean, center: GardenPoint): GardenPoint | null {
+  if (!rootsDeployed(state, lanternOn) || !onGardenBridge(center)) return null;
+  return center.x < GARDEN_GUIDE_MIDSPAN.x ? { ...GARDEN_GUIDE_MIDSPAN } : { ...GARDEN_GUIDE_FAR_BANK };
+}
+
+/**
+ * Scenario v2 07 §8 side path: a handprint on the west-bank wet stone at the sluice crossing, beside the practice lawn.
+ * Revealed by a Pulse within `pulseRadius` of the stone once the water flows. Placeholder art: drawn at runtime.
+ */
+export const GARDEN_HANDPRINT = { centre: { x: 168, y: 256 } as GardenPoint, pulseRadius: 40 } as const;
+export function gardenHandprintReaches(origin: GardenPoint): boolean {
+  return Math.hypot(origin.x - GARDEN_HANDPRINT.centre.x, origin.y - GARDEN_HANDPRINT.centre.y) <= GARDEN_HANDPRINT.pulseRadius;
 }
 
 export function crossedToFarBank(side: GardenCrossingSide, center: GardenPoint): boolean {

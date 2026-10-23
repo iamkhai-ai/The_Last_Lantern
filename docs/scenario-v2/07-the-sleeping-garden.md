@@ -7,7 +7,7 @@
 **Mục tiêu:** Đưa nước tới vườn ươm và mở đường vào điện thờ.\
 **Kỹ năng mới:** Đảo luật. Trọng tâm là bóng tối cho sự sống và đường đi vật lý; màn 3 và 5 đã cần tắt đèn để đọc thông tin, nên đây không phải lần đầu bóng tối có ích.
 
-**Trạng thái:** hướng sửa về lối phụ và cách mô tả luật đã được duyệt trong đợt góp ý; kịch bản v2 vẫn là bản nháp thiết kế, chưa triển khai vào game. Bản đang chạy là [docs/scenario/07-the-sleeping-garden.md](../scenario/07-the-sleeping-garden.md), vẫn là nguồn chuẩn cho gameplay hiện tại. Các dòng *(mới)* thuộc đề xuất v2.
+**Trạng thái:** đã triển khai trên nhánh `feat/level07-scenario-v2` (§8 và các dòng thoại, H, HUD, J *(mới)*). Chưa merge vào `test-develop`. Bản v1 [docs/scenario/07-the-sleeping-garden.md](../scenario/07-the-sleeping-garden.md) được giữ nguyên làm lịch sử. Phần còn thiếu và bản tạm chờ art (bàn tay trên đá) được ghi trong [docs/implementation/07-layout.md](../implementation/07-layout.md), mục Scenario v2.
 
 > **Thay đổi so với bản hiện tại**
 >

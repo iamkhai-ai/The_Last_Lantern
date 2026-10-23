@@ -10,11 +10,11 @@ import type { LanternSystem } from '../systems/LanternSystem';
 import type { DialogueLine } from '../types/gameTypes';
 import type { PromptRect } from '../systems/interactionPromptLayout';
 import {
-  GARDEN_ACTOR, GARDEN_BAR_BEAM, GARDEN_BAR_BEAM_ROWS, GARDEN_BAR_POSTS, GARDEN_BAR_SPRITE, GARDEN_BRIDGE, GARDEN_SHADOW_PATH, GARDEN_ICONS, GARDEN_MODULES, GARDEN_SIDE_PATH, GARDEN_SPANS,
+  GARDEN_ACTOR, GARDEN_BAR_BEAM, GARDEN_BAR_BEAM_ROWS, GARDEN_BAR_POSTS, GARDEN_BAR_SPRITE, GARDEN_BRIDGE, GARDEN_HANDPRINT, GARDEN_SHADOW_PATH, GARDEN_ICONS, GARDEN_MODULES, GARDEN_SIDE_PATH, GARDEN_SPANS,
   GARDEN_SPAWN, GARDEN_STANDS, GARDEN_STATIC_SOLIDS, GARDEN_WATER, NO_HELD_SPANS, barRaised, bridgeWalkable,
   crossingSideFor, crossedToFarBank, effectiveLight, gardenActorBody, gardenCompletionBlock, gardenDrainEnabled,
-  gardenExitReady, gardenHandleEnabled, gardenLatchEastEnabled, gardenLatchWestEnabled, gardenPropDepth, gardenStandingOwner,
-  gardenStandingReach, inGateCorridor,
+  gardenExitReady, gardenHandleEnabled, gardenHandprintReaches, gardenLatchEastEnabled, gardenLatchWestEnabled, gardenLumoGuideTarget,
+  gardenPropDepth, gardenStandingOwner, gardenStandingReach, inGateCorridor,
   isGardenPositionSafe, nearestSafeGardenSpawn, practiceLessonArmed, practiceLessonDue, onGardenBridge, readGardenState, rectsOverlap, rootsDeployed,
   sanitizeGardenState, sidePathOpen, sunOpen, updateHeldSpans,
   type GardenArtVariant, type GardenHeldSpans, type GardenModuleSpec, type GardenPoint, type GardenSpanId, type GardenState,
@@ -69,6 +69,13 @@ const NURSERY_SCENE: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Mình biết thêm được một điều rồi.' },
   { speaker: 'Lumo', text: 'Cứ ngủ đi. Chúng tôi sẽ giữ đường nước mở.' },
 ];
+// Scenario v2 07 §4/§5 (new lines). Lumo's guide line plays once, when Nhinh first steps onto a deployed root bridge.
+const BRIDGE_GUIDE: DialogueLine[] = [{ speaker: 'Lumo', text: 'Đi theo ánh của tôi. Nó không làm rễ co lại đâu.' }];
+// Scenario v2 07 §5 "Những dấu nhỏ" (optional): the handprint revealed by a Pulse on the wet stone.
+const HANDPRINT_LINES: DialogueLine[] = [
+  { speaker: 'Nhinh', text: 'Có một bàn tay nhỏ in trên đá. Nước vừa làm nó hiện lên.' },
+  { speaker: 'Lumo', text: 'Ai đó từng chơi ở đây, lúc đá còn ướt.' },
+];
 const SIDE_LATCHED: DialogueLine[] = [
   { speaker: 'Nhinh', text: 'Chốt đá đã gài. Lối đá phụ mở rồi.' },
   { speaker: 'Lumo', text: 'Lối về này không cần ánh sáng. Cây non có nước và có lúc nghỉ.' },
@@ -104,7 +111,10 @@ export class SleepingGardenLevel {
   private state: GardenState = sanitizeGardenState({ canopyShut: false, sunLatched: false, waterFlowing: false, returnLatched: false, lumoRealized: false, bridgeCrossed: false, crossingSide: null });
   private held: GardenHeldSpans = { ...NO_HELD_SPANS };
   private lastLanternOn = true;
+  private lastRootsDeployed = false;
   private traversalSide: 'west' | 'east' | null = null;
+  /** Placeholder handprint (scenario v2 07 §8): drawn at runtime with Graphics until art exists. */
+  private handprint?: Phaser.GameObjects.Graphics;
 
   private objects: Phaser.GameObjects.GameObject[] = [];
   private colliders: Phaser.Physics.Arcade.Collider[] = [];
@@ -154,8 +164,27 @@ export class SleepingGardenLevel {
     this.drawStatic();
     this.createSolids();
     this.registerInteractions();
+    // Loaded state is silent: only a deploy that happens while playing plays the root cue.
+    this.lastRootsDeployed = rootsDeployed(this.state, this.lanternOn);
     this.updateLightState();
     this.refresh();
+  }
+
+  /**
+   * Scenario v2 07 §8: Lumo flies ahead on the bridge in the dark. CampaignScene reads this every frame and uses the
+   * usual trail target whenever it returns null. Pure with respect to the plants and the save.
+   */
+  public lumoGuideTarget(): GardenPoint | null {
+    return gardenLumoGuideTarget(readGardenState(this.progress.flags), this.lanternOn, { x: this.player.x, y: this.player.y });
+  }
+
+  /** Scenario v2 07 §8: a Pulse near the wet stone reveals the handprint, once, after the water flows. */
+  public onPulse(x: number, y: number): void {
+    if (this.destroyed || this.progress.flags['l6-handprint-seen'] === true) return;
+    if (!this.state.waterFlowing || !gardenHandprintReaches({ x, y })) return;
+    this.progress.flags['l6-handprint-seen'] = true;
+    this.save();
+    this.queueBeat(HANDPRINT_LINES);
   }
 
   public startOpeningDialogue(): void { this.say(INTRO); }
@@ -206,31 +235,30 @@ export class SleepingGardenLevel {
   public getObjectiveText(): string {
     const state = this.state;
     if (!state.waterFlowing) return tr('Đưa nước tới vườn ươm.');
-    if (!state.returnLatched) return tr('Giữ lối về từ vườn ươm.');
-    if (!state.lumoRealized) return tr('Lumo có điều muốn nói.');
     return tr('Tới cổng điện thờ.');
   }
 
   public getStatusText(): string {
     const state = this.state;
     const light = effectiveLight(state, this.lanternOn);
-    return tr('Màn che: {canopy} · Hoa Nhật: {sun} · Chốt: {latch} · Nước: {water} · Lối phụ: {side} · {light}', {
+    const bridge = rootsDeployed(state, this.lanternOn) || this.held.s1 || this.held.s2;
+    return tr('Màn che: {canopy} · Hoa Nhật: {sun} · Chốt: {latch} · Cầu rễ: {bridge} · Nước: {water} · {light}', {
       canopy: state.canopyShut ? tr('đóng') : tr('mở'),
       sun: sunOpen(state, this.lanternOn) ? tr('nở') : tr('gập'),
       latch: state.sunLatched ? tr('giữ') : tr('chưa'),
+      bridge: bridge ? tr('có') : tr('không'),
       water: state.waterFlowing ? tr('chảy') : tr('chưa'),
-      side: state.returnLatched ? tr('mở') : tr('kín'),
       light: state.canopyShut ? (light ? tr('có sáng') : tr('trong tối')) : tr('bể còn sáng'),
     });
   }
 
   public showHint(): void {
     const state = this.state;
+    // Scenario v2 07 §6: after the water the ladder points at the shrine gate; the side path is no longer a stage.
     const stage = !state.canopyShut ? 'canopy'
       : !state.sunLatched || !state.waterFlowing ? 'main'
-        : !state.returnLatched ? 'side'
-          : !state.lumoRealized ? 'story'
-            : 'exit';
+        : !state.lumoRealized ? 'story'
+          : 'exit';
     if (stage !== this.hintStage) { this.hintStage = stage; this.hintIndex = 0; }
     // Scenario 07 §6: the main puzzle (sun, latch, dark, cross) is one stage with one verbatim Mức 1-3 ladder,
     // so lantern toggles do not restart it. Canopy and post-drain stages keep stage-specific guidance.
@@ -243,15 +271,10 @@ export class SleepingGardenLevel {
       main: [
         tr('Hai chậu thử phản ứng trái ngược. Sau thanh chắn có một tay chốt.'),
         tr('Giữ thanh chắn bằng chốt, rồi tắt đèn để rễ làm cầu. Một phần đường phải tự giữ trước khi phần kia xuất hiện.'),
-        tr('Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi gài lối đá phụ.'),
-      ],
-      side: [
-        tr('Nước đã chảy tới vườn ươm. Cổng điện thờ nằm ở góc đông bắc.'),
-        tr('Có một chốt đá ở lối đá phụ cạnh cống, phía đông nam vườn ươm.'),
-        tr('Nhấn E ở chốt để mở lối về không cần ánh sáng.'),
+        tr('Bật đèn, qua thanh chắn và gài chốt. Tắt đèn, qua cầu rễ, mở cống rồi tới điện thờ.'),
       ],
       story: [
-        tr('Lối về đã được giữ. Lumo có điều muốn nói.'),
+        tr('Nước đã chảy tới vườn ươm. Lumo có điều muốn nói.'),
         tr('Lumo đang ở gần mầm cây trong vườn ươm.'),
         tr('Nhấn E ở mầm cây để nghe Lumo.'),
       ],
@@ -275,6 +298,7 @@ export class SleepingGardenLevel {
     if (state.waterFlowing) notes.push({ speaker: 'Nhinh', text: tr('Rễ Nguyệt vươn khi tối và bắc thành cầu qua mương.') });
     if (state.returnLatched) notes.push({ speaker: 'Nhinh', text: tr('Vườn ươm cần nước rồi cần một khoảng tối để nghỉ. Lối đá phụ là lối về không cần sáng.') });
     if (state.lumoRealized) notes.push({ speaker: 'Lumo', text: tr('Không phải chỗ nào cũng cần sáng hơn. Có nơi cần được ngủ.') });
+    if (this.progress.flags['l6-handprint-seen'] === true) notes.push({ speaker: 'Nhinh', text: tr('Những dấu nhỏ: một bàn tay nhỏ in trên đá ướt. Không ai nói đó là tay của ai.') });
     if (notes.length === 1) notes.push({ speaker: 'Nhinh', text: tr('Chưa ghi thêm manh mối nào.') });
     this.say(notes);
   }
@@ -346,6 +370,12 @@ export class SleepingGardenLevel {
         this.queueBeat(HELD_REJOINED);
       }
     }
+    // Scenario v2 07 §1 beat 2: the roots reach out as a bridge (lantern off, canopy shut). Only a live deploy plays it.
+    const deployed = rootsDeployed(this.state, lanternOn);
+    if (deployed !== this.lastRootsDeployed) {
+      this.lastRootsDeployed = deployed;
+      if (deployed) SoundSystem.playEndingCue('water');
+    }
   }
 
   private tryPracticeLesson(): void {
@@ -363,6 +393,11 @@ export class SleepingGardenLevel {
     const center = { x: this.player.x, y: this.player.y };
     this.held = updateHeldSpans(this.held, this.state, this.lanternOn, gardenActorBody(center));
     const onBridge = onGardenBridge(center);
+    if (onBridge && rootsDeployed(this.state, this.lanternOn) && this.progress.flags['l6-bridge-guide'] !== true) {
+      this.progress.flags['l6-bridge-guide'] = true;
+      this.save();
+      this.queueBeat(BRIDGE_GUIDE);
+    }
     if (onBridge && !this.traversalSide) {
       this.traversalSide = crossingSideFor(center);
       this.progress.flags['l6-crossing-side'] = this.traversalSide;
@@ -501,6 +536,18 @@ export class SleepingGardenLevel {
       const image = this.images.get(id);
       if (image) this.protected.push(image);
     }
+    // Placeholder handprint (no art yet): a small dark print with a pale rim on the wet stone, shown only after its flag.
+    const print = this.scene.add.graphics().setDepth(4.5).setVisible(false);
+    const { x: hx, y: hy } = GARDEN_HANDPRINT.centre;
+    print.fillStyle(0x2b5560, 0.6);
+    print.fillEllipse(hx, hy + 2, 9, 9);
+    for (const [dx, dy] of [[-4, -6], [-1, -8], [2, -8], [5, -5]] as const) print.fillEllipse(hx + dx, hy + dy, 3, 5);
+    print.fillEllipse(hx - 6, hy, 3, 4);
+    print.lineStyle(1, 0xbfe1ef, 0.7);
+    print.strokeEllipse(hx, hy + 2, 10, 10);
+    print.setData('garden-id', 'handprint');
+    this.objects.push(print);
+    this.handprint = print;
     const waterline = this.scene.add.graphics().setDepth(5);
     waterline.lineStyle(2, 0x7fb8d8, 0.75);
     waterline.lineBetween(186, 306, 202, 306);
@@ -628,8 +675,7 @@ export class SleepingGardenLevel {
     const text = block === 'canopy' ? tr('Cổng còn khép. Mình phải che bể tích quang trước đã.')
       : block === 'bar' ? tr('Thanh chắn chưa được giữ. Cần gài chốt trước khi cổng mở.')
         : block === 'drain' ? tr('Vườn ươm còn thiếu nước. Mở cống rồi quay lại.')
-          : block === 'side' ? tr('Chưa gài chốt lối đá phụ. Lối về cần được giữ.')
-            : tr('Lumo vẫn đang đợi bên mầm cây.');
+          : tr('Lumo vẫn đang đợi bên mầm cây.');
     this.say([{ speaker: 'Nhinh', text }]);
   }
 
@@ -732,6 +778,8 @@ export class SleepingGardenLevel {
       this.state.lumoRealized = true;
       this.progress.flags['l6-lumo-realized'] = true;
       this.save();
+      // Scenario v2 07 §1 beat 4: the new leaf opens and a second cricket answers Lumo's "sleep" line.
+      if (!this.destroyed) SoundSystem.playEndingCue('answer');
     });
   }
 
@@ -790,6 +838,7 @@ export class SleepingGardenLevel {
     }
     const water = this.images.get('water');
     if (water) water.setVisible(state.waterFlowing);
+    this.handprint?.setVisible(this.progress.flags['l6-handprint-seen'] === true);
     const teaching = this.images.get('teaching-bridge');
     if (teaching) teaching.setVisible(!light && state.canopyShut);
     const sunKey = this.artKey(light ? GARDEN_ICONS.sunOpen : GARDEN_ICONS.sunFolded);

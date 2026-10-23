@@ -149,22 +149,23 @@ console.log('  ending        : EndingScene reachable, completed campaigns resume
 // CAMPAIGN_LEVELS[i].hint is the fallback ladder. For levels 06-10 it is that level's scenario Mức 1-3, verbatim.
 // Level 10 uses the three-branch ladder (its primary ladder in scenario §8, not the overload set).
 {
-  const scenarioLadderOf = (file) => {
-    const md = read(`docs/scenario/${file}`);
+  const scenarioLadderOf = (dir, file) => {
+    const md = read(`docs/${dir}/${file}`);
     const hits = [...md.matchAll(/^- \*\*Mức (\d)[^\n]*?\*\*:?\s*“([^”\n]+)”/gmu)].slice(0, 3);
     assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `${file} lists Mức 1, 2, 3 in order`);
     return hits.map((m) => m[2].normalize('NFC'));
   };
+  // Level 07 reads the v2 document (scenario v2 §6 Mức 3 goes straight to the shrine); the others still read v1.
   const FALLBACK = {
-    5: '06-the-sleepless-tower.md',
-    6: '07-the-sleeping-garden.md',
-    7: '08-ruins-of-two-halves.md',
-    8: '09-dark-moon-observatory.md',
-    9: '10-the-heart-of-elaria.md',
+    5: ['scenario', '06-the-sleepless-tower.md'],
+    6: ['scenario-v2', '07-the-sleeping-garden.md'],
+    7: ['scenario', '08-ruins-of-two-halves.md'],
+    8: ['scenario', '09-dark-moon-observatory.md'],
+    9: ['scenario', '10-the-heart-of-elaria.md'],
   };
-  for (const [index, file] of Object.entries(FALLBACK)) {
-    assert.deepEqual(CAMPAIGN_LEVELS[Number(index)].hint, scenarioLadderOf(file),
-      `CAMPAIGN_LEVELS[${index}] fallback hints are the ${file} Mức 1-3 verbatim`);
+  for (const [index, [dir, file]] of Object.entries(FALLBACK)) {
+    assert.deepEqual(CAMPAIGN_LEVELS[Number(index)].hint, scenarioLadderOf(dir, file),
+      `CAMPAIGN_LEVELS[${index}] fallback hints are the docs/${dir}/${file} Mức 1-3 verbatim`);
   }
 }
 
