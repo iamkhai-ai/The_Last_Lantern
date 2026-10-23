@@ -3,7 +3,7 @@ import type { Reach, ReachException } from '../v4/core/reach';
 export type ZoneId = 'hub' | 'woods' | 'creek' | 'ruins';
 
 export interface DialogueLine {
-  speaker: 'Nhinh' | 'Lumo' | 'Shadow' | 'The Shadow' | 'Hệ thống' | 'Ký Ức' | 'Đứa trẻ trong ký ức' | 'Người lớn trong ký ức' | 'Người Bảo Vệ';
+  speaker: 'Nhinh' | 'Mẹ' | 'Lái đò' | 'Lumo' | 'Shadow' | 'The Shadow' | 'Hệ thống' | 'Ký Ức' | 'Đứa trẻ trong ký ức' | 'Người lớn trong ký ức' | 'Người Bảo Vệ';
   text: string;
 }
 
