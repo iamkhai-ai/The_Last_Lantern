@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { getLevelArtKey, getNhinhTexture, getShadowArtKey, getSharedMechanismKey, type ShadowPose } from '../art/CampaignArt';
 import {
-  EndingMachine, endingBeatLines, MONTAGE_SHOTS, SHADOW_DAWN_POSES, type EndingEffect, type EndingLine,
+  EndingMachine, endingBeatLines, hasAllSmallMarks, MONTAGE_SHOTS, SHADOW_DAWN_POSES, type EndingEffect, type EndingLine,
 } from '../data/campaignEnding';
 import { SoundSystem } from './SoundSystem';
 import type { DialogueLine } from '../types/gameTypes';
@@ -47,7 +47,6 @@ export class CampaignEndingSequence {
   private water?: Phaser.GameObjects.Graphics;
   private title?: Phaser.GameObjects.Image;
   private pickup = false;
-  private cues = new Set<string>();
 
   constructor(options: CampaignEndingSequenceOptions) {
     this.scene = options.scene;
@@ -56,6 +55,7 @@ export class CampaignEndingSequence {
     this.showDialogue = options.showDialogue;
     this.stopDialogue = options.stopDialogue;
     this.showCredits = options.showCredits;
+    this.machine.smallMarks = hasAllSmallMarks(this.progress.flags);
   }
 
   public start(beat: CampaignEndingBeat): void {
@@ -97,9 +97,10 @@ export class CampaignEndingSequence {
       switch (effect.type) {
         case 'enter': this.enter(effect.beat, effect.lines); break;
         case 'shot': this.buildShot(effect.index); break;
-        case 'pose': if (effect.index === 0) SoundSystem.playDawnChord(); this.setShadowPose(SHADOW_DAWN_POSES[effect.index]); break;
+        case 'pose': this.setShadowPose(SHADOW_DAWN_POSES[effect.index]); break;
         case 'title': this.showTitle(); break;
         case 'ambient': this.ambient(effect.progress); break;
+        case 'cue': if (effect.cue === 'dawn') SoundSystem.playDawnChord(); else SoundSystem.playEndingCue(effect.cue); break;
         default: break;
       }
     }
@@ -114,7 +115,7 @@ export class CampaignEndingSequence {
     switch (beat) {
       case 'night-call': this.buildNight(0.72, 0.15); break;
       case 'night-wait': this.buildNight(0.72, 0.15); break;
-      case 'reassure': this.buildNight(0.42, 0.85); break;
+      case 'reassure': this.buildNight(0.42, 0.15); break;
       case 'montage': this.buildShot(0); break;
       case 'shadow-dawn': this.buildShadowDawn(); break;
       case 'tree-return': this.buildTreeReturn(); break;
@@ -152,7 +153,6 @@ export class CampaignEndingSequence {
     this.lumo = undefined; this.nhinh = undefined; this.shadow = undefined; this.spokes = undefined;
     this.water = undefined; this.title = undefined;
     this.pickup = false;
-    this.cues.clear();
   }
 
   private exists(key: string | null): key is string {
@@ -203,12 +203,8 @@ export class CampaignEndingSequence {
     this.water = this.track(this.scene.add.graphics().setDepth(34));
   }
 
-  /** Night wait: the insect, the water and the first fireflies come back one by one; Lumo's light returns, softer. */
+  /** After the silence: the fireflies, the water lines and Lumo's light come back one by one (the sounds are machine cues). */
   private ambient(progress: number): void {
-    // sound, once each: the cricket, then the water, then a second cricket answering
-    for (const [at, cue] of [[0.3, 'cricket'], [0.55, 'water'], [0.8, 'answer']] as const) {
-      if (progress >= at && !this.cues.has(cue)) { this.cues.add(cue); SoundSystem.playEndingCue(cue); }
-    }
     this.lumo?.setAlpha(0.15 + 0.7 * progress);
     this.fireflies.forEach((glow, index) => {
       const start = 0.25 + index * 0.1;

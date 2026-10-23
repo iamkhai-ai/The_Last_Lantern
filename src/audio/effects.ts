@@ -70,6 +70,38 @@ export const lockSunRightVoice: HeldRecipe = (ctx, out, t) =>
 export const lockMoonVoice: HeldRecipe = (ctx, out, t) =>
   heldTone(ctx, out, t, { freq: LOCK_TONE_HZ.moon, type: 'triangle', peak: 0.08, attack: 0.2, lowpass: 700 });
 
+/** Seconds the overload layer takes to climb to its ceiling; the ceiling itself is the voices' peak, never exceeded. */
+export const HEART_OVERLOAD_RISE_SECONDS = 6;
+
+/** A held layer made of several voices that start and stop together. */
+function heldChord(voices: ReadonlyArray<{ freq: number; type: OscillatorType; peak: number; attack: number; lowpass?: number }>): HeldRecipe {
+  return (ctx, out, t) => {
+    const held = voices.map((voice) => heldTone(ctx, out, t, voice));
+    return { release: (fadeSeconds: number) => held.forEach((voice) => voice.release(fadeSeconds)) };
+  };
+}
+
+/**
+ * Level 10 layers (scenario 10 v2 §9). One per living branch: the high chime of level 6 for Memory, the soft Lumo motif
+ * for Hope, and the two bright sun tones with the deep moon tone of level 8 for Balance. The fourth, Overload, is a
+ * bright, slightly out-of-tune pair that rises to a fixed ceiling and never escapes it.
+ */
+export const heartMemoryLayer: HeldRecipe = heldChord([
+  { freq: 1318.51, type: 'sine', peak: 0.03, attack: 1.2 },
+]);
+export const heartHopeLayer: HeldRecipe = heldChord([
+  { freq: 523.25, type: 'triangle', peak: 0.035, attack: 1.8, lowpass: 1600 },
+]);
+export const heartBalanceLayer: HeldRecipe = heldChord([
+  { freq: LOCK_TONE_HZ.sunLeft, type: 'triangle', peak: 0.02, attack: 1.5, lowpass: 3200 },
+  { freq: LOCK_TONE_HZ.sunRight, type: 'triangle', peak: 0.02, attack: 1.5, lowpass: 3200 },
+  { freq: LOCK_TONE_HZ.moon, type: 'triangle', peak: 0.025, attack: 1.5, lowpass: 700 },
+]);
+export const heartOverloadLayer: HeldRecipe = heldChord([
+  { freq: 1760, type: 'triangle', peak: 0.02, attack: HEART_OVERLOAD_RISE_SECONDS, lowpass: 4200 },
+  { freq: 1864.66, type: 'triangle', peak: 0.02, attack: HEART_OVERLOAD_RISE_SECONDS, lowpass: 4200 },
+]);
+
 export const lanternOn: Recipe = (ctx, out, t) => {
   noise(ctx, out, { t, dur: 0.3, peak: 0.03, attack: 0.06, type: 'bandpass', freq: 500, endFreq: 2200, q: 0.9 });
   bell(ctx, out, t + 0.02, 659.25, { peak: 0.1, dur: 0.7 });
