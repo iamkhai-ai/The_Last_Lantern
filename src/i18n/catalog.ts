@@ -11,38 +11,12 @@
  */
 import { getLocale } from './locale.ts';
 import { CHROME_ENTRIES } from './entries/chrome.ts';
-import { PROLOGUE_ENTRIES } from './entries/prologue.ts';
-import { LEGACY_DIALOGUE_ENTRIES } from './entries/legacyDialogue.ts';
-import { LIBRARY_AND_PATH_ENTRIES } from './entries/libraryAndPath.ts';
-import { CAMPAIGN_SCENE_ENTRIES } from './entries/campaignScene.ts';
-import { TOWER_GARDEN_CREEK_ENTRIES } from './entries/towerGardenCreek.ts';
-import { RUINS_HEART_OBSERVATORY_ENTRIES } from './entries/ruinsHeartObservatory.ts';
-import { CAMPAIGN_LEVEL_ENTRIES } from './entries/campaignLevels.ts';
-import { FRAGMENT_ENTRIES } from './entries/fragments.ts';
-import { OBSERVATORY_TEXT_ENTRIES } from './entries/observatoryText.ts';
-import { HEART_AND_STATE_ENTRIES } from './entries/heartAndStates.ts';
-import { PUZZLE_AND_QUEST_ENTRIES } from './entries/puzzleAndQuestText.ts';
-import { COMPOSED_AND_TABLE_ENTRIES } from './entries/composedAndTables.ts';
-import { MERGED_LEVEL_COPY_ENTRIES } from './entries/mergedLevelCopy.ts';
 import type { CatalogEntry } from './entry.ts';
 
 export type { CatalogEntry } from './entry.ts';
 
 export const CATALOG: readonly CatalogEntry[] = [
-  ...PROLOGUE_ENTRIES,
-  ...LEGACY_DIALOGUE_ENTRIES,
-  ...CAMPAIGN_SCENE_ENTRIES,
-  ...LIBRARY_AND_PATH_ENTRIES,
-  ...TOWER_GARDEN_CREEK_ENTRIES,
-  ...RUINS_HEART_OBSERVATORY_ENTRIES,
-  ...CAMPAIGN_LEVEL_ENTRIES,
-  ...FRAGMENT_ENTRIES,
   ...CHROME_ENTRIES,
-  ...OBSERVATORY_TEXT_ENTRIES,
-  ...HEART_AND_STATE_ENTRIES,
-  ...PUZZLE_AND_QUEST_ENTRIES,
-  ...COMPOSED_AND_TABLE_ENTRIES,
-  ...MERGED_LEVEL_COPY_ENTRIES,
 ];
 
 const byVi = new Map<string, CatalogEntry>();

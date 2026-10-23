@@ -61,13 +61,13 @@ function check(name, run) {
 
 check('vietnamese is the default and returns the authored sentence', () => {
   assert.equal(locale.getLocale(), 'vi');
-  const line = 'Trời vẫn chưa sáng sao?';
+  const line = 'Hành trình mới';
   assert.equal(i18n.tr(line), line);
 });
 
 check('english resolves an authored line', () => {
   locale.setLocale('en');
-  assert.equal(i18n.tr('Trời vẫn chưa sáng sao?'), 'Still not morning?');
+  assert.equal(i18n.tr('Hành trình mới'), 'New Journey');
 });
 
 check('english fills {param} templates and leaves unknown placeholders visible', () => {
@@ -131,7 +131,6 @@ check('every catalogue entry module is spread into CATALOG, so the runtime can s
 check('a build tag and a composed HUD line localize from the catalogue', () => {
   locale.setLocale('en');
   assert.equal(i18n.tr('PLAYTEST BUILD · MÀN 01–10'), 'PLAYTEST BUILD · LEVELS 01–10');
-  assert.equal(i18n.tr('Tinh thể đã đặt: {crystals}.', { crystals: 'x' }), 'Crystals placed: x.');
   locale.setLocale('vi');
 });
 

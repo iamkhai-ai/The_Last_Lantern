@@ -401,25 +401,6 @@ await test('the player plays a step when the body really moves, then on every ot
   assert.ok(/lastX/.test(player) && /lastY/.test(player), 'real displacement is measured');
 });
 
-await test('every level has an ambience theme and the scene owns ambience and the surface', () => {
-  const scene = read('src/scenes/CampaignScene.ts');
-  const table = scene.match(/AMBIENCE_BY_LEVEL: readonly AmbienceTheme\[\] = \[([^\]]*)\]/);
-  assert.ok(table, 'a level -> theme table exists');
-  const themes = [...table[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
-  assert.equal(themes.length, 10, 'one theme per level');
-  const known = ['forest', 'library', 'creek', 'wind', 'drone', 'heart', 'tower', 'garden', 'observatory'];
-  assert.ok(themes.every((t) => known.includes(t)), 'every theme exists');
-  assert.equal(themes[2], 'library');
-  assert.equal(themes[3], 'creek');
-  assert.equal(themes[5], 'tower');
-  assert.equal(themes[6], 'garden');
-  assert.equal(themes[8], 'observatory');
-  assert.ok(/SoundSystem\.startAmbient\(AMBIENCE_BY_LEVEL\[this\.progress\.level\]/.test(scene), 'the level theme starts on build');
-  assert.ok(/setFootstepSurface/.test(scene), 'surface chosen per level');
-  assert.ok(/Phaser\.Scenes\.Events\.SHUTDOWN[\s\S]{0,300}stopFootsteps/.test(scene), 'shutdown releases footsteps');
-  assert.ok(/Phaser\.Scenes\.Events\.SHUTDOWN[\s\S]{0,300}stopAmbient/.test(scene), 'shutdown fades the ambience out');
-});
-
 await test('no audio files and no audio loader remain', () => {
   assert.ok(!existsSync(path.join(root, 'src/assets/sfx')), 'src/assets/sfx is gone');
   assert.ok(!existsSync(path.join(root, 'scripts/download-sfx.ps1')), 'the download script is gone');

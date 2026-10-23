@@ -2,10 +2,7 @@ import Phaser from 'phaser';
 import menuDawnUrl from '../../Art_References/07_The_Last_Dawn.png?url';
 import { tr } from '../i18n/catalog.ts';
 import { getLocale, otherLocale, setLocale } from '../i18n/locale.ts';
-import { SaveSystem } from '../systems/SaveSystem';
 import { SoundSystem } from '../systems/SoundSystem';
-import { WorldFactory } from '../world/WorldFactory';
-import { CampaignSaveSystem } from '../systems/CampaignSaveSystem';
 import { RELEASE_POLICY } from '../config/releaseConfig';
 
 type MenuMode = 'menu' | 'confirm-new-game';
@@ -24,7 +21,6 @@ export class MenuScene extends Phaser.Scene {
   /** Label getters, one per menu row, so a toggle redraws every label from its live state. */
   private itemLabels: Array<() => string> = [];
   private selectedIndex = 0;
-  private hasSavedGame = false;
   private actions: Array<() => void> = [];
   /** Guards a held/double-fired New Game activation from clearing or starting twice. */
   private starting = false;
@@ -57,7 +53,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   public create(): void {
-    this.hasSavedGame = this.hasAnySave();
     this.selectedIndex = 0;
     this.starting = false;
     this.menuButtons = [];
@@ -78,7 +73,7 @@ export class MenuScene extends Phaser.Scene {
     if (this.textures.exists('menu_dawn')) {
       this.add.image(320, 180, 'menu_dawn').setDisplaySize(640, 360).setDepth(0);
     } else {
-      WorldFactory.buildZone(this, 'hub', 0, false);
+      this.add.rectangle(320, 180, 640, 360, 0x081d26).setDepth(0);
     }
 
     // Preserve the illustration's golden light and its own Nhinh/Lumo composition.
@@ -104,8 +99,8 @@ export class MenuScene extends Phaser.Scene {
       ...MENU_TEXT_STYLE, fontSize: '12px', color: '#efe6cf',
     }).setDepth(81);
 
+    // Continue is not offered until the V4 save is wired (Task 6).
     const items: Array<{ label: () => string; action: () => void }> = [];
-    if (this.hasSavedGame) items.push({ label: () => tr('Tiếp tục'), action: () => this.continueGame() });
     items.push({ label: () => tr('Hành trình mới'), action: () => this.startNewGame() });
     items.push({
       label: () => this.soundLabel(),
@@ -271,11 +266,12 @@ export class MenuScene extends Phaser.Scene {
   }
 
   /**
-   * Storage is re-queried at the destructive action, not only when the menu was
-   * drawn: another tab can write a save after create() cached `hasSavedGame`.
+   * Whether a V4 save exists. Always false until the V4 save is wired.
+   * The destructive action re-queries it, so a save written after create() is still seen.
    */
   private hasAnySave(): boolean {
-    return CampaignSaveSystem.hasSave() || SaveSystem.hasSave();
+    // Task 6 wires the V4 save
+    return false;
   }
 
   public startNewGame(): void {
@@ -288,14 +284,12 @@ export class MenuScene extends Phaser.Scene {
     this.beginNewGame();
   }
 
-  /** The only place New Game clears saves and starts the prologue. */
+  /** The only place New Game starts a new run in V4. */
   private beginNewGame(): void {
     if (this.starting) return;
     this.starting = true;
-    CampaignSaveSystem.clear();
-    SaveSystem.clear();
     SoundSystem.playLanternToggle(true);
-    this.scene.start('PrologueScene');
+    this.scene.start('V4Scene', { newGame: true });
   }
 
   private requestNewGameConfirmation(): void {
@@ -329,50 +323,12 @@ export class MenuScene extends Phaser.Scene {
     this.beginNewGame();
   }
 
+  /** Stub: Continue is hidden for now; resumes the V4 scene from its save once Task 6 lands. */
   public continueGame(): void {
     if (this.menuMode === 'confirm-new-game' || this.starting) return;
     this.starting = true;
-    if (RELEASE_POLICY.isDemo) {
-      const campaignSave = CampaignSaveSystem.hasSave();
-      // Out-of-range/completed campaigns are explained before any full-ending
-      // dispatch; a legacy save is a different campaign the demo cannot resume.
-      if (campaignSave
-        && RELEASE_POLICY.isOutOfRange(CampaignSaveSystem.load().level, CampaignSaveSystem.isCompleted())) {
-        this.openBlockedSaveMessage();
-        return;
-      }
-      if (campaignSave) {
-        SoundSystem.playLanternToggle(true);
-        this.scene.start('CampaignScene');
-        return;
-      }
-      if (SaveSystem.hasSave()) {
-        this.openBlockedSaveMessage();
-        return;
-      }
-    }
-    if (CampaignSaveSystem.isCompleted()) {
-      this.scene.start('EndingScene', { campaign: true });
-      return;
-    }
-    if (CampaignSaveSystem.hasSave()) {
-      SoundSystem.playLanternToggle(true);
-      this.scene.start('CampaignScene');
-      return;
-    }
-    const saved = SaveSystem.load();
     SoundSystem.playLanternToggle(true);
-    if (saved.stage === 'victory') {
-      this.scene.start('EndingScene');
-    } else {
-      this.scene.start('WorldScene', { progress: saved });
-    }
-  }
-
-  /** Explains a save outside the demo slice without clearing or rewriting it. */
-  private openBlockedSaveMessage(): void {
-    SoundSystem.playLanternToggle(true);
-    this.scene.start('ComingSoonScene', { mode: 'demo-save-blocked' });
+    this.scene.start('V4Scene');
   }
 
   private wireInput(): void {

@@ -84,4 +84,14 @@ export const CHROME_ENTRIES: readonly CatalogEntry[] = [
   entry('ending.mainMenu', 'MAIN MENU (MÀN HÌNH CHÍNH)', 'MAIN MENU'),
   entry('ending.cancel', 'Hủy', 'Cancel'),
   entry('ending.confirmPlayAgain', 'Chơi lại', 'Play again'),
+
+  // Build tags (src/config/releaseConfig.ts).
+  entry('release.playtest', 'PLAYTEST · MÀN 01–10', 'PLAYTEST · LEVELS 01–10'),
+  entry('release.playtestBuild', 'PLAYTEST BUILD · MÀN 01–10', 'PLAYTEST BUILD · LEVELS 01–10'),
+  entry('release.demo', 'DEMO · MÀN 01–04', 'DEMO · LEVELS 01–04'),
+  entry('release.demoBuild', 'DEMO BUILD · MÀN 01–04', 'DEMO BUILD · LEVELS 01–04'),
+
+  // V4 placeholder scene.
+  entry('v4.placeholder.title', 'The Last Lantern — bản V4 đang dựng', 'The Last Lantern — the V4 build is in progress'),
+  entry('v4.placeholder.esc', 'ESC: về menu', 'ESC: back to menu'),
 ];
