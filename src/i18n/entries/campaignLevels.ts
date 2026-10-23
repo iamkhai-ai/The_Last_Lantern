@@ -30,5 +30,4 @@ export const CAMPAIGN_LEVEL_ENTRIES: readonly CatalogEntry[] = [
   entry('levels.05.hint3', 'Gài chốt cửa vừa qua. Quay lại buồng trước, nhấn E ở mốc có cùng số chấm với ấn đang trống.', 'Latch the door you just crossed. Go back to the room before and press E at the post with the same number of dots as the empty plate.'),
   entry('levels.09.hint1', 'Xem các đường nối trên tường. G0 dùng cho cả cửa vào lẫn đường tia tới phòng sao.', 'Study the routes on the walls. G0 serves both the entrance door and the beam into the star room.'),
   entry('levels.09.hint2', 'Giữ cửa vào bằng chốt rồi đổi nguồn sang phòng sao. Cửa cuối cần sáng, nhưng rễ cần bóng của tượng.', 'Latch the entrance door, then move the source to the star room. The far door needs light, but the roots need the statue shadow.'),
-  entry('levels.09.hint3', 'Gài cửa A, gọi tôi tới ấn, hướng G0 qua G1 tới G2. Chọn đường G2 qua khung tượng, che luống rễ rồi qua cầu và mở lối vòng.', 'Latch Door A, call me to the seal, aim G0 through G1 to G2. Take the G2 route past the statue frame, shade the root bed, cross the bridge and open the loop.'),
 ];

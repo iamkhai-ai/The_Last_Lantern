@@ -147,7 +147,7 @@ console.log('  ending        : EndingScene reachable, completed campaigns resume
 
 // ---------------------------------------------------------------- generic H fallback is the scenario text (05-10)
 // CAMPAIGN_LEVELS[i].hint is the fallback ladder. For levels 05-10 it is that level's main Mức 1-3, verbatim
-// (levels 05-07 and 10 from their scenario v2 documents, 08-09 from their scenario document). Level 10 uses the three-branch
+// (levels 05-07, 09 and 10 from their scenario v2 documents, 08 from its scenario document). Level 10 uses the three-branch
 // ladder (its primary ladder in scenario §8, not the overload set).
 {
   const scenarioLadderOf = (dir, file) => {
@@ -156,14 +156,14 @@ console.log('  ending        : EndingScene reachable, completed campaigns resume
     assert.deepEqual(hits.map((m) => Number(m[1])), [1, 2, 3], `docs/${dir}/${file} lists Mức 1, 2, 3 in order`);
     return hits.map((m) => m[2].normalize('NFC'));
   };
-  // Levels 05, 06, 07 and 10 read their v2 documents (07: scenario v2 §6 Mức 3 goes straight to the shrine); 08 and 09 keep v1,
-  // whose Mức lines their v2 documents did not change in a form this regex reads.
+  // Levels 05, 06, 07, 09 and 10 read their v2 documents (07: scenario v2 §6 Mức 3 goes straight to the shrine; 09: Mức 3
+  // keeps the root bed in shadow while the lamp circuit still runs through the door). Level 08's ladder is the same in v1 and v2.
   const FALLBACK = {
     4: ['scenario-v2', '05-a-path-for-two.md'],
     5: ['scenario-v2', '06-the-sleepless-tower.md'],
     6: ['scenario-v2', '07-the-sleeping-garden.md'],
     7: ['scenario', '08-ruins-of-two-halves.md'],
-    8: ['scenario', '09-dark-moon-observatory.md'],
+    8: ['scenario-v2', '09-dark-moon-observatory.md'],
     9: ['scenario-v2', '10-the-heart-of-elaria.md'],
   };
   for (const [index, [dir, file]] of Object.entries(FALLBACK)) {
