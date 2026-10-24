@@ -38,7 +38,7 @@ import {
 import type { CornerLive, TestRoomState, TestRoomView } from './testRoomLogic';
 
 /** The room's ambient darkness: constant, never tied to the lantern (puzzle-contracts §1). */
-const AMBIENT_DARKNESS = 0.42;
+const AMBIENT_DARKNESS = 0.82;
 
 const PROMPT_PLACE = 'E: đặt đèn';
 const PROMPT_TAKE = 'E: lấy đèn';
