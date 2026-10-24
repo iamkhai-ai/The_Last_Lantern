@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { Point, Rect } from '../v4/core/geometry';
 import { canPulse } from '../v4/core/lantern';
 import type { LanternState } from '../v4/core/lantern';
-import { beamPolygon, isPointLit } from '../v4/core/light';
+import { isPointLit } from '../v4/core/light';
 import type { Footprint } from '../v4/core/light';
 import { SoundSystem } from './SoundSystem';
 
@@ -25,19 +25,20 @@ export const DEFAULT_LIGHTING: LanternLightingProfile = { ambientDarkness: 0.42 
 
 /** Side of one lit-area cell, px. Each cell centre is tested with `isPointLit`. */
 const LIT_CELL = 2;
-/** Fill of the lit area and its alpha; rim cells (lit, with an unlit side neighbour) draw brighter. */
+/** Fill of the lit area. A cell lit by a circle fades from its centre: alpha = MIN + SPAN × (1 − d / radius). */
 const LIT_FILL = 0xffe6a0;
-const LIT_ALPHA = 0.26;
-const RIM_ALPHA = 0.5;
+const CIRCLE_ALPHA_MIN = 0.08;
+const CIRCLE_ALPHA_SPAN = 0.3;
+/** A cell lit only by a declared area (a spill or fixed source). */
+const AREA_ALPHA = 0.22;
+/** A rim cell (lit, with an unlit side neighbour) draws brighter. */
+const RIM_ALPHA = 0.45;
+/** Cell alphas are rounded to this step so that equal neighbours merge into one rect. */
+const ALPHA_STEP = 0.01;
 const AMBIENT_FILL = 0x040b12;
 /** The room's size in px; the overlay and the lit area are clamped to it. */
 const ROOM_WIDTH = 640;
 const ROOM_HEIGHT = 360;
-
-/** Cell kinds in the lit grid. */
-const CELL_DARK = 0;
-const CELL_LIT = 1;
-const CELL_RIM = 2;
 
 /**
  * Render-only lantern light. The footprints (the lantern's light and any fixed sources) and the light blockers are
@@ -168,8 +169,9 @@ export class LanternSystem {
   }
 
   /**
-   * Draws the lit area over the bounding box of the footprints: each 2px cell whose centre `isPointLit` is filled,
-   * and the cells on the rim (a lit cell with an unlit 4-neighbour) are filled brighter. Runs of one kind in a row
+   * Draws the lit area over the bounding box of the footprints. Each 2px cell whose centre `isPointLit` is filled:
+   * a cell lit by a circle takes the brightest such circle's fade (centre brighter, edge dimmer); a cell lit only by
+   * an area takes AREA_ALPHA; a rim cell (lit, with an unlit 4-neighbour) takes RIM_ALPHA. Runs of one alpha in a row
    * are drawn as one rect.
    */
   private drawLitArea(footprints: readonly Footprint[], blockers: readonly Rect[], flicker: number): void {
@@ -177,6 +179,7 @@ export class LanternSystem {
     if (!box) return;
     const cols = Math.ceil((box.right - box.left) / LIT_CELL);
     const rows = Math.ceil((box.bottom - box.top) / LIT_CELL);
+    const circles = footprints.filter((f): f is Circle => f.kind === 'circle');
 
     const lit: boolean[][] = [];
     for (let row = 0; row < rows; row++) {
@@ -193,29 +196,30 @@ export class LanternSystem {
 
     const litAt = (row: number, col: number): boolean =>
       row >= 0 && row < rows && col >= 0 && col < cols && lit[row][col];
-    const kinds: number[][] = lit.map((line, row) => line.map((isLit, col) => {
-      if (!isLit) return CELL_DARK;
+    const alphas: number[][] = lit.map((line, row) => line.map((isLit, col) => {
+      if (!isLit) return 0;
       const onRim = !litAt(row - 1, col) || !litAt(row + 1, col) || !litAt(row, col - 1) || !litAt(row, col + 1);
-      return onRim ? CELL_RIM : CELL_LIT;
+      if (onRim) return quantizeAlpha(RIM_ALPHA);
+      const centre = { x: box.left + col * LIT_CELL + LIT_CELL / 2, y: box.top + row * LIT_CELL + LIT_CELL / 2 };
+      const circleFade = brightestCircleAlpha(centre, circles, blockers);
+      return quantizeAlpha(circleFade ?? AREA_ALPHA);
     }));
 
-    const passes: readonly (readonly [number, number])[] = [
-      [CELL_LIT, LIT_ALPHA * flicker],
-      [CELL_RIM, RIM_ALPHA * flicker],
-    ];
-    for (const [kind, alpha] of passes) {
-      this.litArea.fillStyle(LIT_FILL, alpha);
-      kinds.forEach((line, row) => {
+    const levels = new Set(alphas.flat());
+    levels.delete(0);
+    for (const level of levels) {
+      this.litArea.fillStyle(LIT_FILL, level * flicker);
+      alphas.forEach((line, row) => {
         const y = box.top + row * LIT_CELL;
         const h = Math.min(LIT_CELL, box.bottom - y);
         let col = 0;
         while (col < line.length) {
-          if (line[col] !== kind) {
+          if (line[col] !== level) {
             col++;
             continue;
           }
           const start = col;
-          while (col < line.length && line[col] === kind) col++;
+          while (col < line.length && line[col] === level) col++;
           const x = box.left + start * LIT_CELL;
           const right = Math.min(box.left + col * LIT_CELL, box.right);
           this.litArea.fillRect(x, y, right - x, h);
@@ -225,15 +229,35 @@ export class LanternSystem {
   }
 }
 
+/** A circle footprint. */
+type Circle = Extract<Footprint, { kind: 'circle' }>;
+
+/** Rounds a cell alpha to ALPHA_STEP so that neighbours with the same level merge into one rect. */
+function quantizeAlpha(alpha: number): number {
+  return Math.round(alpha / ALPHA_STEP) * ALPHA_STEP;
+}
+
+/**
+ * The alpha of the brightest circle that lights `p` on its own, or null when no circle lights it.
+ * A circle fades from MIN + SPAN at its centre down to MIN at its edge.
+ */
+function brightestCircleAlpha(p: Point, circles: readonly Circle[], blockers: readonly Rect[]): number | null {
+  let best: number | null = null;
+  for (const c of circles) {
+    if (!isPointLit(p, [c], blockers)) continue;
+    const d = Math.hypot(p.x - c.center.x, p.y - c.center.y);
+    const alpha = CIRCLE_ALPHA_MIN + CIRCLE_ALPHA_SPAN * (1 - d / c.radius);
+    if (best === null || alpha > best) best = alpha;
+  }
+  return best;
+}
+
 /** The clamped integer box around every footprint, or null when nothing of them is on the room. */
 function footprintBox(footprints: readonly Footprint[]): { left: number; top: number; right: number; bottom: number } | null {
   const points: Point[] = [];
   for (const f of footprints) {
     switch (f.kind) {
-      case 'beam':
-        points.push(...beamPolygon(f.origin, f.facing));
-        break;
-      case 'halo':
+      case 'circle':
         points.push(
           { x: f.center.x - f.radius, y: f.center.y - f.radius },
           { x: f.center.x + f.radius, y: f.center.y + f.radius },

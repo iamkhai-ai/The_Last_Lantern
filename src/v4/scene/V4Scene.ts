@@ -198,7 +198,7 @@ export class V4Scene extends Phaser.Scene {
     const ground = groundPoint({ x: this.player.x, y: this.player.y });
     const footprints: Footprint[] = [
       ...(lanternAvailable
-        ? lanternFootprints(lantern, ground, this.player.facing, (id) => this.level.pedestalPosition(id), this.level.lightSpills?.() ?? [])
+        ? lanternFootprints(lantern, ground, (id) => this.level.pedestalPosition(id), this.level.lightSpills?.() ?? [])
         : []),
       ...(this.level.fixedFootprints?.() ?? []),
     ];

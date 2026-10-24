@@ -49,9 +49,9 @@ export interface TestRoomLayout extends LevelLayout {
   readonly bridgeDeck: Rect;
   /** Open-face sensor on the floor at the bridge head; not solid. Lighting it blocks the bridge. */
   readonly rootBed: Rect;
-  /** Open face of flower C on the west room side; not solid. */
+  /** Open face of flower C on the west room side, south of the corner wall, east of door C; not solid. */
   readonly flowerSouth: Rect;
-  /** Open face of flower C on the corner side; not solid. */
+  /** Open face of flower C on the corner side, north of the corner wall, east of door C; not solid. */
   readonly flowerNorth: Rect;
   /** The pedestal s1 (solid). The lantern sits at its centre. */
   readonly pedestal: Rect;
@@ -96,8 +96,10 @@ export const TEST_ROOM: TestRoomLayout = Object.freeze({
   chasmSouth: { x: 46, y: 136, width: 34, height: 14 },
   bridgeDeck: { x: 46, y: 112, width: 34, height: 24 },
   rootBed: { x: 80, y: 112, width: 12, height: 24 },
-  flowerSouth: { x: 96, y: 160, width: 8, height: 8 },
-  flowerNorth: { x: 96, y: 140, width: 8, height: 8 },
+  // Both faces moved east of door C, onto the east wall segment. With a circle, faces that sat 4px from the root bed
+  // left almost no place to light one without the other.
+  flowerSouth: { x: 138, y: 160, width: 8, height: 8 },
+  flowerNorth: { x: 138, y: 140, width: 8, height: 8 },
   pedestal: { x: 180, y: 160, width: 24, height: 24 },
   latchA: { x: 340, y: 248, width: 16, height: 16 },
   marker: { x: 420, y: 140, width: 16, height: 16 },

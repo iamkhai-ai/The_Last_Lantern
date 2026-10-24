@@ -1,8 +1,8 @@
 import { rectCenter } from './geometry';
 import type { Point, Rect } from './geometry';
 import { initialLantern } from './lantern';
-import { BEAM_LENGTH, FACINGS, HALO_RADIUS, canSeeMark, groundPoint, isMarkReadable, isRectLit, lanternFootprints } from './light';
-import type { Facing, LightMark, Room } from './light';
+import { LANTERN_RADIUS, canSeeMark, groundPoint, isMarkReadable, isRectLit, lanternFootprints } from './light';
+import type { LightMark, Room } from './light';
 import { reachableFeet } from './reachAudit';
 
 /** A standing area is this many px square; its positions sit on the reach grid. */
@@ -11,7 +11,7 @@ export const AIM_AREA = 8;
 /** Grid step for standing positions. Matches the walk grid used by reachAudit. */
 const AIM_STEP = 2;
 
-/** One aim requirement, checked from each standing position with one facing. */
+/** One aim requirement, checked from each standing position with the handheld lantern. */
 export interface AimGoal {
   /** Every rect here must be lit. */
   readonly hit: readonly Rect[];
@@ -33,9 +33,8 @@ export interface AimInput {
   readonly start: Point;
 }
 
-/** A block of standing positions that all meet the goal with one facing. `x`/`y` is the top-left actor centre. */
+/** A block of standing positions that all meet the goal with the handheld lantern. `x`/`y` is the top-left actor centre. */
 export interface AimArea {
-  readonly facing: Facing;
   readonly x: number;
   readonly y: number;
 }
@@ -49,10 +48,10 @@ function anchorsOf(goal: AimGoal): Point[] {
   return goal.seen ? [rectCenter(goal.seen.rect)] : [];
 }
 
-/** True when a standing position (actor centre) meets the goal with the given facing. */
-function meetsGoal(pos: Point, facing: Facing, goal: AimGoal, input: AimInput): boolean {
+/** True when a standing position (actor centre) meets the goal with the handheld lantern at its ground point. */
+function meetsGoal(pos: Point, goal: AimGoal, input: AimInput): boolean {
   const ground = groundPoint(pos);
-  const footprints = lanternFootprints(initialLantern(), ground, facing, () => null);
+  const footprints = lanternFootprints(initialLantern(), ground, () => null);
   if (!goal.hit.every(r => isRectLit(r, footprints, input.blockers))) return false;
   if (goal.avoid.some(r => isRectLit(r, footprints, input.blockers))) return false;
   if (goal.seen) {
@@ -67,7 +66,7 @@ function collectAimAreas(goal: AimGoal, input: AimInput, limit: number): AimArea
   const anchors = anchorsOf(goal);
   if (anchors.length === 0) return [];
   const reach = reachableFeet(input.start, input, AIM_STEP);
-  const maxDistance = BEAM_LENGTH + HALO_RADIUS;
+  const maxDistance = LANTERN_RADIUS + 8;
   const areas: AimArea[] = [];
 
   const candidates: Point[] = [];
@@ -82,24 +81,22 @@ function collectAimAreas(goal: AimGoal, input: AimInput, limit: number): AimArea
     if (near) candidates.push({ x, y });
   }
 
-  for (const facing of FACINGS) {
-    const good = new Set<string>();
-    for (const pos of candidates) {
-      if (meetsGoal(pos, facing, goal, input)) good.add(`${pos.x},${pos.y}`);
-    }
-    for (const key of good) {
-      const [x, y] = key.split(',').map(Number);
-      const whole = AREA_OFFSETS.every(dy => AREA_OFFSETS.every(dx => good.has(`${x + dx},${y + dy}`)));
-      if (!whole) continue;
-      areas.push({ facing, x, y });
-      if (areas.length >= limit) return areas;
-    }
+  const good = new Set<string>();
+  for (const pos of candidates) {
+    if (meetsGoal(pos, goal, input)) good.add(`${pos.x},${pos.y}`);
+  }
+  for (const key of good) {
+    const [x, y] = key.split(',').map(Number);
+    const whole = AREA_OFFSETS.every(dy => AREA_OFFSETS.every(dx => good.has(`${x + dx},${y + dy}`)));
+    if (!whole) continue;
+    areas.push({ x, y });
+    if (areas.length >= limit) return areas;
   }
   return areas;
 }
 
 /**
- * Every AIM_AREA×AIM_AREA block of standing positions (reachable from `input.start`) that meets the goal with one facing.
+ * Every AIM_AREA×AIM_AREA block of standing positions (reachable from `input.start`) that meets the goal with the handheld lantern.
  * Returns an empty array when the goal has no anchor (no hit rects and no seen mark).
  */
 export function findAimAreas(goal: AimGoal, input: AimInput): AimArea[] {

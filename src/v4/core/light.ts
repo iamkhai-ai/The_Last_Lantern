@@ -3,38 +3,12 @@ import { pointInRect, rectCenter } from './geometry';
 import type { Point, Rect } from './geometry';
 import type { LanternState } from './lantern';
 
-/** The eight directions Nhinh can face. Same strings as `Player.FacingDirection`. */
-export type Facing = 'up' | 'upright' | 'right' | 'downright' | 'down' | 'downleft' | 'left' | 'upleft';
-
-/** Every facing, in a fixed order. */
-export const FACINGS: readonly Facing[] = ['up', 'upright', 'right', 'downright', 'down', 'downleft', 'left', 'upleft'];
-
-/** Beam length from the ground point, in px. */
-export const BEAM_LENGTH = 56;
-/** Beam width at the root (the ground point), in px. */
-export const BEAM_ROOT_WIDTH = 12;
-/** Beam width at the far end, in px. */
-export const BEAM_FAR_WIDTH = 32;
-/** Halo radius around a light origin (hand or pedestal), in px. */
+/** Radius of the handheld lantern's circle of light around its ground point, in px. */
+export const LANTERN_RADIUS = 40;
+/** Halo radius around a placed lantern (its pedestal), in px. */
 export const HALO_RADIUS = 12;
 /** Distance from the ground point to a mark centre within which Nhinh can see the mark, in px. */
 export const SEEN_RADIUS = 64;
-
-const DIAGONAL = Math.SQRT1_2;
-
-/** Unit vector of a facing; screen y grows downward; diagonals are (±√½, ±√½). */
-export function facingVector(f: Facing): Point {
-  switch (f) {
-    case 'up': return { x: 0, y: -1 };
-    case 'upright': return { x: DIAGONAL, y: -DIAGONAL };
-    case 'right': return { x: 1, y: 0 };
-    case 'downright': return { x: DIAGONAL, y: DIAGONAL };
-    case 'down': return { x: 0, y: 1 };
-    case 'downleft': return { x: -DIAGONAL, y: DIAGONAL };
-    case 'left': return { x: -1, y: 0 };
-    case 'upleft': return { x: -DIAGONAL, y: -DIAGONAL };
-  }
-}
 
 /** The floor point under Nhinh: the centre of her foot body. Light and line of sight start here. */
 export function groundPoint(actor: Point): Point {
@@ -42,35 +16,13 @@ export function groundPoint(actor: Point): Point {
 }
 
 /**
- * The beam's four corners, in order: root-left, far-left, far-right, root-right.
- * "Left" and "right" are relative to the facing (screen left/right when facing up).
- * The polygon is convex.
- */
-export function beamPolygon(origin: Point, facing: Facing): Point[] {
-  const d = facingVector(facing);
-  const n = { x: -d.y, y: d.x };
-  const rootHalf = BEAM_ROOT_WIDTH / 2;
-  const farHalf = BEAM_FAR_WIDTH / 2;
-  const farX = origin.x + d.x * BEAM_LENGTH;
-  const farY = origin.y + d.y * BEAM_LENGTH;
-  return [
-    { x: origin.x - n.x * rootHalf, y: origin.y - n.y * rootHalf },
-    { x: farX - n.x * farHalf, y: farY - n.y * farHalf },
-    { x: farX + n.x * farHalf, y: farY + n.y * farHalf },
-    { x: origin.x + n.x * rootHalf, y: origin.y + n.y * rootHalf },
-  ];
-}
-
-/**
  * One piece of light on the floor.
- * - `beam`: the trapezoid from `origin` along `facing`; blocked from `origin`.
- * - `halo`: a circle around `center`; blocked from `center`.
+ * - `circle`: a disc of `radius` around `center`; blocked from `center`.
  * - `area`: a declared polygon (pedestal spill or fixed source). `origin` is where its light comes from
  *   and is used for blocking; null means authored and never clipped.
  */
 export type Footprint =
-  | { readonly kind: 'beam'; readonly origin: Point; readonly facing: Facing }
-  | { readonly kind: 'halo'; readonly center: Point; readonly radius: number }
+  | { readonly kind: 'circle'; readonly center: Point; readonly radius: number }
   | { readonly kind: 'area'; readonly points: readonly Point[]; readonly origin: Point | null };
 
 /** A pedestal's declared spill (puzzle-contracts §1): a convex polygon lit while the lantern is lit on that pedestal. */
@@ -80,28 +32,24 @@ export interface SpillDecl {
 }
 
 /**
- * The lantern's footprints now. Off: none. In hand: beam + halo at `ground`, along `facing`.
- * On a pedestal: a halo at `pedestalAt(id)` plus that pedestal's spills, each with origin = the pedestal point.
+ * The lantern's footprints now. Off: none. In hand: one circle of `LANTERN_RADIUS` at `ground`.
+ * On a pedestal: a circle of `HALO_RADIUS` at `pedestalAt(id)` plus that pedestal's spills, each with origin = the pedestal point.
  * A pedestal with no position gives no footprints.
  */
 export function lanternFootprints(
   lantern: LanternState,
   ground: Point,
-  facing: Facing,
   pedestalAt: (pedestalId: string) => Point | null,
   spills: readonly SpillDecl[] = [],
 ): Footprint[] {
   if (!lantern.on) return [];
   if (lantern.location.at === 'hand') {
-    return [
-      { kind: 'beam', origin: ground, facing },
-      { kind: 'halo', center: ground, radius: HALO_RADIUS },
-    ];
+    return [{ kind: 'circle', center: ground, radius: LANTERN_RADIUS }];
   }
   const pedestalId = lantern.location.pedestalId;
   const at = pedestalAt(pedestalId);
   if (at === null) return [];
-  const footprints: Footprint[] = [{ kind: 'halo', center: at, radius: HALO_RADIUS }];
+  const footprints: Footprint[] = [{ kind: 'circle', center: at, radius: HALO_RADIUS }];
   for (const spill of spills) {
     if (spill.pedestalId === pedestalId) {
       footprints.push({ kind: 'area', points: spill.points, origin: at });
@@ -166,8 +114,7 @@ export function segmentBlocked(a: Point, b: Point, blockers: readonly Rect[]): b
 /** Whether `p` lies inside a footprint's own shape, ignoring blockers. */
 function inShape(p: Point, f: Footprint): boolean {
   switch (f.kind) {
-    case 'beam': return pointInConvexPolygon(p, beamPolygon(f.origin, f.facing));
-    case 'halo': {
+    case 'circle': {
       const dx = p.x - f.center.x;
       const dy = p.y - f.center.y;
       return dx * dx + dy * dy <= f.radius * f.radius;
@@ -179,13 +126,12 @@ function inShape(p: Point, f: Footprint): boolean {
 /** The point a footprint's light comes from for blocking, or null when it is never clipped. */
 function sourceOf(f: Footprint): Point | null {
   switch (f.kind) {
-    case 'beam': return f.origin;
-    case 'halo': return f.center;
+    case 'circle': return f.center;
     case 'area': return f.origin;
   }
 }
 
-/** Inside some footprint's shape (halo: distance ≤ radius) and not hidden from that footprint's origin by a blocker. */
+/** Inside some footprint's shape (circle: distance ≤ radius) and not hidden from that footprint's origin by a blocker. */
 export function isPointLit(p: Point, footprints: readonly Footprint[], blockers: readonly Rect[]): boolean {
   return footprints.some(f => {
     if (!inShape(p, f)) return false;

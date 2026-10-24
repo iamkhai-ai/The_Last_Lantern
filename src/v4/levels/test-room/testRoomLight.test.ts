@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { footRectAt } from '../../core/body';
 import type { Point } from '../../core/geometry';
-import { FACINGS, canSeeMark, groundPoint, isMarkReadable, isRectLit, lanternFootprints, roomAt } from '../../core/light';
+import { canSeeMark, groundPoint, isMarkReadable, isRectLit, lanternFootprints, roomAt } from '../../core/light';
 import type { Footprint, LightMark } from '../../core/light';
 import { hasAimArea } from '../../core/lightAudit';
 import type { AimInput } from '../../core/lightAudit';
@@ -98,11 +98,9 @@ describe('test room light corner: aim', () => {
     let both = false;
     for (const ground of reachableGrounds(CORNER_OPEN)) {
       if (!inCorner(ground)) continue;
-      for (const facing of FACINGS) {
-        const footprints = lanternFootprints(initialLantern(), ground, facing, () => null);
-        if (isRectLit(flowerNorth, footprints, blockers) && isRectLit(rootBed, footprints, blockers)) {
-          both = true;
-        }
+      const footprints = lanternFootprints(initialLantern(), ground, () => null);
+      if (isRectLit(flowerNorth, footprints, blockers) && isRectLit(rootBed, footprints, blockers)) {
+        both = true;
       }
     }
     expect(both).toBe(true);
@@ -110,18 +108,19 @@ describe('test room light corner: aim', () => {
 });
 
 describe('test room light corner: bridge approach', () => {
-  it('lights the root bed when Nhinh faces left from the bridge head, not when she faces up', () => {
+  it('lights the root bed from actor (100,104) and not from actor (140,104)', () => {
     const blockers = testRoomBlockers(INITIAL, CORNER_OPEN);
-    const ground = groundPoint({ x: 110, y: 110 });
-    expect(isRectLit(rootBed, lanternFootprints(initialLantern(), ground, 'left', () => null), blockers)).toBe(true);
-    expect(isRectLit(rootBed, lanternFootprints(initialLantern(), ground, 'up', () => null), blockers)).toBe(false);
+    const near = lanternFootprints(initialLantern(), groundPoint({ x: 100, y: 104 }), () => null);
+    const far = lanternFootprints(initialLantern(), groundPoint({ x: 140, y: 104 }), () => null);
+    expect(isRectLit(rootBed, near, blockers)).toBe(true);
+    expect(isRectLit(rootBed, far, blockers)).toBe(false);
   });
 });
 
 describe('test room light corner: closed door C', () => {
   it('lights flower C north of the wall but not south of it, while door C is closed', () => {
     const blockers = testRoomBlockers(INITIAL, INITIAL_CORNER);
-    const footprints = lanternFootprints(initialLantern(), groundPoint({ x: 100, y: 128 }), 'down', () => null);
+    const footprints = lanternFootprints(initialLantern(), groundPoint({ x: 140, y: 128 }), () => null);
     expect(isRectLit(flowerNorth, footprints, blockers)).toBe(true);
     expect(isRectLit(flowerSouth, footprints, blockers)).toBe(false);
   });
@@ -129,8 +128,8 @@ describe('test room light corner: closed door C', () => {
 
 describe('test room light corner: stepCorner', () => {
   const blockers = testRoomBlockers(INITIAL, INITIAL_CORNER);
-  const litFlower = lanternFootprints(initialLantern(), groundPoint({ x: 100, y: 128 }), 'down', () => null);
-  const litBed = lanternFootprints(initialLantern(), groundPoint({ x: 60, y: 110 }), 'right', () => null);
+  const litFlower = lanternFootprints(initialLantern(), groundPoint({ x: 100, y: 128 }), () => null);
+  const litBed = lanternFootprints(initialLantern(), groundPoint({ x: 60, y: 110 }), () => null);
   const noFootprints: Footprint[] = [];
 
   it('opens door C when flower C is lit', () => {
@@ -229,4 +228,3 @@ describe('test room light corner: reach audit', () => {
     expect(auditReach(auditFor(FULLY_OPEN, CORNER_OPEN))).toEqual([]);
   });
 });
-

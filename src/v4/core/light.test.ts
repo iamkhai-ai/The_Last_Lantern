@@ -2,12 +2,9 @@ import { describe, it, expect } from 'vitest';
 import type { Point, Rect } from './geometry';
 import type { LanternState } from './lantern';
 import {
-  BEAM_LENGTH,
-  FACINGS,
   HALO_RADIUS,
-  beamPolygon,
+  LANTERN_RADIUS,
   canSeeMark,
-  facingVector,
   groundPoint,
   isMarkReadable,
   isPointLit,
@@ -20,81 +17,16 @@ import {
 } from './light';
 import type { Footprint, LightMark, Room } from './light';
 
-const SQRT_HALF = Math.SQRT1_2;
-
 const hand = (on = true): LanternState => ({ location: { at: 'hand' }, on });
 
-/** The hand beam and halo for a lamp at `origin`, facing `facing`. */
-function handFootprints(origin: Point, facing: Parameters<typeof facingVector>[0]): Footprint[] {
-  return [
-    { kind: 'beam', origin, facing },
-    { kind: 'halo', center: origin, radius: HALO_RADIUS },
-  ];
+/** The handheld circle for a lamp at `centre`. */
+function handFootprints(centre: Point): Footprint[] {
+  return [{ kind: 'circle', center: centre, radius: LANTERN_RADIUS }];
 }
-
-function near(a: number, b: number): boolean {
-  return Math.abs(a - b) < 1e-9;
-}
-
-function samePoint(a: Point, b: Point): boolean {
-  return near(a.x, b.x) && near(a.y, b.y);
-}
-
-describe('facingVector', () => {
-  it('gives a unit vector for all eight facings', () => {
-    expect(FACINGS).toHaveLength(8);
-    for (const f of FACINGS) {
-      const v = facingVector(f);
-      expect(Math.hypot(v.x, v.y)).toBeGreaterThan(1 - 1e-9);
-      expect(Math.hypot(v.x, v.y)).toBeLessThan(1 + 1e-9);
-    }
-  });
-
-  it('points up as (0,-1) and down-right as (√½, √½)', () => {
-    expect(facingVector('up')).toEqual({ x: 0, y: -1 });
-    const dr = facingVector('downright');
-    expect(near(dr.x, SQRT_HALF)).toBe(true);
-    expect(near(dr.y, SQRT_HALF)).toBe(true);
-  });
-});
 
 describe('groundPoint', () => {
   it('is the centre of the foot body, 19px below the actor centre', () => {
     expect(groundPoint({ x: 100, y: 100 })).toEqual({ x: 100, y: 119 });
-  });
-});
-
-describe('beamPolygon', () => {
-  it('has the expected corners for a beam facing up', () => {
-    const poly = beamPolygon({ x: 100, y: 200 }, 'up');
-    expect(poly).toHaveLength(4);
-    const expected: Point[] = [
-      { x: 94, y: 200 },
-      { x: 106, y: 200 },
-      { x: 84, y: 144 },
-      { x: 116, y: 144 },
-    ];
-    for (const e of expected) {
-      expect(poly.some(p => samePoint(p, e))).toBe(true);
-    }
-  });
-
-  it('is convex for every facing', () => {
-    for (const f of FACINGS) {
-      const poly = beamPolygon({ x: 0, y: 0 }, f);
-      // Each corner lies on the same side of every edge as the centroid.
-      const cx = poly.reduce((s, p) => s + p.x, 0) / 4;
-      const cy = poly.reduce((s, p) => s + p.y, 0) / 4;
-      expect(pointInConvexPolygon({ x: cx, y: cy }, poly)).toBe(true);
-      for (let i = 0; i < 4; i++) {
-        const a = poly[i];
-        const b = poly[(i + 1) % 4];
-        const c = poly[(i + 2) % 4];
-        const turn = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
-        expect(turn).not.toBe(0);
-      }
-    }
-    expect(BEAM_LENGTH).toBe(56);
   });
 });
 
@@ -113,43 +45,28 @@ describe('pointInConvexPolygon', () => {
 });
 
 describe('isPointLit', () => {
-  const origin = { x: 100, y: 200 };
+  const centre = { x: 100, y: 200 };
 
-  it('lights the beam out to its length and not beyond', () => {
-    const fp = handFootprints(origin, 'up');
-    expect(isPointLit({ x: 100, y: 150 }, fp, [])).toBe(true);
-    expect(isPointLit({ x: 100, y: 143 }, fp, [])).toBe(false);
-  });
-
-  it('lights the halo 5px behind the lamp and not 13px behind', () => {
-    const fp = handFootprints(origin, 'up');
-    expect(isPointLit({ x: 100, y: 205 }, fp, [])).toBe(true);
-    expect(isPointLit({ x: 100, y: 213 }, fp, [])).toBe(false);
-  });
-
-  it('keeps the beam width at distance 50 at about 14.93 px either side', () => {
-    const fp = handFootprints(origin, 'up');
-    expect(isPointLit({ x: 114, y: 150 }, fp, [])).toBe(true);
-    expect(isPointLit({ x: 115, y: 150 }, fp, [])).toBe(false);
-  });
-
-  it('lights the diagonal beam at distance 50 and not at 57', () => {
-    const fp = handFootprints(origin, 'upright');
-    const along = (d: number): Point => ({ x: origin.x + d * SQRT_HALF, y: origin.y - d * SQRT_HALF });
-    expect(isPointLit(along(50), fp, [])).toBe(true);
-    expect(isPointLit(along(57), fp, [])).toBe(false);
+  it('lights the circle out to its radius and not beyond, in every direction', () => {
+    const fp = handFootprints(centre);
+    expect(isPointLit({ x: 140, y: 200 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 141, y: 200 }, fp, [])).toBe(false);
+    expect(isPointLit({ x: 100, y: 160 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 100, y: 159 }, fp, [])).toBe(false);
+    expect(isPointLit({ x: 60, y: 200 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 100, y: 240 }, fp, [])).toBe(true);
   });
 
   it('is cut by a wall between the lamp and the point', () => {
-    const wall: Rect = { x: 98, y: 170, width: 4, height: 10 };
-    const fp = handFootprints(origin, 'up');
-    expect(isPointLit({ x: 100, y: 150 }, fp, [wall])).toBe(false);
-    expect(isPointLit({ x: 110, y: 150 }, fp, [wall])).toBe(true);
+    const wall: Rect = { x: 118, y: 190, width: 4, height: 20 };
+    const fp = handFootprints(centre);
+    expect(isPointLit({ x: 130, y: 200 }, fp, [wall])).toBe(false);
+    expect(isPointLit({ x: 100, y: 170 }, fp, [wall])).toBe(true);
   });
 
-  it('clips the halo at a blocker', () => {
+  it('clips the circle at a blocker', () => {
     const wall: Rect = { x: 95, y: 195, width: 10, height: 2 };
-    const halo: Footprint[] = [{ kind: 'halo', center: origin, radius: HALO_RADIUS }];
+    const halo: Footprint[] = [{ kind: 'circle', center: centre, radius: HALO_RADIUS }];
     expect(isPointLit({ x: 100, y: 192 }, halo, [wall])).toBe(false);
     expect(isPointLit({ x: 100, y: 192 }, halo, [])).toBe(true);
   });
@@ -167,14 +84,13 @@ describe('lanternFootprints', () => {
   const noPedestal = (): Point | null => null;
 
   it('gives nothing when the lantern is off', () => {
-    expect(lanternFootprints(hand(false), ground, 'up', noPedestal)).toEqual([]);
+    expect(lanternFootprints(hand(false), ground, noPedestal)).toEqual([]);
   });
 
-  it('gives a beam and a halo at the ground point in hand', () => {
-    const fps = lanternFootprints(hand(), ground, 'left', noPedestal);
-    expect(fps).toEqual([
-      { kind: 'beam', origin: ground, facing: 'left' },
-      { kind: 'halo', center: ground, radius: HALO_RADIUS },
+  it('gives one circle of LANTERN_RADIUS at the ground point in hand', () => {
+    expect(LANTERN_RADIUS).toBe(40);
+    expect(lanternFootprints(hand(), ground, noPedestal)).toEqual([
+      { kind: 'circle', center: ground, radius: LANTERN_RADIUS },
     ]);
   });
 
@@ -185,15 +101,44 @@ describe('lanternFootprints', () => {
       { pedestalId: 'a', points: [{ x: 60, y: 40 }, { x: 70, y: 40 }, { x: 70, y: 60 }] },
       { pedestalId: 'b', points: [{ x: 210, y: 40 }, { x: 220, y: 40 }, { x: 220, y: 60 }] },
     ];
-    const fps = lanternFootprints(lantern, ground, 'up', id => pedestals[id] ?? null, spills);
+    const fps = lanternFootprints(lantern, ground, id => pedestals[id] ?? null, spills);
     expect(fps).toHaveLength(2);
-    expect(fps[0]).toEqual({ kind: 'halo', center: { x: 50, y: 50 }, radius: HALO_RADIUS });
+    expect(fps[0]).toEqual({ kind: 'circle', center: { x: 50, y: 50 }, radius: HALO_RADIUS });
     expect(fps[1]).toEqual({ kind: 'area', points: spills[0].points, origin: { x: 50, y: 50 } });
+  });
+
+  it('gives a placed lantern a circle of radius 12 only, with no spills declared', () => {
+    const lantern: LanternState = { location: { at: 'pedestal', pedestalId: 'a' }, on: true };
+    expect(lanternFootprints(lantern, ground, id => (id === 'a' ? { x: 50, y: 50 } : null)))
+      .toEqual([{ kind: 'circle', center: { x: 50, y: 50 }, radius: 12 }]);
   });
 
   it('gives nothing for a pedestal with no position', () => {
     const lantern: LanternState = { location: { at: 'pedestal', pedestalId: 'missing' }, on: true };
-    expect(lanternFootprints(lantern, ground, 'up', noPedestal)).toEqual([]);
+    expect(lanternFootprints(lantern, ground, noPedestal)).toEqual([]);
+  });
+});
+
+describe('circle from the ground point', () => {
+  it('lights the circle around a ground point at (100,200) with radius 40', () => {
+    const fp = lanternFootprints(hand(), { x: 100, y: 200 }, () => null);
+    expect(isPointLit({ x: 140, y: 200 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 141, y: 200 }, fp, [])).toBe(false);
+    expect(isPointLit({ x: 100, y: 160 }, fp, [])).toBe(true);
+  });
+
+  it('is cut by a wall at {118,190,4,20}, but not at the same distance in another direction', () => {
+    const fp = lanternFootprints(hand(), { x: 100, y: 200 }, () => null);
+    const wall: Rect = { x: 118, y: 190, width: 4, height: 20 };
+    expect(isPointLit({ x: 130, y: 200 }, fp, [wall])).toBe(false);
+    expect(isPointLit({ x: 100, y: 170 }, fp, [wall])).toBe(true);
+  });
+
+  it('gives a placed lantern a circle of radius 12 only', () => {
+    const lantern: LanternState = { location: { at: 'pedestal', pedestalId: 'a' }, on: true };
+    const fp = lanternFootprints(lantern, { x: 100, y: 200 }, id => (id === 'a' ? { x: 100, y: 200 } : null));
+    expect(isPointLit({ x: 112, y: 200 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 113, y: 200 }, fp, [])).toBe(false);
   });
 });
 
@@ -218,21 +163,21 @@ describe('isRectLit', () => {
   it('is lit when only the corner sample touches the halo', () => {
     // Halo at (100,200), radius 12. Samples of {112,200,2,2}: (112,200), (114,200), (112,202), (114,202).
     // Only (112,200) lies within 12px of the centre.
-    const fp: Footprint[] = [{ kind: 'halo', center: { x: 100, y: 200 }, radius: HALO_RADIUS }];
+    const fp: Footprint[] = [{ kind: 'circle', center: { x: 100, y: 200 }, radius: HALO_RADIUS }];
     expect(isRectLit({ x: 112, y: 200, width: 2, height: 2 }, fp, [])).toBe(true);
   });
 
   it('is not lit when the rect lies fully outside', () => {
-    const fp = handFootprints({ x: 100, y: 200 }, 'up');
+    const fp = handFootprints({ x: 100, y: 200 });
     expect(isRectLit({ x: 200, y: 0, width: 10, height: 10 }, fp, [])).toBe(false);
   });
 });
 
 describe('isMarkReadable', () => {
   const rect: Rect = { x: 98, y: 158, width: 4, height: 4 };
-  const fp = handFootprints({ x: 100, y: 200 }, 'up');
+  const fp = handFootprints({ x: 100, y: 200 });
 
-  it('reads a lit mark under the beam and not without light', () => {
+  it('reads a lit mark under the circle and not without light', () => {
     const lit: LightMark = { id: 'l', kind: 'lit', rect };
     expect(isMarkReadable(lit, fp, [])).toBe(true);
     expect(isMarkReadable(lit, [], [])).toBe(false);
@@ -288,12 +233,12 @@ describe('roomAt', () => {
 });
 
 describe('marksToRecord', () => {
-  const fp = handFootprints({ x: 100, y: 200 }, 'up');
+  const fp = handFootprints({ x: 100, y: 200 });
   const ground = { x: 100, y: 200 };
   const litAhead: LightMark = { id: 'ahead', kind: 'lit', rect: { x: 98, y: 158, width: 4, height: 4 } };
   const litFar: LightMark = { id: 'far', kind: 'lit', rect: { x: 98, y: 98, width: 4, height: 4 } };
   const darkBehind: LightMark = { id: 'dark', kind: 'dark', rect: { x: 98, y: 178, width: 4, height: 4 } };
-  const litAheadSecond: LightMark = { id: 'ahead2', kind: 'lit', rect: { x: 96, y: 150, width: 4, height: 4 } };
+  const litAheadSecond: LightMark = { id: 'ahead2', kind: 'lit', rect: { x: 96, y: 170, width: 4, height: 4 } };
 
   it('keeps list order and skips ids already found', () => {
     const ids = marksToRecord(ground, [litAhead, litAheadSecond], fp, [], [], new Set(['ahead']));
@@ -301,7 +246,7 @@ describe('marksToRecord', () => {
   });
 
   it('skips marks that are unreadable or unseen', () => {
-    // litFar is not seen (more than 64px away); darkBehind sits in the beam, so it is not dark-readable.
+    // litFar is not seen (more than 64px away); darkBehind sits in the circle, so it is not dark-readable.
     const ids = marksToRecord(ground, [litFar, darkBehind, litAhead], fp, [], [], new Set());
     expect(ids).toEqual(['ahead']);
   });
