@@ -20,6 +20,7 @@ import {
   FOREST_EDGE_ROOMS,
   HINGE_ID,
   LAMP_REST_ID,
+  LAMP_REST_REACH,
   LATCH_A_ID,
   S1_ID,
   S2_ID,
@@ -215,7 +216,7 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
       },
       {
         id: LAMP_REST_ID,
-        reach: { kind: 'floor', rect: FOREST_EDGE.lampRest },
+        reach: { kind: 'floor', rect: LAMP_REST_REACH },
         getPrompt: () => this.lampPrompt(),
         onInteract: () => this.onLampRest(),
       },
@@ -378,8 +379,17 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     return 'lantern';
   }
 
+  /**
+   * The lamp is unavailable while it rests on the ground: F cannot light it, and the lantern controls and pulse stay
+   * off until the one pickup. Once taken it is never on the ground again.
+   */
   lanternAvailable(): boolean {
-    return true;
+    return !this.lampOnGroundNow();
+  }
+
+  private lampOnGroundNow(): boolean {
+    const lantern = this.host.getLantern();
+    return lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID;
   }
 
   pedestalPosition(pedestalId: string): Point | null {

@@ -19,6 +19,7 @@ import {
   FOREST_EDGE_ROOMS,
   LAMP_REST_EXCEPTION,
   LAMP_REST_ID,
+  LAMP_REST_REACH,
   MIDDLE_CHECKPOINT_ID,
   S1_ID,
   S2_ID,
@@ -284,6 +285,17 @@ describe('forest edge lamp on the ground', () => {
     expect(rectsOverlap(FOREST_EDGE.lampRest, FOREST_EDGE.stele)).toBe(false);
     expect(rectsOverlap(FOREST_EDGE.lampRest, FOREST_EDGE.s1)).toBe(false);
   });
+
+  it('shows the lamp control from a walkable spot beside the lamp, not only from on top of it', () => {
+    const lamp = FOREST_EDGE.lampRest;
+    expect(LAMP_REST_REACH).toEqual({ x: lamp.x - 8, y: lamp.y - 8, width: lamp.width + 16, height: lamp.height + 16 });
+    const beside = [...reachableFeet(spawnOf(YARD_CHECKPOINT_ID), walk(CLOSED))].map(key => {
+      const [x, y] = key.split(',').map(Number);
+      return { x, y };
+    });
+    const found = beside.some(c => pointInRect(c, LAMP_REST_REACH) && !pointInRect(c, lamp));
+    expect(found).toBe(true);
+  });
 });
 
 describe('forest edge layout JSON matches the runtime', () => {
@@ -308,6 +320,7 @@ describe('forest edge layout JSON matches the runtime', () => {
     expect(interactables.s2.rect).toEqual(FOREST_EDGE.s2);
     expect(interactables.braceB.rect).toEqual(FOREST_EDGE.braceB);
     expect(interactables.lampRest.rect).toEqual(FOREST_EDGE.lampRest);
+    expect((interactables.lampRest as { reach?: Rect }).reach).toEqual(LAMP_REST_REACH);
     for (const it of FOREST_EDGE_ITEMS) {
       expect(interactables[it.id], it.id).toBeDefined();
       expect(interactables[it.id].solid, it.id).toBe(it.reach.kind === 'block');

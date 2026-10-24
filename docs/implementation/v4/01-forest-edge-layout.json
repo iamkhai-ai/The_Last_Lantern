@@ -25,7 +25,7 @@
     "latchA":   { "rect": { "x": 392, "y": 166, "width": 16, "height": 16 }, "solid": true, "note": "chốt cố định ở sân giữa" },
     "s2":       { "rect": { "x": 420, "y": 96,  "width": 24, "height": 24 }, "solid": true, "note": "bệ có đầu nối kín, nối tới cổng B" },
     "braceB":   { "rect": { "x": 520, "y": 60,  "width": 16, "height": 16 }, "solid": true, "note": "tay hãm B ở sân giữa, cạnh cổng B" },
-    "lampRest": { "rect": { "x": 206, "y": 226, "width": 16, "height": 10 }, "solid": false, "note": "đèn nằm trên đất cạnh bia, tắt; E nhặt một lần", "exception": { "rule": "puzzle-contracts §1: E đặt và nhặt đèn chỉ tại bệ", "reason": "Đèn đã được đặt cạnh bia trước khi nghỉ (prologue, cảnh nghỉ cuối); người chơi tự nhặt một lần ở đó (quyết định b, docs/scenario-v4/01)." } }
+    "lampRest": { "rect": { "x": 206, "y": 226, "width": 16, "height": 10 }, "reach": { "x": 198, "y": 218, "width": 32, "height": 26 }, "solid": false, "note": "đèn nằm trên đất cạnh bia, tắt; E nhặt một lần; vùng hiện nút là rect mở rộng 8px mỗi phía", "exception": { "rule": "puzzle-contracts §1: E đặt và nhặt đèn chỉ tại bệ", "reason": "Đèn đã được đặt cạnh bia trước khi nghỉ (prologue, cảnh nghỉ cuối); người chơi tự nhặt một lần ở đó (quyết định b, docs/scenario-v4/01)." } }
   },
   "rooms": [
     { "id": "middle", "rect": { "x": 272, "y": 52,  "width": 328, "height": 138 } },

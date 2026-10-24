@@ -139,6 +139,17 @@ export const FOREST_EDGE_ROOMS: readonly Room[] = Object.freeze([
   { id: 'entry', rect: { x: 16, y: 110, width: 608, height: 220 } },
 ]);
 
+/**
+ * The zone that shows the lamp's prompt: the lamp's rect grown by 8px on every side (RULE_GAMES §2). A flat item shows
+ * its control when the foot centre is inside its zone, so a zone exactly the lamp's size left no room to stand beside it.
+ */
+export const LAMP_REST_REACH: Rect = {
+  x: FOREST_EDGE.lampRest.x - 8,
+  y: FOREST_EDGE.lampRest.y - 8,
+  width: FOREST_EDGE.lampRest.width + 16,
+  height: FOREST_EDGE.lampRest.height + 16,
+};
+
 /** The interactables for the reach audit. The stele and the walls are not interactive. */
 export const FOREST_EDGE_ITEMS: readonly AuditItem[] = Object.freeze([
   { id: HINGE_ID, reach: { kind: 'block', rect: FOREST_EDGE.hinge } },
@@ -146,5 +157,5 @@ export const FOREST_EDGE_ITEMS: readonly AuditItem[] = Object.freeze([
   { id: LATCH_A_ID, reach: { kind: 'block', rect: FOREST_EDGE.latchA } },
   { id: S2_ID, reach: { kind: 'block', rect: FOREST_EDGE.s2 } },
   { id: BRACE_B_ID, reach: { kind: 'block', rect: FOREST_EDGE.braceB } },
-  { id: LAMP_REST_ID, reach: { kind: 'floor', rect: FOREST_EDGE.lampRest } },
+  { id: LAMP_REST_ID, reach: { kind: 'floor', rect: LAMP_REST_REACH } },
 ]);
