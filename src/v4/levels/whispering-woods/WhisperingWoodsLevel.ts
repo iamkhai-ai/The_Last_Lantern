@@ -47,7 +47,7 @@ import {
 import type { Crank, Ring, RingDir, WhisperingWoodsState, WhisperingWoodsView } from './whisperingWoodsLogic';
 
 /** The grove's ambient darkness: constant, never tied to the lantern (puzzle-contracts §1). */
-const AMBIENT_DARKNESS = 0.42;
+const AMBIENT_DARKNESS = 0.82;
 
 /** One-time events (saved). */
 const BELL_EVENT = 'whispering-woods:bell';
