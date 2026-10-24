@@ -60,6 +60,11 @@ export interface ForestEdgeLayout extends LevelLayout {
   readonly sprout: Rect;
   /** The maintenance lamp on the ground by the stele, unlit (not solid). */
   readonly lampRest: Rect;
+  /**
+   * Tree crown, bushes and edge thickets painted in the art: solid for the foot, but not light blockers, so the
+   * lantern's circle is never cut by leaves.
+   */
+  readonly foliage: readonly Rect[];
 }
 
 /**
@@ -91,8 +96,8 @@ export const FOREST_EDGE: ForestEdgeLayout = Object.freeze({
     { x: 600, y: 52, width: 24, height: 162 },    // eastWall: courtyard east wall
     { x: 272, y: 190, width: 64, height: 24 },    // frontWallWest: courtyard south wall, west of door A
     { x: 376, y: 190, width: 224, height: 24 },   // frontWallEast: courtyard south wall, east of door A
-    { x: 40, y: 168, width: 64, height: 30 },     // bigTreeTrunk: the old tree in the entry yard
-    { x: 500, y: 240, width: 100, height: 46 },   // stationShelter: the shelter in the south yard
+    { x: 40, y: 150, width: 72, height: 50 },     // bigTreeTrunk: the old tree's trunk and root crown
+    { x: 496, y: 214, width: 104, height: 72 },   // stationShelter: the shelter, roof to posts
     { x: 568, y: 88, width: 16, height: 16 },     // waterColumn: the water column in the courtyard
   ]),
   checkpoints,
@@ -109,6 +114,14 @@ export const FOREST_EDGE: ForestEdgeLayout = Object.freeze({
   exitZone: { x: 456, y: 0, width: 48, height: 20 },
   sprout: { x: 236, y: 276, width: 16, height: 16 },
   lampRest: { x: 206, y: 226, width: 16, height: 10 },
+  foliage: Object.freeze([
+    { x: 16, y: 110, width: 128, height: 40 },    // crownWest: the old tree's low crown, west of the trunk
+    { x: 144, y: 110, width: 112, height: 20 },   // bushesNorth: thicket between the crown and the courtyard wall
+    { x: 236, y: 130, width: 20, height: 76 },    // wallBushes: shrubs along the courtyard's west wall
+    { x: 16, y: 200, width: 28, height: 130 },    // westEdge: thicket along the west edge
+    { x: 16, y: 306, width: 608, height: 24 },    // southEdge: ferns along the south edge
+    { x: 600, y: 214, width: 24, height: 116 },   // eastEdge: thicket east of the shelter
+  ]),
 });
 
 /** The lit mark and the dark marks. Dark marks sit outside every footprint; the lit mark sits under one. */

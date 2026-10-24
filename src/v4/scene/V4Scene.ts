@@ -33,6 +33,7 @@ import {
   findDevLevelFactory,
   findLevelFactory,
 } from '../levels';
+import { FocusMarker } from './FocusMarker';
 import type { LevelHost, V4LevelRuntime } from './LevelHost';
 import type { IllustrationData } from './IllustrationScene';
 import { safeLocalStorage } from './browserStorage';
@@ -74,6 +75,7 @@ export class V4Scene extends Phaser.Scene {
   private player!: Player;
   private lumo!: Lumo;
   private lanternSystem!: LanternSystem;
+  private focusMarker!: FocusMarker;
   private interactions!: InteractionSystem;
   /** The level's interactables, as registered at build; the ones there now glow faintly in the dark. */
   private items: Interactable[] = [];
@@ -146,6 +148,7 @@ export class V4Scene extends Phaser.Scene {
     this.lumo.setVisible(this.lumoPresent());
     this.lanternSystem = new LanternSystem(this, { ambientDarkness: this.level.ambientDarkness() });
     this.lanternSystem.setLightingEnabled(this.level.lighting() === 'lantern');
+    this.focusMarker = new FocusMarker(this);
     this.interactions = new InteractionSystem(this);
     this.dialogue = new DialogueSystem(this);
     this.choice = new ChoiceBox(this);
@@ -219,6 +222,11 @@ export class V4Scene extends Phaser.Scene {
       glow: handLit ? null : { x: ground.x, y: ground.y - LANTERN_LIFT },
       items: this.items.filter((item) => item.getPrompt() !== null).map((item) => item.reach.rect),
     });
+    const focus = new Set(this.level.focus?.() ?? []);
+    this.focusMarker.update(
+      dt,
+      this.items.filter((item) => focus.has(item.id) && item.getPrompt() !== null).map((item) => item.reach),
+    );
     // Seen marks go into the journal once; the host writes them in the same frame they are seen.
     const found = new Set(this.save.journal);
     for (const id of marksToRecord(ground, this.level.lightMarks(), footprints, blockers, this.level.rooms?.() ?? [], found)) {

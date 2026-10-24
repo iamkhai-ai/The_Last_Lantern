@@ -7,7 +7,9 @@ import {
   FOREST_EDGE,
   FOREST_EDGE_LIGHT_MARKS,
   FOREST_EDGE_PULSE_MARKS,
+  BRACE_B_ID,
   LAMP_REST_ID,
+  LATCH_A_ID,
   MIDDLE_CHECKPOINT_ID,
   S1_ID,
   S2_ID,
@@ -28,6 +30,7 @@ import {
   defaultForestEdgeState,
   deriveForestEdge,
   forestEdgeHint,
+  forestEdgeFocus,
   forestEdgeHud,
   forestExitReady,
   lampOnGround,
@@ -429,5 +432,36 @@ describe('forest edge journal texts', () => {
       expect(FOREST_EDGE_JOURNAL_TEXT[mark.id], mark.id).toBeTruthy();
     }
     expect(FOREST_EDGE_LIGHT_MARKS.some(mark => mark.id === SPROUT_ID)).toBe(true);
+  });
+});
+
+describe('forest edge focus', () => {
+  // The marker follows the reference route: lamp, S1, latch A, S1, S2, brace B, S2, then nothing.
+  it('points at the lamp by the stele first', () => {
+    expect(forestEdgeFocus(lampOnGround(), DEFAULT)).toEqual([LAMP_REST_ID]);
+  });
+
+  it('points at S1, then at latch A while S1 feeds door A', () => {
+    expect(forestEdgeFocus(HAND_ON, DEFAULT)).toEqual([S1_ID]);
+    expect(forestEdgeFocus(ON_S1, DEFAULT)).toEqual([LATCH_A_ID]);
+  });
+
+  it('points back at S1 when the lamp there is off, or once latch A holds', () => {
+    expect(forestEdgeFocus(OFF_S1, DEFAULT)).toEqual([S1_ID]);
+    expect(forestEdgeFocus(ON_S1, LATCHED)).toEqual([S1_ID]);
+  });
+
+  it('points at S2, then at brace B while S2 feeds gate B', () => {
+    expect(forestEdgeFocus(HAND_ON, LATCHED)).toEqual([S2_ID]);
+    expect(forestEdgeFocus(ON_S2, LATCHED)).toEqual([BRACE_B_ID]);
+  });
+
+  it('points at S2 to take the lamp back once brace B holds, then at nothing', () => {
+    expect(forestEdgeFocus(ON_S2, BRACED)).toEqual([S2_ID]);
+    expect(forestEdgeFocus(HAND_ON, BRACED)).toEqual([]);
+  });
+
+  it('points back at S2 for a lamp put there before latch A', () => {
+    expect(forestEdgeFocus(ON_S2, DEFAULT)).toEqual([S2_ID]);
   });
 });

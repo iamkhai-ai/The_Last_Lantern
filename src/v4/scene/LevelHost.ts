@@ -54,6 +54,12 @@ export interface V4LevelRuntime<S> {
   build(host: LevelHost, state: S): void;
   interactables(): Interactable[];
   /**
+   * Ids of the interactables the player most likely needs next on the reference route; the host marks each with a
+   * floor ring and a bobbing arrow. A pointer only: the route is a reference, never a required order (puzzle-contracts §1).
+   * Optional: absent or empty draws no marker.
+   */
+  focus?(): readonly string[];
+  /**
    * Per frame: recompute live doors/bridges from state + lantern + Lumo, update colliders and visuals.
    * `footprints` are every gameplay footprint this frame (the lantern's and the fixed sources').
    */

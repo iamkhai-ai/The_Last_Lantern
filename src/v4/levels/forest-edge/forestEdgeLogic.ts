@@ -8,7 +8,7 @@ import { lanternFeeds, pickUpLantern, placeLantern } from '../../core/lantern';
 import type { LanternState } from '../../core/lantern';
 import { stepMod } from '../../core/rotary';
 import type { DialogueLine } from '../../../types/gameTypes';
-import { FOREST_EDGE, LAMP_REST_ID, S1_ID, S2_ID } from './forestEdgeLayout';
+import { BRACE_B_ID, FOREST_EDGE, LAMP_REST_ID, LATCH_A_ID, S1_ID, S2_ID } from './forestEdgeLayout';
 
 /**
  * The state the level keeps in the save: whether latch A and brace B are engaged. Door and gate openings are not
@@ -160,12 +160,13 @@ export function forestBlockers(live: ForestEdgeLive): Rect[] {
 }
 
 /**
- * Every solid of the level now: walls, the stone, pedestals, latch, brace, hinge and the closed leaves.
+ * Every solid of the level now: walls, foliage, the stone, pedestals, latch, brace, hinge and the closed leaves.
  * Defaults to the initial live state so the layout tests can ask for a closed level.
  */
 export function forestSolids(live: ForestEdgeLive = INITIAL_FOREST_LIVE): Rect[] {
   const solids: Rect[] = [
     ...FOREST_EDGE.walls,
+    ...FOREST_EDGE.foliage,
     FOREST_EDGE.stele,
     FOREST_EDGE.hinge,
     FOREST_EDGE.s1,
@@ -265,6 +266,24 @@ export function forestEdgeHud(view: ForestEdgeView, lantern: LanternState, state
     objective: view.stage === 'done' ? 'Giữ lối qua trạm để mang đèn đi tiếp' : 'Kiểm tra trạm mất nguồn',
     status: `${lamp} · ${doorA} · ${gateB}`,
   };
+}
+
+/**
+ * The interactables to point at next on the reference route (a marker, never a lock): the lamp by the stele, then S1,
+ * latch A while S1 feeds door A, S1 again to take the lamp back, S2, brace B while S2 feeds gate B, and S2 once more
+ * to take the lamp through the gate. A lamp left unlit on a pedestal points back at that pedestal.
+ */
+export function forestEdgeFocus(lantern: LanternState, state: ForestEdgeState): readonly string[] {
+  if (lantern.location.at === 'hand') {
+    if (!state.latchA) return [S1_ID];
+    if (!state.braceB) return [S2_ID];
+    return [];
+  }
+  const at = lantern.location.pedestalId;
+  if (at === LAMP_REST_ID) return [LAMP_REST_ID];
+  if (at === S1_ID) return !state.latchA && lanternFeeds(lantern, S1_ID) ? [LATCH_A_ID] : [S1_ID];
+  if (at === S2_ID) return state.latchA && !state.braceB && lanternFeeds(lantern, S2_ID) ? [BRACE_B_ID] : [S2_ID];
+  return [];
 }
 
 /** The three hint levels from the doc, for the current step. None once both latch and brace hold. */
