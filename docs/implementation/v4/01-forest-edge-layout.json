@@ -17,7 +17,7 @@
   "gateB": { "x": 456, "y": 36,  "width": 48, "height": 16 },
   "interactables": {
     "stele":   { "rect": { "x": 160, "y": 206, "width": 28, "height": 12 }, "solid": true },
-    "lampRest": { "rect": { "x": 192, "y": 218, "width": 16, "height": 12 }, "solid": false, "note": "đèn nằm trên đất cạnh bia lúc đầu, tắt; E nhặt một lần (ngoại lệ, quyết định b). Không đặt xuống đất lại; đặt chỉ tại bệ S1/S2" },
+    "lampRest": { "rect": { "x": 192, "y": 218, "width": 16, "height": 12 }, "solid": false, "exception": { "rule": "puzzle-contracts §1: E đặt và nhặt đèn chỉ tại bệ", "reason": "Đèn đã được đặt cạnh bia trước khi nghỉ (prologue, cảnh nghỉ cuối); người chơi tự nhặt một lần ở đó (quyết định b)." }, "note": "đèn nằm trên đất cạnh bia lúc đầu, tắt; E nhặt một lần. Không đặt xuống đất lại. Tọa độ bản nháp; runtime dùng x=226, y=216" },
     "hinge":   { "rect": { "x": 112, "y": 268, "width": 24, "height": 14 }, "solid": true, "note": "tùy chọn" },
     "s1":      { "rect": { "x": 282, "y": 240, "width": 24, "height": 24 }, "solid": true, "note": "ổ kín, nối tới A" },
     "latchA":  { "rect": { "x": 392, "y": 166, "width": 16, "height": 16 }, "solid": true, "note": "chốt cố định ở sân giữa" },

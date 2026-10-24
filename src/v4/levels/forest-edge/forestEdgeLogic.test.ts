@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { footRectAt } from '../../core/body';
-import { initialLantern, placeLantern, toggleLantern } from '../../core/lantern';
+import { initialLantern, lanternFeeds, placeLantern, toggleLantern } from '../../core/lantern';
 import type { LanternState } from '../../core/lantern';
+import { groundPoint, lanternFootprints } from '../../core/light';
 import {
   FOREST_EDGE_LIGHT_MARKS,
   FOREST_EDGE_PULSE_MARKS,
+  LAMP_REST_ID,
   S1_ID,
   S2_ID,
   SPROUT_ID,
@@ -16,6 +18,8 @@ import {
   HINGE_PHASE_TEXT,
   INITIAL_FOREST_LIVE,
   REFUSE_BRACE_B,
+  REFUSE_LAMP_GONE,
+  REFUSE_LAMP_ON_GROUND,
   REFUSE_LANTERN_ELSEWHERE,
   REFUSE_LATCH_A,
   defaultForestEdgeState,
@@ -23,11 +27,13 @@ import {
   forestEdgeHint,
   forestEdgeHud,
   forestExitReady,
+  lampOnGround,
   lanternAtPedestal,
   nextHingePhase,
   parseForestEdgeState,
   pendingCue,
   stepDoors,
+  takeLampFromRest,
   toggleBraceB,
   toggleLatchA,
 } from './forestEdgeLogic';
@@ -368,6 +374,39 @@ describe('forest edge hinge model', () => {
     expect(nextHingePhase(0)).toBe(1);
     expect(nextHingePhase(1)).toBe(2);
     expect(nextHingePhase(2)).toBe(0);
+  });
+});
+
+describe('forest edge lamp on the ground by the stele', () => {
+  const ON_GROUND = lampOnGround();
+
+  it('starts unlit on the ground, and the lamp is not in hand', () => {
+    expect(ON_GROUND).toEqual({ location: { at: 'pedestal', pedestalId: LAMP_REST_ID }, on: false });
+  });
+
+  it('takes the lamp from the ground into hand, still unlit', () => {
+    expect(takeLampFromRest(ON_GROUND)).toEqual({ ok: true, value: { location: { at: 'hand' }, on: false } });
+  });
+
+  it('refuses to take the lamp when it is not on the ground', () => {
+    expect(takeLampFromRest(HAND_ON)).toEqual({ ok: false, reason: REFUSE_LAMP_GONE });
+    expect(takeLampFromRest(ON_S1)).toEqual({ ok: false, reason: REFUSE_LAMP_GONE });
+  });
+
+  it('refuses to set the lamp down on a pedestal while it rests on the ground', () => {
+    expect(lanternAtPedestal(ON_GROUND, S1_ID)).toEqual({ ok: false, reason: REFUSE_LAMP_ON_GROUND });
+    expect(lanternAtPedestal(ON_GROUND, S2_ID)).toEqual({ ok: false, reason: REFUSE_LAMP_ON_GROUND });
+  });
+
+  it('gives no light and no feed while it rests on the ground', () => {
+    expect(lanternFeeds(ON_GROUND, S1_ID)).toBe(false);
+    expect(lanternFeeds(ON_GROUND, LAMP_REST_ID)).toBe(false);
+    expect(lanternFootprints(ON_GROUND, groundPoint({ x: 226, y: 240 }), () => null)).toEqual([]);
+  });
+
+  it('says where the lamp is in the status line', () => {
+    const hud = forestEdgeHud(deriveForestEdge(DEFAULT, ON_GROUND, CLOSED), ON_GROUND, DEFAULT);
+    expect(hud.status).toBe('Đèn: trên đất cạnh bia tắt · Cửa A: đóng · Cổng B: đóng');
   });
 });
 

@@ -122,7 +122,7 @@ Luật chung (puzzle-contracts): dấu tối chỉ đọc được khi không c�
 
 ## 7. Trạng thái lưu
 
-Lưu: vị trí đèn (`lampRest`, S1, S2, hoặc đang cầm), F bật/tắt, `latchA`, `latchB`, `hingeHooked`, vị trí và chế độ Lumo, các dấu Pulse thật sự phát hiện, các dấu tối đã thấy, và sự kiện một lần: `opening-seen`, `stele-read`, `bar-dropped-line`, `ending-seen`.
+Lưu: vị trí đèn (`lampRest`, S1, S2, hoặc đang cầm), F bật/tắt, `latchA`, `latchB`, `hingeHooked`, vị trí và chế độ Lumo, các dấu Pulse thật sự phát hiện, các dấu tối đã thấy, và sự kiện một lần: `opening-seen`, `stele-read`, `bar-dropped-line`, `ending-seen`, `lamp-taken` (đèn đã nhặt khỏi đất một lần; chưa có sự kiện này thì đèn nằm trên đất khi tải).
 
 Không lưu: trạng thái cửa A/B (tính lại từ nguồn và chốt), hướng quay của Nhinh, footprint của đèn. Sau khi tải, vòng sáng và quầng tính lại từ vị trí đèn hiện tại.
 
@@ -133,13 +133,11 @@ Không lưu: trạng thái cửa A/B (tính lại từ nguồn và chốt), hư�
 Ngoại lệ cần ghi (chưa sửa tài liệu chung):
 - E nhặt đèn trên đất **chỉ tại `lampRest`** và chỉ khi đèn còn ở đó.
 - Không đặt đèn xuống đất. Đặt đèn chỉ tại bệ S1/S2, như luật chung.
-- Cảnh mở đầu gắn với lần bật đèn đầu tiên trong tay (đề xuất, cần duyệt).
+- Cảnh mở đầu chạy khi vòng sáng đầu tiên phủ lên mầm Lumo (runtime hiện tại). Đề xuất gắn với lần bật đầu, cần duyệt.
 
-Phải sửa khi chốt (b):
-- `puzzle-contracts.md`: luật "E chỉ đặt và nhặt đèn tại bệ" thêm ngoại lệ `lampRest`.
-- `01-forgotten-forest-edge.md` §1 và §4: đang viết "không có thao tác E nhặt đèn trên mặt đất" và "Nhinh nhặt đèn" trong cảnh mở. Cần đổi theo (b).
-- `RULE_GAMES.md` và engine: ghi ngoại lệ một lần.
-- `level01-v4` runtime (`3167e94`): chưa có đèn trên đất; cần thêm `lampRest` và E nhặt tương ứng.
+Đã làm theo (b):
+- `puzzle-contracts.md`, `RULE_GAMES.md` mục 8 và `01-forgotten-forest-edge.md` §1/§4 trên `develop-v4` (`7b1b7d0`).
+- Runtime: `LAMP_REST_EXCEPTION` trong `forestEdgeLayout.ts`, nhặt một lần bằng E, sự kiện `forest-edge:lamp-taken`, đặt đèn lên bệ bị từ chối khi đèn còn trên đất.
 
 ## 9. Kiểm đã làm
 
@@ -222,7 +220,6 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 
 ## 12. Bước tiếp theo khi dựng
 
-- Sửa `puzzle-contracts.md`, `01-forgotten-forest-edge.md` §1/§4 và `RULE_GAMES.md` theo §8, trên `develop-v4` (chưa làm).
-- Chạy lại reach audit và `hasAimArea` trên v3 (chưa làm).
-- Runtime `level01-v4` (`3167e94`): thêm `lampRest`, E nhặt một lần, và cảnh mở gắn với lần bật đầu. `forestEdgeLogic.ts` cần test cho ngoại lệ này.
-- `ForestEdgeLevel.ts` dùng host V4 và `light.ts` để vẽ vòng sáng 40 px và quầng.
+- Đã xong: tài liệu chung trên `develop-v4` (`7b1b7d0`). Runtime có `lampRest`, nhặt một lần bằng E, và test cho ngoại lệ này. Toàn bộ 294 test pass, `tsc` sạch.
+- Chưa xong: JSON v3 và blockout dùng tọa độ bản nháp, khác `forestEdgeLayout.ts` của runtime. Ví dụ cửa A ở x=336 trong JSON, x=312 trong runtime; `lampRest` ở x=192 trong JSON, x=226 trong runtime. Reach audit và `hasAimArea` đã chạy trên tọa độ runtime, chưa chạy trên JSON v3. Cần chọn: đồng bộ JSON theo runtime, hoặc coi runtime là nguồn và dựng lại JSON.
+- Chưa kiểm trong trình duyệt.

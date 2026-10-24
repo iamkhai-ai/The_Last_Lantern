@@ -19,6 +19,7 @@ import {
   FOREST_EDGE_LIGHT_MARKS,
   FOREST_EDGE_PULSE_MARKS,
   FOREST_EDGE_ROOMS,
+  LAMP_REST_ID,
   MIDDLE_CHECKPOINT_ID,
   S1_ID,
   S2_ID,
@@ -244,5 +245,23 @@ describe('forest edge light marks and pulse', () => {
       const dy = mark.y - origin.y;
       expect(Math.hypot(dx, dy)).toBeLessThanOrEqual(PULSE_MAX_RADIUS);
     }
+  });
+});
+
+describe('forest edge lamp on the ground', () => {
+  it('reaches the lamp from the yard spawn, with both doors closed and open', () => {
+    const start = spawnOf(YARD_CHECKPOINT_ID);
+    expect(canReachItem(start, item(LAMP_REST_ID), walk(CLOSED))).toBe(true);
+    expect(canReachItem(start, item(LAMP_REST_ID), walk(A_OPEN))).toBe(true);
+  });
+
+  it('keeps the lamp off the solids and out of the light blockers, so it casts nothing', () => {
+    expect(forestSolids(CLOSED).some(rect => rectsOverlap(rect, FOREST_EDGE.lampRest))).toBe(false);
+    expect(forestBlockers(CLOSED).some(rect => rectsOverlap(rect, FOREST_EDGE.lampRest))).toBe(false);
+  });
+
+  it('keeps the lamp out of the stele and the pedestal reach, so one E cannot take the wrong thing', () => {
+    expect(rectsOverlap(FOREST_EDGE.lampRest, FOREST_EDGE.stele)).toBe(false);
+    expect(rectsOverlap(FOREST_EDGE.lampRest, FOREST_EDGE.s1)).toBe(false);
   });
 });

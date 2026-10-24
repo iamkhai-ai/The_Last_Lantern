@@ -12,6 +12,8 @@ export const S2_ID = 's2';
 export const LATCH_A_ID = 'latchA';
 /** Id of the brace B (tay hãm) in the middle yard. */
 export const BRACE_B_ID = 'braceB';
+/** Id of the maintenance lamp on the ground by the stele: taken once with E, never set down there. */
+export const LAMP_REST_ID = 'lampRest';
 /** Id of the optional hinge model by the stele. Never required. */
 export const HINGE_ID = 'hinge';
 /** Id of the lit mark (the sprout Lumo hides). */
@@ -56,7 +58,19 @@ export interface ForestEdgeLayout extends LevelLayout {
   readonly exitZone: Rect;
   /** The lit sprout (not solid). */
   readonly sprout: Rect;
+  /** The maintenance lamp on the ground by the stele, unlit (not solid). */
+  readonly lampRest: Rect;
 }
+
+/**
+ * The one declared exception to puzzle-contracts §1 (lamp picked up only at a pedestal), kept with its reason
+ * (RULE_GAMES §8). Nothing else is picked up from the ground, and the lamp is never set down there.
+ */
+export const LAMP_REST_EXCEPTION = {
+  rule: 'puzzle-contracts §1: E đặt và nhặt đèn chỉ tại bệ',
+  reason:
+    'Đèn đã được đặt cạnh bia trước khi nghỉ (prologue, cảnh nghỉ cuối); người chơi tự nhặt một lần ở đó (quyết định b, docs/scenario-v4/01).',
+} as const;
 
 const checkpoints: readonly Checkpoint[] = [
   { id: YARD_CHECKPOINT_ID, spawn: { x: 120, y: 262 }, zone: { x: 64, y: 236, width: 120, height: 88 } },
@@ -88,6 +102,7 @@ export const FOREST_EDGE: ForestEdgeLayout = Object.freeze({
   braceB: { x: 548, y: 140, width: 16, height: 16 },
   exitZone: { x: 600, y: 190, width: 24, height: 40 },
   sprout: { x: 132, y: 276, width: 12, height: 10 },
+  lampRest: { x: 226, y: 216, width: 14, height: 10 },
 });
 
 /** The lit mark and the dark marks. Dark marks sit outside every footprint; the lit mark sits under one. */
@@ -121,4 +136,5 @@ export const FOREST_EDGE_ITEMS: readonly AuditItem[] = Object.freeze([
   { id: LATCH_A_ID, reach: { kind: 'block', rect: FOREST_EDGE.latchA } },
   { id: S2_ID, reach: { kind: 'block', rect: FOREST_EDGE.s2 } },
   { id: BRACE_B_ID, reach: { kind: 'block', rect: FOREST_EDGE.braceB } },
+  { id: LAMP_REST_ID, reach: { kind: 'floor', rect: FOREST_EDGE.lampRest } },
 ]);

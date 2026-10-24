@@ -18,6 +18,7 @@ import {
   FOREST_EDGE_PULSE_MARKS,
   FOREST_EDGE_ROOMS,
   HINGE_ID,
+  LAMP_REST_ID,
   LATCH_A_ID,
   S1_ID,
   S2_ID,
@@ -29,17 +30,20 @@ import {
   FOREST_EDGE_JOURNAL_TEXT,
   HINGE_PHASE_TEXT,
   INITIAL_FOREST_LIVE,
+  LAMP_TAKEN_EVENT,
   defaultForestEdgeState,
   deriveForestEdge,
   forestBlockers,
   forestEdgeHint,
   forestEdgeHud,
   forestExitReady,
+  lampOnGround,
   lanternAtPedestal,
   nextHingePhase,
   parseForestEdgeState,
   pendingCue,
   stepDoors,
+  takeLampFromRest,
   toggleBraceB,
   toggleLatchA,
 } from './forestEdgeLogic';
@@ -80,6 +84,8 @@ const PROMPT_RELEASE_A = 'E: mở chốt A';
 const PROMPT_ENGAGE_B = 'E: gài tay hãm B';
 const PROMPT_RELEASE_B = 'E: nhả tay hãm B';
 const PROMPT_HINGE = 'E: xoay mô hình bản lề';
+const PROMPT_TAKE_LAMP = 'E: nhặt đèn';
+const PROMPT_LAMP_BY_STELE = 'E: đèn đang ở bên bia';
 
 /**
  * Forest edge (level 01): an entry yard with pedestal S1, door A in the split wall, a middle yard with latch A, pedestal
@@ -192,8 +198,16 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
         getPrompt: () => PROMPT_HINGE,
         onInteract: () => this.onHinge(),
       },
+      {
+        id: LAMP_REST_ID,
+        reach: { kind: 'floor', rect: FOREST_EDGE.lampRest },
+        getPrompt: () => this.lampPrompt(),
+        onInteract: () => this.onLampRest(),
+      },
     ];
 
+    // The lamp rests on the ground by the stele until the player takes it once (decision b, layout v3).
+    if (!host.hasEvent(LAMP_TAKEN_EVENT)) host.setLantern(lampOnGround());
     this.update(0, { x: 0, y: 0, width: 0, height: 0 }, []);
     this.cuesEnabled = true;
   }
@@ -323,7 +337,25 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
   private pedestalPrompt(pedestalId: string): string {
     const lantern = this.host.getLantern();
     if (lantern.location.at === 'hand') return pedestalId === S1_ID ? PROMPT_PLACE_S1 : PROMPT_PLACE_S2;
+    if (lantern.location.pedestalId === LAMP_REST_ID) return PROMPT_LAMP_BY_STELE;
     return lantern.location.pedestalId === pedestalId ? PROMPT_TAKE : `E: đèn đang ở bệ ${lantern.location.pedestalId === S1_ID ? 'S1' : 'S2'}`;
+  }
+
+  /** The lamp on the ground shows its prompt only while it rests there; after the one pickup the control is gone. */
+  private lampPrompt(): string | null {
+    const lantern = this.host.getLantern();
+    return lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID ? PROMPT_TAKE_LAMP : null;
+  }
+
+  private onLampRest(): void {
+    const outcome = takeLampFromRest(this.host.getLantern());
+    if (!outcome.ok) {
+      this.host.toast(outcome.reason);
+      return;
+    }
+    this.host.setLantern(outcome.value);
+    this.host.markEvent(LAMP_TAKEN_EVENT);
+    this.host.requestSave();
   }
 
   private onPedestal(pedestalId: string): void {
@@ -378,6 +410,11 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
         const c = rectCenter(rect);
         g.fillStyle(lantern.on ? COLOR.lanternOn : COLOR.lanternOff, 1).fillCircle(c.x, c.y, 4);
       }
+    }
+    // The lamp resting on the ground by the stele: unlit, drawn as a dim core until it is taken.
+    if (lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID) {
+      const c = rectCenter(FOREST_EDGE.lampRest);
+      g.fillStyle(COLOR.lanternOff, 1).fillCircle(c.x, c.y, 4);
     }
     if (this.state.latchA) {
       const r = FOREST_EDGE.latchA;
