@@ -1,6 +1,7 @@
 import type { V4LevelRuntime } from '../scene/LevelHost';
 import { ForestEdgeLevel } from './forest-edge/ForestEdgeLevel';
 import { WhisperingWoodsLevel } from './whispering-woods/WhisperingWoodsLevel';
+import { LibraryRootsLevel } from './library-roots/LibraryRootsLevel';
 import { TestRoomLevel } from './test-room/TestRoomLevel';
 
 /** Makes a fresh runtime for one level. Constructing it touches no Phaser object; `build()` does. */
@@ -10,6 +11,7 @@ export type V4LevelFactory = () => V4LevelRuntime<unknown>;
 export const V4_LEVELS: readonly V4LevelFactory[] = [
   () => new ForestEdgeLevel(),
   () => new WhisperingWoodsLevel(),
+  () => new LibraryRootsLevel(),
 ];
 
 /** Development levels. Never in the campaign order: a new game starts in one only when the URL names it (?v4level=). */
