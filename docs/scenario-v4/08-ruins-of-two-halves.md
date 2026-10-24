@@ -6,7 +6,7 @@
 
 The Shadow đứng dưới nguồn trắng cố định, che một vạt cây. Ông đếm tiếng khóa như đang kiểm tra ca trực. Khi Nhinh đến gần: “Đừng đổi đường cấp. Bên kia còn người.” Cô đáp: “Bên kia đã chuyển ca. Con nghe được họ.” Ông chưa tin toàn bộ hệ thống có thể tự giữ.
 
-Trạng thái khi vào: đèn bảo trì đang ở tay Nhinh và bật; bệ S đang rỗng; nguồn trắng W bật; rễ cầu đã nhận nước từ sau màn 06; lối đá hồi đóng; bộ điều khiển đường phải ở tuyến trong; tượng ở mặt hẹp; Z có giá trị (0,2); G1 chưa trỏ đúng Nhật trái; các khóa Nhật/Nguyệt chưa được chốt. Tải lại giữ trạng thái thật của từng vật và đặt Nhinh trên nền an toàn gần checkpoint.
+Trạng thái khi vào: đèn bảo trì đang ở tay Nhinh; F giữ trạng thái mang từ 07, mặc định bật; bệ S đang rỗng; nguồn trắng W bật; rễ cầu đã nhận nước từ sau màn 06; lối đá hồi đóng; bộ điều khiển đường phải ở tuyến trong; tượng ở mặt hẹp; Z có giá trị (0,2); G1 chưa trỏ đúng Nhật trái; các khóa Nhật/Nguyệt chưa được chốt. Tải lại giữ trạng thái thật của từng vật và đặt Nhinh trên nền an toàn gần checkpoint.
 
 Ánh sáng trong phòng có ba lớp, không thay thế nhau:
 
@@ -76,4 +76,4 @@ Khi Nhật trái và Nhật phải sáng còn Nguyệt nằm trong bóng, khóa 
 - **Mức 3 — bước tiếp:** “Tắt đèn khi đang cầm, qua rễ mở lối đá phía Đông; chọn đường ngoài, chỉnh Z và mặt tượng. Trở về bằng đá, E đặt đèn vào S rồi F bật để nối hai Nhật.” H chỉ nhắc điều kiện đang thiếu, không đòi Pulse.
 - Sau khóa: “Tượng giữ được vùng cây. Có thể gọi Lumo về và thu đèn.”
 
-Giữ phế tích, tượng, Nhật/Nguyệt, Shadow và dấu vật liệu. Tái dùng loại rễ/cầu sống đã học ở 07, nhưng cầu này là một đoạn ngắn đã nhận nước từ 06. Mới/chỉnh: rìa spill cục bộ của đèn S, D0 chia trái/phải và D1 chia nhánh phải thành Nguyệt/R, lá chuyển R, cặp gương ngoài trên trục Z, tay truyền động cho tượng, lối đá hồi mở ở gờ Đông, mạch nước phát quang chỉ trên cầu đã mọc, và rìa hẹp của nguồn trắng W trên vạt cây. Art phải cho thấy vách chặn đường vòng, lối đá không bypass cổng chính, tia thật theo từng mặt gương, và tượng che Nguyệt từ mạng S đồng thời chắn W khỏi vạt cây. HUD: “Giữ hai khóa sáng và vùng ươm được che.”
+Giữ phế tích, tượng, Nhật/Nguyệt, Shadow và dấu vật liệu. Tái dùng loại rễ/cầu sống đã học ở 07, nhưng cầu này là một đoạn ngắn đã nhận nước từ 06. Mới/chỉnh: rìa spill cục bộ của đèn S, D0 chia trái/phải và D1 chia nhánh phải thành Nguyệt/R, lá chuyển R, cặp gương ngoài trên trục Z, tay truyền động cho tượng, lối đá hồi mở ở gờ Đông, mạch nước phát quang chỉ trên cầu đã mọc, và rìa hẹp của nguồn trắng W trên vạt cây. Art phải cho thấy vách chặn đường vòng, lối đá không bypass cổng chính, tia thật theo từng mặt gương, và tượng che Nguyệt từ mạng S đồng thời chắn W khỏi vạt cây. HUD: “Giữ hai khóa sáng và vạt cây được che.”

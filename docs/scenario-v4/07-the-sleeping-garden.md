@@ -10,7 +10,7 @@ Không thêm một bí mật lớn hay cảnh mất mát ở đây. Cho người
 
 ## 2. Không gian và điều kiện
 
-Trạng thái đầu: Nhinh cầm đèn tắt ở bờ Tây; không có bệ; bể sáng cố định W đang mở; hoa cảm biến của cửa A không nhận W nên A đóng; rễ cầu đã nhận nước hồi từ 06 nhưng đang co vì W chiếu vào luống cầu/ươm; van nước cuối vào khu ươm đóng; chốt đường đá về Tây chưa mở. Một sân nối nhỏ nằm ngay sau A, trước cầu rễ; tay gài A ở sân này, không ở bờ Đông. Tay che W ở bờ Tây và tới được từ A khi cửa được chốt.
+Trạng thái đầu: Nhinh cầm đèn ở bờ Tây; F giữ trạng thái mang từ 06, mặc định tắt; không có bệ; bể sáng cố định W đang mở; hoa cảm biến của cửa A không nhận W nên A đóng; rễ cầu đã nhận nước hồi từ 06 nhưng đang co vì W chiếu vào luống cầu/ươm; van nước cuối vào khu ươm đóng; chốt đường đá về Tây chưa mở. Một sân nối nhỏ nằm ngay sau A, trước cầu rễ; tay gài A ở sân này, không ở bờ Đông. Tay che W ở bờ Tây và tới được từ A khi cửa được chốt.
 
 Ánh nền rêu và phản quang trên đá cho thấy bờ, chân cửa, sân nối, toàn bộ mặt cầu, rãnh, van và mép vực cả khi mọi nguồn gameplay tắt. Không có đoạn cần đi mù; ánh nền không kích cảm biến. W là một nguồn cố định trong bể trên cao. Tay che ở bờ Tây đóng một nắp vật lý trên W; khi nắp đóng, luồng W chỉ bị chặn ở khu vườn, không tắt nền môi trường. Vệt W khi mở chỉ phủ luống rễ cầu và luống ươm, có rìa nhìn được; nó không chiếu hoa A. Không có công tắc từ xa cho W. Cầu rễ co chặn đường tới Đông, không có đường vòng từ Tây.
 

@@ -24,6 +24,43 @@ Dấu tĩnh là thông tin về cách mạng nối, không phải trạng thái 
 
 Màn có thể đặt lớp thông tin chỉ lộ khi dấu ấy **không thật sự bị một vệt đèn gameplay chiếu vào**: mực phát quang, vết nước, đom đóm tụ, rãnh phản quang hoặc hình khắc dưới bụi sao. Tài liệu màn phải nói rõ dấu nào xuất hiện và footprint nào có thể che nó. Tắt F không làm tối toàn phòng, còn bật đèn ở phòng khác không che dấu xuyên phòng; chỉ nguồn có tia thật phủ lên dấu mới đổi khả năng đọc. Đây là art/trạng thái được dựng có chủ ý, không phải hình ảnh vốn tồn tại nhưng bị giấu bằng gamma. Thông tin tối có thể giúp chọn tuyến, đọc dấu hoặc đi trên một cầu đã mọc; không được tự tiết lộ toàn bộ lời giải. Đường đi và vật tương tác vẫn nhìn rõ nhờ ánh nền.
 
+### Vệt đèn, đầu nhận và dấu sáng/tối — quy ước dựng chung
+
+Các số dưới đây là giá trị khởi điểm dùng chung cho mọi màn. Chúng được chỉnh một lần ở phòng thử, không chỉnh riêng từng màn để làm bài dễ hoặc khó hơn.
+
+**Footprint của đèn cầm tay** chỉ tồn tại khi đèn ở tay và F bật. Nó gồm:
+
+- **Vệt:** hình thang đi ra phía trước từ tay cầm đèn theo hướng Nhinh đang quay (8 hướng; hướng chéo cùng chiều dài). Dài 56px, rộng 12px ở gốc và 32px ở đầu xa. Khi đứng yên, Nhinh giữ hướng quay cuối cùng; muốn rọi một vật, người chơi bước một nhịp về phía nó rồi dừng. Không có nút ngắm riêng.
+- **Quầng:** vòng bán kính 12px quanh chính chiếc đèn.
+- **Vật chắn:** tường và cánh cửa đang đóng chắn vệt; phần nằm sau chúng không được chiếu. Cầu, rễ, nước, NPC và Lumo không chắn.
+
+Rìa vẽ trên màn khớp đúng footprint này. Ngoài footprint chỉ có ánh nền; không có quầng trang trí lớn hơn footprint khiến người chơi tưởng một dấu đang bị chiếu.
+
+**Đèn đặt trên bệ** có footprint là quầng 12px quanh đèn cộng các nhánh tràn mà màn khai báo (nhánh spill của S ở 08, nhánh soi hồ sơ ở 09). Đầu nối kín không phải footprint. Không đặt mặt nhận hở hay dấu sáng/tối trong quầng của bệ, trừ khi màn ghi rõ lý do.
+
+**Nguồn cố định** có footprint là vùng khai báo của nguồn khi công tắc/nắp cho phép; F không đổi nó.
+
+**Độ sáng màn hình:** ánh nền của mỗi phòng là cố định, không đổi theo F. F chỉ thêm hoặc bớt footprint của đèn bảo trì. Không có lớp tối phủ toàn màn khi tắt F, và cũng không làm sáng toàn màn khi bật.
+
+**Hai loại đầu nhận**, phân biệt bằng hình dạng, không chỉ bằng màu. Mỗi màn ghi rõ đầu nhận nào thuộc loại nào:
+
+- **Ổ kín** (có nắp, đầu nối vẽ rõ): chỉ nhận qua bệ và mạng đã vẽ. Đèn cầm tay, nguồn cố định và Lumo không kích được. Ví dụ: cửa A/B ở 01, cầu ở 04.
+- **Mặt nhận hở** (hoa, luống rễ, lá cảm biến): nhận khi bất kỳ footprint gameplay nào (vệt, quầng, nhánh tràn, nguồn cố định) chồng lên vùng nhạy. Ví dụ: hoa A ở 07, luống rễ cầu ở 07/08. Trạng thái tính lại liên tục từ footprint hiện tại, không có thời gian chờ; vật đang chịu tải vẫn giữ tới nền an toàn theo luật cầu/cửa.
+
+**Dấu sáng và dấu tối:**
+
+- **Dấu sáng** chỉ đọc được khi một footprint gameplay chồng lên nó: lớp thiên thể trên phiến ở 03, mặt máy và các dấu ánh ở 01.
+- **Dấu tối** chỉ đọc được khi không footprint gameplay nào chồng lên nó: bào tử 01, đom đóm 02, lớp mũi tên 03, vệt khoáng 04, phấn 05, vạch khắc 06, phấn 07, mạch nước trên rễ 08, bột sao 09, đai rễ 10.
+- Một dấu được tính là **đã thấy** khi nó đang đọc được và chân Nhinh ở trong 64px quanh dấu, cùng phòng. Lúc đó J ghi dấu một lần dưới dạng viền mờ và save lưu cờ đã thấy. Cờ này chỉ để xem lại; nó không bao giờ là điều kiện mở cửa, cầu, H hay cảnh truyện.
+
+**Kiểm khi dựng:** mỗi mặt nhận hở phải có ít nhất một chỗ đứng an toàn (RULE_GAMES.md §6) mà từ đó vệt cầm tay phủ được nó. Nếu màn cần vệt chạm vật này mà không chạm vật kia (hoa A và luống cầu ở 07), chỗ đứng đó phải tồn tại và được script kiểm như tầm với E. Mỗi dấu sáng/tối phải có chỗ đứng đọc được trong mọi trạng thái mà màn cần dấu đó.
+
+### Đèn khi chuyển màn
+
+- Rời màn luôn mang đèn ở tay; lối ra không tự lấy đèn khỏi bệ.
+- Trạng thái F đi theo người chơi qua lối ra sang màn sau. "Trạng thái đầu" ghi ở từng màn là trạng thái **mặc định** khi không có trạng thái mang theo: vào màn từ chọn màn, save phải sửa, hoặc đầu chiến dịch. Cảnh mở màn 01 là nơi duy nhất tự bật đèn (Nhinh bật thử lần đầu).
+- Điểm vào và mọi checkpoint phải hợp lệ với cả F bật lẫn F tắt: không đứng trong vùng mà bật/tắt làm đổi cầu hay cửa dưới chân, và người chơi tiếp tục được từ đó với bất kỳ trạng thái F nào.
+
 ### Chu kỳ cấp chính và tháp
 
 Thiết kế lành mạnh nạp/chia trong khoảng ban ngày, hồi về rễ ở các khoảng còn lại; kho của bến tích phần đã nhận để dùng ban đêm. Bài chia bốn phần ở màn 06 là kiểm tra trong nhịp cấp ban ngày, không ép Cây Mẹ xuất liên tục cả đêm. Lượng dùng đêm giảm theo kho đã nạp, không có kho vô hạn. Sự ngắt dòng khẩn cấp trong truyện khác với F của đèn bảo trì.
@@ -78,7 +115,7 @@ Mỗi màn đưa vào tối đa một ý khó mới làm trọng tâm. Các thao
 
 RULE_GAMES.md vẫn áp dụng: vật đứng tương tác trong 8px từ mép footprint, mọi hướng; hốc phẳng theo quy tắc riêng; các ngoại lệ phải được ghi khi dựng. Không chốt tọa độ/collider bằng sơ đồ chữ trong tài liệu này. Mỗi khu dự kiến dùng khung 640×360 hoặc phòng ghép có đường chuyển rõ; tránh thu nhỏ vật để nhét thêm câu đố.
 
-Lưu cấu hình gương/van/chốt, trạng thái từng nguồn cố định và công tắc, vị trí đèn (đang cầm hay đặt ở bệ), F bật/tắt, vị trí/chế độ Lumo, phiến/vật đang cầm, các dấu đã Pulse thật sự phát hiện và sự kiện một lần. Nếu màn có thông tin chỉ thấy trong tối, chỉ lưu trạng thái khám phá sau khi người chơi thực sự nhìn thấy; không biến cờ đó thành điều kiện giải. Hiệu lực tia/cầu/cửa/rễ tính lại từ cấu hình hiện tại khi tải; không khôi phục một cờ “đã sáng” thay nguồn. Checkpoint phải có vùng đứng an toàn và đường tới điều khiển phục hồi ở mọi trạng thái được yêu cầu.
+Lưu cấu hình gương/van/chốt, trạng thái từng nguồn cố định và công tắc, vị trí đèn (đang cầm hay đặt ở bệ), F bật/tắt, vị trí/chế độ Lumo, phiến/vật đang cầm, các dấu đã Pulse thật sự phát hiện và sự kiện một lần. Nếu màn có thông tin chỉ thấy trong tối, chỉ lưu trạng thái khám phá sau khi người chơi thực sự nhìn thấy; không biến cờ đó thành điều kiện giải. Hiệu lực tia/cầu/cửa/rễ tính lại từ cấu hình hiện tại khi tải; không khôi phục một cờ “đã sáng” thay nguồn. Hướng quay của Nhinh và footprint đèn không lưu; sau khi tải, mặt nhận hở tính lại từ hướng mặc định tại checkpoint. Checkpoint phải có vùng đứng an toàn và đường tới điều khiển phục hồi ở mọi trạng thái được yêu cầu.
 
 Cảnh thoại có thể bỏ qua nhưng phải ghi kết quả một lần. Tải giữa cảnh chuyển dùng checkpoint trước hoặc sau cam kết; không phát lại thử tải gây hại, nhân đôi tinh thể/chốt, hoặc đưa Lumo về ấn sau khi đã gọi về. Các cờ V4 cần tên/phân phiên bản riêng khi triển khai; không đoán tương thích với save V2.
 

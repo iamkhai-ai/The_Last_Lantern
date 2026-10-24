@@ -139,3 +139,30 @@ Bảng này lấy trực tiếp từ working files, không gồm chính `design-
 | phase-2-outline.md | `0ba5a207d77096eb801c68512d7798a834ba5f2250bd95ab3539b5b92c4fffb5` |
 | puzzle-contracts.md | `de271a9f05b334b8f93cf131733b5785dbac25e8d7e6f0cfd3e765496a1fbb75` |
 | README.md | `a0d971660688b6d4ae3270fca3017e87a2f3a406a70da750e6a1b8204b8e6856` |
+
+## Đợt chốt quy ước đèn — 2026-10-24
+
+Nền: `feat/v4-foundation` tại `3fb28d8`. Đợt này chốt các điểm mà đợt ánh sáng/Pulse để ngỏ, để có thể dựng chung cho mọi màn. Không đổi luật, lời giải hay cốt truyện của màn nào.
+
+| Điểm còn ngỏ | Quyết định |
+| --- | --- |
+| Vệt đèn cầm tay rộng bao nhiêu, theo hướng nào | Hình thang 56px, gốc 12px, đầu xa 32px, theo 8 hướng quay của Nhinh; quầng 12px quanh đèn. Tường và cửa đóng chắn vệt. Rìa vẽ khớp footprint; không có quầng trang trí lớn hơn. |
+| Đèn trên bệ có footprint không | Chỉ quầng 12px cộng nhánh tràn màn khai báo; đầu nối kín không chiếu. |
+| F có làm tối/sáng cả màn không | Không. Ánh nền mỗi phòng cố định; F chỉ thêm/bớt footprint. |
+| Đèn cầm tay kích được cảm biến nào | Chỉ mặt nhận hở (hoa, luống rễ, lá cảm biến); ổ kín chỉ nhận qua bệ và mạng đã vẽ. |
+| Dấu “đọc được” và “đã thấy” | Dấu sáng cần footprint chồng lên; dấu tối cần không footprint nào. Đã thấy = đọc được và chân Nhinh trong 64px, cùng phòng; chỉ để J xem lại. |
+| Trạng thái F khi vào màn (05/07 ghi tắt, 10 ghi mang theo) | F đi theo người chơi qua lối ra; “trạng thái đầu” của màn là mặc định khi không có trạng thái mang theo. Điểm vào và checkpoint phải hợp lệ với cả hai trạng thái F. Đã sửa câu ở 05, 07, 08 cho khớp. |
+| Lỗi chữ | Tách số dính chữ ở 06 và 10; HUD màn 08 đổi “vùng ươm” thành “vạt cây” cho khớp nội dung màn. |
+
+Các số 56/12/32/64px là giá trị khởi điểm, chỉnh một lần ở phòng thử cho mọi màn. Chưa build, chưa playtest; bảng kiểm script cho chỗ đứng rọi mặt nhận hở là việc của bản dựng.
+
+Dấu vân tay các file sửa trong đợt này (file khác giữ hash của bảng trước):
+
+| File | SHA-256 |
+| --- | --- |
+| puzzle-contracts.md | `6bd2c738f894e795a6aea43e4b749016eec89f010874c68c818c43ea1150bf17` |
+| 05-a-path-for-two.md | `2cdfbe75beb507da9b4906f29d57944acaafb95319567852ec7cd3aab475fbca` |
+| 06-the-sleepless-tower.md | `a97895b300059088dfc541b42a865d752129cc682e7fb2a8ffa28cd20777f850` |
+| 07-the-sleeping-garden.md | `0a8354605db5b4572616769dab4b7590871bd6576d1b7922b1cafe40a2775814` |
+| 08-ruins-of-two-halves.md | `8ac133adf5209adf0767593026bfce1a39be0926073d6b5619a0b1b9a4bad891` |
+| 10-the-heart-of-elaria.md | `cedad31f7e7051120636cdd301aaf2f72d7cc688e26a1009240f4a73a613a399` |

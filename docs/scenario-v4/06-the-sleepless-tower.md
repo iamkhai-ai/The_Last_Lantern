@@ -25,17 +25,17 @@ Các đường cảm biến trên bảng là đèn báo của **mô hình thử*
 | P2 nhánh phải | chia thành 1+1; hoặc gom 2 ra bến |
 | G2 sau P2 | 1 về rễ, 1 làm mát; hoặc xả cả hai ra ống bỏ |
 
-Sau xác nhận của mẹ, nhu cầu mô hình là **bến 2, rễ 1, làm mát 1**, tổng4. Rễ và làm mát là hai cửa có sức nhận1; cấp2 gây chỉ báo vượt mức và van thử tự giữ, không làm hỏng rừng. Vị trí mất đầu vào cho kết quả0, không giữ lượng từ lần trước.
+Sau xác nhận của mẹ, nhu cầu mô hình là **bến 2, rễ 1, làm mát 1**, tổng 4. Rễ và làm mát là hai cửa có sức nhận 1; cấp 2 gây chỉ báo vượt mức và van thử tự giữ, không làm hỏng rừng. Vị trí mất đầu vào cho kết quả 0, không giữ lượng từ lần trước.
 
 **Một cấu hình hợp lệ:** G0 chia, G1 bến, P2 chia, G2 hồi/làm mát; lamp@S bật, Lumo@C, mẹ đã sẵn sàng. Tay Return Flow chỉ có thể cam kết khi các mức hiện tại thỏa điều kiện. Nếu bố cục phát sinh cấu hình khác đáp ứng đúng nhu cầu, cũng chấp nhận.
 
 ## 3. Nhịp suy luận
 
-Khu thử nhỏ cho thấy một luồng2 vào lăng kính thành1+1 bằng hình; không nói vị trí đúng trên máy chính. Người chơi có thể đi thẳng máy nếu đã hiểu. Trình tự chính dự kiến:
+Khu thử nhỏ cho thấy một luồng 2 vào lăng kính thành 1+1 bằng hình; không nói vị trí đúng trên máy chính. Người chơi có thể đi thẳng máy nếu đã hiểu. Trình tự chính dự kiến:
 
 1. Khi còn cầm đèn bật, Pulse tại bảng có thể cho thấy sơ đồ tĩnh G0→G1/P2→G2, các đường ra bến/rễ/làm mát và vị trí C. Đây là liên kết cố định, không hiện hướng gương, lưu lượng hiện tại hay xác nhận đổi ca. J lưu các dấu thực sự đã thấy với viền mờ; không cần Pulse để thử hoặc chốt. Đặt đèn tại S, nối Lumo ở C và bật F để nhìn trạng thái chạy thật.
-2. Nhìn bốn phần đang ra bến và hai đường0; biết vì sao chỉ mở van hồi không đủ. Nếu muốn phân biệt các đầu hồi khi chưa cấp, tắt F để xem loại vạch khắc trên ống; nền và tay điều khiển vẫn nhìn rõ.
-3. Thử chia. Cấu hình cho rễ2 vượt sức nhận; cần chia nhánh nhỏ thêm lần nữa.
+2. Nhìn bốn phần đang ra bến và hai đường 0; biết vì sao chỉ mở van hồi không đủ. Nếu muốn phân biệt các đầu hồi khi chưa cấp, tắt F để xem loại vạch khắc trên ống; nền và tay điều khiển vẫn nhìn rõ.
+3. Thử chia. Cấu hình cho rễ 2 vượt sức nhận; cần chia nhánh nhỏ thêm lần nữa.
 4. Dùng kiến thức gương/đường nối để đặt đúng các đích và Lumo giữ mạch điều khiển.
 5. Phối hợp bến giảm mức cần; xác nhận có thể diễn ra trước hay sau các bước quang học.
 6. Return Flow chốt cấu hình cơ khí vào dòng chính. Nguồn thử tắt, nước thật đổi hướng, người chơi thấy bốn phần được phân phối như mô hình.
@@ -54,12 +54,12 @@ Tinh thể Hy Vọng được lấy từ khoang mở sau chuyển dòng; nó là
 
 ## 5. Phục hồi, H, art
 
-Tất cả gương, S và mốc C trên nền khô liên thông, không bị cửa chưa giải ngăn. Nếu tắt F hoặc gọi Lumo về trước cam kết, mô hình thử dừng và các chỉ báo về cấu hình hiện tại; bật lại S, gọi Lumo tới C rồi tiếp tục, không mất một trạng thái đã xác nhận. Sau Return Flow, chốt cơ khí giữ dòng chính độc lập với đèn và Lumo. Có thể mở lại bàn thử riêng để nghiên cứu mà không đẩy dòng chính về4 trong khi đi lấy tinh thể. Người chơi được thu đèn và gọi Lumo về ngay sau cam kết.
+Tất cả gương, S và mốc C trên nền khô liên thông, không bị cửa chưa giải ngăn. Nếu tắt F hoặc gọi Lumo về trước cam kết, mô hình thử dừng và các chỉ báo về cấu hình hiện tại; bật lại S, gọi Lumo tới C rồi tiếp tục, không mất một trạng thái đã xác nhận. Sau Return Flow, chốt cơ khí giữ dòng chính độc lập với đèn và Lumo. Có thể mở lại bàn thử riêng để nghiên cứu mà không đẩy dòng chính về 4 trong khi đi lấy tinh thể. Người chơi được thu đèn và gọi Lumo về ngay sau cam kết.
 
 Lưu ack giảm tải, các nấc, đích Lumo, vị trí/trạng thái đèn, F, chốt Return Flow, trạng thái dòng chính và tinh thể. Trước cam kết, tải lại tính lại mô hình từ nguồn/nấc/Lumo hiện tại; sau cam kết hiển thị đúng nhánh 2/1/1 dù nguồn thử đã tắt. Không coi tia thử đang tắt là máy thật ngừng. Checkpoint nằm trên nền khô gần S, tay quay, C và Return Flow; không đặt Nhinh trên mô hình hoặc trong đường ống. Sau khi cam kết, đường về tinh thể và lối ra đều thông.
 
 - **Mức 1 — quan sát:** “Hai cửa nhỏ mỗi cửa nhận được bao nhiêu phần?”
-- **Mức 2 — quan hệ:** “Một nhánh2 đủ cho bến; nhánh2 còn lại cần chia cho hai cửa nhỏ.”
+- **Mức 2 — quan hệ:** “Một nhánh 2 đủ cho bến; nhánh 2 còn lại cần chia cho hai cửa nhỏ.”
 - **Mức 3 — bước tiếp:** “G0 chia đôi, G1 đưa nhánh trái về bến, P2 chia nhánh phải, G2 đưa hai phần tới rễ và làm mát; nhờ Lumo giữ C.” Nếu ack thiếu, H nêu trạm liên lạc, không bắt giải lại mạng.
 
 Giữ vòng tháp, máy, khoang, gương/lăng kính, đường nước. Thêm chỉ báo lưu lượng bằng vạch/hình; khắc vạch loại đích trên các ống để chỉ đọc rõ khi đèn thử tắt, không làm mờ đường đi; sửa chi tiết khăn đỏ thành cửa sổ và dấu ca trực phù hợp. Ghi âm cứu hộ thay tuyến người cha chờ con. HUD “Tìm mức cấp mà cả bến và rừng duy trì được.”

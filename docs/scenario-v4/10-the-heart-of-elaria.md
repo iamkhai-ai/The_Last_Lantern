@@ -20,7 +20,7 @@ Lumo tự nhận việc với điều kiện rõ. Nhinh có thể gọi về b�
 
 Giữ nền Cây Mẹ và các cơ cấu đã quen. Các đường quang học là **mạch điều khiển khởi động**, không biểu diễn ba phần năng lượng cộng với bến rồi vượt tổng bốn ở màn 06.
 
-Sơ đồ nối chính xác: `đèn S → G0(chia) → nhánh trái → G1 → đầu vàng`; nhánh phải của G0 đi tới **khung chia cố định đã học ở 08**, tách thành hai đường tới Nhật trái và Nhật phải. Nguyệt nằm dưới **vệt sáng trắng cố định của hệ khẩn cấp**, được chỉ rõ ngay khi vào phòng, giống việc nhận diện nguồn cố định ở màn07. Mặt rộng tượng che vệt trắng khỏi Nguyệt, không chắn các đường ngoài tới hai Nhật. Không giả khung hai đầu tự sinh một đầu thứ ba. Ống tín hiệu tới C lấy điều khiển từ S qua đường riêng đã vẽ, không hút thêm một phần lưu lượng chính. Các đầu nhận có ngưỡng tín hiệu đủ cho những nhánh đã chia; không giả một tia yếu đi rồi vẫn mang nguyên công suất ban đầu. Khung cố định không thêm nút hay nguồn mới. Sau chốt, đường trắng khẩn cấp rút đi cùng việc hệ chuyển chu kỳ.
+Sơ đồ nối chính xác: `đèn S → G0(chia) → nhánh trái → G1 → đầu vàng`; nhánh phải của G0 đi tới **khung chia cố định đã học ở 08**, tách thành hai đường tới Nhật trái và Nhật phải. Nguyệt nằm dưới **vệt sáng trắng cố định của hệ khẩn cấp**, được chỉ rõ ngay khi vào phòng, giống việc nhận diện nguồn cố định ở màn 07. Mặt rộng tượng che vệt trắng khỏi Nguyệt, không chắn các đường ngoài tới hai Nhật. Không giả khung hai đầu tự sinh một đầu thứ ba. Ống tín hiệu tới C lấy điều khiển từ S qua đường riêng đã vẽ, không hút thêm một phần lưu lượng chính. Các đầu nhận có ngưỡng tín hiệu đủ cho những nhánh đã chia; không giả một tia yếu đi rồi vẫn mang nguyên công suất ban đầu. Khung cố định không thêm nút hay nguồn mới. Sau chốt, đường trắng khẩn cấp rút đi cùng việc hệ chuyển chu kỳ.
 
 | Nhánh | Điều kiện trong giai đoạn khởi động | Ý nghĩa |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Sơ đồ nối chính xác: `đèn S → G0(chia) → nhánh trái → G1 → �
 
 G0 trực tiếp có thể làm một đầu nhận sáng mạnh nhưng bỏ hai Nhật của nhánh tím. G1 sai làm nhánh vàng đứt. Tượng hẹp làm Nguyệt sáng. Chỉ đặt tinh thể vào đúng ổ chưa kích hoạt được các nhánh. Các ổ có hình khác nhau và dùng lại silhouette tinh thể, không tạo bài đoán màu.
 
-Van giới hạn có hai nấc được biểu diễn từ 06: `khẩn cấp liên tục` và `theo chu kỳ/định mức`. Mức chia ban ngày đã học là bến2, rễ1, làm mát1; các khoảng hồi không xuất tuyến chính. Kho bến đã được chuẩn bị ở 09, không xuất hiện bất ngờ để làm kết thúc dễ dàng.
+Van giới hạn có hai nấc được biểu diễn từ 06: `khẩn cấp liên tục` và `theo chu kỳ/định mức`. Mức chia ban ngày đã học là bến 2, rễ 1, làm mát 1; các khoảng hồi không xuất tuyến chính. Kho bến đã được chuẩn bị ở 09, không xuất hiện bất ngờ để làm kết thúc dễ dàng.
 
 **Điều kiện chốt trung tâm:** cả ba nhánh đang đúng và xác nhận bàn giao ngày/đêm từ bến đã nhận. E kéo thanh chặn và khóa cơ cấu vào chế độ chu kỳ. Thanh này đồng thời kéo cửa chắn nguồn trắng khẩn cấp qua một cần truyền động nhìn thấy được; đây là cơ cấu ngắt vật lý của nguồn cố định, độc lập với F. Không có yêu cầu đứng yên nhiều giây, không buộc toàn bộ lộ trình thao tác duy nhất.
 
@@ -43,7 +43,7 @@ Van giới hạn có hai nấc được biểu diễn từ 06: `khẩn cấp li�
 5. Gọi Lumo về bất cứ lúc nào: trước chốt, nhánh xanh ngừng nhưng cậu có thể được gọi lại; sau chốt, nhánh xanh vẫn giữ. Nếu đèn ở S, E nhặt đèn thật từ bệ để mang theo; không tự chuyển vào hành trang. Gọi Lumo và thu đèn có thể làm theo thứ tự khác nhau.
 6. Tắt F khi đèn ở tay hoặc tại S. Có thể tắt từ xa trước khi nhặt, hoặc nhặt xong rồi tắt; sau chốt, trạng thái chính không đổi. Nếu vệt cầm chạm mặt đai rễ thì chỉ dấu nền của cơ chế khởi động bị che cục bộ; ánh nền và dấu tự phát quang từ bộ tự giữ vẫn phân biệt được. Nếu kết cảnh bắt đầu khi đèn còn ở S, hoạt ảnh cho thấy Nhinh đi tới lấy nó trước khi rời phòng; không cắt cảnh để dịch chuyển đèn. Nếu Lumo còn ở C, cảnh chuyển thể hiện Nhinh gọi cậu về, đợi cậu thực sự tới nền an toàn rồi mới chuyển sang khoảng lặng; checkpoint ghi đúng tiến độ để không gọi hoặc tạo thêm Lumo lần nữa.
 
-Các thao tác sau chốt — gọi Lumo về, F tắt từ xa, nhặt đèn khỏi S — hoán đổi thứ tự được. Chính việc giải phóng/chốt cơ chế chu kỳ ở bước4 khiến bình minh có thể trở lại; F ở cuối chỉ ngừng mạch thử cục bộ và mở nhịp trình bày kết, không phải chiếc đèn nhỏ có quyền bật mặt trời. Nhinh luôn giữ đèn theo đúng vị trí thực; không tự chuyển từ bệ vào tay hoặc ngược lại. Lumo không phải tự hy sinh để kết thúc.
+Các thao tác sau chốt — gọi Lumo về, F tắt từ xa, nhặt đèn khỏi S — hoán đổi thứ tự được. Chính việc giải phóng/chốt cơ chế chu kỳ ở bước 4 khiến bình minh có thể trở lại; F ở cuối chỉ ngừng mạch thử cục bộ và mở nhịp trình bày kết, không phải chiếc đèn nhỏ có quyền bật mặt trời. Nhinh luôn giữ đèn theo đúng vị trí thực; không tự chuyển từ bệ vào tay hoặc ngược lại. Lumo không phải tự hy sinh để kết thúc.
 
 ## 4. Trạng thái trước và sau chốt
 
