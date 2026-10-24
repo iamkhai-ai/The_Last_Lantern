@@ -1,0 +1,441 @@
+import type Phaser from 'phaser';
+import { tr } from '../../../i18n/catalog.ts';
+import type { Interactable } from '../../../types/gameTypes';
+import { SoundSystem } from '../../../systems/SoundSystem';
+import type { HintLadder } from '../../core/hints';
+import type { HudText, LevelLayout } from '../../core/level';
+import { rectCenter } from '../../core/geometry';
+import type { Point, Rect } from '../../core/geometry';
+import { isMarkReadable, isRectLit } from '../../core/light';
+import type { Footprint, LightMark, Room } from '../../core/light';
+import type { LanternState } from '../../core/lantern';
+import type { PulseMark } from '../../core/pulse';
+import type { LevelHost, V4LevelRuntime } from '../../scene/LevelHost';
+import {
+  BRACE_B_ID,
+  FOREST_EDGE,
+  FOREST_EDGE_LIGHT_MARKS,
+  FOREST_EDGE_PULSE_MARKS,
+  FOREST_EDGE_ROOMS,
+  HINGE_ID,
+  LATCH_A_ID,
+  S1_ID,
+  S2_ID,
+  SPROUT_ID,
+} from './forestEdgeLayout';
+import {
+  CUE_EVENT,
+  CUE_LINES,
+  FOREST_EDGE_JOURNAL_TEXT,
+  HINGE_PHASE_TEXT,
+  INITIAL_FOREST_LIVE,
+  defaultForestEdgeState,
+  deriveForestEdge,
+  forestBlockers,
+  forestEdgeHint,
+  forestEdgeHud,
+  forestExitReady,
+  lanternAtPedestal,
+  nextHingePhase,
+  parseForestEdgeState,
+  pendingCue,
+  stepDoors,
+  toggleBraceB,
+  toggleLatchA,
+} from './forestEdgeLogic';
+import type { ForestEdgeLive, ForestEdgeState, ForestEdgeView } from './forestEdgeLogic';
+
+/** The level's ambient darkness: constant, never tied to the lantern (puzzle-contracts section 1). */
+const AMBIENT_DARKNESS = 0.42;
+
+/** The next level. Level 02 is not built yet on this branch; the host shows the placeholder for the id. */
+const NEXT_LEVEL_ID = 'whispering-woods';
+
+const COLOR = {
+  floor: 0x14262b,
+  yardFloor: 0x1a3236,
+  wall: 0x2c3e40,
+  door: 0x6b5a3a,
+  pedestal: 0x8a7a55,
+  pedestalSocket: 0x4c4330,
+  latch: 0xb08a4a,
+  latchEngaged: 0xffe08a,
+  brace: 0x8a6a3a,
+  braceEngaged: 0xffe08a,
+  stele: 0x59666a,
+  hinge: 0x7a6a4a,
+  lanternOn: 0xfff0a8,
+  lanternOff: 0x3a4a4a,
+  sprout: 0x9be36a,
+  markDark: 0x7df2d4,
+  markLit: 0xffe08a,
+  line: 0xd8b869,
+};
+
+const PROMPT_PLACE_S1 = 'E: đặt đèn lên bệ S1';
+const PROMPT_PLACE_S2 = 'E: đặt đèn lên bệ S2';
+const PROMPT_TAKE = 'E: lấy đèn';
+const PROMPT_ENGAGE_A = 'E: gài chốt A';
+const PROMPT_RELEASE_A = 'E: mở chốt A';
+const PROMPT_ENGAGE_B = 'E: gài tay hãm B';
+const PROMPT_RELEASE_B = 'E: nhả tay hãm B';
+const PROMPT_HINGE = 'E: xoay mô hình bản lề';
+
+/**
+ * Forest edge (level 01): an entry yard with pedestal S1, door A in the split wall, a middle yard with latch A, pedestal
+ * S2 and brace B, and gate B to the exit. Drawn with Graphics; solids are static zones.
+ */
+export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
+  readonly id = 'forest-edge';
+  readonly title = 'Bìa rừng quên lãng';
+  readonly layout: LevelLayout = FOREST_EDGE;
+
+  private host!: LevelHost;
+  private state: ForestEdgeState = defaultForestEdgeState();
+  /** Door A and gate B as they stood last frame; stepDoors carries the bridge rule. */
+  private live: ForestEdgeLive = INITIAL_FOREST_LIVE;
+  /** The optional hinge model's phase: pull, release, hook. Cosmetic; not saved and never required. */
+  private hingePhase = 0;
+  /** True while a one-time dialogue cue is on screen. The exit waits for it. */
+  private speaking = false;
+  /** Off during build's first draw, so no cue starts while the scene is still being made. */
+  private cuesEnabled = false;
+  private items: Interactable[] = [];
+  private leafA: Phaser.GameObjects.Zone | null = null;
+  private leafB: Phaser.GameObjects.Zone | null = null;
+  private leaves: Phaser.GameObjects.Graphics | null = null;
+  private fixtures: Phaser.GameObjects.Graphics | null = null;
+  private marks: Phaser.GameObjects.Graphics | null = null;
+  private statics: Phaser.GameObjects.Graphics[] = [];
+  /** The view and live doors drawn last frame, so door and gate sounds play only on a change. */
+  private shown: ForestEdgeLive | null = null;
+  /** This frame's footprints, kept for the mark readability check. */
+  private footprintsNow: readonly Footprint[] = [];
+
+  defaultState(): ForestEdgeState {
+    return defaultForestEdgeState();
+  }
+
+  parseState(raw: unknown): ForestEdgeState {
+    return parseForestEdgeState(raw);
+  }
+
+  build(host: LevelHost, state: ForestEdgeState): void {
+    this.host = host;
+    this.state = state;
+    this.live = INITIAL_FOREST_LIVE;
+    const scene = host.scene;
+    const world = FOREST_EDGE.world;
+
+    const floor = scene.add.graphics().setDepth(0);
+    floor.fillStyle(COLOR.floor, 1).fillRect(world.x, world.y, world.width, world.height);
+    const yards = scene.add.graphics().setDepth(0.2);
+    for (const room of FOREST_EDGE_ROOMS) {
+      yards.fillStyle(COLOR.yardFloor, 1).fillRect(room.rect.x, room.rect.y, room.rect.width, room.rect.height);
+    }
+
+    const walls = scene.add.graphics().setDepth(1);
+    walls.fillStyle(COLOR.wall, 1);
+    for (const wall of FOREST_EDGE.walls) walls.fillRect(wall.x, wall.y, wall.width, wall.height);
+    const { stele, hinge, s1, s2, latchA, braceB } = FOREST_EDGE;
+    walls.fillStyle(COLOR.stele, 1).fillRect(stele.x, stele.y, stele.width, stele.height);
+    walls.fillStyle(COLOR.hinge, 1).fillRect(hinge.x, hinge.y, hinge.width, hinge.height);
+    walls.fillStyle(COLOR.pedestal, 1).fillRect(s1.x, s1.y, s1.width, s1.height);
+    walls.fillStyle(COLOR.pedestal, 1).fillRect(s2.x, s2.y, s2.width, s2.height);
+    walls.fillStyle(COLOR.latch, 1).fillRect(latchA.x, latchA.y, latchA.width, latchA.height);
+    walls.fillStyle(COLOR.brace, 1).fillRect(braceB.x, braceB.y, braceB.width, braceB.height);
+    this.statics.push(floor, yards, walls);
+
+    this.leaves = scene.add.graphics().setDepth(4);
+    this.fixtures = scene.add.graphics().setDepth(3);
+    this.marks = scene.add.graphics().setDepth(68.5);
+
+    // Solids: walls, the stone, pedestals, latch, brace and hinge are always solid; the two leaves follow the doors.
+    for (const wall of FOREST_EDGE.walls) this.solidZone(wall);
+    this.solidZone(stele);
+    this.solidZone(hinge);
+    this.solidZone(s1);
+    this.solidZone(s2);
+    this.solidZone(latchA);
+    this.solidZone(braceB);
+    this.leafA = this.solidZone(FOREST_EDGE.doorA);
+    this.leafB = this.solidZone(FOREST_EDGE.gateB);
+
+    this.items = [
+      {
+        id: S1_ID,
+        reach: { kind: 'block', rect: s1 },
+        getPrompt: () => this.pedestalPrompt(S1_ID),
+        onInteract: () => this.onPedestal(S1_ID),
+      },
+      {
+        id: LATCH_A_ID,
+        reach: { kind: 'block', rect: latchA },
+        getPrompt: () => (this.state.latchA ? PROMPT_RELEASE_A : PROMPT_ENGAGE_A),
+        onInteract: () => this.onLatchA(),
+      },
+      {
+        id: S2_ID,
+        reach: { kind: 'block', rect: s2 },
+        getPrompt: () => this.pedestalPrompt(S2_ID),
+        onInteract: () => this.onPedestal(S2_ID),
+      },
+      {
+        id: BRACE_B_ID,
+        reach: { kind: 'block', rect: braceB },
+        getPrompt: () => (this.state.braceB ? PROMPT_RELEASE_B : PROMPT_ENGAGE_B),
+        onInteract: () => this.onBraceB(),
+      },
+      {
+        id: HINGE_ID,
+        reach: { kind: 'block', rect: hinge },
+        getPrompt: () => PROMPT_HINGE,
+        onInteract: () => this.onHinge(),
+      },
+    ];
+
+    this.update(0, { x: 0, y: 0, width: 0, height: 0 }, []);
+    this.cuesEnabled = true;
+  }
+
+  interactables(): Interactable[] {
+    return this.items;
+  }
+
+  update(_dt: number, foot: Rect, footprints: readonly Footprint[]): void {
+    const lantern = this.host.getLantern();
+    const live = stepDoors(this.live, this.state, lantern, foot);
+    this.live = live;
+    this.footprintsNow = footprints;
+    const blockers = forestBlockers(live);
+
+    setZoneEnabled(this.leafA, !live.doorAOpen);
+    setZoneEnabled(this.leafB, !live.gateBOpen);
+    if (this.shown) {
+      if (!this.shown.doorAOpen && live.doorAOpen) SoundSystem.playDoorOpen();
+      else if (this.shown.doorAOpen && !live.doorAOpen) SoundSystem.playDoorClose();
+      if (!this.shown.gateBOpen && live.gateBOpen) SoundSystem.playGateOpen();
+    }
+    this.shown = live;
+
+    if (this.cuesEnabled && !this.speaking) {
+      const sprout = FOREST_EDGE_LIGHT_MARKS.find((mark) => mark.id === SPROUT_ID);
+      const sproutLit = sprout !== undefined && isMarkReadable(sprout, footprints, blockers);
+      const cue = pendingCue({
+        hasEvent: (id) => this.host.hasEvent(id),
+        sproutLit,
+        live,
+        lantern,
+        foot,
+      });
+      if (cue) {
+        this.host.markEvent(CUE_EVENT[cue]);
+        this.speaking = true;
+        this.host.say([...CUE_LINES[cue]], () => {
+          this.speaking = false;
+        });
+      }
+    }
+
+    this.draw(live, lantern, footprints, blockers);
+    this.drawMarks(blockers);
+  }
+
+  getState(): ForestEdgeState {
+    return this.state;
+  }
+
+  hud(): HudText {
+    const hud = forestEdgeHud(this.viewNow(), this.host.getLantern(), this.state);
+    return { objective: tr(hud.objective), status: tr(hud.status) };
+  }
+
+  hint(): HintLadder | null {
+    return forestEdgeHint(this.viewNow());
+  }
+
+  pulseMarks(): readonly PulseMark[] {
+    return FOREST_EDGE_PULSE_MARKS;
+  }
+
+  journalText(id: string): string {
+    return FOREST_EDGE_JOURNAL_TEXT[id] ?? '';
+  }
+
+  sealPosition(_sealId: string): Point | null {
+    return null;
+  }
+
+  ambientDarkness(): number {
+    return AMBIENT_DARKNESS;
+  }
+
+  lightBlockers(): readonly Rect[] {
+    return forestBlockers(this.live);
+  }
+
+  lightMarks(): readonly LightMark[] {
+    return FOREST_EDGE_LIGHT_MARKS;
+  }
+
+  rooms(): readonly Room[] {
+    return FOREST_EDGE_ROOMS;
+  }
+
+  lighting(): 'lantern' | 'none' {
+    return 'lantern';
+  }
+
+  lanternAvailable(): boolean {
+    return true;
+  }
+
+  pedestalPosition(pedestalId: string): Point | null {
+    if (pedestalId === S1_ID) return rectCenter(FOREST_EDGE.s1);
+    if (pedestalId === S2_ID) return rectCenter(FOREST_EDGE.s2);
+    return null;
+  }
+
+  isExitReached(foot: Rect): boolean {
+    return !this.speaking && forestExitReady(this.live, this.host.getLantern(), foot);
+  }
+
+  exit(): { illustrations: string[]; nextLevelId: string | null } | null {
+    return { illustrations: [], nextLevelId: NEXT_LEVEL_ID };
+  }
+
+  destroy(): void {
+    for (const graphics of this.statics) graphics.destroy();
+    this.statics = [];
+    this.leaves?.destroy();
+    this.fixtures?.destroy();
+    this.marks?.destroy();
+    this.leaves = null;
+    this.fixtures = null;
+    this.marks = null;
+  }
+
+  /** The view from the saved state, the live doors and the lantern, recomputed on every read. */
+  private viewNow(): ForestEdgeView {
+    return deriveForestEdge(this.state, this.host.getLantern(), this.live);
+  }
+
+  private pedestalPrompt(pedestalId: string): string {
+    const lantern = this.host.getLantern();
+    if (lantern.location.at === 'hand') return pedestalId === S1_ID ? PROMPT_PLACE_S1 : PROMPT_PLACE_S2;
+    return lantern.location.pedestalId === pedestalId ? PROMPT_TAKE : `E: đèn đang ở bệ ${lantern.location.pedestalId === S1_ID ? 'S1' : 'S2'}`;
+  }
+
+  private onPedestal(pedestalId: string): void {
+    const outcome = lanternAtPedestal(this.host.getLantern(), pedestalId);
+    if (!outcome.ok) {
+      this.host.toast(outcome.reason);
+      return;
+    }
+    this.host.setLantern(outcome.value);
+  }
+
+  private onLatchA(): void {
+    const outcome = toggleLatchA(this.state, this.live.doorAOpen);
+    if (!outcome.ok) {
+      this.host.toast(outcome.reason);
+      return;
+    }
+    this.state = outcome.value;
+    SoundSystem.playMechanismLatch();
+    this.host.requestSave();
+  }
+
+  private onBraceB(): void {
+    const outcome = toggleBraceB(this.state, this.live.gateBOpen);
+    if (!outcome.ok) {
+      this.host.toast(outcome.reason);
+      return;
+    }
+    this.state = outcome.value;
+    SoundSystem.playMechanismLatch();
+    this.host.requestSave();
+  }
+
+  private onHinge(): void {
+    this.hingePhase = nextHingePhase(this.hingePhase);
+    this.host.toast(HINGE_PHASE_TEXT[this.hingePhase]);
+  }
+
+  /** Doors, pedestals, latch, brace and hinge: drawn from the state and the live doors every frame. */
+  private draw(live: ForestEdgeLive, lantern: LanternState, footprints: readonly Footprint[], blockers: readonly Rect[]): void {
+    this.leaves?.clear();
+    if (!live.doorAOpen) this.fillRect(this.leaves, FOREST_EDGE.doorA, COLOR.door);
+    if (!live.gateBOpen) this.fillRect(this.leaves, FOREST_EDGE.gateB, COLOR.door);
+
+    const g = this.fixtures;
+    if (!g) return;
+    g.clear();
+    // Sealed sockets: a dark cap with a lit core only while the lantern sits on it and is lit.
+    for (const [rect, id] of [[FOREST_EDGE.s1, S1_ID], [FOREST_EDGE.s2, S2_ID]] as const) {
+      this.fillRect(g, { x: rect.x + 3, y: rect.y + 3, width: rect.width - 6, height: rect.height - 6 }, COLOR.pedestalSocket);
+      if (lantern.location.at === 'pedestal' && lantern.location.pedestalId === id) {
+        const c = rectCenter(rect);
+        g.fillStyle(lantern.on ? COLOR.lanternOn : COLOR.lanternOff, 1).fillCircle(c.x, c.y, 4);
+      }
+    }
+    if (this.state.latchA) {
+      const r = FOREST_EDGE.latchA;
+      this.fillRect(g, { x: r.x + 4, y: r.y + 4, width: r.width - 8, height: r.height - 8 }, COLOR.latchEngaged);
+    }
+    if (this.state.braceB) {
+      const r = FOREST_EDGE.braceB;
+      this.fillRect(g, { x: r.x + 4, y: r.y + 4, width: r.width - 8, height: r.height - 8 }, COLOR.braceEngaged);
+    }
+    // The hinge model: one short bar per phase, so the phase reads without colour alone.
+    const h = FOREST_EDGE.hinge;
+    g.lineStyle(2, COLOR.line, 0.9).lineBetween(h.x + 4, h.y + h.height / 2, h.x + 4 + 8 * (this.hingePhase + 1), h.y + h.height / 2);
+    // The sprout is drawn only while it reads under the light.
+    const sprout = FOREST_EDGE_LIGHT_MARKS.find((mark) => mark.id === SPROUT_ID);
+    if (sprout && isRectLit(sprout.rect, footprints, blockers)) {
+      this.fillRect(g, sprout.rect, COLOR.sprout);
+    }
+  }
+
+  /** The light marks: a dark mark as speckles while it reads, a lit mark as a glyph while it reads. */
+  private drawMarks(blockers: readonly Rect[]): void {
+    const g = this.marks;
+    if (!g) return;
+    g.clear();
+    for (const mark of FOREST_EDGE_LIGHT_MARKS) {
+      if (mark.id === SPROUT_ID) continue;
+      const { x, y, width, height } = mark.rect;
+      if (isMarkReadable(mark, this.footprintsNow, blockers)) {
+        g.fillStyle(COLOR.markDark, 0.9);
+        for (const p of [
+          { x: x + width / 2, y: y + height / 2 },
+          { x: x + width / 4, y: y + height / 4 },
+          { x: x + (3 * width) / 4, y: y + (3 * height) / 4 },
+        ]) {
+          g.fillCircle(p.x, p.y, 1.2);
+        }
+      } else if (this.host.hasJournal(mark.id)) {
+        g.lineStyle(1, COLOR.markDark, 0.25).strokeRect(x, y, width, height);
+      }
+    }
+  }
+
+  private fillRect(graphics: Phaser.GameObjects.Graphics | null, rect: Rect, color: number): void {
+    graphics?.fillStyle(color, 1).fillRect(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  /** A static zone that is solid for Nhinh, registered with the host. */
+  private solidZone(rect: Rect): Phaser.GameObjects.Zone {
+    const scene = this.host.scene;
+    const zone = scene.add.zone(rect.x + rect.width / 2, rect.y + rect.height / 2, rect.width, rect.height);
+    scene.physics.add.existing(zone, true);
+    this.host.solid(zone);
+    return zone;
+  }
+}
+
+/** Turns a zone's static body on or off. A disabled body takes no part in collisions (Arcade skips it). */
+function setZoneEnabled(zone: Phaser.GameObjects.Zone | null, enabled: boolean): void {
+  if (!zone) return;
+  (zone as unknown as { body: { enable: boolean } }).body.enable = enabled;
+}
