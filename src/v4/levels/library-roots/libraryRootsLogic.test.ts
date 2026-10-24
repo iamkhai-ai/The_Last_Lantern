@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   BANK_SHORT,
   CORRECT_RING,
+  START_RACK,
   ROOT_SHORT,
   SOLUTION_VALVES,
   TABLET_IDS,
@@ -61,9 +62,10 @@ function tabletsHeld(s: LibraryState): TabletId[] {
 }
 
 describe('defaultLibraryState', () => {
-  it('starts with the four tablets on the rack in ring order, sockets empty, valves unset and the model unlocked', () => {
+  it('starts with the four tablets on the rack out of ring order, sockets empty, valves unset and the model unlocked', () => {
     const s = defaultLibraryState();
-    expect(s.rack).toEqual([...CORRECT_RING]);
+    expect(s.rack).toEqual([...START_RACK]);
+    expect(s.rack.some((t, i) => t === CORRECT_RING[i])).toBe(false);
     expect(s.sockets).toEqual([null, null, null, null]);
     expect(s.held).toBeNull();
     expect(s.valves).toEqual(['unset', 'unset', 'unset', 'unset']);
@@ -112,12 +114,12 @@ describe('holder actions: take, place, swap', () => {
     let s = defaultLibraryState();
     const taken = holderAction(s, rackHolder(0));
     expect(taken.changed).toBe(true);
-    expect(taken.state.held).toBe('bird');
+    expect(taken.state.held).toBe('boat');
     expect(taken.state.rack[0]).toBeNull();
     s = taken.state;
     // A second tablet cannot be taken while one is held: the rack slot is refused as a swap, never a second hand.
     const placed = holderAction(s, socketHolder(0));
-    expect(placed.state.sockets[0]).toBe('bird');
+    expect(placed.state.sockets[0]).toBe('boat');
     expect(placed.state.held).toBeNull();
   });
 
@@ -128,16 +130,16 @@ describe('holder actions: take, place, swap', () => {
     s = holderAction(s, rackHolder(0)).state; // and return it to its empty hook
     expect(s.sockets[0]).toBeNull();
     expect(s.held).toBeNull();
-    expect(s.rack[0]).toBe('bird');
+    expect(s.rack[0]).toBe('boat');
   });
 
   it('swaps a held tablet with the one in a socket', () => {
     let s = holderAction(defaultLibraryState(), rackHolder(0)).state;
     s = holderAction(s, socketHolder(1)).state;
-    expect(s.sockets[1]).toBe('bird');
+    expect(s.sockets[1]).toBe('boat');
     s = holderAction(holderAction(s, rackHolder(1)).state, socketHolder(1)).state;
-    expect(s.sockets[1]).toBe('leaf');
-    expect(s.held).toBe('bird');
+    expect(s.sockets[1]).toBe('seed');
+    expect(s.held).toBe('boat');
     expect(s.rack[1]).toBeNull();
   });
 
@@ -391,13 +393,13 @@ describe('tablet marks', () => {
   it('gives every tablet a lit and a dark mark, on its place', () => {
     const marks = tabletMarks(defaultLibraryState(), { x: 0, y: 0, width: 14, height: 6 });
     expect(marks.length).toBe(8);
-    expect(marks.find((m) => m.id === 'bird:lit')?.rect).toEqual({ x: LIBRARY.rack[0].x + 1, y: LIBRARY.rack[0].y + 1, width: 14, height: 14 });
+    expect(marks.find((m) => m.id === 'boat:lit')?.rect).toEqual({ x: LIBRARY.rack[0].x + 1, y: LIBRARY.rack[0].y + 1, width: 14, height: 14 });
   });
 
   it('carries the held tablet at the foot with its marks', () => {
     const s = holderAction(defaultLibraryState(), rackHolder(0)).state;
     const foot = { x: 100, y: 150, width: 14, height: 6 };
-    const bird = tabletMarks(s, foot).find((m) => m.id === 'bird:dark');
+    const bird = tabletMarks(s, foot).find((m) => m.id === 'boat:dark');
     expect(bird?.rect.x).toBeCloseTo(107 - 7);
   });
 

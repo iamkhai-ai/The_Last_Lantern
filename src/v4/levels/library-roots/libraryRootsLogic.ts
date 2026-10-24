@@ -85,10 +85,15 @@ export interface StepOutcome {
   readonly text: string;
 }
 
-/** The start: four tablets on the rack in ring order, sockets empty, valves unset, the model unlocked. */
+/**
+ * The rack order at the start. No tablet hangs at its ring position, so the rack never reads as the answer.
+ */
+export const START_RACK: readonly TabletId[] = ['boat', 'seed', 'leaf', 'bird'];
+
+/** The start: four tablets on the rack out of ring order, sockets empty, valves unset, the model unlocked. */
 export function defaultLibraryState(): LibraryState {
   return {
-    rack: [...CORRECT_RING],
+    rack: [...START_RACK],
     sockets: [null, null, null, null],
     held: null,
     doorLatched: false,
