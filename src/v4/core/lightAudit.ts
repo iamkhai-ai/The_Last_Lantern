@@ -1,7 +1,7 @@
 import { rectCenter } from './geometry';
 import type { Point, Rect } from './geometry';
 import { initialLantern } from './lantern';
-import { LANTERN_RADIUS, canSeeMark, groundPoint, isMarkReadable, isRectLit, lanternFootprints } from './light';
+import { LANTERN_RADIUS, SEEN_RADIUS, canSeeMark, groundPoint, isMarkReadable, isRectLit, lanternFootprints } from './light';
 import type { LightMark, Room } from './light';
 import { reachableFeet } from './reachAudit';
 
@@ -66,7 +66,8 @@ function collectAimAreas(goal: AimGoal, input: AimInput, limit: number): AimArea
   const anchors = anchorsOf(goal);
   if (anchors.length === 0) return [];
   const reach = reachableFeet(input.start, input, AIM_STEP);
-  const maxDistance = LANTERN_RADIUS + 8;
+  // A seen goal can be met up to SEEN_RADIUS away: a dark mark is only readable outside the circle.
+  const maxDistance = Math.max(LANTERN_RADIUS, goal.seen ? SEEN_RADIUS : 0) + 8;
   const areas: AimArea[] = [];
 
   const candidates: Point[] = [];

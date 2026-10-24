@@ -35,6 +35,14 @@ describe('findAimAreas and hasAimArea', () => {
     expect(hasAimArea(goal, input)).toBe(false);
   });
 
+  it('finds an aim area for a dark mark, which is read from outside the circle', () => {
+    // A dark mark is readable only when no footprint reaches it, so every standing position that reads it
+    // has its ground point more than 40px away, and it is seen only within 64px.
+    const input: AimInput = { world: WORLD, solids: [], blockers: [], start: { x: 100, y: 150 } };
+    const mark = { id: 'spores', kind: 'dark' as const, rect: { x: 98, y: 40, width: 4, height: 4 } };
+    expect(hasAimArea({ hit: [], avoid: [mark.rect], seen: mark }, input)).toBe(true);
+  });
+
   it('returns no areas when the goal has no anchor', () => {
     const input: AimInput = { world: WORLD, solids: [], blockers: [], start: { x: 100, y: 150 } };
     expect(findAimAreas({ hit: [], avoid: [] }, input)).toEqual([]);
