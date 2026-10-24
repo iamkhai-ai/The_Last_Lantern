@@ -278,3 +278,31 @@ Create the LanternSystem with `{ ambientDarkness: level.ambientDarkness() }`. Pu
 ## Task L4 — lead
 
 Review each task's diff, run `npx tsc --noEmit`, `npm test`, `scripts/check-*.mjs`, build, and play the test room in the browser preview: 8 directions, beam and halo cut at walls and closed door C, the scratch mark not recorded from the corner, aiming at flower C while avoiding the root bed, crossing the root bridge with F off, F state persisting after reload.
+
+## Revision R1 — the lantern lights a circle (supersedes the beam)
+
+Decision (user, 2026-10-24; puzzle-contracts §1 at e7a7107): a lantern glows all around, it is not a torch. The handheld footprint is a **circle of radius 40px centred on the ground point**. Facing no longer matters. The placed lantern keeps its 12px halo plus declared spills. Everything else (blockers, lit/dark marks, seen rule, 8px aim areas, ambient darkness) stays.
+
+### Code changes
+
+`src/v4/core/light.ts`
+- Remove `Facing`, `FACINGS`, `facingVector`, `beamPolygon`, `BEAM_LENGTH`, `BEAM_ROOT_WIDTH`, `BEAM_FAR_WIDTH` and the `'beam'` footprint kind.
+- Rename the `'halo'` kind to `'circle'`: `{ kind: 'circle'; center: Point; radius: number }` (distance ≤ radius, clipped from `center`).
+- Add `export const LANTERN_RADIUS = 40;` keep `HALO_RADIUS = 12` (the placed lantern's halo) and `SEEN_RADIUS = 64`.
+- `lanternFootprints(lantern, ground, pedestalAt, spills = [])` (no facing): off → []; in hand → `[{ kind: 'circle', center: ground, radius: LANTERN_RADIUS }]`; on a pedestal → circle of `HALO_RADIUS` at the pedestal point + that pedestal's spills (unchanged).
+
+`src/v4/core/lightAudit.ts`
+- `AimArea` becomes `{ x, y }`; no facing loop. A position is good when, with the handheld circle at its ground point, every hit rect is lit, no avoid rect is lit, and the optional seen mark is readable and seen. Candidate prefilter distance: `LANTERN_RADIUS + 8` from an anchor.
+
+`src/systems/LanternSystem.ts`
+- Lit-area cells: for a cell lit by a `circle` footprint, alpha = 0.08 + 0.30 × (1 − d / radius), d = distance from that circle's centre (use the brightest lit footprint for the cell); cells lit only by an `area` footprint use 0.22. Rim cells (lit with an unlit 4-neighbour) use 0.45. Keep the flicker multiplier, the ADD blend, the 2px cells and `isPointLit` as the only lit test.
+
+`src/v4/scene/V4Scene.ts`: call `lanternFootprints` without the facing.
+
+Test room (`testRoomLayout.ts`): move both flower faces east of door C, onto the east wall segment: `flowerSouth: { x: 138, y: 160, width: 8, height: 8 }`, `flowerNorth: { x: 138, y: 140, width: 8, height: 8 }`. With a circle, faces 4px from the root bed left almost no place to light one without the other. Update the layout comment.
+
+### Tests to change
+
+- `light.test.ts`: drop beam/facing tests. Circle: from ground (100,200), (140,200) lit, (141,200) not, (100,160) lit; a wall {118,190,4,20} hides (130,200) but not (100,170); placed lantern: circle radius 12 only; everything else as before (segment rules, spills, marks, seen, marksToRecord).
+- `lightAudit.test.ts`: same cases without facing; the target 30px north of the start → true; an avoid rect containing the hit rect → false; the narrow-pocket case → false.
+- `testRoomLight.test.ts`: test 3 becomes "the root bed is lit from actor (100,104) and not from actor (140,104)"; test 4 uses actor (140,128) with door C closed: `flowerNorth` lit, `flowerSouth` not. All other tests keep their meaning (drop any facing argument). The lead pre-checked: west-room aim areas exist, corner aim areas exist (~40), and 315 of 459 corner positions that light the north face also light the bed.
