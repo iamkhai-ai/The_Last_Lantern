@@ -32,7 +32,7 @@ Các số dưới đây là giá trị khởi điểm dùng chung cho mọi màn
 
 - **Vật chắn:** tường và cánh cửa đang đóng chắn ánh sáng; phần nằm sau chúng không được chiếu. Luật này áp dụng cho mọi footprint của đèn bảo trì: cầm tay, đặt trên bệ và nhánh tràn. Hình vẽ và phép tính gameplay bị cắt theo cùng một đường, nên đứng sát tường không chiếu được cảm biến hay dấu ở phía bên kia. Cầu, rễ, nước, NPC và Lumo không chắn.
 
-Ánh sáng được vẽ đậm ở tâm và nhạt dần ra ngoài, nhưng rìa vòng tròn vẽ rõ và khớp đúng footprint. Ngoài footprint chỉ có ánh nền; không có quầng trang trí lớn hơn footprint khiến người chơi tưởng một dấu đang bị chiếu.
+Ánh sáng được vẽ theo kiểu v3: nền đêm tối đều; trong footprint là lõi sáng gần như trong, sáng nhất ở tâm, bị tường và cánh cửa đóng cắt đúng như gameplay; ra khỏi footprint tối hơn một bậc thấy rõ, rồi quầng mềm nhạt dần vào nền tối. Quầng mềm, vùng sáng nhỏ quanh Nhinh khi trong tay không có đèn sáng, và ánh mờ quanh vật tương tác chỉ để trang trí: chúng không phải footprint, không làm dấu sáng hiện lên và không che dấu tối.
 
 **Đèn đặt trên bệ** nằm trong hộp có đầu nối kín, nên chỉ để lọt một quầng 12px quanh đèn, cộng các nhánh tràn mà màn khai báo (nhánh spill của S ở 08, nhánh soi hồ sơ ở 09). Đầu nối kín không phải footprint. Không đặt mặt nhận hở hay dấu sáng/tối trong quầng của bệ, trừ khi màn ghi rõ lý do.
 
