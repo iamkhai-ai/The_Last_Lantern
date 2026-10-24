@@ -202,22 +202,20 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 
 **Không dùng nữa:** cổng vòm đá `woods_arch_*`, vòng đá đứng, dấu chân Pulse cũ, và bệ `s0` (đã bỏ theo (b)).
 
-## 11. Câu chữ và thiết kế cần bạn duyệt
+## 11. Câu chữ trong runtime (chờ bạn duyệt)
+
+Các câu dưới đây là bản đang chạy (nguồn: `forestEdgeLogic.ts`, `ForestEdgeLevel.ts`). Đề xuất cũ của bản 3 đã được thay bằng các câu này; sửa câu nào thì sửa ở hai file đó.
 
 - **Nhắc E:**
-  - Đèn: `E: nhặt đèn` (trên đất tại `lampRest`, hoặc trên bệ) / `E: đặt đèn lên bệ` / `E: lấy đèn`.
-  - Chốt A: `E: gài chốt A` / `E: mở chốt A`.
-  - Hãm B: `E: gài hãm B` / `E: nhả hãm B`.
-  - Bia: `E: đọc bia`.
-  - Bản lề: `E: kéo thử` / `E: kéo và cài móc` / `E: tháo móc`.
-- **Câu từ chối:**
-  - Chốt A khi cửa đóng: "Chốt chỉ ăn khi cửa A đang mở."
-  - Hãm B khi cổng đóng: "Tay hãm chỉ gài được khi cánh B mở."
-  - Ra cổng mà không cầm đèn: "Đèn còn trên bệ."
-  - Đặt đèn xuống đất: "Đèn chỉ đặt được trên bệ." (mới, cần duyệt)
-- **Hai dòng J đã nêu ở §6** và các dòng ở đó.
-- **Ký hiệu trên cột tuyến nước:** hiện chưa có ký hiệu cụ thể. Bạn chọn ký hiệu, hoặc chỉ cho tôi ký hiệu trong nền xưởng.
-- **Cảnh mở đầu gắn với lần bật đầu** thay vì lần nhặt (§1, đề xuất).
+  - Đèn: `E: nhặt đèn` (trên đất) · `E: đặt đèn lên bệ S1` / `E: đặt đèn lên bệ S2` · `E: lấy đèn` · `E: đèn đang ở bên bia` (ở bệ khi đèn còn trên đất).
+  - Chốt A: `E: gài chốt A` / `E: mở chốt A`. Tay hãm B: `E: gài tay hãm B` / `E: nhả tay hãm B`.
+  - Bản lề (vòng bốn bước): `E: kéo thử bản lề` → `E: thả bản lề` → `E: kéo và cài móc` → `E: tháo móc`.
+  - Bia không có E; Pulse (Space) tại bia.
+- **Câu từ chối:** "Chốt A chỉ gài được khi cửa A đang mở." · "Tay hãm B chỉ gài được khi cổng B đang mở." · "Đèn đang đặt ở bệ khác." · "Đèn còn trên đất cạnh bia; nhặt đèn trước." · "Đèn không còn ở chỗ cạnh bia."
+- **Bản lề, sau mỗi E:** "Bản lề: kéo mở; lò xo đang kéo về." · "Bản lề: thả ra, lò xo kéo cánh đóng lại." · "Bản lề: cài móc, cánh giữ mở." · "Bản lề: tháo móc, cánh đóng lại."
+- **J:** `sprout` "Mầm cây dưới vệt đèn: Lumo đang che nó." · `spores-hinge-*` "Bào tử tối cạnh mô hình bản lề: chỉ hiện ngoài vệt đèn cầm tay." · `spores-latch-*` "Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay." · `steps-latch-*` "Vết chân phía sân giữa dẫn tới chốt A." · `line-s1-a` "Đường khắc S1–A: đầu nối kín của bệ S1 đi tới cửa A." · `latch-tool-marks` "Vết dụng cụ quanh chốt A."
+- **Ký hiệu trên cột tuyến nước:** đã chốt theo bộ art: ống chia hai nhánh, hai đầu nối tròn (`water-column.png`, cùng mẫu với bảng xưởng).
+- **Cảnh mở đầu** chạy khi vòng đèn cầm tay phủ lên mầm cây; lần bật đầu ngay chỗ nhặt đèn làm việc đó (§13).
 
 ## 12. Bước tiếp theo khi dựng
 
@@ -241,10 +239,17 @@ Bản đúng của màn 01 trên `level01-v4`. Chỗ nào khác §0–§12, theo
 - Chốt A, tay hãm B, mô hình bản lề (ba pha, minh họa tùy chọn), H ba mức theo trạng thái, HUD theo kịch bản.
 - Mũi tên chỉ dẫn (`focus()`), chỉ có ở màn 01: đèn → S1 → chốt A → S1 → S2 → tay hãm B → S2. Không khóa gì.
 - Va chạm: tán thấp, bụi và mép rừng là khối đặc nhưng không chặn sáng (`foliage`); gốc cây và mái trạm khớp art. Vật dựng sắp lớp theo chân đế, nên Nhinh đi ra sau bia, bệ, chốt.
+- Mở màn: game mới, Nhinh ngồi tựa gốc cây rồi đứng dậy (ba pose của bộ art, 450/300/180 ms, sự kiện `forest-edge:woke`); trong lúc đó chưa điều khiển được.
+- Bia sáng (`stele-pulse`) một giây khi Pulse phát trong 48 px quanh bia.
+- Rãnh khô và các thanh liên kết cơ khí: lớp trang trí phẳng dưới nhân vật, không va chạm, không tương tác.
+- Tán cây phủ trên Nhinh (dưới lớp tối), mờ xuống 0.35 khi che cô. Với khối đặc hiện tại, Nhinh hầu như không đi tới chỗ tán phủ.
+- Cảnh kết ("Đường này nối về bến"): cột tuyến nước và huy hiệu ký hiệu sáng xuyên lớp tối từ lúc đó.
+- Mô hình bản lề: vòng bốn bước kéo thử → thả (tự đóng) → kéo và cài móc (giữ) → tháo móc.
+- Cửa A đóng có nhịp: `door-a-closing-1` (65 ms) → `door-a-closing-2` (45 ms) → đóng. Cánh vẫn giữ mở theo luật cầu/cửa khi còn người trong ngưỡng.
 
-**Lưu:** vị trí đèn và F, `latchA`, `braceB`, checkpoint (`yard`, `middle`), J (dấu đã thấy, dấu Pulse), sự kiện một lần `forest-edge:lamp-taken`, `opening`, `pedestal`, `door-feed`, `lumo-door`, `ending`. Pha mô hình bản lề không lưu.
+**Lưu:** vị trí đèn và F, `latchA`, `braceB`, checkpoint (`yard`, `middle`), J (dấu đã thấy, dấu Pulse), sự kiện một lần `forest-edge:woke`, `lamp-taken`, `opening`, `pedestal`, `door-feed`, `lumo-door`, `ending`. Pha mô hình bản lề không lưu.
 
-**Kiểm:** 310 test và `tsc` sạch trên `level01-v4`; 503 test trên `demo-v4`. Reach audit, `hasAimArea` cho mọi dấu, tách sân, ngưỡng/bệ, checkpoint. Đã chơi trọn trong trình duyệt theo lời giải tham khảo: nhặt đèn → bật (cảnh Lumo) → Pulse → S1 → chốt A → lấy đèn → S2 → tay hãm B → lấy đèn → qua B; đủ sáu cảnh thoại.
+**Kiểm:** 311 test và `tsc` sạch trên `level01-v4`. Reach audit, `hasAimArea` cho mọi dấu, tách sân, ngưỡng/bệ, checkpoint. Đã chơi trọn trong trình duyệt theo lời giải tham khảo: nhặt đèn → bật (cảnh Lumo) → Pulse → S1 → chốt A → lấy đèn → S2 → tay hãm B → lấy đèn → qua B; đủ sáu cảnh thoại.
 
-**Chưa dùng, không chặn DONE:** rãnh khô, liên kết cơ khí, ký hiệu trên cột tuyến nước (chờ chốt ký hiệu, §11), bia sáng khi Pulse (`stele-pulse`), Nhinh ngồi dậy, lớp tán phủ (`canopy`). Câu chữ ở §11 vẫn chờ duyệt.
+**Còn lại:** câu chữ ở §11 chờ bạn duyệt. Art của màn đã dùng hết trừ `water-column-blank` (bản nền để chỉnh ký hiệu), `water-route-symbol` và hai file bảng xưởng (thuộc màn 00),.
 

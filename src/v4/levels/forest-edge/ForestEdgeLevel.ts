@@ -32,7 +32,7 @@ import {
   CUE_EVENT,
   CUE_LINES,
   FOREST_EDGE_JOURNAL_TEXT,
-  HINGE_PHASE_TEXT,
+  HINGE_PHASES,
   INITIAL_FOREST_LIVE,
   LAMP_TAKEN_EVENT,
   defaultForestEdgeState,
@@ -58,6 +58,8 @@ import type { ArtSlot } from './forestEdgeArt';
 
 /** The art textures each slot can show, by the state that picks them (asset-map.json). */
 const HINGE_TEXTURES = ['hinge-closed', 'hinge-pulled', 'hinge-hooked'] as const;
+/** The texture for a hinge phase's pose. */
+const hingeTexture = (phase: number): string => `hinge-${HINGE_PHASES[phase].pose}`;
 
 /** The level's ambient darkness: constant, never tied to the lantern (puzzle-contracts section 1). */
 const AMBIENT_DARKNESS = 0.88;
@@ -72,6 +74,44 @@ const LIGHT_RADIAL_RADIUS = 126;
 const EYE_GLOW_ALPHA_MIN = 0.35;
 const EYE_GLOW_ALPHA_SPAN = 0.25;
 const EYE_GLOW_PERIOD_MS = 1400;
+/**
+ * The old tree's crown is drawn over Nhinh (above every y-sorted depth, below the darkness) and fades to this alpha
+ * while it covers her, at this rate per ms (asset-map.json: canopy).
+ */
+const CANOPY_DEPTH = 60;
+const CANOPY_FADED_ALPHA = 0.35;
+const CANOPY_FADE_PER_MS = 0.004;
+/** Heights above the foot centre sampled for the crown covering Nhinh, px (feet to hood). */
+const CANOPY_SAMPLES = [0, 12, 24, 34];
+/** A Pulse fired within this distance of the stele lights it for this long. */
+const STELE_PULSE_REACH = 48;
+const STELE_PULSE_MS = 1000;
+/** The route badge painted on the water column (water-column.png), in game px: lit with a warm glow for the ending. */
+const ROUTE_BADGE = { x: 576, y: 66 } as const;
+const ROUTE_BADGE_GLOW_RADIUS = 14;
+/**
+ * Door A's leaf shutting (asset-map.json: animation.doorA): each frame with the scene time since the leaf closed at which
+ * it ends; the closed texture holds after the last.
+ */
+const DOOR_A_CLOSING = [
+  { texture: 'door-a-closing-1', until: 65 },
+  { texture: 'door-a-closing-2', until: 110 },
+] as const;
+/** Nhinh wakes against the old tree on a new game (asset-map.json: animation.waking), once. */
+const WAKE_EVENT = 'forest-edge:woke';
+const WAKE_FRAMES = [
+  { texture: 'nhinh-sleeping', ms: 450 },
+  { texture: 'nhinh-awake', ms: 300 },
+  { texture: 'nhinh-rising', ms: 180 },
+] as const;
+
+/**
+ * Depth of an upright prop: it sorts by its base line like Nhinh (Player: depth 10 + ground y / 10), so she passes
+ * behind it when her feet are north of its base. Flat art (the yard, the doors and eyes set in the walls) stays below her.
+ */
+function uprightDepth(slot: keyof typeof ART_SLOTS): number {
+  return 10 + ART_SLOTS[slot].position.y / 10;
+}
 
 /** The next level. Level 02 is not built yet on this branch; the host shows the placeholder for the id. */
 const NEXT_LEVEL_ID = 'whispering-woods';
@@ -104,7 +144,6 @@ const PROMPT_ENGAGE_A = 'E: gài chốt A';
 const PROMPT_RELEASE_A = 'E: mở chốt A';
 const PROMPT_ENGAGE_B = 'E: gài tay hãm B';
 const PROMPT_RELEASE_B = 'E: nhả tay hãm B';
-const PROMPT_HINGE = 'E: xoay mô hình bản lề';
 const PROMPT_TAKE_LAMP = 'E: nhặt đèn';
 const PROMPT_LAMP_BY_STELE = 'E: đèn đang ở bên bia';
 
@@ -144,6 +183,14 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
   private artImages: Record<string, Record<string, Phaser.GameObjects.Image>> = {};
   /** The warm glow behind each live eye (light_radial, additive), by slot. */
   private eyeGlows: Record<string, Phaser.GameObjects.Image> = {};
+  /** The foot body this frame, for the canopy fade. */
+  private footNow: Rect | null = null;
+  /** Scene time until which the stele shows its Pulse glow. */
+  private stelePulseUntil = 0;
+  /** Scene time door A last went from open to closed; the closing frames play from it. */
+  private doorAClosedAt = Number.NEGATIVE_INFINITY;
+  /** The warm glow on the column's route badge, shown from the ending on. */
+  private badgeGlow: Phaser.GameObjects.Image | null = null;
 
   /** Loads the level 01 art (asset-map.json). The host calls this before any build. */
   preload(scene: Phaser.Scene): void {
@@ -230,7 +277,7 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
       {
         id: HINGE_ID,
         reach: { kind: 'block', rect: hinge },
-        getPrompt: () => PROMPT_HINGE,
+        getPrompt: () => HINGE_PHASES[this.hingePhase].prompt,
         onInteract: () => this.onHinge(),
       },
       {
@@ -258,7 +305,9 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     return this.items;
   }
 
-  update(_dt: number, foot: Rect, footprints: readonly Footprint[]): void {
+  update(dt: number, foot: Rect, footprints: readonly Footprint[]): void {
+    this.footNow = foot;
+    this.fadeCanopy(dt);
     const lantern = this.host.getLantern();
     const live = stepDoors(this.live, this.state, lantern, foot);
     this.live = live;
@@ -269,7 +318,10 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     setZoneEnabled(this.leafB, !live.gateBOpen);
     if (this.shown) {
       if (!this.shown.doorAOpen && live.doorAOpen) SoundSystem.playDoorOpen();
-      else if (this.shown.doorAOpen && !live.doorAOpen) SoundSystem.playDoorClose();
+      else if (this.shown.doorAOpen && !live.doorAOpen) {
+        SoundSystem.playDoorClose();
+        this.doorAClosedAt = this.host.scene.time.now;
+      }
       if (!this.shown.gateBOpen && live.gateBOpen) SoundSystem.playGateOpen();
     }
     this.shown = live;
@@ -312,15 +364,21 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
           .setVisible(false);
       }
     };
-    // Upright props sort by their base line like Nhinh (Player: depth 10 + ground y / 10), so she passes behind them
-    // when her feet are north of their base. Flat art (the yard, the doors and eyes set in the walls) stays below her.
-    const upright = (slot: keyof typeof ART_SLOTS): number => 10 + ART_SLOTS[slot].position.y / 10;
     add('background', ['station-yard'], 0);
-    add('column', ['water-column'], upright('column'));
-    add('stele', ['stele-normal'], upright('stele'));
-    add('hinge', HINGE_TEXTURES, upright('hinge'));
-    add('s1', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], upright('s1'));
-    add('s2', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], upright('s2'));
+    add('column', ['water-column'], uprightDepth('column'));
+    add('stele', ['stele-normal', 'stele-pulse'], uprightDepth('stele'));
+    add('dryChannel', ['dry-channel'], 0.5);
+    add('linkages', ['mechanical-linkages'], 0.5);
+    add('canopy', ['canopy'], CANOPY_DEPTH);
+    this.badgeGlow = scene.add
+      .image(ROUTE_BADGE.x, ROUTE_BADGE.y, 'light_radial')
+      .setScale(ROUTE_BADGE_GLOW_RADIUS / LIGHT_RADIAL_RADIUS)
+      .setBlendMode('ADD')
+      .setDepth(EYE_LIVE_DEPTH - 0.05)
+      .setVisible(false);
+    add('hinge', HINGE_TEXTURES, uprightDepth('hinge'));
+    add('s1', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], uprightDepth('s1'));
+    add('s2', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], uprightDepth('s2'));
     add('eyeA', ['eye-dormant', 'eye-live'], 2);
     add('eyeB', ['eye-dormant', 'eye-live'], 2);
     // The carved lines and the tool marks: a hidden line stays under the darkness; a line Pulse found, a live line and
@@ -341,16 +399,40 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
         .setDepth(EYE_LIVE_DEPTH - 0.05)
         .setVisible(false);
     }
-    add('sprout', ['sprout'], upright('sprout'));
-    add('lantern', ['lantern-off'], upright('lantern'));
-    add('latchA', ['latch-a-released', 'latch-a-engaged'], upright('latchA'));
-    add('brakeB', ['brake-b-released', 'brake-b-engaged'], upright('brakeB'));
-    add('doorA', ['door-a-closed', 'door-a-open'], 4);
+    add('sprout', ['sprout'], uprightDepth('sprout'));
+    add('lantern', ['lantern-off'], uprightDepth('lantern'));
+    add('latchA', ['latch-a-released', 'latch-a-engaged'], uprightDepth('latchA'));
+    add('brakeB', ['brake-b-released', 'brake-b-engaged'], uprightDepth('brakeB'));
+    add('doorA', ['door-a-closed', 'door-a-open', ...DOOR_A_CLOSING.map((frame) => frame.texture)], 4);
     add('gateB', ['gate-b-closed', 'gate-b-open'], 4);
     this.showArt('background', 'station-yard');
     this.showArt('column', 'water-column');
     this.showArt('stele', 'stele-normal');
     this.showArt('sprout', 'sprout');
+    this.showArt('dryChannel', 'dry-channel');
+    this.showArt('linkages', 'mechanical-linkages');
+    this.showArt('canopy', 'canopy');
+  }
+
+  /** Door A's texture while closed: the closing frames just after it shut, then the closed leaf. */
+  private doorAClosingTexture(): string {
+    const since = this.host.scene.time.now - this.doorAClosedAt;
+    return DOOR_A_CLOSING.find((frame) => since < frame.until)?.texture ?? 'door-a-closed';
+  }
+
+  /** Eases the crown towards CANOPY_FADED_ALPHA while any sampled point of Nhinh sits under its painted leaves. */
+  private fadeCanopy(dt: number): void {
+    const canopy = this.artImages.canopy?.canopy;
+    const foot = this.footNow;
+    if (!canopy || !foot) return;
+    const key = artKey('canopy');
+    const x = foot.x + foot.width / 2;
+    const y = foot.y + foot.height / 2;
+    // The texture is 2x: game px → texture px.
+    const covered = CANOPY_SAMPLES.some((up) => (this.host.scene.textures.getPixelAlpha(x * 2, (y - up) * 2, key) ?? 0) > 64);
+    const target = covered ? CANOPY_FADED_ALPHA : 1;
+    const step = CANOPY_FADE_PER_MS * dt;
+    canopy.setAlpha(canopy.alpha < target ? Math.min(target, canopy.alpha + step) : Math.max(target, canopy.alpha - step));
   }
 
   /** Shows an eye live (above the darkness, with its breathing glow) or dormant. */
@@ -370,7 +452,7 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
   /** Picks each slot's texture from the state, the live doors and the lantern. Runs every frame. */
   private drawArt(live: ForestEdgeLive, lantern: LanternState): void {
     if (!this.artOn) return;
-    this.showArt('doorA', live.doorAOpen ? 'door-a-open' : 'door-a-closed');
+    this.showArt('doorA', live.doorAOpen ? 'door-a-open' : this.doorAClosingTexture());
     this.showArt('gateB', live.gateBOpen ? 'gate-b-open' : 'gate-b-closed');
     this.showArt('latchA', this.state.latchA ? 'latch-a-engaged' : 'latch-a-released');
     this.showArt('brakeB', this.state.braceB ? 'brake-b-engaged' : 'brake-b-released');
@@ -378,12 +460,18 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     this.showArt('s2', socketTexture(lantern, S2_ID));
     this.showEye('eyeA', lanternFeeds(lantern, S1_ID));
     this.showEye('eyeB', lanternFeeds(lantern, S2_ID));
+    this.showArt('stele', this.host.scene.time.now < this.stelePulseUntil ? 'stele-pulse' : 'stele-normal');
+    // The ending names the route mark on the column (Nhinh: "Đường này nối về bến"); from then on the column and its
+    // badge read in the dark, so the player sees what she means.
+    const badgeLit = this.host.hasEvent(CUE_EVENT.ending);
+    this.artImages.column?.['water-column']?.setDepth(badgeLit ? EYE_LIVE_DEPTH : uprightDepth('column'));
+    this.badgeGlow?.setVisible(badgeLit);
     // Pulse at the stele reveals the S1–A line and the tool marks on latch A; a fed line runs live either way.
     const s1Line = this.host.hasJournal(LINE_S1_A_ID) ? 's1ToA-revealed' : 's1ToA-hidden';
     this.showArt('s1ToA', lanternFeeds(lantern, S1_ID) ? 's1ToA-live' : s1Line);
     this.showArt('s2ToB', lanternFeeds(lantern, S2_ID) ? 's2ToB-live' : 's2ToB-hidden');
     this.showArt('latchTool', this.host.hasJournal(LATCH_TOOL_ID) ? 'latch-tool-marks' : null);
-    this.showArt('hinge', HINGE_TEXTURES[this.hingePhase]);
+    this.showArt('hinge', hingeTexture(this.hingePhase));
     const onGround = lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID;
     this.showArt('lantern', onGround ? 'lantern-off' : null);
   }
@@ -399,6 +487,18 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
 
   hint(): HintLadder | null {
     return forestEdgeHint(this.viewNow());
+  }
+
+  wake(): { event: string; frames: readonly { texture: string; ms: number }[] } | null {
+    if (!this.artOn) return null;
+    return { event: WAKE_EVENT, frames: WAKE_FRAMES.map((frame) => ({ texture: artKey(frame.texture), ms: frame.ms })) };
+  }
+
+  onPulse(origin: Point): void {
+    const s = FOREST_EDGE.stele;
+    const dx = Math.max(s.x - origin.x, 0, origin.x - (s.x + s.width));
+    const dy = Math.max(s.y - origin.y, 0, origin.y - (s.y + s.height));
+    if (Math.hypot(dx, dy) <= STELE_PULSE_REACH) this.stelePulseUntil = this.host.scene.time.now + STELE_PULSE_MS;
   }
 
   focus(): readonly string[] {
@@ -537,7 +637,7 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
 
   private onHinge(): void {
     this.hingePhase = nextHingePhase(this.hingePhase);
-    this.host.toast(HINGE_PHASE_TEXT[this.hingePhase]);
+    this.host.toast(HINGE_PHASES[this.hingePhase].reached);
   }
 
   /** Doors, pedestals, latch, brace and hinge: drawn from the state and the live doors every frame. */

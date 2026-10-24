@@ -1,5 +1,5 @@
 {
-  "_note": "V4 level 01 layout, synced to the runtime (src/v4/levels/forest-edge/forestEdgeLayout.ts; a test checks that both agree). Topology follows the art: entry yard below, walled middle courtyard above it, door A in the courtyard's south wall, gate B in its north wall to level 02. Matches assets/levels/01-forgotten-forest-edge/v4/asset-map.json placements. 640x360 world px, 1x. Rects are {x,y,width,height}; checkpoints give the spawn point (actor centre). Not in the runtime yet: dry channel, mechanical linkages, the water column's marks; see docs/implementation/v4/01-forest-edge.md §13.",
+  "_note": "V4 level 01 layout, synced to the runtime (src/v4/levels/forest-edge/forestEdgeLayout.ts; a test checks that both agree). Topology follows the art: entry yard below, walled middle courtyard above it, door A in the courtyard's south wall, gate B in its north wall to level 02. Matches assets/levels/01-forgotten-forest-edge/v4/asset-map.json placements. 640x360 world px, 1x. Rects are {x,y,width,height}; checkpoints give the spawn point (actor centre). Art only, no collider and no interaction: dry channel, mechanical linkages, canopy; see docs/implementation/v4/01-forest-edge.md §13.",
   "world": { "x": 16, "y": 0, "width": 608, "height": 330 },
   "walls": {
     "forestNW":        { "x": 16,  "y": 0,   "width": 240, "height": 110 },
