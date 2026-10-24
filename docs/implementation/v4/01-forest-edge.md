@@ -64,7 +64,7 @@ Mô hình bản lề là tùy chọn, không đặt cờ bắt buộc. Mỗi l�
 ## 2. Ánh sáng và bố cục
 
 - **Ánh nền:** rêu nhạt làm rõ mặt đường, mép cổng, chốt, bệ và tường **kể cả khi đèn tắt**. Ánh nền là tĩnh, không đổi theo F, và không phải nguồn cảm biến. Không có nguồn cố định gameplay ở màn này.
-- **Vòng sáng đèn cầm tay** (dùng `light.ts`): hình tròn bán kính 40 px quanh tâm khối chân Nhinh, không phụ thuộc hướng quay, không có vệt hình nón. Muốn rọi hay tránh một vật, người chơi đi lại gần, lùi ra xa hoặc tắt F. Vòng sáng bị tường và cánh cửa đang đóng chắn.
+- **Vòng sáng đèn cầm tay** (dùng `light.ts`): hình tròn bán kính 40 px quanh bụng Nhinh (`LANTERN_LIFT` = 14 px phía trên tâm khối chân), không phụ thuộc hướng quay, không có vệt hình nón. Muốn rọi hay tránh một vật, người chơi đi lại gần, lùi ra xa hoặc tắt F. Vòng sáng bị tường và cánh cửa đang đóng chắn, tính từ tâm khối chân.
 - **Đèn trên đất** (`lampRest`) tắt, không có footprint. Chỉ đèn đang bật trong tay hoặc trên bệ mới có ánh.
 - **Quầng bệ:** vòng bán kính 12 px quanh đèn đặt trên bệ, cũng bị tường và cửa chắn.
 - **Đầu nối kín:** A và B là **ổ kín**. Chỉ nhận qua đúng bệ S1/S2 và đường dây đã vẽ. Đèn cầm tay không kích được. Mắt nhận sáng trên tường chỉ là chỉ báo, không là đích của vòng sáng.

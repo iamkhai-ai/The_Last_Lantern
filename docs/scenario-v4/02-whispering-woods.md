@@ -6,7 +6,7 @@
 
 Lumo dẫn Nhinh qua nơi đàn non từng tập bay. Bốn bia Trăng, Lá, Sao, Nước từng dẫn những nhịp gọi. Rễ đã đội lệch nền quanh cụm bia: các vành còn nguyên, tay quay vẫn truyền chuyển động, nhưng những rãnh không còn khớp miệng dẫn. Dấu lệch trên chân đế cho thấy sai vị trí sau khi nền biến dạng, không phải mất nguồn hay cơ cấu gãy. Ba bia đầu dùng glyph hiện có; bia Nước thêm hình giọt. Lumo biết công dụng nhưng không nhớ/đọc thay cấu hình thiết bị. Cậu gỡ chiếc chuông cỏ mắc vào bụi: “Tôi vẫn treo lại. Có con thức dậy sẽ cần nó.” Nhinh kể người lái đò thường chờ cô tan học; hai người nói về những người đang đợi họ trở về.
 
-Ánh nền rừng cho thấy đường đất, bia, tay quay, chân cây và hốc kể cả khi F tắt. Không có nguồn gameplay cố định trong khu này. Đèn cầm khi bật tạo vòng sáng bán kính 40px quanh tâm khối chân, không phụ thuộc hướng quay; nó giúp đọc mặt vành nhưng không cấp nguồn cho tay quay hay cổng. Lumo cũng không cấp các bia.
+Ánh nền rừng cho thấy đường đất, bia, tay quay, chân cây và hốc kể cả khi F tắt. Không có nguồn gameplay cố định trong khu này. Đèn cầm khi bật tạo vòng sáng bán kính 40px quanh bụng Nhinh (14px phía trên tâm khối chân), không phụ thuộc hướng quay; nó giúp đọc mặt vành nhưng không cấp nguồn cho tay quay hay cổng. Lumo cũng không cấp các bia.
 
 Trạng thái mặc định nếu không có F mang theo: Nhinh vào rừng với đèn cầm tay bật, bốn vành ở (0,0,0,0), ba tay quay ở nấc đầu, cổng xuống thư viện đóng, Lumo đi cùng. Trong lượt chơi liền mạch, giữ nguyên trạng thái F từ màn 01. Người chơi có thể tắt/bật F hoặc Pulse ngay; không có cờ khảo sát phải hoàn tất.
 

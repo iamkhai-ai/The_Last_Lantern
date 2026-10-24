@@ -8,7 +8,7 @@ Lumo dẫn Nhinh tới nơi tuyến Bến tách khỏi tuyến Rễ. Lòng suố
 
 Tây [S,G1] — cầu A — đảo [tay truyền động G1,G2] — cầu B — Đông [chốt A/B, van hồi N, trạm T].
 
-Ánh nền phản chiếu trên đá và vệt nước giữ mép suối, cầu đã đóng/mở, bờ an toàn, gương, chốt và tay điều khiển đọc được khi đèn tắt. Không có nguồn gameplay cố định trong màn. Đèn cầm theo luật chung tỏa vòng bán kính 40px quanh tâm khối chân; khi đặt tại S, đầu nối kín lọt quầng 12px và đưa tín hiệu theo các tuyến G1/G2 đã vẽ. Cầm đèn không mở cầu hay trạm ở xa. F bật/tắt đèn cầm hoặc đặt tại S, không cắt đường chính từ Cây Mẹ; trạng thái F mang từ màn trước.
+Ánh nền phản chiếu trên đá và vệt nước giữ mép suối, cầu đã đóng/mở, bờ an toàn, gương, chốt và tay điều khiển đọc được khi đèn tắt. Không có nguồn gameplay cố định trong màn. Đèn cầm theo luật chung tỏa vòng bán kính 40px quanh bụng Nhinh (14px phía trên tâm khối chân); khi đặt tại S, đầu nối kín lọt quầng 12px và đưa tín hiệu theo các tuyến G1/G2 đã vẽ. Cầm đèn không mở cầu hay trạm ở xa. F bật/tắt đèn cầm hoặc đặt tại S, không cắt đường chính từ Cây Mẹ; trạng thái F mang từ màn trước.
 
 Khi dấu không bị vùng sáng trong trò chơi chiếu lên, khoáng phát quang dọc hai ống chính làm rõ nhánh Bến và nhánh Rễ. Chúng cho thấy tuyến qua bờ/đảo và hướng dòng hồi, không chỉ ra hướng gương hay chuỗi thao tác. Tia S→G1→G2 chạy ngay trên hai ống; theo luật tia (dải 6px, puzzle-contracts §1), khi S bật, đoạn khoáng nằm dưới tia bị che. Muốn đọc đoạn ấy, người chơi tắt F (kể cả từ xa khi đèn ở S) hoặc đọc đoạn ống ngoài đường tia và ngoài vòng sáng của đèn cầm; không cần một thao tác bắt buộc để đọc dấu. Tường/cửa đang đóng chắn ánh; dấu trong vùng sáng khó phân biệt, nhưng ánh nền giữ toàn phòng nhìn rõ.
 

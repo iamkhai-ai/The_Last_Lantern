@@ -10,7 +10,7 @@ Nhinh nói mình tới kiểm tra trạm. Lumo muốn tới khu vườn nhưng c
 
 ## 2. Ánh sáng và bố cục
 
-Ánh nền rêu nhạt làm rõ mặt đường, mép cổng, chốt và bệ kể cả khi đèn tắt. Không có nguồn gameplay cố định trong sân này; nền phản quang không bật cảm biến và không có công tắc. Vòng sáng của đèn cầm theo luật chung bán kính 40px quanh tâm khối chân, không phụ thuộc hướng quay; không dùng vệt hình nón hay đèn pin.
+Ánh nền rêu nhạt làm rõ mặt đường, mép cổng, chốt và bệ kể cả khi đèn tắt. Không có nguồn gameplay cố định trong sân này; nền phản quang không bật cảm biến và không có công tắc. Vòng sáng của đèn cầm theo luật chung bán kính 40px quanh bụng Nhinh (14px phía trên tâm khối chân), không phụ thuộc hướng quay; không dùng vệt hình nón hay đèn pin.
 
 Khi cầm, đèn tỏa một vòng sáng nhỏ có rìa rõ quanh Nhinh; vòng sáng này dùng để nhìn mặt máy và các dấu ánh được chỉ định, không phủ cả sân. Tại bệ S1 hoặc S2, đầu nối kín chỉ đưa nguồn tới cửa A hoặc B tương ứng. F tắt/bật đèn dù Nhinh đang cầm hay đèn đang ở bệ.
 

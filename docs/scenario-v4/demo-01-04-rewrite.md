@@ -16,7 +16,7 @@ Nỗi muốn được công nhận của Nhinh thể hiện qua việc cô mong 
 
 ### Luật phải giữ khi cập nhật
 
-- Dùng bản quy ước đèn mới nhất: đèn cầm tỏa vòng bán kính 40px quanh tâm khối chân, không phụ thuộc hướng quay; bệ kín để lọt quầng 12px và nhánh tràn được khai báo. Các số là giá trị khởi điểm dùng chung.
+- Dùng bản quy ước đèn mới nhất: đèn cầm tỏa vòng bán kính 40px quanh bụng Nhinh (14px phía trên tâm khối chân), không phụ thuộc hướng quay; bệ kín để lọt quầng 12px và nhánh tràn được khai báo. Các số là giá trị khởi điểm dùng chung.
 - Tường/cửa đóng chắn ánh; hình ảnh và gameplay khớp nhau. Ánh nền luôn đủ đọc đường và không cấp cảm biến. F điều khiển duy nhất đèn bảo trì và được mang qua màn.
 - Pulse chỉ khi cầm đèn bật; chỉ hiện liên kết/dấu tĩnh. Nó không xác định lỗi thay người chơi, báo trạng thái sống hoặc cấp nguồn. J giữ đúng phần đã quan sát theo luật khoảng cách và che khuất hiện hành.
 - Tia của mạng gương là dải sáng 6px dọc đường tia, bị tường/cửa đóng/vật chắn cắt; nó che dấu tối và kích mặt nhận hở dưới dải, còn ổ kín chỉ nhận tia ở đúng đầu cuối.

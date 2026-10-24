@@ -171,7 +171,7 @@ Dấu vân tay các file sửa trong đợt này (file khác giữ hash của b�
 
 ## Đổi vệt đèn thành vòng sáng — 2026-10-24
 
-Người dùng chỉ ra đèn lồng không phải đèn pin, nên không thể chỉ chiếu trong một hình thang theo hướng quay. Quyết định: đèn cầm tay tỏa một vòng sáng bán kính 40px, tâm ở điểm trên sàn dưới chân Nhinh; hướng quay không đổi vùng sáng. Đèn trên bệ vẫn chỉ để lọt quầng 12px và nhánh tràn đã khai báo, vì bệ là hộp có đầu nối kín. Vật chắn, luật dấu sáng/tối, luật “đã thấy” và vùng đứng 8px giữ nguyên.
+Người dùng chỉ ra đèn lồng không phải đèn pin, nên không thể chỉ chiếu trong một hình thang theo hướng quay. Quyết định: đèn cầm tay tỏa một vòng sáng bán kính 40px, tâm ở điểm trên sàn dưới chân Nhinh; hướng quay không đổi vùng sáng. Đèn trên bệ vẫn chỉ để lọt quầng 12px và nhánh tràn đã khai báo, vì bệ là hộp có đầu nối kín. Vật chắn, luật dấu sáng/tối, luật “đã thấy” và vùng đứng 8px giữ nguyên. (Sau đó: tâm vòng dời lên bụng Nhinh, 14px phía trên tâm khối chân, để vòng sáng cân quanh thân; vật chắn vẫn tính từ tâm khối chân. Xem puzzle-contracts §1.)
 
 Hệ quả: tránh rọi một vật nghĩa là lùi ra hoặc tắt F, không còn quay đèn đi; F có vai trò rõ hơn khi luống, dấu hay cầu nằm ngay trên đường đi. Đã sửa câu có hướng ở 01 (“vật ở phía trước”) và 07 (“vệt hẹp”, “quay vệt khỏi luống”). Bán kính 40px là giá trị khởi điểm, chỉnh ở phòng thử.
 
