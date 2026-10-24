@@ -4,11 +4,15 @@
 
 ## 1. Mở cảnh
 
-Ba tuyến rễ có ổ Ký Ức, Hy Vọng, Cân Bằng. Đường trắng cũ vẫn kéo về tháp, bánh xe chu kỳ bị một thanh chặn giữ. Nhinh có cả ba bộ phận, một bản thiết kế đã hiểu và xác nhận phối hợp từ mẹ ở 09.
+Ba tuyến rễ có ổ Ký Ức, Hy Vọng, Cân Bằng. Đường trắng cũ vẫn kéo về tháp, bánh xe chu kỳ bị một thanh chặn giữ. Nhinh có cả ba bộ phận, đèn cầm tay từ 09 và xác nhận phối hợp từ mẹ. Trạng thái đầu: Nhinh đứng ở nền Cây Mẹ, đèn ở tay (F giữ đúng trạng thái cô mang từ 09), ba ổ tinh thể trống; G0 đang cấp trực tiếp, G1 lệch khỏi đầu Ký Ức, tượng ở mặt hẹp, van ở chế độ khẩn cấp liên tục, thanh chặn trung tâm chưa gài; Lumo ở bậc vào, chưa giữ ấn C.
 
-> **Lumo:** “Tôi sẽ giữ mạch khởi động. Khi rễ tự giữ được, gọi tôi về.”
+Ánh nền trên rễ/đá làm rõ mọi lối, mép, ổ, tay điều khiển và đường về dù đèn bảo trì tắt. Không có đoạn đi mù. Đèn cầm chiếu vệt ngắn; chỉ tác động lên vật/cảm biến nằm trong rìa vệt nhìn thấy. Ổ cắm kín S nằm trên nền chung cạnh sơ đồ: E đặt/nhặt đúng chiếc đèn bảo trì duy nhất; F điều khiển đèn dù ở tay hay tại S. Khi ở S và bật, đèn cấp mạch thử theo các đường ghi ở dưới; không có nhánh tràn cục bộ. Không có nguồn cố định gameplay ngoài **W**, đèn trắng cố định của chế độ khẩn cấp phía trên Nguyệt. W được bật khi vào, chiếu đúng vùng nhận Nguyệt và có đường biên rõ; nó không nối với F. Không có công tắc W riêng; khi thanh trung tâm gài, cần truyền động nhìn thấy được kéo chớp kim loại chắn W lại. Tượng mặt rộng cũng có thể chặn W khỏi Nguyệt trước khi chốt. Ánh tự thân của Lumo chỉ dẫn đường, không kích Nhật/Nguyệt hay cấp nhánh.
+
+Khi đèn đang ở tay và bật, Pulse trên sơ đồ đầu phòng có thể lộ các trục tĩnh S→G0, nhánh G0→G1→đầu vàng, hai nhánh qua khung chia tới hai Nhật, cùng ống riêng tới C. Nó không cho biết gương đang hướng đâu, đèn nào đang sáng, Lumo đã tới C hay van đang ở nấc nào. J lưu dấu đã phát hiện với viền mờ; Pulse không phải điều kiện kích hoạt. Khi đèn tắt, vân tự phát quang trên đai rễ đã khóa chỉ hiện sau khi dòng chính tự giữ; chúng xác nhận cơ cấu còn hoạt động và không thay bản đồ/đáp án. Nền vẫn đọc được trước và sau.
+
+> **Lumo:** “Tôi có thể giữ tiếp điểm lúc khởi động. Bánh xe này chưa từng quay được tới nhịp cuối.”
 >
-> **Nhinh:** “Tôi sẽ nhìn cả đường về của cậu.”
+> **Nhinh:** “Đứng ở chỗ cậu thấy an toàn. Tôi sẽ nhìn cả đường về.”
 
 Lumo tự nhận việc với điều kiện rõ. Nhinh có thể gọi về bất cứ lúc nào; máy chưa xong thì dừng, không làm cậu bị thương.
 
@@ -32,25 +36,25 @@ Van giới hạn có hai nấc được biểu diễn từ 06: `khẩn cấp li�
 
 ## 3. Đường giải tham khảo
 
-1. Lắp ba tinh thể, đặt đèn S. Đọc các đường nối ngắn trên nền; không cần xem lại toàn bộ luật.
+1. Lắp ba tinh thể. Nếu đèn đang tắt, bật F khi còn cầm; nếu muốn chạy thử, đặt đèn tại S. Đọc các đường nối ngắn trên nền; không cần xem lại toàn bộ luật.
 2. Cho G0 chia, chỉnh G1 tới vàng; nhánh còn lại tới cặp Nhật, xoay mặt rộng che Nguyệt.
-3. Đặt van theo chu kỳ/định mức. Gọi Lumo vào C khi muốn thử đồng thời; có thể làm bước này sớm hơn.
-4. Kiểm tra ba nhánh hiện tại, E chốt trung tâm. Rễ xuất hiện các đai giữ, máy chính bắt đầu tự vận hành.
-5. Gọi Lumo về: nhánh xanh vẫn giữ. Rút đèn: các rễ vẫn sống, nguồn thử ngừng là đúng. Người chơi thấy bằng hành động rằng vai trò giữ liên tục đã được thay thế.
-6. F tắt ngọn đèn bảo trì. Có thể làm ngay sau bước4 khi đèn còn ở bệ; cảnh chuyển tự cho Lumo rời C an toàn trước khoảng lặng. Không ép đi lấy đèn hay nghe hết thoại mới được tắt. Nếu Nhinh lấy đèn và giữ bật, có lớp âm/ánh thử dư nhẹ để gợi chú ý, không gây mất tiến trình hay hỏng rễ.
+3. Đặt van theo chu kỳ/định mức. Gọi Lumo vào C khi muốn thử đồng thời; có thể làm bước này sớm hơn. C chỉ được cấp khi Lumo thực sự đứng ở tiếp điểm.
+4. Kiểm tra ba nhánh hiện tại, E chốt trung tâm. Ngay lúc đó các đai cơ khí khép quanh rễ, chỉ báo dòng chính giữ ở 2/1/1 và bánh xe quay tiếp dù đèn thử vẫn đặt tại S. Đây là dấu hiệu trực tiếp của hệ tự giữ, không cần chờ tới khi tối.
+5. Gọi Lumo về bất cứ lúc nào: trước chốt, nhánh xanh ngừng nhưng cậu có thể được gọi lại; sau chốt, nhánh xanh vẫn giữ. Nếu đèn ở S, E nhặt đèn thật từ bệ để mang theo; không tự chuyển vào hành trang. Gọi Lumo và thu đèn có thể làm theo thứ tự khác nhau.
+6. Tắt F khi đèn ở tay hoặc tại S. Có thể tắt từ xa trước khi nhặt, hoặc nhặt xong rồi tắt; sau chốt, trạng thái chính không đổi. Nếu vệt cầm chạm mặt đai rễ thì chỉ dấu nền của cơ chế khởi động bị che cục bộ; ánh nền và dấu tự phát quang từ bộ tự giữ vẫn phân biệt được. Nếu kết cảnh bắt đầu khi đèn còn ở S, hoạt ảnh cho thấy Nhinh đi tới lấy nó trước khi rời phòng; không cắt cảnh để dịch chuyển đèn. Nếu Lumo còn ở C, cảnh chuyển thể hiện Nhinh gọi cậu về, đợi cậu thực sự tới nền an toàn rồi mới chuyển sang khoảng lặng; checkpoint ghi đúng tiến độ để không gọi hoặc tạo thêm Lumo lần nữa.
 
-Các bước5–6 hoán đổi được. Chính việc giải phóng/chốt cơ chế chu kỳ ở bước4 khiến bình minh có thể trở lại; F ở cuối ngừng mạch thử và mở nhịp trình bày kết, không phải chiếc đèn nhỏ có quyền bật mặt trời. Đèn chỉ được cất vào hành trang trong cảnh chuyển nếu còn ở bệ, với động tác Nhinh tới lấy được thể hiện; không xuất hiện vô cớ trong tay. Lumo không phải tự hy sinh để kết thúc.
+Các thao tác sau chốt — gọi Lumo về, F tắt từ xa, nhặt đèn khỏi S — hoán đổi thứ tự được. Chính việc giải phóng/chốt cơ chế chu kỳ ở bước4 khiến bình minh có thể trở lại; F ở cuối chỉ ngừng mạch thử cục bộ và mở nhịp trình bày kết, không phải chiếc đèn nhỏ có quyền bật mặt trời. Nhinh luôn giữ đèn theo đúng vị trí thực; không tự chuyển từ bệ vào tay hoặc ngược lại. Lumo không phải tự hy sinh để kết thúc.
 
 ## 4. Trạng thái trước và sau chốt
 
 | Thao tác | Trước chốt | Sau chốt |
 | --- | --- | --- |
 | Gọi Lumo về | Mạch khởi động Hy Vọng ngừng, chỉnh lại được | Hệ thật tự giữ, cậu về an toàn |
-| F hoặc rút đèn | Tia thử tắt, chưa đủ điều kiện kéo thanh | Không đảo chế độ chính; cho phép kết |
+| F hoặc E nhặt đèn | Tia thử tắt/đèn rời khỏi S, chưa đủ điều kiện kéo thanh | Không đảo chế độ chính; cho phép kết |
 | Xoay gương | Cập nhật tất cả nhánh từ trạng thái hiện tại | Chỉ đổi mạch thử, không tháo đai rễ đã khóa |
 | Van khẩn cấp | Chưa thể cam kết chu kỳ nếu còn nấc này | Tay đã khóa cơ khí ở chế độ mới, không vô tình kéo lại khi đi ngang |
 
-Mọi điều khiển ở cùng vùng nền đi được. Không đặt chốt trung tâm sau cầu chỉ xuất hiện khi Lumo đã được giải phóng. Lưu tinh thể, nấc, nguồn, vị trí Lumo, `roots-latched`, bàn giao, kết đã bắt đầu. Trước chốt tính trạng thái sống; sau chốt dùng kết quả cơ khí đã cam kết. Reload cảnh kết có đúng một lần gọi Lumo về và một chuyển tiếp; không tạo lại cậu trên ấn.
+Mọi điều khiển ở cùng vùng nền đi được; sơ đồ, ba ổ, G0/G1, khung chia, tượng, van và thanh chốt đều ở mặt bằng chung, không bị khóa sau rễ chưa tạo. Lưu tinh thể, nấc, F/vị trí đèn, W/chớp, vị trí Lumo, `roots-latched`, bàn giao, kết đã bắt đầu và dấu Pulse. Trước chốt tính trạng thái sống từ nguồn, tia và vị trí thật; sau chốt dùng kết quả cơ khí đã cam kết. Reload cảnh kết không đặt Nhinh trên mép hoặc cầu, không lặp cuộc gọi/thoại/tinh thể và không tạo Lumo lại trên ấn.
 
 ## 5. Bình minh và trở về
 
@@ -72,4 +76,4 @@ Trên bàn có sơ đồ một vài nhánh cũ bị ngắt, không phát lời c
 - **Mức 2 — quan hệ:** “Tia thẳng chỉ nuôi một nhánh; bộ chia cho các đầu khác hoạt động trong khi tượng giữ Nguyệt tối.”
 - **Mức 3 — bước tiếp:** “G0 chia, G1 vào Ký Ức, hai Nhật sáng và Nguyệt trong bóng, van theo chu kỳ, Lumo giữ C; khi ba nhánh đúng hãy chốt trung tâm.” Sau chốt: “Rễ đã tự giữ. Có thể gọi Lumo về và tắt đèn.”
 
-Giữ art Cây Mẹ, rễ gãy/nối/đai, ba tinh thể, gương, tượng, Shadow tan và bình minh. Đặt thêm một khung chia cố định sau nhánh phải G0, dùng lại loại khung đã học ở 08; G0 và khung này là hai vật riêng. Bổ sung trạng thái van rõ, cửa chắn nguồn trắng nối thanh trung tâm và montage Bến Sương; tái dùng xưởng prologue cho bữa cơm, thêm pose ngồi/đặt đèn nếu bộ hiện có không đủ. HUD “Khôi phục cơ chế tự điều tiết.” → “Đưa Lumo về.” rồi ẩn trong kết.
+Giữ art Cây Mẹ, rễ gãy/nối/đai, ba tinh thể, gương, tượng, Shadow tan và bình minh. Đặt thêm một khung chia cố định sau nhánh phải G0, dùng lại loại khung đã học ở 08; G0 và khung này là hai vật riêng. Bổ sung trạng thái van rõ, chớp W nối thanh trung tâm, đai rễ tự phát sáng sau khi tự giữ, dấu tia và footprint, cùng montage Bến Sương; tái dùng xưởng prologue cho bữa cơm, thêm pose ngồi/đặt đèn nếu bộ hiện có không đủ. Chuyển cảnh không tự đưa đèn vào hành trang; nếu còn ở S, biểu diễn Nhinh đi tới lấy trước khi cắt. HUD “Khôi phục cơ chế tự điều tiết.” → “Đưa Lumo về.” rồi ẩn trong kết.

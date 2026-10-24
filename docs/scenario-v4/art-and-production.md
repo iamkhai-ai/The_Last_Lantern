@@ -7,16 +7,16 @@
 | Khu | Giữ hoặc dùng làm nền tảng | Phần phải thiết kế mới/chỉnh |
 | --- | --- | --- |
 | Prologue | Nhinh, đèn bảo trì, bảng màu và tranh đi đường phù hợp | Xưởng chơi được, mẹ/lái đò, đèn khách, bàn/khay/bảng kiểm; đoạn nhận nhiệm vụ |
-| 01 | Rừng/bia/cổng/đèn/dấu Pulse | Sân giữa, bệ S1/S2, chốt rõ, hình đầu nối kín |
-| 02 | Rừng, ba glyph, cổng, vignette phù hợp | Glyph Nước, bốn vành ba hướng, ba trục/tay quay, miệng kênh; hốc ngủ/chuông |
-| 03 | Phòng giếng, phiến hai lớp, tinh thể, phù điêu | Gian mô hình bốn chặng, van/cấp/hồi/kho nhận; UI ghi chép hai lớp |
+| 01 | Rừng/bia/cổng/đèn/dấu Pulse | Sân giữa, bệ S1/S2, chốt rõ, đầu nối kín; dấu bào tử tối chỉ tới mặt sau A từ sân giữa, không tạo đường vòng |
+| 02 | Rừng, ba glyph, cổng, vignette phù hợp | Glyph Nước, bốn vành ba hướng, ba trục/tay quay và dấu khớp hiện qua Pulse; đom đóm/mực sáng tối chỉ hướng đầu nhận, không số vòng; hốc ngủ/chuông |
+| 03 | Phòng giếng, phiến hai lớp, tinh thể, phù điêu | Gian mô hình bốn chặng, van/cấp/hồi/kho nhận; UI ghi chép hai lớp; nền đủ rõ dưới cả hai lớp |
 | 04 | Bộ đá/bờ/gương/cầu và phù điêu bão | Đảo/tay truyền động G1, hai hãm ở Đông và thanh nối tới A, cần hồi đúng từng bờ, T/N, phản hồi nước và liên lạc |
-| 05 | Bộ hành lang/ống/màng/mốc/ấn | Khoang thứ tư khi cần, chốt rời, cửa C có khớp ống, cửa D, nút hồi phía xa |
-| 06 | Phòng tháp, khoang, gương/lăng kính, luồng nước | Nhánh chia thứ hai, chỉ báo mức bằng vạch, hốc liên lạc; sửa khăn đỏ/ghi âm |
-| 07 | Gần như toàn bộ bố cục vườn/hoa/rễ/bể/van | Hốc kén, con non, vài đồ dùng Lumo và pose nghỉ |
-| 08 | Phế tích/tượng/khóa/Shadow | Đường quang học ngoài, hai gương trục chung, bóng khớp hình học; có thể nới sân |
-| 09 | Ba phòng và họ đồ họa đài hiện có | Hốc minh họa khung nâng, tay hồi, ký ức cứu hộ/trì hoãn/khóa van; bỏ vật riêng về con gái |
-| 10 | Cây/rễ/tinh thể/cơ cấu/bình minh và xưởng prologue | Khung chia cố định thứ hai sau G0 dùng lại mẫu ở 08; van chế độ, cửa chắn nguồn trắng nối thanh trung tâm, thao tác bàn giao, montage dân vận hành, pose bữa cơm |
+| 05 | Bộ hành lang/ống/màng/mốc/ấn | Khoang thứ tư khi cần, chốt rời, cửa C có khớp ống, cửa D, nút hồi phía xa; giữ đèn cầm tay, không thêm bệ |
+| 06 | Phòng tháp, khoang, gương/lăng kính, luồng nước | Nhánh chia thứ hai, chỉ báo mức bằng vạch, hốc liên lạc; vạch khắc phản quang phân loại nhánh khi đèn thử tắt; sửa khăn đỏ/ghi âm |
+| 07 | Gần như toàn bộ bố cục vườn/hoa/rễ/bể/van | Hốc kén, con non, vài đồ dùng Lumo và pose nghỉ; rìa W chỉ phủ luống cầu/ươm, đèn cầm riêng phủ hoa A, tay che W ở Tây và sân nối có chốt |
+| 08 | Phế tích/tượng/khóa/Shadow | Đường quang học ngoài, hai gương trục chung, hai khớp chia D0/D1 và lá chuyển R, bóng khớp hình học; nhánh spill cục bộ S phủ luống rễ, W chỉ phủ vạt cây; lối đá hồi và có thể nới sân |
+| 09 | Ba phòng và họ đồ họa đài hiện có | Hốc minh họa khung nâng, tay hồi, nhánh soi hồ sơ S→H tách khỏi G0/Lumo, bột sao chỉ lộ khi bảng không bị chiếu; ký ức cứu hộ/trì hoãn/khóa van; bỏ vật riêng về con gái |
+| 10 | Cây/rễ/tinh thể/cơ cấu/bình minh và xưởng prologue | Khung chia cố định thứ hai sau G0 dùng lại mẫu ở 08; van chế độ, W trên Nguyệt với chớp nối thanh trung tâm, đai rễ đóng và chỉ báo tự giữ tức thì, montage dân vận hành, pose bữa cơm |
 
 Các đường dẫn tham khảo asset là `assets/levels/01-forgotten-forest-edge` đến `10-the-heart-of-elaria`, cùng `shared`. Nhiều thư mục có concept/offline và runtime khác nhau; khi dựng phải chọn đúng phiên bản người dùng đã duyệt, không lấy tên `v3` của art làm đồng nghĩa `V3` cốt truyện.
 
@@ -28,7 +28,9 @@ Mọi chốt cho nhìn được thanh cơ khí đang đỡ. Chốt rời có tay
 
 Cần làm nền theo hình học puzzle đã khóa: chiều tia, ốp kín, vùng bóng, đường chân người, lối tiếp cận van và đường rút. Không vẽ trước một phòng đẹp rồi giấu collider/đích không khớp vào đó. Khung 640×360 không đủ thì chia phòng có đường nối dễ hiểu.
 
-Mỗi trạng thái âm thanh cần hình tương ứng; bóng tối vẫn đủ nhìn đường. Không bake chữ, nhân vật, tia sống, HUD hoặc lời giải vào nền. Dùng art cũ theo bộ phận, không coi ảnh concept ghép là background sạch.
+Mỗi phòng có lớp ánh nền tĩnh đủ nhìn đường, mép và tương tác; đây không là nguồn cảm biến. Tách lớp đèn cầm tay động khỏi nguồn cố định, thể hiện rìa chiếu và vùng cảm biến bằng hình học/hoa văn chứ không chỉ màu. Bóng Nguyệt/rễ, nhánh S và nguồn W phải khớp đường tia, ốp che và vật cản. Dấu phát quang và sinh vật phải tách khỏi màu nền để đọc được khi nguồn không chiếu trực tiếp; chỉ dấu thật sự nằm trong footprint mới mất tương phản khi đèn bật. Tắt F không phủ đen toàn map, và tăng gamma không làm lộ lớp vốn chưa có điều kiện.
+
+Mỗi trạng thái âm thanh cần hình tương ứng. Không bake chữ, nhân vật, tia sống, HUD hoặc lời giải vào nền. Dùng art cũ theo bộ phận, không coi ảnh concept ghép là background sạch. Ưu tiên tái dùng rễ/cầu/đom đóm/hoa, chỉ thêm lớp động và cơ cấu cần thiết để làm rõ footprint, chốt, công tắc và đường hồi.
 
 ## 3. Thứ tự dựng được đề xuất cho một đợt sau
 

@@ -2,6 +2,8 @@
 
 Ngày: **2026-10-24**. Phạm vi là tài liệu truyện, prologue và 10 màn, không phải một bản game V4 đã dựng.
 
+**Lưu ý phiên bản:** các mục từ “Nguồn và phân công” tới bảng hash đầu tiên dưới đây là hồ sơ lượt biên soạn trước đợt chỉnh ánh sáng/Pulse. Những PASS đó chỉ áp dụng bản đã đọc lúc ấy; không chứng nhận bản đang sửa hoặc runtime hiện tại. Bằng chứng mới nằm ở mục “Đợt chỉnh ánh sáng và Pulse” cuối tài liệu.
+
 ## Nguồn và phân công
 
 - Đã đọc hướng V2, các màn hiện có và `RULE_GAMES.md`. Mốc nhánh tham khảo đã đọc là `origin/test-develop` tại `3e9c12fabff160f1d7919db97ac24ec3130a066b`; không coi đó là HEAD của working tree đang mở.
@@ -80,3 +82,60 @@ Nếu đổi luật, bố cục hoặc điều kiện, phải đọc lại các 
 | puzzle-contracts.md | `b59b1f11b75e6d49ed5b48452370d55e2337072b84f1181989e565f916d8fe26` |
 | README.md | `dc29af7199cf5d211d4fea84eaf2fcc33260be85648c592a96c951d19ca6d5b6` |
 
+
+## Đợt chỉnh ánh sáng và Pulse — 2026-10-24
+
+### Phạm vi và bản được đọc
+
+Đợt này thực hiện yêu cầu đã duyệt về vai trò của F/Pulse trong kịch bản. Nhánh làm việc là `feat/v4-foundation`, HEAD nền `515e723c12ce587fe1ef7e7da53193f786530053`; các bản sửa là working diff, chưa commit hoặc push. Phạm vi gồm 10 màn, `puzzle-contracts.md`, `art-and-production.md`, `README.md` và bản ghi này. Không sửa runtime, art, nhiên liệu, prologue, cốt truyện biên soạn hoặc phần 2.
+
+Luna implementer được yêu cầu `gpt-6-luna` / `xhigh`; Luna reviewer riêng được yêu cầu `gpt-6-luna` / `high`. Các cặp này có trong danh sách công cụ Codex và dispatch được chấp nhận. Công cụ chỉ trả tên task, không trả model/effort resolved: **unknown**. Reviewer nhận chỉ dẫn chỉ đọc; không có bằng chứng sandbox kỹ thuật. Root rà đường mẫu và chỉnh các câu mâu thuẫn trước khi đóng băng 13 tài liệu nội dung cho lượt đọc độc lập.
+
+### Các quyết định và lỗi đã sửa trong lượt viết
+
+| Điểm cần làm rõ | Quyết định trong bản sửa |
+| --- | --- |
+| F có thể thành công tắc tối toàn phòng | Ánh nền luôn đủ nhìn đường; vùng nguồn cầm/đặt/cố định được khai báo riêng. Dấu tối phụ thuộc ánh sáng thật tại dấu. |
+| Pulse trùng thông tin với tối hoặc trở thành bước bắt buộc | Pulse đọc liên kết tĩnh, chỉ khi cầm đèn bật; J giữ dấu đã phát hiện. M02 dành hướng đầu nhận cho lớp tối; không kiểm cờ quét để cho giải. |
+| M01 nhặt đèn sai phía hoặc dùng ánh cầm vượt ổ kín | Nhặt S1 là đang ở sân vào; có thể đặt lại ngay. A/B chỉ nhận qua đúng bệ hoặc được chốt giữ. |
+| M05 lắp lại K khi cửa đã đóng | Dùng mốc/tay hồi mở cửa trước khi lắp lại; có thể tháo từ nền an toàn rồi đi tiếp qua D đã giữ. Không thêm bệ đèn. |
+| M07 nguồn W vô tình thay toàn bộ vai trò F | W chỉ phủ luống cầu/ươm. Hoa A cần đèn cầm; chốt giữ cửa sau khi ánh rời hoa. Luống đầu cầu nằm trong vệt khi tiến vào, nên cần để tối trước khi bắt đầu qua. |
+| M08 có pha tối nhưng chưa có thao tác đặt lại nguồn | Qua rễ tới tay R/Z/tượng ở Đông, mở lối đá hồi; trở về Nam, E đặt đèn S rồi bật. D0/D1 là hai khớp chia thật; Z là nguồn chuẩn cho cặp gương. |
+| M09 chỉnh G0 từ sai phòng hoặc thu đèn từ xa | Khảo sát tối tại H; đi H–P qua A đã chốt để chỉnh G0 rồi trở lại H. Vòng chỉ mở từ O; phải đi bộ về S lấy đèn và đoàn tụ Lumo trước bản ghi. |
+| M10 thiếu dấu tự giữ hoặc đèn/Lumo xuất hiện qua cắt cảnh | Đai và chỉ báo chính xác nhận tự giữ ngay sau E. F, thu đèn và gọi Lumo đổi thứ tự được; cảnh chuyển thể hiện việc lấy đèn/gọi Lumo thực tế trước khi rời. |
+
+### Kiểm tra áp dụng cho đợt này
+
+| Kiểm tra | Trạng thái | Phạm vi bằng chứng |
+| --- | --- | --- |
+| `git -c core.safecrlf=false diff --check -- docs/scenario-v4` | **PASS** | Lệnh root chạy trên bản nội dung đóng băng, không có lỗi whitespace. |
+| Liên kết file trong tài liệu biên soạn | **PASS** | Kiểm 17 Markdown ngoài hai bản nguyên văn: 19 liên kết tới file, không thiếu đích. |
+| Liên kết trong hai bản nguyên văn | **FAIL — tồn tại từ trước** | Liên kết tuyệt đối tới `docs/scenario-v3/README.md` trong `00-original-story-verbatim.md` không có đích trong checkout này. Bản nguyên văn được giữ nguyên; lỗi không nằm trong nội dung sửa. |
+| Giữ nguyên truyện, mở đầu, phần 2 và hồ sơ gốc | **PASS** | SHA-256 của hai file nguyên văn, `00-story-bible.md`, `00-prologue.md`, `phase-2-outline.md` khớp giá trị root đọc đầu đợt. |
+| Đọc độc lập bản sửa | **PASS trong phạm vi đọc** | Task `review_v4_lighting` đọc riêng 13 file sửa, không nêu finding cụ thể. Reviewer báo đã đối chiếu hash đầu/cuối; root kiểm lại toàn bộ hash nội dung trước khi chốt. Đây không phải hai lượt review code độc lập và không chứng nhận mọi trạng thái. |
+| Build/test runtime, kiểm collider/tia/save, playtest và đo độ khó | **NOT_RUN** | Công việc chỉ sửa tài liệu. Đường mẫu và review không chứng minh mọi trạng thái hay chất lượng trải nghiệm thực tế. |
+
+### Dấu vân tay bản nội dung đóng băng
+
+Bảng này lấy trực tiếp từ working files, không gồm chính `design-review.md`. Các bảng/kết quả ở phần lịch sử phía trên không thay thế bằng chứng của bản này. Nếu sửa nội dung sau lượt đọc, cập nhật hash và đọc lại phần liên quan.
+
+| File | SHA-256 |
+| --- | --- |
+| 00-original-prologue-verbatim.md | `b93039c88505fae187be470f04f08d1c71c46fc110d71f7dd6d122761c934d32` |
+| 00-original-story-verbatim.md | `8dedad8060472f697991c2dfd01a551d0d6051413ee6686696a02683877dc150` |
+| 00-prologue.md | `316a0a9c7b3104036290452aa91cce17349851270fab845c170ec6c57220b913` |
+| 00-story-bible.md | `8a4989738a045ee950aa70524deda14da1ea8adcebfe5068690747e12f9741d8` |
+| 01-forgotten-forest-edge.md | `e88add8ada9cb7af72b914568bf500d1bf393aa21ff502b9dcbed44f6f1f88dc` |
+| 02-whispering-woods.md | `5aeb3d1740353d03f4fdc68d9eb74aa8fb72a1047cca8ab86fe0ff71a01c4968` |
+| 03-library-beneath-the-roots.md | `04461f1ec8ed5006df5dc7f773d671d2cb633181741d0658eef3be62b193a478` |
+| 04-shattered-moonlit-creek.md | `3b7de69e785a3a0b789ff232f0b7241f5e8f09a4f343e16a31b8e4e00062cd96` |
+| 05-a-path-for-two.md | `f278c72eb39065d208f2e2a5115dd5ac17b04648590e071c05984e97c59d4135` |
+| 06-the-sleepless-tower.md | `74b13614aebcee6539352c2636e678192fb24a430bf1f07e822a3943f6734fd8` |
+| 07-the-sleeping-garden.md | `8ca13fbd404a2bd9a96e6231796004cbe7dedc1e2cea7b6c14bab2f1057a66ad` |
+| 08-ruins-of-two-halves.md | `e349f0b7f6ddc4aa98e49de65f525c0305437bf2699aff00479d7f923feec47e` |
+| 09-dark-moon-observatory.md | `db3b84bea7b6b94f32eac2207d0b91532d87a077e18f5eef35854c00a5dc3620` |
+| 10-the-heart-of-elaria.md | `1ec5e35edd44224e57380495d6bb88053809c2aaaf51d05ec03da74d1087d354` |
+| art-and-production.md | `f1330e0da0ee8d076b9575d85be44636b257fafb1a344a8067fbd9fd24d633e7` |
+| phase-2-outline.md | `0ba5a207d77096eb801c68512d7798a834ba5f2250bd95ab3539b5b92c4fffb5` |
+| puzzle-contracts.md | `de271a9f05b334b8f93cf131733b5785dbac25e8d7e6f0cfd3e765496a1fbb75` |
+| README.md | `a0d971660688b6d4ae3270fca3017e87a2f3a406a70da750e6a1b8204b8e6856` |
