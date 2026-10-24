@@ -62,3 +62,22 @@ Trạng thái: **danh sách đề xuất, chưa duyệt**. Nguồn: `docs/scenar
 | `assets/levels/02-whispering-woods/sprites/woods_arch_open_passage.png` | Không dùng: cổng vòm, V4 dùng cánh 8×40 |
 | `assets/levels/02-whispering-woods/sprites/memory_vignette.png`, `poem_fragment.png` | Không thuộc màn này theo V4 |
 | Cây, bụi, Nhinh, Lumo trong `src/assets/` và `assets/character/` | Tái dùng |
+
+## 7. P0 đã dựng (2026-10-25)
+
+Bộ P0 nằm trong `assets/levels/02-whispering-woods/v4/`: 15 sprite, `asset-map.json`, `generation-prompts.json`,
+`asset-checks.json`, hai script và ảnh xem. `check-assets.py` PASS 15/15 về kích thước, alpha và neo.
+
+Bốn điểm cần duyệt đã chốt:
+
+1. **Glyph**: giữ ba ký hiệu cũ (Trăng, Lá, Sao), vẽ lại trên đế vuông V4; Nước vẽ mới cùng độ dày nét. Ảnh
+   `runestone_*` cũ không dùng.
+2. **Miệng nhận**: lòng gần đen, không quầng sáng; thông tin duy nhất là 2–3 chấm đom đóm 1 px ở Bắc hoặc Tây Nam.
+3. **Đom đóm trong hốc ngủ**: chưa dựng, thuộc P1.
+4. **Cổng mở**: cánh trượt 8×40; `gate-open` neo đỉnh, phần dưới trong suốt hoàn toàn.
+
+Một sai khác có chủ đích: hub tay quay không nằm trong ảnh sinh mà được đóng dấu 1× bằng code, vì ở 16 px ký hiệu
+vẽ rồi hạ mẫu sẽ nhoè. Cùng cách màn 01 xử lý ký hiệu hình học.
+
+Chưa làm: P1, P2, nạp sprite vào runtime (màn 02 vẫn vẽ bằng Graphics), kiểm ánh sáng thật, chơi thử.
+
