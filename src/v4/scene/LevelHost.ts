@@ -36,6 +36,12 @@ export interface LevelHost {
   requestSave(): void;
 }
 
+/** A waking pose: frames shown in order, then the event that marks it played. */
+export interface WakePose {
+  readonly event: string;
+  readonly frames: readonly { readonly texture: string; readonly ms: number }[];
+}
+
 /** One playable V4 level as the host sees it. */
 export interface V4LevelRuntime<S> {
   readonly id: string;
@@ -59,6 +65,14 @@ export interface V4LevelRuntime<S> {
    * Optional: absent or empty draws no marker.
    */
   focus?(): readonly string[];
+  /**
+   * A one-time waking pose Nhinh plays where she spawns, before the player can move: texture keys in order with their
+   * ms, drawn in her frame's place, then her idle sprite. `event` marks it played (saved). Optional: absent or null
+   * plays nothing.
+   */
+  wake?(): WakePose | null;
+  /** Called once for each Pulse that fires, with its origin (Nhinh's centre). Art only: never a gameplay condition. Optional. */
+  onPulse?(origin: Point): void;
   /**
    * Per frame: recompute live doors/bridges from state + lantern + Lumo, update colliders and visuals.
    * `footprints` are every gameplay footprint this frame (the lantern's and the fixed sources').
