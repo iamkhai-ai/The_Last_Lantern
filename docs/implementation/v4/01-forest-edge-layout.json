@@ -1,5 +1,5 @@
 {
-  "_note": "Draft layout for V4 level 01 (640x360 world px, 1x), v2 for scenario commits 3fb28d8/e75e951/80299c9. Rects are {x,y,width,height}; points are actor centres unless named as ground points. Not yet forestEdgeLayout.ts.",
+  "_note": "V4 level 01 layout, synced to the runtime (src/v4/levels/forest-edge/forestEdgeLayout.ts; a test checks that both agree). Topology follows the art: entry yard below, walled middle courtyard above it, door A in the courtyard's south wall, gate B in its north wall to level 02. Matches assets/levels/01-forgotten-forest-edge/v4/asset-map.json placements. 640x360 world px, 1x. Rects are {x,y,width,height}; checkpoints give the spawn point (actor centre). Not in the runtime yet: dry channel, eyes, S1/S2 cable lines, the water column's marks; see docs/implementation/v4/01-forest-edge.md.",
   "world": { "x": 16, "y": 0, "width": 608, "height": 330 },
   "walls": {
     "forestNW":        { "x": 16,  "y": 0,   "width": 240, "height": 110 },
@@ -13,50 +13,42 @@
     "stationShelter":  { "x": 500, "y": 240, "width": 100, "height": 46 },
     "waterColumn":     { "x": 568, "y": 88,  "width": 16,  "height": 16 }
   },
-  "doorA": { "x": 336, "y": 190, "width": 40, "height": 24 },
-  "gateB": { "x": 456, "y": 36,  "width": 48, "height": 16 },
+  "doorA":       { "x": 336, "y": 190, "width": 40, "height": 24 },
+  "thresholdA":  { "x": 336, "y": 182, "width": 40, "height": 40 },
+  "gateB":       { "x": 456, "y": 36,  "width": 48, "height": 16 },
+  "thresholdB":  { "x": 456, "y": 28,  "width": 48, "height": 32 },
+  "exitZone":    { "x": 456, "y": 0,   "width": 48, "height": 20 },
   "interactables": {
-    "stele":   { "rect": { "x": 160, "y": 206, "width": 28, "height": 12 }, "solid": true },
-    "s0":      { "rect": { "x": 192, "y": 218, "width": 16, "height": 12 }, "solid": true, "note": "bệ đặt đèn cạnh bia (ổ kín); trạng thái đầu của đèn" },
-    "hinge":   { "rect": { "x": 112, "y": 268, "width": 24, "height": 14 }, "solid": true, "note": "tùy chọn" },
-    "s1":      { "rect": { "x": 282, "y": 240, "width": 24, "height": 24 }, "solid": true, "note": "ổ kín, nối tới A" },
-    "latchA":  { "rect": { "x": 392, "y": 166, "width": 16, "height": 16 }, "solid": true, "note": "chốt cố định ở sân giữa" },
-    "s2":      { "rect": { "x": 420, "y": 96,  "width": 24, "height": 24 }, "solid": true, "note": "ổ kín, nối tới B" },
-    "brakeB":  { "rect": { "x": 520, "y": 60,  "width": 16, "height": 16 }, "solid": true, "note": "tay hãm B" }
-  },
-  "sealedEyes": [
-    { "id": "eyeA", "x": 328, "y": 200, "note": "ổ kín: chỉ chỉ báo, đèn cầm tay không kích được" },
-    { "id": "eyeB", "x": 448, "y": 42,  "note": "ổ kín: chỉ chỉ báo" }
-  ],
-  "lines": {
-    "s1ToA": [ { "x": 294, "y": 240 }, { "x": 294, "y": 222 }, { "x": 328, "y": 222 }, { "x": 328, "y": 206 } ],
-    "s2ToB": [ { "x": 432, "y": 96 },  { "x": 432, "y": 70 },  { "x": 448, "y": 70 },  { "x": 448, "y": 48 } ]
+    "stele":    { "rect": { "x": 160, "y": 206, "width": 28, "height": 12 }, "solid": true, "note": "bia: đứng cạnh, không tương tác" },
+    "hinge":    { "rect": { "x": 112, "y": 268, "width": 24, "height": 14 }, "solid": true, "note": "mô hình bản lề, tùy chọn" },
+    "s1":       { "rect": { "x": 282, "y": 240, "width": 24, "height": 24 }, "solid": true, "note": "bệ có đầu nối kín, nối tới cửa A" },
+    "latchA":   { "rect": { "x": 392, "y": 166, "width": 16, "height": 16 }, "solid": true, "note": "chốt cố định ở sân giữa" },
+    "s2":       { "rect": { "x": 420, "y": 96,  "width": 24, "height": 24 }, "solid": true, "note": "bệ có đầu nối kín, nối tới cổng B" },
+    "braceB":   { "rect": { "x": 520, "y": 60,  "width": 16, "height": 16 }, "solid": true, "note": "tay hãm B ở sân giữa, cạnh cổng B" },
+    "lampRest": { "rect": { "x": 206, "y": 226, "width": 16, "height": 10 }, "reach": { "x": 198, "y": 218, "width": 32, "height": 26 }, "solid": false, "note": "đèn nằm trên đất cạnh bia, tắt; E nhặt một lần; vùng hiện nút là rect mở rộng 8px mỗi phía", "exception": { "rule": "puzzle-contracts §1: E đặt và nhặt đèn chỉ tại bệ", "reason": "Đèn đã được đặt cạnh bia trước khi nghỉ (prologue, cảnh nghỉ cuối); người chơi tự nhặt một lần ở đó (quyết định b, docs/scenario-v4/01)." } }
   },
   "rooms": [
-    { "id": "courtyard", "rect": { "x": 272, "y": 52,  "width": 328, "height": 138 } },
-    { "id": "yard",      "rect": { "x": 16,  "y": 110, "width": 608, "height": 220 } }
+    { "id": "middle", "rect": { "x": 272, "y": 52,  "width": 328, "height": 138 } },
+    { "id": "entry",  "rect": { "x": 16,  "y": 110, "width": 608, "height": 220 } }
   ],
+  "sprout": { "rect": { "x": 236, "y": 276, "width": 16, "height": 16 }, "note": "mầm cây Lumo che; sáng khi vòng đèn cầm tay phủ lên" },
   "pulseMarks": [
     { "id": "line-s1-a",        "x": 310, "y": 224, "kind": "carved" },
-    { "id": "latch-tool-marks", "x": 400, "y": 174, "kind": "tool" }
+    { "id": "latch-tool-marks", "x": 386, "y": 168, "kind": "tool" }
   ],
   "lightMarks": [
-    { "id": "sprout",          "kind": "lit",  "rect": { "x": 228, "y": 240, "width": 16, "height": 16 }, "note": "mầm cây Lumo che; sáng khi đèn chiếu" },
-    { "id": "spores-latch-1",  "kind": "dark", "rect": { "x": 380, "y": 180, "width": 6,  "height": 6 } },
-    { "id": "spores-latch-2",  "kind": "dark", "rect": { "x": 412, "y": 184, "width": 6,  "height": 6 } },
-    { "id": "spores-latch-3",  "kind": "dark", "rect": { "x": 404, "y": 150, "width": 6,  "height": 6 } },
-    { "id": "steps-latch-1",   "kind": "dark", "rect": { "x": 380, "y": 186, "width": 8,  "height": 4 } },
-    { "id": "steps-latch-2",   "kind": "dark", "rect": { "x": 382, "y": 172, "width": 8,  "height": 4 } },
-    { "id": "steps-latch-3",   "kind": "dark", "rect": { "x": 386, "y": 158, "width": 8,  "height": 4 } },
-    { "id": "spores-hinge-1",  "kind": "dark", "rect": { "x": 138, "y": 256, "width": 6,  "height": 6 } },
-    { "id": "spores-hinge-2",  "kind": "dark", "rect": { "x": 146, "y": 266, "width": 6,  "height": 6 } }
+    { "id": "sprout",         "kind": "lit",  "rect": { "x": 236, "y": 276, "width": 16, "height": 16 } },
+    { "id": "spores-hinge-1", "kind": "dark", "rect": { "x": 138, "y": 256, "width": 6,  "height": 6 } },
+    { "id": "spores-hinge-2", "kind": "dark", "rect": { "x": 146, "y": 266, "width": 6,  "height": 6 } },
+    { "id": "spores-latch-1", "kind": "dark", "rect": { "x": 380, "y": 180, "width": 6,  "height": 6 } },
+    { "id": "spores-latch-2", "kind": "dark", "rect": { "x": 412, "y": 184, "width": 6,  "height": 6 } },
+    { "id": "spores-latch-3", "kind": "dark", "rect": { "x": 404, "y": 150, "width": 6,  "height": 6 } },
+    { "id": "steps-latch-1",  "kind": "dark", "rect": { "x": 380, "y": 186, "width": 8,  "height": 4 } },
+    { "id": "steps-latch-2",  "kind": "dark", "rect": { "x": 382, "y": 172, "width": 8,  "height": 4 } },
+    { "id": "steps-latch-3",  "kind": "dark", "rect": { "x": 386, "y": 158, "width": 8,  "height": 4 } }
   ],
-  "decor": {
-    "dryChannel": [ { "x": 576, "y": 106 }, { "x": 560, "y": 150 }, { "x": 520, "y": 176 } ]
-  },
   "checkpoints": [
-    { "id": "yard",      "spawn": { "x": 124, "y": 214 }, "zone": { "x": 80,  "y": 190, "width": 110, "height": 80 } },
-    { "id": "courtyard", "spawn": { "x": 480, "y": 150 }, "zone": { "x": 440, "y": 120, "width": 90,  "height": 50 } }
-  ],
-  "exitZone": { "x": 456, "y": 0, "width": 48, "height": 20 }
+    { "id": "yard",   "spawn": { "x": 124, "y": 214 }, "zone": { "x": 80,  "y": 190, "width": 110, "height": 80 } },
+    { "id": "middle", "spawn": { "x": 480, "y": 150 }, "zone": { "x": 440, "y": 120, "width": 90,  "height": 50 } }
+  ]
 }

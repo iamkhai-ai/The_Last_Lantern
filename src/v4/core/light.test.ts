@@ -3,6 +3,7 @@ import type { Point, Rect } from './geometry';
 import type { LanternState } from './lantern';
 import {
   HALO_RADIUS,
+  LANTERN_LIFT,
   LANTERN_RADIUS,
   canSeeMark,
   groundPoint,
@@ -87,10 +88,11 @@ describe('lanternFootprints', () => {
     expect(lanternFootprints(hand(false), ground, noPedestal)).toEqual([]);
   });
 
-  it('gives one circle of LANTERN_RADIUS at the ground point in hand', () => {
+  it('gives one circle of LANTERN_RADIUS at the waist, 14px above the ground point, blocked from the ground point', () => {
     expect(LANTERN_RADIUS).toBe(40);
+    expect(LANTERN_LIFT).toBe(14);
     expect(lanternFootprints(hand(), ground, noPedestal)).toEqual([
-      { kind: 'circle', center: ground, radius: LANTERN_RADIUS },
+      { kind: 'circle', center: { x: 100, y: 105 }, radius: LANTERN_RADIUS, source: ground },
     ]);
   });
 
@@ -119,12 +121,15 @@ describe('lanternFootprints', () => {
   });
 });
 
-describe('circle from the ground point', () => {
-  it('lights the circle around a ground point at (100,200) with radius 40', () => {
+describe('circle at the waist', () => {
+  it('lights the circle of radius 40 around the waist (100,186) for a ground point at (100,200)', () => {
     const fp = lanternFootprints(hand(), { x: 100, y: 200 }, () => null);
-    expect(isPointLit({ x: 140, y: 200 }, fp, [])).toBe(true);
-    expect(isPointLit({ x: 141, y: 200 }, fp, [])).toBe(false);
-    expect(isPointLit({ x: 100, y: 160 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 140, y: 186 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 141, y: 186 }, fp, [])).toBe(false);
+    expect(isPointLit({ x: 100, y: 146 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 100, y: 145 }, fp, [])).toBe(false);
+    expect(isPointLit({ x: 100, y: 226 }, fp, [])).toBe(true);
+    expect(isPointLit({ x: 100, y: 227 }, fp, [])).toBe(false);
   });
 
   it('is cut by a wall at {118,190,4,20}, but not at the same distance in another direction', () => {
@@ -132,6 +137,13 @@ describe('circle from the ground point', () => {
     const wall: Rect = { x: 118, y: 190, width: 4, height: 20 };
     expect(isPointLit({ x: 130, y: 200 }, fp, [wall])).toBe(false);
     expect(isPointLit({ x: 100, y: 170 }, fp, [wall])).toBe(true);
+  });
+
+  it('stays lit when the waist is inside a wall just north of the feet: blocking starts at the ground point', () => {
+    const fp = lanternFootprints(hand(), { x: 100, y: 200 }, () => null);
+    const wall: Rect = { x: 60, y: 160, width: 80, height: 36 };
+    expect(isPointLit({ x: 120, y: 205 }, fp, [wall])).toBe(true);
+    expect(isPointLit({ x: 100, y: 150 }, fp, [wall])).toBe(false);
   });
 
   it('gives a placed lantern a circle of radius 12 only', () => {

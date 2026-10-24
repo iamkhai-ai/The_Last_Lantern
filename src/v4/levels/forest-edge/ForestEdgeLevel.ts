@@ -8,6 +8,7 @@ import { rectCenter } from '../../core/geometry';
 import type { Point, Rect } from '../../core/geometry';
 import { isMarkReadable, isRectLit } from '../../core/light';
 import type { Footprint, LightMark, Room } from '../../core/light';
+import { lanternFeeds } from '../../core/lantern';
 import type { LanternState } from '../../core/lantern';
 import type { PulseMark } from '../../core/pulse';
 import type { LevelHost, V4LevelRuntime } from '../../scene/LevelHost';
@@ -18,6 +19,8 @@ import {
   FOREST_EDGE_PULSE_MARKS,
   FOREST_EDGE_ROOMS,
   HINGE_ID,
+  LAMP_REST_ID,
+  LAMP_REST_REACH,
   LATCH_A_ID,
   S1_ID,
   S2_ID,
@@ -29,24 +32,32 @@ import {
   FOREST_EDGE_JOURNAL_TEXT,
   HINGE_PHASE_TEXT,
   INITIAL_FOREST_LIVE,
+  LAMP_TAKEN_EVENT,
   defaultForestEdgeState,
   deriveForestEdge,
   forestBlockers,
   forestEdgeHint,
   forestEdgeHud,
   forestExitReady,
+  lampOnGround,
   lanternAtPedestal,
   nextHingePhase,
   parseForestEdgeState,
   pendingCue,
   stepDoors,
+  takeLampFromRest,
   toggleBraceB,
   toggleLatchA,
 } from './forestEdgeLogic';
 import type { ForestEdgeLive, ForestEdgeState, ForestEdgeView } from './forestEdgeLogic';
+import { ART_SLOTS, artKey, forestArtReady, preloadForestArt } from './forestEdgeArt';
+import type { ArtSlot } from './forestEdgeArt';
+
+/** The art textures each slot can show, by the state that picks them (asset-map.json). */
+const HINGE_TEXTURES = ['hinge-closed', 'hinge-pulled', 'hinge-hooked'] as const;
 
 /** The level's ambient darkness: constant, never tied to the lantern (puzzle-contracts section 1). */
-const AMBIENT_DARKNESS = 0.42;
+const AMBIENT_DARKNESS = 0.82;
 
 /** The next level. Level 02 is not built yet on this branch; the host shows the placeholder for the id. */
 const NEXT_LEVEL_ID = 'whispering-woods';
@@ -80,6 +91,8 @@ const PROMPT_RELEASE_A = 'E: mở chốt A';
 const PROMPT_ENGAGE_B = 'E: gài tay hãm B';
 const PROMPT_RELEASE_B = 'E: nhả tay hãm B';
 const PROMPT_HINGE = 'E: xoay mô hình bản lề';
+const PROMPT_TAKE_LAMP = 'E: nhặt đèn';
+const PROMPT_LAMP_BY_STELE = 'E: đèn đang ở bên bia';
 
 /**
  * Forest edge (level 01): an entry yard with pedestal S1, door A in the split wall, a middle yard with latch A, pedestal
@@ -111,6 +124,15 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
   private shown: ForestEdgeLive | null = null;
   /** This frame's footprints, kept for the mark readability check. */
   private footprintsNow: readonly Footprint[] = [];
+  /** Whether the level 01 art is loaded. When it is, the placeholder fills are hidden and the sprites are drawn. */
+  private artOn = false;
+  /** The art sprites by slot, then by texture. Each slot shows one texture, picked from the state every frame. */
+  private artImages: Record<string, Record<string, Phaser.GameObjects.Image>> = {};
+
+  /** Loads the level 01 art (asset-map.json). The host calls this before any build. */
+  preload(scene: Phaser.Scene): void {
+    preloadForestArt(scene);
+  }
 
   defaultState(): ForestEdgeState {
     return defaultForestEdgeState();
@@ -192,8 +214,23 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
         getPrompt: () => PROMPT_HINGE,
         onInteract: () => this.onHinge(),
       },
+      {
+        id: LAMP_REST_ID,
+        reach: { kind: 'floor', rect: LAMP_REST_REACH },
+        getPrompt: () => this.lampPrompt(),
+        onInteract: () => this.onLampRest(),
+      },
     ];
 
+    // The lamp rests on the ground by the stele until the player takes it once (decision b, layout v3).
+    if (!host.hasEvent(LAMP_TAKEN_EVENT)) host.setLantern(lampOnGround());
+    this.artOn = forestArtReady(scene);
+    if (this.artOn) {
+      for (const graphics of this.statics) graphics.setVisible(false);
+      this.leaves?.setVisible(false);
+      this.fixtures?.setVisible(false);
+      this.buildArt(scene);
+    }
     this.update(0, { x: 0, y: 0, width: 0, height: 0 }, []);
     this.cuesEnabled = true;
   }
@@ -239,6 +276,62 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
 
     this.draw(live, lantern, footprints, blockers);
     this.drawMarks(blockers);
+    this.drawArt(live, lantern);
+  }
+
+  /** One image per slot and texture. Only the texture the state picks is shown; see drawArt. */
+  private buildArt(scene: Phaser.Scene): void {
+    const add = (slot: keyof typeof ART_SLOTS, textures: readonly string[], depth: number) => {
+      const s: ArtSlot = ART_SLOTS[slot];
+      this.artImages[slot] = {};
+      for (const texture of textures) {
+        this.artImages[slot][texture] = scene.add
+          .image(s.position.x, s.position.y, artKey(texture))
+          .setOrigin(s.anchor[0] / s.gameSize[0], s.anchor[1] / s.gameSize[1])
+          .setScale(0.5)
+          .setDepth(depth)
+          .setVisible(false);
+      }
+    };
+    add('background', ['station-yard'], 0);
+    add('column', ['water-column'], 1.5);
+    add('stele', ['stele-normal'], 2);
+    add('hinge', HINGE_TEXTURES, 2);
+    add('s1', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], 2);
+    add('s2', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], 2);
+    add('eyeA', ['eye-dormant', 'eye-live'], 2);
+    add('eyeB', ['eye-dormant', 'eye-live'], 2);
+    add('sprout', ['sprout'], 2.5);
+    add('lantern', ['lantern-off'], 2.5);
+    add('latchA', ['latch-a-released', 'latch-a-engaged'], 3);
+    add('brakeB', ['brake-b-released', 'brake-b-engaged'], 3);
+    add('doorA', ['door-a-closed', 'door-a-open'], 4);
+    add('gateB', ['gate-b-closed', 'gate-b-open'], 4);
+    this.showArt('background', 'station-yard');
+    this.showArt('column', 'water-column');
+    this.showArt('stele', 'stele-normal');
+    this.showArt('sprout', 'sprout');
+  }
+
+  /** Shows one texture of a slot and hides the rest. A null texture hides the slot. */
+  private showArt(slot: string, texture: string | null): void {
+    for (const [name, image] of Object.entries(this.artImages[slot] ?? {})) image.setVisible(name === texture);
+  }
+
+  /** Picks each slot's texture from the state, the live doors and the lantern. Runs every frame. */
+  private drawArt(live: ForestEdgeLive, lantern: LanternState): void {
+    if (!this.artOn) return;
+    this.showArt('doorA', live.doorAOpen ? 'door-a-open' : 'door-a-closed');
+    this.showArt('gateB', live.gateBOpen ? 'gate-b-open' : 'gate-b-closed');
+    this.showArt('latchA', this.state.latchA ? 'latch-a-engaged' : 'latch-a-released');
+    this.showArt('brakeB', this.state.braceB ? 'brake-b-engaged' : 'brake-b-released');
+    this.showArt('s1', socketTexture(lantern, S1_ID));
+    this.showArt('s2', socketTexture(lantern, S2_ID));
+    this.showArt('eyeA', lanternFeeds(lantern, S1_ID) ? 'eye-live' : 'eye-dormant');
+    this.showArt('eyeB', lanternFeeds(lantern, S2_ID) ? 'eye-live' : 'eye-dormant');
+    this.showArt('hinge', HINGE_TEXTURES[this.hingePhase]);
+    const onGround = lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID;
+    this.showArt('lantern', onGround ? 'lantern-off' : null);
   }
 
   getState(): ForestEdgeState {
@@ -286,8 +379,17 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     return 'lantern';
   }
 
+  /**
+   * The lamp is unavailable while it rests on the ground: F cannot light it, and the lantern controls and pulse stay
+   * off until the one pickup. Once taken it is never on the ground again.
+   */
   lanternAvailable(): boolean {
-    return true;
+    return !this.lampOnGroundNow();
+  }
+
+  private lampOnGroundNow(): boolean {
+    const lantern = this.host.getLantern();
+    return lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID;
   }
 
   pedestalPosition(pedestalId: string): Point | null {
@@ -323,7 +425,25 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
   private pedestalPrompt(pedestalId: string): string {
     const lantern = this.host.getLantern();
     if (lantern.location.at === 'hand') return pedestalId === S1_ID ? PROMPT_PLACE_S1 : PROMPT_PLACE_S2;
+    if (lantern.location.pedestalId === LAMP_REST_ID) return PROMPT_LAMP_BY_STELE;
     return lantern.location.pedestalId === pedestalId ? PROMPT_TAKE : `E: đèn đang ở bệ ${lantern.location.pedestalId === S1_ID ? 'S1' : 'S2'}`;
+  }
+
+  /** The lamp on the ground shows its prompt only while it rests there; after the one pickup the control is gone. */
+  private lampPrompt(): string | null {
+    const lantern = this.host.getLantern();
+    return lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID ? PROMPT_TAKE_LAMP : null;
+  }
+
+  private onLampRest(): void {
+    const outcome = takeLampFromRest(this.host.getLantern());
+    if (!outcome.ok) {
+      this.host.toast(outcome.reason);
+      return;
+    }
+    this.host.setLantern(outcome.value);
+    this.host.markEvent(LAMP_TAKEN_EVENT);
+    this.host.requestSave();
   }
 
   private onPedestal(pedestalId: string): void {
@@ -379,6 +499,11 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
         g.fillStyle(lantern.on ? COLOR.lanternOn : COLOR.lanternOff, 1).fillCircle(c.x, c.y, 4);
       }
     }
+    // The lamp resting on the ground by the stele: unlit, drawn as a dim core until it is taken.
+    if (lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID) {
+      const c = rectCenter(FOREST_EDGE.lampRest);
+      g.fillStyle(COLOR.lanternOff, 1).fillCircle(c.x, c.y, 4);
+    }
     if (this.state.latchA) {
       const r = FOREST_EDGE.latchA;
       this.fillRect(g, { x: r.x + 4, y: r.y + 4, width: r.width - 8, height: r.height - 8 }, COLOR.latchEngaged);
@@ -432,6 +557,12 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     this.host.solid(zone);
     return zone;
   }
+}
+
+/** The socket texture for a pedestal: empty, the lamp set on it unlit, or the lamp set on it lit. */
+function socketTexture(lantern: LanternState, pedestalId: string): string {
+  if (lantern.location.at !== 'pedestal' || lantern.location.pedestalId !== pedestalId) return 'socket-empty';
+  return lantern.on ? 'socket-lamp-on' : 'socket-lamp-off';
 }
 
 /** Turns a zone's static body on or off. A disabled body takes no part in collisions (Arcade skips it). */

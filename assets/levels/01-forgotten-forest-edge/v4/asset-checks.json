@@ -1,0 +1,645 @@
+{
+  "status": "PASS",
+  "scriptSha256": "f71c50e386e47b8c6ae9925de1a498612f613e0d1d88d9ebdf1962abbcaa5011",
+  "manifestSha256": "fbb35e9dd145c76b87dd31ee23f6c445f6a57ed692c784bc519d2daa05686b63",
+  "checks": [
+    {
+      "name": "layout hash",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash background.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash canopy.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash controls.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash door-a-slam.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash doors.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash hinge.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash nhinh-waking.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash sockets-lantern.png",
+      "status": "PASS"
+    },
+    {
+      "name": "source hash story-props.png",
+      "status": "PASS"
+    },
+    {
+      "name": "asset station-yard",
+      "status": "PASS",
+      "detail": {
+        "clear": 0,
+        "solid": 921600,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset door-a-closed",
+      "status": "PASS",
+      "detail": {
+        "clear": 520,
+        "solid": 8763,
+        "size": [
+          136,
+          72
+        ]
+      }
+    },
+    {
+      "name": "asset door-a-open",
+      "status": "PASS",
+      "detail": {
+        "clear": 3750,
+        "solid": 5242,
+        "size": [
+          136,
+          72
+        ]
+      }
+    },
+    {
+      "name": "asset gate-b-closed",
+      "status": "PASS",
+      "detail": {
+        "clear": 1554,
+        "solid": 8639,
+        "size": [
+          136,
+          80
+        ]
+      }
+    },
+    {
+      "name": "asset gate-b-open",
+      "status": "PASS",
+      "detail": {
+        "clear": 6073,
+        "solid": 2515,
+        "size": [
+          136,
+          80
+        ]
+      }
+    },
+    {
+      "name": "asset latch-a-released",
+      "status": "PASS",
+      "detail": {
+        "clear": 792,
+        "solid": 840,
+        "size": [
+          32,
+          60
+        ]
+      }
+    },
+    {
+      "name": "asset latch-a-engaged",
+      "status": "PASS",
+      "detail": {
+        "clear": 812,
+        "solid": 838,
+        "size": [
+          32,
+          60
+        ]
+      }
+    },
+    {
+      "name": "asset brake-b-released",
+      "status": "PASS",
+      "detail": {
+        "clear": 1459,
+        "solid": 831,
+        "size": [
+          46,
+          56
+        ]
+      }
+    },
+    {
+      "name": "asset brake-b-engaged",
+      "status": "PASS",
+      "detail": {
+        "clear": 1493,
+        "solid": 811,
+        "size": [
+          46,
+          56
+        ]
+      }
+    },
+    {
+      "name": "asset eye-dormant",
+      "status": "PASS",
+      "detail": {
+        "clear": 113,
+        "solid": 358,
+        "size": [
+          24,
+          24
+        ]
+      }
+    },
+    {
+      "name": "asset eye-live",
+      "status": "PASS",
+      "detail": {
+        "clear": 107,
+        "solid": 362,
+        "size": [
+          24,
+          24
+        ]
+      }
+    },
+    {
+      "name": "asset socket-empty",
+      "status": "PASS",
+      "detail": {
+        "clear": 658,
+        "solid": 2221,
+        "size": [
+          48,
+          68
+        ]
+      }
+    },
+    {
+      "name": "asset socket-lamp-off",
+      "status": "PASS",
+      "detail": {
+        "clear": 614,
+        "solid": 2233,
+        "size": [
+          48,
+          68
+        ]
+      }
+    },
+    {
+      "name": "asset socket-lamp-on",
+      "status": "PASS",
+      "detail": {
+        "clear": 631,
+        "solid": 2221,
+        "size": [
+          48,
+          68
+        ]
+      }
+    },
+    {
+      "name": "asset lantern-off",
+      "status": "PASS",
+      "detail": {
+        "clear": 72,
+        "solid": 634,
+        "size": [
+          24,
+          36
+        ]
+      }
+    },
+    {
+      "name": "asset lantern-on",
+      "status": "PASS",
+      "detail": {
+        "clear": 70,
+        "solid": 628,
+        "size": [
+          24,
+          36
+        ]
+      }
+    },
+    {
+      "name": "asset stele-normal",
+      "status": "PASS",
+      "detail": {
+        "clear": 1603,
+        "solid": 2362,
+        "size": [
+          56,
+          80
+        ]
+      }
+    },
+    {
+      "name": "asset stele-pulse",
+      "status": "PASS",
+      "detail": {
+        "clear": 1610,
+        "solid": 2373,
+        "size": [
+          56,
+          80
+        ]
+      }
+    },
+    {
+      "name": "asset water-column-blank",
+      "status": "PASS",
+      "detail": {
+        "clear": 1310,
+        "solid": 1688,
+        "size": [
+          32,
+          112
+        ]
+      }
+    },
+    {
+      "name": "asset sprout",
+      "status": "PASS",
+      "detail": {
+        "clear": 207,
+        "solid": 581,
+        "size": [
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "asset hinge-closed",
+      "status": "PASS",
+      "detail": {
+        "clear": 702,
+        "solid": 944,
+        "size": [
+          48,
+          40
+        ]
+      }
+    },
+    {
+      "name": "asset hinge-pulled",
+      "status": "PASS",
+      "detail": {
+        "clear": 474,
+        "solid": 1063,
+        "size": [
+          48,
+          40
+        ]
+      }
+    },
+    {
+      "name": "asset hinge-hooked",
+      "status": "PASS",
+      "detail": {
+        "clear": 503,
+        "solid": 1054,
+        "size": [
+          48,
+          40
+        ]
+      }
+    },
+    {
+      "name": "asset nhinh-sleeping",
+      "status": "PASS",
+      "detail": {
+        "clear": 4435,
+        "solid": 1326,
+        "size": [
+          72,
+          84
+        ]
+      }
+    },
+    {
+      "name": "asset nhinh-awake",
+      "status": "PASS",
+      "detail": {
+        "clear": 4337,
+        "solid": 1406,
+        "size": [
+          72,
+          84
+        ]
+      }
+    },
+    {
+      "name": "asset nhinh-rising",
+      "status": "PASS",
+      "detail": {
+        "clear": 4011,
+        "solid": 1647,
+        "size": [
+          72,
+          84
+        ]
+      }
+    },
+    {
+      "name": "asset door-a-closing-1",
+      "status": "PASS",
+      "detail": {
+        "clear": 1718,
+        "solid": 7450,
+        "size": [
+          136,
+          72
+        ]
+      }
+    },
+    {
+      "name": "asset door-a-closing-2",
+      "status": "PASS",
+      "detail": {
+        "clear": 666,
+        "solid": 8549,
+        "size": [
+          136,
+          72
+        ]
+      }
+    },
+    {
+      "name": "asset canopy",
+      "status": "PASS",
+      "detail": {
+        "clear": 827471,
+        "solid": 77083,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset water-route-symbol",
+      "status": "PASS",
+      "detail": {
+        "clear": 638,
+        "solid": 264,
+        "size": [
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "asset workshop-water-route-plaque",
+      "status": "PASS",
+      "detail": {
+        "clear": 4,
+        "solid": 1004,
+        "size": [
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "asset workshop-route-overlay",
+      "status": "PASS",
+      "detail": {
+        "clear": 920580,
+        "solid": 1004,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset water-column",
+      "status": "PASS",
+      "detail": {
+        "clear": 1250,
+        "solid": 1810,
+        "size": [
+          32,
+          112
+        ]
+      }
+    },
+    {
+      "name": "asset dry-channel",
+      "status": "PASS",
+      "detail": {
+        "clear": 919788,
+        "solid": 1432,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset s1ToA-hidden",
+      "status": "PASS",
+      "detail": {
+        "clear": 920712,
+        "solid": 836,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset s1ToA-revealed",
+      "status": "PASS",
+      "detail": {
+        "clear": 920712,
+        "solid": 836,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset s1ToA-live",
+      "status": "PASS",
+      "detail": {
+        "clear": 920712,
+        "solid": 836,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset s2ToB-hidden",
+      "status": "PASS",
+      "detail": {
+        "clear": 920760,
+        "solid": 788,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset s2ToB-revealed",
+      "status": "PASS",
+      "detail": {
+        "clear": 920760,
+        "solid": 788,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset s2ToB-live",
+      "status": "PASS",
+      "detail": {
+        "clear": 920760,
+        "solid": 788,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "asset latch-tool-marks",
+      "status": "PASS",
+      "detail": {
+        "clear": 598,
+        "solid": 38,
+        "size": [
+          32,
+          24
+        ]
+      }
+    },
+    {
+      "name": "asset mechanical-linkages",
+      "status": "PASS",
+      "detail": {
+        "clear": 920544,
+        "solid": 1044,
+        "size": [
+          1280,
+          720
+        ]
+      }
+    },
+    {
+      "name": "stable anchor door-a-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "stable anchor gate-b-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "stable anchor latch-a-released",
+      "status": "PASS"
+    },
+    {
+      "name": "stable anchor brake-b-released",
+      "status": "PASS"
+    },
+    {
+      "name": "stable anchor eye-dormant",
+      "status": "PASS"
+    },
+    {
+      "name": "stable anchor socket-empty",
+      "status": "PASS"
+    },
+    {
+      "name": "stable anchor hinge-closed",
+      "status": "PASS"
+    },
+    {
+      "name": "stable anchor stele-normal",
+      "status": "PASS"
+    },
+    {
+      "name": "passage mapping door-a-open",
+      "status": "PASS",
+      "detail": [
+        336,
+        376
+      ]
+    },
+    {
+      "name": "transparent passage door-a-open",
+      "status": "PASS",
+      "detail": {
+        "row": 57,
+        "maxAlpha": 0
+      }
+    },
+    {
+      "name": "passage mapping gate-b-open",
+      "status": "PASS",
+      "detail": [
+        456,
+        504
+      ]
+    },
+    {
+      "name": "transparent passage gate-b-open",
+      "status": "PASS",
+      "detail": {
+        "row": 64,
+        "maxAlpha": 1
+      }
+    },
+    {
+      "name": "native preview opening",
+      "status": "PASS"
+    },
+    {
+      "name": "native preview a-powered",
+      "status": "PASS"
+    },
+    {
+      "name": "native preview a-latched",
+      "status": "PASS"
+    },
+    {
+      "name": "native preview both-open",
+      "status": "PASS"
+    },
+    {
+      "name": "native preview a-closed-b-open",
+      "status": "PASS"
+    }
+  ],
+  "notRun": [
+    "Runtime integration/animation playback",
+    "Reach audit (layout unchanged)",
+    "Unit tests/npm build (gameplay source unchanged)"
+  ],
+  "reviewedScriptSha256BeforeEofCleanup": "12e9d2d8f1256668ea781749cff09500d1914c1da536fdc515b5609d67b10fab",
+  "eofCleanup": {
+    "status": "PASS",
+    "method": "Adding one terminal LF exactly reconstructs reviewed script hash; all 42 output hashes rechecked unchanged."
+  }
+}

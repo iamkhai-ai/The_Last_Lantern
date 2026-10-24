@@ -8,7 +8,7 @@ import { lanternFeeds, pickUpLantern, placeLantern } from '../../core/lantern';
 import type { LanternState } from '../../core/lantern';
 import { stepMod } from '../../core/rotary';
 import type { DialogueLine } from '../../../types/gameTypes';
-import { FOREST_EDGE, S1_ID, S2_ID } from './forestEdgeLayout';
+import { FOREST_EDGE, LAMP_REST_ID, S1_ID, S2_ID } from './forestEdgeLayout';
 
 /**
  * The state the level keeps in the save: whether latch A and brace B are engaged. Door and gate openings are not
@@ -49,6 +49,7 @@ export const FOREST_EDGE_JOURNAL_TEXT: Record<string, string> = {
   'spores-hinge-2': 'Bào tử tối cạnh mô hình bản lề: chỉ hiện ngoài vệt đèn cầm tay.',
   'spores-latch-1': 'Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay.',
   'spores-latch-2': 'Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay.',
+  'spores-latch-3': 'Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay.',
   'steps-latch-1': 'Vết chân phía sân giữa dẫn tới chốt A.',
   'steps-latch-2': 'Vết chân phía sân giữa dẫn tới chốt A.',
   'steps-latch-3': 'Vết chân phía sân giữa dẫn tới chốt A.',
@@ -63,6 +64,11 @@ export const HINGE_PHASE_TEXT: readonly string[] = ['Bản lề: kéo.', 'Bản 
 export const REFUSE_LATCH_A = 'Chốt A chỉ gài được khi cửa A đang mở.';
 export const REFUSE_BRACE_B = 'Tay hãm B chỉ gài được khi cổng B đang mở.';
 export const REFUSE_LANTERN_ELSEWHERE = 'Đèn đang đặt ở bệ khác.';
+export const REFUSE_LAMP_ON_GROUND = 'Đèn còn trên đất cạnh bia; nhặt đèn trước.';
+export const REFUSE_LAMP_GONE = 'Đèn không còn ở chỗ cạnh bia.';
+
+/** The save event that records the one pickup of the lamp from the ground (decision b). Once set, the lamp never rests there again. */
+export const LAMP_TAKEN_EVENT = 'forest-edge:lamp-taken';
 
 /** The dialogue cues, in the order the level checks them. Each plays once (a saved event). */
 export type ForestCue = 'opening' | 'pedestal' | 'door-feed' | 'lumo-door' | 'ending';
@@ -198,8 +204,26 @@ export function pendingCue(input: {
   return null;
 }
 
+/**
+ * The lantern a new game starts with: unlit on the ground by the stele, until the player takes it once. Only used
+ * while LAMP_TAKEN_EVENT is absent.
+ */
+export function lampOnGround(): LanternState {
+  return { location: { at: 'pedestal', pedestalId: LAMP_REST_ID }, on: false };
+}
+
+/** Step for E at the lamp on the ground: the one pickup. The lamp comes into hand unlit. */
+export function takeLampFromRest(lantern: LanternState): Outcome<LanternState> {
+  const next = pickUpLantern(lantern, LAMP_REST_ID);
+  if (next) return { ok: true, value: next };
+  return { ok: false, reason: REFUSE_LAMP_GONE };
+}
+
 /** Step for E at pedestal S1 or S2: places the lantern from hand, or takes it back from that pedestal. */
 export function lanternAtPedestal(lantern: LanternState, pedestalId: string): Outcome<LanternState> {
+  if (lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID) {
+    return { ok: false, reason: REFUSE_LAMP_ON_GROUND };
+  }
   const next = placeLantern(lantern, pedestalId) ?? pickUpLantern(lantern, pedestalId);
   if (next) return { ok: true, value: next };
   return { ok: false, reason: REFUSE_LANTERN_ELSEWHERE };
@@ -226,7 +250,14 @@ export function nextHingePhase(phase: number): number {
 
 /** The HUD lines. The objective changes once both latch and brace hold; the status names both doors. */
 export function forestEdgeHud(view: ForestEdgeView, lantern: LanternState, state: ForestEdgeState): HudText {
-  const where = lantern.location.at === 'hand' ? 'trong tay' : lantern.location.pedestalId === S1_ID ? 'trên bệ S1' : 'trên bệ S2';
+  const where =
+    lantern.location.at === 'hand'
+      ? 'trong tay'
+      : lantern.location.pedestalId === LAMP_REST_ID
+        ? 'trên đất cạnh bia'
+        : lantern.location.pedestalId === S1_ID
+          ? 'trên bệ S1'
+          : 'trên bệ S2';
   const lamp = `Đèn: ${where} ${lantern.on ? 'bật' : 'tắt'}`;
   const doorA = `Cửa A: ${view.doorAOpen ? 'mở' : 'đóng'}${state.latchA ? ', đã gài' : ''}`;
   const gateB = `Cổng B: ${view.gateBOpen ? 'mở' : 'đóng'}${state.braceB ? ', đã gài' : ''}`;
