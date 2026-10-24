@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { footRectAt } from '../../core/body';
-import { pointInRect, rectsOverlap } from '../../core/geometry';
+import { pointInRect, rectCenter, rectsOverlap } from '../../core/geometry';
 import type { Rect } from '../../core/geometry';
 import { HALO_RADIUS, canSeeMark, groundPoint, isMarkReadable, lanternFootprints } from '../../core/light';
 import { initialLantern } from '../../core/lantern';
@@ -10,15 +10,14 @@ import { isInReach, rectGap } from '../../core/reach';
 import { auditReach, canReachItem, isFootWalkable, reachableFeet } from '../../core/reachAudit';
 import type { AuditInput } from '../../core/reachAudit';
 import { HUD_BANDS } from '../../../ui/hudLayout';
-
-/** The pulse radius of the lantern (LanternSystem.PULSE_MAX_RADIUS). Kept here so the test stays free of Phaser. */
-const PULSE_MAX_RADIUS = 195;
+import LAYOUT_JSON from '../../../../docs/implementation/v4/01-forest-edge-layout.json';
 import {
   FOREST_EDGE,
   FOREST_EDGE_ITEMS,
   FOREST_EDGE_LIGHT_MARKS,
   FOREST_EDGE_PULSE_MARKS,
   FOREST_EDGE_ROOMS,
+  LAMP_REST_EXCEPTION,
   LAMP_REST_ID,
   MIDDLE_CHECKPOINT_ID,
   S1_ID,
@@ -28,6 +27,9 @@ import {
 } from './forestEdgeLayout';
 import { forestBlockers, forestSolids, INITIAL_FOREST_LIVE } from './forestEdgeLogic';
 import type { ForestEdgeLive } from './forestEdgeLogic';
+
+/** The pulse radius of the lantern (LanternSystem.PULSE_MAX_RADIUS). Kept here so the test stays free of Phaser. */
+const PULSE_MAX_RADIUS = 195;
 
 /** Both doors closed: the level as a new game starts. */
 const CLOSED: ForestEdgeLive = INITIAL_FOREST_LIVE;
@@ -103,10 +105,11 @@ describe('forest edge reachability', () => {
   });
 
   it('keeps the yards apart while door A is closed', () => {
+    const middle = FOREST_EDGE_ROOMS.find(r => r.id === 'middle')!.rect;
     const reach = reachableFeet(spawnOf(YARD_CHECKPOINT_ID), walk(CLOSED));
     for (const key of reach) {
-      const [x] = key.split(',').map(Number);
-      expect(x).toBeLessThan(312);
+      const [x, y] = key.split(',').map(Number);
+      expect(pointInRect(rectCenter(footRectAt({ x, y })), middle), key).toBe(false);
     }
     expect(canReachItem(spawnOf(YARD_CHECKPOINT_ID), item('latchA'), walk(CLOSED))).toBe(false);
   });
@@ -191,8 +194,10 @@ describe('forest edge checkpoints and geometry', () => {
     }
   });
 
-  it('puts the exit zone beyond gate B', () => {
-    expect(FOREST_EDGE.exitZone.x).toBeGreaterThanOrEqual(FOREST_EDGE.gateB.x + FOREST_EDGE.gateB.width);
+  it('puts the exit zone at the north end of gate B, in the same opening', () => {
+    expect(FOREST_EDGE.exitZone.x).toBe(FOREST_EDGE.gateB.x);
+    expect(FOREST_EDGE.exitZone.width).toBe(FOREST_EDGE.gateB.width);
+    expect(FOREST_EDGE.exitZone.y + FOREST_EDGE.exitZone.height).toBeLessThanOrEqual(FOREST_EDGE.gateB.y);
   });
 
   it('keeps every solid and every interactable out of the HUD bands', () => {
@@ -223,7 +228,7 @@ describe('forest edge light marks and pulse', () => {
     const blockers = forestBlockers(CLOSED);
     for (const mark of FOREST_EDGE_LIGHT_MARKS) {
       if (mark.kind !== 'dark') continue;
-      const room = FOREST_EDGE_ROOMS.find(r => pointInRect({ x: mark.rect.x, y: mark.rect.y }, r.rect));
+      const room = FOREST_EDGE_ROOMS.find(r => pointInRect(rectCenter(mark.rect), r.rect));
       const start = room?.id === 'middle' ? spawnOf(MIDDLE_CHECKPOINT_ID) : spawnOf(YARD_CHECKPOINT_ID);
       const grounds = [...reachableFeet(start, walk(CLOSED))].map(key => {
         const [x, y] = key.split(',').map(Number);
@@ -237,14 +242,29 @@ describe('forest edge light marks and pulse', () => {
     }
   });
 
-  it('keeps the pulse marks in reach of a pulse at the stele', () => {
-    const stele = FOREST_EDGE.stele;
-    const origin = { x: stele.x + stele.width / 2, y: stele.y + stele.height / 2 };
-    for (const mark of FOREST_EDGE_PULSE_MARKS) {
-      const dx = mark.x - origin.x;
-      const dy = mark.y - origin.y;
-      expect(Math.hypot(dx, dy)).toBeLessThanOrEqual(PULSE_MAX_RADIUS);
+  it('gives every dark mark a seen aim area from the spawn of its room', () => {
+    for (const mark of FOREST_EDGE_LIGHT_MARKS) {
+      if (mark.kind !== 'dark') continue;
+      const room = FOREST_EDGE_ROOMS.find(r => pointInRect(rectCenter(mark.rect), r.rect));
+      const start = spawnOf(room?.id === 'middle' ? MIDDLE_CHECKPOINT_ID : YARD_CHECKPOINT_ID);
+      const found = hasAimArea({ hit: [], avoid: [], seen: mark, rooms: FOREST_EDGE_ROOMS }, aimInput(start, CLOSED));
+      expect(found, mark.id).toBe(true);
     }
+  });
+
+  it('keeps a standing spot in stele reach from which every pulse mark is in pulse range', () => {
+    // The pulse starts at Nhinh's actor centre, not at the stele, so the origin is a reachable standing spot.
+    const stele = { kind: 'block' as const, rect: FOREST_EDGE.stele };
+    const origins = [...reachableFeet(spawnOf(YARD_CHECKPOINT_ID), walk(CLOSED))].map(key => {
+      const [x, y] = key.split(',').map(Number);
+      return { x, y };
+    });
+    const found = origins.some(
+      origin =>
+        isInReach(footRectAt(origin), stele) &&
+        FOREST_EDGE_PULSE_MARKS.every(mark => Math.hypot(mark.x - origin.x, mark.y - origin.y) <= PULSE_MAX_RADIUS),
+    );
+    expect(found).toBe(true);
   });
 });
 
@@ -263,5 +283,43 @@ describe('forest edge lamp on the ground', () => {
   it('keeps the lamp out of the stele and the pedestal reach, so one E cannot take the wrong thing', () => {
     expect(rectsOverlap(FOREST_EDGE.lampRest, FOREST_EDGE.stele)).toBe(false);
     expect(rectsOverlap(FOREST_EDGE.lampRest, FOREST_EDGE.s1)).toBe(false);
+  });
+});
+
+describe('forest edge layout JSON matches the runtime', () => {
+  const json = LAYOUT_JSON;
+  const interactables = json.interactables as Record<string, { rect: Rect; solid: boolean; exception?: unknown }>;
+
+  it('matches the world, the walls, the doors, the thresholds and the exit', () => {
+    expect(json.world).toEqual(FOREST_EDGE.world);
+    expect(Object.values(json.walls)).toEqual(FOREST_EDGE.walls);
+    expect(json.doorA).toEqual(FOREST_EDGE.doorA);
+    expect(json.thresholdA).toEqual(FOREST_EDGE.thresholdA);
+    expect(json.gateB).toEqual(FOREST_EDGE.gateB);
+    expect(json.thresholdB).toEqual(FOREST_EDGE.thresholdB);
+    expect(json.exitZone).toEqual(FOREST_EDGE.exitZone);
+  });
+
+  it('matches the interactables, their solid flags and the lamp exception', () => {
+    expect(interactables.stele.rect).toEqual(FOREST_EDGE.stele);
+    expect(interactables.hinge.rect).toEqual(FOREST_EDGE.hinge);
+    expect(interactables.s1.rect).toEqual(FOREST_EDGE.s1);
+    expect(interactables.latchA.rect).toEqual(FOREST_EDGE.latchA);
+    expect(interactables.s2.rect).toEqual(FOREST_EDGE.s2);
+    expect(interactables.braceB.rect).toEqual(FOREST_EDGE.braceB);
+    expect(interactables.lampRest.rect).toEqual(FOREST_EDGE.lampRest);
+    for (const it of FOREST_EDGE_ITEMS) {
+      expect(interactables[it.id], it.id).toBeDefined();
+      expect(interactables[it.id].solid, it.id).toBe(it.reach.kind === 'block');
+    }
+    expect(interactables.lampRest.exception).toEqual(LAMP_REST_EXCEPTION);
+  });
+
+  it('matches the rooms, the checkpoints, the sprout, the light marks and the pulse marks', () => {
+    expect(json.rooms).toEqual(FOREST_EDGE_ROOMS);
+    expect(json.checkpoints).toEqual(FOREST_EDGE.checkpoints);
+    expect(json.sprout.rect).toEqual(FOREST_EDGE.sprout);
+    expect(json.lightMarks).toEqual(FOREST_EDGE_LIGHT_MARKS);
+    expect(json.pulseMarks.map(({ id, x, y }) => ({ id, x, y }))).toEqual(FOREST_EDGE_PULSE_MARKS);
   });
 });

@@ -4,12 +4,15 @@ import { initialLantern, lanternFeeds, placeLantern, toggleLantern } from '../..
 import type { LanternState } from '../../core/lantern';
 import { groundPoint, lanternFootprints } from '../../core/light';
 import {
+  FOREST_EDGE,
   FOREST_EDGE_LIGHT_MARKS,
   FOREST_EDGE_PULSE_MARKS,
   LAMP_REST_ID,
+  MIDDLE_CHECKPOINT_ID,
   S1_ID,
   S2_ID,
   SPROUT_ID,
+  YARD_CHECKPOINT_ID,
 } from './forestEdgeLayout';
 import {
   CUE_EVENT,
@@ -48,16 +51,23 @@ const ON_S2: LanternState = placeLantern(HAND_ON, S2_ID)!;
 /** Off on S1. */
 const OFF_S1: LanternState = toggleLantern(ON_S1);
 
+/** The spawn point of a checkpoint in the layout. */
+function spawnOf(id: string) {
+  const checkpoint = FOREST_EDGE.checkpoints.find(c => c.id === id);
+  if (!checkpoint) throw new Error(`no checkpoint ${id}`);
+  return checkpoint.spawn;
+}
+
 /** Feet (foot rects) used across the tests, by where Nhinh stands. */
-const FOOT_YARD = footRectAt({ x: 120, y: 262 });
-/** Foot overlapping threshold A on the entry side. */
-const FOOT_IN_A = footRectAt({ x: 300, y: 210 });
+const FOOT_YARD = footRectAt(spawnOf(YARD_CHECKPOINT_ID));
+/** Foot overlapping threshold A (foot 14x6 at x 349..363, y 206..212 is inside 336..376 x 182..222). */
+const FOOT_IN_A = footRectAt({ x: 356, y: 190 });
 /** Foot in the middle yard, clear of both thresholds. */
-const FOOT_MIDDLE = footRectAt({ x: 420, y: 262 });
-/** Foot overlapping threshold B on the middle side. */
-const FOOT_IN_B = footRectAt({ x: 578, y: 210 });
-/** Foot in the exit zone beyond gate B. */
-const FOOT_EXIT = footRectAt({ x: 612, y: 210 });
+const FOOT_MIDDLE = footRectAt(spawnOf(MIDDLE_CHECKPOINT_ID));
+/** Foot overlapping threshold B on the middle side (foot at x 473..487, y 46..52 is inside 456..504 x 28..60). */
+const FOOT_IN_B = footRectAt({ x: 480, y: 30 });
+/** Foot in the exit zone beyond gate B (foot at x 473..487, y 10..16 is inside 456..504 x 0..20). */
+const FOOT_EXIT = footRectAt({ x: 480, y: -6 });
 
 const DEFAULT = defaultForestEdgeState();
 const LATCHED: ForestEdgeState = { latchA: true, braceB: false };
@@ -401,7 +411,7 @@ describe('forest edge lamp on the ground by the stele', () => {
   it('gives no light and no feed while it rests on the ground', () => {
     expect(lanternFeeds(ON_GROUND, S1_ID)).toBe(false);
     expect(lanternFeeds(ON_GROUND, LAMP_REST_ID)).toBe(false);
-    expect(lanternFootprints(ON_GROUND, groundPoint({ x: 226, y: 240 }), () => null)).toEqual([]);
+    expect(lanternFootprints(ON_GROUND, groundPoint({ x: 214, y: 236 }), () => null)).toEqual([]);
   });
 
   it('says where the lamp is in the status line', () => {

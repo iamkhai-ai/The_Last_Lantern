@@ -141,14 +141,17 @@ Ngoại lệ cần ghi (chưa sửa tài liệu chung):
 
 ## 9. Kiểm đã làm
 
-JSON v3 đã đồng bộ theo runtime (`forestEdgeLayout.ts` tại `8404cb9`). Test tạm chạy trên dữ liệu JSON, không commit.
+JSON v4 và `forestEdgeLayout.ts` đã đồng bộ theo bố cục art (cổng B ở tường bắc). Một test đọc JSON và so với runtime: tường, cửa, ngưỡng, lối ra, vật, phòng, checkpoint và dấu. Test chạy trên file đã commit.
 
+- **Toàn bộ test:** 301 test pass; `tsc` sạch (nhánh `level01-v4`, đã merge foundation).
 - **Reach audit** (`auditReach`): sạch ở cả 4 trạng thái A/B. Tầm với tới `s1`, `hinge`, `lampRest` từ sân vào; `latchA` khi A mở; `s2`, `braceB` từ sân giữa. Lối ra chỉ tới được khi B mở.
+- **Tách sân:** khi A đóng, không chân nào từ sân vào nằm trong phòng sân giữa, và chốt A không tới được từ sân vào.
 - **Checkpoint:** cả hai đứng được ở mọi trạng thái và nằm trong vùng lưu.
-- **Pulse:** cả hai dấu nằm trong 195 px từ bia.
+- **Ngưỡng và bệ:** từ mọi vị trí trong ngưỡng A, S1 ngoài tầm với; trong ngưỡng B, S2 ngoài tầm. Hai bệ cách mọi dấu hơn 12 px.
+- **Pulse:** Pulse xuất phát từ tâm Nhinh, không từ bia. Test kiểm có một vị trí đứng ở sân vào, bia nằm trong tầm E từ đó, và cả hai dấu nằm trong 195 px. Dấu `latch-tool-marks` đã dời từ (400,174) sang (386,168) để đạt điều kiện này.
 - **Dấu sáng (`sprout`):** đọc được từ điểm tải sân vào bằng `hasAimArea`.
-- **Dấu tối:** mỗi dấu có điểm đọc được và nhìn thấy được, kiểm theo điểm. Kiểm theo `hasAimArea` (vùng đứng 8 px) thì cả 7 dấu đều **không đạt**. Nguyên nhân nằm ở `lightAudit.ts` (foundation): ứng viên đứng chỉ lấy trong 48 px (`LANTERN_RADIUS + 8`), trong khi luật chung cho dấu "đã thấy" là 64 px (`SEEN_RADIUS`). Thử tạm đổi bán kính này thành 64 px (không commit): cả 7 dấu đạt. Cần sửa ở foundation, chưa làm.
-
+- **Dấu tối:** 8 dấu, mỗi dấu có điểm đọc được và nhìn thấy được, và có vùng đứng 8 px thấy dấu theo `hasAimArea`, kiểm từ điểm tải của phòng chứa dấu. Trước khi sửa foundation, test này không đạt (dấu đầu tiên lỗi là `spores-hinge-1`). Sau khi sửa ở `a208839` (vùng đứng tìm trong 64 px với dấu tối), cả 8 dấu đạt.
+- **Ảnh ghép đối chiếu** (`01-forest-edge-art-vs-runtime.png`, xem bằng mắt): tường đỏ khớp tường sân giữa và rừng trong art; cửa A và cổng B khớp các khe tường; khung magenta (collider của art) trùng vị trí các vật runtime: chốt A, S2, hãm B, cột nước, bia, bản lề, S1. Không thấy lệch đáng kể.
 
 Ghi chú: mô hình ánh sáng `light.ts`/`lightAudit.ts` đã có trên `feat/v4-foundation` (`4f9fd4a`, vòng 40 px) và đã được merge vào `level01-v4` qua `ccef8f9`.
 
@@ -218,8 +221,7 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 
 ## 12. Bước tiếp theo khi dựng
 
-- Đã xong: tài liệu chung trên `develop-v4` (`7b1b7d0`). Runtime có `lampRest`, nhặt một lần bằng E, và test cho ngoại lệ này. Toàn bộ 294 test pass, `tsc` sạch.
-- Đã đồng bộ: JSON v3 và blockout theo tọa độ runtime. JSON không còn cột tuyến nước, rãnh khô, mắt ổ kín, dây S1/S2 và decor cũ, vì runtime chưa có.
-- Lệch với bản thiết kế (văn bản §1 chưa sửa): runtime đặt cổng B ở tường **đông** (doc ghi tường bắc); sân giữa là phòng bên phải; runtime có 2 vết bào tử quanh chốt A, doc ghi 3. Cần chọn bên nào là đúng.
-- Lỗi audit ở foundation: bán kính ứng viên `hasAimArea` (xem §9). Chưa sửa.
+- Đã xong: tài liệu chung trên `develop-v4` (`7b1b7d0`). Runtime có `lampRest`, nhặt một lần bằng E, và test cho ngoại lệ này. Toàn bộ 301 test pass, `tsc` sạch.
+- Đã đồng bộ: runtime, JSON v4 và art dùng chung một topology: sân vào ở dưới, sân giữa có tường bao ở trên, cửa A ở tường nam sân giữa, cổng B ở tường bắc dẫn sang màn 02. JSON không có rãnh khô, mắt ổ kín, dây S1/S2 và decor cũ, vì runtime chưa có.
+- Lỗi audit ở foundation (bán kính ứng viên `hasAimArea` cho dấu tối) đã sửa ở `a208839`; xem §9.
 - Chưa kiểm trong trình duyệt.

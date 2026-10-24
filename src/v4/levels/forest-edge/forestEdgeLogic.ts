@@ -49,6 +49,7 @@ export const FOREST_EDGE_JOURNAL_TEXT: Record<string, string> = {
   'spores-hinge-2': 'Bào tử tối cạnh mô hình bản lề: chỉ hiện ngoài vệt đèn cầm tay.',
   'spores-latch-1': 'Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay.',
   'spores-latch-2': 'Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay.',
+  'spores-latch-3': 'Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay.',
   'steps-latch-1': 'Vết chân phía sân giữa dẫn tới chốt A.',
   'steps-latch-2': 'Vết chân phía sân giữa dẫn tới chốt A.',
   'steps-latch-3': 'Vết chân phía sân giữa dẫn tới chốt A.',

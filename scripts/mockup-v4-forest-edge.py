@@ -42,7 +42,6 @@ scene = Image.new('RGBA', (640, 360), (22, 40, 30, 255))
 d = ImageDraw.Draw(scene, 'RGBA')
 
 # Ground: the entry yard is grass; the middle yard is worn paving with faint joints.
-d.rectangle(box(W['northWall']), fill=(14, 30, 22, 255))
 yard = ROOMS['entry']
 d.rectangle((yard['x'], yard['y'], yard['x'] + yard['width'] - 1, yard['y'] + yard['height'] - 1), fill=(26, 50, 40, 255))
 mid = ROOMS['middle']
@@ -50,10 +49,8 @@ d.rectangle((mid['x'], mid['y'], mid['x'] + mid['width'] - 1, mid['y'] + mid['he
 for y in range(mid['y'] + 4, mid['y'] + mid['height'], 12):
     d.line((mid['x'], y, mid['x'] + mid['width'] - 1, y), fill=(64, 68, 64, 255))
 
-# Walls: collision strip plus a front face drawn above it.
-for key, r in W.items():
-    if key == 'northWall':
-        continue
+# Walls: collision strip plus a front face drawn above it (every wall in the layout, by its own name).
+for r in W.values():
     d.rectangle(box(r), fill=(96, 84, 66, 255))
     d.rectangle((r['x'], r['y'] + r['height'] - 6, r['x'] + r['width'] - 1, r['y'] + r['height'] - 1), fill=(70, 60, 48, 255))
 
@@ -97,10 +94,10 @@ try:
 except OSError:  # not on Windows: Vietnamese marks may not render
     FONT = ImageFont.load_default()
 TEXT = {
-    'bia': (190, 178), 'đèn trên đất': (212, 232), 'bản lề': (140, 212), 'S1': (252, 218), 'cửa A': (290, 170),
-    'chốt A': (330, 128), 'S2': (500, 218), 'cổng B': (580, 168), 'hãm B': (540, 120),
-    'mầm + Lumo': (104, 292), 'cây lớn': (40, 210), 'Nhinh': (92, 246),
-    'SÂN VÀO': (40, 300), 'SÂN GIỮA': (340, 300), '→ rừng 02': (500, 160),
+    'bia': (150, 186), 'đèn trên đất': (196, 238), 'bản lề': (100, 254), 'S1': (282, 226), 'cửa A': (330, 160),
+    'chốt A': (372, 146), 'S2': (414, 78), 'cổng B': (440, 56), 'hãm B': (512, 78),
+    'mầm + Lumo': (200, 294), 'cây lớn': (24, 206), 'Nhinh': (96, 230),
+    'SÂN VÀO': (40, 300), 'SÂN GIỮA': (300, 58), '→ rừng 02': (462, 22),
 }
 for text, (x, y) in TEXT.items():
     labels.text((x * SCALE + 1, y * SCALE + 1), text, font=FONT, fill=(0, 0, 0, 220))
