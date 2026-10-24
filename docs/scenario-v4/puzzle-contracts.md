@@ -28,7 +28,7 @@ Màn có thể đặt lớp thông tin chỉ lộ khi dấu ấy **không thật
 
 Các số dưới đây là giá trị khởi điểm dùng chung cho mọi màn. Chúng được chỉnh một lần ở phòng thử, không chỉnh riêng từng màn để làm bài dễ hoặc khó hơn.
 
-**Vòng sáng của đèn cầm tay** chỉ tồn tại khi đèn ở tay và F bật. Đèn lồng tỏa sáng đều mọi phía, không phải đèn pin: footprint là một vòng tròn bán kính 40px, tâm là điểm trên sàn dưới chân Nhinh (tâm khối chân). Hướng Nhinh quay không đổi vùng sáng. Muốn rọi hay tránh một vật, người chơi đi lại gần, lùi ra xa hoặc tắt F. Trong tài liệu các màn, “vệt đèn cầm” nghĩa là vòng sáng này.
+**Vòng sáng của đèn cầm tay** chỉ tồn tại khi đèn ở tay và F bật. Đèn lồng tỏa sáng đều mọi phía, không phải đèn pin: footprint là một vòng tròn bán kính 40px, tâm ở bụng Nhinh, nơi cô cầm đèn (14px phía trên tâm khối chân); tường và cánh cửa đóng chặn sáng tính từ tâm khối chân. Hướng Nhinh quay không đổi vùng sáng. Muốn rọi hay tránh một vật, người chơi đi lại gần, lùi ra xa hoặc tắt F. Trong tài liệu các màn, “vệt đèn cầm” nghĩa là vòng sáng này.
 
 - **Vật chắn:** tường và cánh cửa đang đóng chắn ánh sáng; phần nằm sau chúng không được chiếu. Luật này áp dụng cho mọi footprint của đèn bảo trì: cầm tay, đặt trên bệ và nhánh tràn. Hình vẽ và phép tính gameplay bị cắt theo cùng một đường, nên đứng sát tường không chiếu được cảm biến hay dấu ở phía bên kia. Cầu, rễ, nước, NPC và Lumo không chắn.
 
