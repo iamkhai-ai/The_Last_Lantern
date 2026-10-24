@@ -61,13 +61,13 @@ function meetsGoal(pos: Point, goal: AimGoal, input: AimInput): boolean {
   return true;
 }
 
-/** Walk the candidate positions and collect up to `limit` aim areas. */
+/** Walk the candidate positions and collect up to `limit` aim areas. Hit goals search within reach of the lantern; seen-only goals search the seen range. */
 function collectAimAreas(goal: AimGoal, input: AimInput, limit: number): AimArea[] {
   const anchors = anchorsOf(goal);
   if (anchors.length === 0) return [];
   const reach = reachableFeet(input.start, input, AIM_STEP);
-  // A seen goal can be met up to SEEN_RADIUS away: a dark mark is only readable outside the circle.
-  const maxDistance = Math.max(LANTERN_RADIUS, goal.seen ? SEEN_RADIUS : 0) + 8;
+  // Hit goals search within reach of the lantern; seen-only goals search the seen range.
+  const maxDistance = goal.hit.length > 0 ? LANTERN_RADIUS + 8 : SEEN_RADIUS;
   const areas: AimArea[] = [];
 
   const candidates: Point[] = [];
@@ -104,7 +104,7 @@ export function findAimAreas(goal: AimGoal, input: AimInput): AimArea[] {
   return collectAimAreas(goal, input, Infinity);
 }
 
-/** True when at least one aim area exists. Stops at the first one found. */
+/** True when at least one aim area exists (hit goals search within reach of the lantern; seen-only goals search the seen range). Stops at the first one found. */
 export function hasAimArea(goal: AimGoal, input: AimInput): boolean {
   return collectAimAreas(goal, input, 1).length > 0;
 }
