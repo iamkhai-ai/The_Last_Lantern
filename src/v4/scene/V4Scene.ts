@@ -19,6 +19,8 @@ import { NO_HINT_CURSOR, nextHint } from '../core/hints';
 import type { HintCursor } from '../core/hints';
 import { canPulse, toggleLantern } from '../core/lantern';
 import type { LanternState } from '../core/lantern';
+import { groundPoint, lanternFootprints, marksToRecord } from '../core/light';
+import type { Footprint } from '../core/light';
 import { followLumo, lumoArrived } from '../core/lumo';
 import type { LumoMode } from '../core/lumo';
 import { revealMarks } from '../core/pulse';
@@ -140,7 +142,7 @@ export class V4Scene extends Phaser.Scene {
     this.player = new Player(this, checkpoint.spawn.x, checkpoint.spawn.y);
     this.lumo = new Lumo(this, checkpoint.spawn.x + LUMO_OFFSET.x, checkpoint.spawn.y + LUMO_OFFSET.y);
     this.lumo.setVisible(this.lumoPresent());
-    this.lanternSystem = new LanternSystem(this, this.level.lanternLightProfile());
+    this.lanternSystem = new LanternSystem(this, { ambientDarkness: this.level.ambientDarkness() });
     this.lanternSystem.setLightingEnabled(this.level.lighting() === 'lantern');
     this.interactions = new InteractionSystem(this);
     this.dialogue = new DialogueSystem(this);
@@ -192,15 +194,26 @@ export class V4Scene extends Phaser.Scene {
 
     this.player.update(dt, !locked, lanternAvailable && lantern.location.at === 'hand', lantern.on);
     const foot = this.player.getFootBody();
+    // This frame's light: the lantern (in hand or placed, lit or not) and the level's fixed sources.
+    const ground = groundPoint({ x: this.player.x, y: this.player.y });
+    const footprints: Footprint[] = [
+      ...(lanternAvailable
+        ? lanternFootprints(lantern, ground, this.player.facing, (id) => this.level.pedestalPosition(id), this.level.lightSpills?.() ?? [])
+        : []),
+      ...(this.level.fixedFootprints?.() ?? []),
+    ];
     this.updateLumo(dt);
-    this.level.update(dt, foot);
+    this.level.update(dt, foot, footprints);
     this.trackCheckpoint(foot);
     this.checkExit(foot);
 
-    const placedAt = lantern.location.at === 'pedestal'
-      ? this.level.pedestalPosition(lantern.location.pedestalId)
-      : null;
-    this.lanternSystem.update(dt, { x: this.player.x, y: this.player.y }, lantern, placedAt);
+    const blockers = this.level.lightBlockers();
+    this.lanternSystem.update(dt, footprints, blockers);
+    // Seen marks go into the journal once; the host writes them in the same frame they are seen.
+    const found = new Set(this.save.journal);
+    for (const id of marksToRecord(ground, this.level.lightMarks(), footprints, blockers, this.level.rooms?.() ?? [], found)) {
+      this.addJournal(id);
+    }
     this.interactions.update(foot, !locked, this.player.sprite.getBounds(), this.lumoPresent() ? [this.lumo.sprite.getBounds()] : []);
     this.dialogue.update(dt);
 

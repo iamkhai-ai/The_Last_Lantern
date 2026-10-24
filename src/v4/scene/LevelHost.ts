@@ -6,7 +6,7 @@ import type { Point, Rect } from '../core/geometry';
 import type { LanternState } from '../core/lantern';
 import type { LumoMode } from '../core/lumo';
 import type { PulseMark } from '../core/pulse';
-import type { LanternLightingProfile } from '../../systems/LanternSystem';
+import type { Footprint, LightMark, Room, SpillDecl } from '../core/light';
 
 /** What the host scene offers a level runtime. Levels never reach the save, the keys or the actors directly. */
 export interface LevelHost {
@@ -53,8 +53,11 @@ export interface V4LevelRuntime<S> {
   /** Draws the room and creates its solids. Called once per scene start. */
   build(host: LevelHost, state: S): void;
   interactables(): Interactable[];
-  /** Per frame: recompute live doors/bridges from state + lantern + Lumo, update colliders and visuals. */
-  update(dt: number, foot: Rect): void;
+  /**
+   * Per frame: recompute live doors/bridges from state + lantern + Lumo, update colliders and visuals.
+   * `footprints` are every gameplay footprint this frame (the lantern's and the fixed sources').
+   */
+  update(dt: number, foot: Rect, footprints: readonly Footprint[]): void;
   getState(): S;
   hud(): HudText;
   hint(): HintLadder | null;
@@ -62,9 +65,20 @@ export interface V4LevelRuntime<S> {
   journalText(id: string): string;
   /** Where Lumo flies for a seal id, or null if the level has no such seal. */
   sealPosition(sealId: string): Point | null;
-  lanternLightProfile(): LanternLightingProfile | undefined;
   /** World point the placed lantern's light sits on, or null. */
   pedestalPosition(pedestalId: string): Point | null;
+  /** Ambient darkness for this level; constant, never tied to F (puzzle-contracts §1). */
+  ambientDarkness(): number;
+  /** Light blockers now: walls and closed door/gate leaves. */
+  lightBlockers(): readonly Rect[];
+  /** Lit and dark marks; the host records seen ones in J. */
+  lightMarks(): readonly LightMark[];
+  /** Rooms for the "seen" rule. Optional: absent means no room check. */
+  rooms?(): readonly Room[];
+  /** Declared pedestal spills. Optional. */
+  lightSpills?(): readonly SpillDecl[];
+  /** Fixed sources' footprints now. Optional. */
+  fixedFootprints?(): readonly Footprint[];
   /** 'lantern': the darkness and lantern light are drawn. 'none': no darkness overlay at all. */
   lighting(): 'lantern' | 'none';
   /** False while Nhinh has no maintenance lantern: F and Pulse are ignored and she is drawn without a lamp. */
