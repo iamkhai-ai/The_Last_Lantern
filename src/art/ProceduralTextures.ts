@@ -1075,6 +1075,19 @@ export class ProceduralTextures {
       ctx.fillRect(0, 0, 256, 256);
     });
 
+    // Brush that LanternSystem erases the darkness with: opaque at the centre, clear at radius 126 (the same
+    // radius as light_radial), so a stamp scaled to R / 126 lifts the darkness out to R.
+    this.createCanvas(scene, 'light_mask', 256, 256, (ctx) => {
+      const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 126);
+      g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      g.addColorStop(0.3, 'rgba(255, 255, 255, 0.9)');
+      g.addColorStop(0.5, 'rgba(255, 255, 255, 0.6)');
+      g.addColorStop(0.75, 'rgba(255, 255, 255, 0.22)');
+      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 256, 256);
+    });
+
     this.createCanvas(scene, 'level01_darkness_falloff', 256, 256, (ctx) => {
       const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 126);
       g.addColorStop(0, 'rgba(3, 8, 12, 0)');
