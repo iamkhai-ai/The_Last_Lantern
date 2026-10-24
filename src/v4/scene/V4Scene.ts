@@ -225,7 +225,7 @@ export class V4Scene extends Phaser.Scene {
     const focus = new Set(this.level.focus?.() ?? []);
     this.focusMarker.update(
       dt,
-      this.items.filter((item) => focus.has(item.id) && item.getPrompt() !== null).map((item) => item.reach.rect),
+      this.items.filter((item) => focus.has(item.id) && item.getPrompt() !== null).map((item) => item.reach),
     );
     // Seen marks go into the journal once; the host writes them in the same frame they are seen.
     const found = new Set(this.save.journal);
