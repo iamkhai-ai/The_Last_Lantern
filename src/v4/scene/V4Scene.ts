@@ -11,7 +11,7 @@ import { SoundSystem } from '../../systems/SoundSystem';
 import { ChoiceBox } from '../../ui/ChoiceBox';
 import { CampaignHud } from '../../ui/CampaignHud';
 import { PauseMenu } from '../../ui/PauseMenu';
-import type { DialogueLine } from '../../types/gameTypes';
+import type { DialogueLine, Interactable } from '../../types/gameTypes';
 import { addJournalEntry } from '../core/journal';
 import { pointInRect, rectCenter } from '../core/geometry';
 import type { Rect } from '../core/geometry';
@@ -75,6 +75,8 @@ export class V4Scene extends Phaser.Scene {
   private lumo!: Lumo;
   private lanternSystem!: LanternSystem;
   private interactions!: InteractionSystem;
+  /** The level's interactables, as registered at build; the ones there now glow faintly in the dark. */
+  private items: Interactable[] = [];
   private dialogue!: DialogueSystem;
   private choice!: ChoiceBox;
   private hud!: CampaignHud;
@@ -178,7 +180,8 @@ export class V4Scene extends Phaser.Scene {
       requestSave: () => this.requestSave(),
     };
     this.level.build(host, state);
-    for (const item of this.level.interactables()) this.interactions.register(item);
+    this.items = this.level.interactables();
+    for (const item of this.items) this.interactions.register(item);
 
     this.bindKeys();
     this.events.once('shutdown', this.onShutdown, this);
@@ -208,7 +211,14 @@ export class V4Scene extends Phaser.Scene {
     this.checkExit(foot);
 
     const blockers = this.level.lightBlockers();
-    this.lanternSystem.update(dt, footprints, blockers);
+    // Nhinh glows faintly whenever no lit lantern is in her hand (not yet taken, off, or on a pedestal).
+    const handLit = lanternAvailable && lantern.location.at === 'hand' && lantern.on;
+    this.lanternSystem.update(dt, {
+      footprints,
+      blockers,
+      glow: handLit ? null : { x: this.player.x, y: this.player.y },
+      items: this.items.filter((item) => item.getPrompt() !== null).map((item) => item.reach.rect),
+    });
     // Seen marks go into the journal once; the host writes them in the same frame they are seen.
     const found = new Set(this.save.journal);
     for (const id of marksToRecord(ground, this.level.lightMarks(), footprints, blockers, this.level.rooms?.() ?? [], found)) {
