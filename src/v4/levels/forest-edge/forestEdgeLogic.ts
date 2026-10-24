@@ -57,8 +57,17 @@ export const FOREST_EDGE_JOURNAL_TEXT: Record<string, string> = {
   'latch-tool-marks': 'Vết dụng cụ quanh chốt A.',
 };
 
-/** Hinge model phases, in E-cycle order. Cosmetic only: nothing depends on them. */
-export const HINGE_PHASE_TEXT: readonly string[] = ['Bản lề: kéo.', 'Bản lề: thả.', 'Bản lề: cài móc.'];
+/**
+ * The hinge model in E-cycle order (scenario 01 §3: pulled open and let go, it shuts; hooked, it holds): each phase
+ * gives the pose it shows, the prompt for the next E, and the line shown when it is reached. Cosmetic only: nothing
+ * depends on it.
+ */
+export const HINGE_PHASES = [
+  { pose: 'closed', prompt: 'E: kéo thử bản lề', reached: 'Bản lề: tháo móc, cánh đóng lại.' },
+  { pose: 'pulled', prompt: 'E: thả bản lề', reached: 'Bản lề: kéo mở; lò xo đang kéo về.' },
+  { pose: 'closed', prompt: 'E: kéo và cài móc', reached: 'Bản lề: thả ra, lò xo kéo cánh đóng lại.' },
+  { pose: 'hooked', prompt: 'E: tháo móc', reached: 'Bản lề: cài móc, cánh giữ mở.' },
+] as const;
 
 /** The refusal texts. Each says the condition that is still missing. */
 export const REFUSE_LATCH_A = 'Chốt A chỉ gài được khi cửa A đang mở.';
@@ -244,9 +253,9 @@ export function toggleBraceB(state: ForestEdgeState, gateBOpenNow: boolean): Out
   return { ok: true, value: { ...state, braceB: next } };
 }
 
-/** Next hinge phase on E: pull, release, hook, and back to pull. */
+/** Next hinge phase on E: pull, let go, pull and hook, unhook, and back. */
 export function nextHingePhase(phase: number): number {
-  return stepMod(phase, 1, HINGE_PHASE_TEXT.length);
+  return stepMod(phase, 1, HINGE_PHASES.length);
 }
 
 /** The HUD lines. The objective changes once both latch and brace hold; the status names both doors. */

@@ -92,6 +92,8 @@ export class V4Scene extends Phaser.Scene {
   private discardSave = false;
   /** Set when the placeholder screen replaces the level: the save names a level with no runtime. */
   private placeholderLevelId: string | null = null;
+  /** True while Nhinh's waking pose plays: no movement, E, F or Pulse. */
+  private waking = false;
   /** Set once the exit has started the illustrations: nothing else may start a second transition. */
   private leaving = false;
 
@@ -187,6 +189,7 @@ export class V4Scene extends Phaser.Scene {
     for (const item of this.items) this.interactions.register(item);
 
     this.bindKeys();
+    this.startWake();
     this.events.once('shutdown', this.onShutdown, this);
   }
 
@@ -195,7 +198,7 @@ export class V4Scene extends Phaser.Scene {
     const dt = Math.min(delta, 50);
     const now = performance.now();
     const lanternAvailable = this.level.lanternAvailable();
-    const locked = this.dialogue.isInputLocked(now) || this.pauseMenu.isOpen() || this.choice.isOpen();
+    const locked = this.waking || this.dialogue.isInputLocked(now) || this.pauseMenu.isOpen() || this.choice.isOpen();
     const lantern = this.save.lantern;
 
     this.player.update(dt, !locked, lanternAvailable && lantern.location.at === 'hand', lantern.on);
@@ -360,9 +363,34 @@ export class V4Scene extends Phaser.Scene {
   }
 
   /** The pulse reveals marks in range and writes them to the journal. It never powers anything. */
+  /**
+   * Plays the level's waking pose once (`V4LevelRuntime.wake`): Nhinh's sprite is hidden and each frame is shown in her
+   * place at her display size; input waits until the last frame ends, then the event is marked.
+   */
+  private startWake(): void {
+    const wake = this.level.wake?.();
+    if (!wake || wake.frames.length === 0 || this.save.events.includes(wake.event)) return;
+    const sprite = this.player.sprite;
+    this.waking = true;
+    sprite.setVisible(false);
+    const pose = this.add.image(sprite.x, sprite.y, wake.frames[0].texture).setDepth(sprite.depth);
+    pose.setDisplaySize(sprite.displayWidth, sprite.displayHeight);
+    let at = 0;
+    for (const frame of wake.frames) {
+      this.time.delayedCall(at, () => pose.setTexture(frame.texture).setDisplaySize(sprite.displayWidth, sprite.displayHeight));
+      at += frame.ms;
+    }
+    this.time.delayedCall(at, () => {
+      pose.destroy();
+      sprite.setVisible(true);
+      this.waking = false;
+      this.markEvent(wake.event);
+    });
+  }
+
   private pulse(): void {
     const now = performance.now();
-    if (this.pauseMenu.isOpen() || this.dialogue.isInputLocked(now)) return;
+    if (this.waking || this.pauseMenu.isOpen() || this.dialogue.isInputLocked(now)) return;
     if (!this.level.lanternAvailable()) return;
     const marks = this.level.pulseMarks();
     if (marks.length === 0) return;
@@ -378,6 +406,7 @@ export class V4Scene extends Phaser.Scene {
       return;
     }
     this.player.playPulseAction();
+    this.level.onPulse?.(origin);
     const found = new Set(this.save.journal);
     for (const id of revealMarks(origin, LanternSystem.PULSE_MAX_RADIUS, marks, found)) this.addJournal(id);
   }
@@ -456,7 +485,7 @@ export class V4Scene extends Phaser.Scene {
       if (this.pauseMenu.isOpen()) this.pauseMenu.triggerSelected();
       else if (this.choice.isOpen()) this.choice.confirm();
       else if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(now);
-      else this.interactions.tryInteract(now);
+      else if (!this.waking) this.interactions.tryInteract(now);
     });
     keyboard.on('keydown-SPACE', () => {
       const now = performance.now();
@@ -466,7 +495,7 @@ export class V4Scene extends Phaser.Scene {
       else this.pulse();
     });
     keyboard.on('keydown-F', (event: KeyboardEvent) => {
-      if (event.repeat || this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen()) return;
+      if (event.repeat || this.waking || this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen()) return;
       if (this.choice.isOpen() || !this.level.lanternAvailable()) return;
       this.setLantern(toggleLantern(this.save.lantern));
       this.player.playLanternAction(this.save.lantern.on);

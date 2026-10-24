@@ -20,7 +20,7 @@ import {
   CUE_EVENT,
   CUE_LINES,
   FOREST_EDGE_JOURNAL_TEXT,
-  HINGE_PHASE_TEXT,
+  HINGE_PHASES,
   INITIAL_FOREST_LIVE,
   REFUSE_BRACE_B,
   REFUSE_LAMP_GONE,
@@ -382,11 +382,12 @@ describe('forest edge hint ladder and HUD', () => {
 });
 
 describe('forest edge hinge model', () => {
-  it('cycles pull, release and hook, and back to pull', () => {
-    expect(HINGE_PHASE_TEXT).toHaveLength(3);
+  it('cycles pull, let go, pull and hook, unhook, and back', () => {
+    expect(HINGE_PHASES.map(p => p.pose)).toEqual(['closed', 'pulled', 'closed', 'hooked']);
     expect(nextHingePhase(0)).toBe(1);
     expect(nextHingePhase(1)).toBe(2);
-    expect(nextHingePhase(2)).toBe(0);
+    expect(nextHingePhase(2)).toBe(3);
+    expect(nextHingePhase(3)).toBe(0);
   });
 });
 

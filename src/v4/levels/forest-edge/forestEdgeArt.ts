@@ -78,4 +78,10 @@ export const ART_SLOTS = {
   s1ToA: { position: { x: 0, y: 0 }, ...SIZE['s1ToA-hidden'] },
   s2ToB: { position: { x: 0, y: 0 }, ...SIZE['s1ToA-hidden'] },
   latchTool: { position: { x: 386, y: 168 }, ...SIZE['latch-tool-marks'] },
+  // Flat decor under everything that stands: the dry channel to the column and the fixed door linkages.
+  dryChannel: { position: { x: 0, y: 0 }, ...SIZE['station-yard'] },
+  linkages: { position: { x: 0, y: 0 }, ...SIZE['station-yard'] },
+  // The foreground crown of the old tree, drawn over Nhinh.
+  canopy: { position: { x: 0, y: 0 }, ...SIZE['station-yard'] },
+
 } as const satisfies Record<string, ArtSlot>;
