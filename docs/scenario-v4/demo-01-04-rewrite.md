@@ -31,7 +31,7 @@ Nỗi muốn được công nhận của Nhinh thể hiện qua việc cô mong 
 
 ### Cảnh vào
 
-Đồng hồ đã qua buổi sáng nhưng sân trạm vẫn chạng vạng. Trong cảnh mở, Nhinh nhặt đèn và bật thử; người chơi bắt đầu điều khiển khi đèn đã ở tay và đang bật, không có thao tác nhặt đèn trên đất. Vòng sáng phủ lên mầm cây mà Lumo đang che. Cậu phản ứng: “Cậu có thể đừng soi vào nhà người khác không?” Nhinh lùi lại hoặc tắt đèn; cả hai đều làm mầm ra khỏi vòng sáng và được chấp nhận. Không yêu cầu bấm F một lần để mở tiến trình.
+Đồng hồ đã qua buổi sáng nhưng sân trạm vẫn chạng vạng. Đèn bảo trì nằm trên đất cạnh bia, tắt; người chơi tự nhặt bằng E một lần (ngoại lệ của màn 01) rồi bật thử. Cảnh mở chạy khi lần bật đầu tiên có đèn trong tay. Vòng sáng phủ lên mầm cây mà Lumo đang che. Cậu phản ứng: “Cậu có thể đừng soi vào nhà người khác không?” Nhinh lùi lại hoặc tắt đèn; cả hai đều làm mầm ra khỏi vòng sáng và được chấp nhận. Không yêu cầu bấm F một lần để mở tiến trình.
 
 Nhinh xin lỗi, nói mình tới kiểm tra trạm. Lumo muốn tới khu vườn nhưng các cổng bảo trì đang đóng. Cậu biết đường qua thư viện. Hai người đồng ý đi cùng: cô tìm nguyên nhân mất nguồn, cậu dẫn đường và muốn cô giúp mở lối vào vườn.
 

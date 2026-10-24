@@ -257,7 +257,7 @@ Người dùng duyệt bảy cách sửa sau lượt rà bản viết lại demo
 | Tia của mạng gương chưa có trong luật ánh sáng; 04 không rõ tia có che vệt khoáng | Tia là footprint dải 6px, bị tường/cửa đóng/mặt tượng/lưng gương chắn; che dấu tối và kích mặt nhận hở dưới dải; ổ kín chỉ nhận ở đầu cuối. 04: đoạn khoáng dưới tia cần tắt F để đọc |
 | 03 không nói thứ gì chốt mô hình; tự chốt khi khớp cho phép bật thử 16 tổ hợp | Cần xác nhận cạnh bánh xe; sai thì chạy một lượt và chỉ báo phía thiếu, không khóa, không đếm lượt |
 | 02 yêu cầu E gài hãm “để mang đèn đi” dù màn không dùng đèn | Lẫy nhìn thấy được tự sập khi cổng mở hết; quay tay quay sau đó không đóng cổng |
-| 01 để đèn nằm cạnh bia, trái luật chỉ đặt/nhặt tại bệ | Nhặt đèn trong cảnh mở; điều khiển bắt đầu khi đèn đã ở tay và đang bật |
+| 01 để đèn nằm cạnh bia, trái luật chỉ đặt/nhặt tại bệ | Ngoại lệ có khai báo: đèn nằm trên đất tại điểm cạnh bia, người chơi tự nhặt một lần bằng E; không đặt xuống đất (`puzzle-contracts.md` mục 1, `RULE_GAMES.md` mục 8) |
 | 04 chưa nói lối ra phản ứng khi chưa đủ điều kiện; câu “đặt đèn ở bờ Đông” không có bệ | Lối ra là bậc đá luôn thấy; vào vùng ra khi thiếu điều kiện thì nêu điều thiếu, không chuyển cảnh. Bờ Đông không có bệ, T chỉ nhận tia qua G2 |
 | 02/03 ghi “lưu vị trí người chơi”, trái cách lưu theo checkpoint | Đổi thành “checkpoint đang đứng” |
 

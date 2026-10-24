@@ -4,7 +4,7 @@
 
 ## 1. Mở cảnh và động cơ
 
-Đồng hồ đã qua buổi sáng nhưng sân trạm vẫn chạng vạng. Trong cảnh mở, Nhinh nhặt đèn bảo trì cạnh bia và bật thử lần đầu. Người chơi bắt đầu điều khiển khi đèn đã ở tay và đang bật; không có thao tác E nhặt đèn trên mặt đất, vì luật chung chỉ cho đặt và nhặt đèn tại bệ. Vòng sáng phủ lên mầm cây Lumo đang che. Cậu phản ứng: “Cậu có thể đừng soi vào nhà người khác không?” Nhinh xin lỗi, rồi lùi ra hoặc tắt đèn. Cả hai đều đưa mầm cây ra khỏi vòng sáng và được chấp nhận; sau đó trò chơi giữ nguyên trạng thái F mà người chơi chọn, không tự bật lại khi câu đố bắt đầu. Không yêu cầu bấm F một lần để mở tiến trình. Ánh nền vẫn giúp đọc toàn bộ đường và chỗ đứng, không dùng gamma để giấu Lumo.
+Đồng hồ đã qua buổi sáng nhưng sân trạm vẫn chạng vạng. Đèn bảo trì nằm trên đất cạnh bia, tắt, nơi Nhinh đã đặt trước khi nghỉ. Người chơi tự nhặt đèn bằng E tại đó; đây là ngoại lệ một lần của màn 01 (luật chung, mục 1). Lần bật thử đầu tiên khi đèn ở tay mở cảnh. Vòng sáng phủ lên mầm cây Lumo đang che. Cậu phản ứng: “Cậu có thể đừng soi vào nhà người khác không?” Nhinh xin lỗi, rồi lùi ra hoặc tắt đèn. Cả hai đều đưa mầm cây ra khỏi vòng sáng và được chấp nhận; sau đó trò chơi giữ nguyên trạng thái F mà người chơi chọn, không tự bật lại khi câu đố bắt đầu. Không yêu cầu bấm F một lần để mở tiến trình. Ánh nền vẫn giúp đọc toàn bộ đường và chỗ đứng, không dùng gamma để giấu Lumo.
 
 Nhinh nói mình tới kiểm tra trạm. Lumo muốn tới khu vườn nhưng các cổng bảo trì đang đóng. Cậu biết đường qua thư viện; hai người đồng ý đi cùng: cô tìm nguyên nhân mất nguồn, cậu dẫn đường và muốn cô giúp mở lối vào vườn. Nhinh chưa biết mạng rừng hay kết luận trạm đã hỏng.
 
@@ -14,7 +14,7 @@ Nhinh nói mình tới kiểm tra trạm. Lumo muốn tới khu vườn nhưng c
 
 Khi cầm, đèn tỏa một vòng sáng nhỏ có rìa rõ quanh Nhinh; vòng sáng này dùng để nhìn mặt máy và các dấu ánh được chỉ định, không phủ cả sân. Tại bệ S1 hoặc S2, đầu nối kín chỉ đưa nguồn tới cửa A hoặc B tương ứng. F tắt/bật đèn dù Nhinh đang cầm hay đèn đang ở bệ.
 
-Bố cục giữ đúng cấu trúc **sân vào [bia, S1] — cửa A — sân giữa [chốt A, S2, tay hãm B] — cổng B — rừng 02**. Sau cảnh mở, Nhinh ở sân vào với đèn đang cầm; A/B đóng, chốt A/B nhả, Lumo theo cô. Trạng thái F giữ đúng lựa chọn sau lần bật thử đầu tiên, không tự đặt lại khi người chơi vào phần câu đố. Không có nguồn cố định.
+Bố cục giữ đúng cấu trúc **sân vào [bia, S1] — cửa A — sân giữa [chốt A, S2, tay hãm B] — cổng B — rừng 02**. Sau khi nhặt đèn bên bia và bật thử lần đầu, Nhinh ở sân vào với đèn đang cầm; A/B đóng, chốt A/B nhả, Lumo theo cô. Trạng thái F giữ đúng lựa chọn sau lần bật thử đầu tiên, không tự đặt lại khi người chơi vào phần câu đố. Không có nguồn cố định.
 
 Khi bào tử không bị vùng sáng của đèn chiếu lên, vết chân nhỏ và hạt phản quang làm rõ lối đi tới chốt A ở mặt sau cửa. Chốt này chỉ tiếp cận được từ sân giữa sau khi đã đi qua A; tường và cổng chặn hẳn đường vòng từ sân vào. Đầu nối S1 không có nhánh tràn tới dấu; chỉ vòng sáng đèn cầm thật sự phủ lên bào tử mới làm chúng khó đọc. Có thể lùi khỏi vòng sáng hoặc tắt F. Dấu tối giúp nhận ra mặt tiếp cận của chốt, không nói nên đặt đèn ở đâu hay cho sẵn lời giải. Mọi bậc, cạnh và tương tác vẫn thấy bằng ánh nền.
 
@@ -38,7 +38,7 @@ Một mô hình bản lề nhỏ cạnh bia cho thử E khi muốn: kéo mở r�
 
 F khi Nhinh đang ở sân giữa có thể làm A đóng nếu chưa gài. Đèn vẫn ở S1; F từ bất cứ vị trí nào trong cùng màn bật lại được. Chốt A ở sân giữa vẫn tiếp cận được khi A đóng, nhưng chỉ gài được khi cánh mở; vì vậy cần bật lại đèn để A mở rồi mới gài. Không yêu cầu đi qua cửa đã đóng để bật nguồn.
 
-Nếu người chơi để đèn bật ở S1 rồi đi về phía S2, A vẫn mở vì nguồn còn ở đúng bệ; B chưa nhận nguồn nên vẫn đóng. Nếu Nhinh nhặt đèn ở S1 trước khi gài A, cô đang ở sân vào; A đóng khi nguồn rời cảm biến. Có thể đặt lại đèn tại S1 và bật bằng F ngay từ sân vào, không cần đi qua A đã đóng. Đèn cầm tay không cấp được đầu nối kín của A hoặc B; phải đặt tại S1 hoặc S2 tương ứng. Cánh đang chịu người qua giữ đến nền an toàn theo luật cầu/cửa chung.
+Nếu người chơi để đèn bật ở S1 rồi đi về phía S2, A vẫn mở vì nguồn còn ở đúng bệ; B chưa nhận nguồn nên vẫn đóng. Nếu Nhinh nhặt đèn ở S1 trước khi gài A, cô đang ở sân vào; A đóng khi nguồn rời cảm biến. Có thể đặt lại đèn tại S1 và bật bằng F ngay từ sân vào, không cần đi qua A đã đóng. Đèn đã nhặt khỏi chỗ bên bia không đặt xuống đất được; đèn chỉ đặt tại S1 hoặc S2. Đèn cầm tay không cấp được đầu nối kín của A hoặc B; phải đặt tại S1 hoặc S2 tương ứng. Cánh đang chịu người qua giữ đến nền an toàn theo luật cầu/cửa chung.
 
 S1 và S2 nằm ngoài tầm E từ mọi vị trí chân trong ngưỡng A và B (puzzle-contracts §1 “Không mang nguồn qua chính đường nó cấp”), nên không thể nhặt đèn khi đang đứng trong ngưỡng rồi mang nó qua cửa chưa gài. Gài rồi mở lại chốt là thao tác hợp lệ. S2, tay hãm B và đường tới S1 cùng phía B nên không kẹt khi thử sai. Lưu bờ đang đứng, vị trí đèn (đang cầm hay ở S1/S2), F bật/tắt, hai chốt, chỉ dẫn đã xem, dấu Pulse thật sự phát hiện và cảnh gặp Lumo. Điểm tải sân giữa nằm trên nền, ngoài khung cửa; điểm vào/điểm lưu hợp lệ cả khi F bật lẫn tắt. Chốt B giữ khi rời màn.
 

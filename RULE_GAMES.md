@@ -64,6 +64,7 @@ Vi phạm một luật dưới đây chỉ được chấp nhận khi đã khai 
 - Mọi ngoại lệ với mục 1–7 được khai báo **trong data của vật**, kèm một trường lý do bằng chữ. Không chấp nhận ngoại lệ chỉ ghi trong comment hay trong tài liệu.
 - Script kiểm tra (mục 9) đọc trường này, bỏ qua luật bị miễn cho đúng vật đó và in danh sách ngoại lệ trong báo cáo.
 - Ngoại lệ không được dùng để né luật vì bố cục khó; khi đó sửa bố cục.
+- Ngoại lệ của luật đặt/nhặt đèn (`puzzle-contracts.md` mục 1: chỉ đặt và nhặt tại bệ) cũng khai báo trong data của điểm đó, kèm lý do. Hiện có một: màn 01, điểm `lampRest` (đèn trên đất cạnh bia, nhặt một lần; lý do: đèn đã được đặt ở đó trước khi nghỉ theo kịch bản 01 và cảnh cuối prologue). Ngoại lệ này không cho phép đặt đèn xuống đất.
 
 ## 9. Kiểm tra
 

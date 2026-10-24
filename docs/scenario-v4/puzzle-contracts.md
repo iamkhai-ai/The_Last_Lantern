@@ -4,7 +4,7 @@
 
 ### Đèn bảo trì, nguồn cố định và ánh sáng nền
 
-Nhinh chỉ mang một đèn bảo trì. F bật/tắt đèn đó khi Nhinh đang cầm hoặc khi đèn được đặt trên một bệ trong cùng màn. E đặt hoặc nhặt đèn tại bệ. Đèn không có nhiên liệu. Đặt đèn ở bệ không tự tạo thêm nguồn: đầu nối, đường truyền và đầu nhận của màn phải được vẽ, và hiệu lực chỉ đi theo các đường ghi trong màn đó. Đèn cầm tay chỉ chiếu trong vệt cục bộ có rìa được đánh dấu; không mặc định nó rọi tới cảm biến ở xa.
+Nhinh chỉ mang một đèn bảo trì. F bật/tắt đèn đó khi Nhinh đang cầm hoặc khi đèn được đặt trên một bệ trong cùng màn. E đặt hoặc nhặt đèn tại bệ. Ngoại lệ có khai báo: đèn bảo trì nằm trên đất tại một điểm màn ghi rõ (màn 01: cạnh bia) có thể nhặt một lần bằng E; ngoại lệ này khai báo trong data của điểm đó kèm lý do (RULE_GAMES mục 8). Đèn không bao giờ được đặt xuống đất. Đèn không có nhiên liệu. Đặt đèn ở bệ không tự tạo thêm nguồn: đầu nối, đường truyền và đầu nhận của màn phải được vẽ, và hiệu lực chỉ đi theo các đường ghi trong màn đó. Đèn cầm tay chỉ chiếu trong vệt cục bộ có rìa được đánh dấu; không mặc định nó rọi tới cảm biến ở xa.
 
 Mỗi phòng luôn có **ánh nền môi trường** đủ để đọc đường đi, mép vực, nền an toàn, tường, cửa, bậc, vật tương tác và đường về kể cả khi mọi nguồn gameplay tắt. Đây là lớp dẫn đường, không phải nguồn cảm biến. Không dùng tăng gamma để lộ dấu, chốt hay lối chưa được đặt art/điều kiện.
 
