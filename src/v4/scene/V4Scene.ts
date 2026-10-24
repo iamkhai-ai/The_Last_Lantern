@@ -19,7 +19,7 @@ import { NO_HINT_CURSOR, nextHint } from '../core/hints';
 import type { HintCursor } from '../core/hints';
 import { canPulse, toggleLantern } from '../core/lantern';
 import type { LanternState } from '../core/lantern';
-import { groundPoint, lanternFootprints, marksToRecord } from '../core/light';
+import { LANTERN_LIFT, groundPoint, lanternFootprints, marksToRecord } from '../core/light';
 import type { Footprint } from '../core/light';
 import { followLumo, lumoArrived } from '../core/lumo';
 import type { LumoMode } from '../core/lumo';
@@ -216,7 +216,7 @@ export class V4Scene extends Phaser.Scene {
     this.lanternSystem.update(dt, {
       footprints,
       blockers,
-      glow: handLit ? null : { x: this.player.x, y: this.player.y },
+      glow: handLit ? null : { x: ground.x, y: ground.y - LANTERN_LIFT },
       items: this.items.filter((item) => item.getPrompt() !== null).map((item) => item.reach.rect),
     });
     // Seen marks go into the journal once; the host writes them in the same frame they are seen.

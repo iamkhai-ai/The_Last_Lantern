@@ -3,26 +3,28 @@ import { pointInRect, rectCenter } from './geometry';
 import type { Point, Rect } from './geometry';
 import type { LanternState } from './lantern';
 
-/** Radius of the handheld lantern's circle of light around its ground point, in px. */
+/** Radius of the handheld lantern's circle of light around Nhinh's waist, in px. */
 export const LANTERN_RADIUS = 40;
+/** How far above the ground point the handheld circle's centre sits: Nhinh's waist, where she holds the lamp, in px. */
+export const LANTERN_LIFT = 14;
 /** Halo radius around a placed lantern (its pedestal), in px. */
 export const HALO_RADIUS = 12;
 /** Distance from the ground point to a mark centre within which Nhinh can see the mark, in px. */
 export const SEEN_RADIUS = 64;
 
-/** The floor point under Nhinh: the centre of her foot body. Light and line of sight start here. */
+/** The floor point under Nhinh: the centre of her foot body. Line of sight, and the blocking of her lamp's light, start here. */
 export function groundPoint(actor: Point): Point {
   return rectCenter(footRectAt(actor));
 }
 
 /**
  * One piece of light on the floor.
- * - `circle`: a disc of `radius` around `center`; blocked from `center`.
+ * - `circle`: a disc of `radius` around `center`; blocked from `source`, or from `center` when it has none.
  * - `area`: a declared polygon (pedestal spill or fixed source). `origin` is where its light comes from
  *   and is used for blocking; null means authored and never clipped.
  */
 export type Footprint =
-  | { readonly kind: 'circle'; readonly center: Point; readonly radius: number }
+  | { readonly kind: 'circle'; readonly center: Point; readonly radius: number; readonly source?: Point }
   | { readonly kind: 'area'; readonly points: readonly Point[]; readonly origin: Point | null };
 
 /** A pedestal's declared spill (puzzle-contracts §1): a convex polygon lit while the lantern is lit on that pedestal. */
@@ -32,7 +34,8 @@ export interface SpillDecl {
 }
 
 /**
- * The lantern's footprints now. Off: none. In hand: one circle of `LANTERN_RADIUS` at `ground`.
+ * The lantern's footprints now. Off: none. In hand: one circle of `LANTERN_RADIUS` centred LANTERN_LIFT above
+ * `ground` (Nhinh's waist) and blocked from `ground`, so a wall just north of her feet never puts the lamp out.
  * On a pedestal: a circle of `HALO_RADIUS` at `pedestalAt(id)` plus that pedestal's spills, each with origin = the pedestal point.
  * A pedestal with no position gives no footprints.
  */
@@ -44,7 +47,7 @@ export function lanternFootprints(
 ): Footprint[] {
   if (!lantern.on) return [];
   if (lantern.location.at === 'hand') {
-    return [{ kind: 'circle', center: ground, radius: LANTERN_RADIUS }];
+    return [{ kind: 'circle', center: { x: ground.x, y: ground.y - LANTERN_LIFT }, radius: LANTERN_RADIUS, source: ground }];
   }
   const pedestalId = lantern.location.pedestalId;
   const at = pedestalAt(pedestalId);
@@ -126,7 +129,7 @@ function inShape(p: Point, f: Footprint): boolean {
 /** The point a footprint's light comes from for blocking, or null when it is never clipped. */
 function sourceOf(f: Footprint): Point | null {
   switch (f.kind) {
-    case 'circle': return f.center;
+    case 'circle': return f.source ?? f.center;
     case 'area': return f.origin;
   }
 }
