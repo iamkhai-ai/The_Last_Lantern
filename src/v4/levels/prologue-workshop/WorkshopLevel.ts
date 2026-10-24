@@ -10,13 +10,17 @@ import type { LevelHost, V4LevelRuntime } from '../../scene/LevelHost';
 import { choiceBoxHeight } from '../../../ui/ChoiceBox';
 import benchUrl from '../../../../assets/levels/00-workshop/sprites/bench.png?url';
 import boatmanFrontUrl from '../../../../assets/levels/00-workshop/sprites/boatman-front.png?url';
-import boatmanWalkUrl from '../../../../assets/levels/00-workshop/sprites/boatman-walk.png?url';
-import customerLampClosedUrl from '../../../../assets/levels/00-workshop/sprites/customer-lamp-closed.png?url';
+import boatmanWalk0Url from '../../../../assets/levels/00-workshop/sprites/boatman-walk-0.png?url';
+import boatmanWalk1Url from '../../../../assets/levels/00-workshop/sprites/boatman-walk-1.png?url';
+import boatmanWalk2Url from '../../../../assets/levels/00-workshop/sprites/boatman-walk-2.png?url';
 import customerLampLitUrl from '../../../../assets/levels/00-workshop/sprites/customer-lamp-lit.png?url';
 import customerLampOpenUrl from '../../../../assets/levels/00-workshop/sprites/customer-lamp-open.png?url';
+import dockLightsOffUrl from '../../../../assets/levels/00-workshop/sprites/dock-lights-off.png?url';
+import dockLightsOnUrl from '../../../../assets/levels/00-workshop/sprites/dock-lights-on.png?url';
 import motherMapUrl from '../../../../assets/levels/00-workshop/sprites/mother-map.png?url';
 import motherWorkUrl from '../../../../assets/levels/00-workshop/sprites/mother-work.png?url';
 import panelFaultUrl from '../../../../assets/levels/00-workshop/sprites/panel-fault.png?url';
+import panelLooseUrl from '../../../../assets/levels/00-workshop/sprites/panel-loose.png?url';
 import panelOffUrl from '../../../../assets/levels/00-workshop/sprites/panel-off.png?url';
 import partsTrayUrl from '../../../../assets/levels/00-workshop/sprites/parts-tray.png?url';
 import workshopBgUrl from '../../../../assets/levels/00-workshop/sprites/workshop-bg.png?url';
@@ -68,13 +72,17 @@ const SPRITE_SCALE = 0.5;
 const SPRITE_URLS: Readonly<Record<string, string>> = {
   'bench': benchUrl,
   'boatman-front': boatmanFrontUrl,
-  'boatman-walk': boatmanWalkUrl,
-  'customer-lamp-closed': customerLampClosedUrl,
+  'boatman-walk-0': boatmanWalk0Url,
+  'boatman-walk-1': boatmanWalk1Url,
+  'boatman-walk-2': boatmanWalk2Url,
   'customer-lamp-lit': customerLampLitUrl,
   'customer-lamp-open': customerLampOpenUrl,
+  'dock-lights-off': dockLightsOffUrl,
+  'dock-lights-on': dockLightsOnUrl,
   'mother-map': motherMapUrl,
   'mother-work': motherWorkUrl,
   'panel-fault': panelFaultUrl,
+  'panel-loose': panelLooseUrl,
   'panel-off': panelOffUrl,
   'parts-tray': partsTrayUrl,
   'background': workshopBgUrl,
@@ -83,21 +91,22 @@ const SPRITE_URLS: Readonly<Record<string, string>> = {
 /** Boatman's walk to the south door after he is paid, px per second (00-workshop.md). */
 const BOATMAN_SPEED = 90;
 /** Where the boatman walks to and disappears: the foot point south of the door. */
-const BOATMAN_EXIT: Point = { x: 314, y: 330 };
-/** The harbour lamp, seen through the window corner: a dark patch that blinks, then holds half dark. */
-const HARBOR_RECT: Rect = { x: 572, y: 90, width: 68, height: 70 };
+const BOATMAN_EXIT: Point = { x: 320, y: 330 };
+/** The boatman's walk cycles through three frames, one per beat. */
+const BOATMAN_WALK_FRAMES = 3;
+const BOATMAN_WALK_FRAME_MS = 180;
+/** The dock lamps seen through the window flicker for this long once the boatman leaves, then go out (00-prologue.md). */
 const HARBOR_BLINK_MS = 1200;
 const HARBOR_BLINK_STEP_MS = 200;
-const HARBOR_BLINK_DARK = 0.85;
-const HARBOR_BLINK_DIM = 0.1;
-const HARBOR_HOLD_ALPHA = 0.5;
+/** The repaired panel's amber lamp blinks: fault and off alternate on this beat. */
+const PANEL_BLINK_MS = 700;
 /** The part choice opens just above the parts tray, so the choice sits by what it picks from. */
 const PART_CHOICE_AT = {
   x: WORKSHOP.tray.x - 12,
   y: WORKSHOP.tray.y - 6 - choiceBoxHeight(2),
 };
 /** Where the bench lamp stands: the bench's top, centred. */
-const BENCH_LAMP_AT: Point = { x: 301, y: 176 };
+const BENCH_LAMP_AT: Point = { x: 301, y: 180 };
 /** Illustrations of the new game and of the exit (texture keys, see src/v4/scene/illustrationFiles.ts). */
 const INTRO_ILLUSTRATIONS: readonly string[] = ['ill_01-ben-suong'];
 const EXIT_ILLUSTRATIONS: readonly string[] = [
@@ -117,6 +126,11 @@ function spriteKey(name: string): string {
 /** Centre x of a rect, the anchor of a prop standing on it. */
 function centreX(rect: Rect): number {
   return rectCenter(rect).x;
+}
+
+/** Swaps a sprite only when its texture differs, so per-frame calls stay cheap. */
+function showTexture(image: Phaser.GameObjects.Image | null, key: string): void {
+  if (image && image.texture.key !== key) image.setTexture(key);
 }
 
 /** Turns a zone's static body on or off. A disabled body takes no part in collisions (Arcade skips it). */
@@ -147,10 +161,15 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
   private panel: Phaser.GameObjects.Image | null = null;
   private mother: Phaser.GameObjects.Image | null = null;
   private boatman: Phaser.GameObjects.Image | null = null;
-  private harbor: Phaser.GameObjects.Graphics | null = null;
+  private dockOn: Phaser.GameObjects.Image | null = null;
+  private dockOff: Phaser.GameObjects.Image | null = null;
   /** The boatman's sprite position (foot point), moved by the walk. */
   private boatmanAt: Point = { x: WORKSHOP.boatman.x + WORKSHOP.boatman.width / 2, y: WORKSHOP.boatman.y + WORKSHOP.boatman.height };
   private boatmanWalking = false;
+  /** Milliseconds of the boatman's walk, for its frame cycle. */
+  private walkClock = 0;
+  /** Milliseconds since the repaired panel started blinking. */
+  private panelClock = 0;
   /** Mother shows her map while the diagnosis dialogue plays. */
   private showingMap = false;
   /** Milliseconds since the harbour lamp blinked, or null when no blink is running. */
@@ -184,13 +203,13 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     const scene = this.scene;
 
     this.background = this.image('background', 0, 0, 0).setOrigin(0, 0);
-    this.harbor = scene.add.graphics().setDepth(1);
-    this.objects.push(this.harbor);
+    this.dockOn = this.image('dock-lights-on', 0, 0, 1).setOrigin(0, 0);
+    this.dockOff = this.image('dock-lights-off', 0, 0, 1).setOrigin(0, 0);
 
-    this.benchLamp = this.prop('customer-lamp-closed', BENCH_LAMP_AT.x, BENCH_LAMP_AT.y, 31);
+    this.benchLamp = this.prop('customer-lamp-open', BENCH_LAMP_AT.x, BENCH_LAMP_AT.y, 31);
     this.prop('bench', centreX(WORKSHOP.bench), WORKSHOP.bench.y + WORKSHOP.bench.height, 0);
     this.prop('parts-tray', centreX(WORKSHOP.tray), WORKSHOP.tray.y + WORKSHOP.tray.height, 0);
-    this.panel = this.prop('panel-off', centreX(WORKSHOP.panel), WORKSHOP.panel.y + WORKSHOP.panel.height, 0);
+    this.panel = this.prop('panel-loose', centreX(WORKSHOP.panel), WORKSHOP.panel.y + WORKSHOP.panel.height, 0);
     this.mother = this.prop('mother-work', centreX(WORKSHOP.mother), WORKSHOP.mother.y + WORKSHOP.mother.height, 0);
     this.boatman = this.prop('boatman-front', this.boatmanAt.x, this.boatmanAt.y, 0);
     this.boatman.setVisible(!state.boatmanReturned);
@@ -261,7 +280,8 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
         this.firePendingIncident();
       }
     }
-    this.drawHarbor();
+    this.animatePanel(dt);
+    this.showHarbor();
   }
 
   getState(): WorkshopState {
@@ -332,7 +352,8 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     this.panel = null;
     this.mother = null;
     this.boatman = null;
-    this.harbor = null;
+    this.dockOn = null;
+    this.dockOff = null;
   }
 
   /** Applies a rule result: the new state (saved), then its effects in order. */
@@ -418,10 +439,13 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
       return;
     }
     this.boatmanWalking = true;
-    this.boatman.setVisible(true).setTexture(spriteKey('boatman-walk'));
+    this.walkClock = 0;
+    this.boatman.setVisible(true).setTexture(spriteKey('boatman-walk-0'));
   }
 
   private stepBoatman(dt: number): void {
+    this.walkClock += dt;
+    showTexture(this.boatman, spriteKey(`boatman-walk-${Math.floor(this.walkClock / BOATMAN_WALK_FRAME_MS) % BOATMAN_WALK_FRAMES}`));
     const dx = BOATMAN_EXIT.x - this.boatmanAt.x;
     const dy = BOATMAN_EXIT.y - this.boatmanAt.y;
     const distance = Math.hypot(dx, dy);
@@ -445,9 +469,9 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     if (this.benchLamp) {
       const onBench = !s.boatmanReturned && s.held !== 'lamp';
       this.benchLamp.setVisible(onBench);
-      this.benchLamp.setTexture(spriteKey(s.lampInspected ? 'customer-lamp-open' : 'customer-lamp-closed'));
     }
-    this.panel?.setTexture(spriteKey(s.localLineRepaired ? 'panel-fault' : 'panel-off'));
+    // The bench lamp is always broken while it stands there: once repaired it is carried, lit. The repaired panel blinks (animatePanel).
+    if (!s.localLineRepaired) showTexture(this.panel, spriteKey('panel-loose'));
     this.mother?.setTexture(spriteKey(this.showingMap ? 'mother-map' : 'mother-work'));
     if (this.boatman && !this.boatmanWalking) {
       this.boatman.setVisible(!s.boatmanReturned);
@@ -468,16 +492,24 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     this.carriedLamp.setPosition(x, bottom).setDepth(10 + (foot.y + 3) / 10 + 0.1);
   }
 
-  /** Blinks the harbour patch once when the boatman leaves, then holds it half dark for as long as the boatman is gone. */
-  private drawHarbor(): void {
-    if (!this.harbor) return;
-    let alpha = this.state.boatmanReturned ? HARBOR_HOLD_ALPHA : 0;
-    if (this.harborBlink !== null) {
-      alpha = Math.floor(this.harborBlink / HARBOR_BLINK_STEP_MS) % 2 === 0 ? HARBOR_BLINK_DARK : HARBOR_BLINK_DIM;
-      if (this.harborBlink >= HARBOR_BLINK_MS) alpha = HARBOR_HOLD_ALPHA;
-    }
-    this.harbor.clear();
-    if (alpha > 0) this.harbor.fillStyle(0x000000, alpha).fillRect(HARBOR_RECT.x, HARBOR_RECT.y, HARBOR_RECT.width, HARBOR_RECT.height);
+  /**
+   * The dock lamps through the window: lit until Mẹ's call. The boatman's exit starts a flicker that ends dark,
+   * and they stay dark from the call on, also after a reload.
+   */
+  private showHarbor(): void {
+    const lit = this.harborBlink !== null
+      ? Math.floor(this.harborBlink / HARBOR_BLINK_STEP_MS) % 2 === 0
+      : !this.state.incidentCalled;
+    this.dockOn?.setVisible(lit);
+    this.dockOff?.setVisible(!lit);
+  }
+
+  /** The repaired panel's amber lamp blinks: fault and off alternate, with the same footprint. */
+  private animatePanel(dt: number): void {
+    if (!this.panel || !this.state.localLineRepaired) return;
+    this.panelClock += dt;
+    const lit = Math.floor(this.panelClock / PANEL_BLINK_MS) % 2 === 0;
+    showTexture(this.panel, spriteKey(lit ? 'panel-fault' : 'panel-off'));
   }
 
   private image(name: string, x: number, y: number, depth: number): Phaser.GameObjects.Image {

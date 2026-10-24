@@ -38,22 +38,23 @@ export const WORKSHOP_SPAWN: Point = Object.freeze({ x: 300, y: 250 });
 export const WORKSHOP: WorkshopLayout = Object.freeze({
   world: { x: 74, y: 98, width: 486, height: 206 },
   walls: Object.freeze([
-    // Frame around the floor (74..560 x 98..304). The south wall has a gap for the exit (264..364).
+    // Frame around the floor (74..560 x 98..304). The south wall has a gap for the exit (272..368), between the door posts.
     { x: 66, y: 90, width: 502, height: 8 },
     { x: 66, y: 98, width: 8, height: 206 },
     { x: 560, y: 98, width: 8, height: 206 },
-    { x: 66, y: 304, width: 198, height: 8 },
-    { x: 364, y: 304, width: 196, height: 8 },
+    { x: 66, y: 304, width: 206, height: 8 },
+    { x: 368, y: 304, width: 192, height: 8 },
   ]),
   checkpoints: Object.freeze([
     { id: START_CHECKPOINT_ID, spawn: WORKSHOP_SPAWN, zone: { x: 260, y: 220, width: 80, height: 60 } },
   ]),
-  bench: { x: 272, y: 172, width: 58, height: 34 },
-  tray: { x: 95, y: 214, width: 34, height: 22 },
-  panel: { x: 541, y: 150, width: 22, height: 22 },
+  // Footprints of the props in the pass-2 art, drawn with their foot on the bottom edge.
+  bench: { x: 269, y: 172, width: 64, height: 34 },
+  tray: { x: 92, y: 214, width: 40, height: 22 },
+  panel: { x: 528, y: 170, width: 32, height: 16 },
   mother: { x: 516, y: 208, width: 16, height: 6 },
   boatman: { x: 224, y: 282, width: 16, height: 6 },
-  southDoor: { x: 264, y: 298, width: 100, height: 6 },
+  southDoor: { x: 272, y: 298, width: 96, height: 6 },
 });
 
 /** The interactables of the workshop, for the reach audit. Every one is a standing block. */

@@ -74,7 +74,9 @@ Thước đo chung: khung Nhinh 36×42 trên màn 640×360, thân nhìn thấy c
 | Bảng kiểm | trong suốt, 3 file | Đứng trên cột (hoặc gắn tường phải đúng góc nhìn). Trạng thái: đầu nối lỏng, hai chỉ báo tắt; đường xưởng đã nối, chỉ báo xưởng xanh, chỉ báo đầu nguồn cam; như trên nhưng chỉ báo đầu nguồn tắt (để nhấp nháy). |
 | Bác lái đò đi bộ | trong suốt, 2–3 khung | Đi xuống phía nam, cùng tỉ lệ bộ tư thế hiện có. |
 
-Nhân vật mẹ và bác lái đò ở đợt 1 dùng tiếp được. Đặt art mới trong `assets/prologue/story-v4-art-v2/workshop/`; `scripts/prepare-v4-workshop.py` sẽ được sửa để đọc từ đó và xuất ra `assets/levels/00-workshop/`.
+Nhân vật mẹ và bác lái đò ở đợt 1 dùng tiếp được. Art đợt 2 nằm trong `assets/prologue/story-v4-art-v2/workshop/` (thư mục chưa commit). `scripts/prepare-v4-workshop.py --art-root <thư mục assets/prologue>` đọc từ đó và xuất ra `assets/levels/00-workshop/`.
+
+**Tích hợp đợt 2 (đã làm):** nền, bàn, khay, đèn khách, bảng kiểm, lớp đèn bến và ba khung đi của bác lái đò lấy từ đợt 2. Đèn khách hỏng là `customer-lamp-open` trên bàn; đèn đã sửa được cầm và hiện `customer-lamp-lit`. Bảng kiểm lỏng là `panel-loose`; sau khi nối nó nhấp nháy giữa `panel-fault` và `panel-off`. Đèn bến là hai lớp: sáng cho tới khi Mẹ gọi, chớp khi bác lái đò tới cửa rồi tắt. `customer-lamp-closed` đã xuất nhưng chưa được dùng, vì logic không có bước khép vỏ riêng để hiện trạng thái này. Vị trí: bàn, khay, bảng kiểm và cửa được đo lại theo chân của art đợt 2; khe cửa nam mở 272–368.
 
 ## 2. Kế hoạch dựng (cho worker)
 

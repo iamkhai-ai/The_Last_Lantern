@@ -60,11 +60,11 @@ describe('workshop layout', () => {
   });
 
   it('keeps the design rectangles for the bench, tray, panel, Mẹ and the boatman', () => {
-    expect(WORKSHOP.bench).toEqual({ x: 272, y: 172, width: 58, height: 34 });
-    expect(WORKSHOP.tray).toEqual({ x: 95, y: 214, width: 34, height: 22 });
-    expect(WORKSHOP.panel).toEqual({ x: 541, y: 150, width: 22, height: 22 });
+    expect(WORKSHOP.bench).toEqual({ x: 269, y: 172, width: 64, height: 34 });
+    expect(WORKSHOP.tray).toEqual({ x: 92, y: 214, width: 40, height: 22 });
+    expect(WORKSHOP.panel).toEqual({ x: 528, y: 170, width: 32, height: 16 });
     expect(WORKSHOP.mother).toEqual({ x: 516, y: 208, width: 16, height: 6 });
     expect(WORKSHOP.boatman).toEqual({ x: 224, y: 282, width: 16, height: 6 });
-    expect(WORKSHOP.southDoor).toEqual({ x: 264, y: 298, width: 100, height: 6 });
+    expect(WORKSHOP.southDoor).toEqual({ x: 272, y: 298, width: 96, height: 6 });
   });
 });
