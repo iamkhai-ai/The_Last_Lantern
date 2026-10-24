@@ -225,6 +225,17 @@ describe('forest edge light marks and pulse', () => {
     expect(hasAimArea({ hit: [sprout.rect], avoid: [] }, aimInput(start, CLOSED))).toBe(true);
   });
 
+  it('lights the sprout on the first switch-on just south of the lamp, where the lamp is taken', () => {
+    // Scenario 01 §1: the first switch-on with the lamp in hand covers the sprout Lumo hides.
+    const foot = { x: 214, y: 242 };
+    expect(pointInRect(foot, LAMP_REST_REACH)).toBe(true);
+    const footRect = { x: foot.x - 7, y: foot.y - 3, width: 14, height: 6 };
+    expect(isFootWalkable(footRect, { world: FOREST_EDGE.world, solids: forestSolids(CLOSED) })).toBe(true);
+    const sprout = FOREST_EDGE_LIGHT_MARKS.find(m => m.id === SPROUT_ID)!;
+    const lantern = lanternFootprints(initialLantern(), foot, () => null);
+    expect(isMarkReadable(sprout, lantern, forestBlockers(CLOSED))).toBe(true);
+  });
+
   it('lets every dark mark be read with the lantern in hand from a reachable spot out of its circle, and seen from there', () => {
     const blockers = forestBlockers(CLOSED);
     for (const mark of FOREST_EDGE_LIGHT_MARKS) {

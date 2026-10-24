@@ -22,6 +22,8 @@ import {
   LAMP_REST_ID,
   LAMP_REST_REACH,
   LATCH_A_ID,
+  LATCH_TOOL_ID,
+  LINE_S1_A_ID,
   S1_ID,
   S2_ID,
   SPROUT_ID,
@@ -321,6 +323,14 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     add('s2', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], upright('s2'));
     add('eyeA', ['eye-dormant', 'eye-live'], 2);
     add('eyeB', ['eye-dormant', 'eye-live'], 2);
+    // The carved lines and the tool marks: a hidden line stays under the darkness; a line Pulse found, a live line and
+    // the found tool marks are drawn above it, like the eyes.
+    add('s1ToA', ['s1ToA-hidden', 's1ToA-revealed', 's1ToA-live'], 1);
+    add('s2ToB', ['s2ToB-hidden', 's2ToB-live'], 1);
+    add('latchTool', ['latch-tool-marks'], EYE_LIVE_DEPTH);
+    for (const [slot, texture] of [['s1ToA', 's1ToA-revealed'], ['s1ToA', 's1ToA-live'], ['s2ToB', 's2ToB-live']] as const) {
+      this.artImages[slot][texture].setDepth(EYE_LIVE_DEPTH);
+    }
     for (const slot of ['eyeA', 'eyeB'] as const) {
       this.artImages[slot]['eye-live'].setDepth(EYE_LIVE_DEPTH);
       const { position } = ART_SLOTS[slot];
@@ -368,6 +378,11 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     this.showArt('s2', socketTexture(lantern, S2_ID));
     this.showEye('eyeA', lanternFeeds(lantern, S1_ID));
     this.showEye('eyeB', lanternFeeds(lantern, S2_ID));
+    // Pulse at the stele reveals the S1–A line and the tool marks on latch A; a fed line runs live either way.
+    const s1Line = this.host.hasJournal(LINE_S1_A_ID) ? 's1ToA-revealed' : 's1ToA-hidden';
+    this.showArt('s1ToA', lanternFeeds(lantern, S1_ID) ? 's1ToA-live' : s1Line);
+    this.showArt('s2ToB', lanternFeeds(lantern, S2_ID) ? 's2ToB-live' : 's2ToB-hidden');
+    this.showArt('latchTool', this.host.hasJournal(LATCH_TOOL_ID) ? 'latch-tool-marks' : null);
     this.showArt('hinge', HINGE_TEXTURES[this.hingePhase]);
     const onGround = lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID;
     this.showArt('lantern', onGround ? 'lantern-off' : null);

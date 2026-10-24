@@ -112,7 +112,7 @@ export const FOREST_EDGE: ForestEdgeLayout = Object.freeze({
   latchA: { x: 392, y: 166, width: 16, height: 16 },
   braceB: { x: 520, y: 60, width: 16, height: 16 },
   exitZone: { x: 456, y: 0, width: 48, height: 20 },
-  sprout: { x: 236, y: 276, width: 16, height: 16 },
+  sprout: { x: 236, y: 256, width: 16, height: 16 },
   lampRest: { x: 206, y: 226, width: 16, height: 10 },
   foliage: Object.freeze([
     { x: 16, y: 110, width: 128, height: 40 },    // crownWest: the old tree's low crown, west of the trunk
