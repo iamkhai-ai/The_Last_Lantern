@@ -12,7 +12,7 @@ Lumo biết lối qua thư viện tới tuyến trung tâm, nhưng các cổng b
 
 Ánh nền rêu nhạt làm rõ mặt đường, mép cổng, chốt và bệ ngay cả khi đèn tắt. Không có nguồn cố định gameplay trong sân này; nền phản quang không bật cảm biến và không có công tắc.
 
-Khi cầm, đèn chiếu một vệt ngắn có rìa rõ tới vật ở phía trước; vệt này dùng để nhìn mặt máy và các dấu ánh được chỉ định, không phủ cả sân. Tại bệ S1 hoặc S2, đầu nối kín chỉ đưa nguồn tới cửa A hoặc B tương ứng. F tắt/bật đèn dù Nhinh đang cầm hay đèn đang ở bệ.
+Khi cầm, đèn tỏa một vòng sáng nhỏ có rìa rõ quanh Nhinh; vòng sáng này dùng để nhìn mặt máy và các dấu ánh được chỉ định, không phủ cả sân. Tại bệ S1 hoặc S2, đầu nối kín chỉ đưa nguồn tới cửa A hoặc B tương ứng. F tắt/bật đèn dù Nhinh đang cầm hay đèn đang ở bệ.
 
 Bố cục: **sân vào [bia, S1] — cửa A — sân giữa [chốt A, S2, tay hãm B] — cổng B — rừng 02**. Sau cảnh mở, Nhinh ở sân vào với đèn đang cầm và bật; A/B đóng, chốt A/B nhả, Lumo theo cô. Không có nguồn cố định.
 

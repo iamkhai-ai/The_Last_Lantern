@@ -24,19 +24,17 @@ Dấu tĩnh là thông tin về cách mạng nối, không phải trạng thái 
 
 Màn có thể đặt lớp thông tin chỉ lộ khi dấu ấy **không thật sự bị một vệt đèn gameplay chiếu vào**: mực phát quang, vết nước, đom đóm tụ, rãnh phản quang hoặc hình khắc dưới bụi sao. Tài liệu màn phải nói rõ dấu nào xuất hiện và footprint nào có thể che nó. Tắt F không làm tối toàn phòng, còn bật đèn ở phòng khác không che dấu xuyên phòng; chỉ nguồn có tia thật phủ lên dấu mới đổi khả năng đọc. Đây là art/trạng thái được dựng có chủ ý, không phải hình ảnh vốn tồn tại nhưng bị giấu bằng gamma. Thông tin tối có thể giúp chọn tuyến, đọc dấu hoặc đi trên một cầu đã mọc; không được tự tiết lộ toàn bộ lời giải. Đường đi và vật tương tác vẫn nhìn rõ nhờ ánh nền.
 
-### Vệt đèn, đầu nhận và dấu sáng/tối — quy ước dựng chung
+### Vòng sáng, đầu nhận và dấu sáng/tối — quy ước dựng chung
 
 Các số dưới đây là giá trị khởi điểm dùng chung cho mọi màn. Chúng được chỉnh một lần ở phòng thử, không chỉnh riêng từng màn để làm bài dễ hoặc khó hơn.
 
-**Footprint của đèn cầm tay** chỉ tồn tại khi đèn ở tay và F bật. Nó gồm:
+**Vòng sáng của đèn cầm tay** chỉ tồn tại khi đèn ở tay và F bật. Đèn lồng tỏa sáng đều mọi phía, không phải đèn pin: footprint là một vòng tròn bán kính 40px, tâm là điểm trên sàn dưới chân Nhinh (tâm khối chân). Hướng Nhinh quay không đổi vùng sáng. Muốn rọi hay tránh một vật, người chơi đi lại gần, lùi ra xa hoặc tắt F. Trong tài liệu các màn, “vệt đèn cầm” nghĩa là vòng sáng này.
 
-- **Vệt:** hình thang đi ra phía trước từ tay cầm đèn theo hướng Nhinh đang quay (8 hướng; hướng chéo cùng chiều dài). Dài 56px, rộng 12px ở gốc và 32px ở đầu xa. Khi đứng yên, Nhinh giữ hướng quay cuối cùng; muốn rọi một vật, người chơi bước một nhịp về phía nó rồi dừng. Không có nút ngắm riêng.
-- **Quầng:** vòng bán kính 12px quanh chính chiếc đèn.
-- **Vật chắn:** tường và cánh cửa đang đóng chắn cả vệt lẫn quầng; phần nằm sau chúng không được chiếu. Luật này áp dụng cho mọi footprint của đèn bảo trì: cầm tay, đặt trên bệ và nhánh tràn. Hình vẽ và phép tính gameplay bị cắt theo cùng một đường, nên đứng sát tường không chiếu được cảm biến hay dấu ở phía bên kia. Cầu, rễ, nước, NPC và Lumo không chắn.
+- **Vật chắn:** tường và cánh cửa đang đóng chắn ánh sáng; phần nằm sau chúng không được chiếu. Luật này áp dụng cho mọi footprint của đèn bảo trì: cầm tay, đặt trên bệ và nhánh tràn. Hình vẽ và phép tính gameplay bị cắt theo cùng một đường, nên đứng sát tường không chiếu được cảm biến hay dấu ở phía bên kia. Cầu, rễ, nước, NPC và Lumo không chắn.
 
-Rìa vẽ trên màn khớp đúng footprint này. Ngoài footprint chỉ có ánh nền; không có quầng trang trí lớn hơn footprint khiến người chơi tưởng một dấu đang bị chiếu.
+Ánh sáng được vẽ đậm ở tâm và nhạt dần ra ngoài, nhưng rìa vòng tròn vẽ rõ và khớp đúng footprint. Ngoài footprint chỉ có ánh nền; không có quầng trang trí lớn hơn footprint khiến người chơi tưởng một dấu đang bị chiếu.
 
-**Đèn đặt trên bệ** có footprint là quầng 12px quanh đèn cộng các nhánh tràn mà màn khai báo (nhánh spill của S ở 08, nhánh soi hồ sơ ở 09). Đầu nối kín không phải footprint. Không đặt mặt nhận hở hay dấu sáng/tối trong quầng của bệ, trừ khi màn ghi rõ lý do.
+**Đèn đặt trên bệ** nằm trong hộp có đầu nối kín, nên chỉ để lọt một quầng 12px quanh đèn, cộng các nhánh tràn mà màn khai báo (nhánh spill của S ở 08, nhánh soi hồ sơ ở 09). Đầu nối kín không phải footprint. Không đặt mặt nhận hở hay dấu sáng/tối trong quầng của bệ, trừ khi màn ghi rõ lý do.
 
 **Nguồn cố định** có footprint là vùng khai báo của nguồn khi công tắc/nắp cho phép; F không đổi nó.
 
@@ -45,7 +43,7 @@ Rìa vẽ trên màn khớp đúng footprint này. Ngoài footprint chỉ có á
 **Hai loại đầu nhận**, phân biệt bằng hình dạng, không chỉ bằng màu. Mỗi màn ghi rõ đầu nhận nào thuộc loại nào:
 
 - **Ổ kín** (có nắp, đầu nối vẽ rõ): chỉ nhận qua bệ và mạng đã vẽ. Đèn cầm tay, nguồn cố định và Lumo không kích được. Ví dụ: cửa A/B ở 01, cầu ở 04.
-- **Mặt nhận hở** (hoa, luống rễ, lá cảm biến): nhận khi bất kỳ footprint gameplay nào (vệt, quầng, nhánh tràn, nguồn cố định) chồng lên vùng nhạy. Ví dụ: hoa A ở 07, luống rễ cầu ở 07/08. Trạng thái tính lại liên tục từ footprint hiện tại, không có thời gian chờ; vật đang chịu tải vẫn giữ tới nền an toàn theo luật cầu/cửa.
+- **Mặt nhận hở** (hoa, luống rễ, lá cảm biến): nhận khi bất kỳ footprint gameplay nào (vòng sáng cầm tay, quầng của bệ, nhánh tràn, nguồn cố định) chồng lên vùng nhạy. Ví dụ: hoa A ở 07, luống rễ cầu ở 07/08. Trạng thái tính lại liên tục từ footprint hiện tại, không có thời gian chờ; vật đang chịu tải vẫn giữ tới nền an toàn theo luật cầu/cửa.
 
 **Dấu sáng và dấu tối:**
 
@@ -54,9 +52,9 @@ Rìa vẽ trên màn khớp đúng footprint này. Ngoài footprint chỉ có á
 - Một dấu sáng/tối được tính là **đã thấy** khi đủ cả ba điều kiện: nó đang đọc được; chân Nhinh ở trong 64px quanh dấu, cùng phòng; và đoạn thẳng từ tâm Nhinh tới dấu không cắt tường hay cánh cửa đang đóng. Lúc đó J ghi dấu một lần dưới dạng viền mờ và save lưu cờ đã thấy. Cờ này chỉ để xem lại; nó không bao giờ là điều kiện mở cửa, cầu, H hay cảnh truyện.
 - Quy tắc tự ghi này chỉ dành cho dấu sáng/tối. Dấu Pulse vẫn chỉ được ghi khi một lần Pulse thật sự phát hiện nó.
 
-**Quay vệt khỏi dấu cũng hợp lệ:** người chơi có thể đọc dấu tối bằng cách quay vệt đi chỗ khác mà không bấm F. Đây là cách giải đúng luật. F vẫn hữu ích vì tắt đèn bảo đảm không vô tình rọi lại khi di chuyển. Không màn nào kiểm “đã bấm F” hay ép một thao tác cụ thể; chỉ footprint hiện tại quyết định.
+**Ra khỏi vòng sáng cũng hợp lệ:** người chơi có thể đọc dấu tối bằng cách lùi ra cho vòng sáng rời khỏi dấu, không cần bấm F. Đây là cách giải đúng luật. F hữu ích khi dấu, luống hay cầu nằm ngay trên đường đi: tắt đèn là cách duy nhất để đứng sát chúng trong tối. Không màn nào kiểm “đã bấm F” hay ép một thao tác cụ thể; chỉ footprint hiện tại quyết định.
 
-**Kiểm khi dựng:** mỗi mặt nhận hở phải có ít nhất một chỗ đứng an toàn (RULE_GAMES.md §6) mà từ đó vệt cầm tay phủ được nó. Nếu màn cần vệt chạm vật này mà không chạm vật kia (hoa A và luống cầu ở 07), chỗ đứng đó phải tồn tại và được script kiểm như tầm với E. Mỗi dấu sáng/tối phải có chỗ đứng đọc được trong mọi trạng thái mà màn cần dấu đó. Rọi theo 8 hướng phải dễ: mỗi việc rọi trúng hoặc tránh một vật cần một vùng đứng rộng ít nhất 8px mỗi chiều, để người chơi nghĩ về nguồn sáng chứ không chỉnh chân từng pixel. Nếu không đạt, sửa bố cục màn; không nới vệt riêng cho một màn.
+**Kiểm khi dựng:** mỗi mặt nhận hở phải có ít nhất một chỗ đứng an toàn (RULE_GAMES.md §6) mà từ đó vòng sáng cầm tay phủ được nó. Nếu màn cần ánh sáng chạm vật này mà không chạm vật kia (hoa A và luống cầu ở 07), chỗ đứng đó phải tồn tại và được script kiểm như tầm với E. Mỗi dấu sáng/tối phải có chỗ đứng đọc được trong mọi trạng thái mà màn cần dấu đó. Rọi phải dễ: mỗi việc rọi trúng hoặc tránh một vật cần một vùng đứng rộng ít nhất 8px mỗi chiều, để người chơi nghĩ về nguồn sáng chứ không chỉnh chân từng pixel. Nếu không đạt, sửa bố cục màn; không nới vòng sáng riêng cho một màn.
 
 ### Đèn khi chuyển màn
 

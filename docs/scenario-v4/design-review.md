@@ -168,3 +168,15 @@ Dấu vân tay các file sửa trong đợt này (file khác giữ hash của b�
 | 07-the-sleeping-garden.md | `0a8354605db5b4572616769dab4b7590871bd6576d1b7922b1cafe40a2775814` |
 | 08-ruins-of-two-halves.md | `8ac133adf5209adf0767593026bfce1a39be0926073d6b5619a0b1b9a4bad891` |
 | 10-the-heart-of-elaria.md | `cedad31f7e7051120636cdd301aaf2f72d7cc688e26a1009240f4a73a613a399` |
+
+## Đổi vệt đèn thành vòng sáng — 2026-10-24
+
+Người dùng chỉ ra đèn lồng không phải đèn pin, nên không thể chỉ chiếu trong một hình thang theo hướng quay. Quyết định: đèn cầm tay tỏa một vòng sáng bán kính 40px, tâm ở điểm trên sàn dưới chân Nhinh; hướng quay không đổi vùng sáng. Đèn trên bệ vẫn chỉ để lọt quầng 12px và nhánh tràn đã khai báo, vì bệ là hộp có đầu nối kín. Vật chắn, luật dấu sáng/tối, luật “đã thấy” và vùng đứng 8px giữ nguyên.
+
+Hệ quả: tránh rọi một vật nghĩa là lùi ra hoặc tắt F, không còn quay đèn đi; F có vai trò rõ hơn khi luống, dấu hay cầu nằm ngay trên đường đi. Đã sửa câu có hướng ở 01 (“vật ở phía trước”) và 07 (“vệt hẹp”, “quay vệt khỏi luống”). Bán kính 40px là giá trị khởi điểm, chỉnh ở phòng thử.
+
+| File | SHA-256 |
+| --- | --- |
+| puzzle-contracts.md | `091bc9bc21ff8c3d7df54c66456d0d6abaffd99e4eb4facd45962a701dce166f` |
+| 01-forgotten-forest-edge.md | `08e561689d938127281e94e98679e424c35c2a89a9613c6fda5917aaaa44d4b6` |
+| 07-the-sleeping-garden.md | `bf9cfe9b7d103ec6d622777458b0a1f2e2626519263b1840b81ac52d2bcc4553` |
