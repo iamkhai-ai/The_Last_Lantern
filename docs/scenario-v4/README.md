@@ -15,15 +15,16 @@ Ngày biên soạn: **2026-10-24**. Đây là bộ thiết kế cốt truyện v
 
 | Tài liệu | Nội dung |
 | --- | --- |
+| [Bản đọc liền mạch demo 01–04](demo-01-04-rewrite.md) | Bản kịch bản do người điều phối viết theo hướng đã thống nhất; đọc liền mạch trước tài liệu từng màn |
 | [Cốt truyện nguyên văn](00-original-story-verbatim.md) | Giữ nguyên lời đề xuất trong cuộc trò chuyện, gồm nguồn tin nhắn |
 | [Mở đầu nguyên văn](00-original-prologue-verbatim.md) | Giữ nguyên câu trả lời về cảnh xưởng chơi được |
 | [Cốt truyện](00-story-bible.md) | Thế giới, nhân vật, nguyên nhân và kết thúc |
 | [Luật chung và nhịp chiến dịch](puzzle-contracts.md) | Thuật ngữ, đường học, khó nhưng công bằng, trạng thái và giới hạn |
 | [00 — Xưởng bên sông](00-prologue.md) | Prologue chơi được, đã được đồng ý về hướng |
-| [01 — Bìa rừng](01-forgotten-forest-edge.md) | Tắt đèn để đọc đường tới chốt ở mặt sau cửa; gài rồi chuyển nguồn |
-| [02 — Rừng đom đóm](02-whispering-woods.md) | Pulse hiện trục ghép; ánh tối chỉ hướng đích, không số vòng |
-| [03 — Thư viện dưới rễ](03-library-beneath-the-roots.md) | Ghép hai lớp thông tin và kiểm tra chu kỳ hồi lưu |
-| [04 — Con suối](04-shattered-moonlit-creek.md) | Một nguồn qua hai cầu và trạm thử tuyến |
+| [01 — Bìa rừng](01-forgotten-forest-edge.md) | Thử nguồn xác nhận cơ cấu cửa còn tốt; giữ A/B độc lập trước khi chuyển đèn |
+| [02 — Rừng đom đóm](02-whispering-woods.md) | Pulse hiện liên kết trục; tối chỉ hướng đích; hiệu chỉnh cả cụm liên động |
+| [03 — Thư viện dưới rễ](03-library-beneath-the-roots.md) | Ghép phiến hai lớp rồi kiểm quy trình hồi–cấp–hồi–hồi trên mô hình |
+| [04 — Con suối](04-shattered-moonlit-creek.md) | Dùng phép thử có kiểm soát đối chiếu chỉ báo Bến/Rễ; kết điểm demo sau khi máy an toàn |
 | [05 — Lối đi cho hai người](05-a-path-for-two.md) | Một chốt rời phải được chuyển giữa những cửa khác nhau |
 | [06 — Tháp không ngủ](06-the-sleepless-tower.md) | Chia một nguồn hữu hạn và phối hợp giảm nhu cầu ở bến |
 | [07 — Khu vườn ngủ](07-the-sleeping-garden.md) | Chiếu hoa A bằng đèn cầm, chốt cửa, che W để rễ cầu nối |
@@ -40,7 +41,7 @@ Hai bản **nguyên văn** là hồ sơ lưu trữ, không sửa câu chữ đ�
 
 Đây là nhánh thiết kế mới theo yêu cầu hiện tại, nên các giới hạn bố cục/thoại đã chốt cho việc tích hợp V2 không khóa V4. Các quy tắc trải nghiệm vẫn được giữ: không đếm ngược, không chết/rơi/mất tiến trình; trạng thái sống phải thật sự còn được cấp nguồn; có đường phục hồi; âm thanh luôn có hình ảnh tương ứng; hướng dẫn không nói sẵn lời giải.
 
-Màn 01 dạy giữ cửa bằng chốt trước khi chuyển một đèn; M02 tách trục liên kết khỏi hướng đích lộ trong tối. M03 ghép hai lớp thông tin và kiểm tra chu kỳ ở mô hình. M04 tăng khảo sát liên kết Pulse trước thử tuyến; M05 giữ chốt rời và các tay hồi, không thêm bệ đèn. M06 chia nguồn hữu hạn sau khi người chơi có thể khảo sát đường. M07 tách ánh W trên luống khỏi footprint đèn cầm tới hoa; M08–09 yêu cầu chuẩn bị đường về trước khi bật lại; M10 dùng dấu cơ khí của bộ tự giữ để người chơi tự quyết định khi nào gọi Lumo, thu đèn và tắt F.
+Màn 01 dùng một nguồn thử để xác nhận cơ cấu cửa còn tốt, rồi dạy giữ A/B trước khi chuyển đèn; M02 tách trục liên kết khỏi hướng đích lộ trong tối và đặt câu đố ở hiệu chỉnh cụm. M03 ghép hai lớp thông tin và kiểm tra quy trình hồi–cấp–hồi–hồi trên mô hình, không tác động dòng thật. M04 dùng phép thử có kiểm soát để so sánh hai nhánh khi van hồi cục bộ đã mở; Pulse giúp đọc liên kết nhưng không phải điều kiện. M05 giữ chốt rời và các tay hồi, không thêm bệ đèn. M06 chia nguồn hữu hạn sau khi người chơi có thể khảo sát đường. M07 tách ánh W trên luống khỏi footprint đèn cầm tới hoa; M08–09 yêu cầu chuẩn bị đường về trước khi bật lại; M10 dùng dấu cơ khí của bộ tự giữ để người chơi tự quyết định khi nào gọi Lumo, thu đèn và tắt F.
 
 Ba tinh thể Ký Ức, Hy Vọng, Cân Bằng vẫn dùng hình ảnh cũ, nhưng được giải thích là ba bộ phận/khóa của cơ chế hồi phục Cây Mẹ. Thu thập đủ chưa tự giải quyết điều tiết hay thay việc sửa các tuyến.
 

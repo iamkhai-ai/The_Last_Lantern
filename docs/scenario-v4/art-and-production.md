@@ -7,10 +7,10 @@
 | Khu | Giữ hoặc dùng làm nền tảng | Phần phải thiết kế mới/chỉnh |
 | --- | --- | --- |
 | Prologue | Nhinh, đèn bảo trì, bảng màu và tranh đi đường phù hợp | Xưởng chơi được, mẹ/lái đò, đèn khách, bàn/khay/bảng kiểm; đoạn nhận nhiệm vụ |
-| 01 | Rừng/bia/cổng/đèn/dấu Pulse | Sân giữa, bệ S1/S2, chốt rõ, đầu nối kín; dấu bào tử tối chỉ tới mặt sau A từ sân giữa, không tạo đường vòng |
-| 02 | Rừng, ba glyph, cổng, vignette phù hợp | Glyph Nước, bốn vành ba hướng, ba trục/tay quay và dấu khớp hiện qua Pulse; đom đóm/mực sáng tối chỉ hướng đầu nhận, không số vòng; hốc ngủ/chuông |
-| 03 | Phòng giếng, phiến hai lớp, tinh thể, phù điêu | Gian mô hình bốn chặng, van/cấp/hồi/kho nhận; UI ghi chép hai lớp; nền đủ rõ dưới cả hai lớp |
-| 04 | Bộ đá/bờ/gương/cầu và phù điêu bão | Đảo/tay truyền động G1, hai hãm ở Đông và thanh nối tới A, cần hồi đúng từng bờ, T/N, phản hồi nước và liên lạc |
+| 01 | Rừng/bia/cổng/đèn/dấu Pulse | Sân giữa, bệ S1/S2 và ổ kín cho hai cửa; chỉ báo đoạn nguồn thường gián đoạn; lẫy/lò xo/thanh hãm còn nguyên để chứng minh cơ cấu tốt; bào tử tối chỉ tới mặt tiếp cận A từ sân giữa, không tạo đường vòng; mở đầu cho vòng sáng rời mầm bằng bước lùi hoặc F |
+| 02 | Rừng, ba glyph, cổng, cảnh hai bóng người phù hợp | Glyph Nước, bốn vành ba hướng, ba trục/tay quay và dấu khớp hiện qua Pulse; vài đom đóm trưởng thành sẵn có làm rõ hướng miệng nhận khi không bị đèn chiếu; giữ hốc ngủ im lặng, không vẽ lứa mới nở |
+| 03 | Phòng giếng, phiến hai lớp, tinh thể, phù điêu | Gian mô hình thủ công bốn chặng, van cấp/hồi và chỉ báo kho Bến/Rễ; mô hình không tác động dòng thật; giao diện ghi chép hai lớp tách sáng/tối, không tự gắn nhãn thời điểm; không thêm hình gợi thủ phạm |
+| 04 | Bộ đá/bờ/gương/cầu và phù điêu bão | Đảo/tay truyền động G1, hai cầu và hãm ở Đông (thanh nối tới A), cần hồi đúng phía, hai ống chính Bến/Rễ, T/N, chỉ báo đồng thời và nút dừng mẫu có giới hạn; thể hiện Nhinh chủ động kiểm tra có kiểm soát và mẹ chuẩn bị phối hợp, không kết thúc hệ quả trước phép thử |
 | 05 | Bộ hành lang/ống/màng/mốc/ấn | Khoang thứ tư khi cần, chốt rời, cửa C có khớp ống, cửa D, nút hồi phía xa; giữ đèn cầm tay, không thêm bệ |
 | 06 | Phòng tháp, khoang, gương/lăng kính, luồng nước | Nhánh chia thứ hai, chỉ báo mức bằng vạch, hốc liên lạc; vạch khắc phản quang phân loại nhánh khi đèn thử tắt; sửa khăn đỏ/ghi âm |
 | 07 | Gần như toàn bộ bố cục vườn/hoa/rễ/bể/van | Hốc kén, con non, vài đồ dùng Lumo và pose nghỉ; rìa W chỉ phủ luống cầu/ươm, đèn cầm riêng phủ hoa A, tay che W ở Tây và sân nối có chốt |

@@ -38,12 +38,14 @@ Các số dưới đây là giá trị khởi điểm dùng chung cho mọi màn
 
 **Nguồn cố định** có footprint là vùng khai báo của nguồn khi công tắc/nắp cho phép; F không đổi nó.
 
+**Tia của mạng gương** (từ đầu ra của bệ qua gương, lăng kính, bộ chia) là footprint dạng dải rộng 6px dọc đường tia. Dải bắt đầu ở đầu ra của bệ và dừng ở vật chắn hoặc đầu nhận đầu tiên trên đường đi. Tường, cửa đóng, mặt tượng và lưng gương chắn tia. Tia che dấu tối và kích mặt nhận hở nằm dưới dải; ổ kín chỉ nhận tia đi tới đúng đầu cuối của nó. Hình vẽ tia khớp đúng dải này; không có tia trang trí xuyên khối va chạm.
+
 **Độ sáng màn hình:** ánh nền của mỗi phòng là cố định, không đổi theo F. F chỉ thêm hoặc bớt footprint của đèn bảo trì. Không có lớp tối phủ toàn màn khi tắt F, và cũng không làm sáng toàn màn khi bật.
 
 **Hai loại đầu nhận**, phân biệt bằng hình dạng, không chỉ bằng màu. Mỗi màn ghi rõ đầu nhận nào thuộc loại nào:
 
 - **Ổ kín** (có nắp, đầu nối vẽ rõ): chỉ nhận qua bệ và mạng đã vẽ. Đèn cầm tay, nguồn cố định và Lumo không kích được. Ví dụ: cửa A/B ở 01, cầu ở 04.
-- **Mặt nhận hở** (hoa, luống rễ, lá cảm biến): nhận khi bất kỳ footprint gameplay nào (vòng sáng cầm tay, quầng của bệ, nhánh tràn, nguồn cố định) chồng lên vùng nhạy. Ví dụ: hoa A ở 07, luống rễ cầu ở 07/08. Trạng thái tính lại liên tục từ footprint hiện tại, không có thời gian chờ; vật đang chịu tải vẫn giữ tới nền an toàn theo luật cầu/cửa.
+- **Mặt nhận hở** (hoa, luống rễ, lá cảm biến): nhận khi bất kỳ footprint gameplay nào (vòng sáng cầm tay, quầng của bệ, nhánh tràn, tia của mạng gương, nguồn cố định) chồng lên vùng nhạy. Ví dụ: hoa A ở 07, luống rễ cầu ở 07/08. Trạng thái tính lại liên tục từ footprint hiện tại, không có thời gian chờ; vật đang chịu tải vẫn giữ tới nền an toàn theo luật cầu/cửa.
 
 **Dấu sáng và dấu tối:**
 
@@ -76,6 +78,8 @@ Cảm biến và người giữ là điều kiện sống; chốt là hỗ trợ
 
 Cầu chỉ cho bước vào khi đang mở thật. Nếu mất điều kiện lúc người chơi đang đi, phần cầu chịu tải giữ tới bờ; không rơi và không chạy đua. Chạm cầu đã đóng không làm nó tự mọc. Mọi bờ xa có mốc gọi/cần hồi phù hợp hoặc đường bộ để khôi phục nguồn từ phía đó. Rễ sống tự mọc khi có nước và bóng tối theo điều kiện của chính màn. Rễ trên khung nâng cổ ở màn 09 cần nguồn cấp gián tiếp **và** luống trong bóng; đây là hai chỉ báo riêng, không đổi luật rễ tự nhiên của màn 07.
 
+**Không mang nguồn qua chính đường nó cấp.** Bệ cấp cho một cửa hay cầu phải đặt sao cho không thể E bệ đó khi khối chân đang chồng lên ngưỡng cửa hay mặt cầu ấy. Nếu không, luật giữ khi chịu tải cho phép nhặt đèn ngay trong ngưỡng rồi bước qua, bỏ qua bước giữ cửa/cầu bằng chốt. Script kiểm bố cục kiểm điều này cùng lúc với tầm với E.
+
 ### Kết quả và H
 
 Mọi cấu hình thỏa điều kiện vật lý hiện tại đều hợp lệ. Lời giải trong từng màn là đường tham khảo, không phải chuỗi thao tác bắt buộc. Không khóa vì chưa đọc bia, chưa xem gợi ý, chưa Pulse, chưa chạm đủ vật hoặc chưa đi đúng thứ tự tác giả nếu thế giới đã ở trạng thái hợp lệ. Các cảnh truyện chính tự kích hoạt một lần sau kết quả; có thể bỏ qua trình chiếu và đọc lại J.
@@ -87,10 +91,10 @@ H là tùy chọn; ba mức lần lượt giúp người chơi quan sát, nối 
 | Chặng | Điều người chơi phải học/chuyển giao | Khoảng thời gian thiết kế, chưa đo |
 | --- | --- | --- |
 | Prologue | Di chuyển, E, quan sát lỗi, quan hệ ở quê | 1–2 phút cảnh sửa đèn; đoạn dẫn sau đó riêng |
-| 01 | Nguồn sáng có vị trí; cần giữ một cửa trước khi lấy nguồn đi; tắt đèn để khám phá | 6–9 phút |
-| 02 | Một điều khiển ảnh hưởng nhiều bộ phận; dự đoán trước khi quay; tối giúp đọc trục chung | 8–12 phút |
-| 03 | Một lớp thông tin chưa đủ; kết quả phải làm việc trong mô hình | 12–16 phút |
-| 04 | Chia thành khu, giữ kết quả trung gian, Pulse liên kết trước khi cấp nguồn | 14–20 phút |
+| 01 | Dùng nguồn thử để xác nhận cơ cấu cửa còn tốt; giữ A/B cơ khí trước khi chuyển đèn; dấu tối đọc được ngoài footprint | 6–9 phút |
+| 02 | Một điều khiển ảnh hưởng nhiều bộ phận; dự đoán tác động trên cụm; Pulse hiện liên kết, dấu tối hiện hướng đích | 8–12 phút |
+| 03 | Ghép hai lớp thông tin, rồi kiểm quy trình hồi–cấp–hồi–hồi trên mô hình không nối với dòng thật | 12–16 phút |
+| 04 | Chuẩn bị đường mang đèn, phân biệt nguồn thử với dòng chính, đối chiếu chỉ báo Bến/Rễ bằng phép thử có kiểm soát | 14–20 phút |
 | 05 | Hỗ trợ hữu hạn; phân biệt cái gì giữ tạm và cái gì giữ lâu | 12–18 phút |
 | 06 | Nguồn hữu hạn; khảo sát mạng trước khi thử và chia nhu cầu đồng thời | 15–20 phút |
 | 07 | Chuẩn bị lối đi trong sáng rồi trả vùng ươm về tối | 8–12 phút |
@@ -105,6 +109,7 @@ Mỗi màn đưa vào tối đa một ý khó mới làm trọng tâm. Các thao
 ## 3. Manh mối, phản hồi và chống thử mù
 
 - Manh mối mô tả quan hệ nhân quả: trục chung, ống hồi, chốt, đầu ra, vùng bóng. Bia không liệt kê đáp án theo thứ tự thao tác.
+- Trong demo, tay nghề sửa đèn của Nhinh giúp cô nhận ra đầu nối, vòng giữ, trục và lẫy quen thuộc, biết thử nguồn nhỏ và giữ cơ cấu trước khi tháo nguồn. Đây là cơ sở suy luận về bộ phận trước mắt, không phải kiến thức sẵn về toàn bộ mạng cổ; Lumo cung cấp hiểu biết sinh thái, còn mẹ biết việc vận hành ở bến.
 - Đường nối, đích, công tắc và rìa vùng chiếu có hình dạng/ký hiệu, không phân biệt chỉ bằng màu. Âm sắc đi cùng chuyển động hoặc dấu trạng thái.
 - Mỗi lần đổi điều khiển thấy được những bộ phận đổi theo. Có thể xem sơ đồ tĩnh đã khám phá trong J khi nguyên nhân ở phòng khác; J không thay trạng thái đang chạy.
 - Nhinh/Lumo chỉ tự nói điều vừa xảy ra; không tự nói tọa độ, nấc đúng hay chuỗi giải. H là tùy chọn và tính từ trạng thái thật.
@@ -116,7 +121,7 @@ Mỗi màn đưa vào tối đa một ý khó mới làm trọng tâm. Các thao
 
 RULE_GAMES.md vẫn áp dụng: vật đứng tương tác trong 8px từ mép footprint, mọi hướng; hốc phẳng theo quy tắc riêng; các ngoại lệ phải được ghi khi dựng. Không chốt tọa độ/collider bằng sơ đồ chữ trong tài liệu này. Mỗi khu dự kiến dùng khung 640×360 hoặc phòng ghép có đường chuyển rõ; tránh thu nhỏ vật để nhét thêm câu đố.
 
-Lưu cấu hình gương/van/chốt, trạng thái từng nguồn cố định và công tắc, vị trí đèn (đang cầm hay đặt ở bệ), F bật/tắt, vị trí/chế độ Lumo, phiến/vật đang cầm, các dấu đã Pulse thật sự phát hiện và sự kiện một lần. Nếu màn có thông tin chỉ thấy trong tối, chỉ lưu trạng thái khám phá sau khi người chơi thực sự nhìn thấy; không biến cờ đó thành điều kiện giải. Hiệu lực tia/cầu/cửa/rễ tính lại từ cấu hình hiện tại khi tải; không khôi phục một cờ “đã sáng” thay nguồn. Hướng quay của Nhinh và footprint đèn không lưu; sau khi tải, mặt nhận hở tính lại từ hướng mặc định tại checkpoint. Checkpoint phải có vùng đứng an toàn và đường tới điều khiển phục hồi ở mọi trạng thái được yêu cầu.
+Lưu cấu hình gương/van/chốt, trạng thái từng nguồn cố định và công tắc, vị trí đèn (đang cầm hay đặt ở bệ), F bật/tắt, vị trí/chế độ Lumo, phiến/vật đang cầm, các dấu đã Pulse thật sự phát hiện và sự kiện một lần. Nếu màn có thông tin chỉ thấy trong tối, chỉ lưu trạng thái khám phá sau khi người chơi thực sự nhìn thấy; không biến cờ đó thành điều kiện giải. Hiệu lực tia/cầu/cửa/rễ tính lại từ cấu hình hiện tại khi tải; không khôi phục một cờ “đã sáng” thay nguồn. Hướng quay của Nhinh không lưu. Vùng sáng và các mặt nhận hở được tính lại từ vị trí, trạng thái đèn/nguồn và vật chắn hiện tại tại điểm tải; vòng sáng của đèn cầm tay không phụ thuộc hướng quay. Điểm tải phải có vùng đứng an toàn và đường tới điều khiển phục hồi ở mọi trạng thái được yêu cầu.
 
 Cảnh thoại có thể bỏ qua nhưng phải ghi kết quả một lần. Tải giữa cảnh chuyển dùng checkpoint trước hoặc sau cam kết; không phát lại thử tải gây hại, nhân đôi tinh thể/chốt, hoặc đưa Lumo về ấn sau khi đã gọi về. Các cờ V4 cần tên/phân phiên bản riêng khi triển khai; không đoán tương thích với save V2.
 
