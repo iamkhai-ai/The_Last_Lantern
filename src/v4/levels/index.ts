@@ -1,20 +1,18 @@
 import type { V4LevelRuntime } from '../scene/LevelHost';
+import { WorkshopLevel } from './prologue-workshop/WorkshopLevel';
 import { TestRoomLevel } from './test-room/TestRoomLevel';
 
 /** Makes a fresh runtime for one level. Constructing it touches no Phaser object; `build()` does. */
 export type V4LevelFactory = () => V4LevelRuntime<unknown>;
 
-/**
- * The campaign levels in play order. The first one is where a new game starts. On the foundation branch the only
- * level is the test room; each `levelNN-v4` branch puts its level here.
- */
-export const V4_LEVELS: readonly V4LevelFactory[] = [() => new TestRoomLevel()];
+/** The campaign levels in play order. The first one is where a new game starts. */
+export const V4_LEVELS: readonly V4LevelFactory[] = [() => new WorkshopLevel()];
 
 /** Development levels. Never in the campaign order: a new game starts in one only when the URL names it (?v4level=). */
-export const DEV_LEVELS: readonly V4LevelFactory[] = [];
+export const DEV_LEVELS: readonly V4LevelFactory[] = [() => new TestRoomLevel()];
 
 /** Display numbers of planned levels that have no runtime yet. The placeholder screen shows them. */
-export const PLANNED_LEVEL_NUMBERS: Readonly<Record<string, string>> = {};
+export const PLANNED_LEVEL_NUMBERS: Readonly<Record<string, string>> = { 'forest-edge': '01' };
 
 /** The factory for a level id among the campaign and development levels, or null when no level has that id. */
 export function findLevelFactory(id: string): V4LevelFactory | null {
