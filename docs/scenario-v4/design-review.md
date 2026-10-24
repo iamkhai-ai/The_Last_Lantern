@@ -271,3 +271,18 @@ Chưa build, chưa playtest. Dấu vân tay các file sửa trong đợt này:
 | 02-whispering-woods.md | `b9b22fb858d2ef556968447c38e5eefc9b1e6323bc12c10598d12e2564e48cf9` |
 | 03-library-beneath-the-roots.md | `8093769866d19ad5da7f8252651d867ce0754e41f2055213ed67e60c23218b65` |
 | 04-shattered-moonlit-creek.md | `ebdf864502fa66fb07842ece86d335dd540fc8dc82549a99447df1fa0e07c948` |
+
+## Màn 04: nhả chốt và cần hồi — 2026-10-24
+
+Hai chỗ kịch bản 04 chưa nói rõ, lộ ra khi dựng màn. Người dùng đã duyệt cả hai.
+
+| Chỗ hở | Quyết định |
+| --- | --- |
+| Nhả chốt A/B khi đèn đang trong tay làm Nhinh kẹt ở Đông hoặc đảo (không có bệ ở đó) | Chỉ nhả được khi đèn ở S; lúc ấy mọi cầu vừa đóng đều mở lại được bằng tay truyền động trên đảo hoặc cần hồi B. Đèn không ở S thì E ở chốt nói lý do và không nhả |
+| “Cần A ở Tây/đảo, cần B ở đảo/Đông” không chỉ một chỗ | Cần hồi A ở bờ Tây, cần hồi B ở bờ Đông; đảo đã có tay truyền động G1/G2 |
+
+Đã chơi thử màn 04 trên demo-v4. Dấu vân tay:
+
+| File | SHA-256 |
+| --- | --- |
+| 04-shattered-moonlit-creek.md | `8ac8b1981d77ca26dcf2763c49184fc0dd65d313156a423258c8c6a7e69cff2b` |

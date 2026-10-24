@@ -405,8 +405,9 @@ export class MoonlitCreekLevel implements V4LevelRuntime<MoonlitState> {
   private onLatch(which: 'A' | 'B'): void {
     const view = this.viewNow();
     const live = which === 'A' ? view.bridgeALive : view.bridgeBLive;
-    const inHand = this.host.getLantern().location.at === 'hand';
-    this.apply(stepLatch(this.state, which, live, inHand), true);
+    const location = this.host.getLantern().location;
+    const onS = location.at === 'pedestal' && location.pedestalId === PEDESTAL_S_ID;
+    this.apply(stepLatch(this.state, which, live, onS), true);
   }
 
   private onTest(): void {
