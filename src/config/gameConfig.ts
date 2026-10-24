@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootScene } from '../scenes/BootScene';
 import { ComingSoonScene } from '../scenes/ComingSoonScene';
 import { MenuScene } from '../scenes/MenuScene';
+import { IllustrationScene } from '../v4/scene/IllustrationScene';
 import { V4Scene } from '../v4/scene/V4Scene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
@@ -22,5 +23,5 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [BootScene, MenuScene, V4Scene, ComingSoonScene],
+  scene: [BootScene, MenuScene, V4Scene, IllustrationScene, ComingSoonScene],
 };

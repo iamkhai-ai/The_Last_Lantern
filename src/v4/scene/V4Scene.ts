@@ -2,11 +2,13 @@ import Phaser from 'phaser';
 import { Lumo } from '../../actors/Lumo';
 import { Player } from '../../actors/Player';
 import { getLocale, otherLocale, setLocale } from '../../i18n/locale.ts';
+import { tr } from '../../i18n/catalog.ts';
 import { consumeCampaignNewGameIntent } from '../../systems/CampaignStartIntent';
 import { DialogueSystem } from '../../systems/DialogueSystem';
 import { InteractionSystem } from '../../systems/InteractionSystem';
 import { LanternSystem } from '../../systems/LanternSystem';
 import { SoundSystem } from '../../systems/SoundSystem';
+import { ChoiceBox } from '../../ui/ChoiceBox';
 import { CampaignHud } from '../../ui/CampaignHud';
 import { PauseMenu } from '../../ui/PauseMenu';
 import type { DialogueLine } from '../../types/gameTypes';
@@ -17,13 +19,22 @@ import { NO_HINT_CURSOR, nextHint } from '../core/hints';
 import type { HintCursor } from '../core/hints';
 import { canPulse, toggleLantern } from '../core/lantern';
 import type { LanternState } from '../core/lantern';
+import { groundPoint, lanternFootprints, marksToRecord } from '../core/light';
+import type { Footprint } from '../core/light';
 import { followLumo, lumoArrived } from '../core/lumo';
 import type { LumoMode } from '../core/lumo';
 import { revealMarks } from '../core/pulse';
 import { V4SaveStore, createDefaultSave } from '../core/save';
 import type { V4Save } from '../core/save';
-import { V4_LEVELS, findLevelFactory } from '../levels';
+import {
+  PLANNED_LEVEL_NUMBERS,
+  V4_LEVELS,
+  allLevelFactories,
+  findDevLevelFactory,
+  findLevelFactory,
+} from '../levels';
 import type { LevelHost, V4LevelRuntime } from './LevelHost';
+import type { IllustrationData } from './IllustrationScene';
 import { safeLocalStorage } from './browserStorage';
 
 /** At most one save write per this many milliseconds; a write also happens on shutdown. */
@@ -32,8 +43,6 @@ const SAVE_INTERVAL_MS = 300;
 const LUMO_FLY_SPEED = 90;
 /** Lumo's hover offset from the point he follows (see Lumo.update). */
 const LUMO_OFFSET = { x: 18, y: -12 };
-/** The journal's one-time event for leaving the test room. */
-const TEST_ROOM_EXIT_EVENT = 'test-room-exit';
 
 const TOAST_EXIT = 'Đã qua phòng thử.';
 const TOAST_JOURNAL_ADDED = 'Đã ghi vào sổ tay.';
@@ -42,9 +51,21 @@ const TOAST_PULSE_NEEDS_LANTERN = 'Xung sáng cần đèn trong tay và đang b�
 const TOAST_NO_HINT = 'Không còn gợi ý cho bước này.';
 const TOAST_LUMO_ARRIVED = 'Lumo đã tới ấn.';
 
+/** The URL switch that starts a new game in a development level (the test room, for one). */
+const DEV_LEVEL_PARAM = 'v4level';
+
+/** The development level named by the URL, or null when there is none or the URL cannot be read. */
+function requestedDevLevelId(): string | null {
+  try {
+    return new URLSearchParams(window.location.search).get(DEV_LEVEL_PARAM);
+  } catch {
+    return null;
+  }
+}
+
 /**
- * The V4 host scene. It owns the save, the keys, the actors and the HUD, and runs whichever level the save names
- * through the V4LevelRuntime contract. Nothing level-specific lives here except the exit toast.
+ * The host scene. It owns the save, the keys, the actors and the HUD, and runs whichever level the save names
+ * through the V4LevelRuntime contract. A save that names a level with no runtime shows the placeholder screen.
  */
 export class V4Scene extends Phaser.Scene {
   private store!: V4SaveStore;
@@ -55,6 +76,7 @@ export class V4Scene extends Phaser.Scene {
   private lanternSystem!: LanternSystem;
   private interactions!: InteractionSystem;
   private dialogue!: DialogueSystem;
+  private choice!: ChoiceBox;
   private hud!: CampaignHud;
   private pauseMenu!: PauseMenu;
   private hintCursor: HintCursor = NO_HINT_CURSOR;
@@ -64,9 +86,18 @@ export class V4Scene extends Phaser.Scene {
   private lastSaveAt = 0;
   /** Set by the pause menu's restart: the save was just cleared and must not be written back on shutdown. */
   private discardSave = false;
+  /** Set when the placeholder screen replaces the level: the save names a level with no runtime. */
+  private placeholderLevelId: string | null = null;
+  /** Set once the exit has started the illustrations: nothing else may start a second transition. */
+  private leaving = false;
 
   constructor() {
     super({ key: 'V4Scene' });
+  }
+
+  /** Every level's textures load before any build, so a level can be entered from any save. */
+  public preload(): void {
+    for (const factory of allLevelFactories()) factory().preload?.(this);
   }
 
   public create(data?: { newGame?: boolean }): void {
@@ -75,18 +106,33 @@ export class V4Scene extends Phaser.Scene {
     this.lastSaveAt = 0;
     this.hintCursor = NO_HINT_CURSOR;
     this.lumoSettled = false;
+    this.placeholderLevelId = null;
+    this.leaving = false;
     this.store = new V4SaveStore(safeLocalStorage());
 
-    const firstLevelId = V4_LEVELS[0]().id;
-    if (consumeCampaignNewGameIntent(data, this.sys.settings.data)) {
-      this.save = createDefaultSave(firstLevelId);
+    const newGame = consumeCampaignNewGameIntent(data, this.sys.settings.data);
+    if (newGame) {
+      const devFactory = findDevLevelFactory(requestedDevLevelId() ?? '');
+      this.save = createDefaultSave((devFactory ?? V4_LEVELS[0])().id);
       this.store.save(this.save);
     } else {
-      this.save = this.store.load() ?? createDefaultSave(firstLevelId);
+      this.save = this.store.load() ?? createDefaultSave(V4_LEVELS[0]().id);
     }
-    const factory = findLevelFactory(this.save.levelId) ?? V4_LEVELS[0];
+
+    const factory = findLevelFactory(this.save.levelId);
+    if (!factory) {
+      this.showPlaceholder(this.save.levelId);
+      return;
+    }
     this.level = factory();
-    if (this.save.levelId !== this.level.id) this.save = { ...this.save, levelId: this.level.id };
+
+    // A new game may open with illustrations; they lead back here with the saved game (no new-game flag).
+    const intro = newGame ? this.level.intro?.() ?? [] : [];
+    if (intro.length > 0) {
+      this.scene.start('IllustrationScene', { illustrations: [...intro], next: { scene: 'V4Scene' } } satisfies IllustrationData);
+      return;
+    }
+
     const state = this.level.parseState(this.save.levels[this.level.id]);
 
     const { layout } = this.level;
@@ -95,9 +141,12 @@ export class V4Scene extends Phaser.Scene {
 
     this.player = new Player(this, checkpoint.spawn.x, checkpoint.spawn.y);
     this.lumo = new Lumo(this, checkpoint.spawn.x + LUMO_OFFSET.x, checkpoint.spawn.y + LUMO_OFFSET.y);
-    this.lanternSystem = new LanternSystem(this, this.level.lanternLightProfile());
+    this.lumo.setVisible(this.lumoPresent());
+    this.lanternSystem = new LanternSystem(this, { ambientDarkness: this.level.ambientDarkness() });
+    this.lanternSystem.setLightingEnabled(this.level.lighting() === 'lantern');
     this.interactions = new InteractionSystem(this);
     this.dialogue = new DialogueSystem(this);
+    this.choice = new ChoiceBox(this);
     this.hud = new CampaignHud(this);
     this.pauseMenu = new PauseMenu(this, {
       onResume: () => undefined,
@@ -119,10 +168,12 @@ export class V4Scene extends Phaser.Scene {
       hasEvent: (id) => this.save.events.includes(id),
       markEvent: (id) => this.markEvent(id),
       hasJournal: (id) => this.save.journal.includes(id),
+      addJournal: (id) => this.addJournal(id),
       solid: (zone) => {
         this.physics.add.collider(this.player.sprite, zone);
       },
       say: (lines, onDone) => this.dialogue.startDialogue(lines, onDone),
+      choose: (options, onPick) => this.choice.open(options, onPick),
       toast: (text) => this.hud.showToast(text),
       requestSave: () => this.requestSave(),
     };
@@ -134,23 +185,36 @@ export class V4Scene extends Phaser.Scene {
   }
 
   public update(_time: number, delta: number): void {
+    if (this.placeholderLevelId !== null) return;
     const dt = Math.min(delta, 50);
     const now = performance.now();
-    const locked = this.dialogue.isInputLocked(now) || this.pauseMenu.isOpen();
+    const lanternAvailable = this.level.lanternAvailable();
+    const locked = this.dialogue.isInputLocked(now) || this.pauseMenu.isOpen() || this.choice.isOpen();
     const lantern = this.save.lantern;
 
-    this.player.update(dt, !locked, lantern.location.at === 'hand', lantern.on);
+    this.player.update(dt, !locked, lanternAvailable && lantern.location.at === 'hand', lantern.on);
     const foot = this.player.getFootBody();
+    // This frame's light: the lantern (in hand or placed, lit or not) and the level's fixed sources.
+    const ground = groundPoint({ x: this.player.x, y: this.player.y });
+    const footprints: Footprint[] = [
+      ...(lanternAvailable
+        ? lanternFootprints(lantern, ground, (id) => this.level.pedestalPosition(id), this.level.lightSpills?.() ?? [])
+        : []),
+      ...(this.level.fixedFootprints?.() ?? []),
+    ];
     this.updateLumo(dt);
-    this.level.update(dt, foot);
+    this.level.update(dt, foot, footprints);
     this.trackCheckpoint(foot);
     this.checkExit(foot);
 
-    const placedAt = lantern.location.at === 'pedestal'
-      ? this.level.pedestalPosition(lantern.location.pedestalId)
-      : null;
-    this.lanternSystem.update(dt, { x: this.player.x, y: this.player.y }, lantern, placedAt);
-    this.interactions.update(foot, !locked, this.player.sprite.getBounds(), [this.lumo.sprite.getBounds()]);
+    const blockers = this.level.lightBlockers();
+    this.lanternSystem.update(dt, footprints, blockers);
+    // Seen marks go into the journal once; the host writes them in the same frame they are seen.
+    const found = new Set(this.save.journal);
+    for (const id of marksToRecord(ground, this.level.lightMarks(), footprints, blockers, this.level.rooms?.() ?? [], found)) {
+      this.addJournal(id);
+    }
+    this.interactions.update(foot, !locked, this.player.sprite.getBounds(), this.lumoPresent() ? [this.lumo.sprite.getBounds()] : []);
     this.dialogue.update(dt);
 
     const text = this.level.hud();
@@ -161,8 +225,8 @@ export class V4Scene extends Phaser.Scene {
       move: true,
       run: true,
       interact: true,
-      lantern: true,
-      pulse: this.level.pulseMarks().length > 0,
+      lantern: lanternAvailable,
+      pulse: lanternAvailable && this.level.pulseMarks().length > 0,
       journal: true,
       hint: true,
       pause: true,
@@ -173,8 +237,14 @@ export class V4Scene extends Phaser.Scene {
     if (this.saveDirty && now - this.lastSaveAt >= SAVE_INTERVAL_MS) this.writeSave();
   }
 
+  /** Whether Lumo exists in the current level. */
+  private lumoPresent(): boolean {
+    return this.level.lumoPresent?.() ?? true;
+  }
+
   /** Lumo follows Nhinh, flies to his seal at a constant speed, then holds it (puzzle-contracts section 1). */
   private updateLumo(dt: number): void {
+    if (!this.lumoPresent()) return;
     const lumo = this.save.lumo;
     if (lumo.mode === 'follow') {
       this.lumo.update(dt, this.player.x, this.player.y);
@@ -220,6 +290,15 @@ export class V4Scene extends Phaser.Scene {
     this.requestSave();
   }
 
+  /** Adds a journal entry once. The toast says it was written; an entry already held says nothing. */
+  private addJournal(id: string): void {
+    const { entries, added } = addJournalEntry(this.save.journal, id);
+    if (!added) return;
+    this.save = { ...this.save, journal: [...entries] };
+    this.requestSave();
+    this.hud.showToast(TOAST_JOURNAL_ADDED);
+  }
+
   private requestSave(): void {
     this.saveDirty = true;
   }
@@ -234,17 +313,38 @@ export class V4Scene extends Phaser.Scene {
   }
 
   private checkExit(foot: Rect): void {
-    if (!this.level.isExitReached(foot)) return;
+    if (this.leaving || !this.level.isExitReached(foot)) return;
+    const exit = this.level.exit();
+    if (exit) {
+      this.leaveForIllustrations(exit);
+      return;
+    }
     const event = `${this.level.id}-exit`;
     if (this.save.events.includes(event)) return;
     this.markEvent(event);
     this.hud.showToast(TOAST_EXIT);
   }
 
+  /** Plays the exit's illustrations, then starts the next level (or the menu when there is none). */
+  private leaveForIllustrations(exit: { illustrations: string[]; nextLevelId: string | null }): void {
+    this.leaving = true;
+    let next: IllustrationData['next'];
+    if (exit.nextLevelId === null) {
+      next = { scene: 'MenuScene' };
+    } else {
+      // The next level's id is saved before the illustrations, so a reload there lands on the same place.
+      this.save = { ...this.save, levelId: exit.nextLevelId, checkpointId: '' };
+      next = { scene: 'V4Scene' };
+    }
+    this.writeSave();
+    this.scene.start('IllustrationScene', { illustrations: exit.illustrations, next } satisfies IllustrationData);
+  }
+
   /** The pulse reveals marks in range and writes them to the journal. It never powers anything. */
   private pulse(): void {
     const now = performance.now();
     if (this.pauseMenu.isOpen() || this.dialogue.isInputLocked(now)) return;
+    if (!this.level.lanternAvailable()) return;
     const marks = this.level.pulseMarks();
     if (marks.length === 0) return;
     const lantern = this.save.lantern;
@@ -260,13 +360,7 @@ export class V4Scene extends Phaser.Scene {
     }
     this.player.playPulseAction();
     const found = new Set(this.save.journal);
-    for (const id of revealMarks(origin, LanternSystem.PULSE_MAX_RADIUS, marks, found)) {
-      const { entries, added } = addJournalEntry(this.save.journal, id);
-      if (!added) continue;
-      this.save = { ...this.save, journal: [...entries] };
-      this.requestSave();
-      this.hud.showToast(TOAST_JOURNAL_ADDED);
-    }
+    for (const id of revealMarks(origin, LanternSystem.PULSE_MAX_RADIUS, marks, found)) this.addJournal(id);
   }
 
   private openJournal(): void {
@@ -294,6 +388,29 @@ export class V4Scene extends Phaser.Scene {
     this.scene.start('V4Scene', { newGame: true });
   }
 
+  /** A save that names a level with no runtime: a dark screen and a way back to the menu. Nothing is saved. */
+  private showPlaceholder(levelId: string): void {
+    this.placeholderLevelId = levelId;
+    const number = PLANNED_LEVEL_NUMBERS[levelId] ?? levelId;
+    this.add.rectangle(0, 0, 640, 360, 0x05090c).setOrigin(0, 0);
+    this.add.text(320, 164, tr('Màn {number} — đang dựng', { number }), {
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: '16px',
+      color: '#f7dfaa',
+    }).setOrigin(0.5, 0.5);
+    this.add.text(320, 196, tr('[ESC] Về màn hình chính'), {
+      fontFamily: 'Segoe UI, sans-serif',
+      fontSize: '11px',
+      color: '#9ec4bd',
+    }).setOrigin(0.5, 0.5);
+    const keyboard = this.input.keyboard;
+    if (!keyboard) return;
+    keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    keyboard.on('keydown-ESC', (event: KeyboardEvent) => {
+      if (!event.repeat) this.scene.start('MenuScene');
+    });
+  }
+
   private writeSave(): void {
     const level = this.level;
     this.store.save({ ...this.save, levels: { ...this.save.levels, [level.id]: level.getState() } });
@@ -318,40 +435,53 @@ export class V4Scene extends Phaser.Scene {
     keyboard.on('keydown-E', () => {
       const now = performance.now();
       if (this.pauseMenu.isOpen()) this.pauseMenu.triggerSelected();
+      else if (this.choice.isOpen()) this.choice.confirm();
       else if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(now);
       else this.interactions.tryInteract(now);
     });
     keyboard.on('keydown-SPACE', () => {
       const now = performance.now();
       if (this.pauseMenu.isOpen()) this.pauseMenu.triggerSelected();
+      else if (this.choice.isOpen()) this.choice.confirm();
       else if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(now);
       else this.pulse();
     });
     keyboard.on('keydown-F', (event: KeyboardEvent) => {
       if (event.repeat || this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen()) return;
+      if (this.choice.isOpen() || !this.level.lanternAvailable()) return;
       this.setLantern(toggleLantern(this.save.lantern));
       this.player.playLanternAction(this.save.lantern.on);
     });
     keyboard.on('keydown-H', (event: KeyboardEvent) => {
       if (event.repeat || this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen()) return;
+      if (this.choice.isOpen()) return;
       this.showHint();
     });
     keyboard.on('keydown-J', (event: KeyboardEvent) => {
       if (event.repeat || this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen()) return;
+      if (this.choice.isOpen()) return;
       this.openJournal();
     });
     keyboard.on('keydown-ESC', (event: KeyboardEvent) => {
       if (event.repeat) return;
-      if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
+      if (this.choice.isOpen()) this.choice.cancel();
+      else if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(performance.now());
       else if (this.pauseMenu.isOpen()) this.pauseMenu.close();
       else this.pauseMenu.open();
     });
-    // While the pause menu is open it owns the navigation keys.
-    const whenPaused = (action: () => void) => (): void => {
-      if (this.pauseMenu.isOpen()) action();
+    // While the choice box or the pause menu is open it owns the navigation keys; the choice box ignores key repeat.
+    const navigate = (delta: number) => (event: KeyboardEvent): void => {
+      if (this.choice.isOpen()) {
+        if (!event.repeat) this.choice.move(delta);
+        return;
+      }
+      if (this.pauseMenu.isOpen()) this.pauseMenu.moveSelection(delta);
     };
-    for (const key of ['UP', 'W']) keyboard.on(`keydown-${key}`, whenPaused(() => this.pauseMenu.moveSelection(-1)));
-    for (const key of ['DOWN', 'S']) keyboard.on(`keydown-${key}`, whenPaused(() => this.pauseMenu.moveSelection(1)));
-    keyboard.on('keydown-ENTER', whenPaused(() => this.pauseMenu.triggerSelected()));
+    for (const key of ['UP', 'W']) keyboard.on(`keydown-${key}`, navigate(-1));
+    for (const key of ['DOWN', 'S']) keyboard.on(`keydown-${key}`, navigate(1));
+    keyboard.on('keydown-ENTER', () => {
+      if (this.choice.isOpen()) this.choice.confirm();
+      else if (this.pauseMenu.isOpen()) this.pauseMenu.triggerSelected();
+    });
   }
 }

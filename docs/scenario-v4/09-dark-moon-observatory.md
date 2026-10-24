@@ -1,53 +1,63 @@
 # 09 — Đài quan sát Hắc Nguyệt
 
-**Ý chính:** tổng hợp một nguồn qua ba phòng và chuẩn bị đường rút trước khi giải phóng người giữ. **Vai trò:** đỉnh suy luận phần 1, không giới thiệu động từ mới. **Thời lượng thiết kế:** 20–28 phút, chưa đo.
+**Ý chính:** tổng hợp một nguồn qua ba phòng; tắt F để khảo sát một tuyến tối, sau đó cấp lại mạng sao cho Nhật sáng, khung có nguồn và luống nằm trong bóng. Giữ lối về trước khi rút đèn hoặc gọi Lumo khỏi ấn. **Vai trò:** đỉnh suy luận phần 1, không giới thiệu động từ mới. **Thời lượng thiết kế:** 20–28 phút, chưa đo.
 
-## 1. Không gian và kiến thức đầu vào
+## 1. Không gian, ánh sáng và trạng thái đầu
 
-Giữ ba phòng của đài: tiền sảnh P, hành lang sao H, thiên văn O. Không cần bỏ bộ art đài mới chỉ để đổi truyện. Đường dây trên tường và một sơ đồ ở P thể hiện kết nối; J lưu những phần đã khám phá.
+Giữ ba phòng của đài: tiền sảnh P, hành lang sao H, thiên văn O. Đường dây và trục trên tường thể hiện liên kết; J lưu những phần đã khám phá.
 
-`P [S,G0] — cửa A/chốt A — H [ấn Lumo, G1,G2,tượng] — cầu rễ + cửa Nhật — O [chốt Nhật, mở lối vòng, bản ghi]`.
+P [S,G0] — cửa A/chốt A — H [ấn Lumo,G1,G2,tượng] — cầu khung nâng + cửa Nhật — O [chốt Nhật, tay mở vòng, bản ghi].
 
-Lối vòng đá nối O về P, bị then cơ khí chỉ mở từ O. Mọi gương trong P/H có đường nền khô tới được sau khi gài A. Mốc gọi từ P/H đưa Lumo tới ấn; mốc hồi ở O cũng gọi được về chính ấn khi cần phục hồi, không tự tạo cầu nếu các gương sai.
+Vào màn, Nhinh cầm đèn bật; bệ S rỗng, G0 hướng A, cửa A đóng, chốt A chưa gài, Lumo ở P/H gần đường vào, gương G1/G2 ở vị trí đầu đã vẽ trong sơ đồ. Cầu hạ, cửa Nhật đóng, vòng O–P đóng. Ánh nền rêu/đá phản quang làm chân đường, bậc, mép cầu, cửa, tay điều khiển và khối va chạm nhìn rõ cả khi S tắt. Không có nguồn gameplay cố định riêng trong đài; nguồn S duy nhất là đèn bảo trì. Ánh nền không bật cảm biến và không có công tắc.
 
-## 2. Hợp đồng mạng
+Khi đèn ở tay, vệt ngắn chỉ tác động lên mặt phẳng trong vùng được tô biên. Khi đặt ở S, đầu nối chính cấp cho các mạng qua G0. Một nhánh soi hồ sơ riêng nối trực tiếp từ S tới sơ đồ trên tường H, độc lập với hướng G0, A và Lumo; nhánh này chỉ chiếu mặt sơ đồ, không cấp điện hay thay đổi cảm biến. Nếu S đặt và bật, nhánh soi hồ sơ chiếu lên hình khắc. Nếu đèn bật trên tay và vệt cầm tay chạm bảng ở H, bảng cũng bị ánh trực tiếp làm lóa. Khi không có nguồn nào chiếu bảng, mực bột sao phát quang mới đọc được. Tắt F làm nhánh soi từ S tắt nhưng không tối toàn phòng; đường đi và vật tương tác vẫn rõ.
 
-- S/G0 có hai tuyến hữu ích: cấp mắt A; hoặc cấp thân mạng sang G1. A chỉ tiếp tục mở khi được cấp hoặc có chốt.
-- Ấn Lumo mở màn dẫn giữa G0 và G1. Tia đi qua khoảng cửa A, nên `trunk = đèn ở S bật & G0 hướng H & A đang mở & Lumo@ấn`. Sau khi G0 rời tuyến cấp A, chốt A là cách giữ khoảng này thông.
-- G1 phải hướng tới G2. G2 có đường trực tiếp vào Nhật hoặc đường khung chia cạnh tượng.
-- Đường trực tiếp mở Nhật nhưng chiếu cả luống rễ. Đường chia đưa một nhánh tới Nhật và một nhánh đi qua tượng; mặt rộng chặn nhánh chiếu luống.
-- Cầu ở đây là rễ trên khung nâng cổ, cần **trunk cấp cho khung** và **luống trong bóng**. Đường cấp gián tiếp tới chân khung được vẽ riêng. Một hốc thử nhỏ ở H cho quan sát hai chỉ báo này; không thay quy tắc rễ tự nhiên ở màn 07.
-- `bridge = trunk & G1 nối G2 & G2 chia & tượng rộng`; `sunDoor = nhận tia hiện tại hoặc latchSun`.
-- Ngắt trunk làm khung hạ và rễ co dù luống vẫn tối. Không dùng nguồn từng bật làm cờ duy trì. Lối vòng/chốt là cách giữ đường sau khi rút hỗ trợ.
+Sơ đồ tối vẽ ba quan hệ: đường thẳng qua G2 đi ngang luống rễ; đường chia đi vòng qua tượng rồi ra Nhật; và nét đứt chỉ vị trí đường vòng O–P. Nó không in nấc gương hay thứ tự thao tác. Người chơi cần đối chiếu sơ đồ với phản ứng thực của máy. Nếu người chơi không xem sơ đồ, các đầu nhận và chỉ báo vẫn cho biết trạng thái thật.
 
-## 3. Đường giải tham khảo
+## 2. Khảo sát, mạng và điều kiện
 
-1. Đặt đèn S. G0 cấp A, qua A gài chốt rồi về chỉnh G0 sang H.
-2. Gọi Lumo tới ấn, nối G1 tới G2. Thử đường trực tiếp thấy cửa Nhật mở nhưng luống sáng, cầu chưa nối.
-3. Dùng đường chia và mặt rộng tượng. Nhật có sáng, khung có nguồn, luống có bóng; qua cầu tới O.
-4. Gài cửa Nhật và mở lối vòng O–P. Không thu đèn hoặc gọi Lumo về trước khi biết mình còn đường đi nào.
-5. Qua vòng thu đèn; gọi Lumo về. Cầu co, đường đá vẫn có, hai người trở lại O cùng nhau. Có thể gọi trước rồi lấy đèn, cả hai thứ tự hợp lệ.
-6. E xem bản ghi với Lumo đã tới bên Nhinh. Đây là nhịp cùng nghe của nhân vật, được báo rõ “Đợi Lumo cùng nghe”; không tự coi cậu đang bay là đã đoàn tụ. Cảnh có thể bỏ qua, sự thật vẫn lưu J. Nhận Tinh thể Cân Bằng, đi tiếp theo lối vòng dẫn tới Cây Mẹ.
+Trước khi đặt đèn, khi đang cầm và bật, Pulse ở sơ đồ đầu P có thể cho thấy cấu trúc tĩnh: G0 có nhánh tới A và nhánh vào H; G1 nối với G2; G2 có đường thẳng và đường tới bộ chia cố định bên tượng. Pulse không cho biết hướng gương hiện tại, trạng thái cửa, Lumo đang ở đâu hay nhánh nào nhận nguồn. J giữ các dấu đã phát hiện với viền mờ. Sau khi đặt đèn tại S thì không thể Pulse; có thể nhặt lại khi còn tới được, bật lên và khảo sát. Không có yêu cầu quét mọi dấu.
 
-Không tăng khó bằng thêm số phòng rỗng. Trọng tâm là nhận ra một cấu hình mở được đường vào chưa đảm bảo đường về khi Lumo rời ấn. Các kết quả trung gian đã chốt không mất khi đổi mạng.
+Điều kiện tại thời điểm hiện tại:
 
-## 4. Phục hồi các tình huống dự kiến
+- A mở nếu đèn ở S và đang bật, G0 hướng vào A; hoặc nếu chốt A đã gài. Đèn đặt tại S được F điều khiển từ xa; chốt A độc lập với nguồn.
+- Tuyến vào H có nguồn khi đèn ở S và đang bật, G0 hướng H, A mở, và Lumo thực sự đứng tại ấn.
+- Cầu máy/rễ có nguồn khi tuyến vào H đang sống, G1 nối G2 và G2 chọn bộ chia. Tuyến chia cấp khung nâng qua ống riêng; tượng mặt rộng phải giữ luống trong bóng. Đây là rễ trên khung nâng cổ, khác rễ sống tự nhiên của màn 07.
+- Cửa Nhật mở nếu nhận tia từ mạng hoặc được chốt ở phía O. Tia đi thẳng từ G2 mở cửa nhưng cũng chiếu luống; bộ chia cố định hướng một nhánh tới Nhật và nhánh kia qua tượng, nên có thể giữ Nhật sáng trong khi luống ở bóng.
+- Tượng mặt rộng chặn nhánh tới luống; mặt hẹp để ánh sáng vào luống. Vùng bóng được vẽ và tính theo chính tia. Không có trạng thái “đã từng sáng” thay cho nguồn hiện tại.
 
-| Tình huống | Cách tiếp tục |
+Đường vòng đá nối O về P, mở bằng tay cơ khí từ phía O. Đây là đường rút sau khi đã tới O; nó không cho đi vòng tới hồ sơ/tinh thể và không bỏ qua cầu. Mọi gương P/H có đường nền khô tới được sau khi A được gài. Mốc gọi ở P/H đưa Lumo tới ấn theo ống nhìn thấy. Ở O có tay hồi đưa Lumo về ấn để khôi phục tuyến. Một ống hẹp riêng từ ấn H tới bệ ghi chép O cho Lumo, không đủ cho Nhinh; sau khi tới O, một mốc gọi ở đó có thể mời Lumo tới đứng cạnh bệ. Ống này không nâng khung, mở cửa hay thay cầu.
+
+## 3. Hai pha và lời giải tham khảo
+
+**Pha khảo sát và mở đường vào.** Cầm đèn bật tại P, Pulse nếu muốn ghi sơ đồ tĩnh. Đặt đèn ở S, giữ G0 về A, bật nguồn và đi qua cửa A. Gài chốt A từ H. Ngay tại H, F tắt đèn đang ở S; nhánh soi hồ sơ tắt và sơ đồ bột sao hiện ra trên nền H. Người chơi đọc đường nào đi ngang luống, đường nào vòng qua tượng và hướng của lối đá O–P mà không cần rời bảng. Đây là một giai đoạn khảo sát trong tối để chuẩn bị lựa chọn tuyến. Bảng không tự chọn gương, không mở cửa, không cấp cầu và không lưu một cờ giải.
+
+**Pha cấp nguồn và đối chiếu.** Từ H đi về P qua A đã chốt. Ở P chỉnh G0 sang H rồi F bật lại đèn tại S; trở lại H qua A. Gọi Lumo tới ấn, nối G1 với G2. Đối chiếu sơ đồ tối đã thấy với phản ứng thực:
+
+1. Đưa G2 đi thẳng vào Nhật: cửa Nhật nhận sáng nhưng luống cũng sáng; chỉ báo cầu cho biết luống chưa nằm trong bóng.
+2. Chuyển G2 sang bộ chia cố định và giữ tượng mặt rộng. Nhật tiếp tục nhận tia, khung nâng có nguồn riêng, luống ở trong bóng; khi ba dấu đúng, cầu nối.
+3. Qua cầu tới O trên nền an toàn. Tay mở vòng O–P nằm ngay trên nền O và dùng được độc lập với nguồn. Mở nó trước khi thu đèn hoặc gọi Lumo khỏi ấn.
+4. Từ O đi vòng đá về P, tới S lấy đèn và mang đèn theo lối đã mở trở lại O. Đèn không tự dịch chuyển. Từ O có thể gọi Lumo qua ống hẹp tới bệ ghi chép; E nghe bản ghi cùng cậu khi cậu đã tới thật.
+5. Tinh thể Cân Bằng ở khoang cạnh bệ ghi chép. Nhặt tinh thể và mang theo khi rời O để đi tới Cây Mẹ. Cảnh bản ghi có thể bỏ qua; sự thật được ghi một lần vào J và đọc lại được. Việc nghe không yêu cầu giữ nguyên mạng hay Lumo ở ấn.
+
+Các thao tác không bị khóa theo đường tham khảo: có thể mở vòng ngay khi sang O, gài cửa Nhật khi nó đang mở, bật/tắt S từ bất cứ phòng nào, hoặc gọi Lumo về sau khi đã có lối đá. Cầu và khóa kiểm tra điều kiện vật lý hiện tại, không yêu cầu Pulse, đã thấy sơ đồ, dùng H hay hoàn thành các bước theo thứ tự cứng. Cấu hình khác cấp khung, giữ luống tối và chiếu Nhật cũng được chấp nhận.
+
+## 4. Phục hồi và lưu
+
+| Trạng thái | Cách tiếp tục |
 | --- | --- |
-| Quên chốt A, đổi G0 | G0 ở P hoặc tay hồi A phía H đưa nguồn về A; gài rồi làm tiếp |
-| Tới O rồi gọi Lumo về trước khi mở vòng | Mốc hồi O đưa cậu lại ấn. Nếu gương giữ cấu hình, cầu mọc lại; tay vòng vẫn ở O và luôn dùng được |
-| Nhấc đèn sau khi vòng mở | Đường đá thay cầu; mang đèn quay lại O được |
-| Tắt đèn giữa cầu | Khung giữ phần đang chịu tải tới bờ; tại bờ có F/mốc hồi và tay mở vòng nếu ở O |
-| Lumo về, luống tối nhưng cầu không mọc | Hai chỉ báo nêu rõ thiếu nguồn khung; giải pháp đi vòng hoặc khôi phục ấn, không tăng độ tối |
+| Quên chốt A rồi đổi G0 | G0 ở P và tay hồi A ở H luôn tới được từ các nền đã mở. Đưa G0 về A, gài chốt rồi chuyển sang H. |
+| Đang ở H, S tắt | F bật lại đèn ở S; A vẫn mở nhờ chốt. Có thể xem sơ đồ tối hoặc bật nguồn bất cứ lúc nào. |
+| Tới O nhưng vòng chưa mở | Tay mở vòng ở O luôn tới được và không cần nguồn. Người chơi có thể dùng F để bật/tắt S hoặc dùng tay hồi O để gọi Lumo về ấn; không thể nhặt đèn từ O khi đèn vẫn ở S. Mở vòng cho phép đi bộ về P và tự lấy đèn. |
+| Đã mở vòng rồi thu đèn/gọi Lumo | Đi lại giữa O và P bằng nền đá; đặt/bật đèn hoặc gọi Lumo lại nếu còn muốn khôi phục cầu. Vòng giữ độc lập với mạng. |
+| F tắt giữa cầu | Phần khung đang chịu tải giữ tới bờ theo luật chung. Từ H bật lại nguồn và gọi Lumo; từ O mở/dùng vòng đá về P hoặc gọi Lumo về ấn qua tay hồi O. |
+| Lumo về, luống tối nhưng cầu không mọc | Hai dấu riêng cần kiểm tra là nguồn ở khung và bóng trên luống. Luống tối tự nó không cấp khung. Dùng vòng nếu đã mở, hoặc khôi phục Lumo/trunk từ H. |
 
-Tay mở vòng nằm ở phần O tới được ngay khi sang cầu, không ở sau một cửa cần bản ghi/tinh thể. Nếu dời nó sau phần thưởng sẽ tạo vòng phụ thuộc sai. Tay hồi A trong H chỉ đưa G0 về A, không tự chốt hoặc sửa G1/G2. Không có mốc O trước khi đã sang O.
-
-Lưu room/đèn/G0–G2/tượng/chốt/mốc Lumo/vòng/bản ghi/tinh thể. Các checkpoint trước cầu, sau cầu và sau vòng; reload sau cầu không đặt Nhinh vào đoạn khung co. Bản ghi không yêu cầu giữ nguyên mạng trong khi nghe.
+Checkpoint trước A, ở H sau A, tại O sau cầu và sau khi mở vòng. Tải giữa cầu đặt Nhinh về nền an toàn gần bờ vừa rời. Lưu phòng, vị trí/cách mang đèn, F, G0–G2, tượng, chốt A/Nhật, trạng thái Lumo, vòng O–P, ghi chép, sơ đồ tối chỉ sau khi người chơi nhìn thấy, tinh thể và cảnh đã phát. Các tia/cửa/cầu tính lại từ cấu hình hiện tại; J không là điều kiện thắng. Tải sau kết quả không phát lại thử nghiệm, không đặt Nhinh trên cầu đã co và không nhân đôi tinh thể. Lối ra sang màn 10 ở O; Nhinh phải mang đèn đang cầm và tinh thể đã nhận theo lối thật, không tự lấy đèn khỏi S hoặc chuyển nó qua màn.
 
 ## 5. Sự thật
 
-Bản ghi có ba đoạn hình ngắn, các hồ sơ chi tiết đọc thêm tùy chọn:
+Bản ghi có ba đoạn hình ngắn; hồ sơ chi tiết đọc thêm tùy chọn:
 
 1. Bão: đèn dẫn thuyền; Người Bảo Vệ mở chế độ khẩn cấp. Có người thực sự được cứu.
 2. Những lần trì hoãn: đề nghị trả chu kỳ, lịch tái thiết, lượng dùng tăng. Mỗi lần “thêm một thời gian” để lại một dấu rõ, không ngụ ý cộng đồng đã đồng ý vô hạn.
@@ -67,8 +77,9 @@ Nhinh liên lạc, nhận xác nhận Bến Sương sẵn sàng dùng kho tích 
 
 ## 6. H và art
 
-- **Mức 1 — quan sát:** “Cầu có hai dấu: nguồn ở khung và bóng trên luống. Dấu nào đang thiếu?”
-- **Mức 2 — quan hệ:** “Giữ A rồi chuyển nguồn sâu vào đài; đường chia cho phép giữ Nhật sáng mà che luống.”
-- **Mức 3 — bước tiếp:** “Gài A, Lumo giữ ấn, nối G0–G1–G2 qua khung chia và tượng rộng; sang O mở vòng trước khi rút hỗ trợ.” H sau O chỉ nhắc phần đường rút/cùng nghe còn thiếu.
+- **Mức 1 — quan sát:** “Khi F tắt, sơ đồ nào hiện trên nền H? Đèn ở S có nhánh soi riêng không?”
+- **Mức 2 — quan hệ:** “Sơ đồ tối tách đường thẳng qua luống khỏi nhánh vòng qua tượng. Cầu cần nguồn ở khung và bóng trên luống cùng lúc.”
+- **Mức 3 — bước tiếp:** “Gài A, F tắt ngay tại H để xem sơ đồ tối; sau đó quay về P chỉnh G0 sang H, F bật tại S rồi trở lại H gọi Lumo và nối G1–G2. Đưa G2 qua bộ chia, giữ tượng rộng. Sang O mở vòng trước khi về lấy đèn; gọi Lumo tới bệ ghi chép rồi nhận Cân Bằng.” H chỉ nêu điều kiện vật lý đang thiếu, không yêu cầu Pulse hay xem sơ đồ.
+- Sau khi mở vòng: “Đường đá đã nối hai phòng. Dùng nó để mang đèn tới O và gặp Lumo trước khi nghe bản ghi.”
 
-Giữ ba nền đài, máy, gương, tượng, rễ và khung chuyển ký ức. Chỉnh/add các lớp ký ức cứu hộ/ca trực/cảnh báo/khóa van; bỏ khăn đỏ và chữ riêng về con gái. Tái dùng tư thế Guardian/Shadow có sẵn. HUD “Mở đường tới bộ điều tiết.” → “Giữ đường về cho cả hai.” → “Đưa Cân Bằng về Cây Mẹ.”
+Giữ ba nền đài, máy, gương, tượng, rễ và khung chuyển ký ức. Tái dùng kiểu vạch/bột sao như lớp phát quang tĩnh trên nền H; nguồn chiếu bảng lấy từ một nhánh soi trực tiếp của S, độc lập G0/Lumo. Không tạo chế độ scan mới hay làm dấu chạy theo camera. Thêm hốc minh họa khung nâng, tay hồi ở H, chốt Nhật, tay mở vòng ở O, ống hẹp cho Lumo và bệ ghi chép; hồ sơ cứu hộ/trì hoãn/khóa van thay nội dung riêng về con gái. Mọi cửa, mép cầu, tay điều khiển và lối vòng phải hiện đủ cả khi S tắt. HUD: “Mở đường tới bộ điều tiết.” → “Giữ đường về cho cả hai.” → “Đưa Cân Bằng về Cây Mẹ.”

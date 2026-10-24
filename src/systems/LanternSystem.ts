@@ -1,50 +1,57 @@
 import Phaser from 'phaser';
-import type { Point } from '../v4/core/geometry';
+import type { Point, Rect } from '../v4/core/geometry';
 import { canPulse } from '../v4/core/lantern';
 import type { LanternState } from '../v4/core/lantern';
+import { isPointLit } from '../v4/core/light';
+import type { Footprint } from '../v4/core/light';
 import { SoundSystem } from './SoundSystem';
 
 export type PulseCallback = (x: number, y: number, maxRadius: number) => void;
 
-/** Numbers for the falloff-shaded lantern box: a lit box and a dark (lantern off) box, each with its darkness and halo. */
+/** A level's lighting numbers. The ambient darkness is constant for the level; it never depends on the lantern. */
 export type LanternLightingProfile = {
-  litShadeSize: number;
-  litDarkness: number;
-  litHaloScale: number;
-  litHaloAlpha: number;
-  darkShadeSize: number;
-  darkDarkness: number;
-  darkHaloScale: number;
-  darkHaloAlpha: number;
+  /** Darkness of the room outside every footprint, 0 (none) to 1 (black). */
+  readonly ambientDarkness: number;
 };
 
-// Forest night lighting, shared by Level 01 (Forgotten Forest Edge) and Level 02 (Whispering Woods):
-// a falloff-shaded lantern box inside a dark forest.
-export const FOREST_LIGHTING: LanternLightingProfile = {
-  litShadeSize: 300, litDarkness: 0.80, litHaloScale: 0.80, litHaloAlpha: 0.48,
-  darkShadeSize: 120, darkDarkness: 0.88, darkHaloScale: 0.30, darkHaloAlpha: 0.14,
-};
+/** Forest night: a dark wood that the lantern's light cuts through. */
+export const FOREST_LIGHTING: LanternLightingProfile = { ambientDarkness: 0.5 };
 
-// Level 03 (Library Beneath the Roots): a wider warm box when lit keeps the tablets readable across the room;
-// with the lantern off, the box is tighter and the room darker, and the glowing dark ink carries the clues.
-export const LIBRARY_LIGHTING: LanternLightingProfile = {
-  litShadeSize: 380, litDarkness: 0.62, litHaloScale: 0.75, litHaloAlpha: 0.42,
-  darkShadeSize: 170, darkDarkness: 0.74, darkHaloScale: 0.30, darkHaloAlpha: 0.12,
-};
+/** Library: a warmer, slightly brighter room; the glowing dark ink carries the clues. */
+export const LIBRARY_LIGHTING: LanternLightingProfile = { ambientDarkness: 0.42 };
+
+/** The profile for a V4 level that declares none. */
+export const DEFAULT_LIGHTING: LanternLightingProfile = { ambientDarkness: 0.42 };
+
+/** Side of one lit-area cell, px. Each cell centre is tested with `isPointLit`. */
+const LIT_CELL = 2;
+/** Fill of the lit area. A cell lit by a circle fades from its centre: alpha = MIN + SPAN × (1 − d / radius). */
+const LIT_FILL = 0xffe6a0;
+const CIRCLE_ALPHA_MIN = 0.08;
+const CIRCLE_ALPHA_SPAN = 0.3;
+/** A cell lit only by a declared area (a spill or fixed source). */
+const AREA_ALPHA = 0.22;
+/** A rim cell (lit, with an unlit side neighbour) draws brighter. */
+const RIM_ALPHA = 0.45;
+/** Cell alphas are rounded to this step so that equal neighbours merge into one rect. */
+const ALPHA_STEP = 0.01;
+const AMBIENT_FILL = 0x040b12;
+/** The room's size in px; the overlay and the lit area are clamped to it. */
+const ROOM_WIDTH = 640;
+const ROOM_HEIGHT = 360;
 
 /**
- * Render-only lantern light. The lantern's state (in hand or on a pedestal, lit or not) is owned by the
- * caller and passed into `update()`; this class only draws it and keeps the Pulse wave and its cooldown.
+ * Render-only lantern light. The footprints (the lantern's light and any fixed sources) and the light blockers are
+ * owned by the caller and passed into `update()`; this class draws them with the same `isPointLit` rule the gameplay
+ * uses, so the drawn edge is the edge Nhinh is judged by. It also keeps the Pulse wave and its cooldown.
  */
 export class LanternSystem {
   private scene: Phaser.Scene;
   private darknessOverlay: Phaser.GameObjects.Graphics;
-  private haloSprite: Phaser.GameObjects.Image;
+  private litArea: Phaser.GameObjects.Graphics;
   private pulseGraphics: Phaser.GameObjects.Graphics;
   private vignetteImage: Phaser.GameObjects.Image;
-  private forestEdgeShade?: Phaser.GameObjects.Image;
-  /** Set when the shaded box recipe is active (an explicit profile); null for generic lighting. */
-  private readonly shadedLighting: LanternLightingProfile | null;
+  private readonly ambientDarkness: number;
 
   private flickerTime = 0;
   private pulseCooldownRemaining = 0; // ms
@@ -52,21 +59,24 @@ export class LanternSystem {
   private pulseOriginX = 0;
   private pulseOriginY = 0;
   private pulseListeners: PulseCallback[] = [];
+  /** False for a level without darkness (lighting 'none'): no overlay, lit area or vignette; Pulse still draws. */
+  private lightingEnabled = true;
 
   public static readonly PULSE_COOLDOWN_MS = 3000;
   public static readonly PULSE_DURATION_MS = 1000;
   public static readonly PULSE_MAX_RADIUS = 195;
 
-  /** @param profile shaded falloff box numbers; omit for the generic lighting branch. */
-  constructor(scene: Phaser.Scene, profile?: LanternLightingProfile) {
+  /** @param profile the level's lighting numbers; omit for the default. */
+  constructor(scene: Phaser.Scene, profile: LanternLightingProfile = DEFAULT_LIGHTING) {
     this.scene = scene;
-    this.shadedLighting = profile ?? null;
+    this.ambientDarkness = profile.ambientDarkness;
 
     this.darknessOverlay = scene.add.graphics();
     this.darknessOverlay.setDepth(68);
 
-    this.haloSprite = scene.add.image(0, 0, 'light_radial');
-    this.haloSprite.setDepth(69);
+    this.litArea = scene.add.graphics();
+    this.litArea.setDepth(69);
+    this.litArea.setBlendMode(Phaser.BlendModes.ADD);
 
     this.pulseGraphics = scene.add.graphics();
     this.pulseGraphics.setDepth(70);
@@ -74,17 +84,15 @@ export class LanternSystem {
     this.vignetteImage = scene.add.image(320, 180, 'vignette');
     this.vignetteImage.setDepth(71);
     this.vignetteImage.setScrollFactor(0);
-    if (this.shadedLighting) {
-      this.vignetteImage.setVisible(false);
-      if (!scene.textures.exists('level01_darkness_falloff')) {
-        throw new Error('Missing darkness falloff texture');
-      }
-      this.forestEdgeShade = scene.add.image(0, 0, 'level01_darkness_falloff').setDepth(68.5);
-    }
   }
 
   public onPulse(cb: PulseCallback): void {
     this.pulseListeners.push(cb);
+  }
+
+  /** Turns the darkness and the lantern light on or off for the level. Off draws no light at all. */
+  public setLightingEnabled(enabled: boolean): void {
+    this.lightingEnabled = enabled;
   }
 
   public clearPulseListeners(): void {
@@ -111,71 +119,34 @@ export class LanternSystem {
     return true;
   }
 
-  /** Where the carried lamp's light sits relative to the player; the halo and every beam from the carried lamp share it. */
-  public getCarriedLightPosition(player: Point): Point {
-    return { x: player.x + 6, y: player.y + 2 };
-  }
-
   public getCooldownRatio(): number {
     return Math.max(0, Math.min(1, this.pulseCooldownRemaining / LanternSystem.PULSE_COOLDOWN_MS));
   }
 
   /**
-   * Draws the lantern light for this frame.
-   * @param player the player's centre, used for the carried light and the lamp-off halo
-   * @param lantern the lantern's state; lit when `lantern.on`
-   * @param placedAt where the placed lantern's light sits (the pedestal point), or null when it is not placed
+   * Draws the light for this frame: the constant ambient overlay, the lit area (every footprint, cut by the blockers),
+   * and the Pulse wave.
+   * @param footprints every light footprint this frame (the lantern's, when it is on, and fixed sources)
+   * @param blockers the light blockers this frame (walls and closed leaves)
    */
-  public update(dt: number, player: Point, lantern: LanternState, placedAt: Point | null): void {
+  public update(dt: number, footprints: readonly Footprint[], blockers: readonly Rect[]): void {
     this.flickerTime += dt * 0.005;
 
     if (this.pulseCooldownRemaining > 0) {
       this.pulseCooldownRemaining = Math.max(0, this.pulseCooldownRemaining - dt);
     }
 
-    const carried = this.getCarriedLightPosition(player);
-    const placed = lantern.location.at === 'pedestal' ? placedAt : null;
-    const lightX = placed ? placed.x : carried.x;
-    const lightY = placed ? placed.y : carried.y;
-
-    // Gentle 2-4% organic flicker
+    // Gentle 2-4% organic flicker, applied to the lit area only: the ambient darkness is constant.
     const flicker = 1 + Math.sin(this.flickerTime * 2.3) * 0.025 + Math.cos(this.flickerTime * 5.7) * 0.012;
 
     this.darknessOverlay.clear();
+    this.litArea.clear();
+    this.vignetteImage.setVisible(this.lightingEnabled);
 
-    if (this.shadedLighting) {
-      // The shaded falloff box: the profile picks the numbers, the box and halo code below is shared.
-      const profile = this.shadedLighting;
-      const activeLantern = lantern.on;
-      this.haloSprite.setVisible(true);
-      this.haloSprite.setPosition(lightX, lightY);
-      this.haloSprite.setScale((activeLantern ? profile.litHaloScale : profile.darkHaloScale) * flicker);
-      this.haloSprite.setAlpha(activeLantern ? profile.litHaloAlpha : profile.darkHaloAlpha);
-      const darknessAlpha = activeLantern ? profile.litDarkness : profile.darkDarkness;
-      const size = activeLantern ? profile.litShadeSize : profile.darkShadeSize;
-      const shadeX = Math.round(lightX);
-      const shadeY = Math.round(lightY);
-      this.forestEdgeShade!.setPosition(shadeX, shadeY).setDisplaySize(size, size).setAlpha(darknessAlpha);
-      this.fillForestEdgeDarknessOutside(shadeX, shadeY, size, darknessAlpha);
-    } else if (lantern.on) {
-      // Night mode with warm lantern light active (radius ~115 world px)
-      this.haloSprite.setVisible(true);
-      this.haloSprite.setPosition(lightX, lightY);
-      this.haloSprite.setScale(0.95 * flicker);
-      this.haloSprite.setAlpha(0.88);
-
-      // Subtle outer darkness frame so environment stays readable while focusing light
-      this.darknessOverlay.fillStyle(0x040d12, 0.24);
-      this.darknessOverlay.fillRect(0, 0, 640, 360);
-    } else {
-      // Lantern OFF: dim atmosphere (0.46 alpha) so player, paths, and locks remain clearly visible
-      this.haloSprite.setVisible(true);
-      this.haloSprite.setPosition(player.x, player.y);
-      this.haloSprite.setScale(0.38);
-      this.haloSprite.setAlpha(0.32);
-
-      this.darknessOverlay.fillStyle(0x040b12, 0.44);
-      this.darknessOverlay.fillRect(0, 0, 640, 360);
+    if (this.lightingEnabled) {
+      this.darknessOverlay.fillStyle(AMBIENT_FILL, this.ambientDarkness);
+      this.darknessOverlay.fillRect(0, 0, ROOM_WIDTH, ROOM_HEIGHT);
+      this.drawLitArea(footprints, blockers, flicker);
     }
 
     // Draw expanding Light Pulse wave (~1s outward)
@@ -197,16 +168,111 @@ export class LanternSystem {
     }
   }
 
-  private fillForestEdgeDarknessOutside(centerX: number, centerY: number, size: number, alpha: number): void {
-    const half = size / 2;
-    const left = Phaser.Math.Clamp(centerX - half, 0, 640);
-    const right = Phaser.Math.Clamp(centerX + half, 0, 640);
-    const top = Phaser.Math.Clamp(centerY - half, 0, 360);
-    const bottom = Phaser.Math.Clamp(centerY + half, 0, 360);
-    this.darknessOverlay.fillStyle(0x03080c, alpha);
-    if (top > 0) this.darknessOverlay.fillRect(0, 0, 640, top);
-    if (bottom < 360) this.darknessOverlay.fillRect(0, bottom, 640, 360 - bottom);
-    if (left > 0 && bottom > top) this.darknessOverlay.fillRect(0, top, left, bottom - top);
-    if (right < 640 && bottom > top) this.darknessOverlay.fillRect(right, top, 640 - right, bottom - top);
+  /**
+   * Draws the lit area over the bounding box of the footprints. Each 2px cell whose centre `isPointLit` is filled:
+   * a cell lit by a circle takes the brightest such circle's fade (centre brighter, edge dimmer); a cell lit only by
+   * an area takes AREA_ALPHA; a rim cell (lit, with an unlit 4-neighbour) takes RIM_ALPHA. Runs of one alpha in a row
+   * are drawn as one rect.
+   */
+  private drawLitArea(footprints: readonly Footprint[], blockers: readonly Rect[], flicker: number): void {
+    const box = footprintBox(footprints);
+    if (!box) return;
+    const cols = Math.ceil((box.right - box.left) / LIT_CELL);
+    const rows = Math.ceil((box.bottom - box.top) / LIT_CELL);
+    const circles = footprints.filter((f): f is Circle => f.kind === 'circle');
+
+    const lit: boolean[][] = [];
+    for (let row = 0; row < rows; row++) {
+      const y = box.top + row * LIT_CELL;
+      const cellH = Math.min(LIT_CELL, box.bottom - y);
+      const line: boolean[] = [];
+      for (let col = 0; col < cols; col++) {
+        const x = box.left + col * LIT_CELL;
+        const cellW = Math.min(LIT_CELL, box.right - x);
+        line.push(isPointLit({ x: x + cellW / 2, y: y + cellH / 2 }, footprints, blockers));
+      }
+      lit.push(line);
+    }
+
+    const litAt = (row: number, col: number): boolean =>
+      row >= 0 && row < rows && col >= 0 && col < cols && lit[row][col];
+    const alphas: number[][] = lit.map((line, row) => line.map((isLit, col) => {
+      if (!isLit) return 0;
+      const onRim = !litAt(row - 1, col) || !litAt(row + 1, col) || !litAt(row, col - 1) || !litAt(row, col + 1);
+      if (onRim) return quantizeAlpha(RIM_ALPHA);
+      const centre = { x: box.left + col * LIT_CELL + LIT_CELL / 2, y: box.top + row * LIT_CELL + LIT_CELL / 2 };
+      const circleFade = brightestCircleAlpha(centre, circles, blockers);
+      return quantizeAlpha(circleFade ?? AREA_ALPHA);
+    }));
+
+    const levels = new Set(alphas.flat());
+    levels.delete(0);
+    for (const level of levels) {
+      this.litArea.fillStyle(LIT_FILL, level * flicker);
+      alphas.forEach((line, row) => {
+        const y = box.top + row * LIT_CELL;
+        const h = Math.min(LIT_CELL, box.bottom - y);
+        let col = 0;
+        while (col < line.length) {
+          if (line[col] !== level) {
+            col++;
+            continue;
+          }
+          const start = col;
+          while (col < line.length && line[col] === level) col++;
+          const x = box.left + start * LIT_CELL;
+          const right = Math.min(box.left + col * LIT_CELL, box.right);
+          this.litArea.fillRect(x, y, right - x, h);
+        }
+      });
+    }
   }
+}
+
+/** A circle footprint. */
+type Circle = Extract<Footprint, { kind: 'circle' }>;
+
+/** Rounds a cell alpha to ALPHA_STEP so that neighbours with the same level merge into one rect. */
+function quantizeAlpha(alpha: number): number {
+  return Math.round(alpha / ALPHA_STEP) * ALPHA_STEP;
+}
+
+/**
+ * The alpha of the brightest circle that lights `p` on its own, or null when no circle lights it.
+ * A circle fades from MIN + SPAN at its centre down to MIN at its edge.
+ */
+function brightestCircleAlpha(p: Point, circles: readonly Circle[], blockers: readonly Rect[]): number | null {
+  let best: number | null = null;
+  for (const c of circles) {
+    if (!isPointLit(p, [c], blockers)) continue;
+    const d = Math.hypot(p.x - c.center.x, p.y - c.center.y);
+    const alpha = CIRCLE_ALPHA_MIN + CIRCLE_ALPHA_SPAN * (1 - d / c.radius);
+    if (best === null || alpha > best) best = alpha;
+  }
+  return best;
+}
+
+/** The clamped integer box around every footprint, or null when nothing of them is on the room. */
+function footprintBox(footprints: readonly Footprint[]): { left: number; top: number; right: number; bottom: number } | null {
+  const points: Point[] = [];
+  for (const f of footprints) {
+    switch (f.kind) {
+      case 'circle':
+        points.push(
+          { x: f.center.x - f.radius, y: f.center.y - f.radius },
+          { x: f.center.x + f.radius, y: f.center.y + f.radius },
+        );
+        break;
+      case 'area':
+        points.push(...f.points);
+        break;
+    }
+  }
+  if (points.length === 0) return null;
+  const left = Math.max(0, Math.floor(Math.min(...points.map(p => p.x))));
+  const top = Math.max(0, Math.floor(Math.min(...points.map(p => p.y))));
+  const right = Math.min(ROOM_WIDTH, Math.ceil(Math.max(...points.map(p => p.x))));
+  const bottom = Math.min(ROOM_HEIGHT, Math.ceil(Math.max(...points.map(p => p.y))));
+  if (right <= left || bottom <= top) return null;
+  return { left, top, right, bottom };
 }

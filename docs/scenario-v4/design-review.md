@@ -2,6 +2,8 @@
 
 Ngày: **2026-10-24**. Phạm vi là tài liệu truyện, prologue và 10 màn, không phải một bản game V4 đã dựng.
 
+**Lưu ý phiên bản:** các mục từ “Nguồn và phân công” tới bảng hash đầu tiên dưới đây là hồ sơ lượt biên soạn trước đợt chỉnh ánh sáng/Pulse. Những PASS đó chỉ áp dụng bản đã đọc lúc ấy; không chứng nhận bản đang sửa hoặc runtime hiện tại. Bằng chứng mới nằm ở mục “Đợt chỉnh ánh sáng và Pulse” cuối tài liệu.
+
 ## Nguồn và phân công
 
 - Đã đọc hướng V2, các màn hiện có và `RULE_GAMES.md`. Mốc nhánh tham khảo đã đọc là `origin/test-develop` tại `3e9c12fabff160f1d7919db97ac24ec3130a066b`; không coi đó là HEAD của working tree đang mở.
@@ -80,3 +82,192 @@ Nếu đổi luật, bố cục hoặc điều kiện, phải đọc lại các 
 | puzzle-contracts.md | `b59b1f11b75e6d49ed5b48452370d55e2337072b84f1181989e565f916d8fe26` |
 | README.md | `dc29af7199cf5d211d4fea84eaf2fcc33260be85648c592a96c951d19ca6d5b6` |
 
+
+## Đợt chỉnh ánh sáng và Pulse — 2026-10-24
+
+### Phạm vi và bản được đọc
+
+Đợt này thực hiện yêu cầu đã duyệt về vai trò của F/Pulse trong kịch bản. Nhánh làm việc là `feat/v4-foundation`, HEAD nền `515e723c12ce587fe1ef7e7da53193f786530053`; các bản sửa là working diff, chưa commit hoặc push. Phạm vi gồm 10 màn, `puzzle-contracts.md`, `art-and-production.md`, `README.md` và bản ghi này. Không sửa runtime, art, nhiên liệu, prologue, cốt truyện biên soạn hoặc phần 2.
+
+Luna implementer được yêu cầu `gpt-6-luna` / `xhigh`; Luna reviewer riêng được yêu cầu `gpt-6-luna` / `high`. Các cặp này có trong danh sách công cụ Codex và dispatch được chấp nhận. Công cụ chỉ trả tên task, không trả model/effort resolved: **unknown**. Reviewer nhận chỉ dẫn chỉ đọc; không có bằng chứng sandbox kỹ thuật. Root rà đường mẫu và chỉnh các câu mâu thuẫn trước khi đóng băng 13 tài liệu nội dung cho lượt đọc độc lập.
+
+### Các quyết định và lỗi đã sửa trong lượt viết
+
+| Điểm cần làm rõ | Quyết định trong bản sửa |
+| --- | --- |
+| F có thể thành công tắc tối toàn phòng | Ánh nền luôn đủ nhìn đường; vùng nguồn cầm/đặt/cố định được khai báo riêng. Dấu tối phụ thuộc ánh sáng thật tại dấu. |
+| Pulse trùng thông tin với tối hoặc trở thành bước bắt buộc | Pulse đọc liên kết tĩnh, chỉ khi cầm đèn bật; J giữ dấu đã phát hiện. M02 dành hướng đầu nhận cho lớp tối; không kiểm cờ quét để cho giải. |
+| M01 nhặt đèn sai phía hoặc dùng ánh cầm vượt ổ kín | Nhặt S1 là đang ở sân vào; có thể đặt lại ngay. A/B chỉ nhận qua đúng bệ hoặc được chốt giữ. |
+| M05 lắp lại K khi cửa đã đóng | Dùng mốc/tay hồi mở cửa trước khi lắp lại; có thể tháo từ nền an toàn rồi đi tiếp qua D đã giữ. Không thêm bệ đèn. |
+| M07 nguồn W vô tình thay toàn bộ vai trò F | W chỉ phủ luống cầu/ươm. Hoa A cần đèn cầm; chốt giữ cửa sau khi ánh rời hoa. Luống đầu cầu nằm trong vệt khi tiến vào, nên cần để tối trước khi bắt đầu qua. |
+| M08 có pha tối nhưng chưa có thao tác đặt lại nguồn | Qua rễ tới tay R/Z/tượng ở Đông, mở lối đá hồi; trở về Nam, E đặt đèn S rồi bật. D0/D1 là hai khớp chia thật; Z là nguồn chuẩn cho cặp gương. |
+| M09 chỉnh G0 từ sai phòng hoặc thu đèn từ xa | Khảo sát tối tại H; đi H–P qua A đã chốt để chỉnh G0 rồi trở lại H. Vòng chỉ mở từ O; phải đi bộ về S lấy đèn và đoàn tụ Lumo trước bản ghi. |
+| M10 thiếu dấu tự giữ hoặc đèn/Lumo xuất hiện qua cắt cảnh | Đai và chỉ báo chính xác nhận tự giữ ngay sau E. F, thu đèn và gọi Lumo đổi thứ tự được; cảnh chuyển thể hiện việc lấy đèn/gọi Lumo thực tế trước khi rời. |
+
+### Kiểm tra áp dụng cho đợt này
+
+| Kiểm tra | Trạng thái | Phạm vi bằng chứng |
+| --- | --- | --- |
+| `git -c core.safecrlf=false diff --check -- docs/scenario-v4` | **PASS** | Lệnh root chạy trên bản nội dung đóng băng, không có lỗi whitespace. |
+| Liên kết file trong tài liệu biên soạn | **PASS** | Kiểm 17 Markdown ngoài hai bản nguyên văn: 19 liên kết tới file, không thiếu đích. |
+| Liên kết trong hai bản nguyên văn | **FAIL — tồn tại từ trước** | Liên kết tuyệt đối tới `docs/scenario-v3/README.md` trong `00-original-story-verbatim.md` không có đích trong checkout này. Bản nguyên văn được giữ nguyên; lỗi không nằm trong nội dung sửa. |
+| Giữ nguyên truyện, mở đầu, phần 2 và hồ sơ gốc | **PASS** | SHA-256 của hai file nguyên văn, `00-story-bible.md`, `00-prologue.md`, `phase-2-outline.md` khớp giá trị root đọc đầu đợt. |
+| Đọc độc lập bản sửa | **PASS trong phạm vi đọc** | Task `review_v4_lighting` đọc riêng 13 file sửa, không nêu finding cụ thể. Reviewer báo đã đối chiếu hash đầu/cuối; root kiểm lại toàn bộ hash nội dung trước khi chốt. Đây không phải hai lượt review code độc lập và không chứng nhận mọi trạng thái. |
+| Build/test runtime, kiểm collider/tia/save, playtest và đo độ khó | **NOT_RUN** | Công việc chỉ sửa tài liệu. Đường mẫu và review không chứng minh mọi trạng thái hay chất lượng trải nghiệm thực tế. |
+
+### Dấu vân tay bản nội dung đóng băng
+
+Bảng này lấy trực tiếp từ working files, không gồm chính `design-review.md`. Các bảng/kết quả ở phần lịch sử phía trên không thay thế bằng chứng của bản này. Nếu sửa nội dung sau lượt đọc, cập nhật hash và đọc lại phần liên quan.
+
+| File | SHA-256 |
+| --- | --- |
+| 00-original-prologue-verbatim.md | `b93039c88505fae187be470f04f08d1c71c46fc110d71f7dd6d122761c934d32` |
+| 00-original-story-verbatim.md | `8dedad8060472f697991c2dfd01a551d0d6051413ee6686696a02683877dc150` |
+| 00-prologue.md | `316a0a9c7b3104036290452aa91cce17349851270fab845c170ec6c57220b913` |
+| 00-story-bible.md | `8a4989738a045ee950aa70524deda14da1ea8adcebfe5068690747e12f9741d8` |
+| 01-forgotten-forest-edge.md | `e88add8ada9cb7af72b914568bf500d1bf393aa21ff502b9dcbed44f6f1f88dc` |
+| 02-whispering-woods.md | `5aeb3d1740353d03f4fdc68d9eb74aa8fb72a1047cca8ab86fe0ff71a01c4968` |
+| 03-library-beneath-the-roots.md | `04461f1ec8ed5006df5dc7f773d671d2cb633181741d0658eef3be62b193a478` |
+| 04-shattered-moonlit-creek.md | `3b7de69e785a3a0b789ff232f0b7241f5e8f09a4f343e16a31b8e4e00062cd96` |
+| 05-a-path-for-two.md | `f278c72eb39065d208f2e2a5115dd5ac17b04648590e071c05984e97c59d4135` |
+| 06-the-sleepless-tower.md | `74b13614aebcee6539352c2636e678192fb24a430bf1f07e822a3943f6734fd8` |
+| 07-the-sleeping-garden.md | `8ca13fbd404a2bd9a96e6231796004cbe7dedc1e2cea7b6c14bab2f1057a66ad` |
+| 08-ruins-of-two-halves.md | `e349f0b7f6ddc4aa98e49de65f525c0305437bf2699aff00479d7f923feec47e` |
+| 09-dark-moon-observatory.md | `db3b84bea7b6b94f32eac2207d0b91532d87a077e18f5eef35854c00a5dc3620` |
+| 10-the-heart-of-elaria.md | `1ec5e35edd44224e57380495d6bb88053809c2aaaf51d05ec03da74d1087d354` |
+| art-and-production.md | `f1330e0da0ee8d076b9575d85be44636b257fafb1a344a8067fbd9fd24d633e7` |
+| phase-2-outline.md | `0ba5a207d77096eb801c68512d7798a834ba5f2250bd95ab3539b5b92c4fffb5` |
+| puzzle-contracts.md | `de271a9f05b334b8f93cf131733b5785dbac25e8d7e6f0cfd3e765496a1fbb75` |
+| README.md | `a0d971660688b6d4ae3270fca3017e87a2f3a406a70da750e6a1b8204b8e6856` |
+
+## Đợt chốt quy ước đèn — 2026-10-24
+
+Nền: `feat/v4-foundation` tại `3fb28d8`. Đợt này chốt các điểm mà đợt ánh sáng/Pulse để ngỏ, để có thể dựng chung cho mọi màn. Không đổi luật, lời giải hay cốt truyện của màn nào.
+
+| Điểm còn ngỏ | Quyết định |
+| --- | --- |
+| Vệt đèn cầm tay rộng bao nhiêu, theo hướng nào | Hình thang 56px, gốc 12px, đầu xa 32px, theo 8 hướng quay của Nhinh; quầng 12px quanh đèn. Tường và cửa đóng chắn vệt. Rìa vẽ khớp footprint; không có quầng trang trí lớn hơn. |
+| Đèn trên bệ có footprint không | Chỉ quầng 12px cộng nhánh tràn màn khai báo; đầu nối kín không chiếu. |
+| F có làm tối/sáng cả màn không | Không. Ánh nền mỗi phòng cố định; F chỉ thêm/bớt footprint. |
+| Đèn cầm tay kích được cảm biến nào | Chỉ mặt nhận hở (hoa, luống rễ, lá cảm biến); ổ kín chỉ nhận qua bệ và mạng đã vẽ. |
+| Dấu “đọc được” và “đã thấy” | Dấu sáng cần footprint chồng lên; dấu tối cần không footprint nào. Đã thấy = đọc được và chân Nhinh trong 64px, cùng phòng; chỉ để J xem lại. |
+| Trạng thái F khi vào màn (05/07 ghi tắt, 10 ghi mang theo) | F đi theo người chơi qua lối ra; “trạng thái đầu” của màn là mặc định khi không có trạng thái mang theo. Điểm vào và checkpoint phải hợp lệ với cả hai trạng thái F. Đã sửa câu ở 05, 07, 08 cho khớp. |
+| Lỗi chữ | Tách số dính chữ ở 06 và 10; HUD màn 08 đổi “vùng ươm” thành “vạt cây” cho khớp nội dung màn. |
+
+Bổ sung sau lượt đọc lại `e75e951`: tường và cửa đóng chắn cả quầng, kể cả đèn trên bệ và nhánh tràn, với hình và gameplay cắt cùng một đường; “đã thấy” thêm điều kiện không bị tường/cửa đóng che; tự ghi J chỉ cho dấu sáng/tối, dấu Pulse vẫn cần Pulse; quay vệt khỏi dấu là cách hợp lệ, không kiểm “đã bấm F”; mỗi việc rọi trúng/tránh cần vùng đứng ít nhất 8px mỗi chiều.
+
+Các số 56/12/32/64px là giá trị khởi điểm, chỉnh một lần ở phòng thử cho mọi màn. Chưa build, chưa playtest; bảng kiểm script cho chỗ đứng rọi mặt nhận hở là việc của bản dựng.
+
+Dấu vân tay các file sửa trong đợt này (file khác giữ hash của bảng trước):
+
+| File | SHA-256 |
+| --- | --- |
+| puzzle-contracts.md | `5ae7a1a0617e55fdc89e24916741d04a7ba67bb148fcf8a74ce1cf8d0f0a2f3c` |
+| 05-a-path-for-two.md | `2cdfbe75beb507da9b4906f29d57944acaafb95319567852ec7cd3aab475fbca` |
+| 06-the-sleepless-tower.md | `a97895b300059088dfc541b42a865d752129cc682e7fb2a8ffa28cd20777f850` |
+| 07-the-sleeping-garden.md | `0a8354605db5b4572616769dab4b7590871bd6576d1b7922b1cafe40a2775814` |
+| 08-ruins-of-two-halves.md | `8ac133adf5209adf0767593026bfce1a39be0926073d6b5619a0b1b9a4bad891` |
+| 10-the-heart-of-elaria.md | `cedad31f7e7051120636cdd301aaf2f72d7cc688e26a1009240f4a73a613a399` |
+
+## Đổi vệt đèn thành vòng sáng — 2026-10-24
+
+Người dùng chỉ ra đèn lồng không phải đèn pin, nên không thể chỉ chiếu trong một hình thang theo hướng quay. Quyết định: đèn cầm tay tỏa một vòng sáng bán kính 40px, tâm ở điểm trên sàn dưới chân Nhinh; hướng quay không đổi vùng sáng. Đèn trên bệ vẫn chỉ để lọt quầng 12px và nhánh tràn đã khai báo, vì bệ là hộp có đầu nối kín. Vật chắn, luật dấu sáng/tối, luật “đã thấy” và vùng đứng 8px giữ nguyên.
+
+Hệ quả: tránh rọi một vật nghĩa là lùi ra hoặc tắt F, không còn quay đèn đi; F có vai trò rõ hơn khi luống, dấu hay cầu nằm ngay trên đường đi. Đã sửa câu có hướng ở 01 (“vật ở phía trước”) và 07 (“vệt hẹp”, “quay vệt khỏi luống”). Bán kính 40px là giá trị khởi điểm, chỉnh ở phòng thử.
+
+| File | SHA-256 |
+| --- | --- |
+| puzzle-contracts.md | `091bc9bc21ff8c3d7df54c66456d0d6abaffd99e4eb4facd45962a701dce166f` |
+| 01-forgotten-forest-edge.md | `08e561689d938127281e94e98679e424c35c2a89a9613c6fda5917aaaa44d4b6` |
+| 07-the-sleeping-garden.md | `bf9cfe9b7d103ec6d622777458b0a1f2e2626519263b1840b81ac52d2bcc4553` |
+
+## Đợt chỉnh demo theo nghề sửa đèn của Nhinh — 2026-10-24
+
+### Phạm vi, nguồn và phân công
+
+Nền đọc: `feat/v4-foundation` tại `5833b25138b09edcde13b32b93e80d1fdd135868`. Người dùng duyệt hướng chỉnh để nghề sửa đèn và quá trình trưởng thành của Nhinh hiện qua việc chơi, sau đó thu phạm vi còn bốn màn demo và xác nhận chỉ hoàn thiện kịch bản/tài liệu. Việc duyệt hướng không có nghĩa người dùng đã đọc duyệt riêng mọi câu chữ mới.
+
+Orchestrator trực tiếp viết `demo-01-04-rewrite.md` trước khi giao Luna tích hợp. Bản này nối 01 thử nguồn, 02 hiệu chỉnh trục, 03 kiểm quy trình và 04 đo tác động Bến/Rễ thành một quá trình chẩn đoán. Luna cập nhật bốn tài liệu màn và đồng bộ README, contracts, kế hoạch art. Orchestrator viết bổ sung các quyết định sau rà rồi Luna mới đồng bộ phần chi tiết. Không mở rộng sang các đề xuất về màn 05–10.
+
+Phạm vi sửa gồm bản kịch bản mới, bảy tài liệu tích hợp và chính báo cáo này. Bốn tài liệu `00-*`, màn 05–10 và outline phần 2 (11 tệp) khớp hash trước khi làm. Quy ước đèn hiện hành là vòng sáng 40px, bệ 12px cộng nhánh tràn khai báo; không trở lại hình thang/8 hướng. Lần này không sửa code hoặc tạo art; workspace có thay đổi runtime của tác vụ khác, không dùng chúng làm bằng chứng cho kịch bản này.
+
+Cấu hình yêu cầu qua công cụ native: worker `gpt-6-luna` / `xhigh`; hai reviewer riêng `gpt-6-luna` / `high`, không dùng ngữ cảnh hội thoại kế thừa. Công cụ chấp nhận các yêu cầu; không trả trường model/effort đã phân giải, nên giá trị thực đã phân giải là **không rõ**. Lượt worker đầu lỗi “You’ve hit your usage limit.”; sau khi công cụ tài khoản báo `ordinaryUsageAllowed=true`, chạy lại cùng agent/cấu hình và hoàn tất. Không chuyển model/provider. Read-only là chỉ dẫn cho reviewer, không phải một sandbox được chứng minh. Hai reviewer cùng họ model vẫn có thể có điểm mù tương quan.
+
+### Các lượt rà và phát hiện
+
+- Vòng 1: hai reviewer đọc bản nguồn và bảy tài liệu tích hợp trên cùng bộ hash; không báo phát hiện cần sửa trong phạm vi đã đọc. Bằng chứng đó thuộc bản vòng 1, không thay kết quả bản cuối.
+- Sau vòng 1, orchestrator tìm R1 và R2, tự sửa quyết định trong bản nguồn rồi giao Luna tích hợp. Vòng 2 đọc lại ba tệp thay đổi và đối chiếu contracts; reviewer logic không thấy phát hiện mới, reviewer truyện tìm R3.
+- Orchestrator sửa đúng đoạn HUD của bản nguồn cho R3. Hai reviewer kiểm đoạn thay đổi cùng điều kiện ra màn, xác nhận 18 tệp nội dung còn lại không đổi bằng hash. Cả hai không báo phát hiện cần sửa ở bản cuối.
+
+| Mã | Mức | Nguồn phát hiện | Vấn đề và cách xử lý | Trạng thái bản cuối |
+| --- | --- | --- | --- | --- |
+| R1 | P2 | Orchestrator sau vòng 1 | Màn 04 từng chuẩn hóa N về mở khi tải, kể cả người chơi đã đóng. Bản cuối lưu/tải N thực tế; T dừng không đổi N. Nếu N đóng, người chơi mở lại từ nền Đông trước khi kết demo. | RESOLVED — đã đối chiếu bản cuối |
+| R2 | P2 | Orchestrator sau vòng 1 | T được mô tả khóa sau mẫu nhưng còn nói đến thử tiếp, có thể gây triển khai lặp rút nước mà giấu hậu quả. Bản cuối ghi cặp kết quả ở lần E hợp lệ đầu, T về tải thấp/gài lẫy khi kết thúc hoặc dừng; E sau chỉ xem kết quả. Thiếu nguồn/N đóng không ghi mẫu. | RESOLVED — đã đối chiếu bản cuối |
+| R3 | P2 | Reviewer truyện, vòng 2 | Dãy HUD ở bản nguồn thiếu nhánh mở N sau mẫu trong khi điều kiện kết yêu cầu N mở. Đã thêm mục tiêu mở van có ưu tiên khi N đóng, kể cả đã thu đèn. | RESOLVED — hai reviewer kiểm đoạn sửa |
+
+Thoại ở 04 nói N đã mở **lúc lấy mẫu**, không khẳng định N vẫn đang mở nếu người chơi đã đóng sau đó. Tải giữa phần trình bày mẫu giữ kết quả/tiến độ liên lạc và đưa T về an toàn, không lặp hậu quả. Kết demo kiểm mẫu thật, T ở tải thấp/lẫy gài, N mở, đèn đang cầm và Nhinh ở lối ra Đông; không thay đường đi thật bằng cờ lịch sử chốt/Pulse/thoại.
+
+### Kiểm tra thực tế và giới hạn
+
+| Kiểm tra | Kết quả | Bằng chứng/phạm vi |
+| --- | --- | --- |
+| Diff tài liệu đã theo dõi | PASS | `git -c core.safecrlf=false diff --check -- docs/scenario-v4`, không có lỗi khoảng trắng. |
+| Bản kịch bản mới | PASS | Kiểm tra trực tiếp: 0 dòng có khoảng trắng cuối, 0 dòng dấu xung đột. |
+| Liên kết tài liệu đang biên soạn | PASS | 20 liên kết cục bộ trong các tệp không phải bản nguyên văn, tất cả có đích tồn tại. |
+| Phạm vi được giữ | PASS | 11 tệp được bảo vệ khớp hash trước khi sửa. |
+| Bản nội dung được rà | PASS | Orchestrator và hai reviewer xác nhận 19/19 hash của bản cuối; không gồm chính báo cáo này. |
+| Logic/truyện trên tài liệu | PASS | Đối chiếu bản nguồn với chi tiết 01–04, trạng thái dừng/mất nguồn/N đóng/tải lại/E lặp/đi ra sớm và phần kết. Không còn phát hiện cần xử lý trong phạm vi đã rà. |
+| Build, test runtime, kiểm collider/tầm với và playtest | NOT_RUN | Chỉ làm tài liệu. Chưa chứng minh độ khó, thời lượng, hình học vòng sáng hoặc trải nghiệm của người mới. |
+
+Liên kết V3 bị thiếu trong bản lưu nguyên văn đã ghi ở đợt trước vẫn nằm ngoài phạm vi sửa và kiểm liên kết đang biên soạn của đợt này. Không dùng việc giữ hash bản lưu để tuyên bố liên kết lịch sử đã được sửa.
+
+### Dấu vân tay bản nội dung cuối
+
+SHA-256 lấy từ byte thực của working files sau chỉnh sửa. Báo cáo này không tự nằm trong bảng. Nếu nội dung hoặc yêu cầu thay đổi, đối chiếu lại phần liên quan; các kết quả lịch sử phía trên không thay cho việc rà bản mới.
+
+| File | SHA-256 |
+| --- | --- |
+| 00-original-prologue-verbatim.md | `b93039c88505fae187be470f04f08d1c71c46fc110d71f7dd6d122761c934d32` |
+| 00-original-story-verbatim.md | `8dedad8060472f697991c2dfd01a551d0d6051413ee6686696a02683877dc150` |
+| 00-prologue.md | `316a0a9c7b3104036290452aa91cce17349851270fab845c170ec6c57220b913` |
+| 00-story-bible.md | `8a4989738a045ee950aa70524deda14da1ea8adcebfe5068690747e12f9741d8` |
+| 01-forgotten-forest-edge.md | `06469a73cae9d1d02de5f5e206c5f9c5e0401b0eae7eb3fb0d56cb01286ce509` |
+| 02-whispering-woods.md | `72df175f795ee9033f456812524c35911c3743390eca20b52ad3ad11e0d8acfb` |
+| 03-library-beneath-the-roots.md | `51891b45681390dd73b0d12f38bcca3f85b47602818abeecb5c09627f059f73a` |
+| 04-shattered-moonlit-creek.md | `b1e46983678499080c99ff27f0fb2c36059ba63ccfe78a27e6c70169e849bd22` |
+| 05-a-path-for-two.md | `2cdfbe75beb507da9b4906f29d57944acaafb95319567852ec7cd3aab475fbca` |
+| 06-the-sleepless-tower.md | `a97895b300059088dfc541b42a865d752129cc682e7fb2a8ffa28cd20777f850` |
+| 07-the-sleeping-garden.md | `bf9cfe9b7d103ec6d622777458b0a1f2e2626519263b1840b81ac52d2bcc4553` |
+| 08-ruins-of-two-halves.md | `8ac133adf5209adf0767593026bfce1a39be0926073d6b5619a0b1b9a4bad891` |
+| 09-dark-moon-observatory.md | `db3b84bea7b6b94f32eac2207d0b91532d87a077e18f5eef35854c00a5dc3620` |
+| 10-the-heart-of-elaria.md | `cedad31f7e7051120636cdd301aaf2f72d7cc688e26a1009240f4a73a613a399` |
+| art-and-production.md | `3a7013b3278439d84b51758e7e8bf49f6e0ccc73e053cdff7169de3ddd8d5619` |
+| demo-01-04-rewrite.md | `cbd293526adf6bcec64731bf2a92293555c5103a504f2a6726340b6ee420cd24` |
+| phase-2-outline.md | `0ba5a207d77096eb801c68512d7798a834ba5f2250bd95ab3539b5b92c4fffb5` |
+| puzzle-contracts.md | `0298b792b12933c7f81ff202093541ea4d9f1ff3383012352e36a0c9ec01bd82` |
+| README.md | `ba920892ec3613b19ec8904649791ac160b14a69823558203919d508fbab8875` |
+
+## Vá lỗ hổng demo 01–04 — 2026-10-24
+
+Người dùng duyệt bảy cách sửa sau lượt rà bản viết lại demo và tài liệu 01–04. Không đổi mạch truyện, lời giải hay thoại.
+
+| Lỗ hổng | Sửa |
+| --- | --- |
+| Luật giữ khi chịu tải cho phép nhặt đèn ngay trong ngưỡng A (01) hoặc trên cầu A (04) rồi bước qua, bỏ qua bước gài chốt | Luật chung “Không mang nguồn qua chính đường nó cấp”: bệ đặt ngoài tầm E từ ngưỡng/mặt cầu nó cấp; script bố cục kiểm cùng tầm với. Ghi rõ ở 01 (S1/S2) và 04 (S) |
+| Tia của mạng gương chưa có trong luật ánh sáng; 04 không rõ tia có che vệt khoáng | Tia là footprint dải 6px, bị tường/cửa đóng/mặt tượng/lưng gương chắn; che dấu tối và kích mặt nhận hở dưới dải; ổ kín chỉ nhận ở đầu cuối. 04: đoạn khoáng dưới tia cần tắt F để đọc |
+| 03 không nói thứ gì chốt mô hình; tự chốt khi khớp cho phép bật thử 16 tổ hợp | Cần xác nhận cạnh bánh xe; sai thì chạy một lượt và chỉ báo phía thiếu, không khóa, không đếm lượt |
+| 02 yêu cầu E gài hãm “để mang đèn đi” dù màn không dùng đèn | Lẫy nhìn thấy được tự sập khi cổng mở hết; quay tay quay sau đó không đóng cổng |
+| 01 để đèn nằm cạnh bia, trái luật chỉ đặt/nhặt tại bệ | Nhặt đèn trong cảnh mở; điều khiển bắt đầu khi đèn đã ở tay và đang bật |
+| 04 chưa nói lối ra phản ứng khi chưa đủ điều kiện; câu “đặt đèn ở bờ Đông” không có bệ | Lối ra là bậc đá luôn thấy; vào vùng ra khi thiếu điều kiện thì nêu điều thiếu, không chuyển cảnh. Bờ Đông không có bệ, T chỉ nhận tia qua G2 |
+| 02/03 ghi “lưu vị trí người chơi”, trái cách lưu theo checkpoint | Đổi thành “checkpoint đang đứng” |
+
+Chưa build, chưa playtest. Dấu vân tay các file sửa trong đợt này:
+
+| File | SHA-256 |
+| --- | --- |
+| puzzle-contracts.md | `214ea489e17131f0f56d1de1f66ebe25aaf5f1faaeacba56258b7b217d519f6c` |
+| demo-01-04-rewrite.md | `400512c447f2442bfef6c8f0de0f388a91af950cfd81a067cb01a6fbf74d1730` |
+| 01-forgotten-forest-edge.md | `2d87372c918a3d636d0d319783104c261248a2f02c18ec6e4ee137f867fb0789` |
+| 02-whispering-woods.md | `b9b22fb858d2ef556968447c38e5eefc9b1e6323bc12c10598d12e2564e48cf9` |
+| 03-library-beneath-the-roots.md | `8093769866d19ad5da7f8252651d867ce0754e41f2055213ed67e60c23218b65` |
+| 04-shattered-moonlit-creek.md | `ebdf864502fa66fb07842ece86d335dd540fc8dc82549a99447df1fa0e07c948` |

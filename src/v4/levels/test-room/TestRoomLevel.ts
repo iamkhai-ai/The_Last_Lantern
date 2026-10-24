@@ -1,7 +1,6 @@
 import type Phaser from 'phaser';
 import { tr } from '../../../i18n/catalog.ts';
 import type { Interactable } from '../../../types/gameTypes';
-import type { LanternLightingProfile } from '../../../systems/LanternSystem';
 import { SoundSystem } from '../../../systems/SoundSystem';
 import type { HintLadder } from '../../core/hints';
 import type { HudText, LevelLayout } from '../../core/level';
@@ -9,19 +8,37 @@ import { rectCenter, rectsOverlap } from '../../core/geometry';
 import type { Point, Rect } from '../../core/geometry';
 import { setFixedLatch } from '../../core/latch';
 import { pickUpLantern, placeLantern } from '../../core/lantern';
+import { isMarkReadable, isRectLit } from '../../core/light';
+import type { Footprint, LightMark, Room } from '../../core/light';
 import { callLumo, recallLumo } from '../../core/lumo';
 import type { PulseMark } from '../../core/pulse';
 import type { LevelHost, V4LevelRuntime } from '../../scene/LevelHost';
-import { CARVING_ID, LATCH_ID, MARKER_ID, PEDESTAL_ID, SEAL_ID, TEST_ROOM } from './testRoomLayout';
+import {
+  CARVING_ID,
+  LATCH_ID,
+  MARKER_ID,
+  PEDESTAL_ID,
+  SEAL_ID,
+  TEST_ROOM,
+  TEST_ROOM_LIGHT_MARKS,
+  TEST_ROOM_ROOMS,
+} from './testRoomLayout';
 import {
   CARVING_JOURNAL_TEXT,
+  INITIAL_CORNER,
+  LIGHT_MARK_JOURNAL_TEXT,
   defaultTestRoomState,
   deriveTestRoom,
   parseTestRoomState,
+  stepCorner,
+  testRoomBlockers,
   testRoomHint,
   testRoomHud,
 } from './testRoomLogic';
-import type { TestRoomState, TestRoomView } from './testRoomLogic';
+import type { CornerLive, TestRoomState, TestRoomView } from './testRoomLogic';
+
+/** The room's ambient darkness: constant, never tied to the lantern (puzzle-contracts §1). */
+const AMBIENT_DARKNESS = 0.42;
 
 const PROMPT_PLACE = 'E: đặt đèn';
 const PROMPT_TAKE = 'E: lấy đèn';
@@ -42,6 +59,14 @@ const COLOR = {
   lanternOn: 0xfff0a8,
   lanternOff: 0x3a4a4a,
   carving: 0xd8b869,
+  chasm: 0x05090c,
+  bridge: 0x5a6b3a,
+  rootBed: 0x3d5a2a,
+  rootBedLit: 0x6f8f4a,
+  petalLit: 0xf2c46a,
+  petalDark: 0x8a6a3a,
+  markDark: 0x7df2d4,
+  markLit: 0xffe08a,
 };
 
 /**
@@ -58,12 +83,26 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
   private items: Interactable[] = [];
   private leafA: Phaser.GameObjects.Zone | null = null;
   private leafB: Phaser.GameObjects.Zone | null = null;
+  /** Door C's leaf in the corner's south wall. */
+  private leafC: Phaser.GameObjects.Zone | null = null;
+  /** The root bridge's deck: solid unless the bridge is walkable. */
+  private bridgeZone: Phaser.GameObjects.Zone | null = null;
   private leaves: Phaser.GameObjects.Graphics | null = null;
   private fixtures: Phaser.GameObjects.Graphics | null = null;
   private carving: Phaser.GameObjects.Graphics | null = null;
+  /** The root bridge, the root bed and flower C's faces. Drawn every frame. */
+  private corners: Phaser.GameObjects.Graphics | null = null;
+  /** The light marks, drawn above the ambient darkness. Drawn every frame. */
+  private marks: Phaser.GameObjects.Graphics | null = null;
   private statics: Phaser.GameObjects.Graphics[] = [];
   /** The view drawn last frame, so door and gate sounds play only on a change. */
   private shown: TestRoomView | null = null;
+  /** The corner drawn last frame, so door C's sound plays only on a change. */
+  private shownCorner: CornerLive | null = null;
+  /** The light corner, carried frame to frame (the bridge rule needs the previous frame). */
+  private corner: CornerLive = INITIAL_CORNER;
+  /** This frame's footprints, kept for the mark readability check. */
+  private footprintsNow: readonly Footprint[] = [];
 
   defaultState(): TestRoomState {
     return defaultTestRoomState();
@@ -89,9 +128,14 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
     walls.fillStyle(COLOR.pedestal, 1).fillRect(pedestal.x, pedestal.y, pedestal.width, pedestal.height);
     walls.fillStyle(COLOR.latch, 1).fillRect(latchA.x, latchA.y, latchA.width, latchA.height);
     walls.fillStyle(COLOR.marker, 1).fillRect(marker.x, marker.y, marker.width, marker.height);
-    this.statics.push(floor, walls);
+    // The chasm is the dark gap the root bridge crosses: north bank, bridge span and south bank in one fill.
+    const chasmTop = TEST_ROOM.chasmNorth.y;
+    const chasmBottom = TEST_ROOM.chasmSouth.y + TEST_ROOM.chasmSouth.height;
+    const chasm = scene.add.graphics().setDepth(0.5);
+    chasm.fillStyle(COLOR.chasm, 1).fillRect(TEST_ROOM.chasmNorth.x, chasmTop, TEST_ROOM.chasmNorth.width, chasmBottom - chasmTop);
+    this.statics.push(floor, walls, chasm);
 
-    const seal = scene.add.graphics().setDepth(2);
+    const seal =scene.add.graphics().setDepth(2);
     seal.lineStyle(1.5, COLOR.marker, 0.85).strokeCircle(TEST_ROOM.seal.x, TEST_ROOM.seal.y, 6);
     this.statics.push(seal);
 
@@ -102,16 +146,23 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
     this.carving.lineBetween(cx - 10, cy + 2, cx + 6, cy - 3);
     this.carving.lineBetween(cx + 6, cy - 3, cx + 12, cy + 4);
 
+    this.corners = scene.add.graphics().setDepth(1.5);
     this.fixtures = scene.add.graphics().setDepth(3);
     this.leaves = scene.add.graphics().setDepth(4);
+    this.marks = scene.add.graphics().setDepth(68.5);
 
-    // Solids: the walls, the fixed pieces, and the two leaves, which follow the derived view.
+    // Solids: the walls (the corner's three included), the chasm banks, the fixed pieces, and the leaves and the
+    // bridge deck, which follow the derived view and the corner.
     for (const wall of TEST_ROOM.walls) this.solidZone(wall);
+    this.solidZone(TEST_ROOM.chasmNorth);
+    this.solidZone(TEST_ROOM.chasmSouth);
     this.solidZone(pedestal);
     this.solidZone(latchA);
     this.solidZone(marker);
     this.leafA = this.solidZone(TEST_ROOM.doorA);
     this.leafB = this.solidZone(TEST_ROOM.gateB);
+    this.leafC = this.solidZone(TEST_ROOM.doorC);
+    this.bridgeZone = this.solidZone(TEST_ROOM.bridgeDeck);
 
     this.items = [
       {
@@ -134,24 +185,39 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
       },
     ];
 
-    this.update(0, { x: 0, y: 0, width: 0, height: 0 });
+    this.update(0, { x: 0, y: 0, width: 0, height: 0 }, []);
   }
 
   interactables(): Interactable[] {
     return this.items;
   }
 
-  update(_dt: number, _foot: Rect): void {
+  update(_dt: number, foot: Rect, footprints: readonly Footprint[]): void {
     const view = this.viewNow();
+    // The corner steps on last frame's blockers: door C and the bridge keep their previous state for this frame.
+    const blockers = testRoomBlockers(view, this.corner);
+    const corner = stepCorner(this.corner, footprints, blockers, foot);
+    this.corner = corner;
+    this.footprintsNow = footprints;
+
     setZoneEnabled(this.leafA, !view.doorAOpen);
     setZoneEnabled(this.leafB, !view.gateBOpen);
+    setZoneEnabled(this.leafC, !corner.doorCOpen);
+    setZoneEnabled(this.bridgeZone, !corner.bridgeWalkable);
     if (this.shown) {
       if (!this.shown.doorAOpen && view.doorAOpen) SoundSystem.playDoorOpen();
       else if (this.shown.doorAOpen && !view.doorAOpen) SoundSystem.playDoorClose();
       if (!this.shown.gateBOpen && view.gateBOpen) SoundSystem.playGateOpen();
     }
+    if (this.shownCorner) {
+      if (!this.shownCorner.doorCOpen && corner.doorCOpen) SoundSystem.playDoorOpen();
+      else if (this.shownCorner.doorCOpen && !corner.doorCOpen) SoundSystem.playDoorClose();
+    }
     this.shown = view;
-    this.draw(view);
+    this.shownCorner = corner;
+    this.draw(view, corner);
+    this.drawCorner(corner, footprints, blockers);
+    this.drawMarks();
   }
 
   getState(): TestRoomState {
@@ -171,15 +237,40 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
   }
 
   journalText(id: string): string {
-    return id === CARVING_ID ? CARVING_JOURNAL_TEXT : '';
+    if (id === CARVING_ID) return CARVING_JOURNAL_TEXT;
+    return LIGHT_MARK_JOURNAL_TEXT[id] ?? '';
   }
 
   sealPosition(sealId: string): Point | null {
     return sealId === SEAL_ID ? { x: TEST_ROOM.seal.x, y: TEST_ROOM.seal.y } : null;
   }
 
-  lanternLightProfile(): LanternLightingProfile | undefined {
-    return undefined;
+  ambientDarkness(): number {
+    return AMBIENT_DARKNESS;
+  }
+
+  lightBlockers(): readonly Rect[] {
+    return testRoomBlockers(this.viewNow(), this.corner);
+  }
+
+  lightMarks(): readonly LightMark[] {
+    return TEST_ROOM_LIGHT_MARKS;
+  }
+
+  rooms(): readonly Room[] {
+    return TEST_ROOM_ROOMS;
+  }
+
+  lighting(): 'lantern' | 'none' {
+    return 'lantern';
+  }
+
+  lanternAvailable(): boolean {
+    return true;
+  }
+
+  exit(): { illustrations: string[]; nextLevelId: string | null } | null {
+    return null;
   }
 
   pedestalPosition(pedestalId: string): Point | null {
@@ -196,9 +287,13 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
     this.leaves?.destroy();
     this.fixtures?.destroy();
     this.carving?.destroy();
+    this.corners?.destroy();
+    this.marks?.destroy();
     this.leaves = null;
     this.fixtures = null;
     this.carving = null;
+    this.corners = null;
+    this.marks = null;
   }
 
   /** The view from the live lantern and Lumo, recomputed on every read so a just-changed state is never stale. */
@@ -229,11 +324,12 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
     this.host.setLumo(lumo.mode === 'follow' ? callLumo(lumo, SEAL_ID) : recallLumo(lumo));
   }
 
-  private draw(view: TestRoomView): void {
+  private draw(view: TestRoomView, corner: CornerLive): void {
     const lantern = this.host.getLantern();
     this.leaves?.clear();
     if (!view.doorAOpen) this.fillRect(this.leaves, TEST_ROOM.doorA, COLOR.door);
     if (!view.gateBOpen) this.fillRect(this.leaves, TEST_ROOM.gateB, COLOR.door);
+    if (!corner.doorCOpen) this.fillRect(this.leaves, TEST_ROOM.doorC, COLOR.door);
 
     this.fixtures?.clear();
     if (this.state.latchA) {
@@ -245,6 +341,62 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
       this.fixtures?.fillStyle(lantern.on ? COLOR.lanternOn : COLOR.lanternOff, 1).fillCircle(c.x, c.y, 4);
     }
     this.carving?.setVisible(this.host.hasJournal(CARVING_ID));
+  }
+
+  /**
+   * The light corner's floor: the root bridge (a deck when walkable, two retracted stubs at each bank when not),
+   * the root bed (lighter while lit) and flower C's two faces (petals lit or dark, each read on its own).
+   */
+  private drawCorner(corner: CornerLive, footprints: readonly Footprint[], blockers: readonly Rect[]): void {
+    const g = this.corners;
+    if (!g) return;
+    g.clear();
+    const deck = TEST_ROOM.bridgeDeck;
+    if (corner.bridgeWalkable) {
+      this.fillRect(g, deck, COLOR.bridge);
+    } else {
+      for (const x of [deck.x, deck.x + deck.width - 6]) {
+        g.fillStyle(COLOR.bridge, 1).fillRect(x, deck.y, 6, 3);
+        g.fillStyle(COLOR.bridge, 1).fillRect(x, deck.y + deck.height - 3, 6, 3);
+      }
+    }
+    this.fillRect(g, TEST_ROOM.rootBed, corner.bedLit ? COLOR.rootBedLit : COLOR.rootBed);
+    for (const face of [TEST_ROOM.flowerSouth, TEST_ROOM.flowerNorth]) {
+      this.fillRect(g, face, isRectLit(face, footprints, blockers) ? COLOR.petalLit : COLOR.petalDark);
+    }
+  }
+
+  /**
+   * The light marks: a dark mark shows as speckles while it is readable, a lit mark as a line glyph while it is
+   * readable; a mark that is not readable but already in the journal leaves a faint outline.
+   */
+  private drawMarks(): void {
+    const g = this.marks;
+    if (!g) return;
+    g.clear();
+    const blockers = this.lightBlockers();
+    for (const mark of TEST_ROOM_LIGHT_MARKS) {
+      const { x, y, width, height } = mark.rect;
+      const colour = mark.kind === 'dark' ? COLOR.markDark : COLOR.markLit;
+      if (isMarkReadable(mark, this.footprintsNow, blockers)) {
+        if (mark.kind === 'dark') {
+          g.fillStyle(colour, 0.9);
+          for (const p of [
+            { x: x + width / 2, y: y + height / 2 },
+            { x: x + width / 4, y: y + height / 4 },
+            { x: x + (3 * width) / 4, y: y + height / 4 },
+            { x: x + width / 4, y: y + (3 * height) / 4 },
+            { x: x + (3 * width) / 4, y: y + (3 * height) / 4 },
+          ]) {
+            g.fillCircle(p.x, p.y, 1.2);
+          }
+        } else {
+          g.lineStyle(1, colour, 0.9).lineBetween(x + 1, y + height - 1, x + width - 1, y + 1);
+        }
+      } else if (this.host.hasJournal(mark.id)) {
+        g.lineStyle(1, colour, 0.25).strokeRect(x, y, width, height);
+      }
+    }
   }
 
   private fillRect(graphics: Phaser.GameObjects.Graphics | null, rect: Rect, color: number): void {

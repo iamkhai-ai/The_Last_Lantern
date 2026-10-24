@@ -135,4 +135,9 @@ export const CHROME_ENTRIES: readonly CatalogEntry[] = [
   entry('v4.toast.pulseNeedsLantern', 'Xung sáng cần đèn trong tay và đang bật.', 'Light Pulse needs the lantern in hand and lit.'),
   entry('v4.toast.noHint', 'Không còn gợi ý cho bước này.', 'No more hints for this step.'),
   entry('v4.toast.lumoArrived', 'Lumo đã tới ấn.', 'Lumo has reached the seal.'),
+
+  // V4 choice box and placeholder screen for a level that is not built yet.
+  entry('v4.choice.hint', '[↑↓ / W S] Chọn · [E] Xác nhận · [ESC] Hủy', '[↑↓ / W S] Select · [E] Confirm · [ESC] Cancel'),
+  entry('v4.placeholder.building', 'Màn {number} — đang dựng', 'Level {number} — under construction'),
+  entry('v4.placeholder.back', '[ESC] Về màn hình chính', '[ESC] Back to main menu'),
 ];
