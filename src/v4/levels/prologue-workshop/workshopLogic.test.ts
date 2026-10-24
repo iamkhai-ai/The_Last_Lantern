@@ -15,6 +15,8 @@ import {
   motherPrompt,
   panelPrompt,
   parseWorkshopState,
+  incidentPending,
+  markIncidentCalled,
   takePart,
   trayPrompt,
   useBench,
@@ -36,8 +38,11 @@ const START: WorkshopState = defaultWorkshopState();
 /** The lamp repaired and in hand, boatman still here. */
 const DELIVER: WorkshopState = { ...START, lampInspected: true, lampRepaired: true, held: 'lamp' };
 
-/** Boatman has returned; the window panel is next. */
-const PANEL: WorkshopState = { ...DELIVER, held: null, boatmanReturned: true };
+/** Boatman has returned and Mẹ has called Nhinh to the panel. */
+const PANEL: WorkshopState = { ...DELIVER, held: null, boatmanReturned: true, incidentCalled: true };
+
+/** Boatman has just walked off; Mẹ has not called yet. */
+const WALKED_OFF: WorkshopState = { ...DELIVER, held: null, boatmanReturned: true };
 
 /** Diagnosis done; the assignment is granted. */
 const DEPART: WorkshopState = { ...PANEL, localLineRepaired: true, assignmentReceived: true };
@@ -278,10 +283,24 @@ describe('reload invariants', () => {
   });
 
   it('does not replay the incident after a reload past it', () => {
-    const s = parseWorkshopState({ lampRepaired: true, boatmanReturned: true });
+    const s = parseWorkshopState({ lampRepaired: true, boatmanReturned: true, incidentCalled: true });
+    expect(incidentPending(s)).toBe(false);
     expect(boatmanPrompt(s)).toBeNull();
     expect(workshopStage(s)).toBe('panel');
     expect(effectKinds(useMother(s).effects)).toEqual(['toast:Mẹ đang đợi ở bảng kiểm.']);
+  });
+
+  it('plays the call of Mẹ once after the boatman leaves, and never again', () => {
+    expect(incidentPending(WALKED_OFF)).toBe(true);
+    expect(incidentPending(markIncidentCalled(WALKED_OFF))).toBe(false);
+    expect(incidentPending(START)).toBe(false);
+  });
+
+  it('plays the pending call after a reload while the boatman walks off', () => {
+    const reloaded = parseWorkshopState(JSON.parse(JSON.stringify(WALKED_OFF)));
+    expect(incidentPending(reloaded)).toBe(true);
+    const called = markIncidentCalled(reloaded);
+    expect(incidentPending(parseWorkshopState(JSON.parse(JSON.stringify(called))))).toBe(false);
   });
 
   it('round-trips a mid-game state through JSON', () => {

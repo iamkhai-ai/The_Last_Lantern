@@ -171,7 +171,7 @@ export class V4Scene extends Phaser.Scene {
         this.physics.add.collider(this.player.sprite, zone);
       },
       say: (lines, onDone) => this.dialogue.startDialogue(lines, onDone),
-      choose: (options, onPick) => this.choice.open(options, onPick),
+      choose: (options, onPick, placement) => this.choice.open(options, onPick, placement),
       toast: (text) => this.hud.showToast(text),
       requestSave: () => this.requestSave(),
     };

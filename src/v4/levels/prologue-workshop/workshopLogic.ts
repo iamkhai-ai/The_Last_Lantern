@@ -19,6 +19,8 @@ export interface WorkshopState {
   readonly boatmanReturned: boolean;
   readonly localLineRepaired: boolean;
   readonly assignmentReceived: boolean;
+  /** Mẹ's call has played. Kept apart from the flags so a reload while the boatman walks off still plays it. */
+  readonly incidentCalled: boolean;
 }
 
 /** The step the player is on. */
@@ -147,6 +149,7 @@ export function defaultWorkshopState(): WorkshopState {
     boatmanReturned: false,
     localLineRepaired: false,
     assignmentReceived: false,
+    incidentCalled: false,
   };
 }
 
@@ -155,6 +158,7 @@ export function defaultWorkshopState(): WorkshopState {
  * and an unknown held item as null. Flags that imply earlier ones are completed forward:
  * assignment, then local line, then boatman, then lamp repaired (and inspected). The held item then follows
  * the flags: the boatman's return clears it, a repaired lamp is held, and parts are kept only before repair.
+ * Mẹ's call is done once the local line is repaired; before that it is done only if its own flag says so.
  */
 export function parseWorkshopState(raw: unknown): WorkshopState {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return defaultWorkshopState();
@@ -166,6 +170,7 @@ export function parseWorkshopState(raw: unknown): WorkshopState {
   const boatmanReturned = localLineRepaired || flag('boatmanReturned');
   const lampRepaired = boatmanReturned || flag('lampRepaired');
   const lampInspected = lampRepaired || flag('lampInspected');
+  const incidentCalled = boatmanReturned && (localLineRepaired || flag('incidentCalled'));
 
   const rawHeld = r.held;
   const savedHeld: HeldItem = rawHeld === 'ring' || rawHeld === 'spring' || rawHeld === 'lamp' ? rawHeld : null;
@@ -174,7 +179,17 @@ export function parseWorkshopState(raw: unknown): WorkshopState {
   else if (lampRepaired) held = 'lamp';
   else held = savedHeld === 'lamp' ? null : savedHeld;
 
-  return { lampInspected, held, lampRepaired, boatmanReturned, localLineRepaired, assignmentReceived };
+  return { lampInspected, held, lampRepaired, boatmanReturned, localLineRepaired, assignmentReceived, incidentCalled };
+}
+
+/** True when the boatman has gone but Mẹ has not yet called Nhinh to the panel. */
+export function incidentPending(s: WorkshopState): boolean {
+  return s.boatmanReturned && !s.incidentCalled;
+}
+
+/** The state once Mẹ's call has played. */
+export function markIncidentCalled(s: WorkshopState): WorkshopState {
+  return { ...s, incidentCalled: true };
 }
 
 /** The step the player is on, from the flags alone. */

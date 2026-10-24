@@ -10,6 +10,18 @@ const PAD = 12;
 const ROW_HEIGHT = 20;
 const HINT_GAP = 22;
 
+/** Where the box sits: its top-left corner and, optionally, its width (level pixels). Default: the top right. */
+export interface ChoicePlacement {
+  readonly x: number;
+  readonly y: number;
+  readonly width?: number;
+}
+
+/** The height of the box for a number of options, so a caller can place it above something. */
+export function choiceBoxHeight(optionCount: number): number {
+  return PAD * 2 + optionCount * ROW_HEIGHT + HINT_GAP;
+}
+
 /**
  * A small choice box in the dialogue box's style. While it is open it owns the navigation keys: the host routes
  * ↑/↓ or W/S to move, E/Space/Enter to confirm and ESC to cancel, and nothing else reaches the level.
@@ -22,6 +34,7 @@ export class ChoiceBox {
   private options: string[] = [];
   private selected = 0;
   private onPick: ((index: number | null) => void) | null = null;
+  private placement: Required<ChoicePlacement> = { x: BOX_X, y: BOX_Y, width: BOX_WIDTH };
 
   constructor(private readonly scene: Phaser.Scene) {
     this.bg = scene.add.graphics();
@@ -36,7 +49,7 @@ export class ChoiceBox {
   }
 
   /** Shows the options with the first one selected. `onPick` runs once: with the index, or null on cancel. */
-  public open(options: string[], onPick: (index: number | null) => void): void {
+  public open(options: string[], onPick: (index: number | null) => void, placement?: ChoicePlacement): void {
     if (options.length === 0) {
       onPick(null);
       return;
@@ -44,6 +57,7 @@ export class ChoiceBox {
     this.options = [...options];
     this.selected = 0;
     this.onPick = onPick;
+    this.placement = { x: placement?.x ?? BOX_X, y: placement?.y ?? BOX_Y, width: placement?.width ?? BOX_WIDTH };
     this.rebuild();
     this.container.setVisible(true);
   }
@@ -90,8 +104,9 @@ export class ChoiceBox {
   /** Lays out the rows for the current options and redraws the frame. */
   private rebuild(): void {
     for (const row of this.rows) row.destroy();
+    const { x, y, width } = this.placement;
     this.rows = this.options.map((_option, index) => {
-      const text = this.scene.add.text(BOX_X + PAD, BOX_Y + PAD + index * ROW_HEIGHT, '', {
+      const text = this.scene.add.text(x + PAD, y + PAD + index * ROW_HEIGHT, '', {
         fontFamily: FONT,
         fontSize: '12px',
         color: '#f5efe0',
@@ -100,13 +115,13 @@ export class ChoiceBox {
       return text;
     });
     this.hint.setText(tr('[↑↓ / W S] Chọn · [E] Xác nhận · [ESC] Hủy'));
-    this.hint.setPosition(BOX_X + PAD, BOX_Y + PAD + this.options.length * ROW_HEIGHT + 2);
-    const height = PAD * 2 + this.options.length * ROW_HEIGHT + HINT_GAP;
+    this.hint.setPosition(x + PAD, y + PAD + this.options.length * ROW_HEIGHT + 2);
+    const height = choiceBoxHeight(this.options.length);
     this.bg.clear();
     this.bg.fillStyle(0x07141b, 0.94);
     this.bg.lineStyle(1.5, 0xd8b869, 0.85);
-    this.bg.fillRoundedRect(BOX_X, BOX_Y, BOX_WIDTH, height, 7);
-    this.bg.strokeRoundedRect(BOX_X, BOX_Y, BOX_WIDTH, height, 7);
+    this.bg.fillRoundedRect(x, y, width, height, 7);
+    this.bg.strokeRoundedRect(x, y, width, height, 7);
     this.paintRows();
   }
 

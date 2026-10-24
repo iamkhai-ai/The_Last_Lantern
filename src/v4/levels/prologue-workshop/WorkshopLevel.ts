@@ -7,6 +7,7 @@ import { rectCenter, rectsOverlap } from '../../core/geometry';
 import type { Point, Rect } from '../../core/geometry';
 import type { PulseMark } from '../../core/pulse';
 import type { LevelHost, V4LevelRuntime } from '../../scene/LevelHost';
+import { choiceBoxHeight } from '../../../ui/ChoiceBox';
 import benchUrl from '../../../../assets/levels/00-workshop/sprites/bench.png?url';
 import boatmanFrontUrl from '../../../../assets/levels/00-workshop/sprites/boatman-front.png?url';
 import boatmanWalkUrl from '../../../../assets/levels/00-workshop/sprites/boatman-walk.png?url';
@@ -36,6 +37,8 @@ import {
   completeAssignment,
   defaultWorkshopState,
   exitOpen,
+  incidentPending,
+  markIncidentCalled,
   motherPrompt,
   panelPrompt,
   parseWorkshopState,
@@ -88,6 +91,11 @@ const HARBOR_BLINK_STEP_MS = 200;
 const HARBOR_BLINK_DARK = 0.85;
 const HARBOR_BLINK_DIM = 0.1;
 const HARBOR_HOLD_ALPHA = 0.5;
+/** The part choice opens just above the parts tray, so the choice sits by what it picks from. */
+const PART_CHOICE_AT = {
+  x: WORKSHOP.tray.x - 12,
+  y: WORKSHOP.tray.y - 6 - choiceBoxHeight(2),
+};
 /** Where the bench lamp stands: the bench's top, centred. */
 const BENCH_LAMP_AT: Point = { x: 301, y: 176 };
 /** Illustrations of the new game and of the exit (texture keys, see src/v4/scene/illustrationFiles.ts). */
@@ -232,6 +240,11 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     ];
 
     this.refresh();
+    // The boatman left before the game was closed: the harbour lamp blinks, then Mẹ calls as usual.
+    if (incidentPending(state)) {
+      this.pendingIncident = () => this.callMother(() => undefined);
+      this.harborBlink = 0;
+    }
   }
 
   interactables(): Interactable[] {
@@ -364,7 +377,7 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
             this.apply(takePart(this.state, part));
           }
           next();
-        });
+        }, PART_CHOICE_AT);
         return;
     }
   }
@@ -373,7 +386,7 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     if (id === 'incident') {
       // The boatman leaves, the harbour lamp blinks out, and only then does Mother call (00-prologue.md).
       // The controls stay free while he walks.
-      this.pendingIncident = () => this.host.say(WORKSHOP_DIALOGUE.incident, onDone);
+      this.pendingIncident = () => this.callMother(onDone);
       return;
     }
     if (id === 'diagnosis') this.showingMap = true;
@@ -389,6 +402,13 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     const call = this.pendingIncident;
     this.pendingIncident = null;
     call?.();
+  }
+
+  /** Mẹ's call: marks it played (saved), then shows her line. */
+  private callMother(onDone: () => void): void {
+    this.state = markIncidentCalled(this.state);
+    this.host.requestSave();
+    this.host.say(WORKSHOP_DIALOGUE.incident, onDone);
   }
 
   private startBoatmanWalk(): void {

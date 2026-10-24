@@ -19,7 +19,7 @@ Nội dung không có trong V4 và được thêm tối thiểu để tuân `RUL
 
 ### Trạng thái lưu
 
-`lamp-inspected` (sự kiện một lần), `held` (`null | 'ring' | 'spring' | 'lamp'`), và bốn cờ V4: `lamp-repaired`, `boatman-returned`, `local-line-repaired`, `assignment-received`. Bỏ qua thoại vẫn đặt cờ. Tải lại giữa chừng không phát lại sự cố đèn bến, không nhân đôi đèn/bản đồ; bác lái đò đã về thì không xuất hiện lại.
+`lamp-inspected` (sự kiện một lần), `held` (`null | 'ring' | 'spring' | 'lamp'`), và bốn cờ V4: `lamp-repaired`, `boatman-returned`, `local-line-repaired`, `assignment-received`. Thêm `incident-called`: Mẹ đã gọi Nhinh tới bảng kiểm. Bỏ qua thoại vẫn đặt cờ. Tải lại sau khi bác lái đò đã về nhưng trước khi Mẹ gọi thì đèn bến chớp rồi Mẹ gọi ngay; sau đó không gọi lại. Không nhân đôi đèn/bản đồ; bác lái đò đã về thì không xuất hiện lại.
 
 ### HUD, gợi ý H, sổ tay J
 
@@ -112,7 +112,7 @@ Quy tắc chung như mục "Rules for every worker" của plan nền tảng. Lev
 
 ### W3 — Runtime và host
 
-- Host (`V4Scene` / `LevelHost` / `V4LevelRuntime`) thêm: `lighting(): 'lantern' | 'none'` (none: không lớp tối); `lanternAvailable(): boolean` (false: F/Pulse bị bỏ qua, Nhinh dùng sprite `_nolamp`); `choose(options: string[], onPick: (index | null) => void)` — hộp chọn nhỏ dùng phong cách DialogueSystem, ↑/↓ chọn, E/Space xác nhận, ESC hủy; `exit(): { illustrations: string[]; nextLevelId: string | null } | null` khi `isExitReached`.
+- Host (`V4Scene` / `LevelHost` / `V4LevelRuntime`) thêm: `lighting(): 'lantern' | 'none'` (none: không lớp tối); `lanternAvailable(): boolean` (false: F/Pulse bị bỏ qua, Nhinh dùng sprite `_nolamp`); `choose(options: string[], onPick: (index | null) => void, placement?: ChoicePlacement)` — hộp chọn nhỏ dùng phong cách DialogueSystem, ↑/↓ chọn, E/Space xác nhận, ESC hủy; `placement` {x, y, width?} đặt góc trên trái (mặc định góc trên phải), màn xưởng đặt hộp ngay trên khay phụ tùng; `exit(): { illustrations: string[]; nextLevelId: string | null } | null` khi `isExitReached`.
 - `src/v4/scene/IllustrationScene.ts`: hiện lần lượt các ảnh (key texture), E/Space/Enter để tiếp, rồi `scene.start` đích được truyền vào. Nạp ảnh bằng `?url` import + `this.load.image`.
 - `WorkshopLevel.ts` implements `V4LevelRuntime<WorkshopState>`: nạp sprite W2, vẽ nền, đồ vật, NPC, đèn khách theo trạng thái (mở/tắt → sáng), lớp đèn bến chớp, bác lái đò đi tới `(314,330)` rồi ẩn (90 px/s), áp dụng `WorkshopEffect` (dialogue, toast, choose, journal) qua host.
 - Registry: thứ tự chiến dịch `['prologue-workshop']`; phòng thử chỉ mở bằng `?v4level=test-room`. Hành trình mới → `IllustrationScene` [`01`] → `V4Scene` mới. Lối ra xưởng → `IllustrationScene` [`02`..`05`] → `V4Scene` placeholder màn 01 (dùng lại màn hình “bản V4 đang dựng”, chữ “Màn 01 — đang dựng”).
