@@ -1,62 +1,50 @@
 {
-  "_note": "Draft layout for V4 level 01 (640x360 world px, 1x), v3: scenario commits f7d7ea8/e7a7107 (circle lantern, sealed pedestals), lamp rests on the ground by the stele and the player picks it up (decision b). Rects are {x,y,width,height}; points are actor centres unless named as ground points. Not yet forestEdgeLayout.ts.",
-  "world": { "x": 16, "y": 0, "width": 608, "height": 330 },
+  "_note": "V4 level 01 layout, synced to the runtime (src/v4/levels/forest-edge/forestEdgeLayout.ts at 8404cb9). 640x360 world px, 1x. Rects are {x,y,width,height}; checkpoints give the spawn point (foot centre). Items the runtime does not have yet (water column and its marks, dry channel, eyes, S1/S2 cable lines, tree trunk and station shelter decor) are not here; see docs/implementation/v4/01-forest-edge.md. Gate B is on the east wall, not the north wall as the design draft had it.",
+  "world": { "x": 0, "y": 0, "width": 640, "height": 360 },
   "walls": {
-    "forestNW":        { "x": 16,  "y": 0,   "width": 240, "height": 110 },
-    "innerWest":       { "x": 256, "y": 0,   "width": 16,  "height": 214 },
-    "northWallWest":   { "x": 272, "y": 0,   "width": 184, "height": 52 },
-    "northWallEast":   { "x": 504, "y": 0,   "width": 120, "height": 52 },
-    "eastWall":        { "x": 600, "y": 52,  "width": 24,  "height": 162 },
-    "frontWallWest":   { "x": 272, "y": 190, "width": 64,  "height": 24 },
-    "frontWallEast":   { "x": 376, "y": 190, "width": 224, "height": 24 },
-    "bigTreeTrunk":    { "x": 40,  "y": 168, "width": 64,  "height": 30 },
-    "stationShelter":  { "x": 500, "y": 240, "width": 100, "height": 46 },
-    "waterColumn":     { "x": 568, "y": 88,  "width": 16,  "height": 16 }
+    "northWall":  { "x": 0,   "y": 0,   "width": 640, "height": 112 },
+    "southWall":  { "x": 0,   "y": 328, "width": 640, "height": 32 },
+    "westWall":   { "x": 0,   "y": 112, "width": 24,  "height": 216 },
+    "splitNorth": { "x": 312, "y": 112, "width": 8,   "height": 78 },
+    "splitSouth": { "x": 312, "y": 230, "width": 8,   "height": 98 },
+    "eastNorth":  { "x": 600, "y": 112, "width": 40,  "height": 78 },
+    "eastSouth":  { "x": 600, "y": 230, "width": 40,  "height": 98 }
   },
-  "doorA": { "x": 336, "y": 190, "width": 40, "height": 24 },
-  "gateB": { "x": 456, "y": 36,  "width": 48, "height": 16 },
+  "doorA":       { "x": 312, "y": 190, "width": 8,  "height": 40 },
+  "thresholdA":  { "x": 304, "y": 186, "width": 16, "height": 48 },
+  "gateB":       { "x": 592, "y": 190, "width": 8,  "height": 40 },
+  "thresholdB":  { "x": 584, "y": 186, "width": 16, "height": 48 },
+  "exitZone":    { "x": 600, "y": 190, "width": 24, "height": 40 },
   "interactables": {
-    "stele":   { "rect": { "x": 160, "y": 206, "width": 28, "height": 12 }, "solid": true },
-    "lampRest": { "rect": { "x": 192, "y": 218, "width": 16, "height": 12 }, "solid": false, "exception": { "rule": "puzzle-contracts §1: E đặt và nhặt đèn chỉ tại bệ", "reason": "Đèn đã được đặt cạnh bia trước khi nghỉ (prologue, cảnh nghỉ cuối); người chơi tự nhặt một lần ở đó (quyết định b)." }, "note": "đèn nằm trên đất cạnh bia lúc đầu, tắt; E nhặt một lần. Không đặt xuống đất lại. Tọa độ bản nháp; runtime dùng x=226, y=216" },
-    "hinge":   { "rect": { "x": 112, "y": 268, "width": 24, "height": 14 }, "solid": true, "note": "tùy chọn" },
-    "s1":      { "rect": { "x": 282, "y": 240, "width": 24, "height": 24 }, "solid": true, "note": "ổ kín, nối tới A" },
-    "latchA":  { "rect": { "x": 392, "y": 166, "width": 16, "height": 16 }, "solid": true, "note": "chốt cố định ở sân giữa" },
-    "s2":      { "rect": { "x": 420, "y": 96,  "width": 24, "height": 24 }, "solid": true, "note": "ổ kín, nối tới B" },
-    "brakeB":  { "rect": { "x": 520, "y": 60,  "width": 16, "height": 16 }, "solid": true, "note": "tay hãm B" }
-  },
-  "sealedEyes": [
-    { "id": "eyeA", "x": 328, "y": 200, "note": "ổ kín: chỉ chỉ báo, đèn cầm tay không kích được" },
-    { "id": "eyeB", "x": 448, "y": 42,  "note": "ổ kín: chỉ chỉ báo" }
-  ],
-  "lines": {
-    "s1ToA": [ { "x": 294, "y": 240 }, { "x": 294, "y": 222 }, { "x": 328, "y": 222 }, { "x": 328, "y": 206 } ],
-    "s2ToB": [ { "x": 432, "y": 96 },  { "x": 432, "y": 70 },  { "x": 448, "y": 70 },  { "x": 448, "y": 48 } ]
+    "stele":    { "rect": { "x": 200, "y": 196, "width": 28, "height": 16 }, "solid": true, "note": "bia: đứng cạnh, không tương tác" },
+    "hinge":    { "rect": { "x": 152, "y": 226, "width": 24, "height": 14 }, "solid": true, "note": "mô hình bản lề, tùy chọn" },
+    "s1":       { "rect": { "x": 252, "y": 232, "width": 24, "height": 24 }, "solid": true, "note": "bệ có đầu nối kín, nối tới cửa A" },
+    "latchA":   { "rect": { "x": 336, "y": 150, "width": 16, "height": 16 }, "solid": true, "note": "chốt cố định ở sân giữa" },
+    "s2":       { "rect": { "x": 500, "y": 232, "width": 24, "height": 24 }, "solid": true, "note": "bệ có đầu nối kín, nối tới cổng B" },
+    "braceB":   { "rect": { "x": 548, "y": 140, "width": 16, "height": 16 }, "solid": true, "note": "tay hãm B ở sân giữa" },
+    "lampRest": { "rect": { "x": 226, "y": 216, "width": 14, "height": 10 }, "solid": false, "note": "đèn nằm trên đất cạnh bia, tắt; E nhặt một lần", "exception": { "rule": "puzzle-contracts §1: E đặt và nhặt đèn chỉ tại bệ", "reason": "Đèn đã được đặt cạnh bia trước khi nghỉ (prologue, cảnh nghỉ cuối); người chơi tự nhặt một lần ở đó (quyết định b)." } }
   },
   "rooms": [
-    { "id": "courtyard", "rect": { "x": 272, "y": 52,  "width": 328, "height": 138 } },
-    { "id": "yard",      "rect": { "x": 16,  "y": 110, "width": 608, "height": 220 } }
+    { "id": "entry",  "rect": { "x": 24,  "y": 112, "width": 288, "height": 216 } },
+    { "id": "middle", "rect": { "x": 320, "y": 112, "width": 272, "height": 216 } }
   ],
+  "sprout": { "rect": { "x": 132, "y": 276, "width": 12, "height": 10 }, "note": "mầm cây Lumo che; sáng khi vòng đèn cầm tay phủ lên" },
   "pulseMarks": [
-    { "id": "line-s1-a",        "x": 310, "y": 224, "kind": "carved" },
-    { "id": "latch-tool-marks", "x": 400, "y": 174, "kind": "tool" }
+    { "id": "line-s1-a",        "x": 290, "y": 240, "kind": "carved" },
+    { "id": "latch-tool-marks", "x": 344, "y": 166, "kind": "tool" }
   ],
   "lightMarks": [
-    { "id": "sprout",          "kind": "lit",  "rect": { "x": 228, "y": 240, "width": 16, "height": 16 }, "note": "mầm cây Lumo che; sáng khi đèn chiếu" },
-    { "id": "spores-latch-1",  "kind": "dark", "rect": { "x": 380, "y": 180, "width": 6,  "height": 6 } },
-    { "id": "spores-latch-2",  "kind": "dark", "rect": { "x": 412, "y": 184, "width": 6,  "height": 6 } },
-    { "id": "spores-latch-3",  "kind": "dark", "rect": { "x": 404, "y": 150, "width": 6,  "height": 6 } },
-    { "id": "steps-latch-1",   "kind": "dark", "rect": { "x": 380, "y": 186, "width": 8,  "height": 4 } },
-    { "id": "steps-latch-2",   "kind": "dark", "rect": { "x": 382, "y": 172, "width": 8,  "height": 4 } },
-    { "id": "steps-latch-3",   "kind": "dark", "rect": { "x": 386, "y": 158, "width": 8,  "height": 4 } },
-    { "id": "spores-hinge-1",  "kind": "dark", "rect": { "x": 138, "y": 256, "width": 6,  "height": 6 } },
-    { "id": "spores-hinge-2",  "kind": "dark", "rect": { "x": 146, "y": 266, "width": 6,  "height": 6 } }
+    { "id": "sprout",         "kind": "lit",  "rect": { "x": 132, "y": 276, "width": 12, "height": 10 } },
+    { "id": "spores-hinge-1", "kind": "dark", "rect": { "x": 138, "y": 246, "width": 6,  "height": 6 } },
+    { "id": "spores-hinge-2", "kind": "dark", "rect": { "x": 160, "y": 258, "width": 6,  "height": 6 } },
+    { "id": "spores-latch-1", "kind": "dark", "rect": { "x": 350, "y": 180, "width": 6,  "height": 6 } },
+    { "id": "spores-latch-2", "kind": "dark", "rect": { "x": 360, "y": 170, "width": 6,  "height": 6 } },
+    { "id": "steps-latch-1",  "kind": "dark", "rect": { "x": 324, "y": 208, "width": 8,  "height": 4 } },
+    { "id": "steps-latch-2",  "kind": "dark", "rect": { "x": 330, "y": 196, "width": 8,  "height": 4 } },
+    { "id": "steps-latch-3",  "kind": "dark", "rect": { "x": 338, "y": 174, "width": 8,  "height": 4 } }
   ],
-  "decor": {
-    "dryChannel": [ { "x": 576, "y": 106 }, { "x": 560, "y": 150 }, { "x": 520, "y": 176 } ]
-  },
   "checkpoints": [
-    { "id": "yard",      "spawn": { "x": 124, "y": 214 }, "zone": { "x": 80,  "y": 190, "width": 110, "height": 80 } },
-    { "id": "courtyard", "spawn": { "x": 480, "y": 150 }, "zone": { "x": 440, "y": 120, "width": 90,  "height": 50 } }
-  ],
-  "exitZone": { "x": 456, "y": 0, "width": 48, "height": 20 }
+    { "id": "yard",   "spawn": { "x": 120, "y": 262 }, "zone": { "x": 64,  "y": 236, "width": 120, "height": 88 } },
+    { "id": "middle", "spawn": { "x": 420, "y": 262 }, "zone": { "x": 368, "y": 236, "width": 120, "height": 88 } }
+  ]
 }

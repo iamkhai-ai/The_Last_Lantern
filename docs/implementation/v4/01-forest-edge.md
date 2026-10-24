@@ -141,16 +141,14 @@ Ngoại lệ cần ghi (chưa sửa tài liệu chung):
 
 ## 9. Kiểm đã làm
 
-Script kiểm nằm ở scratchpad, không commit. Dùng `reachAudit.ts`, `light.ts`, `lightAudit.ts` và `pulse.ts`, chạy trên layout v2 trước khi đổi sang v3. Chưa chạy lại trên v3.
+JSON v3 đã đồng bộ theo runtime (`forestEdgeLayout.ts` tại `8404cb9`). Test tạm chạy trên dữ liệu JSON, không commit.
 
-- **Reach audit** (`auditReach`): không lỗi ở cả 4 trạng thái A/B (v2).
-- **Tầm với (v2):** `stele`, `s0`, `hinge`, `s1` tới được từ sân vào. `latchA`, `s2`, `brakeB` tới được từ sân vào khi A mở, và `brakeB`, `latchA`, `s2` tới được từ sân giữa. Lối ra chỉ mở khi B mở. `lampRest` đặt đúng vị trí `s0` cũ, nhưng chưa kiểm lại.
-- **Dấu sáng/tối:** mỗi dấu có ít nhất một vị trí đứng thấy được và đọc được đúng trạng thái (`hasAimArea`). Dấu tối trong sân giữa chỉ kiểm khi A mở, vì đó là điều kiện thấy.
-- **Quầng bệ:** không dấu tối nào nằm trong quầng 12 px của S1 hoặc S2.
-- **Pulse:** có vị trí đứng sát bia mà `line-s1-a` nằm trong 195 px.
-- **Checkpoint:** cả hai đứng được và không nằm trong khung cửa.
+- **Reach audit** (`auditReach`): sạch ở cả 4 trạng thái A/B. Tầm với tới `s1`, `hinge`, `lampRest` từ sân vào; `latchA` khi A mở; `s2`, `braceB` từ sân giữa. Lối ra chỉ tới được khi B mở.
+- **Checkpoint:** cả hai đứng được ở mọi trạng thái và nằm trong vùng lưu.
+- **Pulse:** cả hai dấu nằm trong 195 px từ bia.
+- **Dấu sáng (`sprout`):** đọc được từ điểm tải sân vào bằng `hasAimArea`.
+- **Dấu tối:** mỗi dấu có điểm đọc được và nhìn thấy được, kiểm theo điểm. Kiểm theo `hasAimArea` (vùng đứng 8 px) thì cả 7 dấu đều **không đạt**. Nguyên nhân nằm ở `lightAudit.ts` (foundation): ứng viên đứng chỉ lấy trong 48 px (`LANTERN_RADIUS + 8`), trong khi luật chung cho dấu "đã thấy" là 64 px (`SEEN_RADIUS`). Thử tạm đổi bán kính này thành 64 px (không commit): cả 7 dấu đạt. Cần sửa ở foundation, chưa làm.
 
-Cần kiểm lại sau khi đổi sang vòng sáng 40 px và `lampRest`: vòng sáng 40 px có thể chạm dấu tối ở sân giữa từ vị trí cũ, nên `hasAimArea` phải chạy lại.
 
 Ghi chú: mô hình ánh sáng `light.ts`/`lightAudit.ts` đã có trên `feat/v4-foundation` (`4f9fd4a`, vòng 40 px) và đã được merge vào `level01-v4` qua `ccef8f9`.
 
@@ -221,5 +219,7 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 ## 12. Bước tiếp theo khi dựng
 
 - Đã xong: tài liệu chung trên `develop-v4` (`7b1b7d0`). Runtime có `lampRest`, nhặt một lần bằng E, và test cho ngoại lệ này. Toàn bộ 294 test pass, `tsc` sạch.
-- Chưa xong: JSON v3 và blockout dùng tọa độ bản nháp, khác `forestEdgeLayout.ts` của runtime. Ví dụ cửa A ở x=336 trong JSON, x=312 trong runtime; `lampRest` ở x=192 trong JSON, x=226 trong runtime. Reach audit và `hasAimArea` đã chạy trên tọa độ runtime, chưa chạy trên JSON v3. Cần chọn: đồng bộ JSON theo runtime, hoặc coi runtime là nguồn và dựng lại JSON.
+- Đã đồng bộ: JSON v3 và blockout theo tọa độ runtime. JSON không còn cột tuyến nước, rãnh khô, mắt ổ kín, dây S1/S2 và decor cũ, vì runtime chưa có.
+- Lệch với bản thiết kế (văn bản §1 chưa sửa): runtime đặt cổng B ở tường **đông** (doc ghi tường bắc); sân giữa là phòng bên phải; runtime có 2 vết bào tử quanh chốt A, doc ghi 3. Cần chọn bên nào là đúng.
+- Lỗi audit ở foundation: bán kính ứng viên `hasAimArea` (xem §9). Chưa sửa.
 - Chưa kiểm trong trình duyệt.

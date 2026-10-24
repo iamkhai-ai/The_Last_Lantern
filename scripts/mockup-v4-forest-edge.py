@@ -1,9 +1,9 @@
-"""Blockout of V4 level 01 (forest edge station) at game scale, from the draft layout JSON.
+"""Blockout of V4 level 01 (forest edge station) at game scale, from the layout JSON (synced to the runtime).
 
 Run from the repo root:  python scripts/mockup-v4-forest-edge.py
 Writes docs/implementation/v4/previews/01-forest-edge-blockout.png and -debug.png (both 1280x720).
 Placeholder art only: the forest kit, the old stele/lantern sprites and Nhinh/Lumo give scale; every
-mechanism (walls, doors, pedestals, latches, column) is a flat block until the real art exists.
+mechanism (walls, doors, pedestals, latches, brace) is a flat block until the real art exists.
 """
 import io
 import json
@@ -37,44 +37,40 @@ def box(r):
 W = LAYOUT['walls']
 I = {k: v['rect'] for k, v in LAYOUT['interactables'].items()}
 MARKS = {m['id']: m for m in LAYOUT['lightMarks']}
+ROOMS = {r['id']: r['rect'] for r in LAYOUT['rooms']}
 scene = Image.new('RGBA', (640, 360), (22, 40, 30, 255))
 d = ImageDraw.Draw(scene, 'RGBA')
 
-# Ground: yard grass with a dirt path; the courtyard behind door A is worn paving.
-d.rectangle((272, 52, 599, 189), fill=(74, 78, 74, 255))
-for y in range(56, 190, 12):
-    d.line((272, y, 599, y), fill=(64, 68, 64, 255))
-d.polygon([(120, 330), (150, 270), (210, 244), (300, 232), (356, 218), (356, 190), (376, 190), (380, 226),
-           (320, 262), (230, 270), (190, 300), (180, 330)], fill=(92, 72, 46, 255))
-d.line([(p['x'], p['y']) for p in LAYOUT['decor']['dryChannel']], fill=(48, 44, 40, 255), width=6)
+# Ground: the entry yard is grass; the middle yard is worn paving with faint joints.
+d.rectangle(box(W['northWall']), fill=(14, 30, 22, 255))
+yard = ROOMS['entry']
+d.rectangle((yard['x'], yard['y'], yard['x'] + yard['width'] - 1, yard['y'] + yard['height'] - 1), fill=(26, 50, 40, 255))
+mid = ROOMS['middle']
+d.rectangle((mid['x'], mid['y'], mid['x'] + mid['width'] - 1, mid['y'] + mid['height'] - 1), fill=(74, 78, 74, 255))
+for y in range(mid['y'] + 4, mid['y'] + mid['height'], 12):
+    d.line((mid['x'], y, mid['x'] + mid['width'] - 1, y), fill=(64, 68, 64, 255))
 
 # Walls: collision strip plus a front face drawn above it.
-for key in ('innerWest', 'northWallWest', 'northWallEast', 'eastWall', 'frontWallWest', 'frontWallEast'):
-    r = W[key]
+for key, r in W.items():
+    if key == 'northWall':
+        continue
     d.rectangle(box(r), fill=(96, 84, 66, 255))
     d.rectangle((r['x'], r['y'] + r['height'] - 6, r['x'] + r['width'] - 1, r['y'] + r['height'] - 1), fill=(70, 60, 48, 255))
-d.rectangle(box(W['forestNW']), fill=(14, 30, 22, 255))
-d.rectangle(box(W['stationShelter']), fill=(84, 62, 44, 255))
-d.rectangle((W['stationShelter']['x'] - 6, W['stationShelter']['y'] - 24, W['stationShelter']['x'] + 105, W['stationShelter']['y'] + 6), fill=(60, 74, 52, 255))
 
 # Mechanisms (flat placeholders).
 d.rectangle(box(LAYOUT['doorA']), fill=(122, 92, 52, 255), outline=(40, 28, 16, 255))
-d.line((340, 196, 372, 196), fill=(200, 200, 210, 255), width=2)  # the spring bar
 d.rectangle(box(LAYOUT['gateB']), fill=(122, 92, 52, 255), outline=(40, 28, 16, 255))
-d.rectangle((456, 14, 503, 36), fill=(112, 100, 80, 255))
-for e in LAYOUT['sealedEyes']:
-    d.ellipse((e['x'] - 4, e['y'] - 4, e['x'] + 4, e['y'] + 4), fill=(210, 170, 70, 255), outline=(60, 40, 10, 255))
-for line in LAYOUT['lines'].values():
-    d.line([(p['x'], p['y']) for p in line], fill=(180, 140, 70, 255), width=2)
 for key in ('s1', 's2'):
     r = I[key]
     d.rectangle((r['x'], r['y'] - 10, r['x'] + r['width'] - 1, r['y'] + r['height'] - 1), fill=(128, 118, 96, 255), outline=(50, 44, 34, 255))
     d.rectangle((r['x'] + 8, r['y'] - 6, r['x'] + 15, r['y'] + 1), fill=(176, 130, 60, 255))  # sealed socket
-for key in ('latchA', 'brakeB'):
+for key in ('latchA', 'braceB'):
     r = I[key]
     d.rectangle((r['x'] + 4, r['y'] - 14, r['x'] + 11, r['y'] + 15), fill=(160, 120, 70, 255), outline=(50, 34, 16, 255))
-r = I['hinge']; d.rectangle(box(r), fill=(110, 96, 70, 255), outline=(40, 30, 20, 255))
-r = W['waterColumn']; d.rectangle((r['x'], r['y'] - 40, r['x'] + 15, r['y'] + 15), fill=(120, 116, 104, 255), outline=(50, 46, 40, 255))
+r = I['hinge']
+d.rectangle(box(r), fill=(110, 96, 70, 255), outline=(40, 30, 20, 255))
+r = I['stele']
+d.rectangle((r['x'], r['y'] - 6, r['x'] + r['width'] - 1, r['y'] + r['height'] - 1), fill=(89, 102, 106, 255), outline=(40, 46, 48, 255))
 # Dark marks: spores and footprints drawn dim so they read as unlit.
 for m in LAYOUT['lightMarks']:
     if m['kind'] == 'dark':
@@ -88,11 +84,11 @@ d.ellipse((r['x'], r['y'], r['x'] + r['width'], r['y'] + r['height']), fill=(70,
 place(scene, sprite('assets/environment/forest-expansion/sprites-v2/ancient-tree-01.png', 150), 72, 200)
 for x, y in ((36, 330), (230, 116), (600, 330), (420, 344), (20, 250)):
     place(scene, sprite('src/assets/bush_woods.png', 34), x, y)
-place(scene, sprite('assets/levels/01-forgotten-forest-edge/sprites/beacon-stone-hidden.png', 40), 174, 218)
-place(scene, sprite('assets/levels/01-forgotten-forest-edge/sprites/pickup-lantern.png', 16), I['lampRest']['x'] + 8, I['lampRest']['y'] + 2)
-place(scene, sprite('src/assets/lumo_0.png', 14), r['x'] + 8, r['y'] + 4)
-yard = LAYOUT['checkpoints'][0]['spawn']
-place(scene, Image.open(ROOT / 'assets/character/nhinh_down_idle_0.png').convert('RGBA'), yard['x'], yard['y'] + 21)
+place(scene, sprite('assets/levels/01-forgotten-forest-edge/sprites/beacon-stone-hidden.png', 40), I['stele']['x'] + 14, I['stele']['y'] + 16)
+place(scene, sprite('assets/levels/01-forgotten-forest-edge/sprites/pickup-lantern.png', 16), I['lampRest']['x'] + 7, I['lampRest']['y'] + 8)
+place(scene, sprite('src/assets/lumo_0.png', 14), r['x'] + 6, r['y'] + 4)
+spawn = LAYOUT['checkpoints'][0]['spawn']
+place(scene, Image.open(ROOT / 'assets/character/nhinh_down_idle_0.png').convert('RGBA'), spawn['x'], spawn['y'] + 21)
 
 big = scene.resize((640 * SCALE, 360 * SCALE), Image.NEAREST)
 labels = ImageDraw.Draw(big, 'RGBA')
@@ -101,10 +97,10 @@ try:
 except OSError:  # not on Windows: Vietnamese marks may not render
     FONT = ImageFont.load_default()
 TEXT = {
-    'bia': (150, 222), 'đèn trên đất': (176, 232), 'bản lề': (108, 284), 'S1': (284, 264), 'cửa A': (340, 178),
-    'chốt A': (382, 148), 'S2': (424, 120), 'cổng B': (462, 2), 'hãm B': (516, 80), 'cột tuyến nước': (528, 108),
-    'mầm + Lumo': (226, 226), 'mái trạm': (520, 256), 'cây lớn': (40, 210), 'Nhinh': (112, 240),
-    'SÂN VÀO': (60, 300), 'SÂN GIỮA': (300, 120), '→ rừng 02': (510, 4),
+    'bia': (190, 178), 'đèn trên đất': (212, 232), 'bản lề': (140, 212), 'S1': (252, 218), 'cửa A': (290, 170),
+    'chốt A': (330, 128), 'S2': (500, 218), 'cổng B': (580, 168), 'hãm B': (540, 120),
+    'mầm + Lumo': (104, 292), 'cây lớn': (40, 210), 'Nhinh': (92, 246),
+    'SÂN VÀO': (40, 300), 'SÂN GIỮA': (340, 300), '→ rừng 02': (500, 160),
 }
 for text, (x, y) in TEXT.items():
     labels.text((x * SCALE + 1, y * SCALE + 1), text, font=FONT, fill=(0, 0, 0, 220))
@@ -112,7 +108,7 @@ for text, (x, y) in TEXT.items():
 OUT.mkdir(parents=True, exist_ok=True)
 big.save(OUT / '01-forest-edge-blockout.png')
 
-# Debug: HUD bands, collision, 8px reach bands, light marks, checkpoints, exit.
+# Debug: HUD bands, collision, item reach bands, light marks, checkpoints, exit.
 dbg = big.copy()
 g = ImageDraw.Draw(dbg, 'RGBA')
 
