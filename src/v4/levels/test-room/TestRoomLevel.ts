@@ -182,6 +182,18 @@ export class TestRoomLevel implements V4LevelRuntime<TestRoomState> {
     return undefined;
   }
 
+  lighting(): 'lantern' | 'none' {
+    return 'lantern';
+  }
+
+  lanternAvailable(): boolean {
+    return true;
+  }
+
+  exit(): { illustrations: string[]; nextLevelId: string | null } | null {
+    return null;
+  }
+
   pedestalPosition(pedestalId: string): Point | null {
     return pedestalId === PEDESTAL_ID ? rectCenter(TEST_ROOM.pedestal) : null;
   }

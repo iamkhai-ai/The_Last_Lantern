@@ -52,6 +52,8 @@ export class LanternSystem {
   private pulseOriginX = 0;
   private pulseOriginY = 0;
   private pulseListeners: PulseCallback[] = [];
+  /** False for a level without darkness (lighting 'none'): no halo, vignette or darkness overlay; Pulse still draws. */
+  private lightingEnabled = true;
 
   public static readonly PULSE_COOLDOWN_MS = 3000;
   public static readonly PULSE_DURATION_MS = 1000;
@@ -85,6 +87,11 @@ export class LanternSystem {
 
   public onPulse(cb: PulseCallback): void {
     this.pulseListeners.push(cb);
+  }
+
+  /** Turns the darkness and the lantern light on or off for the level. Off draws no light at all. */
+  public setLightingEnabled(enabled: boolean): void {
+    this.lightingEnabled = enabled;
   }
 
   public clearPulseListeners(): void {
@@ -142,8 +149,12 @@ export class LanternSystem {
     const flicker = 1 + Math.sin(this.flickerTime * 2.3) * 0.025 + Math.cos(this.flickerTime * 5.7) * 0.012;
 
     this.darknessOverlay.clear();
+    this.vignetteImage.setVisible(this.lightingEnabled && !this.shadedLighting);
+    this.forestEdgeShade?.setVisible(this.lightingEnabled && this.shadedLighting !== null);
 
-    if (this.shadedLighting) {
+    if (!this.lightingEnabled) {
+      this.haloSprite.setVisible(false);
+    } else if (this.shadedLighting) {
       // The shaded falloff box: the profile picks the numbers, the box and halo code below is shared.
       const profile = this.shadedLighting;
       const activeLantern = lantern.on;

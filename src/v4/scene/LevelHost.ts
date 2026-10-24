@@ -24,9 +24,13 @@ export interface LevelHost {
   markEvent(id: string): void;
   /** True when the journal holds this mark id. */
   hasJournal(id: string): boolean;
+  /** Adds a journal entry once (saved). The host shows the usual "written in the journal" toast when it is new. */
+  addJournal(id: string): void;
   /** Makes a static-bodied zone solid for Nhinh's foot. The level toggles `zone.body.enable` for doors and gates. */
   solid(zone: Phaser.GameObjects.Zone): void;
   say(lines: DialogueLine[], onDone?: () => void): void;
+  /** A small choice box. `onPick` gets the chosen index, or null when the player cancels (ESC). */
+  choose(options: string[], onPick: (index: number | null) => void): void;
   toast(text: string): void;
   /** Marks the save dirty. The host writes at most once per 300 ms, and again on shutdown. */
   requestSave(): void;
@@ -39,6 +43,13 @@ export interface V4LevelRuntime<S> {
   readonly layout: LevelLayout;
   defaultState(): S;
   parseState(raw: unknown): S;
+  /**
+   * Loads the level's textures. The host calls it from its own preload, before any build. Optional: a level with
+   * only Graphics needs none.
+   */
+  preload?(scene: Phaser.Scene): void;
+  /** Illustration texture keys shown before a new game of this level starts. Optional. */
+  intro?(): readonly string[];
   /** Draws the room and creates its solids. Called once per scene start. */
   build(host: LevelHost, state: S): void;
   interactables(): Interactable[];
@@ -54,7 +65,19 @@ export interface V4LevelRuntime<S> {
   lanternLightProfile(): LanternLightingProfile | undefined;
   /** World point the placed lantern's light sits on, or null. */
   pedestalPosition(pedestalId: string): Point | null;
+  /** 'lantern': the darkness and lantern light are drawn. 'none': no darkness overlay at all. */
+  lighting(): 'lantern' | 'none';
+  /** False while Nhinh has no maintenance lantern: F and Pulse are ignored and she is drawn without a lamp. */
+  lanternAvailable(): boolean;
+  /** False when Lumo is not in this level at all (he first appears in level 01). Optional: absent means present. */
+  lumoPresent?(): boolean;
   /** True when the foot body is in the level's exit zone and the level is finished. */
   isExitReached(foot: Rect): boolean;
+  /**
+   * What happens when the exit is reached. The illustrations play first, then the host starts `nextLevelId`. A level
+   * id with no runtime shows the placeholder screen; a null `nextLevelId` returns to the main menu. Null here means
+   * the exit is a plain one-time event (the host shows its toast).
+   */
+  exit(): { illustrations: string[]; nextLevelId: string | null } | null;
   destroy(): void;
 }
