@@ -36,6 +36,7 @@ import {
   defaultForestEdgeState,
   deriveForestEdge,
   forestBlockers,
+  forestEdgeFocus,
   forestEdgeHint,
   forestEdgeHud,
   forestExitReady,
@@ -159,6 +160,8 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     const walls = scene.add.graphics().setDepth(1);
     walls.fillStyle(COLOR.wall, 1);
     for (const wall of FOREST_EDGE.walls) walls.fillRect(wall.x, wall.y, wall.width, wall.height);
+    walls.fillStyle(COLOR.wall, 0.6);
+    for (const rect of FOREST_EDGE.foliage) walls.fillRect(rect.x, rect.y, rect.width, rect.height);
     const { stele, hinge, s1, s2, latchA, braceB } = FOREST_EDGE;
     walls.fillStyle(COLOR.stele, 1).fillRect(stele.x, stele.y, stele.width, stele.height);
     walls.fillStyle(COLOR.hinge, 1).fillRect(hinge.x, hinge.y, hinge.width, hinge.height);
@@ -174,6 +177,7 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
 
     // Solids: walls, the stone, pedestals, latch, brace and hinge are always solid; the two leaves follow the doors.
     for (const wall of FOREST_EDGE.walls) this.solidZone(wall);
+    for (const rect of FOREST_EDGE.foliage) this.solidZone(rect);
     this.solidZone(stele);
     this.solidZone(hinge);
     this.solidZone(s1);
@@ -293,18 +297,21 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
           .setVisible(false);
       }
     };
+    // Upright props sort by their base line like Nhinh (Player: depth 10 + ground y / 10), so she passes behind them
+    // when her feet are north of their base. Flat art (the yard, the doors and eyes set in the walls) stays below her.
+    const upright = (slot: keyof typeof ART_SLOTS): number => 10 + ART_SLOTS[slot].position.y / 10;
     add('background', ['station-yard'], 0);
-    add('column', ['water-column'], 1.5);
-    add('stele', ['stele-normal'], 2);
-    add('hinge', HINGE_TEXTURES, 2);
-    add('s1', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], 2);
-    add('s2', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], 2);
+    add('column', ['water-column'], upright('column'));
+    add('stele', ['stele-normal'], upright('stele'));
+    add('hinge', HINGE_TEXTURES, upright('hinge'));
+    add('s1', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], upright('s1'));
+    add('s2', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], upright('s2'));
     add('eyeA', ['eye-dormant', 'eye-live'], 2);
     add('eyeB', ['eye-dormant', 'eye-live'], 2);
-    add('sprout', ['sprout'], 2.5);
-    add('lantern', ['lantern-off'], 2.5);
-    add('latchA', ['latch-a-released', 'latch-a-engaged'], 3);
-    add('brakeB', ['brake-b-released', 'brake-b-engaged'], 3);
+    add('sprout', ['sprout'], upright('sprout'));
+    add('lantern', ['lantern-off'], upright('lantern'));
+    add('latchA', ['latch-a-released', 'latch-a-engaged'], upright('latchA'));
+    add('brakeB', ['brake-b-released', 'brake-b-engaged'], upright('brakeB'));
     add('doorA', ['door-a-closed', 'door-a-open'], 4);
     add('gateB', ['gate-b-closed', 'gate-b-open'], 4);
     this.showArt('background', 'station-yard');
@@ -345,6 +352,10 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
 
   hint(): HintLadder | null {
     return forestEdgeHint(this.viewNow());
+  }
+
+  focus(): readonly string[] {
+    return forestEdgeFocus(this.host.getLantern(), this.state);
   }
 
   pulseMarks(): readonly PulseMark[] {

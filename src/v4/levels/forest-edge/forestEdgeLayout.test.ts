@@ -305,6 +305,8 @@ describe('forest edge layout JSON matches the runtime', () => {
   it('matches the world, the walls, the doors, the thresholds and the exit', () => {
     expect(json.world).toEqual(FOREST_EDGE.world);
     expect(Object.values(json.walls)).toEqual(FOREST_EDGE.walls);
+    const { _note: _foliageNote, ...foliage } = json.foliage;
+    expect(Object.values(foliage)).toEqual(FOREST_EDGE.foliage);
     expect(json.doorA).toEqual(FOREST_EDGE.doorA);
     expect(json.thresholdA).toEqual(FOREST_EDGE.thresholdA);
     expect(json.gateB).toEqual(FOREST_EDGE.gateB);
