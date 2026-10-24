@@ -1,0 +1,1239 @@
+{
+  "baseRevision": "6dfbfc9",
+  "scale": 2,
+  "layout": "docs/implementation/v4/01-forest-edge-layout.json",
+  "layoutSha256": "bc1313d87120e9b7ccb6058738d4cbccfa6086202468391db9e26df78172f439",
+  "filter": "Export resampling: lanczos3. Runtime and native previews: nearest (gameConfig.pixelArt=true).",
+  "status": "Art package; not integrated into V4 runtime",
+  "registration": {
+    "sourceX": [
+      0,
+      700,
+      737,
+      855,
+      974,
+      1153,
+      1298,
+      1570,
+      1619,
+      1672
+    ],
+    "outputX": [
+      0,
+      512,
+      544,
+      672,
+      752,
+      912,
+      1008,
+      1200,
+      1248,
+      1280
+    ],
+    "sourceY": [
+      0,
+      123,
+      475,
+      550,
+      735,
+      941
+    ],
+    "outputY": [
+      0,
+      104,
+      380,
+      428,
+      572,
+      720
+    ]
+  },
+  "placements": {
+    "doorA": {
+      "closed": "door-a-closed",
+      "open": "door-a-open",
+      "position": [
+        356,
+        214
+      ],
+      "collider": {
+        "x": 336,
+        "y": 190,
+        "width": 40,
+        "height": 24
+      }
+    },
+    "gateB": {
+      "closed": "gate-b-closed",
+      "open": "gate-b-open",
+      "position": [
+        480,
+        52
+      ],
+      "collider": {
+        "x": 456,
+        "y": 36,
+        "width": 48,
+        "height": 16
+      }
+    },
+    "latchA": {
+      "released": "latch-a-released",
+      "engaged": "latch-a-engaged",
+      "position": [
+        400,
+        182
+      ],
+      "collider": {
+        "x": 392,
+        "y": 166,
+        "width": 16,
+        "height": 16
+      }
+    },
+    "brakeB": {
+      "released": "brake-b-released",
+      "engaged": "brake-b-engaged",
+      "position": [
+        528,
+        76
+      ],
+      "collider": {
+        "x": 520,
+        "y": 60,
+        "width": 16,
+        "height": 16
+      }
+    },
+    "s1": {
+      "empty": "socket-empty",
+      "off": "socket-lamp-off",
+      "on": "socket-lamp-on",
+      "position": [
+        294,
+        264
+      ],
+      "collider": {
+        "x": 282,
+        "y": 240,
+        "width": 24,
+        "height": 24
+      }
+    },
+    "s2": {
+      "empty": "socket-empty",
+      "off": "socket-lamp-off",
+      "on": "socket-lamp-on",
+      "position": [
+        432,
+        120
+      ],
+      "collider": {
+        "x": 420,
+        "y": 96,
+        "width": 24,
+        "height": 24
+      }
+    },
+    "eyeA": {
+      "dormant": "eye-dormant",
+      "live": "eye-live",
+      "position": [
+        328,
+        200
+      ]
+    },
+    "eyeB": {
+      "dormant": "eye-dormant",
+      "live": "eye-live",
+      "position": [
+        448,
+        42
+      ]
+    },
+    "stele": {
+      "normal": "stele-normal",
+      "pulse": "stele-pulse",
+      "position": [
+        174,
+        218
+      ],
+      "collider": {
+        "x": 160,
+        "y": 206,
+        "width": 28,
+        "height": 12
+      }
+    },
+    "lantern": {
+      "off": "lantern-off",
+      "on": "lantern-on",
+      "position": [
+        214,
+        236
+      ]
+    },
+    "hinge": {
+      "closed": "hinge-closed",
+      "pulled": "hinge-pulled",
+      "hooked": "hinge-hooked",
+      "position": [
+        124,
+        282
+      ],
+      "collider": {
+        "x": 112,
+        "y": 268,
+        "width": 24,
+        "height": 14
+      }
+    },
+    "column": {
+      "normal": "water-column",
+      "position": [
+        576,
+        104
+      ],
+      "collider": {
+        "x": 568,
+        "y": 88,
+        "width": 16,
+        "height": 16
+      }
+    },
+    "sprout": {
+      "normal": "sprout",
+      "position": [
+        244,
+        292
+      ]
+    }
+  },
+  "animation": {
+    "doorA": {
+      "frames": [
+        "door-a-open",
+        "door-a-closing-1",
+        "door-a-closing-2",
+        "door-a-closed"
+      ],
+      "ms": [
+        0,
+        65,
+        45,
+        70
+      ],
+      "guard": "Hold open while doorway occupied."
+    },
+    "waking": {
+      "frames": [
+        "nhinh-sleeping",
+        "nhinh-awake",
+        "nhinh-rising"
+      ],
+      "ms": [
+        450,
+        300,
+        180
+      ],
+      "finish": "existing nhinh_downright_idle_nolamp_0"
+    }
+  },
+  "sources": {
+    "background.png": {
+      "sha256": "640c82781e94f32a3310d1b07c7a6a7e33733330adb75b5914512804a1304365",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "background"
+    },
+    "canopy.png": {
+      "sha256": "5d39f4e98b56546e5cd77bd1ff999409b04642cc40e4baf7f8fc475fbbc1689b",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "canopy"
+    },
+    "controls.png": {
+      "sha256": "aea75e1c6cb4ee5555f0e1aedd32f33d0320fd18b1cfa2a3c6aa8661e1d7ba4b",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "controls"
+    },
+    "door-a-slam.png": {
+      "sha256": "5cd83b9bc774dac75cd58a6bb24b19b4cea9c976fb0a34b582377f59c6d3c3f8",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "door-a-slam"
+    },
+    "doors.png": {
+      "sha256": "69cf2cf4b0f97377910303af8056b2c8e1b2835f3f6dd99d575ba6fe258e7b9d",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "doors"
+    },
+    "hinge.png": {
+      "sha256": "2016c3261b05e25740ff3e01387dfd4bb48ed031aef1f6f8ef9be8719b48a3b7",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "hinge"
+    },
+    "nhinh-waking.png": {
+      "sha256": "10c61b41ad4c048ddfdca2fe96be862ef2fb4e434c2356763d93f2af7e304fce",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "nhinh-waking"
+    },
+    "sockets-lantern.png": {
+      "sha256": "4eaf840c72a01b699b7a225fcb055cc1b39f263930653c9586bf4dc01f84c76e",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "sockets-lantern"
+    },
+    "story-props.png": {
+      "sha256": "1dc8c6ab1b6d69e6adb5ed60f3e42046c48d3b84c8a605493929aa66a0c0ac79",
+      "tool": "built-in image_gen.imagegen",
+      "promptId": "story-props"
+    }
+  },
+  "assets": {
+    "station-yard": {
+      "file": "sprites/station-yard.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "b56df1bc33828eb6a9128f85eed6205e61c8d119322f2a4d74184882692d3410",
+      "source": "sources/background.png",
+      "registration": {
+        "sourceX": [
+          0,
+          700,
+          737,
+          855,
+          974,
+          1153,
+          1298,
+          1570,
+          1619,
+          1672
+        ],
+        "outputX": [
+          0,
+          512,
+          544,
+          672,
+          752,
+          912,
+          1008,
+          1200,
+          1248,
+          1280
+        ],
+        "sourceY": [
+          0,
+          123,
+          475,
+          550,
+          735,
+          941
+        ],
+        "outputY": [
+          0,
+          104,
+          380,
+          428,
+          572,
+          720
+        ]
+      }
+    },
+    "door-a-closed": {
+      "file": "sprites/door-a-closed.png",
+      "outputSize": [
+        136,
+        72
+      ],
+      "gameSize": [
+        68,
+        36
+      ],
+      "anchor": [
+        34,
+        36
+      ],
+      "sha256": "3328a81406be1d47031fd5051b2a7a07d08631216d92b16135abccc2683baaeb",
+      "source": "sources/doors.png",
+      "crop": [
+        175,
+        100,
+        437,
+        378
+      ],
+      "openingGameX": [
+        14,
+        54
+      ],
+      "note": "Frame posts overlap existing wall colliders; clear passage matches layout width."
+    },
+    "door-a-open": {
+      "file": "sprites/door-a-open.png",
+      "outputSize": [
+        136,
+        72
+      ],
+      "gameSize": [
+        68,
+        36
+      ],
+      "anchor": [
+        34,
+        36
+      ],
+      "sha256": "610576dfdfdb4e434104f598f85fe6fe8e3cf3ec773d72746b378816f9a27c65",
+      "source": "sources/doors.png",
+      "crop": [
+        790,
+        99,
+        436,
+        379
+      ],
+      "openingGameX": [
+        14,
+        54
+      ],
+      "note": "Frame posts overlap existing wall colliders; clear passage matches layout width."
+    },
+    "gate-b-closed": {
+      "file": "sprites/gate-b-closed.png",
+      "outputSize": [
+        136,
+        80
+      ],
+      "gameSize": [
+        68,
+        40
+      ],
+      "anchor": [
+        34,
+        40
+      ],
+      "sha256": "7bbd26fdf05c6e10bc8c749caca14ce6ad559806541a1c7df48f1aacae156dd2",
+      "source": "sources/doors.png",
+      "crop": [
+        74,
+        574,
+        604,
+        448
+      ],
+      "openingGameX": [
+        10,
+        58
+      ],
+      "note": "Frame posts overlap existing wall colliders; clear passage matches layout width."
+    },
+    "gate-b-open": {
+      "file": "sprites/gate-b-open.png",
+      "outputSize": [
+        136,
+        80
+      ],
+      "gameSize": [
+        68,
+        40
+      ],
+      "anchor": [
+        34,
+        40
+      ],
+      "sha256": "f8e04e6bad5a372f923dd7dbddac0f230e37e52282a1e2ee747f8a5b537b42da",
+      "source": "sources/doors.png",
+      "crop": [
+        725,
+        574,
+        604,
+        447
+      ],
+      "openingGameX": [
+        10,
+        58
+      ],
+      "note": "Frame posts overlap existing wall colliders; clear passage matches layout width."
+    },
+    "latch-a-released": {
+      "file": "sprites/latch-a-released.png",
+      "outputSize": [
+        32,
+        60
+      ],
+      "gameSize": [
+        16,
+        30
+      ],
+      "anchor": [
+        8,
+        30
+      ],
+      "sha256": "7f67d085c08ab4d1916b62b48d15650bfc9d650d8e06f3de7ad657bf82c53957",
+      "source": "sources/controls.png",
+      "crop": [
+        169,
+        78,
+        239,
+        457
+      ]
+    },
+    "latch-a-engaged": {
+      "file": "sprites/latch-a-engaged.png",
+      "outputSize": [
+        32,
+        60
+      ],
+      "gameSize": [
+        16,
+        30
+      ],
+      "anchor": [
+        8,
+        30
+      ],
+      "sha256": "4269fd62711e45672b6a0139799b348ce2664636bd2e891a539524e5ddebcfba",
+      "source": "sources/controls.png",
+      "crop": [
+        616,
+        156,
+        240,
+        380
+      ]
+    },
+    "brake-b-released": {
+      "file": "sprites/brake-b-released.png",
+      "outputSize": [
+        46,
+        56
+      ],
+      "gameSize": [
+        23,
+        28
+      ],
+      "anchor": [
+        8.137426900584796,
+        28
+      ],
+      "sha256": "b6108b14795494c29ad73ebc756f652f64a1f846e0abc5b06d51901c2edfd83e",
+      "source": "sources/controls.png",
+      "crop": [
+        180,
+        569,
+        242,
+        570
+      ],
+      "note": "Lever sweep extends beyond the 16px collision foot; base anchor is fixed."
+    },
+    "brake-b-engaged": {
+      "file": "sprites/brake-b-engaged.png",
+      "outputSize": [
+        46,
+        56
+      ],
+      "gameSize": [
+        23,
+        28
+      ],
+      "anchor": [
+        8.137426900584796,
+        28
+      ],
+      "sha256": "148e7cf6cbd9ed4e38f59b7e097d3ef6741fc2b859726b94c85afa681b0589d8",
+      "source": "sources/controls.png",
+      "crop": [
+        603,
+        754,
+        342,
+        385
+      ],
+      "note": "Lever sweep extends beyond the 16px collision foot; base anchor is fixed."
+    },
+    "eye-dormant": {
+      "file": "sprites/eye-dormant.png",
+      "outputSize": [
+        24,
+        24
+      ],
+      "gameSize": [
+        12,
+        12
+      ],
+      "anchor": [
+        6,
+        6
+      ],
+      "sha256": "b50c399fee6222a0a375634e454e9ef49588dfd8658f2b716c3fec2d8f48d061",
+      "source": "sources/controls.png",
+      "crop": [
+        176,
+        1215,
+        227,
+        231
+      ]
+    },
+    "eye-live": {
+      "file": "sprites/eye-live.png",
+      "outputSize": [
+        24,
+        24
+      ],
+      "gameSize": [
+        12,
+        12
+      ],
+      "anchor": [
+        6,
+        6
+      ],
+      "sha256": "a7c67a18953779053eb98afcbcbd6bacc6ebcb40f63977d47bf9b4ac1ca1db41",
+      "source": "sources/controls.png",
+      "crop": [
+        621,
+        1215,
+        227,
+        231
+      ]
+    },
+    "socket-empty": {
+      "file": "sprites/socket-empty.png",
+      "outputSize": [
+        48,
+        68
+      ],
+      "gameSize": [
+        24,
+        34
+      ],
+      "anchor": [
+        12,
+        34
+      ],
+      "sha256": "bb8431115c85d576cea9fa43f6517fb9f83ac079af2b41b5b03aa415cca14cc4",
+      "source": "sources/sockets-lantern.png",
+      "crop": [
+        131,
+        80,
+        313,
+        504
+      ]
+    },
+    "socket-lamp-off": {
+      "file": "sprites/socket-lamp-off.png",
+      "outputSize": [
+        48,
+        68
+      ],
+      "gameSize": [
+        24,
+        34
+      ],
+      "anchor": [
+        12,
+        34
+      ],
+      "sha256": "423d0f115a4621687620823d7fdea26a4b9e4538d37f4927cc0d48ccf14ab6d8",
+      "source": "sources/sockets-lantern.png",
+      "crop": [
+        627,
+        79,
+        307,
+        504
+      ]
+    },
+    "socket-lamp-on": {
+      "file": "sprites/socket-lamp-on.png",
+      "outputSize": [
+        48,
+        68
+      ],
+      "gameSize": [
+        24,
+        34
+      ],
+      "anchor": [
+        12,
+        34
+      ],
+      "sha256": "21828b6975b4c40cb51fb78a52d360bfa3db716755451dca8599a3fdd8810858",
+      "source": "sources/sockets-lantern.png",
+      "crop": [
+        1099,
+        79,
+        310,
+        505
+      ]
+    },
+    "lantern-off": {
+      "file": "sprites/lantern-off.png",
+      "outputSize": [
+        24,
+        36
+      ],
+      "gameSize": [
+        12,
+        18
+      ],
+      "anchor": [
+        6,
+        18
+      ],
+      "sha256": "219fe45590f28ad1dd928b805ff326833c8c25928d9e09cfde39d26974d96f4a",
+      "source": "sources/sockets-lantern.png",
+      "crop": [
+        224,
+        657,
+        163,
+        315
+      ]
+    },
+    "lantern-on": {
+      "file": "sprites/lantern-on.png",
+      "outputSize": [
+        24,
+        36
+      ],
+      "gameSize": [
+        12,
+        18
+      ],
+      "anchor": [
+        6,
+        18
+      ],
+      "sha256": "e27a41b96f456eade2ed989f963fa54a40ea3e286dfe7dc6f8585256eb49da6d",
+      "source": "sources/sockets-lantern.png",
+      "crop": [
+        688,
+        656,
+        167,
+        315
+      ]
+    },
+    "stele-normal": {
+      "file": "sprites/stele-normal.png",
+      "outputSize": [
+        56,
+        80
+      ],
+      "gameSize": [
+        28,
+        40
+      ],
+      "anchor": [
+        14,
+        40
+      ],
+      "sha256": "090344fa1c4579ed83ae56e0669482c4e494ff9cd3d5d30fb84346b5eb57d6a9",
+      "source": "sources/story-props.png",
+      "crop": [
+        226,
+        82,
+        432,
+        446
+      ]
+    },
+    "stele-pulse": {
+      "file": "sprites/stele-pulse.png",
+      "outputSize": [
+        56,
+        80
+      ],
+      "gameSize": [
+        28,
+        40
+      ],
+      "anchor": [
+        14,
+        40
+      ],
+      "sha256": "3a845b0a9f10f02b58bdd9a794a39ca202eb90fa66bd5fa9f75436847e546dbf",
+      "source": "sources/story-props.png",
+      "crop": [
+        771,
+        82,
+        432,
+        446
+      ]
+    },
+    "water-column-blank": {
+      "file": "sprites/water-column-blank.png",
+      "outputSize": [
+        32,
+        112
+      ],
+      "gameSize": [
+        16,
+        56
+      ],
+      "anchor": [
+        8,
+        56
+      ],
+      "sha256": "14be08797360be197a1b8f049037a81bd20faf689def3dcf31c439bdb154f327",
+      "source": "sources/story-props.png",
+      "crop": [
+        301,
+        568,
+        295,
+        524
+      ]
+    },
+    "sprout": {
+      "file": "sprites/sprout.png",
+      "outputSize": [
+        32,
+        32
+      ],
+      "gameSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        8,
+        16
+      ],
+      "sha256": "3d5c026d0488e44ac694f8935e9f3da16d05f92980fdce2967f16e65bc551e24",
+      "source": "sources/story-props.png",
+      "crop": [
+        904,
+        863,
+        242,
+        221
+      ]
+    },
+    "hinge-closed": {
+      "file": "sprites/hinge-closed.png",
+      "outputSize": [
+        48,
+        40
+      ],
+      "gameSize": [
+        24,
+        20
+      ],
+      "anchor": [
+        12,
+        20
+      ],
+      "sha256": "5200a86896beb0ed9f15368599b76c25ca8ae4b0f5379027bde761862aca20c7",
+      "source": "sources/hinge.png",
+      "crop": [
+        24,
+        330,
+        453,
+        455
+      ]
+    },
+    "hinge-pulled": {
+      "file": "sprites/hinge-pulled.png",
+      "outputSize": [
+        48,
+        40
+      ],
+      "gameSize": [
+        24,
+        20
+      ],
+      "anchor": [
+        12,
+        20
+      ],
+      "sha256": "7d2152d6ddde3e0e7b38f3d3e8d0454b76a5c47ec306f81de0745b717ea215f8",
+      "source": "sources/hinge.png",
+      "crop": [
+        539,
+        211,
+        458,
+        574
+      ]
+    },
+    "hinge-hooked": {
+      "file": "sprites/hinge-hooked.png",
+      "outputSize": [
+        48,
+        40
+      ],
+      "gameSize": [
+        24,
+        20
+      ],
+      "anchor": [
+        12,
+        20
+      ],
+      "sha256": "4213560da5856273ce1e9b53645a2679ce3596daf29d39227576bc0586a3e06d",
+      "source": "sources/hinge.png",
+      "crop": [
+        1061,
+        211,
+        458,
+        574
+      ]
+    },
+    "nhinh-sleeping": {
+      "file": "sprites/nhinh-sleeping.png",
+      "outputSize": [
+        72,
+        84
+      ],
+      "gameSize": [
+        36,
+        42
+      ],
+      "anchor": [
+        18,
+        36
+      ],
+      "sha256": "1e7a0f48471e70d5dbb9e22c4a9b2e381bf76b134a2806819a12d7550323bd08",
+      "source": "sources/nhinh-waking.png",
+      "crop": [
+        104,
+        162,
+        509,
+        528
+      ],
+      "note": "End animation by switching to existing Nhinh idle sprite."
+    },
+    "nhinh-awake": {
+      "file": "sprites/nhinh-awake.png",
+      "outputSize": [
+        72,
+        84
+      ],
+      "gameSize": [
+        36,
+        42
+      ],
+      "anchor": [
+        18,
+        36
+      ],
+      "sha256": "8dd7d283ef4c49b7ca0ee5592f1af3e4c72803f254e467eb75363c205506c648",
+      "source": "sources/nhinh-waking.png",
+      "crop": [
+        752,
+        153,
+        517,
+        546
+      ],
+      "note": "End animation by switching to existing Nhinh idle sprite."
+    },
+    "nhinh-rising": {
+      "file": "sprites/nhinh-rising.png",
+      "outputSize": [
+        72,
+        84
+      ],
+      "gameSize": [
+        36,
+        42
+      ],
+      "anchor": [
+        18,
+        36
+      ],
+      "sha256": "8735ab74669c62709e76505f39f8c70a482b034f22d6fc107cc171c4a3eb6fed",
+      "source": "sources/nhinh-waking.png",
+      "crop": [
+        1426,
+        157,
+        505,
+        526
+      ],
+      "note": "End animation by switching to existing Nhinh idle sprite."
+    },
+    "door-a-closing-1": {
+      "file": "sprites/door-a-closing-1.png",
+      "outputSize": [
+        136,
+        72
+      ],
+      "gameSize": [
+        68,
+        36
+      ],
+      "anchor": [
+        34,
+        36
+      ],
+      "sha256": "0829427c3c1d7d8cb2f1cff074475ea47a64a498fc3c80835704ca12b1496dd5",
+      "source": "sources/door-a-slam.png",
+      "durationMs": 65
+    },
+    "door-a-closing-2": {
+      "file": "sprites/door-a-closing-2.png",
+      "outputSize": [
+        136,
+        72
+      ],
+      "gameSize": [
+        68,
+        36
+      ],
+      "anchor": [
+        34,
+        36
+      ],
+      "sha256": "43ec5e4b21c01c1573e4e19faae3e90e863cfd41cc75aa0759d210fa8fd9e51f",
+      "source": "sources/door-a-slam.png",
+      "durationMs": 45
+    },
+    "canopy": {
+      "file": "sprites/canopy.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "cb66602f846ed09d7abdc0fa6b6f719f5f8cdbfd428b6f05ef8e05346fe78a29",
+      "source": "sources/canopy.png",
+      "note": "Foreground; fade to 0.35 when it overlaps Nhinh. No collision."
+    },
+    "water-route-symbol": {
+      "file": "sprites/water-route-symbol.png",
+      "outputSize": [
+        32,
+        32
+      ],
+      "gameSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        8,
+        8
+      ],
+      "sha256": "f9c0c7ece95beacf6e8b4d3733db11e38935d91bf05fc9d118a9ef93a3d9b6ea",
+      "source": "code-native SVG"
+    },
+    "workshop-water-route-plaque": {
+      "file": "sprites/workshop-water-route-plaque.png",
+      "outputSize": [
+        32,
+        32
+      ],
+      "gameSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        8,
+        8
+      ],
+      "sha256": "cebe1a164a8cdaad1efabde2af8a41f1d0f9549d8d6f0859d8c26725fa09c248",
+      "source": "code-native SVG",
+      "note": "Mount beside workshop map/pipe. Uses exact same glyph as the column badge."
+    },
+    "workshop-route-overlay": {
+      "file": "sprites/workshop-route-overlay.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "0083d2e26c92ec3fcae07c5e2b7b7ac69f99f44d8acaa1b26f265821d4f432b1",
+      "source": "sprites/workshop-water-route-plaque.png",
+      "note": "Mount at game (552,134), above the existing workshop panel at (552,172); no new collider or interaction."
+    },
+    "water-column": {
+      "file": "sprites/water-column.png",
+      "outputSize": [
+        32,
+        112
+      ],
+      "gameSize": [
+        16,
+        56
+      ],
+      "anchor": [
+        8,
+        56
+      ],
+      "sha256": "3584689f321968b55e9e6fe1f636a148ac2b4649d55a5b5f9a9e73b5bfdcf4a2",
+      "source": [
+        "sprites/water-column-blank.png",
+        "sprites/workshop-water-route-plaque.png"
+      ]
+    },
+    "dry-channel": {
+      "file": "sprites/dry-channel.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "da2fca26403a7a581d18cf5c64cb434b645987472c668e8b53994c3bf6f72ab2",
+      "source": "layout decor.dryChannel; code-native SVG",
+      "collision": "none; flat drainage groove"
+    },
+    "s1ToA-hidden": {
+      "file": "sprites/s1ToA-hidden.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "ea24d7f572cdddc7371f1d40c0ac3ee680dc92f049f1d1c574c51f9edf9fc3f1",
+      "source": "layout lines.s1ToA; code-native SVG",
+      "collision": "none"
+    },
+    "s1ToA-revealed": {
+      "file": "sprites/s1ToA-revealed.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "f302412e08118afba5b65eb9b43dd825592bbcb11ee19f09f5b6b45e6f9f07e7",
+      "source": "layout lines.s1ToA; code-native SVG",
+      "collision": "none"
+    },
+    "s1ToA-live": {
+      "file": "sprites/s1ToA-live.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "eeef13f5587430a84249e4c01eb7c1ec1e23f9942fc0b755d91a6e46757ef6f1",
+      "source": "layout lines.s1ToA; code-native SVG",
+      "collision": "none"
+    },
+    "s2ToB-hidden": {
+      "file": "sprites/s2ToB-hidden.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "ec12f85848e9711476d18be9ecc6c799a423d8f0a7768ab40102ece1bdcc4115",
+      "source": "layout lines.s2ToB; code-native SVG",
+      "collision": "none"
+    },
+    "s2ToB-revealed": {
+      "file": "sprites/s2ToB-revealed.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "47563705c685c8bd8eedf935e4fa8c6b9af6e7a87ea832d82b927831a6a05954",
+      "source": "layout lines.s2ToB; code-native SVG",
+      "collision": "none"
+    },
+    "s2ToB-live": {
+      "file": "sprites/s2ToB-live.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "bb03397af0d9ab3ff1a8f879f12ae63b3b750966ec145cb90f42fed4fe9752f8",
+      "source": "layout lines.s2ToB; code-native SVG",
+      "collision": "none"
+    },
+    "latch-tool-marks": {
+      "file": "sprites/latch-tool-marks.png",
+      "outputSize": [
+        32,
+        24
+      ],
+      "gameSize": [
+        16,
+        12
+      ],
+      "anchor": [
+        8,
+        6
+      ],
+      "sha256": "482abaec1d174d41b10b268a8b893a42da5dd5e202a1cb6e82b7c3c08f0fa8e0",
+      "source": "code-native SVG",
+      "collision": "none; Pulse overlay"
+    },
+    "mechanical-linkages": {
+      "file": "sprites/mechanical-linkages.png",
+      "outputSize": [
+        1280,
+        720
+      ],
+      "gameSize": [
+        640,
+        360
+      ],
+      "anchor": [
+        0,
+        0
+      ],
+      "sha256": "4eaef6b890de42ff2606bdbcd6fa12050cfa63108357051d36b46ef49fc515db",
+      "source": "code-native SVG",
+      "collision": "none; elevated control linkages",
+      "note": "Fixed keeper/drive connections. No new interactable or power route."
+    }
+  }
+}
