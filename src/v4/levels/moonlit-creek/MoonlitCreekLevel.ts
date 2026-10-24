@@ -58,7 +58,7 @@ import {
 import type { CrossingLive, MoonlitState, MoonlitView, StepOutcome } from './moonlitCreekLogic';
 
 /** Ambient darkness of the creek: constant, never tied to F (puzzle-contracts §1). */
-const AMBIENT_DARKNESS = 0.42;
+const AMBIENT_DARKNESS = 0.80;
 
 /** One-time events: the sample is recorded (coordination), and the mother's ending lines have played. */
 const EVENT_SAMPLE = 'moonlit-creek-sample';
