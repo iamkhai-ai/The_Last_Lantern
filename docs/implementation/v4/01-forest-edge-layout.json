@@ -1,5 +1,5 @@
 {
-  "_note": "Draft layout for V4 level 01 (640x360 world px, 1x), v2 for scenario commits 3fb28d8/e75e951/80299c9. Rects are {x,y,width,height}; points are actor centres unless named as ground points. Not yet forestEdgeLayout.ts.",
+  "_note": "Draft layout for V4 level 01 (640x360 world px, 1x), v3: scenario commits f7d7ea8/e7a7107 (circle lantern, sealed pedestals), lamp rests on the ground by the stele and the player picks it up (decision b). Rects are {x,y,width,height}; points are actor centres unless named as ground points. Not yet forestEdgeLayout.ts.",
   "world": { "x": 16, "y": 0, "width": 608, "height": 330 },
   "walls": {
     "forestNW":        { "x": 16,  "y": 0,   "width": 240, "height": 110 },
@@ -17,7 +17,7 @@
   "gateB": { "x": 456, "y": 36,  "width": 48, "height": 16 },
   "interactables": {
     "stele":   { "rect": { "x": 160, "y": 206, "width": 28, "height": 12 }, "solid": true },
-    "s0":      { "rect": { "x": 192, "y": 218, "width": 16, "height": 12 }, "solid": true, "note": "bệ đặt đèn cạnh bia (ổ kín); trạng thái đầu của đèn" },
+    "lampRest": { "rect": { "x": 192, "y": 218, "width": 16, "height": 12 }, "solid": false, "note": "đèn nằm trên đất cạnh bia lúc đầu, tắt; E nhặt một lần (ngoại lệ, quyết định b). Không đặt xuống đất lại; đặt chỉ tại bệ S1/S2" },
     "hinge":   { "rect": { "x": 112, "y": 268, "width": 24, "height": 14 }, "solid": true, "note": "tùy chọn" },
     "s1":      { "rect": { "x": 282, "y": 240, "width": 24, "height": 24 }, "solid": true, "note": "ổ kín, nối tới A" },
     "latchA":  { "rect": { "x": 392, "y": 166, "width": 16, "height": 16 }, "solid": true, "note": "chốt cố định ở sân giữa" },

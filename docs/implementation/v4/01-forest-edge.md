@@ -1,18 +1,25 @@
-# Màn 01 — Bìa rừng quên lãng: layout V4 (bản 2) và danh sách art
+# Màn 01 — Bìa rừng quên lãng: layout V4 (bản 3) và danh sách art
 
-Trạng thái: **bản nháp để duyệt**, chưa phải code. Nguồn: `docs/scenario-v4/01-forgotten-forest-edge.md` (commit `80299c9`), `puzzle-contracts.md` (mục "Vệt đèn", "Pulse, J và dấu đã phát hiện", "Đèn khi chuyển màn"), `00-prologue.md` (cảnh nghỉ cuối), `RULE_GAMES.md`. Tọa độ: `01-forest-edge-layout.json`. Ảnh blockout: `previews/01-forest-edge-blockout.png` và `-debug.png`, dựng bằng `scripts/mockup-v4-forest-edge.py`.
+Trạng thái: **bản nháp để duyệt**, chưa phải code. Nguồn: `docs/scenario-v4/01-forgotten-forest-edge.md` và `puzzle-contracts.md` trên `develop-v4` (commit `f7d7ea8`, `e7a7107`), `00-prologue.md` (cảnh nghỉ cuối), `RULE_GAMES.md`, `art-and-production.md`. Tọa độ: `01-forest-edge-layout.json`. Ảnh blockout: `previews/01-forest-edge-blockout.png` và `-debug.png`, dựng bằng `scripts/mockup-v4-forest-edge.py`.
 
-## 0. Thay đổi so với bản 1
+Quyết định đã chọn: **(b)**, đèn nằm trên đất cạnh bia và Nhinh tự nhặt (xem §8). Phần kịch bản và luật chung còn ghi "không nhặt đèn trên đất", nên phải sửa theo (b) trước khi dựng.
 
-| Chủ đề | Bản 1 | Bản 2 (theo kịch bản mới) |
+## 0. Thay đổi so với bản 2
+
+| Chủ đề | Bản 2 | Bản 3 (theo kịch bản mới và quyết định b) |
 | --- | --- | --- |
-| Chỗ đặt đèn lúc đầu | "đèn dưới đất" cạnh bia | **bệ `s0` cạnh bia** (ổ kín, không có đầu nối). Xem §8 |
-| Ánh nền | không nói | ánh nền rêu tĩnh; tắt F **không** phủ tối toàn màn |
-| Dấu tối | không có | 3 bào tử + 3 vết chân ở sân giữa; 2 bào tử ở bản lề (§6) |
-| Mầm cây và Lumo | mục P1 | cảnh mở đầu: vệt đèn chiếu mầm cây Lumo đang che (P0) |
-| Vệt đèn | chưa đo | 56 px dài, gốc 12, đầu 32, 8 hướng; quầng 12 px (`light.ts`) |
-| Pulse | chỉ bia | khắc đá S1→A và dấu chốt A; chỉ khi đèn ở tay và bật |
-| Lối ra | cổng B | cổng B; phải cầm đèn trong tay khi qua |
+| Chỗ đặt đèn lúc đầu | bệ `s0` cạnh bia (ổ kín) | **đèn trên đất** cạnh bia (`lampRest`), không có bệ; người chơi nhặt bằng E một lần |
+| Vòng sáng đèn cầm tay | vệt 56 px, gốc 12, đầu 32 | **vòng tròn bán kính 40 px** quanh chân Nhinh; không theo hướng quay |
+| Bệ S1/S2 | ổ kín có nắp | hộp có nắp, đầu nối kín; chỉ quầng 12 px lọt ra |
+| Đầu cắm S1 | — | hình khớp với đèn bảo trì |
+| Đường nguồn thường | — | có đoạn tối đứt nhịp ở đầu vào S1 |
+| Cửa A/B | — | lẫy, lò xo, thanh hãm còn nguyên, không gãy |
+| Bào tử bản lề | dấu tối | tạo đường chạy của lò xo khi tắt đèn |
+| Ánh nền | ánh nền rêu tĩnh | giữ; tắt F không phủ tối toàn màn |
+| Dấu tối | 3 bào tử + 3 vết chân ở sân giữa; 2 bào tử ở bản lề | giữ |
+| Mầm cây và Lumo | cảnh mở đầu | Lumo đọc được bằng ánh tự thân, kể cả khi vòng đèn đã rời mầm |
+| Pulse | khắc đá S1→A và dấu chốt A | giữ |
+| Lối ra | cổng B; cầm đèn khi qua | giữ |
 
 ## 1. Thiết kế
 
@@ -26,24 +33,25 @@ Cả màn nằm trong một khung 640×360, không cuộn camera. Lý do: kịch
    │  S2      hãm B  cột │   SÂN GIỮA (lát đá, rãnh khô)
    │        chốt A       │
 ───┴──────┤cửa A├────────┘
- cây lớn  bia s0  S1          mái trạm
+ cây lớn  bia đèn  S1         mái trạm
  bản lề     mầm+Lumo         SÂN VÀO (cỏ, lối đất)
 ```
 
-- **Sân vào:** cây lớn, bia (cạnh đó là bệ `s0`), mô hình bản lề (tùy chọn), mầm cây có Lumo che, bệ S1 cạnh cửa A, mái trạm (chỉ là cảnh).
+- **Sân vào:** cây lớn, bia (cạnh đó là đèn nằm trên đất, `lampRest`), mô hình bản lề (tùy chọn), mầm cây có Lumo che, bệ S1 cạnh cửa A, mái trạm (chỉ là cảnh).
 - **Tường trạm** chạy ngang, mặt quay về người chơi. Cửa A nằm trong tường. Đường dây kín từ S1 tới mắt nhận của A ở mặt ngoài.
 - **Sân giữa** (phòng `courtyard`, sau tường): chốt A ngay sau cửa, bệ S2 có đường dây tới B, tay hãm B, và cột ký hiệu tuyến nước có rãnh khô.
 - **Cổng B** ở tường bắc, dẫn lên rừng 02.
 
 ### Trạng thái đầu và cảnh mở màn
 
-- Đèn bảo trì đặt trên `s0`, **tắt**. Nhinh đã đặt nó cạnh bia trước khi nghỉ (prologue).
-- Cảnh mở đầu (một lần): Nhinh nhặt đèn, bật thử, chiếu thẳng vào mầm cây Lumo đang che. Cảnh này là nơi duy nhất tự bật đèn. Đoạn đối thoại xong thì Lumo theo Nhinh và HUD đổi thành "Mở đường qua trạm."
+- Đèn bảo trì nằm **trên đất** tại `lampRest`, cạnh bia, **tắt**. Nhinh đã đặt nó ở đó trước khi nghỉ (prologue).
+- Người chơi nhặt đèn bằng E (ngoại lệ một lần, §8). Đèn chỉ được nhặt từ vị trí này một lần; sau đó không còn đèn trên đất.
+- Cảnh mở đầu (một lần) chạy khi lần bật đèn đầu tiên trong tay: Nhinh chiếu vòng sáng vào mầm cây Lumo đang che. Đoạn đối thoại xong thì Lumo theo Nhinh và HUD đổi thành "Mở đường qua trạm." **Đề xuất, cần duyệt:** kịch bản hiện viết "Nhinh nhặt đèn" trong cảnh mở; với quyết định b, người chơi tự nhặt, nên cảnh gắn với lần bật đầu thay vì lần nhặt.
 
 ### Trình tự tham khảo (không bắt buộc)
 
-1. Nhặt đèn ở `s0` (E), bật (F). Cảnh mở đầu chạy một lần.
-2. Đứng gần bia, E để đọc. Lần đầu bia dạy F và Pulse: nhấc đèn, bật, rồi Pulse. Pulse hiện khắc đá S1→A và dấu chốt A (§6). Dấu được ghi vào J.
+1. Nhặt đèn ở `lampRest` (E), bật (F). Cảnh mở đầu chạy một lần.
+2. Đứng gần bia, E để đọc. Lần đầu bia dạy F và Pulse: bật đèn, rồi Pulse. Pulse hiện khắc đá S1→A và dấu chốt A (§6). Dấu được ghi vào J.
 3. Đặt đèn lên S1 và bật: A mở, thanh lò xo căng.
 4. Đi qua A (khi A mở), E ở chốt A để gài. Chốt chỉ gài được khi A đang mở.
 5. Quay ra lấy đèn từ S1; A vẫn mở nhờ chốt.
@@ -56,18 +64,20 @@ Mô hình bản lề là tùy chọn, không đặt cờ bắt buộc. Mỗi l�
 ## 2. Ánh sáng và bố cục
 
 - **Ánh nền:** rêu nhạt làm rõ mặt đường, mép cổng, chốt, bệ và tường **kể cả khi đèn tắt**. Ánh nền là tĩnh, không đổi theo F, và không phải nguồn cảm biến. Không có nguồn cố định gameplay ở màn này.
-- **Vệt đèn cầm tay** (dùng `light.ts`): hình thang từ tay cầm, dài 56 px, gốc rộng 12 px, đầu rộng 32 px, theo 8 hướng. Khi đứng yên, Nhinh giữ hướng quay cuối; muốn rọi một vật, người chơi bước một nhịp rồi dừng. Vệt bị tường và cánh cửa đang đóng chắn.
-- **Quầng đèn:** vòng bán kính 12 px quanh đèn. Quầng đặt trên bệ cũng bị tường và cửa chắn.
-- **Đầu nối kín:** A và B là **ổ kín**. Chỉ nhận qua đúng bệ S1/S2 và đường dây đã vẽ. Đèn cầm tay không kích được. Mắt nhận sáng trên tường chỉ là chỉ báo, không là đích của vệt.
-- **Bệ `s0`** không có đường dây; đèn đặt tại đó không cấp cho cửa nào. Quầng 12 px quanh `s0`, S1 và S2 không chứa dấu sáng/tối nào (kiểm bằng script, §8).
+- **Vòng sáng đèn cầm tay** (dùng `light.ts`): hình tròn bán kính 40 px quanh tâm khối chân Nhinh, không phụ thuộc hướng quay, không có vệt hình nón. Muốn rọi hay tránh một vật, người chơi đi lại gần, lùi ra xa hoặc tắt F. Vòng sáng bị tường và cánh cửa đang đóng chắn.
+- **Đèn trên đất** (`lampRest`) tắt, không có footprint. Chỉ đèn đang bật trong tay hoặc trên bệ mới có ánh.
+- **Quầng bệ:** vòng bán kính 12 px quanh đèn đặt trên bệ, cũng bị tường và cửa chắn.
+- **Đầu nối kín:** A và B là **ổ kín**. Chỉ nhận qua đúng bệ S1/S2 và đường dây đã vẽ. Đèn cầm tay không kích được. Mắt nhận sáng trên tường chỉ là chỉ báo, không là đích của vòng sáng.
+- **Bệ S1/S2** là hộp có nắp, đầu nối kín. Quầng 12 px quanh S1, S2 không chứa dấu sáng/tối nào (kiểm bằng script, §9).
 
 ## 3. Luật và câu đố
 
 - **Pulse** dùng được khi đèn ở tay và đang bật. Hiện khắc tĩnh `line-s1-a` (S1→A) và `latch-tool-marks` (chốt A). Pulse không bật cửa, không đổi trạng thái gì. Dấu đã phát hiện được ghi vào J với viền mờ. Không có thời hạn nhấn E sau Pulse.
 - **A** mở khi S1 đang nhận nguồn, hoặc khi chốt A đang gài. **B** mở khi S2 đang nhận nguồn, hoặc khi hãm B đang gài. Hai bệ không cùng nhận vì chỉ có một đèn. Không dùng cờ "đã từng chiếu".
+- **Đường nguồn thường** của trạm có đoạn tối đứt nhịp ở đầu vào S1. Đầu cắm S1 khớp hình đèn bảo trì. Lẫy, lò xo và thanh hãm còn nguyên: đây là chứng cứ cơ cấu cửa vẫn tốt, chỉ đường cấp thường bị gián đoạn.
 - **Chốt A** nằm ở sân giữa. Gài vào thanh đang mở thì A giữ, dù F tắt hoặc Nhinh lấy đèn đi.
 - **Hãm B** ở sân giữa chỉ gài được khi cánh B đang mở. Sau khi gài, B giữ độc lập với đèn.
-- **Lumo** theo Nhinh, chưa dạy ấn gọi. Ánh Lumo chỉ dẫn đường, không mở A/B.
+- **Lumo** theo Nhinh, chưa dạy ấn gọi. Ánh tự thân của Lumo chỉ dẫn đường, không mở A/B.
 - Cửa không mở vì người chơi đã từng chiếu sáng; phải có nguồn ở đúng bệ hoặc chốt đang giữ.
 
 ## 4. Sai và phục hồi
@@ -76,27 +86,28 @@ Mô hình bản lề là tùy chọn, không đặt cờ bắt buộc. Mỗi l�
 - **F ở sân giữa khi chưa gài A:** A đóng. Đèn vẫn ở S1; F từ bất kỳ vị trí nào trong màn bật lại được, nên A mở lại. Chốt A vẫn tiếp cận được khi cửa đóng, nhưng chỉ gài được khi cánh mở. Không cần đi qua cửa đã đóng để bật nguồn.
 - **Đèn bật ở S1 rồi đi về S2:** A vẫn mở vì nguồn còn ở S1; B chưa có nguồn nên đóng.
 - **Đèn đang trong tay ở sân giữa, A đã đóng:** không kẹt, vì S2 nằm trong sân giữa. Đặt đèn lên S2 và bật thì B mở; khi đó gài hãm B. Từ sân giữa không có đường nào khác về sân vào, nên người chơi phải dùng S2 này để đi tiếp.
+- **Đèn đã nhặt khỏi `lampRest`:** không quay lại được vị trí đó để nhặt lần nữa. Đèn luôn ở tay hoặc trên bệ S1/S2.
 - **Người đang đứng trong khung cửa khi nguồn mất:** cánh giữ mở đến nền an toàn (luật cầu/cửa chung).
 - **Gài rồi mở lại chốt:** hợp lệ. S2, hãm B và đường tới S1 cùng phía B nên không kẹt khi thử sai.
-- **Checkpoint:** `yard` (gốc cây lớn) và `courtyard` (giữa sân giữa). Cả hai không nằm trong khung cửa, hợp lệ với F bật lẫn F tắt.
+- **Checkpoint:** `yard` (gốc cây lớn) và `courtyard` (giữa sân giữa). Cả hai không nằm trong khung cửa, hợp lệ với F bật lẫn F tắt. Sau khi tải, nếu đèn đã nhặt khỏi `lampRest` thì đèn ở tay hoặc trên bệ đúng như lúc lưu.
 
 ## 5. Kết và H
 
 Nhinh thấy ký hiệu tuyến nước trên cột giống trong xưởng. "Đường này nối về bến." Lumo nhìn rãnh khô: "Cũng từng nối về vườn tôi." Câu hỏi mang sang 02: trước đây con người và rừng đã cùng sử dụng mạng ra sao?
 
 H, ba mức:
-- **Mức 1 — quan sát:** "Thanh bên trong cửa A khác với mắt nhận sáng ở phía ngoài. Khi tắt đèn, đường bào tử nào vẫn hiện?"
-- **Mức 2 — quan hệ:** "Đèn đang làm cửa mở. Một bộ phận khác có thể giữ nó khi đèn đi nơi khác."
-- **Mức 3 — bước tiếp:** "Đặt đèn ở S1, qua A và gài chốt từ sân giữa; sau đó quay lại lấy đèn sang S2." Sau khi A gài, H chỉ nhắc tay hãm B nếu cần.
+- **Mức 1 — quan sát:** "Đầu cắm S1 khớp với đèn thử. Lẫy và thanh hãm ở cửa A còn nguyên; cửa đã phản ứng với nguồn chưa?"
+- **Mức 2 — quan hệ:** "Nguồn thử mở cửa A, còn chốt cơ khí có thể giữ kết quả khi đèn được chuyển sang S2."
+- **Mức 3 — bước tiếp:** "Đặt đèn ở S1, qua A, gài chốt từ sân giữa rồi quay lại lấy đèn sang S2. Khi B mở, dùng tay hãm ở phía sân giữa." H chỉ gợi bước còn thiếu theo trạng thái hiện tại.
 
 ## 6. Dấu sáng/tối và Pulse
 
 | Id | Loại | Vị trí (rect) | Đọc được khi | Thấy từ |
 | --- | --- | --- | --- | --- |
-| `sprout` | sáng | `{228,240,16,16}` | vệt đèn cầm tay chiếu vào | sân vào |
+| `sprout` | sáng | `{228,240,16,16}` | vòng đèn cầm tay chiếu vào | sân vào |
 | `spores-latch-1..3` | tối | 3 cụm quanh chốt A | đèn không chiếu vào | sân giữa, A mở |
 | `steps-latch-1..3` | tối | 3 vết chân từ cửa tới chốt | đèn không chiếu vào | sân giữa, A mở |
-| `spores-hinge-1..2` | tối | 2 cụm cạnh bản lề | đèn không chiếu vào | sân vào |
+| `spores-hinge-1..2` | tối | 2 cụm cạnh bản lề, tạo đường chạy của lò xo | đèn không chiếu vào | sân vào |
 | `line-s1-a` | Pulse (khắc) | `(310,224)` | Pulse trong 195 px | bia |
 | `latch-tool-marks` | Pulse (khắc) | `(400,174)` | Pulse trong 195 px | sân giữa |
 
@@ -111,54 +122,60 @@ Luật chung (puzzle-contracts): dấu tối chỉ đọc được khi không c�
 
 ## 7. Trạng thái lưu
 
-Lưu: vị trí đèn (`s0`, S1, S2, hoặc đang cầm), F bật/tắt, `latchA`, `latchB`, `hingeHooked`, vị trí và chế độ Lumo, các dấu Pulse thật sự phát hiện, các dấu tối đã thấy, và sự kiện một lần: `opening-seen`, `stele-read`, `bar-dropped-line`, `ending-seen`.
+Lưu: vị trí đèn (`lampRest`, S1, S2, hoặc đang cầm), F bật/tắt, `latchA`, `latchB`, `hingeHooked`, vị trí và chế độ Lumo, các dấu Pulse thật sự phát hiện, các dấu tối đã thấy, và sự kiện một lần: `opening-seen`, `stele-read`, `bar-dropped-line`, `ending-seen`.
 
-Không lưu: trạng thái cửa A/B (tính lại từ nguồn và chốt), hướng quay của Nhinh, footprint của đèn. Sau khi tải, quầng và vệt tính lại từ vị trí đèn hiện tại.
+Không lưu: trạng thái cửa A/B (tính lại từ nguồn và chốt), hướng quay của Nhinh, footprint của đèn. Sau khi tải, vòng sáng và quầng tính lại từ vị trí đèn hiện tại.
 
-## 8. Quyết định đang mở
+## 8. Quyết định
 
-**Mâu thuẫn:** luật chung nói E chỉ đặt và nhặt đèn **tại bệ**. Nhưng kịch bản và cảnh cuối prologue nói đèn nằm **cạnh bia**.
+**Đã chọn (b):** đèn nằm trên đất cạnh bia, người chơi tự nhặt.
 
-- **(a) — đang dùng trong bản này:** thêm bệ `s0` cạnh bia. Bệ là ổ kín, không nối dây; đèn đặt tại đây không cấp cho gì. Giữ nguyên luật chung. Cần thêm art bệ (P0).
-- **(b) — phương án thay thế:** giữ đèn trên đất cạnh bia và ghi là ngoại lệ một lần ở đầu màn. Không cần art bệ, nhưng phải thêm luật ngoại lệ vào `RULE_GAMES` và engine.
+Ngoại lệ cần ghi (chưa sửa tài liệu chung):
+- E nhặt đèn trên đất **chỉ tại `lampRest`** và chỉ khi đèn còn ở đó.
+- Không đặt đèn xuống đất. Đặt đèn chỉ tại bệ S1/S2, như luật chung.
+- Cảnh mở đầu gắn với lần bật đèn đầu tiên trong tay (đề xuất, cần duyệt).
 
-Nếu chọn (b), đổi `s0` thành một vật nhỏ không tương tác và bỏ mục bệ trong art.
+Phải sửa khi chốt (b):
+- `puzzle-contracts.md`: luật "E chỉ đặt và nhặt đèn tại bệ" thêm ngoại lệ `lampRest`.
+- `01-forgotten-forest-edge.md` §1 và §4: đang viết "không có thao tác E nhặt đèn trên mặt đất" và "Nhinh nhặt đèn" trong cảnh mở. Cần đổi theo (b).
+- `RULE_GAMES.md` và engine: ghi ngoại lệ một lần.
+- `level01-v4` runtime (`3167e94`): chưa có đèn trên đất; cần thêm `lampRest` và E nhặt tương ứng.
 
 ## 9. Kiểm đã làm
 
-Script kiểm nằm ở scratchpad, không commit. Dùng `reachAudit.ts`, `light.ts`, `lightAudit.ts` và `pulse.ts` từ `feat/v4-foundation`, chạy trên layout v2.
+Script kiểm nằm ở scratchpad, không commit. Dùng `reachAudit.ts`, `light.ts`, `lightAudit.ts` và `pulse.ts`, chạy trên layout v2 trước khi đổi sang v3. Chưa chạy lại trên v3.
 
-- **Reach audit** (`auditReach`): không lỗi ở cả 4 trạng thái A/B.
-- **Tầm với:** `stele`, `s0`, `hinge`, `s1` tới được từ sân vào. `latchA`, `s2`, `brakeB` tới được từ sân vào khi A mở, và `brakeB`, `latchA`, `s2` tới được từ sân giữa. Lối ra chỉ mở khi B mở.
+- **Reach audit** (`auditReach`): không lỗi ở cả 4 trạng thái A/B (v2).
+- **Tầm với (v2):** `stele`, `s0`, `hinge`, `s1` tới được từ sân vào. `latchA`, `s2`, `brakeB` tới được từ sân vào khi A mở, và `brakeB`, `latchA`, `s2` tới được từ sân giữa. Lối ra chỉ mở khi B mở. `lampRest` đặt đúng vị trí `s0` cũ, nhưng chưa kiểm lại.
 - **Dấu sáng/tối:** mỗi dấu có ít nhất một vị trí đứng thấy được và đọc được đúng trạng thái (`hasAimArea`). Dấu tối trong sân giữa chỉ kiểm khi A mở, vì đó là điều kiện thấy.
-- **Quầng bệ:** không dấu tối nào nằm trong quầng 12 px của `s0`, S1 hoặc S2.
+- **Quầng bệ:** không dấu tối nào nằm trong quầng 12 px của S1 hoặc S2.
 - **Pulse:** có vị trí đứng sát bia mà `line-s1-a` nằm trong 195 px.
 - **Checkpoint:** cả hai đứng được và không nằm trong khung cửa.
 
-Phép thử âm: thêm dấu tối vào quầng S1, dấu không thấy được, và Pulse ngoài tầm. Cả ba đều bị bắt, nên script có khả năng báo lỗi.
+Cần kiểm lại sau khi đổi sang vòng sáng 40 px và `lampRest`: vòng sáng 40 px có thể chạm dấu tối ở sân giữa từ vị trí cũ, nên `hasAimArea` phải chạy lại.
 
-Ghi chú: mô hình ánh sáng `light.ts`/`lightAudit.ts` hiện chỉ có trên `feat/v4-foundation` (`b01034e`), chưa có trên `level01-v4`. Khi dựng màn, cần nhánh `level01-v4` dựa trên `feat/v4-foundation` hoặc merge vào.
+Ghi chú: mô hình ánh sáng `light.ts`/`lightAudit.ts` đã có trên `feat/v4-foundation` (`4f9fd4a`, vòng 40 px) và đã được merge vào `level01-v4` qua `ccef8f9`.
 
 ## 10. Art cần làm
 
 Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 1280×720 cho 640×360. Không bake chữ, HUD, nhân vật, ánh sáng sống, cửa hay chốt vào nền. Nền phải khớp collider trong blockout.
 
-**Vệt và quầng đèn không cần art**: vẽ bằng code theo footprint của `light.ts`. Art chỉ cung cấp phần đèn và bệ.
+**Vòng sáng và quầng đèn không cần art**: vẽ bằng code theo footprint của `light.ts`. Art chỉ cung cấp phần đèn, bệ và vật thể.
 
 ### P0 — chặn việc dựng
 
 | # | Asset | Trạng thái | Ghi chú |
 | --- | --- | --- | --- |
 | 1 | Nền sân trạm 640×360 | một | Sân vào, sân giữa, tường có khe cửa A và cổng B. Ánh nền rêu nhạt **đọc được khi đèn tắt**; không đốt sáng sẵn. Cùng bảng màu với tranh 03/05. |
-| 2 | Cánh cửa A | đóng · mở (lò xo căng) | 40×36; lò xo phải thấy rõ là phần kéo về. |
+| 2 | Cánh cửa A | đóng · mở (lò xo căng) | 40×36; lẫy và lò xo vẽ **còn nguyên**, lò xo phải thấy rõ là phần kéo về. |
 | 3 | Chốt A | nhả · gài | 16×30; thanh cơ khí đang đỡ phải thấy rõ. |
 | 4 | Cánh cổng B | đóng · mở | 48×40; có thể chung khung đá với cổng ra rừng. |
 | 5 | Tay hãm B | nhả · gài | 16×28; khác hình chốt A. |
-| 6 | Bệ `s0`, S1, S2 | trống · có đèn | 24×34; ổ kín có nắp. `s0` không có đầu nối. |
-| 7 | Mắt nhận sáng A/B | ngủ · sống | 12×12; chỉ là chỉ báo. |
-| 8 | Đèn bảo trì | bật · tắt, trên bệ | Khớp đèn trong tranh 03/05 và đèn Nhinh cầm. `pickup-lantern.png` cũ màu cam, sai kiểu. |
-| 9 | **Mầm cây + Lumo che** | mầm sáng khi chiếu | Lumo đang che mầm; mầm có quầng khi bị vệt đèn chiếu. |
-| 10 | **Bào tử phản quang** (dấu tối) | một kiểu, 2 cụm | Phải đọc được khi đèn tắt và biến mất khi vệt phủ lên. Tách màu với nền. |
+| 6 | Bệ S1, S2 | trống · có đèn | 24×34; hộp có nắp, đầu nối kín. **Đầu cắm S1 khớp hình đèn bảo trì:** thiết kế cùng lúc với #8. |
+| 7 | Mắt nhận sáng A/B | ngủ · sống | 12×12; ổ kín có nắp; chỉ là chỉ báo. |
+| 8 | Đèn bảo trì | bật · tắt; trên đất · trên bệ · trong tay | Khớp đèn trong tranh 03/05 và đèn Nhinh cầm. Hình dạng phải khớp đầu cắm S1. `pickup-lantern.png` cũ màu cam, sai kiểu. |
+| 9 | **Mầm cây + Lumo che** | mầm sáng khi chiếu | Lumo đang che mầm. Lumo phải đọc được bằng ánh tự thân khi vòng đèn đã rời mầm. |
+| 10 | **Bào tử phản quang** (dấu tối) | một kiểu, 2 cụm bản lề + 3 cụm chốt | Phải đọc được khi đèn tắt và biến mất khi vòng sáng phủ lên. Cụm bản lề phải xếp thành đường chạy của lò xo. Tách màu với nền. |
 | 11 | **Vết chân nhỏ** (dấu tối) | 3 vết | Cùng nguyên tắc với bào tử. |
 
 ### P1 — cần cho bản chơi đủ nghĩa
@@ -170,6 +187,7 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 | 14 | Đường dây kín S1→A, S2→B | Dạng nét mảnh có dấu đầu nối; có thể vẽ bằng code. |
 | 15 | Cột ký hiệu tuyến nước | Ký hiệu trùng ký hiệu trong xưởng. Cần chốt ký hiệu (xem §11). |
 | 16 | Mô hình bản lề | Ba trạng thái: đóng, kéo mở, cài móc. |
+| 17 | Đường nguồn thường có đoạn tối ở đầu vào S1 | Đoạn đứt nhịp, đọc được là "chỉ báo gián đoạn". |
 
 ### P2
 
@@ -183,12 +201,12 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 - Bộ rừng `forest-expansion/sprites-v2` và `bush_woods` cho viền rừng.
 - Ô nền đất/cỏ trong `assets/ground-tiles`.
 
-**Không dùng nữa:** cổng vòm đá `woods_arch_*`, vòng đá đứng, dấu chân Pulse cũ.
+**Không dùng nữa:** cổng vòm đá `woods_arch_*`, vòng đá đứng, dấu chân Pulse cũ, và bệ `s0` (đã bỏ theo (b)).
 
 ## 11. Câu chữ và thiết kế cần bạn duyệt
 
 - **Nhắc E:**
-  - Đèn và bệ: `E: nhặt đèn` / `E: đặt đèn lên bệ` / `E: lấy đèn`.
+  - Đèn: `E: nhặt đèn` (trên đất tại `lampRest`, hoặc trên bệ) / `E: đặt đèn lên bệ` / `E: lấy đèn`.
   - Chốt A: `E: gài chốt A` / `E: mở chốt A`.
   - Hãm B: `E: gài hãm B` / `E: nhả hãm B`.
   - Bia: `E: đọc bia`.
@@ -197,13 +215,14 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
   - Chốt A khi cửa đóng: "Chốt chỉ ăn khi cửa A đang mở."
   - Hãm B khi cổng đóng: "Tay hãm chỉ gài được khi cánh B mở."
   - Ra cổng mà không cầm đèn: "Đèn còn trên bệ."
+  - Đặt đèn xuống đất: "Đèn chỉ đặt được trên bệ." (mới, cần duyệt)
 - **Hai dòng J đã nêu ở §6** và các dòng ở đó.
 - **Ký hiệu trên cột tuyến nước:** hiện chưa có ký hiệu cụ thể. Bạn chọn ký hiệu, hoặc chỉ cho tôi ký hiệu trong nền xưởng.
-- **Quyết định (a)/(b)** ở §8.
+- **Cảnh mở đầu gắn với lần bật đầu** thay vì lần nhặt (§1, đề xuất).
 
 ## 12. Bước tiếp theo khi dựng
 
-- `forestEdgeLayout.ts` sinh từ JSON này.
-- `forestEdgeLogic.ts` thuần, có test: tham khảo đường, nhấc đèn sớm, từ chối chốt, mở lại chốt ở sân giữa, tải lại, `auditReach` và kiểm dấu theo từng trạng thái.
-- `ForestEdgeLevel.ts` dùng host V4 và `light.ts` để vẽ quầng và vệt.
-- Thêm trạng thái đèn "trên bệ `s0`" nếu chọn (a); nếu chọn (b), thêm ngoại lệ đặt đèn một lần.
+- Sửa `puzzle-contracts.md`, `01-forgotten-forest-edge.md` §1/§4 và `RULE_GAMES.md` theo §8, trên `develop-v4` (chưa làm).
+- Chạy lại reach audit và `hasAimArea` trên v3 (chưa làm).
+- Runtime `level01-v4` (`3167e94`): thêm `lampRest`, E nhặt một lần, và cảnh mở gắn với lần bật đầu. `forestEdgeLogic.ts` cần test cho ngoại lệ này.
+- `ForestEdgeLevel.ts` dùng host V4 và `light.ts` để vẽ vòng sáng 40 px và quầng.

@@ -66,7 +66,7 @@ for e in LAYOUT['sealedEyes']:
     d.ellipse((e['x'] - 4, e['y'] - 4, e['x'] + 4, e['y'] + 4), fill=(210, 170, 70, 255), outline=(60, 40, 10, 255))
 for line in LAYOUT['lines'].values():
     d.line([(p['x'], p['y']) for p in line], fill=(180, 140, 70, 255), width=2)
-for key in ('s0', 's1', 's2'):
+for key in ('s1', 's2'):
     r = I[key]
     d.rectangle((r['x'], r['y'] - 10, r['x'] + r['width'] - 1, r['y'] + r['height'] - 1), fill=(128, 118, 96, 255), outline=(50, 44, 34, 255))
     d.rectangle((r['x'] + 8, r['y'] - 6, r['x'] + 15, r['y'] + 1), fill=(176, 130, 60, 255))  # sealed socket
@@ -89,7 +89,7 @@ place(scene, sprite('assets/environment/forest-expansion/sprites-v2/ancient-tree
 for x, y in ((36, 330), (230, 116), (600, 330), (420, 344), (20, 250)):
     place(scene, sprite('src/assets/bush_woods.png', 34), x, y)
 place(scene, sprite('assets/levels/01-forgotten-forest-edge/sprites/beacon-stone-hidden.png', 40), 174, 218)
-place(scene, sprite('assets/levels/01-forgotten-forest-edge/sprites/pickup-lantern.png', 16), I['s0']['x'] + 8, I['s0']['y'] + 2)
+place(scene, sprite('assets/levels/01-forgotten-forest-edge/sprites/pickup-lantern.png', 16), I['lampRest']['x'] + 8, I['lampRest']['y'] + 2)
 place(scene, sprite('src/assets/lumo_0.png', 14), r['x'] + 8, r['y'] + 4)
 yard = LAYOUT['checkpoints'][0]['spawn']
 place(scene, Image.open(ROOT / 'assets/character/nhinh_down_idle_0.png').convert('RGBA'), yard['x'], yard['y'] + 21)
@@ -101,7 +101,7 @@ try:
 except OSError:  # not on Windows: Vietnamese marks may not render
     FONT = ImageFont.load_default()
 TEXT = {
-    'bia': (150, 222), 'bệ đèn': (188, 244), 'bản lề': (108, 284), 'S1': (284, 264), 'cửa A': (340, 178),
+    'bia': (150, 222), 'đèn trên đất': (176, 232), 'bản lề': (108, 284), 'S1': (284, 264), 'cửa A': (340, 178),
     'chốt A': (382, 148), 'S2': (424, 120), 'cổng B': (462, 2), 'hãm B': (516, 80), 'cột tuyến nước': (528, 108),
     'mầm + Lumo': (226, 226), 'mái trạm': (520, 256), 'cây lớn': (40, 210), 'Nhinh': (112, 240),
     'SÂN VÀO': (60, 300), 'SÂN GIỮA': (300, 120), '→ rừng 02': (510, 4),
