@@ -60,6 +60,22 @@ Mọi tọa độ nằm trong `workshopLayout.ts`, đổi khi có nền mới.
 
 Ghép thử trong game dùng art đợt 1 làm chỗ đặt tạm; khi có art mới chỉ cần thay file và sửa `workshopLayout.ts`.
 
+### Đặc tả art đợt 2 (người dùng tạo)
+
+Thước đo chung: khung Nhinh 36×42 trên màn 640×360, thân nhìn thấy cao ~28 px. Bản nguồn vẽ ở 1280×720 thì Nhinh cao ~56 px (khung 72×84).
+
+| File | Kích thước nguồn | Yêu cầu |
+| --- | --- | --- |
+| Nền xưởng v2 | 1280×720, không trong suốt | Cửa cao ~2× Nhinh; mặt bàn ~0,6× Nhinh; phòng vừa khung, sàn trống ở giữa. Cửa nam ở giữa cạnh dưới, cửa sổ nhìn ra bến ở tường phải. Góc trên trái 520×172 (bản 1280) và dải 52 px dưới cùng bị HUD che: chỉ đồ trang trí. Không vẽ sẵn nhân vật, đồ tương tác, chữ, tia sáng. |
+| Lớp đèn bến | 1280×720, trong suốt | Chỉ các đèn bến nhìn thấy qua cửa sổ/góc phải, đặt đúng chỗ trên nền v2. Hai file: đèn sáng và đèn tắt. |
+| Bàn sửa | trong suốt | Cùng tỉ lệ nền; một chiếc, nhìn từ trên-nghiêng như nền. |
+| Khay phụ tùng | trong suốt | Hai linh kiện khác hình rõ: vòng giữ và lò xo. |
+| Đèn của khách | trong suốt, 3 file | Lõi lệch + chốt vỏ mở; đã khép, tắt; đã khép, sáng. |
+| Bảng kiểm | trong suốt, 3 file | Đứng trên cột (hoặc gắn tường phải đúng góc nhìn). Trạng thái: đầu nối lỏng, hai chỉ báo tắt; đường xưởng đã nối, chỉ báo xưởng xanh, chỉ báo đầu nguồn cam; như trên nhưng chỉ báo đầu nguồn tắt (để nhấp nháy). |
+| Bác lái đò đi bộ | trong suốt, 2–3 khung | Đi xuống phía nam, cùng tỉ lệ bộ tư thế hiện có. |
+
+Nhân vật mẹ và bác lái đò ở đợt 1 dùng tiếp được. Đặt art mới trong `assets/prologue/story-v4-art-v2/workshop/`; `scripts/prepare-v4-workshop.py` sẽ được sửa để đọc từ đó và xuất ra `assets/levels/00-workshop/`.
+
 ## 2. Kế hoạch dựng (cho worker)
 
 Quy tắc chung như mục "Rules for every worker" của plan nền tảng. Level id: `prologue-workshop`. Thư mục: `src/v4/levels/prologue-workshop/`.
