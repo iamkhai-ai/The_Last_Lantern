@@ -1,9 +1,11 @@
-"""Cut the generated level 02 source sheets into runtime sprites.
+﻿"""Cut the generated level 02 source sheets into runtime sprites.
 
 The model draws each object large on a transparent sheet; this script splits the sheet on transparent
 gutters, thresholds away the soft halo, trims each object, downscales it, and pastes it into a fixed
-canvas with an explicit anchor. Every size and anchor comes from the V4 runtime layout
-(`src/v4/levels/whispering-woods/whisperingWoodsLayout.ts`) and from `docs/implementation/v4/02-whispering-woods-art.md`.
+canvas with an explicit anchor. Three outputs are derived rather than cut: the grove floor plate, the
+half-raised gate frame and the effect glow. Every size and anchor comes from the V4 runtime layout
+(`src/v4/levels/whispering-woods/whisperingWoodsLayout.ts`) and from
+`docs/implementation/v4/02-whispering-woods-art.md`.
 
 Run: python prepare-assets.py
 Outputs: sprites/*.png, previews/*-cut.png, asset-checks.json
@@ -12,6 +14,7 @@ Outputs: sprites/*.png, previews/*-cut.png, asset-checks.json
 from __future__ import annotations
 
 import json
+import math
 import os
 from dataclasses import dataclass
 
@@ -31,6 +34,17 @@ STELE_CANVAS = (32, 32)
 STELE_BOX = (28, 30)
 RING_BOX = (26, 26)
 RING_PLACE = (3, 6)
+
+# The floor plate is painted large and dropped onto the layout's world rect. The gain keeps it at the
+# brightness the level already used (0x17261f) so the props on top keep their contrast.
+FLOOR_SIZE = (608, 232)
+FLOOR_GAIN = 0.55
+
+# The gate's half-raised frame: the closed leaf, lifted by half the opening, clipped by the canvas.
+GATE_LIFT = 20
+
+GLOW_SIZE = 16
+GLOW_COLOUR = (255, 226, 164)
 
 # A 16x16 sprite cannot keep a painted symbol readable once it is downscaled, so the crank hub mark is
 # stamped at 1x, the same way the level 01 direction draws geometric symbols in code instead of art.
@@ -75,9 +89,10 @@ class Target:
     width: int
     height: int
     canvas: tuple[int, int] | None = None
-    anchor: str = "bottom"  # "bottom", "top" or "place"
+    anchor: str = "bottom"  # "bottom", "top", "center" or "place"
     place: tuple[int, int] | None = None
     glyph: str | None = None  # a 1x pixel mark stamped on the cut sprite (see GLYPHS)
+    stretch: bool = False  # fill the target box exactly; for a part that must span a fixed run
 
 
 @dataclass(frozen=True)
@@ -87,6 +102,7 @@ class Sheet:
     source: str
     targets: tuple[Target, ...]
     take: tuple[int, ...] | None = None  # object indices to use, when the sheet holds more than the targets
+    uniform: bool = False  # one shared scale for every target, so an animation's body never changes size
 
 
 SHEETS: tuple[Sheet, ...] = (
@@ -128,6 +144,38 @@ SHEETS: tuple[Sheet, ...] = (
             Target("mouth-star", 12, 12, (12, 12)),
             Target("mouth-water", 12, 12, (12, 12)),
         ),
+    ),
+    Sheet(
+        "axles.png",
+        (
+            Target("axle-x", 80, 12, (80, 12), "center", stretch=True),
+            Target("axle-y", 80, 12, (80, 12), "center", stretch=True),
+            Target("axle-z", 80, 12, (80, 12), "center", stretch=True),
+        ),
+    ),
+    Sheet(
+        "crank-marks.png",
+        (
+            Target("mark-x", 32, 32, (32, 32), "center"),
+            Target("mark-y", 32, 32, (32, 32), "center"),
+            Target("mark-z", 32, 32, (32, 32), "center"),
+        ),
+    ),
+    Sheet(
+        "props.png",
+        (
+            Target("hollow", 64, 32, (64, 32), "bottom"),
+            Target("bell", 16, 20, (16, 20), "center"),
+        ),
+    ),
+    Sheet(
+        "firefly.png",
+        (
+            Target("firefly-0", 8, 8, (8, 8), "center"),
+            Target("firefly-1", 8, 8, (8, 8), "center"),
+            Target("firefly-2", 8, 8, (8, 8), "center"),
+        ),
+        uniform=True,
     ),
 )
 
@@ -178,30 +226,40 @@ def cut(source: Sheet) -> list[tuple[Target, Image.Image]]:
         raise SystemExit(
             f"{source.source}: found {len(bands)} objects, expected {len(source.targets)}"
         )
-    cut_out: list[tuple[Target, Image.Image]] = []
-    for (start, end), target in zip(bands, source.targets):
-        cut_out.append((target, solid(sheet.crop((start, 0, end, sheet.height)))))
-    return cut_out
+    return [
+        (target, solid(sheet.crop((start, 0, end, sheet.height))))
+        for (start, end), target in zip(bands, source.targets)
+    ]
 
 
-def fit(image: Image.Image, target: Target) -> Image.Image:
+def quantize(image: Image.Image) -> Image.Image:
+    """Binary alpha for a crisp silhouette, then one palette for the whole sprite."""
+    alpha = image.getchannel("A").point(lambda value: 255 if value >= ALPHA_CUTOFF else 0)
+    rgb = image.convert("RGB").quantize(colors=MAX_COLOURS, method=Image.MEDIANCUT).convert("RGB")
+    out = rgb.convert("RGBA")
+    out.putalpha(alpha)
+    return out
+
+
+def fit(image: Image.Image, target: Target, scale: float | None = None) -> Image.Image:
     """Downscale into the target box, then place on the canvas at the target anchor."""
-    scale = min(target.width / image.width, target.height / image.height)
-    size = (max(1, round(image.width * scale)), max(1, round(image.height * scale)))
-    small = image.resize(size, Image.LANCZOS)
-
-    # Binary alpha keeps the silhouette crisp at game scale; the palette stays inside one family.
-    alpha = small.getchannel("A").point(lambda value: 255 if value >= ALPHA_CUTOFF else 0)
-    rgb = small.convert("RGB").quantize(colors=MAX_COLOURS, method=Image.MEDIANCUT).convert("RGB")
-    small = rgb.convert("RGBA")
-    small.putalpha(alpha)
+    if scale is None:
+        scale = min(target.width / image.width, target.height / image.height)
+    size = (target.width, target.height) if target.stretch else (
+        max(1, round(image.width * scale)),
+        max(1, round(image.height * scale)),
+    )
+    small = quantize(image.resize(size, Image.LANCZOS))
 
     canvas_w, canvas_h = target.canvas or (target.width, target.height)
     if target.anchor == "place" and target.place is not None:
         x, y = target.place
+    elif target.anchor == "center":
+        x, y = (canvas_w - small.width) // 2, (canvas_h - small.height) // 2
+    elif target.anchor == "top":
+        x, y = (canvas_w - small.width) // 2, 0
     else:
-        x = (canvas_w - small.width) // 2
-        y = 0 if target.anchor == "top" else canvas_h - small.height
+        x, y = (canvas_w - small.width) // 2, canvas_h - small.height
     canvas = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
     canvas.alpha_composite(small, (x, y))
     return canvas
@@ -235,13 +293,44 @@ def stamp(sprite: Image.Image, name: str) -> Image.Image:
     return sprite
 
 
+def floor_plate() -> Image.Image:
+    """The painted grove floor, dropped to the layout's world rect at the level's existing brightness."""
+    image = Image.open(os.path.join(SOURCES, "grove-floor.png")).convert("RGB")
+    image = image.resize(FLOOR_SIZE, Image.LANCZOS)
+    gain = lambda value: min(255, round(value * FLOOR_GAIN))
+    plate = Image.merge("RGB", [channel.point(gain) for channel in image.split()])
+    return plate.convert("RGBA")
+
+
+def gate_half() -> Image.Image:
+    """The leaf half raised: the closed sprite lifted by half the opening and clipped by the canvas."""
+    closed = Image.open(os.path.join(SPRITES, "gate-closed.png")).convert("RGBA")
+    canvas = Image.new("RGBA", closed.size, (0, 0, 0, 0))
+    canvas.alpha_composite(closed, (0, -GATE_LIFT))
+    return canvas
+
+
+def glow() -> Image.Image:
+    """A soft radial glow for the ring-match and gate effects. Derived, never painted."""
+    canvas = Image.new("RGBA", (GLOW_SIZE, GLOW_SIZE), (0, 0, 0, 0))
+    pixels = canvas.load()
+    centre = (GLOW_SIZE - 1) / 2
+    for y in range(GLOW_SIZE):
+        for x in range(GLOW_SIZE):
+            distance = math.hypot(x - centre, y - centre) / (GLOW_SIZE / 2)
+            falloff = max(0.0, 1.0 - distance) ** 2
+            if falloff > 0:
+                pixels[x, y] = (*GLOW_COLOUR, round(falloff * 255))
+    return canvas
+
+
 def preview(items: list[tuple[Target, Image.Image]], name: str) -> None:
     """A nearest-neighbour blow-up on the forest floor tone, for eyeballing the cut sprites."""
-    scale = 8
+    scale = 6
     pad = 10
     width = sum(image.width * scale + pad for _, image in items) + pad
     height = max(image.height * scale for _, image in items) + pad * 2
-    sheet = Image.new("RGBA", (width, height), (24, 34, 36, 255))
+    sheet = Image.new("RGBA", (width, height), (18, 26, 28, 255))
     x = pad
     for _, image in items:
         big = image.resize((image.width * scale, image.height * scale), Image.NEAREST)
@@ -250,32 +339,51 @@ def preview(items: list[tuple[Target, Image.Image]], name: str) -> None:
     sheet.save(os.path.join(PREVIEWS, name))
 
 
+def record(checks: list[dict[str, object]], target_id: str, sprite: Image.Image, source: str) -> None:
+    bbox = sprite.getchannel("A").getbbox()
+    checks.append(
+        {
+            "id": target_id,
+            "file": f"sprites/{target_id}.png",
+            "source": source,
+            "canvas": list(sprite.size),
+            "ink_bbox": list(bbox) if bbox else None,
+            "ink_size": [bbox[2] - bbox[0], bbox[3] - bbox[1]] if bbox else None,
+            "colours": len(sprite.getcolors(maxcolors=1 << 20) or []),
+        }
+    )
+
+
 def main() -> None:
     os.makedirs(SPRITES, exist_ok=True)
     os.makedirs(PREVIEWS, exist_ok=True)
     checks: list[dict[str, object]] = []
     for source in SHEETS:
-        items: list[tuple[Target, Image.Image]] = []
-        for target, art in cut(source):
-            sprite = fit(art, target)
+        items = cut(source)
+        shared = None
+        if source.uniform:
+            widest = max(art.width for _, art in items)
+            tallest = max(art.height for _, art in items)
+            first = source.targets[0]
+            shared = min(first.width / widest, first.height / tallest)
+        previews: list[tuple[Target, Image.Image]] = []
+        for target, art in items:
+            sprite = fit(art, target, shared)
             if target.glyph is not None:
                 sprite = stamp(sprite, target.glyph)
             sprite.save(os.path.join(SPRITES, f"{target.id}.png"))
-            bbox = sprite.getchannel("A").getbbox()
-            checks.append(
-                {
-                    "id": target.id,
-                    "file": f"sprites/{target.id}.png",
-                    "source": f"sources/{source.source}",
-                    "canvas": list(sprite.size),
-                    "trim": list(art.size),
-                    "ink_bbox": list(bbox) if bbox else None,
-                    "ink_size": [bbox[2] - bbox[0], bbox[3] - bbox[1]] if bbox else None,
-                    "colours": len(sprite.getcolors(maxcolors=1 << 20) or []),
-                }
-            )
-            items.append((target, sprite))
-        preview(items, f"{os.path.splitext(source.source)[0]}-cut.png")
+            record(checks, target.id, sprite, f"sources/{source.source}")
+            previews.append((target, sprite))
+        preview(previews, f"{os.path.splitext(source.source)[0]}-cut.png")
+
+    for target_id, sprite, source in (
+        ("grove-floor", floor_plate(), "sources/grove-floor.png"),
+        ("gate-half", gate_half(), "derived from sprites/gate-closed.png"),
+        ("glow", glow(), "derived"),
+    ):
+        sprite.save(os.path.join(SPRITES, f"{target_id}.png"))
+        record(checks, target_id, sprite, source)
+
     with open(os.path.join(HERE, "asset-checks.json"), "w", encoding="utf-8") as handle:
         json.dump({"checks": checks}, handle, indent=2)
         handle.write("\n")

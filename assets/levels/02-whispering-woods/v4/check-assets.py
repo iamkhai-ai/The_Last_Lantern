@@ -1,10 +1,12 @@
-"""Verify the level 02 P0 sprites against the V4 runtime layout and build the review previews.
+"""Verify the level 02 sprites against the V4 runtime layout and build the review previews.
 
-Checks sizes, alpha and anchors; composites the ring over one stele at its three notch positions; and
-lays every sprite on the grove layout at 640x360 (shown at 2x) so the fit can be judged in place.
+Checks sizes, alpha and anchors; composites the ring over one stele at its three notch positions; and lays
+every sprite on the grove layout at 640x360 (shown at 2x), once in normal play and once with the Pulse
+layer revealed, so the fit can be judged in place.
 
 Run: python check-assets.py
-Outputs: previews/contact-sheet.png, previews/stele-ring-3-positions.png, previews/grove-640x360-2x.png
+Outputs: previews/contact-sheet.png, previews/stele-ring-3-positions.png, previews/grove-640x360-2x.png,
+         previews/grove-pulse-640x360-2x.png
 Exit code: 0 when every check passes.
 """
 
@@ -19,7 +21,7 @@ SPRITES = os.path.join(HERE, "sprites")
 PREVIEWS = os.path.join(HERE, "previews")
 
 FLOOR = (26, 38, 40, 255)
-WALL = (52, 66, 66, 255)
+WALL = (38, 50, 50, 255)
 
 # World rects copied from src/v4/levels/whispering-woods/whisperingWoodsLayout.ts.
 STELES = {
@@ -40,9 +42,14 @@ WORLD = (16, 96, 608, 232)
 WALLS = ((592, 96, 8, 94), (592, 230, 8, 98))
 NOTCH = {"moon": 2, "leaf": 0, "star": 0, "water": 2}  # 0 = N, 1 = SE, 2 = SW
 
+# Decorative P1 props: chosen in the level code, no layout rect.
+HOLLOW = (444, 100, 64, 32)
+BELL = (58, 140, 16, 20)
+
 # Canvas placement: the stele art is 28x24 inside a 32x32 canvas anchored at the bottom centre.
 STELE_CANVAS = 32
 RING_PIVOT = (16, 19)
+AXLE_Y = 140
 
 EXPECTED = {
     "stele-moon": (32, 32),
@@ -55,11 +62,25 @@ EXPECTED = {
     "crank-z": (16, 16),
     "gate-closed": (8, 40),
     "gate-open": (8, 40),
+    "gate-half": (8, 40),
     "latch": (8, 8),
     "mouth-moon": (12, 12),
     "mouth-leaf": (12, 12),
     "mouth-star": (12, 12),
     "mouth-water": (12, 12),
+    "grove-floor": (608, 232),
+    "axle-x": (80, 12),
+    "axle-y": (80, 12),
+    "axle-z": (80, 12),
+    "mark-x": (32, 32),
+    "mark-y": (32, 32),
+    "mark-z": (32, 32),
+    "hollow": (64, 32),
+    "bell": (16, 20),
+    "firefly-0": (8, 8),
+    "firefly-1": (8, 8),
+    "firefly-2": (8, 8),
+    "glow": (16, 16),
 }
 
 
@@ -89,6 +110,8 @@ def verify() -> list[str]:
             problems.append(f"{name}: foot at y{bbox[3]}, expected {STELE_CANVAS}")
     if load("gate-closed").getchannel("A").getbbox()[3] != 40:
         problems.append("gate-closed: leaf does not reach the sill")
+    if load("gate-half").getchannel("A").getbbox()[3] != 20:
+        problems.append("gate-half: leaf is not half raised")
     return problems
 
 
@@ -102,39 +125,49 @@ def ring_positions() -> None:
     scale = 8
     pad = 12
     cell = STELE_CANVAS * scale
-    sheet = Image.new("RGBA", (cell * 3 + pad * 4, cell + pad * 2 + 16), (24, 34, 36, 255))
+    sheet = Image.new("RGBA", (cell * 3 + pad * 4, cell + pad * 2), (24, 34, 36, 255))
     for index, notch in enumerate((0, 1, 2)):
-        art = stele_with_ring("moon", notch)
-        big = art.resize((cell, cell), Image.NEAREST)
+        big = stele_with_ring("moon", notch).resize((cell, cell), Image.NEAREST)
         sheet.alpha_composite(big, (pad + index * (cell + pad), pad))
     sheet.save(os.path.join(PREVIEWS, "stele-ring-3-positions.png"))
 
 
-def grove() -> None:
+def grove(pulse: bool) -> None:
     scene = Image.new("RGBA", (640, 360), FLOOR)
-    scene.alpha_composite(Image.new("RGBA", (WORLD[2], WORLD[3]), (22, 32, 34, 255)), (WORLD[0], WORLD[1]))
+    scene.alpha_composite(load("grove-floor"), (WORLD[0], WORLD[1]))
     for wall in WALLS:
         scene.alpha_composite(Image.new("RGBA", (wall[2], wall[3]), WALL), (wall[0], wall[1]))
 
-    def place(sprite: Image.Image, rect: tuple[int, int, int, int]) -> None:
-        """Bottom-centre anchor inside the rect."""
+    def bottom(sprite: Image.Image, rect: tuple[int, int, int, int]) -> None:
         x = rect[0] + rect[2] // 2 - sprite.width // 2
         y = rect[1] + rect[3] - sprite.height
         scene.alpha_composite(sprite, (x, y))
 
+    def centred(sprite: Image.Image, cx: int, cy: int) -> None:
+        scene.alpha_composite(sprite, (cx - sprite.width // 2, cy - sprite.height // 2))
+
+    bottom(load("hollow"), HOLLOW)
+    centred(load("bell"), BELL[0] + BELL[2] // 2, BELL[1] + BELL[3] // 2)
+    if pulse:
+        for name in ("x", "y", "z"):
+            centred(load(f"mark-{name}"), CRANKS[name][0] + 8, CRANKS[name][1] + 8)
+        centred(load("axle-x"), 214, AXLE_Y)
+        centred(load("axle-y"), 294, AXLE_Y)
+        centred(load("axle-z"), 374, AXLE_Y)
     for name, rect in STELES.items():
-        place(stele_with_ring(name, NOTCH[name]), rect)
+        bottom(stele_with_ring(name, NOTCH[name]), rect)
     for name, rect in CRANKS.items():
-        place(load(f"crank-{name}"), rect)
+        bottom(load(f"crank-{name}"), rect)
     for name, rect in MOUTHS.items():
         scene.alpha_composite(load(f"mouth-{name}"), (rect[0], rect[1]))
-    place(load("gate-closed"), GATE)
-    scene.resize((1280, 720), Image.NEAREST).save(os.path.join(PREVIEWS, "grove-640x360-2x.png"))
+    bottom(load("gate-closed"), GATE)
+    suffix = "grove-pulse-640x360-2x.png" if pulse else "grove-640x360-2x.png"
+    scene.resize((1280, 720), Image.NEAREST).save(os.path.join(PREVIEWS, suffix))
 
 
 def contact_sheet() -> None:
-    scale = 6
-    pad = 12
+    scale = 3
+    pad = 10
     names = list(EXPECTED)
     widths = [load(name).width * scale for name in names]
     height = max(load(name).height * scale for name in names)
@@ -152,7 +185,8 @@ def main() -> None:
     os.makedirs(PREVIEWS, exist_ok=True)
     problems = verify()
     ring_positions()
-    grove()
+    grove(pulse=False)
+    grove(pulse=True)
     contact_sheet()
     if problems:
         for problem in problems:

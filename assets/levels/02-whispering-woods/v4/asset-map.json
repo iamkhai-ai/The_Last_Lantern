@@ -155,6 +155,146 @@
       "target": [12, 12],
       "runtimeRect": [408, 178, 12, 12],
       "role": "Dark receiving mouth, fireflies at the SW edge (notch 2)."
+    },
+    {
+      "id": "grove-floor",
+      "source": "sources/grove-floor.png",
+      "cell": null,
+      "canvas": [608, 232],
+      "anchor": "top-left at the world rect",
+      "target": [608, 232],
+      "runtimeRect": [16, 96, 608, 232],
+      "role": "The grove floor plate. Cut to the world rect and dropped to 0.55 gain so it keeps the level's old brightness."
+    },
+    {
+      "id": "axle-x",
+      "source": "sources/axles.png",
+      "cell": 1,
+      "canvas": [80, 12],
+      "anchor": "centre",
+      "target": [80, 12],
+      "runtimeRect": [174, 134, 80, 12],
+      "role": "Rod between Moon and Leaf, behind the stones. Pulse-revealed; stretched to span the 80px run."
+    },
+    {
+      "id": "axle-y",
+      "source": "sources/axles.png",
+      "cell": 2,
+      "canvas": [80, 12],
+      "anchor": "centre",
+      "target": [80, 12],
+      "runtimeRect": [254, 134, 80, 12],
+      "role": "Rod between Leaf and Star."
+    },
+    {
+      "id": "axle-z",
+      "source": "sources/axles.png",
+      "cell": 3,
+      "canvas": [80, 12],
+      "anchor": "centre",
+      "target": [80, 12],
+      "runtimeRect": [334, 134, 80, 12],
+      "role": "Rod between Star and Water."
+    },
+    {
+      "id": "mark-x",
+      "source": "sources/crank-marks.png",
+      "cell": 1,
+      "canvas": [32, 32],
+      "anchor": "centre",
+      "target": [32, 32],
+      "runtimeRect": [198, 254, 32, 32],
+      "role": "Crank X's match mark: a ring holding the Moon and Leaf glyphs joined by a bar. Pulse-revealed."
+    },
+    {
+      "id": "mark-y",
+      "source": "sources/crank-marks.png",
+      "cell": 2,
+      "canvas": [32, 32],
+      "anchor": "centre",
+      "target": [32, 32],
+      "runtimeRect": [278, 254, 32, 32],
+      "role": "Crank Y's match mark: Leaf and Star."
+    },
+    {
+      "id": "mark-z",
+      "source": "sources/crank-marks.png",
+      "cell": 3,
+      "canvas": [32, 32],
+      "anchor": "centre",
+      "target": [32, 32],
+      "runtimeRect": [358, 254, 32, 32],
+      "role": "Crank Z's match mark: Star and Water."
+    },
+    {
+      "id": "hollow",
+      "source": "sources/props.png",
+      "cell": 1,
+      "canvas": [64, 32],
+      "anchor": "bottom-centre",
+      "target": [64, 32],
+      "runtimeRect": [444, 100, 64, 32],
+      "role": "The sleeping hollow with three adult fireflies perched. Decorative, never solid."
+    },
+    {
+      "id": "bell",
+      "source": "sources/props.png",
+      "cell": 2,
+      "canvas": [16, 20],
+      "anchor": "centre",
+      "target": [16, 20],
+      "runtimeRect": [58, 140, 16, 20],
+      "role": "Lumo's grass bell hanging by the entry. Decorative, never solid."
+    },
+    {
+      "id": "firefly-0",
+      "source": "sources/firefly.png",
+      "cell": 1,
+      "canvas": [8, 8],
+      "anchor": "centre",
+      "target": [8, 8],
+      "runtimeRect": null,
+      "role": "Flying firefly, wings raised. One of three frames swapped every 130 ms."
+    },
+    {
+      "id": "firefly-1",
+      "source": "sources/firefly.png",
+      "cell": 2,
+      "canvas": [8, 8],
+      "anchor": "centre",
+      "target": [8, 8],
+      "runtimeRect": null,
+      "role": "Flying firefly, wings level."
+    },
+    {
+      "id": "firefly-2",
+      "source": "sources/firefly.png",
+      "cell": 3,
+      "canvas": [8, 8],
+      "anchor": "centre",
+      "target": [8, 8],
+      "runtimeRect": null,
+      "role": "Flying firefly, wings lowered."
+    },
+    {
+      "id": "gate-half",
+      "source": "derived from sprites/gate-closed.png",
+      "cell": null,
+      "canvas": [8, 40],
+      "anchor": "bottom-centre",
+      "target": [8, 40],
+      "runtimeRect": [592, 190, 8, 40],
+      "role": "The leaf half raised: the closed sprite lifted 20px. Shown for 180 ms while the gate opens."
+    },
+    {
+      "id": "glow",
+      "source": "derived",
+      "cell": null,
+      "canvas": [16, 16],
+      "anchor": "centre",
+      "target": [16, 16],
+      "runtimeRect": null,
+      "role": "One radial flash for the ring-match and gate-open effects: scaled up and faded over 420 ms."
     }
   ]
 }

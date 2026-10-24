@@ -79,12 +79,9 @@ const PROMPT_CRANK: Record<Crank, string> = {
 const STELE_TOAST = 'Vành đứng yên trên bia; hướng của nó đổi khi tay quay đi cùng bia.';
 
 const COLOR = {
-  floor: 0x17261f,
   wall: 0x2c3e40,
   ringMatched: 0xffe08a,
   latchOff: 0x6b6b6b,
-  crankMark: 0xd8b869,
-  axle: 0x7f9a8a,
 };
 
 /** The grove's rings and cranks, in order. */
@@ -101,8 +98,34 @@ const RING_ANGLE: Readonly<Record<RingDir, number>> = {
 /** Alpha of a mouth that is no longer readable but is already in the journal: a faint trace of where it was. */
 const FAINT_MOUTH_ALPHA = 0.25;
 
+/** The axle bars run behind the stele tops, at the height where a rod would meet each stone. */
+const AXLE_Y = 140;
+/** How long the gate leaf shows its half-raised frame while it opens. */
+const GATE_SWING_MS = 180;
+/** Wing frames of a flying firefly swap at this rate. */
+const FIREFLY_FRAME_MS = 130;
+/** Where the flying fireflies drift: around the sleeping hollow, off the walking lanes. */
+const FIREFLY_HOMES: readonly Point[] = [
+  { x: 466, y: 112 },
+  { x: 484, y: 120 },
+  { x: 452, y: 122 },
+];
+/** The P1 props have no layout rect: they are placed off the lanes, and never become solid. */
+const HOLLOW_AT = { x: 444, y: 100 };
+const BELL_AT = { x: 58, y: 140 };
+/** Fireflies and effect flashes sit above the darkness (68) so they read as light at night. */
+const FIREFLY_DEPTH = 68.6;
+const EFFECT_DEPTH = 68.7;
+
+/** Midpoint between each pair of stele centres, where that axle bar sits. */
+const AXLE_MID: Readonly<Record<Crank, number>> = { x: 214, y: 294, z: 374 };
+/** The journal entry that reveals each axle, and the one that reveals each crank's match mark. */
+const AXLE_ID: Readonly<Record<Crank, string>> = { x: AXLE_X_ID, y: AXLE_Y_ID, z: AXLE_Z_ID };
+const MARK_ID: Readonly<Record<Crank, string>> = { x: CRANK_MARK_X_ID, y: CRANK_MARK_Y_ID, z: CRANK_MARK_Z_ID };
+
 /** The sprites of one build. Positions come from the layout; each frame changes only rotation, tint and texture. */
 interface GroveArt {
+  readonly floor: Phaser.GameObjects.Image;
   readonly steles: Record<Ring, Phaser.GameObjects.Image>;
   readonly rings: Record<Ring, Phaser.GameObjects.Image>;
   readonly cranks: Record<Crank, Phaser.GameObjects.Image>;
@@ -110,6 +133,13 @@ interface GroveArt {
   readonly latch: Phaser.GameObjects.Image;
   /** Keyed by mark id. */
   readonly mouths: Record<string, Phaser.GameObjects.Image>;
+  /** Pulse-revealed: the bars between the steles and the match marks on the cranks. */
+  readonly axles: Record<Crank, Phaser.GameObjects.Image>;
+  readonly marks: Record<Crank, Phaser.GameObjects.Image>;
+  /** P1 props and the P2 fireflies that drift around the hollow. */
+  readonly hollow: Phaser.GameObjects.Image;
+  readonly bell: Phaser.GameObjects.Image;
+  readonly fireflies: readonly Phaser.GameObjects.Image[];
 }
 
 /**
@@ -125,7 +155,9 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
   private state: WhisperingWoodsState = defaultWhisperingWoodsState();
   private items: Interactable[] = [];
   private gateZone: Phaser.GameObjects.Zone | null = null;
-  private statics: Phaser.GameObjects.Graphics[] = [];
+  private statics: Phaser.GameObjects.GameObject[] = [];
+  /** When the gate started opening, for the half-raised frame. Zero means it was already open. */
+  private gateOpenedAt = 0;
   /** Steles, cranks, gate and catch: redrawn each frame from the view. */
   private fixtures: Phaser.GameObjects.Graphics | null = null;
   private art: GroveArt | null = null;
@@ -155,16 +187,12 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
     this.host = host;
     this.state = state;
     const scene = host.scene;
-    const world = WHISPERING_WOODS.world;
     const { steles, cranks, gate } = WHISPERING_WOODS;
-
-    const floor = scene.add.graphics().setDepth(0);
-    floor.fillStyle(COLOR.floor, 1).fillRect(world.x, world.y, world.width, world.height);
 
     const walls = scene.add.graphics().setDepth(1);
     walls.fillStyle(COLOR.wall, 1);
     for (const wall of WHISPERING_WOODS.walls) walls.fillRect(wall.x, wall.y, wall.width, wall.height);
-    this.statics.push(floor, walls);
+    this.statics.push(walls);
 
     this.fixtures = scene.add.graphics().setDepth(3.4);
     this.art = this.createArt();
@@ -208,9 +236,14 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
     this.footprintsNow = footprints;
     const view = this.viewNow();
     if (this.shown) {
-      if (!this.shown.gateOpen && view.gateOpen) SoundSystem.playGateOpen();
+      if (!this.shown.gateOpen && view.gateOpen) {
+        SoundSystem.playGateOpen();
+        this.gateOpenedAt = this.host.scene.time.now;
+        this.spawnGlow(WHISPERING_WOODS.gate.x + 4, WHISPERING_WOODS.gate.y + 20, EFFECT_DEPTH);
+      }
       if (!this.shown.gateLive && view.gateLive) SoundSystem.playMechanismLatch();
     }
+    this.animateFireflies(this.host.scene.time.now);
     if (view.gateOpen && !this.host.hasEvent(END_EVENT)) {
       this.host.markEvent(END_EVENT);
       this.host.say(END_LINES);
@@ -334,7 +367,19 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
     for (const mark of WHISPERING_WOODS_LIGHT_MARKS) {
       mouths[mark.id] = at(GROVE_SPRITE_KEYS.mouths[MOUTH_RING[mark.id]], mark.rect.x, mark.rect.y, 68.5).setAlpha(0);
     }
+    // The axles run between the stele centres, behind the stones; the marks sit under each crank.
+    const axles = {} as Record<Crank, Phaser.GameObjects.Image>;
+    const marks = {} as Record<Crank, Phaser.GameObjects.Image>;
+    for (const crank of CRANKS) {
+      axles[crank] = at(GROVE_SPRITE_KEYS.axles[crank], AXLE_MID[crank] - 40, AXLE_Y - 6, 2.5).setAlpha(0);
+      const centre = rectCenter(cranks[crank]);
+      marks[crank] = at(GROVE_SPRITE_KEYS.marks[crank], centre.x - 16, centre.y - 16, 3.3).setAlpha(0);
+    }
+    const fireflies = FIREFLY_HOMES.map((home, index) =>
+      at(GROVE_SPRITE_KEYS.fireflies[index % GROVE_SPRITE_KEYS.fireflies.length], home.x - 4, home.y - 4, FIREFLY_DEPTH),
+    );
     return {
+      floor: at(GROVE_SPRITE_KEYS.floor, WHISPERING_WOODS.world.x, WHISPERING_WOODS.world.y, 0),
       steles: steleArt,
       rings: ringArt,
       cranks: crankArt,
@@ -342,6 +387,11 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
       // The catch sits on the gate's inner edge, a little below its middle.
       latch: at(GROVE_SPRITE_KEYS.latch, gate.x - 8, gate.y + 16, 3.2),
       mouths,
+      axles,
+      marks,
+      hollow: at(GROVE_SPRITE_KEYS.hollow, HOLLOW_AT.x, HOLLOW_AT.y, 3),
+      bell: at(GROVE_SPRITE_KEYS.bell, BELL_AT.x, BELL_AT.y, 3),
+      fireflies,
     };
   }
 
@@ -349,12 +399,18 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
     const art = this.art;
     if (!art) return;
     const images = [
+      art.floor,
       ...Object.values(art.steles),
       ...Object.values(art.rings),
       ...Object.values(art.cranks),
       art.gate,
       art.latch,
       ...Object.values(art.mouths),
+      ...Object.values(art.axles),
+      ...Object.values(art.marks),
+      art.hollow,
+      art.bell,
+      ...art.fireflies,
     ];
     for (const image of images) image.destroy();
     this.art = null;
@@ -366,18 +422,41 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
     if (!g || !art) return;
     g.clear();
     this.drawArt(view, art);
-    // Pulse-revealed match marks on each crank, and axles under the moss between each pair of steles.
-    const { steles, cranks } = WHISPERING_WOODS;
+    // Pulse-revealed: the axle bars under the moss, and the match mark under each crank.
     for (const crank of CRANKS) {
-      const markId = crank === 'x' ? CRANK_MARK_X_ID : crank === 'y' ? CRANK_MARK_Y_ID : CRANK_MARK_Z_ID;
-      if (this.host.hasJournal(markId)) {
-        const c = rectCenter(cranks[crank]);
-        g.lineStyle(1, COLOR.crankMark, 0.8).strokeCircle(c.x, c.y, 11);
-      }
+      art.axles[crank].setAlpha(this.host.hasJournal(AXLE_ID[crank]) ? 1 : 0);
+      art.marks[crank].setAlpha(this.host.hasJournal(MARK_ID[crank]) ? 1 : 0);
     }
-    if (this.host.hasJournal(AXLE_X_ID)) this.drawAxle(g, steles.moon, steles.leaf);
-    if (this.host.hasJournal(AXLE_Y_ID)) this.drawAxle(g, steles.leaf, steles.star);
-    if (this.host.hasJournal(AXLE_Z_ID)) this.drawAxle(g, steles.star, steles.water);
+  }
+
+  /** The P2 loop: swap the three wing frames and let each firefly drift on a small ellipse. */
+  private animateFireflies(now: number): void {
+    const art = this.art;
+    if (!art) return;
+    art.fireflies.forEach((image, index) => {
+      const home = FIREFLY_HOMES[index];
+      const frames = GROVE_SPRITE_KEYS.fireflies;
+      const frame = frames[Math.floor((now + index * 90) / FIREFLY_FRAME_MS) % frames.length];
+      if (image.texture.key !== frame) image.setTexture(frame);
+      image.setPosition(
+        home.x - 4 + Math.sin(now * 0.0009 + index * 2.1) * 7,
+        home.y - 4 + Math.cos(now * 0.0013 + index * 1.7) * 4,
+      );
+    });
+  }
+
+  /** One expanding flash above the darkness: a matched ring, or the gate letting go. */
+  private spawnGlow(x: number, y: number, depth: number): void {
+    const scene = this.host.scene;
+    const glow = scene.add.image(x, y, GROVE_SPRITE_KEYS.glow).setDepth(depth).setAlpha(0.9);
+    scene.tweens.add({
+      targets: glow,
+      alpha: 0,
+      scale: 2.6,
+      duration: 420,
+      ease: 'Quad.easeOut',
+      onComplete: () => glow.destroy(),
+    });
   }
 
   /**
@@ -390,19 +469,23 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
       image.setRotation(RING_ANGLE[view.rings[ring]]);
       if (view.matched[ring]) image.setTint(COLOR.ringMatched);
       else image.clearTint();
+      // A ring that has just found its mouth flashes once.
+      if (view.matched[ring] && !this.shown?.matched[ring]) {
+        const centre = rectCenter(WHISPERING_WOODS.steles[ring]);
+        this.spawnGlow(centre.x, centre.y - 4, EFFECT_DEPTH);
+      }
     }
-    const gateKey = view.gateOpen ? GROVE_SPRITE_KEYS.gateOpen : GROVE_SPRITE_KEYS.gateClosed;
+    const now = this.host.scene.time.now;
+    let gateKey: string = GROVE_SPRITE_KEYS.gateClosed;
+    if (view.gateOpen) {
+      gateKey =
+        this.gateOpenedAt > 0 && now - this.gateOpenedAt < GATE_SWING_MS
+          ? GROVE_SPRITE_KEYS.gateHalf
+          : GROVE_SPRITE_KEYS.gateOpen;
+    }
     if (art.gate.texture.key !== gateKey) art.gate.setTexture(gateKey);
     if (view.gateLive || this.state.gateCatch) art.latch.clearTint();
     else art.latch.setTint(COLOR.latchOff);
-  }
-
-  private drawAxle(g: Phaser.GameObjects.Graphics, a: Rect, b: Rect): void {
-    const ca = rectCenter(a);
-    const cb = rectCenter(b);
-    g.lineStyle(1.5, COLOR.axle, 0.9).lineBetween(ca.x, 118, cb.x, 118);
-    g.lineBetween(ca.x, 118, ca.x, a.y);
-    g.lineBetween(cb.x, 118, cb.x, b.y);
   }
 
   /**

@@ -53,3 +53,29 @@ bộ bia phải sinh lại lần hai.
 - Đom đóm non, dấu hiệu khu vườn đã hồi phục, cổng vòm cũ, rune xoắn/tam giác của pilot cũ.
 - Nhãn, mũi tên, số, sơ đồ, chữ.
 - Bóng đổ ra ngoài silhouette vật.
+
+## Nền rừng và đường bộ (P1)
+
+- Một tấm nền 608×232 phủ đúng rect `world`: đường đất vào từ mép trái, rẽ nhánh lên hàng bia và xuống hàng tay quay, rồi chạy tới cổng bên phải.
+- Tấm nền bị hạ sáng **0.55 lần** lúc cắt để giữ đúng độ sáng cũ của màn (`0x17261f`); nhờ vậy vật tương tác vẫn nổi trên nền.
+- Tấm nền không chứa vật thể, không bóng đổ của vật.
+
+## Trục và dấu khớp (P1)
+
+- Ba thanh trục 80×12 nối tâm hai bia liền kề, đặt ở `y = 140` để thanh chui sau chân bia; chỉ hiện khi sổ tay đã ghi mục tương ứng.
+- Ảnh trục bị **kéo ngang** cho đủ 80 px (hình gốc ~3.5:1). Chấp nhận được vì thanh chỉ hiện lúc Pulse, và nếu để đúng tỉ lệ thì thanh không chạm được hai bia.
+- Dấu khớp 32×32: một vòng mảnh chứa **hai glyph của cặp bia** mà tay quay điều khiển, nối bằng một thanh ngang. Đây là cách nói "tay X quay Trăng và Lá" bằng hình, không bằng màu.
+
+## Hốc ngủ và chuông cỏ (P1)
+
+- Hốc 64×32 đặt tại (444, 100), tựa vào dải dương xỉ trên cùng; có ba con đom đóm trưởng thành **đậu sẵn**. Không phải vật cản.
+- Chuông cỏ 16×20 đặt tại (58, 140), gần lối vào. Không phải vật cản.
+- Không vẽ con non, không vẽ dấu hiệu khu vườn đã hồi phục.
+
+## Đom đóm bay và hiệu ứng (P2)
+
+- Ba khung 8×8 (cánh lên, cánh ngang, cánh xuống), đổi khung mỗi 130 ms; mỗi con trôi trên một ellipse nhỏ quanh hốc.
+- Đom đóm và hiệu ứng nằm **trên lớp tối** (depth 68.6 và 68.7) nên vẫn đọc như nguồn sáng.
+- Hiệu ứng dùng chung một ảnh `glow` 16×16: phóng to và mờ dần trong 420 ms, cho cả lúc vành vừa khớp và lúc cổng mở.
+- Khung chuyển cổng: `gate-half` chính là cánh cổng đóng, **dịch lên 20 px** rồi cắt theo canvas, hiện 180 ms trước khi sang `gate-open`. Không sinh ảnh riêng để khỏi lệch thiết kế.
+

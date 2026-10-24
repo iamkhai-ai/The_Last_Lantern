@@ -8,10 +8,6 @@
         32,
         32
       ],
-      "trim": [
-        441,
-        401
-      ],
       "ink_bbox": [
         2,
         7,
@@ -31,10 +27,6 @@
       "canvas": [
         32,
         32
-      ],
-      "trim": [
-        440,
-        401
       ],
       "ink_bbox": [
         2,
@@ -56,10 +48,6 @@
         32,
         32
       ],
-      "trim": [
-        440,
-        401
-      ],
       "ink_bbox": [
         2,
         6,
@@ -79,10 +67,6 @@
       "canvas": [
         32,
         32
-      ],
-      "trim": [
-        440,
-        401
       ],
       "ink_bbox": [
         2,
@@ -104,10 +88,6 @@
         32,
         32
       ],
-      "trim": [
-        534,
-        557
-      ],
       "ink_bbox": [
         3,
         6,
@@ -127,10 +107,6 @@
       "canvas": [
         16,
         16
-      ],
-      "trim": [
-        598,
-        661
       ],
       "ink_bbox": [
         1,
@@ -152,10 +128,6 @@
         16,
         16
       ],
-      "trim": [
-        599,
-        661
-      ],
       "ink_bbox": [
         1,
         0,
@@ -175,10 +147,6 @@
       "canvas": [
         16,
         16
-      ],
-      "trim": [
-        598,
-        661
       ],
       "ink_bbox": [
         1,
@@ -200,10 +168,6 @@
         8,
         40
       ],
-      "trim": [
-        190,
-        808
-      ],
       "ink_bbox": [
         0,
         6,
@@ -223,10 +187,6 @@
       "canvas": [
         8,
         40
-      ],
-      "trim": [
-        326,
-        169
       ],
       "ink_bbox": [
         0,
@@ -248,10 +208,6 @@
         8,
         8
       ],
-      "trim": [
-        422,
-        336
-      ],
       "ink_bbox": [
         0,
         2,
@@ -271,10 +227,6 @@
       "canvas": [
         12,
         12
-      ],
-      "trim": [
-        328,
-        333
       ],
       "ink_bbox": [
         0,
@@ -296,10 +248,6 @@
         12,
         12
       ],
-      "trim": [
-        328,
-        333
-      ],
       "ink_bbox": [
         0,
         0,
@@ -319,10 +267,6 @@
       "canvas": [
         12,
         12
-      ],
-      "trim": [
-        329,
-        333
       ],
       "ink_bbox": [
         0,
@@ -344,10 +288,6 @@
         12,
         12
       ],
-      "trim": [
-        330,
-        333
-      ],
       "ink_bbox": [
         0,
         0,
@@ -359,6 +299,286 @@
         12
       ],
       "colours": 127
+    },
+    {
+      "id": "axle-x",
+      "file": "sprites/axle-x.png",
+      "source": "sources/axles.png",
+      "canvas": [
+        80,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        80,
+        12
+      ],
+      "ink_size": [
+        80,
+        12
+      ],
+      "colours": 126
+    },
+    {
+      "id": "axle-y",
+      "file": "sprites/axle-y.png",
+      "source": "sources/axles.png",
+      "canvas": [
+        80,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        80,
+        12
+      ],
+      "ink_size": [
+        80,
+        12
+      ],
+      "colours": 124
+    },
+    {
+      "id": "axle-z",
+      "file": "sprites/axle-z.png",
+      "source": "sources/axles.png",
+      "canvas": [
+        80,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        80,
+        12
+      ],
+      "ink_size": [
+        80,
+        12
+      ],
+      "colours": 125
+    },
+    {
+      "id": "mark-x",
+      "file": "sprites/mark-x.png",
+      "source": "sources/crank-marks.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "ink_size": [
+        32,
+        32
+      ],
+      "colours": 87
+    },
+    {
+      "id": "mark-y",
+      "file": "sprites/mark-y.png",
+      "source": "sources/crank-marks.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "ink_size": [
+        32,
+        32
+      ],
+      "colours": 85
+    },
+    {
+      "id": "mark-z",
+      "file": "sprites/mark-z.png",
+      "source": "sources/crank-marks.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "ink_size": [
+        32,
+        32
+      ],
+      "colours": 82
+    },
+    {
+      "id": "hollow",
+      "file": "sprites/hollow.png",
+      "source": "sources/props.png",
+      "canvas": [
+        64,
+        32
+      ],
+      "ink_bbox": [
+        10,
+        0,
+        54,
+        32
+      ],
+      "ink_size": [
+        44,
+        32
+      ],
+      "colours": 122
+    },
+    {
+      "id": "bell",
+      "file": "sprites/bell.png",
+      "source": "sources/props.png",
+      "canvas": [
+        16,
+        20
+      ],
+      "ink_bbox": [
+        0,
+        1,
+        16,
+        19
+      ],
+      "ink_size": [
+        16,
+        18
+      ],
+      "colours": 73
+    },
+    {
+      "id": "firefly-0",
+      "file": "sprites/firefly-0.png",
+      "source": "sources/firefly.png",
+      "canvas": [
+        8,
+        8
+      ],
+      "ink_bbox": [
+        1,
+        0,
+        5,
+        7
+      ],
+      "ink_size": [
+        4,
+        7
+      ],
+      "colours": 19
+    },
+    {
+      "id": "firefly-1",
+      "file": "sprites/firefly-1.png",
+      "source": "sources/firefly.png",
+      "canvas": [
+        8,
+        8
+      ],
+      "ink_bbox": [
+        0,
+        2,
+        8,
+        6
+      ],
+      "ink_size": [
+        8,
+        4
+      ],
+      "colours": 18
+    },
+    {
+      "id": "firefly-2",
+      "file": "sprites/firefly-2.png",
+      "source": "sources/firefly.png",
+      "canvas": [
+        8,
+        8
+      ],
+      "ink_bbox": [
+        0,
+        2,
+        6,
+        6
+      ],
+      "ink_size": [
+        6,
+        4
+      ],
+      "colours": 14
+    },
+    {
+      "id": "grove-floor",
+      "file": "sprites/grove-floor.png",
+      "source": "sources/grove-floor.png",
+      "canvas": [
+        608,
+        232
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        608,
+        232
+      ],
+      "ink_size": [
+        608,
+        232
+      ],
+      "colours": 21051
+    },
+    {
+      "id": "gate-half",
+      "file": "sprites/gate-half.png",
+      "source": "derived from sprites/gate-closed.png",
+      "canvas": [
+        8,
+        40
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        8,
+        20
+      ],
+      "ink_size": [
+        8,
+        20
+      ],
+      "colours": 93
+    },
+    {
+      "id": "glow",
+      "file": "sprites/glow.png",
+      "source": "derived",
+      "canvas": [
+        16,
+        16
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        16,
+        16
+      ],
+      "ink_size": [
+        16,
+        16
+      ],
+      "colours": 24
     }
   ]
 }
