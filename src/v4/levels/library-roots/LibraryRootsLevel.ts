@@ -51,7 +51,7 @@ import {
 import type { Holder, LibraryState, MarkSymbol, StepOutcome } from './libraryRootsLogic';
 
 /** Ambient darkness: constant for the room, never tied to F (puzzle-contracts section 1). */
-const AMBIENT_DARKNESS = 0.42;
+const AMBIENT_DARKNESS = 0.72;
 const NEXT_LEVEL_ID = 'moonlit-creek';
 
 const INTRO_LINES: DialogueLine[] = [
