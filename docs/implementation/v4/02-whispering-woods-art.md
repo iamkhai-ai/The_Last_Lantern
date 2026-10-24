@@ -111,6 +111,7 @@ module không lỗi.
 chuông cỏ, cổng; Pulse lộ trục sau chân bia và ba dấu khớp; tắt F thì nền và đường vẫn đọc được; đom đóm đổi khung
 sau 160 ms; cổng chuyển `closed → half → open` và thoại kết màn chạy. Ảnh trong `previews/runtime-*.png`.
 
-Chưa chơi trọn một lượt bằng tay (trạng thái đã giải được đặt qua console), chưa đo độ tương phản ở các góc màn.
+Đã chơi trọn một lượt bằng bàn phím: đi bộ tới ba tay quay, E đủ năm nấc, cổng mở, thoại kết màn chạy, đi qua cổng
+sang màn hình chờ màn 03. Chưa đo độ tương phản của dấu khớp ở các góc màn.
 
 

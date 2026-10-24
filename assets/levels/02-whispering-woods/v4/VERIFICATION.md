@@ -57,17 +57,18 @@ bấm F, và đặt trạng thái đã giải để mở cổng.
 | Đom đóm bay | Khung đổi sau 160 ms: `[1,1,2]` → `[2,0,0]` |
 | Khung chuyển cổng | `wwd-gate-closed → wwd-gate-half` (3 mẫu) `→ wwd-gate-open`, lấy mẫu mỗi 45 ms |
 | Hiệu ứng mở cổng | Quầng sáng xuất hiện đúng tại cổng ở khung hình chuyển |
-| Kết màn | Vào trạng thái giải thì thoại kết (`Hồi đó họ cũng đến kiểm tra đèn.`) chạy |
+| Kết màn | Thoại kết (`Hồi đó họ cũng đến kiểm tra đèn.`) chạy khi cổng mở |
+| Chơi trọn bằng bàn phím | Đi bộ tới từng tay quay: X chặn ở `x=199` rồi E×2 → `x=2`; Y → `y=1`; Z → `z=2`; cổng sang `wwd-gate-open` |
+| Qua cổng | Vào vùng thoát, màn chuyển sang màn hình chờ `Màn library-roots — đang dựng` |
 | Trạng thái sprite | `axle-x.alpha = 1`, `mark-x.alpha = 1` sau Pulse; `floor` và `hollow` nạp đúng texture |
 
 Ảnh chụp: `previews/runtime-pulse-640x360.png`, `previews/runtime-lantern-off-640x360.png`,
-`previews/runtime-gate-open-640x360.png`.
+`previews/runtime-gate-open-640x360.png`, `previews/runtime-exit-640x360.png`.
 
 ## Chưa kiểm
 
 | Việc | Trạng thái |
 | --- | --- |
-| Chơi trọn một lượt bằng tay (quay tay quay, gài cổng) | **NOT_RUN** — trạng thái đã giải được đặt qua console, không quay đủ 5 nấc |
 | Độ tương phản của dấu khớp và trục ở các góc màn | chưa đo |
 | Chuyển động đom đóm có bị giật khi khung hình dao động | chưa đo |
 | Chơi thử và duyệt của người dùng | chưa |

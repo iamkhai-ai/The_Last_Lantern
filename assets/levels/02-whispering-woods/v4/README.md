@@ -52,6 +52,7 @@ phân và lượng tử hoá còn tối đa 128 màu. Ba đầu ra được **d�
 | `previews/runtime-pulse-640x360.png` | Chụp từ game đang chạy: Pulse vừa lộ trục và dấu khớp |
 | `previews/runtime-lantern-off-640x360.png` | Chụp từ game: tắt F, nền và đường vẫn đọc được |
 | `previews/runtime-gate-open-640x360.png` | Chụp từ game: cổng mở và thoại kết màn |
+| `previews/runtime-exit-640x360.png` | Chụp từ game: qua cổng, sang màn hình chờ màn 03 |
 | `previews/*-cut.png` | Từng sheet sau khi cắt |
 
 Ảnh preview dựng bằng script không phải bằng chứng đã chạy trong game; ba ảnh `runtime-*` thì có.
@@ -67,8 +68,7 @@ phân và lượng tử hoá còn tối đa 128 màu. Ba đầu ra được **d�
 
 ## Giới hạn
 
-- Đã chạy thật trong Chrome headless: màn nạp, Pulse lộ trục và dấu khớp, đom đóm đổi khung, cổng chuyển
-  `closed → half → open` và thoại kết màn chạy. Chưa chơi trọn một lượt bằng tay: trạng thái đã giải được đặt qua
-  console chứ không quay đủ năm nấc.
+- Đã chơi trọn một lượt bằng bàn phím trong Chrome headless: đi bộ tới ba tay quay, E đủ năm nấc, cổng mở, thoại
+  kết màn chạy, đi qua cổng sang màn hình chờ màn 03.
 - `latch` vẫn chưa có rect trong layout; đang đặt cạnh cổng theo toạ độ suy ra.
 - Bia ở cỡ thật 28×24, glyph đọc được nhưng đây là art painterly hạ mẫu, không phải pixel art vẽ tay ở 1×.
