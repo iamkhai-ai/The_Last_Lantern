@@ -154,13 +154,15 @@ Nền: `feat/v4-foundation` tại `3fb28d8`. Đợt này chốt các điểm mà
 | Trạng thái F khi vào màn (05/07 ghi tắt, 10 ghi mang theo) | F đi theo người chơi qua lối ra; “trạng thái đầu” của màn là mặc định khi không có trạng thái mang theo. Điểm vào và checkpoint phải hợp lệ với cả hai trạng thái F. Đã sửa câu ở 05, 07, 08 cho khớp. |
 | Lỗi chữ | Tách số dính chữ ở 06 và 10; HUD màn 08 đổi “vùng ươm” thành “vạt cây” cho khớp nội dung màn. |
 
+Bổ sung sau lượt đọc lại `e75e951`: tường và cửa đóng chắn cả quầng, kể cả đèn trên bệ và nhánh tràn, với hình và gameplay cắt cùng một đường; “đã thấy” thêm điều kiện không bị tường/cửa đóng che; tự ghi J chỉ cho dấu sáng/tối, dấu Pulse vẫn cần Pulse; quay vệt khỏi dấu là cách hợp lệ, không kiểm “đã bấm F”; mỗi việc rọi trúng/tránh cần vùng đứng ít nhất 8px mỗi chiều.
+
 Các số 56/12/32/64px là giá trị khởi điểm, chỉnh một lần ở phòng thử cho mọi màn. Chưa build, chưa playtest; bảng kiểm script cho chỗ đứng rọi mặt nhận hở là việc của bản dựng.
 
 Dấu vân tay các file sửa trong đợt này (file khác giữ hash của bảng trước):
 
 | File | SHA-256 |
 | --- | --- |
-| puzzle-contracts.md | `6bd2c738f894e795a6aea43e4b749016eec89f010874c68c818c43ea1150bf17` |
+| puzzle-contracts.md | `5ae7a1a0617e55fdc89e24916741d04a7ba67bb148fcf8a74ce1cf8d0f0a2f3c` |
 | 05-a-path-for-two.md | `2cdfbe75beb507da9b4906f29d57944acaafb95319567852ec7cd3aab475fbca` |
 | 06-the-sleepless-tower.md | `a97895b300059088dfc541b42a865d752129cc682e7fb2a8ffa28cd20777f850` |
 | 07-the-sleeping-garden.md | `0a8354605db5b4572616769dab4b7590871bd6576d1b7922b1cafe40a2775814` |

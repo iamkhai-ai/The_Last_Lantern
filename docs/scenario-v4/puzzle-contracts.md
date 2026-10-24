@@ -32,7 +32,7 @@ Các số dưới đây là giá trị khởi điểm dùng chung cho mọi màn
 
 - **Vệt:** hình thang đi ra phía trước từ tay cầm đèn theo hướng Nhinh đang quay (8 hướng; hướng chéo cùng chiều dài). Dài 56px, rộng 12px ở gốc và 32px ở đầu xa. Khi đứng yên, Nhinh giữ hướng quay cuối cùng; muốn rọi một vật, người chơi bước một nhịp về phía nó rồi dừng. Không có nút ngắm riêng.
 - **Quầng:** vòng bán kính 12px quanh chính chiếc đèn.
-- **Vật chắn:** tường và cánh cửa đang đóng chắn vệt; phần nằm sau chúng không được chiếu. Cầu, rễ, nước, NPC và Lumo không chắn.
+- **Vật chắn:** tường và cánh cửa đang đóng chắn cả vệt lẫn quầng; phần nằm sau chúng không được chiếu. Luật này áp dụng cho mọi footprint của đèn bảo trì: cầm tay, đặt trên bệ và nhánh tràn. Hình vẽ và phép tính gameplay bị cắt theo cùng một đường, nên đứng sát tường không chiếu được cảm biến hay dấu ở phía bên kia. Cầu, rễ, nước, NPC và Lumo không chắn.
 
 Rìa vẽ trên màn khớp đúng footprint này. Ngoài footprint chỉ có ánh nền; không có quầng trang trí lớn hơn footprint khiến người chơi tưởng một dấu đang bị chiếu.
 
@@ -51,9 +51,12 @@ Rìa vẽ trên màn khớp đúng footprint này. Ngoài footprint chỉ có á
 
 - **Dấu sáng** chỉ đọc được khi một footprint gameplay chồng lên nó: lớp thiên thể trên phiến ở 03, mặt máy và các dấu ánh ở 01.
 - **Dấu tối** chỉ đọc được khi không footprint gameplay nào chồng lên nó: bào tử 01, đom đóm 02, lớp mũi tên 03, vệt khoáng 04, phấn 05, vạch khắc 06, phấn 07, mạch nước trên rễ 08, bột sao 09, đai rễ 10.
-- Một dấu được tính là **đã thấy** khi nó đang đọc được và chân Nhinh ở trong 64px quanh dấu, cùng phòng. Lúc đó J ghi dấu một lần dưới dạng viền mờ và save lưu cờ đã thấy. Cờ này chỉ để xem lại; nó không bao giờ là điều kiện mở cửa, cầu, H hay cảnh truyện.
+- Một dấu sáng/tối được tính là **đã thấy** khi đủ cả ba điều kiện: nó đang đọc được; chân Nhinh ở trong 64px quanh dấu, cùng phòng; và đoạn thẳng từ tâm Nhinh tới dấu không cắt tường hay cánh cửa đang đóng. Lúc đó J ghi dấu một lần dưới dạng viền mờ và save lưu cờ đã thấy. Cờ này chỉ để xem lại; nó không bao giờ là điều kiện mở cửa, cầu, H hay cảnh truyện.
+- Quy tắc tự ghi này chỉ dành cho dấu sáng/tối. Dấu Pulse vẫn chỉ được ghi khi một lần Pulse thật sự phát hiện nó.
 
-**Kiểm khi dựng:** mỗi mặt nhận hở phải có ít nhất một chỗ đứng an toàn (RULE_GAMES.md §6) mà từ đó vệt cầm tay phủ được nó. Nếu màn cần vệt chạm vật này mà không chạm vật kia (hoa A và luống cầu ở 07), chỗ đứng đó phải tồn tại và được script kiểm như tầm với E. Mỗi dấu sáng/tối phải có chỗ đứng đọc được trong mọi trạng thái mà màn cần dấu đó.
+**Quay vệt khỏi dấu cũng hợp lệ:** người chơi có thể đọc dấu tối bằng cách quay vệt đi chỗ khác mà không bấm F. Đây là cách giải đúng luật. F vẫn hữu ích vì tắt đèn bảo đảm không vô tình rọi lại khi di chuyển. Không màn nào kiểm “đã bấm F” hay ép một thao tác cụ thể; chỉ footprint hiện tại quyết định.
+
+**Kiểm khi dựng:** mỗi mặt nhận hở phải có ít nhất một chỗ đứng an toàn (RULE_GAMES.md §6) mà từ đó vệt cầm tay phủ được nó. Nếu màn cần vệt chạm vật này mà không chạm vật kia (hoa A và luống cầu ở 07), chỗ đứng đó phải tồn tại và được script kiểm như tầm với E. Mỗi dấu sáng/tối phải có chỗ đứng đọc được trong mọi trạng thái mà màn cần dấu đó. Rọi theo 8 hướng phải dễ: mỗi việc rọi trúng hoặc tránh một vật cần một vùng đứng rộng ít nhất 8px mỗi chiều, để người chơi nghĩ về nguồn sáng chứ không chỉnh chân từng pixel. Nếu không đạt, sửa bố cục màn; không nới vệt riêng cho một màn.
 
 ### Đèn khi chuyển màn
 
