@@ -147,6 +147,8 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
   private showingMap = false;
   /** Milliseconds since the harbour lamp blinked, or null when no blink is running. */
   private harborBlink: number | null = null;
+  /** Mother's call, held until the boatman is gone and the harbour lamp has blinked (00-prologue.md). */
+  private pendingIncident: (() => void) | null = null;
 
   preload(scene: Phaser.Scene): void {
     for (const [name, url] of Object.entries(SPRITE_URLS)) {
@@ -241,7 +243,10 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     if (this.boatmanWalking) this.stepBoatman(dt);
     if (this.harborBlink !== null) {
       this.harborBlink += dt;
-      if (this.harborBlink >= HARBOR_BLINK_MS) this.harborBlink = null;
+      if (this.harborBlink >= HARBOR_BLINK_MS) {
+        this.harborBlink = null;
+        this.firePendingIncident();
+      }
     }
     this.drawHarbor();
   }
@@ -303,6 +308,7 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
   }
 
   destroy(): void {
+    this.pendingIncident = null;
     for (const object of this.objects) object.destroy();
     this.objects = [];
     this.boatmanZone = null;
@@ -364,18 +370,33 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
   }
 
   private say(id: WorkshopDialogueId, onDone: () => void): void {
+    if (id === 'incident') {
+      // The boatman leaves, the harbour lamp blinks out, and only then does Mother call (00-prologue.md).
+      // The controls stay free while he walks.
+      this.pendingIncident = () => this.host.say(WORKSHOP_DIALOGUE.incident, onDone);
+      return;
+    }
     if (id === 'diagnosis') this.showingMap = true;
     this.refresh();
     this.host.say(WORKSHOP_DIALOGUE[id], () => {
       if (id === 'diagnosis') this.showingMap = false;
-      // The boatman walks off as the payment ends; the incident line follows at once and the controls stay free.
       if (id === 'payment') this.startBoatmanWalk();
       onDone();
     });
   }
 
+  private firePendingIncident(): void {
+    const call = this.pendingIncident;
+    this.pendingIncident = null;
+    call?.();
+  }
+
   private startBoatmanWalk(): void {
-    if (!this.boatman) return;
+    if (!this.boatman) {
+      // No boatman sprite to walk: the harbour lamp blinks at once.
+      this.harborBlink = 0;
+      return;
+    }
     this.boatmanWalking = true;
     this.boatman.setVisible(true).setTexture(spriteKey('boatman-walk'));
   }
