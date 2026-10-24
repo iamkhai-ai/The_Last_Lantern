@@ -1,6 +1,6 @@
 # Màn 02 — Rừng đom đóm: danh sách art (V4)
 
-Trạng thái: **danh sách đề xuất, chưa duyệt**. Nguồn: `docs/scenario-v4/02-whispering-woods.md`, runtime `src/v4/levels/whispering-woods/` (layout `whisperingWoodsLayout.ts`). Không chứa ảnh hay tọa độ mới; mọi kích thước dưới đây lấy từ runtime.
+Trạng thái: **bốn quyết định P0 đã được duyệt**; bộ P0 đã nối vào runtime (xem `whisperingWoodsArt.ts`). Phần P1–P2 chưa làm. Nguồn: `docs/scenario-v4/02-whispering-woods.md`, runtime `src/v4/levels/whispering-woods/` (layout `whisperingWoodsLayout.ts`). Không chứa ảnh hay tọa độ mới; mọi kích thước dưới đây lấy từ runtime.
 
 ## 0. Phạm vi và cách dùng
 
