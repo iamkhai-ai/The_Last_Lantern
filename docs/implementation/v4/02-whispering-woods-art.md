@@ -105,7 +105,12 @@ Không còn đường vẽ tạm cho trục và dấu khớp. Nhinh và Lumo v�
 ### Kiểm chứng và giới hạn
 
 `tsc --noEmit` sạch; `vitest` 265/265 pass (gồm test đếm đủ 29 texture và test mỗi key có URL); `vite build` 770
-module không lỗi. **Chưa chơi thử trong trình duyệt** vì phiên này không có trình điều khiển trình duyệt — cần
-người xem lại độ sáng nền so với lớp tối 0.82, chuyển động đom đóm và hiệu ứng.
+module không lỗi.
+
+Đã chạy thật trong Chrome headless qua DevTools Protocol: màn nạp và vẽ đủ nền, bia, miệng nhận, tay quay, hốc ngủ,
+chuông cỏ, cổng; Pulse lộ trục sau chân bia và ba dấu khớp; tắt F thì nền và đường vẫn đọc được; đom đóm đổi khung
+sau 160 ms; cổng chuyển `closed → half → open` và thoại kết màn chạy. Ảnh trong `previews/runtime-*.png`.
+
+Chưa chơi trọn một lượt bằng tay (trạng thái đã giải được đặt qua console), chưa đo độ tương phản ở các góc màn.
 
 

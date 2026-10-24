@@ -11,6 +11,7 @@ Ngày: **2026-10-25**. Phạm vi: bộ P0 + P1 + P2 trong thư mục này, và p
 | Type-check | `node node_modules/typescript/bin/tsc --noEmit` | sạch |
 | Unit test | `node node_modules/vitest/vitest.mjs run` | **265/265 pass**, 21 tệp |
 | Build production | `vite build --outDir %TEMP%\v4-build-check-l02` | 770 module, không lỗi |
+| Chạy trong trình duyệt | Chrome headless + DevTools Protocol | màn nạp, vẽ và chạy đúng — chi tiết bên dưới |
 
 `check-assets.py` trả mã lỗi khác 0 nếu sai một trong: kích thước canvas, không có pixel đục, alpha không nhị phân,
 chân bia không chạm đáy canvas, cánh cổng không chạm ngưỡng, `gate-half` không đúng nửa.
@@ -42,14 +43,33 @@ Nếu một ảnh không được Vite glob nhận, test đỏ ngay.
 - `previews/grove-pulse-640x360-2x.png`: trục chạy sau chân bia, dấu khớp nằm dưới mỗi tay quay.
 - `previews/crank-marks-cut.png`: phân biệt được cặp Trăng–Lá, Lá–Sao, Sao–Nước ở 32 px.
 
+## Chạy thật trong trình duyệt (2026-10-25)
+
+Chrome headless 155, cửa sổ 1280×800, điều khiển qua DevTools Protocol; dev server Vite ở `127.0.0.1:5183`.
+Màn được nạp bằng save `levelId: 'whispering-woods'`, rồi bấm E để đóng thoại mở màn, đi bộ, bấm Space (Pulse),
+bấm F, và đặt trạng thái đã giải để mở cổng.
+
+| Việc | Kết quả |
+| --- | --- |
+| Màn nạp và vẽ | Có: nền, bốn bia + vành, bốn miệng nhận, ba tay quay, hốc ngủ, chuông cỏ, cổng |
+| Nền và đường bộ | Đọc được khi tắt F: đường đất, rêu, dương xỉ, chân cây, hốc |
+| Pulse | Trục hiện sau chân bia; ba dấu khớp hiện dưới tay quay; toast `Đã ghi vào sổ tay.` |
+| Đom đóm bay | Khung đổi sau 160 ms: `[1,1,2]` → `[2,0,0]` |
+| Khung chuyển cổng | `wwd-gate-closed → wwd-gate-half` (3 mẫu) `→ wwd-gate-open`, lấy mẫu mỗi 45 ms |
+| Hiệu ứng mở cổng | Quầng sáng xuất hiện đúng tại cổng ở khung hình chuyển |
+| Kết màn | Vào trạng thái giải thì thoại kết (`Hồi đó họ cũng đến kiểm tra đèn.`) chạy |
+| Trạng thái sprite | `axle-x.alpha = 1`, `mark-x.alpha = 1` sau Pulse; `floor` và `hollow` nạp đúng texture |
+
+Ảnh chụp: `previews/runtime-pulse-640x360.png`, `previews/runtime-lantern-off-640x360.png`,
+`previews/runtime-gate-open-640x360.png`.
+
 ## Chưa kiểm
 
 | Việc | Trạng thái |
 | --- | --- |
-| Chạy game trong trình duyệt | **NOT_RUN** — phiên này không có trình điều khiển trình duyệt |
-| Độ sáng nền so với lớp tối 0.82 khi vào màn thật | NOT_RUN |
-| Chuyển động đom đóm và hiệu ứng có bị giật không | NOT_RUN |
-| Vòng sáng 40 px có thật sự làm miệng nhận khuất | NOT_RUN |
+| Chơi trọn một lượt bằng tay (quay tay quay, gài cổng) | **NOT_RUN** — trạng thái đã giải được đặt qua console, không quay đủ 5 nấc |
+| Độ tương phản của dấu khớp và trục ở các góc màn | chưa đo |
+| Chuyển động đom đóm có bị giật khi khung hình dao động | chưa đo |
 | Chơi thử và duyệt của người dùng | chưa |
 
 Ảnh preview không được dùng thay cho bằng chứng tích hợp.

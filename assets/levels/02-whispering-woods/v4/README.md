@@ -49,9 +49,12 @@ phân và lượng tử hoá còn tối đa 128 màu. Ba đầu ra được **d�
 | `previews/stele-ring-3-positions.png` | Một bia với vành ở ba nấc 0 / 1 / 2 |
 | `previews/grove-640x360-2x.png` | Cả khu rừng đặt đúng rect runtime, ảnh 2× |
 | `previews/grove-pulse-640x360-2x.png` | Như trên, thêm lớp Pulse: trục và dấu khớp |
+| `previews/runtime-pulse-640x360.png` | Chụp từ game đang chạy: Pulse vừa lộ trục và dấu khớp |
+| `previews/runtime-lantern-off-640x360.png` | Chụp từ game: tắt F, nền và đường vẫn đọc được |
+| `previews/runtime-gate-open-640x360.png` | Chụp từ game: cổng mở và thoại kết màn |
 | `previews/*-cut.png` | Từng sheet sau khi cắt |
 
-Ảnh preview không phải bằng chứng đã chạy trong game.
+Ảnh preview dựng bằng script không phải bằng chứng đã chạy trong game; ba ảnh `runtime-*` thì có.
 
 ## Runtime dùng thế nào
 
@@ -64,7 +67,8 @@ phân và lượng tử hoá còn tối đa 128 màu. Ba đầu ra được **d�
 
 ## Giới hạn
 
-- Tôi chưa chơi thử trong trình duyệt (phiên này không có trình điều khiển trình duyệt); đã kiểm bằng `tsc`,
-  `vitest` (265 test) và build production.
+- Đã chạy thật trong Chrome headless: màn nạp, Pulse lộ trục và dấu khớp, đom đóm đổi khung, cổng chuyển
+  `closed → half → open` và thoại kết màn chạy. Chưa chơi trọn một lượt bằng tay: trạng thái đã giải được đặt qua
+  console chứ không quay đủ năm nấc.
 - `latch` vẫn chưa có rect trong layout; đang đặt cạnh cổng theo toạ độ suy ra.
 - Bia ở cỡ thật 28×24, glyph đọc được nhưng đây là art painterly hạ mẫu, không phải pixel art vẽ tay ở 1×.
