@@ -58,7 +58,7 @@ import type { ArtSlot } from './forestEdgeArt';
 const HINGE_TEXTURES = ['hinge-closed', 'hinge-pulled', 'hinge-hooked'] as const;
 
 /** The level's ambient darkness: constant, never tied to the lantern (puzzle-contracts section 1). */
-const AMBIENT_DARKNESS = 0.82;
+const AMBIENT_DARKNESS = 0.88;
 
 /** The next level. Level 02 is not built yet on this branch; the host shows the placeholder for the id. */
 const NEXT_LEVEL_ID = 'whispering-woods';
