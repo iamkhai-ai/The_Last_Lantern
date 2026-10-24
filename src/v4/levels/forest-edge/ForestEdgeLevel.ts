@@ -59,6 +59,17 @@ const HINGE_TEXTURES = ['hinge-closed', 'hinge-pulled', 'hinge-hooked'] as const
 
 /** The level's ambient darkness: constant, never tied to the lantern (puzzle-contracts section 1). */
 const AMBIENT_DARKNESS = 0.88;
+/**
+ * A live eye (its socket feeds its door) is drawn above the darkness (68) with a warm breathing glow, so the feed reads
+ * at night; a dormant eye stays under it. Like the marks at 68.5, it is art the level shows on purpose.
+ */
+const EYE_LIVE_DEPTH = 68.6;
+const EYE_GLOW_RADIUS = 20;
+/** Radius of the gradient in the light_radial texture, px. */
+const LIGHT_RADIAL_RADIUS = 126;
+const EYE_GLOW_ALPHA_MIN = 0.35;
+const EYE_GLOW_ALPHA_SPAN = 0.25;
+const EYE_GLOW_PERIOD_MS = 1400;
 
 /** The next level. Level 02 is not built yet on this branch; the host shows the placeholder for the id. */
 const NEXT_LEVEL_ID = 'whispering-woods';
@@ -129,6 +140,8 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
   private artOn = false;
   /** The art sprites by slot, then by texture. Each slot shows one texture, picked from the state every frame. */
   private artImages: Record<string, Record<string, Phaser.GameObjects.Image>> = {};
+  /** The warm glow behind each live eye (light_radial, additive), by slot. */
+  private eyeGlows: Record<string, Phaser.GameObjects.Image> = {};
 
   /** Loads the level 01 art (asset-map.json). The host calls this before any build. */
   preload(scene: Phaser.Scene): void {
@@ -308,6 +321,16 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     add('s2', ['socket-empty', 'socket-lamp-off', 'socket-lamp-on'], upright('s2'));
     add('eyeA', ['eye-dormant', 'eye-live'], 2);
     add('eyeB', ['eye-dormant', 'eye-live'], 2);
+    for (const slot of ['eyeA', 'eyeB'] as const) {
+      this.artImages[slot]['eye-live'].setDepth(EYE_LIVE_DEPTH);
+      const { position } = ART_SLOTS[slot];
+      this.eyeGlows[slot] = scene.add
+        .image(position.x, position.y, 'light_radial')
+        .setScale(EYE_GLOW_RADIUS / LIGHT_RADIAL_RADIUS)
+        .setBlendMode('ADD')
+        .setDepth(EYE_LIVE_DEPTH - 0.05)
+        .setVisible(false);
+    }
     add('sprout', ['sprout'], upright('sprout'));
     add('lantern', ['lantern-off'], upright('lantern'));
     add('latchA', ['latch-a-released', 'latch-a-engaged'], upright('latchA'));
@@ -318,6 +341,15 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     this.showArt('column', 'water-column');
     this.showArt('stele', 'stele-normal');
     this.showArt('sprout', 'sprout');
+  }
+
+  /** Shows an eye live (above the darkness, with its breathing glow) or dormant. */
+  private showEye(slot: 'eyeA' | 'eyeB', live: boolean): void {
+    this.showArt(slot, live ? 'eye-live' : 'eye-dormant');
+    const glow = this.eyeGlows[slot];
+    if (!glow) return;
+    const wave = (1 - Math.cos(((this.host.scene.time.now % EYE_GLOW_PERIOD_MS) / EYE_GLOW_PERIOD_MS) * Math.PI * 2)) / 2;
+    glow.setVisible(live).setAlpha(EYE_GLOW_ALPHA_MIN + EYE_GLOW_ALPHA_SPAN * wave);
   }
 
   /** Shows one texture of a slot and hides the rest. A null texture hides the slot. */
@@ -334,8 +366,8 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
     this.showArt('brakeB', this.state.braceB ? 'brake-b-engaged' : 'brake-b-released');
     this.showArt('s1', socketTexture(lantern, S1_ID));
     this.showArt('s2', socketTexture(lantern, S2_ID));
-    this.showArt('eyeA', lanternFeeds(lantern, S1_ID) ? 'eye-live' : 'eye-dormant');
-    this.showArt('eyeB', lanternFeeds(lantern, S2_ID) ? 'eye-live' : 'eye-dormant');
+    this.showEye('eyeA', lanternFeeds(lantern, S1_ID));
+    this.showEye('eyeB', lanternFeeds(lantern, S2_ID));
     this.showArt('hinge', HINGE_TEXTURES[this.hingePhase]);
     const onGround = lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID;
     this.showArt('lantern', onGround ? 'lantern-off' : null);
