@@ -76,6 +76,8 @@ const ENDING_LINES: DialogueLine[] = [
   { speaker: 'Lumo', text: 'Nhinh… nước bên này đang rút.' },
   { speaker: 'Nhinh', text: 'Lúc lấy mẫu, van hồi đã mở. Đường về chưa đứt… nhưng phần nước vẫn hụt.' },
   { speaker: MOTHER, text: 'Mẹ đang đưa những chuyến thuyền cuối vào bến. Con nói mẹ nghe bên đó thế nào.' },
+  { speaker: 'Nhinh', text: 'Tôi cứ nghĩ nối lại được là sửa xong.' },
+  { speaker: 'Lumo', text: 'Giờ cậu đã thấy cả bên này rồi.' },
 ];
 
 const PROMPT_PLACE = 'E: đặt đèn lên bệ S';
