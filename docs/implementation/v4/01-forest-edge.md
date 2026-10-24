@@ -206,16 +206,88 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 
 Các câu dưới đây là bản đang chạy (nguồn: `forestEdgeLogic.ts`, `ForestEdgeLevel.ts`). Đề xuất cũ của bản 3 đã được thay bằng các câu này; sửa câu nào thì sửa ở hai file đó.
 
-- **Nhắc E:**
-  - Đèn: `E: nhặt đèn` (trên đất) · `E: đặt đèn lên bệ S1` / `E: đặt đèn lên bệ S2` · `E: lấy đèn` · `E: đèn đang ở bên bia` (ở bệ khi đèn còn trên đất).
-  - Chốt A: `E: gài chốt A` / `E: mở chốt A`. Tay hãm B: `E: gài tay hãm B` / `E: nhả tay hãm B`.
-  - Bản lề (vòng bốn bước): `E: kéo thử bản lề` → `E: thả bản lề` → `E: kéo và cài móc` → `E: tháo móc`.
-  - Bia không có E; Pulse (Space) tại bia.
-- **Câu từ chối:** "Chốt A chỉ gài được khi cửa A đang mở." · "Tay hãm B chỉ gài được khi cổng B đang mở." · "Đèn đang đặt ở bệ khác." · "Đèn còn trên đất cạnh bia; nhặt đèn trước." · "Đèn không còn ở chỗ cạnh bia."
-- **Bản lề, sau mỗi E:** "Bản lề: kéo mở; lò xo đang kéo về." · "Bản lề: thả ra, lò xo kéo cánh đóng lại." · "Bản lề: cài móc, cánh giữ mở." · "Bản lề: tháo móc, cánh đóng lại."
-- **J:** `sprout` "Mầm cây dưới vệt đèn: Lumo đang che nó." · `spores-hinge-*` "Bào tử tối cạnh mô hình bản lề: chỉ hiện ngoài vệt đèn cầm tay." · `spores-latch-*` "Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay." · `steps-latch-*` "Vết chân phía sân giữa dẫn tới chốt A." · `line-s1-a` "Đường khắc S1–A: đầu nối kín của bệ S1 đi tới cửa A." · `latch-tool-marks` "Vết dụng cụ quanh chốt A."
+### 11.1 Nhắc phím E
+
+Hiện khi đứng gần vật tương tác, theo trạng thái lúc đó.
+
+| Đứng ở | Trạng thái | Nhắc |
+|---|---|---|
+| Đèn trên đất cạnh bia | Đèn còn nằm đó | `E: nhặt đèn` |
+| Bệ S1 hoặc S2 | Đang cầm đèn | `E: đặt đèn lên bệ S1` (hoặc `S2`) |
+| Bệ S1 hoặc S2 | Đèn đang nằm trên bệ này | `E: lấy đèn` |
+| Bệ S1 hoặc S2 | Đèn đang nằm trên bệ kia | `E: đèn đang ở bệ S1` (hoặc `S2`, theo bệ đang có đèn) |
+| Bệ S1 hoặc S2 | Đèn còn nằm trên đất cạnh bia | `E: đèn đang ở bên bia` |
+| Chốt A | Chưa gài / đã gài | `E: gài chốt A` / `E: mở chốt A` |
+| Tay hãm B | Chưa gài / đã gài | `E: gài tay hãm B` / `E: nhả tay hãm B` |
+| Mô hình bản lề | Bốn bước, lặp lại | `E: kéo thử bản lề` → `E: thả bản lề` → `E: kéo và cài móc` → `E: tháo móc` → quay lại bước đầu |
+
+Bia không có E; bấm Space (Pulse) ngay cạnh bia.
+
+### 11.2 Thông báo khi E không làm được
+
+Hiện khi bấm E mà chưa đủ điều kiện.
+
+| Khi nào | Câu |
+|---|---|
+| Gài chốt A khi cửa A đang đóng | Chốt A chỉ gài được khi cửa A đang mở. |
+| Gài tay hãm B khi cổng B đang đóng | Tay hãm B chỉ gài được khi cổng B đang mở. |
+| Bấm E ở bệ S1 hoặc S2 khi đèn còn trên đất cạnh bia | Đèn còn trên đất cạnh bia; nhặt đèn trước. |
+| Bấm E ở bệ S1 hoặc S2 khi đèn đang ở bệ kia | Đèn đang đặt ở bệ khác. |
+| Bấm E ở chỗ đèn trên đất khi đèn không còn ở đó | Đèn không còn ở chỗ cạnh bia. (Dự phòng: nhắc E thường đã ẩn lúc này.) |
+
+### 11.3 Bản lề
+
+Thông báo hiện sau mỗi lần bấm E ở mô hình bản lề.
+
+| Bấm E ở bước | Thông báo sau đó |
+|---|---|
+| 1. `E: kéo thử bản lề` | Bản lề: kéo mở; lò xo đang kéo về. |
+| 2. `E: thả bản lề` | Bản lề: thả ra, lò xo kéo cánh đóng lại. |
+| 3. `E: kéo và cài móc` | Bản lề: cài móc, cánh giữ mở. |
+| 4. `E: tháo móc` | Bản lề: tháo móc, cánh đóng lại. |
+
+### 11.4 Gợi ý (H)
+
+Bấm H để xem gợi ý tiếp theo. Mỗi lần bấm lên một mức, đến mức ba thì giữ nguyên.
+
+| Mục tiêu | Mức 1 | Mức 2 | Mức 3 |
+|---|---|---|---|
+| Chốt A | Đầu cắm S1 khớp với đèn thử. Lẫy và thanh hãm ở cửa A còn nguyên; cửa đã phản ứng với nguồn chưa? | Nguồn thử mở cửa A, còn chốt cơ khí có thể giữ kết quả khi đèn được chuyển sang S2. | Đặt đèn ở S1, qua A, gài chốt từ sân giữa rồi quay lại lấy đèn sang S2. Khi B mở, dùng tay hãm ở phía sân giữa. |
+| Tay hãm B | Cổng B nhận nguồn từ S2, như cửa A nhận từ S1. | Tay hãm B chỉ gài được khi cổng B đang mở; sau khi gài, B giữ dù đèn ở đâu. | Đặt đèn bật ở S2 để mở B, gài tay hãm B từ sân giữa, rồi lấy đèn đi qua cổng. |
+
+### 11.5 Nhật ký (J)
+
+Các mục ghi vào nhật ký khi Nhinh gặp vật đó. Mã trong ngoặc là tên dùng trong code.
+
+| Vật (mã) | Nội dung |
+|---|---|
+| Mầm cây (`sprout`) | Mầm cây dưới vệt đèn: Lumo đang che nó. |
+| Bào tử cạnh bản lề (`spores-hinge-1`, `-2`) | Bào tử tối cạnh mô hình bản lề: chỉ hiện ngoài vệt đèn cầm tay. |
+| Bào tử cạnh chốt A (`spores-latch-1` đến `-3`) | Bào tử tối cạnh chốt A: chỉ hiện ngoài vệt đèn cầm tay. |
+| Vết chân (`steps-latch-1` đến `-3`) | Vết chân phía sân giữa dẫn tới chốt A. |
+| Đường khắc S1–A (`line-s1-a`) | Đường khắc S1–A: đầu nối kín của bệ S1 đi tới cửa A. |
+| Vết dụng cụ (`latch-tool-marks`) | Vết dụng cụ quanh chốt A. |
+
+### 11.6 Lời thoại
+
+Mỗi đoạn chỉ hiện một lần. Lời thoại theo thứ tự xuất hiện trong màn.
+
+| Khi nào | Người nói | Câu |
+|---|---|---|
+| Lần đầu vệt đèn cầm tay phủ lên mầm cây | Lumo | Cậu có thể đừng soi vào nhà người khác không? |
+| | Nhinh | Xin lỗi. Tôi đến đây để kiểm tra trạm. |
+| Lần đầu đặt đèn lên bệ S1 | Nhinh | Khớp này giống ở xưởng. |
+| Lần đầu đèn bật trên S1 nuôi được cửa A | Nhinh | Cửa còn chạy. Đường cấp của trạm mới là thứ đang thiếu. |
+| Lần đầu cửa A mở | Lumo | Trước đây cửa vẫn mở khi người giữ trạm tới. |
+| Lúc kết màn, khi đã tới lối ra | Nhinh | Đường này nối về bến. |
+| | Lumo | Cũng từng nối về vườn tôi. |
+
+Lưu ý: câu xin lỗi của Nhinh (dòng đầu) là bản diễn đạt lại; kịch bản không có câu gốc. Cần duyệt riêng.
+
+### 11.7 Ký hiệu và cảnh mở đầu
+
 - **Ký hiệu trên cột tuyến nước:** đã chốt theo bộ art: ống chia hai nhánh, hai đầu nối tròn (`water-column.png`, cùng mẫu với bảng xưởng).
-- **Cảnh mở đầu** chạy khi vòng đèn cầm tay phủ lên mầm cây; lần bật đầu ngay chỗ nhặt đèn làm việc đó (§13).
+- **Cảnh mở đầu:** lời thoại dòng đầu ở 11.6 chạy khi vòng đèn cầm tay phủ lên mầm cây; lần bật đầu ngay chỗ nhặt đèn làm việc đó (§13). Cảnh Nhinh ngồi dậy khi bắt đầu game không có chữ.
 
 ## 12. Bước tiếp theo khi dựng
 
