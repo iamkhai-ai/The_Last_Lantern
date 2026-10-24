@@ -1,15 +1,15 @@
 # Màn 01 — Bìa rừng quên lãng: layout V4 (bản 3) và danh sách art
 
-Trạng thái: **bản nháp để duyệt**, chưa phải code. Nguồn: `docs/scenario-v4/01-forgotten-forest-edge.md` và `puzzle-contracts.md` trên `develop-v4` (commit `f7d7ea8`, `e7a7107`), `00-prologue.md` (cảnh nghỉ cuối), `RULE_GAMES.md`, `art-and-production.md`. Tọa độ: `01-forest-edge-layout.json`. Ảnh blockout: `previews/01-forest-edge-blockout.png` và `-debug.png`, dựng bằng `scripts/mockup-v4-forest-edge.py`.
+Trạng thái: **DONE** (2026-10-25). Đã dựng trên `level01-v4` và gộp vào `develop-v4`, `demo-v4`. §0–§12 là bản thiết kế (bản 3), giữ làm lịch sử; chỗ nào runtime khác thiết kế, §13 là bản đúng. Nguồn: `docs/scenario-v4/01-forgotten-forest-edge.md` và `puzzle-contracts.md` trên `develop-v4` (commit `f7d7ea8`, `e7a7107`), `00-prologue.md` (cảnh nghỉ cuối), `RULE_GAMES.md`, `art-and-production.md`. Tọa độ: `01-forest-edge-layout.json`. Ảnh blockout: `previews/01-forest-edge-blockout.png` và `-debug.png`, dựng bằng `scripts/mockup-v4-forest-edge.py`.
 
-Quyết định đã chọn: **(b)**, đèn nằm trên đất cạnh bia và Nhinh tự nhặt (xem §8). Phần kịch bản và luật chung còn ghi "không nhặt đèn trên đất", nên phải sửa theo (b) trước khi dựng.
+Quyết định đã chọn: **(b)**, đèn nằm trên đất cạnh bia và Nhinh tự nhặt (xem §8). Kịch bản và luật chung đã sửa theo (b).
 
 ## 0. Thay đổi so với bản 2
 
 | Chủ đề | Bản 2 | Bản 3 (theo kịch bản mới và quyết định b) |
 | --- | --- | --- |
 | Chỗ đặt đèn lúc đầu | bệ `s0` cạnh bia (ổ kín) | **đèn trên đất** cạnh bia (`lampRest`), không có bệ; người chơi nhặt bằng E một lần |
-| Vòng sáng đèn cầm tay | vệt 56 px, gốc 12, đầu 32 | **vòng tròn bán kính 40 px** quanh chân Nhinh; không theo hướng quay |
+| Vòng sáng đèn cầm tay | vệt 56 px, gốc 12, đầu 32 | **vòng tròn bán kính 40 px** quanh bụng Nhinh (14 px trên tâm khối chân); không theo hướng quay |
 | Bệ S1/S2 | ổ kín có nắp | hộp có nắp, đầu nối kín; chỉ quầng 12 px lọt ra |
 | Đầu cắm S1 | — | hình khớp với đèn bảo trì |
 | Đường nguồn thường | — | có đoạn tối đứt nhịp ở đầu vào S1 |
@@ -104,12 +104,12 @@ H, ba mức:
 
 | Id | Loại | Vị trí (rect) | Đọc được khi | Thấy từ |
 | --- | --- | --- | --- | --- |
-| `sprout` | sáng | `{228,240,16,16}` | vòng đèn cầm tay chiếu vào | sân vào |
+| `sprout` | sáng | `{236,256,16,16}` | vòng đèn cầm tay chiếu vào | sân vào |
 | `spores-latch-1..3` | tối | 3 cụm quanh chốt A | đèn không chiếu vào | sân giữa, A mở |
 | `steps-latch-1..3` | tối | 3 vết chân từ cửa tới chốt | đèn không chiếu vào | sân giữa, A mở |
 | `spores-hinge-1..2` | tối | 2 cụm cạnh bản lề, tạo đường chạy của lò xo | đèn không chiếu vào | sân vào |
 | `line-s1-a` | Pulse (khắc) | `(310,224)` | Pulse trong 195 px | bia |
-| `latch-tool-marks` | Pulse (khắc) | `(400,174)` | Pulse trong 195 px | sân giữa |
+| `latch-tool-marks` | Pulse (khắc) | `(386,168)` | Pulse trong 195 px | sân giữa |
 
 Luật chung (puzzle-contracts): dấu tối chỉ đọc được khi không có footprint nào chồng lên; dấu được **ghi là đã thấy** khi đọc được, chân Nhinh trong 64 px, cùng phòng, và không bị tường hoặc cánh đang đóng chắn. Cờ này chỉ để xem lại trong J; không là điều kiện mở cửa, cầu, H hay cảnh truyện.
 
@@ -130,7 +130,7 @@ Không lưu: trạng thái cửa A/B (tính lại từ nguồn và chốt), hư�
 
 **Đã chọn (b):** đèn nằm trên đất cạnh bia, người chơi tự nhặt.
 
-Ngoại lệ cần ghi (chưa sửa tài liệu chung):
+Ngoại lệ (đã ghi vào tài liệu chung):
 - E nhặt đèn trên đất **chỉ tại `lampRest`** và chỉ khi đèn còn ở đó.
 - Không đặt đèn xuống đất. Đặt đèn chỉ tại bệ S1/S2, như luật chung.
 - Cảnh mở đầu chạy khi vòng sáng đầu tiên phủ lên mầm Lumo (runtime hiện tại). Đề xuất gắn với lần bật đầu, cần duyệt.
@@ -224,4 +224,27 @@ Tỉ lệ theo Nhinh (khung 36×42, thân nhìn thấy khoảng 28 px). Nền 12
 - Đã xong: tài liệu chung trên `develop-v4` (`7b1b7d0`). Runtime có `lampRest`, nhặt một lần bằng E, và test cho ngoại lệ này. Toàn bộ 301 test pass, `tsc` sạch.
 - Đã đồng bộ: runtime, JSON v4 và art dùng chung một topology: sân vào ở dưới, sân giữa có tường bao ở trên, cửa A ở tường nam sân giữa, cổng B ở tường bắc dẫn sang màn 02. JSON không có rãnh khô, mắt ổ kín, dây S1/S2 và decor cũ, vì runtime chưa có.
 - Lỗi audit ở foundation (bán kính ứng viên `hasAimArea` cho dấu tối) đã sửa ở `a208839`; xem §9.
-- Chưa kiểm trong trình duyệt.
+- Đã kiểm trong trình duyệt: xem §13.
+
+## 13. Trạng thái runtime (DONE)
+
+Bản đúng của màn 01 trên `level01-v4`. Chỗ nào khác §0–§12, theo mục này.
+
+**Đã dựng**
+- Bố cục theo art: sân vào ở dưới, sân giữa có tường bao, cửa A ở tường nam, cổng B ở tường bắc sang màn 02. JSON (`01-forest-edge-layout.json`) và runtime khớp, có test so hai bên.
+- Đèn trên đất tại `lampRest`, nhặt một lần bằng E; F không tác động khi đèn còn trên đất. Đèn chỉ đặt được trên S1/S2.
+- Vòng đèn cầm tay 40 px quanh bụng Nhinh (`LANTERN_LIFT` = 14 px trên tâm khối chân); tường và cửa đóng chặn tính từ tâm khối chân. Quầng bệ 12 px.
+- Ánh sáng vẽ kiểu v3: nền đêm 0.88 cố định; lõi sáng khớp footprint, quầng mềm ngoài lõi chỉ trang trí; quầng nhỏ quanh Nhinh khi trong tay không có đèn sáng; vật tương tác sáng mờ.
+- Mầm cây ở `{236,256,16,16}`: lần bật đèn đầu tiên ngay chỗ nhặt đèn phủ lên mầm và chạy cảnh mở đầu (có test).
+- Pulse (Space, đèn trong tay và bật) gần bia làm hiện dây S1→A (nét xanh) và vết dụng cụ ở chốt A, ghi vào J. Bia không có E.
+- Đèn bật trên S1/S2: mắt A/B sáng xuyên lớp tối, dây S1→A / S2→B chuyển vàng. Không có nguồn: mắt và dây chìm dưới lớp tối.
+- Chốt A, tay hãm B, mô hình bản lề (ba pha, minh họa tùy chọn), H ba mức theo trạng thái, HUD theo kịch bản.
+- Mũi tên chỉ dẫn (`focus()`), chỉ có ở màn 01: đèn → S1 → chốt A → S1 → S2 → tay hãm B → S2. Không khóa gì.
+- Va chạm: tán thấp, bụi và mép rừng là khối đặc nhưng không chặn sáng (`foliage`); gốc cây và mái trạm khớp art. Vật dựng sắp lớp theo chân đế, nên Nhinh đi ra sau bia, bệ, chốt.
+
+**Lưu:** vị trí đèn và F, `latchA`, `braceB`, checkpoint (`yard`, `middle`), J (dấu đã thấy, dấu Pulse), sự kiện một lần `forest-edge:lamp-taken`, `opening`, `pedestal`, `door-feed`, `lumo-door`, `ending`. Pha mô hình bản lề không lưu.
+
+**Kiểm:** 310 test và `tsc` sạch trên `level01-v4`; 503 test trên `demo-v4`. Reach audit, `hasAimArea` cho mọi dấu, tách sân, ngưỡng/bệ, checkpoint. Đã chơi trọn trong trình duyệt theo lời giải tham khảo: nhặt đèn → bật (cảnh Lumo) → Pulse → S1 → chốt A → lấy đèn → S2 → tay hãm B → lấy đèn → qua B; đủ sáu cảnh thoại.
+
+**Chưa dùng, không chặn DONE:** rãnh khô, liên kết cơ khí, ký hiệu trên cột tuyến nước (chờ chốt ký hiệu, §11), bia sáng khi Pulse (`stele-pulse`), Nhinh ngồi dậy, lớp tán phủ (`canopy`). Câu chữ ở §11 vẫn chờ duyệt.
+

@@ -1,5 +1,5 @@
 {
-  "_note": "V4 level 01 layout, synced to the runtime (src/v4/levels/forest-edge/forestEdgeLayout.ts; a test checks that both agree). Topology follows the art: entry yard below, walled middle courtyard above it, door A in the courtyard's south wall, gate B in its north wall to level 02. Matches assets/levels/01-forgotten-forest-edge/v4/asset-map.json placements. 640x360 world px, 1x. Rects are {x,y,width,height}; checkpoints give the spawn point (actor centre). Not in the runtime yet: dry channel, eyes, S1/S2 cable lines, the water column's marks; see docs/implementation/v4/01-forest-edge.md.",
+  "_note": "V4 level 01 layout, synced to the runtime (src/v4/levels/forest-edge/forestEdgeLayout.ts; a test checks that both agree). Topology follows the art: entry yard below, walled middle courtyard above it, door A in the courtyard's south wall, gate B in its north wall to level 02. Matches assets/levels/01-forgotten-forest-edge/v4/asset-map.json placements. 640x360 world px, 1x. Rects are {x,y,width,height}; checkpoints give the spawn point (actor centre). Not in the runtime yet: dry channel, mechanical linkages, the water column's marks; see docs/implementation/v4/01-forest-edge.md §13.",
   "world": { "x": 16, "y": 0, "width": 608, "height": 330 },
   "walls": {
     "forestNW":        { "x": 16,  "y": 0,   "width": 240, "height": 110 },
@@ -40,13 +40,13 @@
     { "id": "middle", "rect": { "x": 272, "y": 52,  "width": 328, "height": 138 } },
     { "id": "entry",  "rect": { "x": 16,  "y": 110, "width": 608, "height": 220 } }
   ],
-  "sprout": { "rect": { "x": 236, "y": 276, "width": 16, "height": 16 }, "note": "mầm cây Lumo che; sáng khi vòng đèn cầm tay phủ lên" },
+  "sprout": { "rect": { "x": 236, "y": 256, "width": 16, "height": 16 }, "note": "mầm cây Lumo che; sáng khi vòng đèn cầm tay phủ lên" },
   "pulseMarks": [
     { "id": "line-s1-a",        "x": 310, "y": 224, "kind": "carved" },
     { "id": "latch-tool-marks", "x": 386, "y": 168, "kind": "tool" }
   ],
   "lightMarks": [
-    { "id": "sprout",         "kind": "lit",  "rect": { "x": 236, "y": 276, "width": 16, "height": 16 } },
+    { "id": "sprout",         "kind": "lit",  "rect": { "x": 236, "y": 256, "width": 16, "height": 16 } },
     { "id": "spores-hinge-1", "kind": "dark", "rect": { "x": 138, "y": 256, "width": 6,  "height": 6 } },
     { "id": "spores-hinge-2", "kind": "dark", "rect": { "x": 146, "y": 266, "width": 6,  "height": 6 } },
     { "id": "spores-latch-1", "kind": "dark", "rect": { "x": 380, "y": 180, "width": 6,  "height": 6 } },

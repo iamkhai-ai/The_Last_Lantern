@@ -244,7 +244,8 @@ export class V4Scene extends Phaser.Scene {
       run: true,
       interact: true,
       lantern: lanternAvailable,
-      pulse: lanternAvailable && this.level.pulseMarks().length > 0,
+      // Pulse only with the lantern in hand and lit (puzzle-contracts §1): no key while it sits on a pedestal or is off.
+      pulse: lanternAvailable && canPulse(lantern) && this.level.pulseMarks().length > 0,
       journal: true,
       hint: true,
       pause: true,

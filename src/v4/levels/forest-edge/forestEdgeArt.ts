@@ -54,6 +54,8 @@ const SIZE: Readonly<Record<string, Pick<ArtSlot, 'anchor' | 'gameSize'>>> = {
   'lantern-off': { anchor: [6, 18], gameSize: [12, 18] },
   'water-column': { anchor: [8, 56], gameSize: [16, 56] },
   'station-yard': { anchor: [0, 0], gameSize: [640, 360] },
+  's1ToA-hidden': { anchor: [0, 0], gameSize: [640, 360] },
+  'latch-tool-marks': { anchor: [8, 6], gameSize: [16, 12] },
 };
 
 /** The slots of the level, by place. Each slot takes its texture from the level's state. */
@@ -70,6 +72,10 @@ export const ART_SLOTS = {
   s2: { position: { x: 432, y: 120 }, ...SIZE['socket-empty'] },
   eyeA: { position: { x: 328, y: 200 }, ...SIZE['eye-dormant'] },
   eyeB: { position: { x: 448, y: 42 }, ...SIZE['eye-dormant'] },
-  sprout: { position: { x: 244, y: 292 }, ...SIZE.sprout },
+  sprout: { position: { x: 244, y: 272 }, ...SIZE.sprout },
   lantern: { position: { x: 214, y: 236 }, ...SIZE['lantern-off'] },
+  // The carved S1–A and S2–B lines: full-screen overlays, registered to the yard.
+  s1ToA: { position: { x: 0, y: 0 }, ...SIZE['s1ToA-hidden'] },
+  s2ToB: { position: { x: 0, y: 0 }, ...SIZE['s1ToA-hidden'] },
+  latchTool: { position: { x: 386, y: 168 }, ...SIZE['latch-tool-marks'] },
 } as const satisfies Record<string, ArtSlot>;
