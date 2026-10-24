@@ -248,11 +248,15 @@ export function restoreB(s: MoonlitState): StepOutcome {
   return done({ ...s, g1: 'G2', g2: 'B' }, 'Cần hồi B đưa G1 về G2 và G2 về cầu B.');
 }
 
+/** Why a latch will not release while the lantern is not on S (04 §5). */
+export const LATCH_RELEASE_REFUSED = 'Đèn không ở S: nhả chốt thì cầu đóng, bên này không còn nguồn nào mở lại.';
+
 /**
- * Latch A or B (East bank). Engaging needs its bridge open right now (`liveNow`). Releasing is refused while the
- * lantern is in hand: the bridge would close behind a carried lantern with no way to feed it again.
+ * Latch A or B (East bank). Engaging needs its bridge open right now (`liveNow`). Releasing needs the lantern on S
+ * (04 §5): then every bridge that closes can be fed again by the island drive or restore B. With the lantern
+ * anywhere else nothing on this side can feed a bridge, so the release would cut the way back.
  */
-export function stepLatch(s: MoonlitState, which: 'A' | 'B', liveNow: boolean, lanternInHand: boolean): StepOutcome {
+export function stepLatch(s: MoonlitState, which: 'A' | 'B', liveNow: boolean, lanternOnS: boolean): StepOutcome {
   const key = which === 'A' ? 'latchA' : 'latchB';
   const engaged = s[key];
   if (!engaged) {
@@ -260,7 +264,7 @@ export function stepLatch(s: MoonlitState, which: 'A' | 'B', liveNow: boolean, l
     if (next === null) return refused(s, `Cầu ${which} chưa mở thật nên chưa gài được chốt ${which}.`);
     return done({ ...s, [key]: next }, `Chốt ${which} đã gài.`);
   }
-  if (lanternInHand) return refused(s, `Đèn còn trong tay: chưa nhả chốt ${which}, cầu sẽ đóng sau lưng.`);
+  if (!lanternOnS) return refused(s, LATCH_RELEASE_REFUSED);
   return done({ ...s, [key]: false }, `Chốt ${which} đã nhả.`);
 }
 

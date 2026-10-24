@@ -4,6 +4,7 @@ import type { LanternState } from '../../core/lantern';
 import { MOONLIT_CREEK, PEDESTAL_S_ID, DIAGRAM_ID, PIPE_BEN_WEST_ID, PIPE_RE_EAST_ID } from './moonlitCreekLayout';
 import {
   INITIAL_CROSSINGS,
+  LATCH_RELEASE_REFUSED,
   MOONLIT_JOURNAL_TEXT,
   PRESENTATION_MS,
   defaultMoonlitState,
@@ -152,27 +153,40 @@ describe('the drive and restore cranks', () => {
 
 describe('latches', () => {
   it('engages only while the bridge is live', () => {
-    const out = stepLatch(defaultMoonlitState(), 'A', false, false);
+    const out = stepLatch(defaultMoonlitState(), 'A', false, true);
     expect(out.ok).toBe(false);
     expect(out.message).toContain('chưa mở thật');
-    const ok = stepLatch(defaultMoonlitState(), 'A', true, false);
+    const ok = stepLatch(defaultMoonlitState(), 'A', true, true);
     expect(ok.ok).toBe(true);
     expect(ok.state.latchA).toBe(true);
   });
 
   it('releases freely when the lantern sits on S', () => {
     const engaged = { ...defaultMoonlitState(), latchB: true };
-    const out = stepLatch(engaged, 'B', false, false);
+    const out = stepLatch(engaged, 'B', false, true);
     expect(out.ok).toBe(true);
     expect(out.state.latchB).toBe(false);
   });
 
-  it('refuses to release while the lantern is in hand, so a carried lantern cannot strand Nhinh', () => {
+  it('refuses to release while the lantern is not on S, and says why', () => {
     const engaged = { ...defaultMoonlitState(), latchA: true };
-    const out = stepLatch(engaged, 'A', false, true);
+    const out = stepLatch(engaged, 'A', false, false);
     expect(out.ok).toBe(false);
     expect(out.state.latchA).toBe(true);
-    expect(out.message).toContain('còn trong tay');
+    expect(out.message).toBe(LATCH_RELEASE_REFUSED);
+  });
+
+  it('every bridge released with the lantern on S opens again from the far side', () => {
+    // Release A while G1 aims G2: A closes; the island drive brings G1 back to A.
+    let s: MoonlitState = { ...defaultMoonlitState(), latchA: true, latchB: true, g1: 'G2' };
+    s = stepLatch(s, 'A', false, true).state;
+    expect(view(s, ON_S).bridgeAOpen).toBe(false);
+    expect(view(driveG1(s).state, ON_S).bridgeAOpen).toBe(true);
+    // Release B while G1 aims A: B closes; restore B on the East bank routes G1 to G2 and G2 to B.
+    s = { ...defaultMoonlitState(), latchA: true, latchB: true, g1: 'A', g2: 'T' };
+    s = stepLatch(s, 'B', false, true).state;
+    expect(view(s, ON_S).bridgeBOpen).toBe(false);
+    expect(view(restoreB(s).state, ON_S).bridgeBOpen).toBe(true);
   });
 
   it('latch A holds bridge A open after G1 leaves A (independent of the ray)', () => {
@@ -327,7 +341,7 @@ describe('the full reference solution, end to end', () => {
     expect(view(s, lantern).bridgeBOpen).toBe(true);
 
     // 3. At the East bank: latch B engages while B is live.
-    let out = stepLatch(s, 'B', view(s, lantern).bridgeBLive, false);
+    let out = stepLatch(s, 'B', view(s, lantern).bridgeBLive, true);
     expect(out.ok).toBe(true);
     s = out.state;
 
@@ -336,7 +350,7 @@ describe('the full reference solution, end to end', () => {
     expect(view(s, lantern).bridgeALive).toBe(true);
 
     // 5. At the East bank: latch A engages from afar while A is fed.
-    out = stepLatch(s, 'A', view(s, lantern).bridgeALive, false);
+    out = stepLatch(s, 'A', view(s, lantern).bridgeALive, true);
     expect(out.ok).toBe(true);
     s = out.state;
 
@@ -370,9 +384,9 @@ describe('the full reference solution, end to end', () => {
 describe('recovery cases', () => {
   it('reopens a latch after a mistaken release, with no history flag', () => {
     let s = { ...defaultMoonlitState(), latchB: true };
-    s = stepLatch(s, 'B', false, false).state;
+    s = stepLatch(s, 'B', false, true).state;
     expect(s.latchB).toBe(false);
-    const again = stepLatch(s, 'B', true, false);
+    const again = stepLatch(s, 'B', true, true);
     expect(again.ok).toBe(true);
     expect(again.state.latchB).toBe(true);
   });
@@ -395,8 +409,8 @@ describe('recovery cases', () => {
   it('the stranded island case is served by the drive cranks, not by the lantern in hand', () => {
     // Lantern in hand with both latches off would strand Nhinh; the release rule prevents that path.
     const s = { ...defaultMoonlitState(), latchA: true, latchB: true };
-    expect(stepLatch(s, 'A', false, true).ok).toBe(false);
-    expect(stepLatch(s, 'B', false, true).ok).toBe(false);
+    expect(stepLatch(s, 'A', false, false).ok).toBe(false);
+    expect(stepLatch(s, 'B', false, false).ok).toBe(false);
   });
 });
 
