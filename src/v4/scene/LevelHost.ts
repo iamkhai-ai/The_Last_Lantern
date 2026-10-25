@@ -58,6 +58,8 @@ export interface V4LevelRuntime<S> {
   preload?(scene: Phaser.Scene): void;
   /** Illustration texture keys shown before a new game of this level starts. Optional. */
   intro?(): readonly string[];
+  /** The narration shown under one of this level's illustrations (intro or exit), Vietnamese catalog key. Optional. */
+  illustrationCaption?(key: string): string | null;
   /** Draws the room and creates its solids. Called once per scene start. */
   build(host: LevelHost, state: S): void;
   interactables(): Interactable[];

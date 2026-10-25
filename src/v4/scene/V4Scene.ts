@@ -135,7 +135,11 @@ export class V4Scene extends Phaser.Scene {
     // A new game may open with illustrations; they lead back here with the saved game (no new-game flag).
     const intro = newGame ? this.level.intro?.() ?? [] : [];
     if (intro.length > 0) {
-      this.scene.start('IllustrationScene', { illustrations: [...intro], next: { scene: 'V4Scene' } } satisfies IllustrationData);
+      this.scene.start('IllustrationScene', {
+        illustrations: [...intro],
+        captions: this.captionsFor(intro),
+        next: { scene: 'V4Scene' },
+      } satisfies IllustrationData);
       return;
     }
 
@@ -359,7 +363,16 @@ export class V4Scene extends Phaser.Scene {
       next = { scene: 'V4Scene' };
     }
     this.writeSave();
-    this.scene.start('IllustrationScene', { illustrations: exit.illustrations, next } satisfies IllustrationData);
+    this.scene.start('IllustrationScene', {
+      illustrations: exit.illustrations,
+      captions: this.captionsFor(exit.illustrations),
+      next,
+    } satisfies IllustrationData);
+  }
+
+  /** The level's narration for each illustration, in order (null where it has none). */
+  private captionsFor(keys: readonly string[]): (string | null)[] {
+    return keys.map((key) => this.level.illustrationCaption?.(key) ?? null);
   }
 
   /** The pulse reveals marks in range and writes them to the journal. It never powers anything. */

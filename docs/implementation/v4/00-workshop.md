@@ -82,6 +82,31 @@ Nhân vật mẹ và bác lái đò ở đợt 1 dùng tiếp được. Art đ�
 
 **Chỉ dẫn:** xưởng là phòng đầu tiên của game, nên dùng focus marker của host (`workshopFocus`) để chỉ bước kế tiếp: bàn → khay → bàn (khi cầm vòng) → bác lái đò → bảng kiểm (sau khi Mẹ gọi). Cầm lò xo thì chỉ về khay. Không đánh dấu gì khi đang chờ Mẹ gọi và sau khi chẩn đoán.
 
+**Câu mở đầu và lời dẫn (ngoài tài liệu V4, người dùng yêu cầu 2026-10-25):** lần đầu vào xưởng, bác lái đò nói một câu chỉ tới chiếc đèn trên bàn (`WORKSHOP_DIALOGUE.opening`, lưu `greeted`, không phát lại sau khi đã xem đèn). Năm tranh 01–05 có lời dẫn ở dải dưới (`ILLUSTRATION_CAPTIONS` trong `WorkshopLevel.ts`, host truyền qua `illustrationCaption()`), viết từ các sự kiện của `00-prologue.md`.
+
+### Đặc tả art đợt 3: mẹ và bác lái đò kiểu chibi
+
+Lý do: Nhinh vẽ kiểu chibi, còn mẹ và bác lái đò ở đợt 1 vẽ tỉ lệ người lớn. Phóng to 1,3 lần chỉ đỡ chênh, chưa hết. Đợt này vẽ lại hai nhân vật theo tỉ lệ của Nhinh, giữ nhận diện của đợt 1 (mẹ: tóc nâu sẫm, áo làm việc tối màu, tạp dề; bác lái đò: nón lá/nón rơm, áo sáng màu, quần xám xanh).
+
+Thước đo từ Nhinh (`assets/character/nhinh_down_idle_nolamp_0.png`, khung 36×42 ở 1×): thân nhìn thấy 20×28 px, đầu và mũ trùm cao ~13 px (≈ 46% chiều cao, khoảng hai đầu), viền tối dày một pixel, ánh sáng ấm từ trên. Xem thêm `assets/character/nhinh_all_poses_contact_sheet.png`.
+
+Yêu cầu chung:
+
+- Cùng tỉ lệ đầu/thân với Nhinh (đầu ≈ 45% chiều cao), cùng độ dày viền, cùng kiểu đổ bóng và bảng màu ấm của xưởng.
+- Người lớn cao hơn Nhinh một chút: thân nhìn thấy ~34 px trong game (≈ 1,2 lần), đầu cỡ bằng hoặc lớn hơn đầu Nhinh một chút.
+- Xuất ở 2× như các sprite xưởng khác: mỗi tư thế một canvas 80×96, trong suốt, chân đặt ở (40, 92). Không vẽ chữ, không bóng đổ ra sàn ngoài chân.
+- Nhìn từ trên-nghiêng giống Nhinh và nền xưởng.
+
+| File | Canvas | Tư thế |
+| --- | --- | --- |
+| `01-mother-work.png` | 80×96 | Đứng nghiêng, đang sửa dở một chiếc đèn nhỏ trên tay (tư thế mặc định) |
+| `02-mother-map.png` | 80×96 | Cầm bản đồ mở, hướng về phía Nhinh (khi chẩn đoán) |
+| `03-boatman-front.png` | 80×96 | Đứng chờ ở cửa, quay về phía người chơi |
+| `04-boatman-walk-south.png` | 240×96 | Ba khung 80×96 đi xuống phía nam, cùng đường chân, cùng tỉ lệ với `03` |
+| `05-mother-front.png`, `06-mother-back.png`, `07-boatman-back.png`, `08-boatman-lamp.png` | 80×96 | Tùy chọn, runtime chưa dùng |
+
+Đặt file trong `assets/prologue/story-v4-art-v3/characters/` (thư mục chưa commit, giống đợt 1 và 2). Kiểm tra trước khi giao: ghép cạnh Nhinh ở cỡ 640×360 trên nền xưởng; đầu ba nhân vật gần cỡ nhau, người lớn cao hơn rõ, viền và màu cùng một bộ. Khi art về, `scripts/prepare-v4-workshop.py` đọc thư mục này cho mẹ và bác lái đò, bỏ `ADULT_SCALE`.
+
 ## 2. Kế hoạch dựng (cho worker)
 
 Quy tắc chung như mục "Rules for every worker" của plan nền tảng. Level id: `prologue-workshop`. Thư mục: `src/v4/levels/prologue-workshop/`.

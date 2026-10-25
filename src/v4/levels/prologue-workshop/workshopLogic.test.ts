@@ -16,7 +16,9 @@ import {
   panelPrompt,
   parseWorkshopState,
   incidentPending,
+  markGreeted,
   markIncidentCalled,
+  openingPending,
   takePart,
   trayPrompt,
   useBench,
@@ -37,7 +39,7 @@ import { BENCH_ID, BOATMAN_ID, PANEL_ID, TRAY_ID, WORKSHOP, WORKSHOP_SPAWN } fro
 const START: WorkshopState = defaultWorkshopState();
 
 /** The lamp repaired and in hand, boatman still here. */
-const DELIVER: WorkshopState = { ...START, lampInspected: true, lampRepaired: true, held: 'lamp' };
+const DELIVER: WorkshopState = { ...START, greeted: true, lampInspected: true, lampRepaired: true, held: 'lamp' };
 
 /** Boatman has returned and Mẹ has called Nhinh to the panel. */
 const PANEL: WorkshopState = { ...DELIVER, held: null, boatmanReturned: true, incidentCalled: true };
@@ -308,6 +310,26 @@ describe('reload invariants', () => {
     const mid = takePart(START, 'ring').state;
     expect(parseWorkshopState(JSON.parse(JSON.stringify(mid)))).toEqual(mid);
     expect(parseWorkshopState(JSON.parse(JSON.stringify(PANEL)))).toEqual(PANEL);
+  });
+});
+
+describe('opening line', () => {
+  it('plays once on the first visit and is saved as played', () => {
+    expect(openingPending(START)).toBe(true);
+    const greeted = markGreeted(START);
+    expect(openingPending(greeted)).toBe(false);
+    expect(openingPending(parseWorkshopState(JSON.parse(JSON.stringify(greeted))))).toBe(false);
+  });
+
+  it('does not play once the lamp has been looked at, even from an old save without the flag', () => {
+    expect(openingPending(useBench(START).state)).toBe(false);
+    expect(parseWorkshopState({ lampInspected: true }).greeted).toBe(true);
+  });
+
+  it('is said by the boatman about the lamp on the bench', () => {
+    expect(WORKSHOP_DIALOGUE.opening).toEqual([
+      { speaker: 'Lái đò', text: 'Cô thợ ơi, chiếc đèn bác để trên bàn rồi đấy. Xem giúp bác với.' },
+    ]);
   });
 });
 

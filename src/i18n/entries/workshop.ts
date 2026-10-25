@@ -5,6 +5,18 @@ import { entry, type CatalogEntry } from '../entry.ts';
 
 export const WORKSHOP_ENTRIES: readonly CatalogEntry[] = [
   entry('v4.workshop.title', 'Xưởng bên sông', 'Riverside workshop'),
+  entry('v4.workshop.openingBoatman', 'Cô thợ ơi, chiếc đèn bác để trên bàn rồi đấy. Xem giúp bác với.',
+    'There you are, miss. I\'ve left the lamp on your bench. Could you take a look at it for me?'),
+  entry('v4.workshop.caption01', 'Bến Sương, chiều muộn. Nhinh học việc ở xưởng sửa đèn của mẹ bên bến thuyền, và cô mong một ngày mẹ giao cho mình những việc lớn hơn.',
+    'Ben Suong, late afternoon. Nhinh is an apprentice in her mother\'s lamp workshop by the ferry landing, and she hopes one day to be trusted with bigger jobs.'),
+  entry('v4.workshop.caption02', 'Mẹ ở lại giữ đèn cho các chuyến thuyền và trạm bơm. Nhinh mang đèn bảo trì và bản đồ, theo đường ven sông đi về phía rừng.',
+    'Her mother stays behind to keep the lights on for the boats and the pump station. Nhinh takes the maintenance lantern and the map and follows the river path towards the forest.'),
+  entry('v4.workshop.caption03', 'Trời nhá nhem khi Nhinh tới trạm ở bìa rừng. Trạm không có gì nguy hiểm, nhưng hướng dẫn trên bia đã cũ.',
+    'Dusk is falling when Nhinh reaches the station at the forest edge. Nothing there is dangerous, but the instructions on the marker are old.'),
+  entry('v4.workshop.caption04', 'Đi tiếp trong bóng tối thì liều quá. Nhinh đặt đèn cạnh bia, tựa vào gốc cây và chờ trời sáng.',
+    'Going on in the dark would be reckless. Nhinh sets the lantern beside the marker, leans against a tree and waits for morning.'),
+  entry('v4.workshop.caption05', 'Đồng hồ đã sang buổi sáng. Nhưng sương không tan, và khu rừng vẫn chạng vạng như lúc cô thiếp đi.',
+    'The clock says it is morning. But the mist has not lifted, and the forest is as dim as when she dozed off.'),
   entry('v4.workshop.inspectNhinh', 'Lõi lệch rồi. Bác có làm rơi nó không?', 'The core is off-centre. Did you drop it?'),
   entry('v4.workshop.inspectBoatman', 'Sóng làm rơi. Bác chỉ cầm hộ thôi.', 'A wave knocked it down. I was only holding it.'),
   entry('v4.workshop.paymentBoatman1', 'Bao nhiêu tiền công đây, cô thợ?', 'What do I owe you for the work, miss?'),

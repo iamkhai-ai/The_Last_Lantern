@@ -21,13 +21,15 @@ export interface WorkshopState {
   readonly assignmentReceived: boolean;
   /** Mẹ's call has played. Kept apart from the flags so a reload while the boatman walks off still plays it. */
   readonly incidentCalled: boolean;
+  /** The boatman's opening line has played (it points Nhinh at the lamp on the bench). */
+  readonly greeted: boolean;
 }
 
 /** The step the player is on. */
 export type WorkshopStage = 'repair' | 'deliver' | 'panel' | 'depart';
 
 /** The dialogue scripts, one per beat. */
-export type WorkshopDialogueId = 'inspect' | 'payment' | 'incident' | 'diagnosis';
+export type WorkshopDialogueId = 'opening' | 'inspect' | 'payment' | 'incident' | 'diagnosis';
 
 /** The journal entries the workshop writes. */
 export type WorkshopJournalId = 'elaria-signal' | 'assignment';
@@ -47,6 +49,10 @@ export interface WorkshopResult {
 
 /** Dialogue lines from docs/scenario-v4/00-prologue.md, copied word for word. Speaker ids are the labels shown. */
 export const WORKSHOP_DIALOGUE: Record<WorkshopDialogueId, DialogueLine[]> = {
+  // Not in the V4 docs: added at the user's request (2026-10-25) so a new player knows where to start.
+  opening: [
+    { speaker: 'Lái đò', text: 'Cô thợ ơi, chiếc đèn bác để trên bàn rồi đấy. Xem giúp bác với.' },
+  ],
   inspect: [
     { speaker: 'Nhinh', text: 'Lõi lệch rồi. Bác có làm rơi nó không?' },
     { speaker: 'Lái đò', text: 'Sóng làm rơi. Bác chỉ cầm hộ thôi.' },
@@ -150,6 +156,7 @@ export function defaultWorkshopState(): WorkshopState {
     localLineRepaired: false,
     assignmentReceived: false,
     incidentCalled: false,
+    greeted: false,
   };
 }
 
@@ -159,6 +166,7 @@ export function defaultWorkshopState(): WorkshopState {
  * assignment, then local line, then boatman, then lamp repaired (and inspected). The held item then follows
  * the flags: the boatman's return clears it, a repaired lamp is held, and parts are kept only before repair.
  * Mẹ's call is done once the local line is repaired; before that it is done only if its own flag says so.
+ * The opening line counts as played once the lamp has been inspected.
  */
 export function parseWorkshopState(raw: unknown): WorkshopState {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return defaultWorkshopState();
@@ -171,6 +179,7 @@ export function parseWorkshopState(raw: unknown): WorkshopState {
   const lampRepaired = boatmanReturned || flag('lampRepaired');
   const lampInspected = lampRepaired || flag('lampInspected');
   const incidentCalled = boatmanReturned && (localLineRepaired || flag('incidentCalled'));
+  const greeted = lampInspected || flag('greeted');
 
   const rawHeld = r.held;
   const savedHeld: HeldItem = rawHeld === 'ring' || rawHeld === 'spring' || rawHeld === 'lamp' ? rawHeld : null;
@@ -179,7 +188,7 @@ export function parseWorkshopState(raw: unknown): WorkshopState {
   else if (lampRepaired) held = 'lamp';
   else held = savedHeld === 'lamp' ? null : savedHeld;
 
-  return { lampInspected, held, lampRepaired, boatmanReturned, localLineRepaired, assignmentReceived, incidentCalled };
+  return { lampInspected, held, lampRepaired, boatmanReturned, localLineRepaired, assignmentReceived, incidentCalled, greeted };
 }
 
 /** True when the boatman has gone but Mẹ has not yet called Nhinh to the panel. */
@@ -190,6 +199,16 @@ export function incidentPending(s: WorkshopState): boolean {
 /** The state once Mẹ's call has played. */
 export function markIncidentCalled(s: WorkshopState): WorkshopState {
   return { ...s, incidentCalled: true };
+}
+
+/** True while the boatman's opening line has not played: the first time in the room, before the lamp is looked at. */
+export function openingPending(s: WorkshopState): boolean {
+  return !s.greeted && !s.lampInspected;
+}
+
+/** The state once the opening line has played. */
+export function markGreeted(s: WorkshopState): WorkshopState {
+  return { ...s, greeted: true };
 }
 
 /** The step the player is on, from the flags alone. */

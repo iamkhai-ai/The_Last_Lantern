@@ -43,7 +43,9 @@ import {
   defaultWorkshopState,
   exitOpen,
   incidentPending,
+  markGreeted,
   markIncidentCalled,
+  openingPending,
   motherPrompt,
   panelPrompt,
   parseWorkshopState,
@@ -117,7 +119,18 @@ const EXIT_ILLUSTRATIONS: readonly string[] = [
   'ill_04-waiting-for-morning',
   'ill_05-morning-without-dawn',
 ];
-/** The level the south door leads to. Not built yet: the host shows its placeholder. */
+/**
+ * Narration under each illustration (Vietnamese catalog keys, src/i18n/entries/workshop.ts). Not in the V4 docs:
+ * written from the events of 00-prologue.md at the user's request (2026-10-25).
+ */
+const ILLUSTRATION_CAPTIONS: Readonly<Record<string, string>> = {
+  'ill_01-ben-suong': 'Bến Sương, chiều muộn. Nhinh học việc ở xưởng sửa đèn của mẹ bên bến thuyền, và cô mong một ngày mẹ giao cho mình những việc lớn hơn.',
+  'ill_02-leaving-ben-suong': 'Mẹ ở lại giữ đèn cho các chuyến thuyền và trạm bơm. Nhinh mang đèn bảo trì và bản đồ, theo đường ven sông đi về phía rừng.',
+  'ill_03-maintenance-station': 'Trời nhá nhem khi Nhinh tới trạm ở bìa rừng. Trạm không có gì nguy hiểm, nhưng hướng dẫn trên bia đã cũ.',
+  'ill_04-waiting-for-morning': 'Đi tiếp trong bóng tối thì liều quá. Nhinh đặt đèn cạnh bia, tựa vào gốc cây và chờ trời sáng.',
+  'ill_05-morning-without-dawn': 'Đồng hồ đã sang buổi sáng. Nhưng sương không tan, và khu rừng vẫn chạng vạng như lúc cô thiếp đi.',
+};
+/** The level the south door leads to. */
 const NEXT_LEVEL_ID = 'forest-edge';
 
 /** The texture key of a workshop sprite. */
@@ -178,6 +191,8 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
   private harborBlink: number | null = null;
   /** Mother's call, held until the boatman is gone and the harbour lamp has blinked (00-prologue.md). */
   private pendingIncident: (() => void) | null = null;
+  /** The boatman's opening line is still to play (set in build, played on the first update). */
+  private openingDue = false;
 
   preload(scene: Phaser.Scene): void {
     for (const [name, url] of Object.entries(SPRITE_URLS)) {
@@ -188,6 +203,10 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
 
   intro(): readonly string[] {
     return INTRO_ILLUSTRATIONS;
+  }
+
+  illustrationCaption(key: string): string | null {
+    return ILLUSTRATION_CAPTIONS[key] ?? null;
   }
 
   defaultState(): WorkshopState {
@@ -266,6 +285,8 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
       this.pendingIncident = () => this.callMother(() => undefined);
       this.harborBlink = 0;
     }
+    // First time in the room: the boatman points Nhinh at his lamp, on the first frame once the scene runs.
+    this.openingDue = openingPending(state);
   }
 
   interactables(): Interactable[] {
@@ -277,6 +298,12 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
   }
 
   update(dt: number, foot: Rect): void {
+    if (this.openingDue) {
+      this.openingDue = false;
+      this.state = markGreeted(this.state);
+      this.host.requestSave();
+      this.host.say(WORKSHOP_DIALOGUE.opening, () => undefined);
+    }
     this.carryLamp(foot);
     if (this.boatmanWalking) this.stepBoatman(dt);
     if (this.harborBlink !== null) {
