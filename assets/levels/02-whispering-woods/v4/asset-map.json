@@ -1,0 +1,300 @@
+{
+  "level": "02-whispering-woods",
+  "version": "v4",
+  "built": "2026-10-25",
+  "layout": "src/v4/levels/whispering-woods/whisperingWoodsLayout.ts",
+  "note": "Runtime sizes and rects are copied from the level layout, not invented here. The level still draws with Phaser Graphics; this folder is the art set for the pass that replaces those draws.",
+  "canvasRule": "Every sprite is cut into a fixed RGBA canvas. Anchor bottom-centre means the canvas floor (y = canvas height) is the actor's foot line.",
+  "sprites": [
+    {
+      "id": "stele-moon",
+      "source": "sources/steles.png",
+      "cell": 1,
+      "canvas": [32, 32],
+      "anchor": "bottom-centre",
+      "target": [28, 28],
+      "runtimeRect": [160, 140, 28, 28],
+      "role": "Stele base with the kept crescent glyph. The ring rotates over this face."
+    },
+    {
+      "id": "stele-leaf",
+      "source": "sources/steles.png",
+      "cell": 2,
+      "canvas": [32, 32],
+      "anchor": "bottom-centre",
+      "target": [28, 28],
+      "runtimeRect": [240, 140, 28, 28],
+      "role": "Stele base with the kept leaf glyph."
+    },
+    {
+      "id": "stele-star",
+      "source": "sources/steles.png",
+      "cell": 3,
+      "canvas": [32, 32],
+      "anchor": "bottom-centre",
+      "target": [28, 28],
+      "runtimeRect": [320, 140, 28, 28],
+      "role": "Stele base with the kept star glyph."
+    },
+    {
+      "id": "stele-water",
+      "source": "sources/steles.png",
+      "cell": 4,
+      "canvas": [32, 32],
+      "anchor": "bottom-centre",
+      "target": [28, 28],
+      "runtimeRect": [400, 140, 28, 28],
+      "role": "Stele base with the new water droplet glyph."
+    },
+    {
+      "id": "ring",
+      "source": "sources/ring-cranks.png",
+      "cell": 1,
+      "canvas": [32, 32],
+      "anchor": "fixed at (3, 6)",
+      "target": [26, 26],
+      "runtimeRect": null,
+      "role": "The shared rotating ring. Draw it over any stele canvas at the same offset and rotate about (16, 19) by -120 degrees per notch step. 0 = N, 1 = SE, 2 = SW."
+    },
+    {
+      "id": "crank-x",
+      "source": "sources/cranks.png",
+      "cell": 1,
+      "canvas": [16, 16],
+      "anchor": "bottom-centre",
+      "target": [16, 16],
+      "runtimeRect": [206, 262, 16, 16],
+      "role": "Crank X (turns Moon and Leaf). Hub mark stamped at 1x by prepare-assets.py."
+    },
+    {
+      "id": "crank-y",
+      "source": "sources/cranks.png",
+      "cell": 2,
+      "canvas": [16, 16],
+      "anchor": "bottom-centre",
+      "target": [16, 16],
+      "runtimeRect": [286, 262, 16, 16],
+      "role": "Crank Y (turns Leaf and Star). Hub mark stamped at 1x."
+    },
+    {
+      "id": "crank-z",
+      "source": "sources/cranks.png",
+      "cell": 3,
+      "canvas": [16, 16],
+      "anchor": "bottom-centre",
+      "target": [16, 16],
+      "runtimeRect": [366, 262, 16, 16],
+      "role": "Crank Z (turns Star and Water). Hub mark stamped at 1x."
+    },
+    {
+      "id": "gate-closed",
+      "source": "sources/gate-latch.png",
+      "cell": 1,
+      "canvas": [8, 40],
+      "anchor": "bottom-centre",
+      "target": [8, 40],
+      "runtimeRect": [592, 190, 8, 40],
+      "role": "The gate leaf closed: solid and a light blocker while drawn."
+    },
+    {
+      "id": "gate-open",
+      "source": "sources/gate-latch.png",
+      "cell": 2,
+      "canvas": [8, 40],
+      "anchor": "top-centre",
+      "target": [8, 8],
+      "runtimeRect": [592, 190, 8, 40],
+      "role": "The same leaf gathered in the pocket above the opening. The passage below stays fully transparent."
+    },
+    {
+      "id": "latch",
+      "source": "sources/gate-latch.png",
+      "cell": 3,
+      "canvas": [8, 8],
+      "anchor": "bottom-centre",
+      "target": [8, 8],
+      "runtimeRect": null,
+      "role": "The catch that holds the raised gate. The layout has no rect for it yet; place it at the gate, not in the walking lane."
+    },
+    {
+      "id": "mouth-moon",
+      "source": "sources/mouths.png",
+      "cell": 1,
+      "canvas": [12, 12],
+      "anchor": "bottom-centre",
+      "target": [12, 12],
+      "runtimeRect": [168, 178, 12, 12],
+      "role": "Dark receiving mouth, fireflies at the SW edge (notch 2)."
+    },
+    {
+      "id": "mouth-leaf",
+      "source": "sources/mouths.png",
+      "cell": 2,
+      "canvas": [12, 12],
+      "anchor": "bottom-centre",
+      "target": [12, 12],
+      "runtimeRect": [248, 178, 12, 12],
+      "role": "Dark receiving mouth, fireflies at the N edge (notch 0)."
+    },
+    {
+      "id": "mouth-star",
+      "source": "sources/mouths.png",
+      "cell": 3,
+      "canvas": [12, 12],
+      "anchor": "bottom-centre",
+      "target": [12, 12],
+      "runtimeRect": [328, 178, 12, 12],
+      "role": "Dark receiving mouth, fireflies at the N edge (notch 0)."
+    },
+    {
+      "id": "mouth-water",
+      "source": "sources/mouths.png",
+      "cell": 4,
+      "canvas": [12, 12],
+      "anchor": "bottom-centre",
+      "target": [12, 12],
+      "runtimeRect": [408, 178, 12, 12],
+      "role": "Dark receiving mouth, fireflies at the SW edge (notch 2)."
+    },
+    {
+      "id": "grove-floor",
+      "source": "sources/grove-floor.png",
+      "cell": null,
+      "canvas": [608, 232],
+      "anchor": "top-left at the world rect",
+      "target": [608, 232],
+      "runtimeRect": [16, 96, 608, 232],
+      "role": "The grove floor plate. Cut to the world rect and dropped to 0.55 gain so it keeps the level's old brightness."
+    },
+    {
+      "id": "axle-x",
+      "source": "sources/axles.png",
+      "cell": 1,
+      "canvas": [80, 12],
+      "anchor": "centre",
+      "target": [80, 12],
+      "runtimeRect": [174, 134, 80, 12],
+      "role": "Rod between Moon and Leaf, behind the stones. Pulse-revealed; stretched to span the 80px run."
+    },
+    {
+      "id": "axle-y",
+      "source": "sources/axles.png",
+      "cell": 2,
+      "canvas": [80, 12],
+      "anchor": "centre",
+      "target": [80, 12],
+      "runtimeRect": [254, 134, 80, 12],
+      "role": "Rod between Leaf and Star."
+    },
+    {
+      "id": "axle-z",
+      "source": "sources/axles.png",
+      "cell": 3,
+      "canvas": [80, 12],
+      "anchor": "centre",
+      "target": [80, 12],
+      "runtimeRect": [334, 134, 80, 12],
+      "role": "Rod between Star and Water."
+    },
+    {
+      "id": "mark-x",
+      "source": "sources/crank-marks.png",
+      "cell": 1,
+      "canvas": [32, 32],
+      "anchor": "centre",
+      "target": [32, 32],
+      "runtimeRect": [198, 254, 32, 32],
+      "role": "Crank X's match mark: a ring holding the Moon and Leaf glyphs joined by a bar. Pulse-revealed."
+    },
+    {
+      "id": "mark-y",
+      "source": "sources/crank-marks.png",
+      "cell": 2,
+      "canvas": [32, 32],
+      "anchor": "centre",
+      "target": [32, 32],
+      "runtimeRect": [278, 254, 32, 32],
+      "role": "Crank Y's match mark: Leaf and Star."
+    },
+    {
+      "id": "mark-z",
+      "source": "sources/crank-marks.png",
+      "cell": 3,
+      "canvas": [32, 32],
+      "anchor": "centre",
+      "target": [32, 32],
+      "runtimeRect": [358, 254, 32, 32],
+      "role": "Crank Z's match mark: Star and Water."
+    },
+    {
+      "id": "hollow",
+      "source": "sources/props.png",
+      "cell": 1,
+      "canvas": [64, 32],
+      "anchor": "bottom-centre",
+      "target": [64, 32],
+      "runtimeRect": [444, 100, 64, 32],
+      "role": "The sleeping hollow with three adult fireflies perched. Decorative, never solid."
+    },
+    {
+      "id": "bell",
+      "source": "sources/props.png",
+      "cell": 2,
+      "canvas": [16, 20],
+      "anchor": "centre",
+      "target": [16, 20],
+      "runtimeRect": [58, 140, 16, 20],
+      "role": "Lumo's grass bell hanging by the entry. Decorative, never solid."
+    },
+    {
+      "id": "firefly-0",
+      "source": "sources/firefly.png",
+      "cell": 1,
+      "canvas": [8, 8],
+      "anchor": "centre",
+      "target": [8, 8],
+      "runtimeRect": null,
+      "role": "Flying firefly, wings raised. One of three frames swapped every 130 ms."
+    },
+    {
+      "id": "firefly-1",
+      "source": "sources/firefly.png",
+      "cell": 2,
+      "canvas": [8, 8],
+      "anchor": "centre",
+      "target": [8, 8],
+      "runtimeRect": null,
+      "role": "Flying firefly, wings level."
+    },
+    {
+      "id": "firefly-2",
+      "source": "sources/firefly.png",
+      "cell": 3,
+      "canvas": [8, 8],
+      "anchor": "centre",
+      "target": [8, 8],
+      "runtimeRect": null,
+      "role": "Flying firefly, wings lowered."
+    },
+    {
+      "id": "gate-half",
+      "source": "derived from sprites/gate-closed.png",
+      "cell": null,
+      "canvas": [8, 40],
+      "anchor": "bottom-centre",
+      "target": [8, 40],
+      "runtimeRect": [592, 190, 8, 40],
+      "role": "The leaf half raised: the closed sprite lifted 20px. Shown for 180 ms while the gate opens."
+    },
+    {
+      "id": "glow",
+      "source": "derived",
+      "cell": null,
+      "canvas": [16, 16],
+      "anchor": "centre",
+      "target": [16, 16],
+      "runtimeRect": null,
+      "role": "One radial flash for the ring-match and gate-open effects: scaled up and faded over 420 ms."
+    }
+  ]
+}

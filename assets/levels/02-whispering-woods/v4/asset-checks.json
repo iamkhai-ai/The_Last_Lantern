@@ -1,0 +1,584 @@
+{
+  "checks": [
+    {
+      "id": "stele-moon",
+      "file": "sprites/stele-moon.png",
+      "source": "sources/steles.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        2,
+        7,
+        30,
+        32
+      ],
+      "ink_size": [
+        28,
+        25
+      ],
+      "colours": 122
+    },
+    {
+      "id": "stele-leaf",
+      "file": "sprites/stele-leaf.png",
+      "source": "sources/steles.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        2,
+        6,
+        30,
+        32
+      ],
+      "ink_size": [
+        28,
+        26
+      ],
+      "colours": 122
+    },
+    {
+      "id": "stele-star",
+      "file": "sprites/stele-star.png",
+      "source": "sources/steles.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        2,
+        6,
+        30,
+        32
+      ],
+      "ink_size": [
+        28,
+        26
+      ],
+      "colours": 121
+    },
+    {
+      "id": "stele-water",
+      "file": "sprites/stele-water.png",
+      "source": "sources/steles.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        2,
+        6,
+        30,
+        32
+      ],
+      "ink_size": [
+        28,
+        26
+      ],
+      "colours": 122
+    },
+    {
+      "id": "ring",
+      "file": "sprites/ring.png",
+      "source": "sources/ring-cranks.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        3,
+        6,
+        28,
+        32
+      ],
+      "ink_size": [
+        25,
+        26
+      ],
+      "colours": 101
+    },
+    {
+      "id": "crank-x",
+      "file": "sprites/crank-x.png",
+      "source": "sources/cranks.png",
+      "canvas": [
+        16,
+        16
+      ],
+      "ink_bbox": [
+        1,
+        0,
+        15,
+        16
+      ],
+      "ink_size": [
+        14,
+        16
+      ],
+      "colours": 89
+    },
+    {
+      "id": "crank-y",
+      "file": "sprites/crank-y.png",
+      "source": "sources/cranks.png",
+      "canvas": [
+        16,
+        16
+      ],
+      "ink_bbox": [
+        1,
+        0,
+        15,
+        16
+      ],
+      "ink_size": [
+        14,
+        16
+      ],
+      "colours": 93
+    },
+    {
+      "id": "crank-z",
+      "file": "sprites/crank-z.png",
+      "source": "sources/cranks.png",
+      "canvas": [
+        16,
+        16
+      ],
+      "ink_bbox": [
+        1,
+        0,
+        15,
+        16
+      ],
+      "ink_size": [
+        14,
+        16
+      ],
+      "colours": 82
+    },
+    {
+      "id": "gate-closed",
+      "file": "sprites/gate-closed.png",
+      "source": "sources/gate-latch.png",
+      "canvas": [
+        8,
+        40
+      ],
+      "ink_bbox": [
+        0,
+        6,
+        8,
+        40
+      ],
+      "ink_size": [
+        8,
+        34
+      ],
+      "colours": 118
+    },
+    {
+      "id": "gate-open",
+      "file": "sprites/gate-open.png",
+      "source": "sources/gate-latch.png",
+      "canvas": [
+        8,
+        40
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        8,
+        4
+      ],
+      "ink_size": [
+        8,
+        4
+      ],
+      "colours": 33
+    },
+    {
+      "id": "latch",
+      "file": "sprites/latch.png",
+      "source": "sources/gate-latch.png",
+      "canvas": [
+        8,
+        8
+      ],
+      "ink_bbox": [
+        0,
+        2,
+        8,
+        8
+      ],
+      "ink_size": [
+        8,
+        6
+      ],
+      "colours": 40
+    },
+    {
+      "id": "mouth-moon",
+      "file": "sprites/mouth-moon.png",
+      "source": "sources/mouths.png",
+      "canvas": [
+        12,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        12,
+        12
+      ],
+      "ink_size": [
+        12,
+        12
+      ],
+      "colours": 128
+    },
+    {
+      "id": "mouth-leaf",
+      "file": "sprites/mouth-leaf.png",
+      "source": "sources/mouths.png",
+      "canvas": [
+        12,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        12,
+        12
+      ],
+      "ink_size": [
+        12,
+        12
+      ],
+      "colours": 127
+    },
+    {
+      "id": "mouth-star",
+      "file": "sprites/mouth-star.png",
+      "source": "sources/mouths.png",
+      "canvas": [
+        12,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        12,
+        12
+      ],
+      "ink_size": [
+        12,
+        12
+      ],
+      "colours": 128
+    },
+    {
+      "id": "mouth-water",
+      "file": "sprites/mouth-water.png",
+      "source": "sources/mouths.png",
+      "canvas": [
+        12,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        12,
+        12
+      ],
+      "ink_size": [
+        12,
+        12
+      ],
+      "colours": 127
+    },
+    {
+      "id": "axle-x",
+      "file": "sprites/axle-x.png",
+      "source": "sources/axles.png",
+      "canvas": [
+        80,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        80,
+        12
+      ],
+      "ink_size": [
+        80,
+        12
+      ],
+      "colours": 126
+    },
+    {
+      "id": "axle-y",
+      "file": "sprites/axle-y.png",
+      "source": "sources/axles.png",
+      "canvas": [
+        80,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        80,
+        12
+      ],
+      "ink_size": [
+        80,
+        12
+      ],
+      "colours": 124
+    },
+    {
+      "id": "axle-z",
+      "file": "sprites/axle-z.png",
+      "source": "sources/axles.png",
+      "canvas": [
+        80,
+        12
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        80,
+        12
+      ],
+      "ink_size": [
+        80,
+        12
+      ],
+      "colours": 125
+    },
+    {
+      "id": "mark-x",
+      "file": "sprites/mark-x.png",
+      "source": "sources/crank-marks.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "ink_size": [
+        32,
+        32
+      ],
+      "colours": 87
+    },
+    {
+      "id": "mark-y",
+      "file": "sprites/mark-y.png",
+      "source": "sources/crank-marks.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "ink_size": [
+        32,
+        32
+      ],
+      "colours": 85
+    },
+    {
+      "id": "mark-z",
+      "file": "sprites/mark-z.png",
+      "source": "sources/crank-marks.png",
+      "canvas": [
+        32,
+        32
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "ink_size": [
+        32,
+        32
+      ],
+      "colours": 82
+    },
+    {
+      "id": "hollow",
+      "file": "sprites/hollow.png",
+      "source": "sources/props.png",
+      "canvas": [
+        64,
+        32
+      ],
+      "ink_bbox": [
+        10,
+        0,
+        54,
+        32
+      ],
+      "ink_size": [
+        44,
+        32
+      ],
+      "colours": 122
+    },
+    {
+      "id": "bell",
+      "file": "sprites/bell.png",
+      "source": "sources/props.png",
+      "canvas": [
+        16,
+        20
+      ],
+      "ink_bbox": [
+        0,
+        1,
+        16,
+        19
+      ],
+      "ink_size": [
+        16,
+        18
+      ],
+      "colours": 73
+    },
+    {
+      "id": "firefly-0",
+      "file": "sprites/firefly-0.png",
+      "source": "sources/firefly.png",
+      "canvas": [
+        8,
+        8
+      ],
+      "ink_bbox": [
+        1,
+        0,
+        5,
+        7
+      ],
+      "ink_size": [
+        4,
+        7
+      ],
+      "colours": 19
+    },
+    {
+      "id": "firefly-1",
+      "file": "sprites/firefly-1.png",
+      "source": "sources/firefly.png",
+      "canvas": [
+        8,
+        8
+      ],
+      "ink_bbox": [
+        0,
+        2,
+        8,
+        6
+      ],
+      "ink_size": [
+        8,
+        4
+      ],
+      "colours": 18
+    },
+    {
+      "id": "firefly-2",
+      "file": "sprites/firefly-2.png",
+      "source": "sources/firefly.png",
+      "canvas": [
+        8,
+        8
+      ],
+      "ink_bbox": [
+        0,
+        2,
+        6,
+        6
+      ],
+      "ink_size": [
+        6,
+        4
+      ],
+      "colours": 14
+    },
+    {
+      "id": "grove-floor",
+      "file": "sprites/grove-floor.png",
+      "source": "sources/grove-floor.png",
+      "canvas": [
+        608,
+        232
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        608,
+        232
+      ],
+      "ink_size": [
+        608,
+        232
+      ],
+      "colours": 21051
+    },
+    {
+      "id": "gate-half",
+      "file": "sprites/gate-half.png",
+      "source": "derived from sprites/gate-closed.png",
+      "canvas": [
+        8,
+        40
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        8,
+        20
+      ],
+      "ink_size": [
+        8,
+        20
+      ],
+      "colours": 93
+    },
+    {
+      "id": "glow",
+      "file": "sprites/glow.png",
+      "source": "derived",
+      "canvas": [
+        16,
+        16
+      ],
+      "ink_bbox": [
+        0,
+        0,
+        16,
+        16
+      ],
+      "ink_size": [
+        16,
+        16
+      ],
+      "colours": 24
+    }
+  ]
+}

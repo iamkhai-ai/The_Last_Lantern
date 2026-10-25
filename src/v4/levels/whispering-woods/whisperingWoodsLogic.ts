@@ -95,6 +95,17 @@ export function deriveWhisperingWoods(s: WhisperingWoodsState): WhisperingWoodsV
   return { rings, matched, matchedCount, gateLive, gateOpen: isDoorOpen(gateLive, s.gateCatch) };
 }
 
+const RING_ORDER: readonly Ring[] = ['moon', 'leaf', 'star', 'water'];
+
+/**
+ * The rings that match in `after` but did not match in `before`, in ring order. With no earlier view (the first draw
+ * of a build) nothing is new: a ring already matched when the level opens does not flash again.
+ */
+export function newlyMatchedRings(before: WhisperingWoodsView | null, after: WhisperingWoodsView): readonly Ring[] {
+  if (!before) return [];
+  return RING_ORDER.filter((ring) => after.matched[ring] && !before.matched[ring]);
+}
+
 /** The catch engages as soon as the gate is live. Turning cranks afterwards never releases it. */
 export function settleCatch(s: WhisperingWoodsState): WhisperingWoodsState {
   if (s.gateCatch || !deriveWhisperingWoods(s).gateLive) return s;
