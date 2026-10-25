@@ -129,3 +129,32 @@ Cue mới `agreement` (`forest-edge:agreement`), bốn câu, phát một lần:
 - Hai bản nguyên văn, art, collision, luật nguồn/cửa/chốt và phiên bản save không đổi.
 - Chưa có playtest với 3–5 người mới, chưa đo thời lượng đọc tự nhiên và chưa chơi hết chiến dịch. Không dùng test
   tự động để tuyên bố người mới đã hiểu cốt truyện. Cần lượt chơi của người dùng để đánh giá nhịp và độ rõ.
+
+## 8. Mở đầu mười một tranh (2026-10-26)
+
+- Trước khi vào xưởng, ván mới chạy **11 tranh** (`assets/levels/00-workshop/illustrations/intro-01-town.png` …
+  `intro-11-boatmans-visit.png`, mỗi ảnh 1280×720), mỗi tranh một dòng; hết tranh cuối thì xưởng mở ra như cũ.
+- Dữ liệu thuần: `src/v4/levels/prologue-workshop/openingNarrative.ts` (`OPENING_PAGES`: `key` = texture key
+  `ill_intro-NN-…`, `caption` = câu Việt). `WorkshopLevel.ts` lấy `INTRO_ILLUSTRATIONS` và `ILLUSTRATION_CAPTIONS` từ
+  đây; tranh mở đầu cũ `ill_01-ben-suong` và mục `v4.workshop.caption01` đã bỏ. Bốn tranh chuyển cảnh sau xưởng
+  (`caption02`–`caption05`) giữ nguyên.
+- Chữ: `vi`/`en` copy nguyên văn từ `assets/prologue/opening-narrative-v1/production-plan.json` (giữ “ ” trong intro08),
+  vào catalogue `v4.workshop.intro01`…`intro11`. Đã đối chiếu tự động module ↔ JSON: 11/11 khớp cả VI, EN và key.
+- Esc bỏ qua phần còn lại: `IllustrationScene` nhận `skippable?: boolean`, hiện nhãn `[Esc] Bỏ qua` ở góc trên phải
+  (cùng cỡ/style với gợi ý `E`), và `keydown-ESC` gọi `finish()` ngay. Chỉ lời gọi mở đầu của `V4Scene` đặt
+  `skippable: true`; các tranh chuyển cảnh sau màn chơi không đổi. Sau mỗi lần sang trang, `armedAt` được đặt lại
+  (`performance.now() + 250`), nên bấm nhanh hai lần không nhảy hai tranh; lần vào đầu vẫn giữ 300 ms.
+- Caption: `setOrigin(0.5, 0.5)` quanh tâm dải 74 px đã đủ cho 1–3 dòng 13 px (đo trong Phaser trước đó: 34 px cho
+  2 dòng), nên không đổi bố cục dải; chỉ thêm ghi chú.
+
+Kiểm chứng đã chạy (worktree `feat/opening-level00-v4`, sau thay đổi):
+
+- `npm test`: **31 file, 607 test passed** (trước thay đổi: 30 file, 602 test).
+- `npm run build`: **PASS** (tsc + vite, 894 module). `dist/index.html` sau đó được `git checkout --` trả về HEAD
+  để build output không lẫn vào thay đổi.
+- `node scripts/check-i18n.mjs`: **PASS** (187 entry, `tr()` literal 30, thiếu 0; coverage hội thoại 61.1% không đổi,
+  21 dòng còn thiếu đều ngoài phạm vi).
+- `node scripts/check-i18n-runtime.mjs`: **9/9 PASS**.
+- `git diff --check`: không có lỗi khoảng trắng.
+- Chưa mở browser cho lượt này: chưa đo lại thời gian đọc 11 trang, chưa xác nhận bằng mắt vị trí nhãn `[Esc] Bỏ qua`
+  trên ảnh sáng, và chưa chơi liền mạch mở đầu → xưởng → màn 01 sau thay đổi.

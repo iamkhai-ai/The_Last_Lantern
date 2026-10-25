@@ -70,16 +70,34 @@ H nếu được gọi: quan sát chốt lỏng → tìm vòng giữ cùng tiế
 
 ## Những gì bản dựng thêm (2026-10-25)
 
-Năm dòng dưới mỗi tranh, mỗi dòng tối đa hai câu (chữ Việt là khoá tra bản dịch; bản tiếng Anh nằm trong `src/i18n/entries/workshop.ts`):
+### Mở đầu mười một tranh (bản dựng 2026-10-26)
 
-1. “Chiều xuống Bến Sương, đèn ven sông dẫn thuyền qua sương. Trong xưởng của mẹ, Nhinh vẫn là cô thợ học việc đang mong được giao việc lớn hơn.”
-2. “Được mẹ giao việc, Nhinh mang bản đồ và đèn bảo trì theo đường ven sông. Sau lưng cô, mẹ còn giữ đèn cho thuyền và trạm bơm.”
-3. “Trạm bìa rừng hiện ra lúc nhá nhem. Dấu bảo trì giống ở xưởng, nhưng những dòng hướng dẫn trên bia đã cũ.”
-4. “Nhinh muốn kiểm tra tiếp, rồi nhớ lời mẹ dặn đừng đi khi trời tối. Cô đặt đèn cạnh bia, tựa vào gốc cây và chờ sáng.”
-5. “Giờ này Bến Sương đã sáng. Đồng hồ của Nhinh cũng sang ngày mới, nhưng sương trong rừng không tan — buổi sáng ở Elaria vẫn như chiều tối.”
+Trước khi vào xưởng, một ván mới chạy mười một tranh kể chuyện liên tiếp, mỗi tranh một dòng; hết tranh cuối thì xưởng mở ra như hiện nay. Esc bỏ qua phần còn lại — chỉ phần mở đầu này, các tranh chuyển cảnh sau mỗi màn chơi vẫn phải xem hết. Người chơi có thể bấm E/Space/Enter hoặc nhấp chuột để sang tranh kế; một lần bấm không nhảy hai tranh. Chữ Việt dưới đây là khoá tra bản dịch; bản tiếng Anh nằm trong `src/i18n/entries/workshop.ts` (`v4.workshop.intro01`…`intro11`), dữ liệu tranh ở `src/v4/levels/prologue-workshop/openingNarrative.ts`. Nguồn tranh và chữ: `assets/prologue/opening-narrative-v1/` (gpt-image-2.5; xem `production-plan.json` và `asset-manifest.json`, bản thô trong `sources/`); ảnh nằm ở `assets/levels/00-workshop/illustrations/intro-01-town.png` … `intro-11-boatmans-visit.png`.
+
+1. “Bến Sương là một thị trấn nhỏ bên sông, có bến thuyền, chợ sớm, những xưởng sửa chữa và các ngôi nhà dựng sát mép nước.”
+2. “Ban ngày, nơi này khá bình thường. Khi đêm xuống và sương phủ mặt sông, dãy đèn dọc bờ dẫn thuyền về bến; cũng nguồn ấy giữ cho các trạm bơm chạy.”
+3. “Nguồn sáng ấy không sinh ra ở Bến Sương. Nó đi xuống từ Elaria, khu rừng ở đầu nguồn, qua những tuyến dẫn và các trạm bảo trì dọc đường.”
+4. “Người dân được dạy rằng rừng Elaria có thể tích ánh mặt trời rồi chia một phần cho con người. Nhờ nguồn sáng ấy, đèn ở bến vẫn sáng khi đêm xuống.”
+5. “Trẻ con ở bến lớn lên cùng câu chuyện về Người Bảo Vệ: trong một trận bão lớn năm xưa, ông đã thắp sáng dòng sông và cứu hàng trăm người.”
+6. “Nhưng nhiều năm gần đây, những đợt mất sáng đến thường hơn. Nước ở trạm bơm yếu đi, thuyền phải chờ ngoài bến, còn thợ sửa mãi chưa tìm ra nguyên nhân.”
+7. “Mẹ của Nhinh lo bảo trì các trạm quanh bến. Hai mẹ con sống ở tầng trên xưởng sửa đèn, giữa những hộp linh kiện và tiếng khách gọi cửa.”
+8. “Từ nhỏ, Nhinh đã quen nghe mẹ nói: “Ngoài kia còn người đợi đèn để về.” Với mẹ, sửa một chiếc đèn cũng là giúp ai đó trở về an toàn.”
+9. “Giờ Nhinh chừng mười bảy tuổi, đang học nghề của mẹ. Cô khéo tay, tò mò, hơi nóng vội, và hay giữ đồ hỏng vì tin rằng mình sẽ sửa được.”
+10. “Điều cô mong rất đời thường: được mẹ tin giao một việc lớn, được người trong thị trấn nhìn nhận như một người thợ thực thụ.”
+11. “Chiều hôm ấy, bác lái đò quen mang tới xưởng một chiếc đèn hỏng. Hồi Nhinh còn bé, bác vẫn chở cô qua sông mà không lấy tiền.”
+
+Mười một dòng này thay dòng mở đầu cũ (“Chiều xuống Bến Sương, đèn ven sông dẫn thuyền qua sương…”, tranh `ill_01-ben-suong`); mục `v4.workshop.caption01` đã bỏ khỏi catalogue. Không dòng nào lộ nhịp nghỉ của rừng, chuyện Cây Mẹ, tinh thể, hay ai gây ra sự cố: Người Bảo Vệ chỉ là câu chuyện trẻ con ở bến lớn lên cùng nghe.
+
+### Bốn dòng dưới tranh chuyển cảnh
+
+Sau khi rời xưởng, bốn tranh đi đường giữ nguyên, mỗi dòng tối đa hai câu (chữ Việt là khoá tra bản dịch):
+
+1. “Được mẹ giao việc, Nhinh mang bản đồ và đèn bảo trì theo đường ven sông. Sau lưng cô, mẹ còn giữ đèn cho thuyền và trạm bơm.”
+2. “Trạm bìa rừng hiện ra lúc nhá nhem. Dấu bảo trì giống ở xưởng, nhưng những dòng hướng dẫn trên bia đã cũ.”
+3. “Nhinh muốn kiểm tra tiếp, rồi nhớ lời mẹ dặn đừng đi khi trời tối. Cô đặt đèn cạnh bia, tựa vào gốc cây và chờ sáng.”
+4. “Giờ này Bến Sương đã sáng. Đồng hồ của Nhinh cũng sang ngày mới, nhưng sương trong rừng không tan — buổi sáng ở Elaria vẫn như chiều tối.”
 
 Không thêm sự kiện, nhân vật hay địa điểm nào ngoài những gì cảnh đã có; chữ chỉ nói rõ việc làm của Nhinh, chỗ đứng của mẹ, và chiếc đèn bảo trì. Bến Sương vẫn có ngày và đêm bình thường; chỉ khu rừng chạng vạng.
-
 ## Art và âm thanh
 
 Mới: nền xưởng, bàn/khay, đèn khách tắt/sáng, bảng kiểm, mẹ, lái đò. Nhinh và đèn bảo trì dùng bộ hiện có nếu tỷ lệ phù hợp. Hoạt ảnh khách đơn giản nhưng phải có bước ra cửa; có thể dùng vài pose, không cần NPC đi tự do. Tranh đi đường có thể sửa prologue cũ; cảnh nghỉ ở bìa rừng giữ bố cục quen thuộc. Tiếng bến và mái chèo giới thiệu motif sẽ trở lại khi liên lạc màn 04/06 và đoạn kết.

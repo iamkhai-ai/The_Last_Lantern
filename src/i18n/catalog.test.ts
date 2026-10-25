@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CATALOG, entriesByVi } from './catalog';
+import { CATALOG, entriesByVi, tr } from './catalog';
 import {
   WORKSHOP_DIALOGUE,
   WORKSHOP_JOURNAL,
@@ -13,6 +13,7 @@ import {
   workshopHint,
   workshopHud,
 } from '../v4/levels/prologue-workshop/workshopLogic';
+import { OPENING_PAGES } from '../v4/levels/prologue-workshop/openingNarrative';
 import type { WorkshopState } from '../v4/levels/prologue-workshop/workshopLogic';
 import {
   AGREEMENT_JOURNAL_ID,
@@ -101,14 +102,37 @@ describe('workshop copy is translated', () => {
     expect(workshopHint(PAST_DIAGNOSIS)?.key).toBe('workshop:assignment');
   });
 
-  it('keeps the five captions short enough for the caption band', () => {
+  it('keeps the four exit captions short enough for the caption band', () => {
     const captions = CATALOG.filter(item => item.id.startsWith('v4.workshop.caption'));
-    expect(captions).toHaveLength(5);
+    expect(captions.map(item => item.id)).toEqual([
+      'v4.workshop.caption02',
+      'v4.workshop.caption03',
+      'v4.workshop.caption04',
+      'v4.workshop.caption05',
+    ]);
     for (const caption of captions) {
-      // Two sentences at most, and short enough that the band does not have to shrink the type.
+      // Two sentences each, and short enough that the band does not have to shrink the type.
       expect(caption.vi.split('.').filter(part => part.trim() !== '')).toHaveLength(2);
       expect(caption.vi.length).toBeLessThanOrEqual(200);
       expect(caption.en.length).toBeLessThanOrEqual(240);
+    }
+  });
+
+  it('has one translated page for each of the eleven intro pictures', () => {
+    const intro = CATALOG.filter(item => item.id.startsWith('v4.workshop.intro'));
+    expect(intro).toHaveLength(11);
+    expect(OPENING_PAGES).toHaveLength(11);
+    for (const page of OPENING_PAGES) {
+      // The Vietnamese sentence is the catalog key, so every page must resolve to an English line.
+      expect(englishOf(page.caption), page.key).not.toBeNull();
+      expect(tr(page.caption), page.key).not.toBe('');
+    }
+    for (const item of intro) {
+      const sentences = item.vi.split('.').filter(part => part.trim() !== '');
+      expect(sentences.length, item.id).toBeGreaterThanOrEqual(1);
+      expect(sentences.length, item.id).toBeLessThanOrEqual(3);
+      expect(item.vi.length, item.id).toBeLessThanOrEqual(200);
+      expect(item.en.length, item.id).toBeLessThanOrEqual(240);
     }
   });
 });

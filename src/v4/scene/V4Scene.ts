@@ -138,6 +138,8 @@ export class V4Scene extends Phaser.Scene {
       this.scene.start('IllustrationScene', {
         illustrations: [...intro],
         captions: this.captionsFor(intro),
+        // The opening narration can be left with Esc; the exit journey after a level cannot.
+        skippable: true,
         next: { scene: 'V4Scene' },
       } satisfies IllustrationData);
       return;

@@ -1,0 +1,167 @@
+{
+  "generator": "PI-Desktop GenerateImages, model gpt-image-2.5",
+  "normalization": "Pillow ImageOps.fit centre crop to 16:9 then LANCZOS resize to 1280x720, RGB opaque",
+  "notes": {
+    "intro-06": "first master kept most lamps lit (outage unreadable); accepted master is an edit of it with most lamps dark",
+    "intro-04": "first request failed with IMAGE_REQUEST_FAILED; one retry approved by the user succeeded"
+  },
+  "rights": "AI-generated project artwork; no stock or public-domain license asserted.",
+  "pages": [
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-01-town.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-01-town-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "4fbb1e93412eabf3240efabee5fcf88eda42054c24a8ec039083bfd838de39b1"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-02-night-lights.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-02-night-lights-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "d618de3a6dfcca29685fe3427e6d7350b02dcd156c36b7d9f8eca3689c2a1acd"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-03-elaria-source.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-03-elaria-source-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "e29991c8e45760a891578eb4ee29b7e8442dfd1a516f88c1a8b8f2c180d6d770"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-04-stored-sunlight.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-04-stored-sunlight-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "72117042c3d00c528d7c8a57ec92de631575ccd5ea6d4272d579ffe90b622d1b"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-05-storm-rescue.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-05-storm-rescue-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1671,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "0225c50d3ad6a02a9c8ef71aa8fc0bd1f1a726f8e4bbf267b565cfc413e1c612"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-06-failing-lights.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-06-failing-lights-raw-b.png",
+      "rejected": [
+        "assets/prologue/opening-narrative-v1/sources/intro-06-failing-lights-raw.png"
+      ],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "239f958dca8e1aed4c0c90e38ad046578d313af551c78dd0d080063684288392"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-07-home-workshop.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-07-home-workshop-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "e9dea2b2cc661af4e8e2a46ee87ead342ea7487754c471d77a08eaa3fb97e827"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-08-mothers-lesson.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-08-mothers-lesson-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "4ec81057ee86aca2fd19966d1e3bc9450ed19870e67632b36e605cf8da8bb9d7"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-09-apprentice.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-09-apprentice-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "3a667b7b1a0c8fce35549b6759f881d0d87a8ac03e8f76757be4669f15d63ea0"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-10-earned-trust.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-10-earned-trust-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "0520552988d57bfbbc0ae78fa2adfac914c1d1460bf121595b89e2d478f97bec"
+    },
+    {
+      "file": "assets/levels/00-workshop/illustrations/intro-11-boatmans-visit.png",
+      "master": "assets/prologue/opening-narrative-v1/sources/intro-11-boatmans-visit-raw.png",
+      "rejected": [],
+      "masterSize": [
+        1672,
+        941
+      ],
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "0e8d84e80748e58575edbc5c7970362df5a3c5e8a970849448d19c722b4a8b21"
+    }
+  ]
+}

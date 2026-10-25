@@ -33,6 +33,7 @@ import {
   TRAY_ID,
   WORKSHOP,
 } from './workshopLayout';
+import { OPENING_PAGES } from './openingNarrative';
 import {
   PART_LABELS,
   WORKSHOP_DIALOGUE,
@@ -112,7 +113,7 @@ const PART_CHOICE_AT = {
 /** Where the bench lamp stands: the bench's top, centred. */
 const BENCH_LAMP_AT: Point = { x: 301, y: 180 };
 /** Illustrations of the new game and of the exit (texture keys, see src/v4/scene/illustrationFiles.ts). */
-const INTRO_ILLUSTRATIONS: readonly string[] = ['ill_01-ben-suong'];
+const INTRO_ILLUSTRATIONS: readonly string[] = OPENING_PAGES.map((page) => page.key);
 const EXIT_ILLUSTRATIONS: readonly string[] = [
   'ill_02-leaving-ben-suong',
   'ill_03-maintenance-station',
@@ -120,12 +121,14 @@ const EXIT_ILLUSTRATIONS: readonly string[] = [
   'ill_05-morning-without-dawn',
 ];
 /**
- * Narration under each illustration (Vietnamese catalog keys, src/i18n/entries/workshop.ts). Not in the V4 docs:
- * written from the events of 00-prologue.md at the user's request (2026-10-25). Two sentences at most, and only what
- * the picture shows: the evening harbour, the road out, the station, the night by the stele, the dim morning.
+ * Narration under each illustration (Vietnamese catalog keys, src/i18n/entries/workshop.ts). The eleven intro pages
+ * come from openingNarrative.ts, one to three sentences each, and stay inside what their picture shows. The four exit
+ * pages are the journey after the workshop: two sentences at most, and only what their pictures show — the road out,
+ * the station, the night by the stele, the dim morning. Not in the V4 docs: written from 00-prologue.md at the user's
+ * request (2026-10-25).
  */
 const ILLUSTRATION_CAPTIONS: Readonly<Record<string, string>> = {
-  'ill_01-ben-suong': 'Chiều xuống Bến Sương, đèn ven sông dẫn thuyền qua sương. Trong xưởng của mẹ, Nhinh vẫn là cô thợ học việc đang mong được giao việc lớn hơn.',
+  ...Object.fromEntries(OPENING_PAGES.map((page) => [page.key, page.caption])),
   'ill_02-leaving-ben-suong': 'Được mẹ giao việc, Nhinh mang bản đồ và đèn bảo trì theo đường ven sông. Sau lưng cô, mẹ còn giữ đèn cho thuyền và trạm bơm.',
   'ill_03-maintenance-station': 'Trạm bìa rừng hiện ra lúc nhá nhem. Dấu bảo trì giống ở xưởng, nhưng những dòng hướng dẫn trên bia đã cũ.',
   'ill_04-waiting-for-morning': 'Nhinh muốn kiểm tra tiếp, rồi nhớ lời mẹ dặn đừng đi khi trời tối. Cô đặt đèn cạnh bia, tựa vào gốc cây và chờ sáng.',
