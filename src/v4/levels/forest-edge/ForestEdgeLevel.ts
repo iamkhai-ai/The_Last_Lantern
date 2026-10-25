@@ -56,6 +56,8 @@ import {
 import type { ForestEdgeLive, ForestEdgeState, ForestEdgeView } from './forestEdgeLogic';
 import { ART_SLOTS, artKey, forestArtReady, preloadForestArt } from './forestEdgeArt';
 import type { ArtSlot } from './forestEdgeArt';
+import { FOREST_EDGE_TUTORIAL } from './forestEdgeTutorial';
+import type { TutorialStep } from '../../core/tutorial';
 
 /** The art textures each slot can show, by the state that picks them (asset-map.json). */
 const HINGE_TEXTURES = ['hinge-closed', 'hinge-pulled', 'hinge-hooked'] as const;
@@ -490,6 +492,10 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
 
   hint(): HintLadder | null {
     return forestEdgeHint(this.viewNow());
+  }
+
+  tutorial(): readonly TutorialStep[] {
+    return FOREST_EDGE_TUTORIAL;
   }
 
   wake(): { event: string; frames: readonly { texture: string; ms: number }[] } | null {

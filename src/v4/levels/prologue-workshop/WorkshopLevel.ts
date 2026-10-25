@@ -34,6 +34,8 @@ import {
   WORKSHOP,
 } from './workshopLayout';
 import { OPENING_PAGES } from './openingNarrative';
+import { WORKSHOP_TUTORIAL } from './workshopTutorial';
+import type { TutorialStep } from '../../core/tutorial';
 import {
   PART_LABELS,
   WORKSHOP_DIALOGUE,
@@ -216,6 +218,10 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
 
   illustrationCaption(key: string): string | null {
     return ILLUSTRATION_CAPTIONS[key] ?? null;
+  }
+
+  tutorial(): readonly TutorialStep[] {
+    return WORKSHOP_TUTORIAL;
   }
 
   defaultState(): WorkshopState {

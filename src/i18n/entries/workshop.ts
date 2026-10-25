@@ -105,4 +105,12 @@ export const WORKSHOP_ENTRIES: readonly CatalogEntry[] = [
   entry('v4.workshop.toastAssignment', 'Nhận đèn bảo trì và bản đồ.', 'Received the maintenance lamp and the map.'),
   entry('v4.workshop.toastMotherPanel', 'Mẹ đang đợi ở bảng kiểm.', 'Mother is waiting at the panel.'),
   entry('v4.workshop.toastMotherDepart', 'Mẹ: “Mang bản đồ. Nếu đường hỏng thì quay về.”', 'Mother: “Take the map. If the road is broken, turn back.”'),
+  // First-play control lessons (workshopTutorial.ts).
+  entry('v4.workshop.tutorialMove', 'Di chuyển: WASD hoặc các phím mũi tên.', 'Move: WASD or the arrow keys.'),
+  entry('v4.workshop.tutorialRun', 'Giữ Shift trong khi di chuyển để chạy nhanh hơn.', 'Hold Shift while moving to run.'),
+  entry('v4.workshop.tutorialInteract',
+    'Lại gần người hoặc đồ vật có viền sáng. Khi nhãn E hiện ra, nhấn E để xem hoặc nói chuyện; trong hội thoại, E hoặc Space để đọc tiếp.',
+    'Walk up to a person or object outlined in light. When the E label appears, press E to examine or talk; in a conversation, E or Space continues.'),
+  entry('v4.workshop.tutorialHelp', 'Chưa biết làm gì tiếp? Nhấn H để xem gợi ý, J để mở sổ tay, Esc để tạm dừng.',
+    'Not sure what to do next? Press H for a hint, J for the journal, Esc to pause.'),
 ];

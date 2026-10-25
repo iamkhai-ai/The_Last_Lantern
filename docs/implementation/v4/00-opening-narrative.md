@@ -158,3 +158,21 @@ Kiểm chứng đã chạy (worktree `feat/opening-level00-v4`, sau thay đổi)
 - `git diff --check`: không có lỗi khoảng trắng.
 - Chưa mở browser cho lượt này: chưa đo lại thời gian đọc 11 trang, chưa xác nhận bằng mắt vị trí nhãn `[Esc] Bỏ qua`
   trên ảnh sáng, và chưa chơi liền mạch mở đầu → xưởng → màn 01 sau thay đổi.
+
+## Lượt sửa: chữ dẫn nhập hiện dần và hướng dẫn điều khiển
+
+- **Chữ dẫn nhập hiện từng chữ** (`IllustrationScene`, `captionTyping.ts`): mỗi câu được ngắt dòng một lần ở độ dài
+  đầy đủ, mỗi dòng là một Text riêng đặt sẵn đúng chỗ của dòng hoàn chỉnh, nên chữ không nhảy dòng hay xê dịch khi
+  đang hiện. Tốc độ 26 ms/ký tự, tính theo đồng hồ thực (không theo `delta` đã làm mượt của Phaser). Bấm E/Space/
+  Enter/click khi đang gõ thì hiện hết câu; bấm lần nữa mới sang trang. Esc vẫn bỏ qua cả phần dẫn nhập.
+- **Hướng dẫn lần đầu** (`core/tutorial.ts`): mỗi màn khai báo một danh sách bài ngắn (`tutorial()` trong
+  `V4LevelRuntime`). Host hiện từng bài trong khung viền vàng ngay trên hàng phím, ẩn khi đang hội thoại/tạm dừng.
+  Bài xong khi người chơi làm đúng việc (tín hiệu: đi, chạy, E thành công, H/J, F bật, xung sáng) hoặc khi trạng thái
+  đèn khớp, một số bài chỉ thông tin thì tự tắt sau vài giây. Bài xong được lưu thành sự kiện `tutorial:<id>` trong
+  `events` (không đổi schema save), nên tải lại không hiện lại.
+  - Màn 00 (`workshopTutorial.ts`): WASD/mũi tên → giữ Shift để chạy → E với vật có viền sáng (E/Space đọc tiếp lời
+    thoại) → H gợi ý, J sổ tay, Esc tạm dừng.
+  - Màn 01 (`forestEdgeTutorial.ts`): E nhặt đèn → F bật/tắt (nhặt không tự bật) → vùng sáng cho đọc dấu khắc và cơ
+    chế → Space phát xung sáng khi cầm đèn sáng → E đặt đèn lên bệ S1/S2, đèn sáng trên bệ cấp nguồn thử → E lấy lại.
+- Câu chữ VI/EN nằm trong `src/i18n/entries/workshop.ts` và `forestEdge.ts`; `tutorial.test.ts` kiểm thứ tự bài,
+  điều kiện hoàn thành, bản dịch và hàm gõ chữ.

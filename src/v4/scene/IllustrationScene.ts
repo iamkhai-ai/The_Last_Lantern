@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { tr } from '../../i18n/catalog.ts';
 import { ILLUSTRATION_FILES } from './illustrationFiles';
+import { revealLines, typedCharacters } from './captionTyping';
 
 /** What the illustration scene shows and where it goes next. */
 export interface IllustrationData {
@@ -22,10 +23,16 @@ const PAGE_ARM_DELAY_MS = 250;
 const CAPTION_BAND_Y = 286;
 const CAPTION_BAND_ALPHA = 0.62;
 const CAPTION_WRAP = 560;
-
+const CAPTION_LINE_SPACING = 4;
+const CAPTION_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
+  fontFamily: 'Segoe UI, sans-serif',
+  fontSize: '13px',
+  color: '#f2e6cc',
+};
 /**
  * Full-screen illustrations (640x360). E, Space, Enter or a click moves on; Esc leaves the rest of a skippable set at
- * once (the new-game introduction); the last picture starts the next scene.
+ * once (the new-game introduction); the last picture starts the next scene. The narration under each picture types
+ * itself out; a press while it is still typing shows the whole line, the next press moves on.
  */
 export class IllustrationScene extends Phaser.Scene {
   private plan: IllustrationData = { illustrations: [], next: { scene: 'MenuScene' } };
@@ -33,7 +40,16 @@ export class IllustrationScene extends Phaser.Scene {
   private armedAt = 0;
   private picture: Phaser.GameObjects.Image | null = null;
   private captionBand: Phaser.GameObjects.Rectangle | null = null;
-  private captionText: Phaser.GameObjects.Text | null = null;
+  /** Measures and wraps the caption; never drawn. */
+  private captionMeasure: Phaser.GameObjects.Text | null = null;
+  /** One text per wrapped line, each placed where its finished line sits, so typing never shifts the words. */
+  private captionLines: Phaser.GameObjects.Text[] = [];
+  /** The current caption, wrapped, one array of characters per line. */
+  private captionChars: string[][] = [];
+  private captionTotal = 0;
+  private captionShown = 0;
+  /** Wall-clock start of the current caption's typing: the speed holds even when frames drop. */
+  private typingStartedAt = 0;
 
   constructor() {
     super({ key: 'IllustrationScene' });
@@ -87,17 +103,18 @@ export class IllustrationScene extends Phaser.Scene {
 
     this.captionBand = this.add.rectangle(0, CAPTION_BAND_Y, 640, 360 - CAPTION_BAND_Y, 0x000000, CAPTION_BAND_ALPHA)
       .setOrigin(0, 0).setDepth(2).setVisible(false);
-    // Centred on the band (origin 0.5, 0.5), so one to three lines of 13px text stay centred in the 74px strip.
-    this.captionText = this.add.text(320, CAPTION_BAND_Y + (360 - CAPTION_BAND_Y) / 2, '', {
-      fontFamily: 'Segoe UI, sans-serif',
-      fontSize: '13px',
-      color: '#f2e6cc',
-      align: 'center',
-      lineSpacing: 4,
+    this.captionMeasure = this.add.text(0, 0, '', {
+      ...CAPTION_STYLE,
       wordWrap: { width: CAPTION_WRAP, useAdvancedWrap: true },
-    }).setOrigin(0.5, 0.5).setDepth(3).setVisible(false);
+    }).setVisible(false);
+    this.captionLines = [];
 
     this.show();
+  }
+
+  public update(): void {
+    if (this.captionShown >= this.captionTotal) return;
+    this.revealTo(typedCharacters(performance.now() - this.typingStartedAt, this.captionTotal));
   }
 
   private onAdvance(event: KeyboardEvent): void {
@@ -114,9 +131,14 @@ export class IllustrationScene extends Phaser.Scene {
 
   private advance(): void {
     if (performance.now() < this.armedAt) return;
-    this.index += 1;
-    this.show();
-    // Re-armed per page: a fast double press moves one picture on, never two.
+    if (this.captionShown < this.captionTotal) {
+      // Still typing: the press finishes the line instead of turning the page.
+      this.revealTo(this.captionTotal);
+    } else {
+      this.index += 1;
+      this.show();
+    }
+    // Re-armed per press: a fast double press moves one step on, never two.
     this.armedAt = performance.now() + PAGE_ARM_DELAY_MS;
   }
 
@@ -137,7 +159,41 @@ export class IllustrationScene extends Phaser.Scene {
     }
     const caption = this.plan.captions?.[this.index] ?? null;
     this.captionBand?.setVisible(caption !== null);
-    this.captionText?.setText(caption === null ? '' : tr(caption)).setVisible(caption !== null);
+    this.layoutCaption(caption === null ? '' : tr(caption));
+  }
+
+  /**
+   * Wraps the caption once at its full length and lays out one text per line, each left-aligned at the x where the
+   * finished, centred line starts. The block is centred vertically on the band. Every line then starts empty.
+   */
+  private layoutCaption(full: string): void {
+    for (const line of this.captionLines) line.destroy();
+    this.captionLines = [];
+    this.captionChars = [];
+    this.captionTotal = 0;
+    this.captionShown = 0;
+    this.typingStartedAt = performance.now();
+    const measure = this.captionMeasure;
+    if (!measure || full === '') return;
+    const wrapped = measure.getWrappedText(full).map((line) => line.trimEnd()).filter((line) => line !== '');
+    const lineHeight = measure.setText('Ag').height;
+    const blockHeight = wrapped.length * lineHeight + (wrapped.length - 1) * CAPTION_LINE_SPACING;
+    const top = CAPTION_BAND_Y + (360 - CAPTION_BAND_Y - blockHeight) / 2;
+    wrapped.forEach((line, i) => {
+      const width = measure.setText(line).width;
+      const text = this.add.text(Math.round(320 - width / 2), Math.round(top + i * (lineHeight + CAPTION_LINE_SPACING)), '', CAPTION_STYLE)
+        .setDepth(3);
+      this.captionLines.push(text);
+      this.captionChars.push(Array.from(line));
+    });
+    measure.setText('');
+    this.captionTotal = this.captionChars.reduce((sum, chars) => sum + chars.length, 0);
+  }
+
+  /** Shows the first `count` characters of the caption, line by line. */
+  private revealTo(count: number): void {
+    this.captionShown = Math.min(count, this.captionTotal);
+    revealLines(this.captionChars, this.captionShown).forEach((text, i) => this.captionLines[i]?.setText(text));
   }
 
   private finish(): void {
