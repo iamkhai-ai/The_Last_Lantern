@@ -6,6 +6,7 @@ import {
   TARGET_RINGS,
   defaultWhisperingWoodsState,
   deriveWhisperingWoods,
+  newlyMatchedRings,
   parseWhisperingWoodsState,
   ringsOf,
   turnCrank,
@@ -213,5 +214,22 @@ describe('the hint ladder', () => {
 
   it('keeps the direction words used by the journal in the doc convention', () => {
     expect(DIR_WORDS).toEqual({ 0: 'Bắc', 1: 'Đông Nam', 2: 'Tây Nam' });
+  });
+});
+
+describe('newly matched rings', () => {
+  const view = (s: WhisperingWoodsState) => deriveWhisperingWoods(s);
+
+  it('is empty before the first draw, so rings matched at the start do not flash', () => {
+    expect(newlyMatchedRings(null, view(START))).toEqual([]);
+  });
+
+  it('is empty when nothing changed', () => {
+    expect(newlyMatchedRings(view(START), view(START))).toEqual([]);
+  });
+
+  it('names only the ring that gained its match', () => {
+    // Two notches on X turn Moon to its mouth; Leaf turns off its mouth, so it is not new.
+    expect(newlyMatchedRings(view(START), view(run(START, ['x', 'x'])))).toEqual(['moon']);
   });
 });

@@ -1,0 +1,91 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "model": "gpt-image-2.5-sunburst",
+  "generatedAt": "2026-10-25",
+  "scope": "Level 02 art: four stele bases, the rotating ring, three cranks, the gate leaf in both states with its latch, four dark mouths (P0); the grove floor, three axle bars, three crank match marks, the sleeping hollow with its fireflies, Lumo's grass bell and the flying-firefly frames (P1/P2).",
+  "style": "Painterly pixel-cluster fantasy RPG, front-facing orthographic top-down view with a slight visible top face, cold blue-grey slate, dark teal moss, old honey brass, soft upper-left light. Follows the Level 01 V4 direction (assets/levels/01-forgotten-forest-edge/v4/ART-DIRECTION.md).",
+  "revisions": [
+    {
+      "sheet": "steles.png",
+      "revision": 2,
+      "reason": "The first sheet filled the stele face with the glyph, so the rotating ring covered it. Regenerated with the glyph at about 40 percent of the face width and a wide blank stone border for the ring to sit around."
+    },
+    {
+      "sheet": "cranks.png",
+      "revision": 2,
+      "reason": "In the first sheet the cranks were post-and-wheel scenes; at 16x16 the shaped hub disappeared. Regenerated as face-on wheels with a large bright hub, and the hub mark is stamped at 1x by prepare-assets.py because a downscaled painting cannot stay legible at that size."
+    }
+  ],
+  "prompts": [
+    {
+      "id": "steles",
+      "phase": "P0",
+      "sheet": "1536x1024, 1 row x 4 equal cells",
+      "targets": "stele-moon, stele-leaf, stele-star, stele-water",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY FOUR isolated stone steles in ONE horizontal row, evenly spaced, very generous transparent gutters in every cell, nothing touching a cell edge. No text, numbers, labels, arrows, floor, ground shadow, backdrops or UI. Flat sprite sheet, not a mockup, no perspective convergence.\nAll four share the SAME squat standing stone block: a broad low tapered slab, nearly square front face reading at 28x28 logical pixels but drawn LARGE in the cell, slightly wider at the foot, chipped worn edges, cold blue-grey slate with faint violet vein, thin dark teal moss along the base, two tiny pale flowers at the foot. Front-facing orthographic with a small visible top face, crisp painterly pixel clusters, soft light from the upper left, restrained highlights. Same silhouette, size, baseline, facing, lighting and scale for all four; ONLY the carved glyph differs.\nEach stele carries ONE SMALL glyph cut into the front face and filled with dim old honey brass. The glyph is compact and sits in the middle of the face, occupying only about 40 percent of the face width, with a wide blank border of bare stone all around it; it must never touch the edges of the stone, because a brass ring will later be fitted over the face around it. Same thin even stroke weight in all four, shallow engraving catching light on its lower edge, NO glow outside the stone, NO other markings:\ncell 1 CRESCENT MOON tilted about 30 degrees, horns opening to the upper right;\ncell 2 a POINTED LEAF seen flat, a single centre vein, tip up;\ncell 3 an EIGHT-POINTED STAR, four long points on the axes and four short between them;\ncell 4 a single WATER DROPLET with a round belly and sharp top, one short ripple line beneath.\nThe four glyphs must look like one family carved by the same hand: same stroke width, same engraving depth, same wear. Keep the stone quiet and matte so the glyph stays the only identifier. Objects fully inside their cells."
+    },
+    {
+      "id": "ring",
+      "phase": "P0",
+      "sheet": "1536x1024, 1 row x 4 cells (only the ring cell is used)",
+      "targets": "ring",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY FOUR isolated mechanism sprites in ONE horizontal row, evenly spaced, very generous transparent gutters, nothing touching a cell edge. No text, numbers, labels, arrows, floor, shadow or UI. Flat sheet, not a mockup.\nCell 1: the ROTATING RING that sits over a stele face, reading at 28x28 logical pixels but drawn large. A thin worn honey-brass ring with a hollow FULLY TRANSPARENT centre, one raised rectangular NOTCH tab on the top edge, two small rivets, dark patina in the recess. The ring must read as a rim that turns in 120-degree steps; it is not a solid disc and carries no glyph.\nCells 2 to 4: three CRANK wheels that stand on the forest floor, each reading at 16x16 logical pixels but drawn large, each with the SAME body: a short dark wooden post, a small brass axle, a flat round wheel face with a worn rim and a low handle knob at the side. Same size, baseline and lighting in all three; ONLY the shaped hub at the centre differs so the three are told apart by silhouette, never by colour:\ncell 2 hub is TWO CROSSED BARS forming an X;\ncell 3 hub is a THREE-PRONGED FORK forming a Y;\ncell 4 hub is a SHORT ZIGZAG BAR forming a Z.\nFront-facing orthographic with slight visible tops, crisp painterly pixel clusters, cold dark wood, aged honey brass, faint moss at the foot. No lettering of any kind; the hubs are physical metal shapes."
+    },
+    {
+      "id": "cranks",
+      "phase": "P0",
+      "sheet": "1536x1024, 1 row x 3 equal cells",
+      "targets": "crank-x, crank-y, crank-z",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY THREE isolated crank wheels in ONE horizontal row, evenly spaced, generous transparent gutters, nothing touching a cell edge. No text, numbers, labels, arrows, floor or UI. Flat sheet, not a mockup.\nEach crank reads at 16x16 logical pixels but is drawn LARGE and fills its cell. It is a FACE-ON view of a small mechanism wheel standing on the forest floor: a short dark wooden post stub visible only at the bottom edge, a thick worn honey-brass rim around a dark aged-wood wheel face, and a bright raised brass HUB at the dead centre.\nThe hub is the identifier and must be big, simple and bright: it covers about two thirds of the wheel face, is clearly raised above the wood, and is polished brass with a strong dark outline so it stays readable when the whole sprite is only 16 pixels wide. Value contrast matters more than detail: bright brass against near-black wood.\nCell 1 hub: TWO CROSSED BARS forming an X.\nCell 2 hub: a THREE-PRONGED FORK forming a Y.\nCell 3 hub: a Z-SHAPED BAR with two square bends.\nAll three share the exact same wheel diameter, rim, post stub, baseline, facing and lighting; only the hub shape changes. Front-facing orthographic, crisp painterly pixel clusters, soft upper-left light, faint moss only on the post stub. No lettering anywhere: each hub is one solid physical metal casting, thick and blocky, not a thin drawn symbol."
+    },
+    {
+      "id": "gate-and-latch",
+      "phase": "P0",
+      "sheet": "1536x1024, 1 row x 3 equal cells",
+      "targets": "gate-closed, gate-open, latch",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY THREE isolated sprites in ONE horizontal row, evenly spaced, generous transparent gutters, nothing touching a cell edge. No text, numbers, labels, arrows, floor, cast shadow or UI. Flat sheet, not a mockup.\nThe gate is a NARROW VERTICAL SLIDING LEAF, 8 wide and 40 tall logical pixels, drawn large inside its cell at that tall narrow proportion: dark aged wood planks bound by two thin honey-brass straps, a small square brass keeper plate halfway up, chipped corners. It is NOT an arch, NOT double doors, NOT a portcullis.\nCell 1 GATE CLOSED: the leaf fills the full 8x40 opening, planks tight, straps level, bottom edge seated on a barely visible brass sill.\nCell 2 GATE OPEN: the SAME leaf pulled straight up into its pocket, so the visible part is a compressed gathered bundle at the very top of the cell and the lower four fifths of the cell are COMPLETELY TRANSPARENT empty passage; keep the leaf's outer width identical to cell 1.\nCell 3 LATCH, reading at 8x8 logical pixels but drawn large: a small brass hook lever on a square slate foot, hooked end pointing left over a short steel keeper, a seated pin through the hook. It must read as a mechanical catch that holds a raised gate, not a door handle.\nCrisp painterly pixel clusters, cold dark wood, aged honey brass, faint green moss only on the outer edges, soft upper-left light. Same material family and scale across the three."
+    },
+    {
+      "id": "mouths",
+      "phase": "P0",
+      "sheet": "1536x1024, 1 row x 4 equal cells",
+      "targets": "mouth-moon, mouth-leaf, mouth-star, mouth-water",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY FOUR isolated receiving mouths in ONE horizontal row, evenly spaced, generous transparent gutters, nothing touching a cell edge. No text, numbers, labels, arrows, floor or UI.\nEach mouth is a small RECESSED SOCKET IN THE FOREST FLOOR, reading at 12x12 logical pixels but drawn large: a shallow square-ish stone inset with a dark slate lip, its interior almost black, a hairline brass seam around the rim, tiny chips and one blade of moss. These are DARK MARKS: they must stay almost illegible in full light and only reveal their information when no lantern light falls on them. Do NOT paint a glow, halo or bright rim.\nInside each socket, TWO OR THREE TINY WARM FIREFLY DOTS are perched at the rim, and their POSITION is the only signal, pointing along one of three directions (north, south-east, south-west):\ncell 1 dots clustered at the SOUTH-WEST edge;\ncell 2 dots clustered at the NORTH edge;\ncell 3 dots clustered at the NORTH edge;\ncell 4 dots clustered at the SOUTH-WEST edge.\nThe dots are 1-pixel warm amber specks with the faintest one-pixel falloff, never a large bloom. All four sockets share the same stone, size, depth and lighting; only the dot direction differs. Front-facing orthographic, crisp painterly pixel clusters, desaturated cold palette so the amber dots are the only warm accent."
+    },
+    {
+      "id": "grove-floor",
+      "phase": "P1",
+      "sheet": "1536x1024, wide landscape, no transparency",
+      "targets": "grove-floor",
+      "prompt": "Use case: stylized-concept. Production 2D game environment plate: a forest floor seen straight top-down, exact wide landscape aspect ratio 608x232, painted at 2x. Painterly pixel-cluster fantasy RPG art, dark blue-green twilight forest, cold moss, wet packed earth, restrained detail.\nNO objects and NO props: no steles, no stone blocks, no rings, no cranks, no gate, no walls, no characters, no fireflies, no text, no labels, no UI, no cast shadows of objects, no vignette. This is a floor only.\nPATH LAYOUT: a broad worn dirt path enters at the LEFT edge about one third up from the bottom and runs right across the grove. Near the middle it forks: one spur runs UP to a flat trampled stone row along the upper middle where four standing stones will later stand, and one spur runs DOWN into a small open clearing in the lower middle where three cranks will later stand. The main path continues to the RIGHT edge at mid height where a gate will later be. Path edges are soft and worn, with small pebbles, leaf litter and moss creeping in from the sides.\nThe rest is deep forest floor: dark teal moss, exposed roots, ferns and dense undergrowth along the TOP edge, a few scattered pale flowers, faint dappled light patches. Keep the path unmistakable but LOW contrast and calm, so future props read clearly on top of it. No perspective convergence, flat orthographic ground."
+    },
+    {
+      "id": "axles",
+      "phase": "P1",
+      "sheet": "1536x1024, 1 row x 3 equal cells",
+      "targets": "axle-x, axle-y, axle-z",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY THREE isolated horizontal axle bars in ONE row, evenly spaced, generous transparent gutters, nothing touching a cell edge. No text, numbers, labels, arrows, characters or UI.\nEach bar reads at 80x12 logical pixels but is drawn large and wide, lying FLAT ON THE GROUND and seen from directly above: a dark old iron rod with two thick honey-brass collars, one near each end, a few rivets, a slot where it meets a stone base at either end. The middle of each rod is half buried under a thin crust of dark teal moss and fine root fibres, with a couple of dead leaves; the iron shows faint cold highlights where the moss has broken away.\nSame rod, same length, same collars, same moss pattern and same lighting in all three cells; they are three copies of one part. Crisp painterly pixel clusters, cold iron, aged honey brass, dark teal moss, soft upper-left light. No glow, no grass blades standing up, no shadow outside the rod."
+    },
+    {
+      "id": "crank-marks",
+      "phase": "P1",
+      "sheet": "1536x1024, 1 row x 3 equal cells",
+      "targets": "mark-x, mark-y, mark-z",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY THREE isolated brass marks in ONE row, evenly spaced, very generous transparent gutters, nothing touching a cell edge. No text, numbers, labels, letters, arrows or UI.\nEach mark reads at 24x24 logical pixels but is drawn large: THIN ENGRAVED LINE ART ONLY, a single-hairline honey-brass drawing with no filled areas and no glow, as if stamped on mossy stone. The mark is a thin open ring with TWO SMALL GLYPHS inside it, side by side, joined by a short horizontal bar between them — the bar is the axle, the two glyphs are the two things it turns.\nCell 1: a small crescent moon on the left joined to a small pointed leaf on the right.\nCell 2: a small pointed leaf on the left joined to a small eight-pointed star on the right.\nCell 3: a small eight-pointed star on the left joined to a small water droplet on the right.\nAll three share the same ring diameter, line weight, glyph size and spacing; only the glyph pair changes. Same crisp line, same worn brass tone, faint green patina in the grooves. Designed to read when revealed over dark moss."
+    },
+    {
+      "id": "props",
+      "phase": "P1",
+      "sheet": "1536x1024, 1 row x 2 cells",
+      "targets": "hollow, bell",
+      "prompt": "Use case: stylized-concept. Production game sprite sheet on a truly transparent background: EXACTLY TWO isolated props in ONE row, left and right, wide transparent gutter between them, nothing touching a cell edge. No text, numbers, labels, arrows or UI.\nLEFT PROP, reading at 64x32 logical pixels but drawn large: a SLEEPING HOLLOW at the foot of an old tree, seen front-on and slightly from above. A dark cavity between thick exposed roots, its mouth rimmed with pale worn wood and dark teal moss, a few dry leaves inside, the interior falling into near-black. THREE ADULT FIREFLIES are perched quietly at the rim and just inside it, each a tiny warm amber dot with the faintest one-pixel falloff and one folded wing visible; they are resting, not swarming, and there is no large bloom, no glow cloud and no young larvae.\nRIGHT PROP, reading at 16x20 logical pixels but drawn large: a GRASS BELL hanging from a short twig. A small bell woven from dry pale grass blades, a tiny dark wooden clapper showing at the bottom, tied to the twig with a thin cord, one or two blades of grass still attached and curling. Quiet and small, no metal, no shine.\nCrisp painterly pixel clusters, cold teal moss, weathered wood, faded straw, warm amber accents only on the fireflies, soft upper-left light. No ground plane, no shadow outside each prop."
+    },
+    {
+      "id": "fireflies",
+      "phase": "P2",
+      "sheet": "1536x1024, 1 row x 3 equal frames",
+      "targets": "firefly-0, firefly-1, firefly-2",
+      "prompt": "Use case: stylized-concept. Production game animation strip on a truly transparent background: EXACTLY THREE frames of ONE tiny flying firefly, in a single horizontal row, evenly spaced, generous transparent gutters, nothing touching a cell edge. No text, numbers, labels, arrows or UI.\nEach frame reads at 8x8 logical pixels but is drawn large: a warm amber insect with a soft cream glow, a dark tiny body, and thin translucent wings. Frame 1 wings raised, frame 2 wings level and glow brightest, frame 3 wings lowered with the glow slightly dimmer. The three frames must share the exact same body size, glow radius, colour and centre position; only the wings and the glow strength change, so they loop cleanly.\nThe glow stays tight, about one body width, with no long trails, no sparks and no big bloom. Crisp pixel clusters, warm amber and cream against the transparent background, no green tint, no scenery."
+    }
+  ]
+}
