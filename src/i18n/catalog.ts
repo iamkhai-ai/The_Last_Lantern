@@ -11,12 +11,14 @@
  */
 import { getLocale } from './locale.ts';
 import { CHROME_ENTRIES } from './entries/chrome.ts';
+import { WORKSHOP_ENTRIES } from './entries/workshop.ts';
 import type { CatalogEntry } from './entry.ts';
 
 export type { CatalogEntry } from './entry.ts';
 
 export const CATALOG: readonly CatalogEntry[] = [
   ...CHROME_ENTRIES,
+  ...WORKSHOP_ENTRIES,
 ];
 
 const byVi = new Map<string, CatalogEntry>();

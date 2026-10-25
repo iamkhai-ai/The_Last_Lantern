@@ -1,0 +1,371 @@
+{
+  "scale": 2,
+  "source_root_note": "source paths are relative to the art root (assets/prologue of the checkout that holds the untracked art)",
+  "nhinh_visible_height": 28,
+  "assets": {
+    "illustrations/01-ben-suong.png": {
+      "kind": "illustration",
+      "source": "story-v4-art-v1/illustrations/01-ben-suong.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/02-leaving-ben-suong.png": {
+      "kind": "illustration",
+      "source": "story-v4-art-v1/illustrations/02-leaving-ben-suong.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/03-maintenance-station.png": {
+      "kind": "illustration",
+      "source": "story-v4-art-v1/illustrations/03-maintenance-station.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/04-waiting-for-morning.png": {
+      "kind": "illustration",
+      "source": "story-v4-art-v1/illustrations/04-waiting-for-morning.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "illustrations/05-morning-without-dawn.png": {
+      "kind": "illustration",
+      "source": "story-v4-art-v1/illustrations/05-morning-without-dawn.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "sprites/bench.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/03-bench.png",
+      "source_cell": null,
+      "output_size": [
+        128,
+        92
+      ],
+      "in_game_size": [
+        64.0,
+        46.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-back.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v1/workshop/03-boatman-poses.png",
+      "source_cell": 1,
+      "output_size": [
+        27,
+        58
+      ],
+      "in_game_size": [
+        13.5,
+        29.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-front.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v1/workshop/03-boatman-poses.png",
+      "source_cell": 0,
+      "output_size": [
+        28,
+        58
+      ],
+      "in_game_size": [
+        14.0,
+        29.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-lamp.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v1/workshop/03-boatman-poses.png",
+      "source_cell": 2,
+      "output_size": [
+        28,
+        58
+      ],
+      "in_game_size": [
+        14.0,
+        29.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-walk-0.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/07-boatman-walk-south.png",
+      "source_cell": 0,
+      "output_size": [
+        72,
+        78
+      ],
+      "in_game_size": [
+        36.0,
+        39.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-walk-1.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/07-boatman-walk-south.png",
+      "source_cell": 1,
+      "output_size": [
+        72,
+        78
+      ],
+      "in_game_size": [
+        36.0,
+        39.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/boatman-walk-2.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/07-boatman-walk-south.png",
+      "source_cell": 2,
+      "output_size": [
+        72,
+        78
+      ],
+      "in_game_size": [
+        36.0,
+        39.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/customer-lamp-closed.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/05-customer-lamp-closed.png",
+      "source_cell": null,
+      "output_size": [
+        48,
+        36
+      ],
+      "in_game_size": [
+        24.0,
+        18.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/customer-lamp-lit.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/05-customer-lamp-lit.png",
+      "source_cell": null,
+      "output_size": [
+        48,
+        36
+      ],
+      "in_game_size": [
+        24.0,
+        18.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/customer-lamp-open.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/05-customer-lamp-open.png",
+      "source_cell": null,
+      "output_size": [
+        48,
+        36
+      ],
+      "in_game_size": [
+        24.0,
+        18.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/dock-lights-off.png": {
+      "kind": "overlay",
+      "source": "story-v4-art-v2/workshop/02-dock-lights-off.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "sprites/dock-lights-on.png": {
+      "kind": "overlay",
+      "source": "story-v4-art-v2/workshop/02-dock-lights-on.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    },
+    "sprites/mother-back.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 1,
+      "output_size": [
+        27,
+        60
+      ],
+      "in_game_size": [
+        13.5,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/mother-front.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 0,
+      "output_size": [
+        26,
+        60
+      ],
+      "in_game_size": [
+        13.0,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/mother-map.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 2,
+      "output_size": [
+        35,
+        60
+      ],
+      "in_game_size": [
+        17.5,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/mother-work.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v1/workshop/02-mother-poses.png",
+      "source_cell": 3,
+      "output_size": [
+        30,
+        60
+      ],
+      "in_game_size": [
+        15.0,
+        30.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/panel-fault.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/06-panel-fault.png",
+      "source_cell": null,
+      "output_size": [
+        64,
+        76
+      ],
+      "in_game_size": [
+        32.0,
+        38.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/panel-loose.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/06-panel-loose.png",
+      "source_cell": null,
+      "output_size": [
+        64,
+        76
+      ],
+      "in_game_size": [
+        32.0,
+        38.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/panel-off.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/06-panel-off.png",
+      "source_cell": null,
+      "output_size": [
+        64,
+        76
+      ],
+      "in_game_size": [
+        32.0,
+        38.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/parts-tray.png": {
+      "kind": "sprite",
+      "source": "story-v4-art-v2/workshop/04-parts-tray.png",
+      "source_cell": null,
+      "output_size": [
+        80,
+        44
+      ],
+      "in_game_size": [
+        40.0,
+        22.0
+      ],
+      "anchor": "bottom-center"
+    },
+    "sprites/workshop-bg.png": {
+      "kind": "background",
+      "source": "story-v4-art-v2/workshop/01-background.png",
+      "source_cell": null,
+      "output_size": [
+        1280,
+        720
+      ],
+      "in_game_size": [
+        640.0,
+        360.0
+      ],
+      "anchor": "top-left"
+    }
+  }
+}

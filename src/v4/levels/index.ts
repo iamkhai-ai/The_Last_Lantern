@@ -1,4 +1,5 @@
 import type { V4LevelRuntime } from '../scene/LevelHost';
+import { WorkshopLevel } from './prologue-workshop/WorkshopLevel';
 import { ForestEdgeLevel } from './forest-edge/ForestEdgeLevel';
 import { WhisperingWoodsLevel } from './whispering-woods/WhisperingWoodsLevel';
 import { LibraryRootsLevel } from './library-roots/LibraryRootsLevel';
@@ -8,8 +9,9 @@ import { TestRoomLevel } from './test-room/TestRoomLevel';
 /** Makes a fresh runtime for one level. Constructing it touches no Phaser object; `build()` does. */
 export type V4LevelFactory = () => V4LevelRuntime<unknown>;
 
-/** The campaign levels in play order. The first one is where a new game starts. The demo runs levels 01–04. */
+/** The campaign levels in play order. The first one is where a new game starts. The demo runs the workshop (00) and levels 01–04. */
 export const V4_LEVELS: readonly V4LevelFactory[] = [
+  () => new WorkshopLevel(),
   () => new ForestEdgeLevel(),
   () => new WhisperingWoodsLevel(),
   () => new LibraryRootsLevel(),

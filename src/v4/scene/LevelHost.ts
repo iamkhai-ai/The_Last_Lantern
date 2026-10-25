@@ -7,6 +7,8 @@ import type { LanternState } from '../core/lantern';
 import type { LumoMode } from '../core/lumo';
 import type { PulseMark } from '../core/pulse';
 import type { Footprint, LightMark, Room, SpillDecl } from '../core/light';
+import type { LanternLightingProfile } from '../../systems/LanternSystem';
+import type { ChoicePlacement } from '../../ui/ChoiceBox';
 
 /** What the host scene offers a level runtime. Levels never reach the save, the keys or the actors directly. */
 export interface LevelHost {
@@ -29,8 +31,8 @@ export interface LevelHost {
   /** Makes a static-bodied zone solid for Nhinh's foot. The level toggles `zone.body.enable` for doors and gates. */
   solid(zone: Phaser.GameObjects.Zone): void;
   say(lines: DialogueLine[], onDone?: () => void): void;
-  /** A small choice box. `onPick` gets the chosen index, or null when the player cancels (ESC). */
-  choose(options: string[], onPick: (index: number | null) => void): void;
+  /** A small choice box. `onPick` gets the chosen index, or null when the player cancels (ESC). `placement` moves it. */
+  choose(options: string[], onPick: (index: number | null) => void, placement?: ChoicePlacement): void;
   toast(text: string): void;
   /** Marks the save dirty. The host writes at most once per 300 ms, and again on shutdown. */
   requestSave(): void;
