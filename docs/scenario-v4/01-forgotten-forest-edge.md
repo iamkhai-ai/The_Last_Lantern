@@ -4,9 +4,21 @@
 
 ## 1. Mở cảnh và động cơ
 
-Đồng hồ đã qua buổi sáng nhưng sân trạm vẫn chạng vạng. Đèn bảo trì nằm trên đất cạnh bia, tắt, nơi Nhinh đã đặt trước khi nghỉ. Người chơi tự nhặt đèn bằng E tại đó; đây là ngoại lệ một lần của màn 01 (luật chung, mục 1). Lần bật thử đầu tiên khi đèn ở tay mở cảnh. Vòng sáng phủ lên mầm cây Lumo đang che. Cậu phản ứng: “Cậu có thể đừng soi vào nhà người khác không?” Nhinh xin lỗi, rồi lùi ra hoặc tắt đèn. Cả hai đều đưa mầm cây ra khỏi vòng sáng và được chấp nhận; sau đó trò chơi giữ nguyên trạng thái F mà người chơi chọn, không tự bật lại khi câu đố bắt đầu. Không yêu cầu bấm F một lần để mở tiến trình. Ánh nền vẫn giúp đọc toàn bộ đường và chỗ đứng, không dùng gamma để giấu Lumo.
+Đồng hồ đã qua buổi sáng nhưng sân trạm vẫn chạng vạng. Đèn bảo trì nằm trên đất cạnh bia, tắt, nơi Nhinh đã đặt trước khi nghỉ. Người chơi tự nhặt đèn bằng E tại đó; đây là ngoại lệ một lần của màn 01 (luật chung, mục 1). Lần bật thử đầu tiên khi đèn ở tay mở cảnh. Vòng sáng phủ lên mầm cây Lumo đang che. Cậu phản ứng: “Cậu có thể đừng soi vào nhà người khác không?” Nhinh xin lỗi, rồi lùi ra hoặc tắt đèn. Cả hai đều đưa mầm cây ra khỏi vòng sáng và được chấp nhận; sau đó trò chơi giữ nguyên trạng thái F mà người chơi chọn, không tự bật lại khi câu đố bắt đầu. Không yêu cầu bấm F một lần để mở tiến trình. Ánh nền vẫn giúp đọc toàn bộ đường và chỗ đứng, không dùng gamma để giấu Lumo. (bản dựng) Trước lần nhặt đó, HUD ghi “Nhặt đèn cạnh bia để kiểm tra trạm.”, H mở ba bậc riêng của bước nhặt đèn và dấu nhắc nằm trên chiếc đèn; F, Pulse và ô đèn vẫn tắt cho tới khi đèn vào tay.
 
 Nhinh nói mình tới kiểm tra trạm. Lumo muốn tới khu vườn nhưng các cổng bảo trì đang đóng. Cậu biết đường qua thư viện; hai người đồng ý đi cùng: cô tìm nguyên nhân mất nguồn, cậu dẫn đường và muốn cô giúp mở lối vào vườn. Nhinh chưa biết mạng rừng hay kết luận trạm đã hỏng.
+
+(bản dựng) Đoạn thỏa thuận này có bốn câu thoại riêng, phát một lần, ngay sau hai câu mở cảnh nếu người chơi đã soi mầm; ai bỏ qua mầm thì gặp nó khi cửa A mở, trước câu Lumo nhận xét về cửa:
+
+> **Nhinh:** “Tôi là Nhinh, thợ sửa đèn ở Bến Sương.”
+>
+> **Lumo:** “Còn tôi là Lumo. Tôi muốn về vườn của mình, nhưng cổng bảo trì đóng cả rồi.”
+>
+> **Lumo:** “Tôi biết đường qua thư viện và trung tâm trạm. Cậu giúp tôi mở lối vào vườn nhé?”
+>
+> **Nhinh:** “Cậu dẫn đường, tôi giúp mở lối vào vườn. Nhưng tôi phải kiểm tra nguồn của bến trước.”
+
+(bản dựng) Câu “Cậu có thể đừng soi vào nhà người khác không?” chỉ phát khi mầm thật sự bị soi; thoả thuận không phụ thuộc vào nó và không khoá gì. Khi thoại bắt đầu, J ghi một mục: “Lumo muốn về vườn nhưng cổng bảo trì đóng. Cậu biết đường qua thư viện và trung tâm trạm; đổi lại, Nhinh giúp cậu mở lối vào vườn. Nhinh kiểm tra trạm trước.” Nhờ vậy bỏ qua thoại hay tải lại vẫn giữ được tên, mục tiêu và việc đổi công.
 
 ## 2. Ánh sáng và bố cục
 

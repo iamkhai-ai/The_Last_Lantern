@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { addJournalEntry } from './journal';
+import { addJournalEntry, journalTexts } from './journal';
+import { WORKSHOP_JOURNAL } from '../levels/prologue-workshop/workshopLogic';
+import { FOREST_EDGE_JOURNAL_TEXT } from '../levels/forest-edge/forestEdgeLogic';
 
 describe('addJournalEntry', () => {
   it('appends a new entry at the end', () => {
@@ -27,5 +29,33 @@ describe('addJournalEntry', () => {
     const entries = ['a'];
     addJournalEntry(entries, 'b');
     expect(entries).toEqual(['a']);
+  });
+});
+
+describe('journalTexts across levels', () => {
+  const readers = [
+    (id: string) => FOREST_EDGE_JOURNAL_TEXT[id] ?? '',
+    (id: string) => (WORKSHOP_JOURNAL as Record<string, string>)[id] ?? '',
+  ];
+
+  it('keeps the workshop assignment readable alongside forest clues, in collection order', () => {
+    expect(journalTexts(['elaria-signal', 'assignment', 'line-s1-a'], readers)).toEqual([
+      WORKSHOP_JOURNAL['elaria-signal'],
+      WORKSHOP_JOURNAL.assignment,
+      FOREST_EDGE_JOURNAL_TEXT['line-s1-a'],
+    ]);
+  });
+
+  it('never reveals known text for an entry the player has not collected', () => {
+    expect(journalTexts(['assignment'], readers)).toEqual([WORKSHOP_JOURNAL.assignment]);
+    expect(journalTexts([], readers)).toEqual([]);
+  });
+
+  it('ignores unknown saved entries without losing the other notes', () => {
+    expect(journalTexts(['unknown-old-note', 'assignment'], readers)).toEqual([WORKSHOP_JOURNAL.assignment]);
+  });
+
+  it('gives the current level priority when old local identifiers overlap', () => {
+    expect(journalTexts(['shared'], [() => 'Current clue', () => 'Earlier clue'])).toEqual(['Current clue']);
   });
 });

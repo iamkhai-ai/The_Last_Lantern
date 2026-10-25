@@ -17,6 +17,7 @@ import {
   YARD_CHECKPOINT_ID,
 } from './forestEdgeLayout';
 import {
+  AGREEMENT_JOURNAL_ID,
   CUE_EVENT,
   CUE_LINES,
   FOREST_EDGE_JOURNAL_TEXT,
@@ -313,31 +314,52 @@ describe('forest edge cues', () => {
 
   it('plays the opening when the sprout reads lit, once', () => {
     expect(pendingCue({ hasEvent: none, sproutLit: true, live: CLOSED, lantern: HAND_ON, foot: FOOT_YARD })).toBe('opening');
-    expect(pendingCue({ hasEvent: played('opening'), sproutLit: true, live: CLOSED, lantern: HAND_ON, foot: FOOT_YARD })).not.toBe('opening');
+    expect(pendingCue({ hasEvent: played('opening'), sproutLit: true, live: CLOSED, lantern: HAND_ON, foot: FOOT_YARD })).toBe('agreement');
   });
 
   it('plays the pedestal remark once the lantern is set on S1', () => {
-    const input = { hasEvent: played('opening'), sproutLit: false, live: CLOSED, lantern: ON_S1, foot: FOOT_YARD };
+    const input = {
+      hasEvent: played('opening', 'agreement'),
+      sproutLit: false,
+      live: CLOSED,
+      lantern: ON_S1,
+      foot: FOOT_YARD,
+    };
     expect(pendingCue(input)).toBe('pedestal');
-    expect(pendingCue({ ...input, hasEvent: played('opening', 'pedestal'), live: A_OPEN })).toBe('door-feed');
+    expect(pendingCue({ ...input, hasEvent: played('opening', 'agreement', 'pedestal'), live: A_OPEN })).toBe('door-feed');
   });
 
   it('plays the door-feed line only while S1 feeds an open door A', () => {
-    const base = { hasEvent: played('opening', 'pedestal'), sproutLit: false, lantern: ON_S1, foot: FOOT_YARD };
+    const base = {
+      hasEvent: played('opening', 'agreement', 'pedestal'),
+      sproutLit: false,
+      lantern: ON_S1,
+      foot: FOOT_YARD,
+    };
     expect(pendingCue({ ...base, live: A_OPEN })).toBe('door-feed');
     expect(pendingCue({ ...base, live: CLOSED, lantern: ON_S2 })).toBe(null);
   });
 
   it('plays the Lumo line when door A is open, once', () => {
-    const base = { hasEvent: played('opening', 'pedestal', 'door-feed'), sproutLit: false, lantern: HAND_ON, foot: FOOT_YARD };
+    const base = {
+      hasEvent: played('opening', 'agreement', 'pedestal', 'door-feed'),
+      sproutLit: false,
+      lantern: HAND_ON,
+      foot: FOOT_YARD,
+    };
     expect(pendingCue({ ...base, live: A_OPEN })).toBe('lumo-door');
-    expect(pendingCue({ ...base, hasEvent: played('opening', 'pedestal', 'door-feed', 'lumo-door'), live: A_OPEN })).toBe(null);
+    expect(pendingCue({ ...base, hasEvent: played('opening', 'agreement', 'pedestal', 'door-feed', 'lumo-door'), live: A_OPEN })).toBe(null);
   });
 
   it('plays the ending when the exit is ready, once', () => {
-    const base = { hasEvent: played('opening', 'pedestal', 'door-feed', 'lumo-door'), sproutLit: false, lantern: HAND_ON, foot: FOOT_EXIT };
+    const base = {
+      hasEvent: played('opening', 'agreement', 'pedestal', 'door-feed', 'lumo-door'),
+      sproutLit: false,
+      lantern: HAND_ON,
+      foot: FOOT_EXIT,
+    };
     expect(pendingCue({ ...base, live: B_OPEN })).toBe('ending');
-    expect(pendingCue({ ...base, hasEvent: played('opening', 'pedestal', 'door-feed', 'lumo-door', 'ending'), live: B_OPEN })).toBe(null);
+    expect(pendingCue({ ...base, hasEvent: played('opening', 'agreement', 'pedestal', 'door-feed', 'lumo-door', 'ending'), live: B_OPEN })).toBe(null);
   });
 
   it('keeps the doc lines verbatim', () => {
@@ -348,6 +370,71 @@ describe('forest edge cues', () => {
       { speaker: 'Nhinh', text: 'Đường này nối về bến.' },
       { speaker: 'Lumo', text: 'Cũng từng nối về vườn tôi.' },
     ]);
+  });
+});
+
+describe('the agreement between Nhinh and Lumo', () => {
+  const none = () => false;
+  const played = (...cues: (keyof typeof CUE_EVENT)[]) => (id: string) => cues.some(c => CUE_EVENT[c] === id);
+  const base = { sproutLit: false, lantern: HAND_ON, foot: FOOT_YARD };
+
+  it('follows the opening, so a player who lit the sprout hears both halves in one place', () => {
+    expect(CUE_EVENT.agreement).toBe('forest-edge:agreement');
+    expect(pendingCue({ ...base, hasEvent: played('opening'), live: CLOSED })).toBe('agreement');
+  });
+
+  it('still happens for a player who never lit the sprout, once door A is open', () => {
+    // No opening line was ever said ("đừng soi" must not fire), but the deal is known before Lumo's door remark.
+    expect(pendingCue({ ...base, hasEvent: none, live: A_OPEN })).toBe('agreement');
+    expect(pendingCue({ ...base, hasEvent: played('agreement'), live: A_OPEN })).toBe('lumo-door');
+  });
+
+  it('never repeats once its saved event exists, also after a reload', () => {
+    const reloaded = played('opening', 'agreement');
+    expect(pendingCue({ ...base, hasEvent: reloaded, live: CLOSED })).toBe(null);
+    expect(pendingCue({ ...base, hasEvent: reloaded, live: A_OPEN })).toBe('lumo-door');
+  });
+
+  it('gates nothing: the puzzle cues and the exit carry on without it', () => {
+    // The pedestal, the feed and the exit are decided by the lantern and the doors alone.
+    expect(pendingCue({ ...base, hasEvent: played('opening'), live: CLOSED, lantern: ON_S1 })).toBe('agreement');
+    expect(pendingCue({ ...base, hasEvent: played('opening', 'agreement'), live: CLOSED, lantern: ON_S1 })).toBe('pedestal');
+    expect(forestExitReady(B_OPEN, HAND_ON, FOOT_EXIT)).toBe(true);
+  });
+
+  it('gives each of them a name, a goal, an offer and an acceptance', () => {
+    const lines = CUE_LINES.agreement;
+    expect(lines).toHaveLength(4);
+    expect(lines[0].speaker).toBe('Nhinh');
+    expect(lines[0].text).toContain('Nhinh');
+    expect(lines[0].text).toContain('Bến Sương');
+    expect(lines[1].speaker).toBe('Lumo');
+    expect(lines[1].text).toContain('Lumo');
+    expect(lines[1].text).toContain('vườn');
+    expect(lines[1].text).toContain('cổng bảo trì');
+    // Lumo makes the offer: he knows the way and asks for the garden path in return.
+    expect(lines[2].speaker).toBe('Lumo');
+    expect(lines[2].text).toContain('thư viện');
+    expect(lines[2].text).toContain('Cậu giúp tôi mở lối vào vườn');
+    // Nhinh accepts in her own words, and puts the harbour's power first.
+    expect(lines[3].speaker).toBe('Nhinh');
+    expect(lines[3].text).toContain('Cậu dẫn đường, tôi giúp mở lối vào vườn.');
+    expect(lines[3].text).toContain('Nhưng tôi phải kiểm tra nguồn của bến trước.');
+    expect(lines.filter(line => line.speaker === 'Nhinh')).toHaveLength(2);
+  });
+
+  it('spoils nothing about the forest, the creature or who caused it', () => {
+    const all = CUE_LINES.agreement.map(l => l.text).join(' ');
+    for (const spoiler of ['Guardian', 'Người Bảo Vệ', 'Cây Mẹ', 'thủ phạm', 'con vật', 'ngủ', 'nghỉ']) {
+      expect(all).not.toContain(spoiler);
+    }
+  });
+
+  it('writes one journal note with the same deal', () => {
+    const note = FOREST_EDGE_JOURNAL_TEXT[AGREEMENT_JOURNAL_ID];
+    expect(note).toContain('Lumo');
+    expect(note).toContain('vườn');
+    expect(note).toContain('thư viện');
   });
 });
 
@@ -464,5 +551,28 @@ describe('forest edge focus', () => {
 
   it('points back at S2 for a lamp put there before latch A', () => {
     expect(forestEdgeFocus(ON_S2, DEFAULT)).toEqual([S2_ID]);
+  });
+});
+
+describe('arrival guidance before the lamp is picked up', () => {
+  it('keeps HUD, H and the focus on the lamp left beside the stele', () => {
+    const lantern = lampOnGround();
+    const view = deriveForestEdge(DEFAULT, lantern, CLOSED);
+    expect(view.stage).toBe('take-lantern');
+    expect(forestEdgeHud(view, lantern, DEFAULT).objective).toBe('Nhặt đèn cạnh bia để kiểm tra trạm');
+    expect(forestEdgeFocus(lantern, DEFAULT)).toEqual([LAMP_REST_ID]);
+    expect(forestEdgeHint(view)?.key).toBe('forest-edge:take-lantern');
+    expect(forestEdgeHint(view)?.steps[2]).toContain('nhấn E');
+  });
+
+  it('returns to the normal puzzle hints after pickup without changing the chosen F state', () => {
+    const pickup = takeLampFromRest(lampOnGround());
+    expect(pickup.ok).toBe(true);
+    if (!pickup.ok) throw new Error(pickup.reason);
+    expect(pickup.value.on).toBe(false);
+    const view = deriveForestEdge(DEFAULT, pickup.value, CLOSED);
+    expect(view.stage).toBe('latch-a');
+    expect(forestEdgeHint(view)?.key).toBe('forest-edge:latch-a');
+    expect(forestEdgeFocus(pickup.value, DEFAULT)).toEqual([S1_ID]);
   });
 });

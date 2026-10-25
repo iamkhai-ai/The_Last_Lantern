@@ -12,7 +12,7 @@ import { ChoiceBox } from '../../ui/ChoiceBox';
 import { CampaignHud } from '../../ui/CampaignHud';
 import { PauseMenu } from '../../ui/PauseMenu';
 import type { DialogueLine, Interactable } from '../../types/gameTypes';
-import { addJournalEntry } from '../core/journal';
+import { addJournalEntry, journalTexts } from '../core/journal';
 import { pointInRect, rectCenter } from '../core/geometry';
 import type { Rect } from '../core/geometry';
 import { NO_HINT_CURSOR, nextHint } from '../core/hints';
@@ -24,6 +24,8 @@ import type { Footprint } from '../core/light';
 import { followLumo, lumoArrived } from '../core/lumo';
 import type { LumoMode } from '../core/lumo';
 import { revealMarks } from '../core/pulse';
+import { TUTORIAL_MOVE_DISTANCE, currentTutorialStep, tutorialEvent, tutorialStepDone } from '../core/tutorial';
+import type { TutorialSignal } from '../core/tutorial';
 import { V4SaveStore, createDefaultSave } from '../core/save';
 import type { V4Save } from '../core/save';
 import {
@@ -96,6 +98,15 @@ export class V4Scene extends Phaser.Scene {
   private waking = false;
   /** Set once the exit has started the illustrations: nothing else may start a second transition. */
   private leaving = false;
+  /** The first-play lesson on screen (its id), how long it has been readable, and what the player did meanwhile. */
+  private tutorialStepId: string | null = null;
+  private tutorialShownMs = 0;
+  private tutorialSignals = new Set<TutorialSignal>();
+  /** Distance walked (and run, with Shift held) since the current lesson came up. */
+  private tutorialWalked = 0;
+  private tutorialRun = 0;
+  private lastPlayerAt: { x: number; y: number } | null = null;
+  private shiftKey: Phaser.Input.Keyboard.Key | null = null;
 
   constructor() {
     super({ key: 'V4Scene' });
@@ -114,6 +125,13 @@ export class V4Scene extends Phaser.Scene {
     this.lumoSettled = false;
     this.placeholderLevelId = null;
     this.leaving = false;
+    this.tutorialStepId = null;
+    this.tutorialShownMs = 0;
+    this.tutorialSignals = new Set();
+    this.tutorialWalked = 0;
+    this.tutorialRun = 0;
+    this.lastPlayerAt = null;
+    this.shiftKey = null;
     this.store = new V4SaveStore(safeLocalStorage());
 
     const newGame = consumeCampaignNewGameIntent(data, this.sys.settings.data);
@@ -138,6 +156,8 @@ export class V4Scene extends Phaser.Scene {
       this.scene.start('IllustrationScene', {
         illustrations: [...intro],
         captions: this.captionsFor(intro),
+        // The opening narration can be left with Esc; the exit journey after a level cannot.
+        skippable: true,
         next: { scene: 'V4Scene' },
       } satisfies IllustrationData);
       return;
@@ -206,6 +226,7 @@ export class V4Scene extends Phaser.Scene {
     const lantern = this.save.lantern;
 
     this.player.update(dt, !locked, lanternAvailable && lantern.location.at === 'hand', lantern.on);
+    this.trackTutorialMovement(!locked);
     const foot = this.player.getFootBody();
     // This frame's light: the lantern (in hand or placed, lit or not) and the level's fixed sources.
     const ground = groundPoint({ x: this.player.x, y: this.player.y });
@@ -260,7 +281,54 @@ export class V4Scene extends Phaser.Scene {
     this.hud.update(dt, this.lanternSystem.getCooldownRatio());
     this.hud.setHidden(this.dialogue.isActive() || this.pauseMenu.isOpen());
 
+    this.updateTutorial(dt, locked);
     if (this.saveDirty && now - this.lastSaveAt >= SAVE_INTERVAL_MS) this.writeSave();
+  }
+
+  /** Reports a player action to the first-play lesson on screen. */
+  private tutorialSignal(signal: TutorialSignal): void {
+    this.tutorialSignals.add(signal);
+  }
+
+  /** Adds up how far Nhinh walked (and ran) since the lesson came up; enough of either counts as a signal. */
+  private trackTutorialMovement(canMove: boolean): void {
+    const at = { x: this.player.x, y: this.player.y };
+    const last = this.lastPlayerAt;
+    this.lastPlayerAt = at;
+    if (!canMove || !last) return;
+    const step = Math.hypot(at.x - last.x, at.y - last.y);
+    if (step <= 0 || step > 40) return; // a teleport (respawn) is not a walk
+    this.tutorialWalked += step;
+    if (this.shiftKey?.isDown) this.tutorialRun += step;
+    if (this.tutorialWalked >= TUTORIAL_MOVE_DISTANCE) this.tutorialSignal('moved');
+    if (this.tutorialRun >= TUTORIAL_MOVE_DISTANCE) this.tutorialSignal('ran');
+  }
+
+  /**
+   * Shows the level's current first-play lesson above the key row and saves it as done once the player has done what
+   * it asks. Time only counts while the lesson is readable (not during a line, a choice or the pause menu).
+   */
+  private updateTutorial(dt: number, locked: boolean): void {
+    const ctx = { lantern: this.save.lantern };
+    const step = currentTutorialStep(this.level.tutorial?.() ?? [], this.save.events, ctx);
+    if (step?.id !== this.tutorialStepId) {
+      this.tutorialStepId = step?.id ?? null;
+      this.tutorialShownMs = 0;
+      this.tutorialSignals.clear();
+      this.tutorialWalked = 0;
+      this.tutorialRun = 0;
+    }
+    if (!step) {
+      this.hud.setCoach(null);
+      return;
+    }
+    if (!locked) this.tutorialShownMs += dt;
+    if (tutorialStepDone(step, ctx, this.tutorialSignals, this.tutorialShownMs)) {
+      this.markEvent(tutorialEvent(step.id));
+      this.hud.setCoach(null);
+      return;
+    }
+    this.hud.setCoach(step.text);
   }
 
   /** Whether Lumo exists in the current level. */
@@ -419,15 +487,16 @@ export class V4Scene extends Phaser.Scene {
       return;
     }
     this.player.playPulseAction();
+    this.tutorialSignal('pulsed');
     this.level.onPulse?.(origin);
     const found = new Set(this.save.journal);
     for (const id of revealMarks(origin, LanternSystem.PULSE_MAX_RADIUS, marks, found)) this.addJournal(id);
   }
 
   private openJournal(): void {
-    const lines: DialogueLine[] = this.save.journal
-      .map((id) => this.level.journalText(id))
-      .filter((text) => text !== '')
+    const levels = [this.level, ...allLevelFactories().map((factory) => factory())];
+    const readers = levels.map((level) => (id: string) => level.journalText(id));
+    const lines: DialogueLine[] = journalTexts(this.save.journal, readers)
       .map((text) => ({ speaker: 'Hệ thống', text }));
     this.dialogue.startDialogue(lines.length > 0 ? lines : [{ speaker: 'Hệ thống', text: TOAST_JOURNAL_EMPTY }]);
   }
@@ -492,13 +561,14 @@ export class V4Scene extends Phaser.Scene {
     for (const code of [codes.E, codes.F, codes.H, codes.J, codes.SPACE, codes.ESC, codes.ENTER, codes.W, codes.S]) {
       keyboard.addKey(code);
     }
+    this.shiftKey = keyboard.addKey(codes.SHIFT);
 
     keyboard.on('keydown-E', () => {
       const now = performance.now();
       if (this.pauseMenu.isOpen()) this.pauseMenu.triggerSelected();
       else if (this.choice.isOpen()) this.choice.confirm();
       else if (this.dialogue.isActive()) this.dialogue.handleAdvanceInput(now);
-      else if (!this.waking) this.interactions.tryInteract(now);
+      else if (!this.waking && this.interactions.tryInteract(now)) this.tutorialSignal('interacted');
     });
     keyboard.on('keydown-SPACE', () => {
       const now = performance.now();
@@ -512,16 +582,19 @@ export class V4Scene extends Phaser.Scene {
       if (this.choice.isOpen() || !this.level.lanternAvailable()) return;
       this.setLantern(toggleLantern(this.save.lantern));
       this.player.playLanternAction(this.save.lantern.on);
+      if (this.save.lantern.on) this.tutorialSignal('lantern-on');
     });
     keyboard.on('keydown-H', (event: KeyboardEvent) => {
       if (event.repeat || this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen()) return;
       if (this.choice.isOpen()) return;
       this.showHint();
+      this.tutorialSignal('help');
     });
     keyboard.on('keydown-J', (event: KeyboardEvent) => {
       if (event.repeat || this.dialogue.isInputLocked(performance.now()) || this.pauseMenu.isOpen()) return;
       if (this.choice.isOpen()) return;
       this.openJournal();
+      this.tutorialSignal('help');
     });
     keyboard.on('keydown-ESC', (event: KeyboardEvent) => {
       if (event.repeat) return;

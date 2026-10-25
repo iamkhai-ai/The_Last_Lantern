@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { footRectAt } from '../../core/body';
 import { rectsOverlap } from '../../core/geometry';
+import { addJournalEntry } from '../../core/journal';
 import { HUD_BANDS } from '../../../ui/hudLayout';
 import { auditReach, canReachItem, reachableFeet, isFootWalkable } from '../../core/reachAudit';
 import type { AuditInput } from '../../core/reachAudit';
@@ -90,10 +91,10 @@ describe('reference path', () => {
     expect(r.state.held).toBeNull();
     expect(workshopStage(r.state)).toBe('panel');
 
-    // Window panel: the local line is repaired, the diagnosis plays and the Elaria journal entry is written.
+    // Window panel: the local line is repaired, the signal note is written first, then the diagnosis plays.
     r = usePanel(r.state);
     expect(r.state.localLineRepaired).toBe(true);
-    expect(effectKinds(r.effects)).toEqual(['dialogue:diagnosis', 'journal:elaria-signal']);
+    expect(effectKinds(r.effects)).toEqual(['journal:elaria-signal', 'dialogue:diagnosis']);
     expect(r.state.assignmentReceived).toBe(false);
     expect(exitOpen(r.state)).toBe(false);
 
@@ -191,10 +192,11 @@ describe('panel', () => {
     expect(panelPrompt(r.state)).toBe('E: kiểm tra bảng');
   });
 
-  it('repeats only the diagnosis while the assignment is pending, with no second journal entry', () => {
+  it('repeats the diagnosis while the assignment is pending, re-emitting the note the journal already holds', () => {
     const once = usePanel(PANEL).state;
     const again = usePanel(once);
-    expect(effectKinds(again.effects)).toEqual(['dialogue:diagnosis']);
+    // The note comes before the dialogue on the repeat too: host.addJournal ignores an id it already has.
+    expect(effectKinds(again.effects)).toEqual(['journal:elaria-signal', 'dialogue:diagnosis']);
     expect(again.state).toEqual(once);
   });
 
@@ -221,16 +223,70 @@ describe('mother', () => {
     for (const s of STAGE_STATES) expect(motherPrompt(s)).toBe('E: nói chuyện');
   });
 
-  it('gives a toast that depends on the stage', () => {
-    expect(effectKinds(useMother(START).effects)).toEqual(['toast:Mẹ đang sửa dở một chiếc đèn.']);
-    expect(effectKinds(useMother(DELIVER).effects)).toEqual(['toast:Mẹ đang sửa dở một chiếc đèn.']);
+  it('offers her own optional script while the lamp work is going on', () => {
+    for (const s of [START, DELIVER]) {
+      const r = useMother(s);
+      expect(effectKinds(r.effects)).toEqual(['dialogue:mother-work']);
+      // Optional: talking to her changes nothing and gates nothing.
+      expect(r.state).toEqual(s);
+    }
+  });
+
+  it('hands over a small lamp, hears Nhinh out and asks her to work carefully', () => {
+    const lines = WORKSHOP_DIALOGUE['mother-work'];
+    expect(lines.map(l => l.speaker)).toEqual(['Mẹ', 'Nhinh', 'Mẹ']);
+    expect(lines[0].text).toContain('đèn nhỏ');
+    expect(lines[1].text).toContain('trạm');
+    expect(lines[2].text).toContain('cần đèn để về');
+  });
+
+  it('gives a toast that depends on the stage once the panel is done with', () => {
     expect(effectKinds(useMother(PANEL).effects)).toEqual(['toast:Mẹ đang đợi ở bảng kiểm.']);
     expect(effectKinds(useMother(DEPART).effects)).toEqual(['toast:Mẹ: “Mang bản đồ. Nếu đường hỏng thì quay về.”']);
   });
 });
 
 describe('dialogue and journal copy', () => {
-  it('matches the V4 prologue lines exactly', () => {
+  it('keeps the five prologue diagnosis lines word for word and in order', () => {
+    const texts = WORKSHOP_DIALOGUE.diagnosis.map(l => l.text);
+    expect(texts).toContain('Đường trong xưởng thông rồi. Nhánh này vẫn yếu.');
+    expect(texts).toContain('Từ Elaria. Lâu lắm trạm ấy mới gửi tín hiệu.');
+    expect(texts).toContain('Con biết đọc mốc bảo trì. Con tới trạm ngoài rừng xem.');
+    expect(texts).toContain('Mang bản đồ. Nếu đường hỏng thì quay về; đừng cố đi khi trời tối.');
+    expect(texts).toContain('Lần này mẹ cứ để con sửa.');
+    expect(texts.indexOf('Đường trong xưởng thông rồi. Nhánh này vẫn yếu.'))
+      .toBeLessThan(texts.indexOf('Từ Elaria. Lâu lắm trạm ấy mới gửi tín hiệu.'));
+    expect(texts.indexOf('Từ Elaria. Lâu lắm trạm ấy mới gửi tín hiệu.'))
+      .toBeLessThan(texts.indexOf('Con biết đọc mốc bảo trì. Con tới trạm ngoài rừng xem.'));
+    expect(texts.indexOf('Con biết đọc mốc bảo trì. Con tới trạm ngoài rừng xem.'))
+      .toBeLessThan(texts.indexOf('Mang bản đồ. Nếu đường hỏng thì quay về; đừng cố đi khi trời tối.'));
+    expect(texts.indexOf('Mang bản đồ. Nếu đường hỏng thì quay về; đừng cố đi khi trời tối.'))
+      .toBeLessThan(texts.indexOf('Lần này mẹ cứ để con sửa.'));
+  });
+
+  it('adds three explanation lines: where the harbour source comes from, why Mẹ stays, what the lamp can do', () => {
+    expect(WORKSHOP_DIALOGUE.diagnosis).toHaveLength(8);
+    const texts = WORKSHOP_DIALOGUE.diagnosis.map(l => l.text);
+    const source = texts.findIndex(t => t.includes('Elaria') && t.includes('bìa rừng') && t.includes('tuyến bảo trì'));
+    expect(source).toBeGreaterThan(-1);
+    expect(texts[source]).toContain('Nguồn của bến');
+    const stays = texts.findIndex(t => t.includes('giữ bơm'));
+    expect(stays).toBeGreaterThan(-1);
+    expect(texts[stays]).toContain('Ngoài kia còn người đợi đèn để về.');
+    expect(WORKSHOP_DIALOGUE.diagnosis[stays].speaker).toBe('Mẹ');
+    const lamp = texts.findIndex(t => t.includes('đèn bảo trì') && t.includes('nguồn thử'));
+    expect(lamp).toBeGreaterThan(-1);
+    expect(texts[lamp]).toContain('không thay được nguồn của bến');
+  });
+
+  it('never claims the trip saves the world or explains the forest from the start', () => {
+    const all = WORKSHOP_DIALOGUE.diagnosis.map(l => l.text).join(' ');
+    for (const spoiler of ['thế giới', 'Guardian', 'Người Bảo Vệ', 'Cây Mẹ', 'thủ phạm', 'chạng vạng']) {
+      expect(all).not.toContain(spoiler);
+    }
+  });
+
+  it('matches the V4 prologue lines for the lamp and the payment', () => {
     expect(WORKSHOP_DIALOGUE.inspect).toEqual([
       { speaker: 'Nhinh', text: 'Lõi lệch rồi. Bác có làm rơi nó không?' },
       { speaker: 'Lái đò', text: 'Sóng làm rơi. Bác chỉ cầm hộ thôi.' },
@@ -241,11 +297,26 @@ describe('dialogue and journal copy', () => {
       { speaker: 'Lái đò', text: 'Thế bác còn phải sửa đèn ở đây lâu đấy.' },
     ]);
     expect(WORKSHOP_DIALOGUE.incident).toEqual([
-      { speaker: 'Mẹ', text: 'Nhinh, xem trạm cửa sổ với mẹ.' },
+      { speaker: 'Mẹ', text: 'Nhinh, xem bảng kiểm với mẹ.' },
     ]);
-    expect(WORKSHOP_DIALOGUE.diagnosis).toHaveLength(5);
-    expect(WORKSHOP_DIALOGUE.diagnosis[4]).toEqual({ speaker: 'Nhinh', text: 'Lần này mẹ cứ để con sửa.' });
-    expect(WORKSHOP_JOURNAL['elaria-signal']).toBe('Tín hiệu bảo trì cũ từ Elaria: đường trong xưởng đã thông, đầu nguồn vẫn đứt nhịp.');
+  });
+
+  it('writes the journal entry for the signal with the same facts as the diagnosis', () => {
+    expect(WORKSHOP_JOURNAL['elaria-signal']).toContain('Elaria');
+    expect(WORKSHOP_JOURNAL['elaria-signal']).toContain('đầu nguồn');
+    expect(WORKSHOP_JOURNAL['elaria-signal']).toContain('đứt nhịp');
+  });
+
+  it('writes an assignment that carries the job, the reason and the limit of the lamp', () => {
+    const note = WORKSHOP_JOURNAL.assignment;
+    expect(note).toContain('trạm bìa rừng');
+    expect(note).toContain('quay về');
+    expect(note).toContain('không đi đêm');
+    expect(note).toContain('Đèn bảo trì');
+    expect(note).toContain('chỉ thử máy');
+    expect(note).toContain('không cấp nguồn cho bến');
+    // Short enough for the journal box: two lines of body text, clear of the "Tiếp" label.
+    expect([...note].length).toBeLessThanOrEqual(145);
   });
 });
 
@@ -326,10 +397,17 @@ describe('opening line', () => {
     expect(parseWorkshopState({ lampInspected: true }).greeted).toBe(true);
   });
 
-  it('is said by the boatman about the lamp on the bench', () => {
-    expect(WORKSHOP_DIALOGUE.opening).toEqual([
-      { speaker: 'Lái đò', text: 'Cô thợ ơi, chiếc đèn bác để trên bàn rồi đấy. Xem giúp bác với.' },
-    ]);
+  it('is said by the boatman about the lamp on the bench, and about the crossing tonight', () => {
+    const lines = WORKSHOP_DIALOGUE.opening;
+    expect(lines[0]).toEqual({
+      speaker: 'Lái đò',
+      text: 'Cô thợ ơi, chiếc đèn bác để trên bàn rồi đấy. Xem giúp bác với.',
+    });
+    // One added line: the evening crossing through the mist, and the lamps that show the landing.
+    expect(lines).toHaveLength(2);
+    expect(lines[1].speaker).toBe('Lái đò');
+    expect(lines[1].text).toContain('qua sương');
+    expect(lines[1].text).toContain('bến');
   });
 });
 
@@ -351,8 +429,8 @@ describe('focus marker', () => {
     expect(workshopFocus(PANEL)).toEqual([PANEL_ID]);
   });
 
-  it('marks nothing once the local line is repaired', () => {
-    expect(workshopFocus({ ...PANEL, localLineRepaired: true })).toEqual([]);
+  it('keeps the panel marked until the assignment, not just the repair, is complete', () => {
+    expect(workshopFocus({ ...PANEL, localLineRepaired: true })).toEqual([PANEL_ID]);
     expect(workshopFocus(DEPART)).toEqual([]);
   });
 });
@@ -361,15 +439,15 @@ describe('HUD and hints', () => {
   it('gives the objective of each stage from the design table', () => {
     expect(workshopHud(START).objective).toBe('Sửa chiếc đèn của bác lái đò.');
     expect(workshopHud(DELIVER).objective).toBe('Mang đèn ra cửa cho bác lái đò.');
-    expect(workshopHud(PANEL).objective).toBe('Xem trạm cửa sổ với mẹ.');
+    expect(workshopHud(PANEL).objective).toBe('Xem bảng kiểm với mẹ.');
     expect(workshopHud(DEPART).objective).toBe('Đi tới trạm ở bìa rừng.');
   });
 
-  it('gives a three-step hint in each stage and none after the diagnosis is pending', () => {
+  it('keeps a three-step hint while the assignment is pending, including after a reload', () => {
     expect(workshopHint(START)?.steps).toHaveLength(3);
     expect(workshopHint(DELIVER)?.steps[2]).toBe('Nhấn E cạnh bác lái đò.');
     expect(workshopHint(PANEL)?.steps[2]).toBe('Nhấn E ở bảng kiểm cạnh mẹ.');
-    expect(workshopHint({ ...PANEL, localLineRepaired: true })).toBeNull();
+    expect(workshopHint({ ...PANEL, localLineRepaired: true })?.steps).toHaveLength(3);
     expect(workshopHint(DEPART)?.steps[2]).toBe('Đi ra cửa phía nam.');
   });
 });
@@ -412,5 +490,63 @@ describe('workshop reach audit and reachability', () => {
     expect(workshopSolids(PANEL)).not.toContainEqual(WORKSHOP.boatman);
     expect(workshopItems(PANEL).map(i => i.id)).not.toContain('boatman');
     expect(workshopSolids(DELIVER)).toContainEqual(WORKSHOP.boatman);
+  });
+});
+
+describe('interrupted assignment guidance', () => {
+  it('points a restored diagnosis back to the panel until the assignment is received', () => {
+    const restored = parseWorkshopState({ localLineRepaired: true });
+    expect(exitOpen(restored)).toBe(false);
+    expect(workshopFocus(restored)).toEqual([PANEL_ID]);
+    expect(workshopHint(restored)?.key).toBe('workshop:assignment');
+    expect(workshopHud(restored).objective).toBe('Nghe mẹ dặn ở bảng kiểm.');
+    expect(effectKinds(usePanel(restored).effects)).toEqual(['journal:elaria-signal', 'dialogue:diagnosis']);
+    expect(exitOpen(completeAssignment(restored).state)).toBe(true);
+  });
+});
+
+describe('the signal note survives a reload in the middle of the diagnosis', () => {
+  /** Plays the workshop's journal effects the way the host does, so a dialogue can be cut short between them. */
+  function playJournal(effects: readonly WorkshopEffect[], journal: readonly string[]): string[] {
+    let entries: readonly string[] = [...journal];
+    for (const effect of effects) {
+      if (effect.kind === 'journal') entries = addJournalEntry(entries, effect.id).entries;
+    }
+    return [...entries];
+  }
+
+  it('writes the note first, then replays it and grants the order, in order and without duplicates', () => {
+    // E at the panel: only the note gets through; the reload interrupts the diagnosis.
+    const first = usePanel(PANEL);
+    expect(effectKinds(first.effects)).toEqual(['journal:elaria-signal', 'dialogue:diagnosis']);
+    const journal = playJournal(first.effects.slice(0, 1), []);
+    expect(journal).toEqual(['elaria-signal']);
+
+    // The save keeps the repaired line, not the dialogue.
+    const restored = parseWorkshopState(JSON.parse(JSON.stringify(first.state)));
+    expect(restored.localLineRepaired).toBe(true);
+    expect(restored.assignmentReceived).toBe(false);
+
+    // Continue: E at the panel again replays the note (already held, so no duplicate) and the diagnosis.
+    const replay = usePanel(restored);
+    const afterReplay = playJournal(replay.effects, journal);
+    expect(afterReplay).toEqual(['elaria-signal']);
+
+    // The order is granted once, after that dialogue.
+    const granted = completeAssignment(replay.state);
+    const afterGrant = playJournal(granted.effects, afterReplay);
+    expect(afterGrant).toEqual(['elaria-signal', 'assignment']);
+    // A second grant changes nothing: no duplicate note and no duplicate order.
+    expect(completeAssignment(granted.state).effects).toEqual([]);
+    expect(playJournal(completeAssignment(granted.state).effects, afterGrant)).toEqual(['elaria-signal', 'assignment']);
+  });
+
+  it('re-emits the note for a save restored from before the fix, whose journal is still empty', () => {
+    const restored = parseWorkshopState({ localLineRepaired: true });
+    expect(restored.assignmentReceived).toBe(false);
+    const replay = playJournal(usePanel(restored).effects, []);
+    expect(replay).toEqual(['elaria-signal']);
+    const granted = completeAssignment(usePanel(restored).state);
+    expect(playJournal(granted.effects, replay)).toEqual(['elaria-signal', 'assignment']);
   });
 });

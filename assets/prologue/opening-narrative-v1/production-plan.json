@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "purpose": "Eleven distinct illustrations and eleven localized narration pages before the playable V4 workshop",
+  "baseCommit": "61c9f1f",
+  "engine": "Phaser 3 (keep installed version)",
+  "viewport": [640, 360],
+  "productionSize": [1280, 720],
+  "source": "PI-Desktop GenerateImages; provider/model determined by configured image-generation service, not inferred from chat model",
+  "rights": "AI-generated project artwork; no stock/public-domain license is asserted. Preserve returned masters and embedded metadata unchanged.",
+  "visualTarget": "Existing 00-workshop illustrations and canonical character sprites; user delegated creating the family in the game's existing direction",
+  "locks": "Warm timber and brass; amber practical lanterns contrasted with river/forest teal; dense but readable pixel-edged painted illustration, not photoreal or 3D; 16:9; lower 22 percent quiet for code-rendered captions; no lettering, captions, logos, UI, arrows or diagram labels. Nhinh: young woman about 17, tan hood, dark hair, red scarf, brown clothes, dark teal trousers and boots, no maintenance lamp before assignment. Mother: middle-aged brown-haired woman, cream rolled-sleeve blouse, dark teal work dress/apron with brown leather tool apron. Boatman: older man, brown broad-brim hat, cream shirt, slate vest, olive trousers and boots. No Lumo or Shadow in this introduction.",
+  "references": [
+    "assets/levels/00-workshop/illustrations/01-ben-suong.png",
+    "assets/levels/00-workshop/illustrations/02-leaving-ben-suong.png",
+    "assets/levels/00-workshop/sprites/mother-front.png",
+    "assets/levels/00-workshop/sprites/boatman-front.png",
+    "assets/character/source_sheets/nhinh_down_generated.png",
+    "assets/levels/00-workshop/sprites/workshop-bg.png"
+  ],
+  "pages": [
+    {
+      "id": "intro01",
+      "file": "intro-01-town.png",
+      "title": "Bến Sương — đời sống bên sông",
+      "scene": "Wide daylight establishing view of the same riverside town: early market stalls, small boats, timber repair shops, close-set waterfront homes and distant wooded hills; a lived-in ordinary place, not a royal fantasy city.",
+      "vi": "Bến Sương là một thị trấn nhỏ bên sông, có bến thuyền, chợ sớm, những xưởng sửa chữa và các ngôi nhà dựng sát mép nước.",
+      "en": "Ben Suong is a small riverside town, with boat landings, a morning market, repair shops, and houses built close to the water."
+    },
+    {
+      "id": "intro02",
+      "file": "intro-02-night-lights.png",
+      "title": "Đèn dẫn thuyền và giữ bơm chạy",
+      "scene": "Same harbor at blue-hour night: a clear row of warm river lamps guides a small ferry through mist; a modest working pump station and water outlet are readable on the near bank. Ordinary useful infrastructure, not a magical laser show.",
+      "vi": "Ban ngày, nơi này khá bình thường. Khi đêm xuống và sương phủ mặt sông, dãy đèn dọc bờ dẫn thuyền về bến; cũng nguồn ấy giữ cho các trạm bơm chạy.",
+      "en": "By day, life here is ordinary. At night, riverside lamps guide boats through the mist; the same energy keeps the pumping stations running."
+    },
+    {
+      "id": "intro03",
+      "file": "intro-03-elaria-source.png",
+      "title": "Tuyến dẫn từ Elaria",
+      "scene": "A wide landscape following the river from the town toward an old maintenance station at the edge of Elaria forest, a restrained warm luminous trace connecting successive stations. Show the geographic relationship without specifying technological internals: no cables, pipes, batteries, crystal power cells, arrows, maps or diagrams.",
+      "vi": "Nguồn sáng ấy không sinh ra ở Bến Sương. Nó đi xuống từ Elaria, khu rừng ở đầu nguồn, qua những tuyến dẫn và các trạm bảo trì dọc đường.",
+      "en": "That light does not originate in Ben Suong. It comes from Elaria, the forest upriver, through old supply routes and maintenance stations."
+    },
+    {
+      "id": "intro04",
+      "file": "intro-04-stored-sunlight.png",
+      "title": "Khu rừng giữ ánh mặt trời",
+      "scene": "A gently symbolic view of a healthy sunlit forest canopy gathering scattered golden daylight, with a subtle stored amber glow beneath leaves and a modest warm trace continuing toward a distant river settlement. This represents the public teaching that the forest stores sunlight and shares a part. No ruined forest, machinery, secret central tree reveal, crystals, depletion, energy explosions or labelled infographic.",
+      "vi": "Người dân được dạy rằng rừng Elaria có thể tích ánh mặt trời rồi chia một phần cho con người. Nhờ nguồn sáng ấy, đèn ở bến vẫn sáng khi đêm xuống.",
+      "en": "People are taught that Elaria can store sunlight and share part of it with humans. That stored light keeps the harbor lamps shining after nightfall."
+    },
+    {
+      "id": "intro05",
+      "file": "intro-05-storm-rescue.png",
+      "title": "Câu chuyện cứu hộ trong bão",
+      "scene": "Historical rescue remembered by the town: heavy rain and rough river, an anonymous human keeper seen from behind on a quay lighting the guiding lamps while crowded ferries head safely toward shore. Human courage and useful warm lights, no monster, villain, crown, battle or identifiable Shadow. Same small timber harbor, period unspecified.",
+      "vi": "Trẻ con ở bến lớn lên cùng câu chuyện về Người Bảo Vệ: trong một trận bão lớn năm xưa, ông đã thắp sáng dòng sông và cứu hàng trăm người.",
+      "en": "Children grow up hearing of the Guardian: during a great storm long ago, he lit the river and saved hundreds of people."
+    },
+    {
+      "id": "intro06",
+      "file": "intro-06-failing-lights.png",
+      "title": "Những đợt mất sáng",
+      "scene": "Present-day evening harbor with some lamps dim and others out; ferries wait off the quay, weak water trickles from a pump outlet, two ordinary workers inspect a small station. A worrying practical interruption, not apocalypse or fire. Do not show the hidden cause or any suffering forest.",
+      "vi": "Nhưng nhiều năm gần đây, những đợt mất sáng đến thường hơn. Nước ở trạm bơm yếu đi, thuyền phải chờ ngoài bến, còn thợ sửa mãi chưa tìm ra nguyên nhân.",
+      "en": "But in recent years, outages have grown more frequent. Pumps weaken, boats wait outside the harbor, and repeated repairs have not revealed the cause."
+    },
+    {
+      "id": "intro07",
+      "file": "intro-07-home-workshop.png",
+      "title": "Nhà và xưởng của hai mẹ con",
+      "scene": "Cozy riverside repair shop in an open-front three-quarter view: mother's workbench downstairs, a stair leading to the small lived-in upstairs home, familiar waterfront visible outside. Mother repairs an ordinary brass lantern; teen Nhinh sorts small spare parts nearby. Match both canonical identities and the existing timber/brass workshop.",
+      "vi": "Mẹ của Nhinh lo bảo trì các trạm quanh bến. Hai mẹ con sống ở tầng trên xưởng sửa đèn, giữa những hộp linh kiện và tiếng khách gọi cửa.",
+      "en": "Nhinh's mother maintains the stations around the harbor. They live above their lamp-repair shop, among boxes of parts and the calls of familiar customers."
+    },
+    {
+      "id": "intro08",
+      "file": "intro-08-mothers-lesson.png",
+      "title": "Ngoài kia còn người đợi đèn để về",
+      "scene": "Intimate workshop lesson: canonical mother and hooded teen Nhinh stand by an ordinary repaired brass lantern on the bench, mother gently indicates the ferry lights beyond the open window. Convey care for people waiting to return home. Warm amber faces, quiet teal river, no speech bubbles or lettering; Nhinh does not carry a maintenance lantern.",
+      "vi": "Từ nhỏ, Nhinh đã quen nghe mẹ nói: “Ngoài kia còn người đợi đèn để về.” Với mẹ, sửa một chiếc đèn cũng là giúp ai đó trở về an toàn.",
+      "en": "Since childhood, Nhinh has heard her mother say, “There are people out there waiting for a light to get home.” Every repair helps someone return safely."
+    },
+    {
+      "id": "intro09",
+      "file": "intro-09-apprentice.png",
+      "title": "Nhinh — cô thợ học việc",
+      "scene": "Character-focused medium-wide view of canonical Nhinh, about 17, tan hood framing dark hair, red scarf, brown tunic and teal trousers, absorbed in examining a small broken brass retaining ring and dismantled lamp on the bench. A handful of saved broken objects at her side shows curiosity, not a new inventory system. Preserve youthful identity, no glowing powers or maintenance lamp in her hand.",
+      "vi": "Giờ Nhinh chừng mười bảy tuổi, đang học nghề của mẹ. Cô khéo tay, tò mò, hơi nóng vội, và hay giữ đồ hỏng vì tin rằng mình sẽ sửa được.",
+      "en": "Now about seventeen, Nhinh is learning her mother's trade. Skilled, curious, and a little impatient, she keeps broken things, certain she can fix them."
+    },
+    {
+      "id": "intro10",
+      "file": "intro-10-earned-trust.png",
+      "title": "Mong được tin tưởng",
+      "scene": "Quiet two-character workshop composition: hooded Nhinh has carefully laid out a completed small repair and looks toward her mother, who is absorbed in maintaining a more complex station component. Show the apprentice's hope to be entrusted with real responsibility, not rejection, conflict, sadness, a dream bubble, public award, or a new incident. Match canonical outfits and same shop.",
+      "vi": "Điều cô mong rất đời thường: được mẹ tin giao một việc lớn, được người trong thị trấn nhìn nhận như một người thợ thực thụ.",
+      "en": "Her wish is simple: for her mother to trust her with an important job, and for the town to see her as a craftswoman in her own right."
+    },
+    {
+      "id": "intro11",
+      "file": "intro-11-boatmans-visit.png",
+      "title": "Chiếc đèn của bác lái đò",
+      "scene": "Late-afternoon workshop doorway: the canonical older boatman in his brown broad-brim hat, cream shirt, slate waistcoat and olive trousers brings a small unlit broken brass lantern to hooded Nhinh by the repair bench; mother works further back. Friendly familiar visit, no payment yet, no repaired glowing lamp and no outage yet. This must transition naturally into the existing playable workshop.",
+      "vi": "Chiều hôm ấy, bác lái đò quen mang tới xưởng một chiếc đèn hỏng. Hồi Nhinh còn bé, bác vẫn chở cô qua sông mà không lấy tiền.",
+      "en": "That afternoon, a familiar boatman brings a broken lamp to the shop. When Nhinh was little, he used to carry her across the river for free."
+    }
+  ]
+}

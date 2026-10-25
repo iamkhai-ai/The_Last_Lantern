@@ -33,7 +33,7 @@ export interface ForestEdgeView {
   readonly gateBFed: boolean;
   readonly doorAOpen: boolean;
   readonly gateBOpen: boolean;
-  readonly stage: 'latch-a' | 'brace-b' | 'done';
+  readonly stage: 'take-lantern' | 'latch-a' | 'brace-b' | 'done';
 }
 
 /** A step result: the new value, or the reason it was refused (RULE_GAMES §7). */
@@ -42,8 +42,13 @@ export type Outcome<T> = { readonly ok: true; readonly value: T } | { readonly o
 /** The door and gate at the start of a new game: both closed. */
 export const INITIAL_FOREST_LIVE: ForestEdgeLive = { doorAOpen: false, gateBOpen: false };
 
+/** The journal entry the first meeting writes: who Lumo is, what he wants, and the trade. */
+export const AGREEMENT_JOURNAL_ID = 'agreement';
+
 /** Journal text for each mark, keyed by mark id. */
 export const FOREST_EDGE_JOURNAL_TEXT: Record<string, string> = {
+  [AGREEMENT_JOURNAL_ID]:
+    'Lumo muốn về vườn nhưng cổng bảo trì đóng. Cậu biết đường qua thư viện và trung tâm trạm; đổi lại, Nhinh giúp cậu mở lối vào vườn. Nhinh kiểm tra trạm trước.',
   sprout: 'Mầm cây dưới vệt đèn: Lumo đang che nó.',
   'spores-hinge-1': 'Bào tử tối cạnh mô hình bản lề: chỉ hiện ngoài vệt đèn cầm tay.',
   'spores-hinge-2': 'Bào tử tối cạnh mô hình bản lề: chỉ hiện ngoài vệt đèn cầm tay.',
@@ -79,12 +84,16 @@ export const REFUSE_LAMP_GONE = 'Đèn không còn ở chỗ cạnh bia.';
 /** The save event that records the one pickup of the lamp from the ground (decision b). Once set, the lamp never rests there again. */
 export const LAMP_TAKEN_EVENT = 'forest-edge:lamp-taken';
 
-/** The dialogue cues, in the order the level checks them. Each plays once (a saved event). */
-export type ForestCue = 'opening' | 'pedestal' | 'door-feed' | 'lumo-door' | 'ending';
+/**
+ * The dialogue cues, in the order the level checks them. Each plays once (a saved event). `agreement` is the one
+ * exception to the trigger order: it follows the opening line when that has played, and otherwise waits for door A.
+ */
+export type ForestCue = 'opening' | 'agreement' | 'pedestal' | 'door-feed' | 'lumo-door' | 'ending';
 
 /** The save event each cue leaves behind once it has played. */
 export const CUE_EVENT: Readonly<Record<ForestCue, string>> = {
   opening: 'forest-edge:opening',
+  agreement: 'forest-edge:agreement',
   pedestal: 'forest-edge:pedestal',
   'door-feed': 'forest-edge:door-feed',
   'lumo-door': 'forest-edge:lumo-door',
@@ -93,12 +102,20 @@ export const CUE_EVENT: Readonly<Record<ForestCue, string>> = {
 
 /**
  * Dialogue for each cue. Lines are quoted from docs/scenario-v4/01-forgotten-forest-edge.md and the demo rewrite.
- * The opening apology is a paraphrase; the doc gives it no verbatim line.
+ * The opening apology is a paraphrase; the doc gives it no verbatim line. `agreement` turns the paragraph in
+ * 01 section 1 into four spoken lines: who they are, what each of them wants, and the trade they make.
  */
 export const CUE_LINES: Readonly<Record<ForestCue, readonly DialogueLine[]>> = {
   opening: [
     { speaker: 'Lumo', text: 'Cậu có thể đừng soi vào nhà người khác không?' },
     { speaker: 'Nhinh', text: 'Xin lỗi. Tôi đến đây để kiểm tra trạm.' },
+  ],
+  // Quoted in 01 section 1 (added there with this pass): Lumo offers the trade, Nhinh accepts it and puts the station first.
+  agreement: [
+    { speaker: 'Nhinh', text: 'Tôi là Nhinh, thợ sửa đèn ở Bến Sương.' },
+    { speaker: 'Lumo', text: 'Còn tôi là Lumo. Tôi muốn về vườn của mình, nhưng cổng bảo trì đóng cả rồi.' },
+    { speaker: 'Lumo', text: 'Tôi biết đường qua thư viện và trung tâm trạm. Cậu giúp tôi mở lối vào vườn nhé?' },
+    { speaker: 'Nhinh', text: 'Cậu dẫn đường, tôi giúp mở lối vào vườn. Nhưng tôi phải kiểm tra nguồn của bến trước.' },
   ],
   pedestal: [{ speaker: 'Nhinh', text: 'Khớp này giống ở xưởng.' }],
   'door-feed': [{ speaker: 'Nhinh', text: 'Cửa còn chạy. Đường cấp của trạm mới là thứ đang thiếu.' }],
@@ -150,7 +167,9 @@ export function stepDoors(prev: ForestEdgeLive, state: ForestEdgeState, lantern:
 
 /** The derived view from the saved state, the live doors and the lantern. */
 export function deriveForestEdge(state: ForestEdgeState, lantern: LanternState, live: ForestEdgeLive): ForestEdgeView {
-  const stage = !state.latchA ? 'latch-a' : !state.braceB ? 'brace-b' : 'done';
+  const stage = lantern.location.at === 'pedestal' && lantern.location.pedestalId === LAMP_REST_ID
+    ? 'take-lantern'
+    : !state.latchA ? 'latch-a' : !state.braceB ? 'brace-b' : 'done';
   return {
     doorAFed: lanternFeeds(lantern, S1_ID),
     gateBFed: lanternFeeds(lantern, S2_ID),
@@ -207,6 +226,9 @@ export function pendingCue(input: {
   const { hasEvent, sproutLit, live, lantern, foot } = input;
   const played = (cue: ForestCue) => hasEvent(CUE_EVENT[cue]);
   if (!played('opening') && sproutLit) return 'opening';
+  // The agreement needs either the apology already said or door A open, so it never carries "đừng soi" for a player
+  // who never lit the sprout, and it always comes before Lumo's remark about the door.
+  if (!played('agreement') && (played('opening') || live.doorAOpen)) return 'agreement';
   if (!played('pedestal') && lantern.location.at === 'pedestal' && lantern.location.pedestalId === S1_ID) return 'pedestal';
   if (!played('door-feed') && lanternFeeds(lantern, S1_ID) && live.doorAOpen) return 'door-feed';
   if (!played('lumo-door') && live.doorAOpen) return 'lumo-door';
@@ -272,7 +294,8 @@ export function forestEdgeHud(view: ForestEdgeView, lantern: LanternState, state
   const doorA = `Cửa A: ${view.doorAOpen ? 'mở' : 'đóng'}${state.latchA ? ', đã gài' : ''}`;
   const gateB = `Cổng B: ${view.gateBOpen ? 'mở' : 'đóng'}${state.braceB ? ', đã gài' : ''}`;
   return {
-    objective: view.stage === 'done' ? 'Giữ lối qua trạm để mang đèn đi tiếp' : 'Kiểm tra trạm mất nguồn',
+    objective: view.stage === 'take-lantern' ? 'Nhặt đèn cạnh bia để kiểm tra trạm'
+      : view.stage === 'done' ? 'Giữ lối qua trạm để mang đèn đi tiếp' : 'Kiểm tra trạm mất nguồn',
     status: `${lamp} · ${doorA} · ${gateB}`,
   };
 }
@@ -296,7 +319,15 @@ export function forestEdgeFocus(lantern: LanternState, state: ForestEdgeState): 
 }
 
 /** The three hint levels from the doc, for the current step. None once both latch and brace hold. */
-const HINTS: Record<'latch-a' | 'brace-b', HintLadder> = {
+const HINTS: Record<Exclude<ForestEdgeView['stage'], 'done'>, HintLadder> = {
+  'take-lantern': {
+    key: 'forest-edge:take-lantern',
+    steps: [
+      'Đèn bảo trì vẫn ở nơi Nhinh đặt trước khi ngủ.',
+      'Chiếc đèn nằm trên đất cạnh bia, chưa ở trong tay.',
+      'Đi tới đèn cạnh bia rồi nhấn E để nhặt. Khi cầm đèn, F bật hoặc tắt.',
+    ],
+  },
   'latch-a': {
     key: 'forest-edge:latch-a',
     steps: [

@@ -33,6 +33,9 @@ import {
   TRAY_ID,
   WORKSHOP,
 } from './workshopLayout';
+import { OPENING_PAGES } from './openingNarrative';
+import { WORKSHOP_TUTORIAL } from './workshopTutorial';
+import type { TutorialStep } from '../../core/tutorial';
 import {
   PART_LABELS,
   WORKSHOP_DIALOGUE,
@@ -112,7 +115,7 @@ const PART_CHOICE_AT = {
 /** Where the bench lamp stands: the bench's top, centred. */
 const BENCH_LAMP_AT: Point = { x: 301, y: 180 };
 /** Illustrations of the new game and of the exit (texture keys, see src/v4/scene/illustrationFiles.ts). */
-const INTRO_ILLUSTRATIONS: readonly string[] = ['ill_01-ben-suong'];
+const INTRO_ILLUSTRATIONS: readonly string[] = OPENING_PAGES.map((page) => page.key);
 const EXIT_ILLUSTRATIONS: readonly string[] = [
   'ill_02-leaving-ben-suong',
   'ill_03-maintenance-station',
@@ -120,15 +123,18 @@ const EXIT_ILLUSTRATIONS: readonly string[] = [
   'ill_05-morning-without-dawn',
 ];
 /**
- * Narration under each illustration (Vietnamese catalog keys, src/i18n/entries/workshop.ts). Not in the V4 docs:
- * written from the events of 00-prologue.md at the user's request (2026-10-25).
+ * Narration under each illustration (Vietnamese catalog keys, src/i18n/entries/workshop.ts). The eleven intro pages
+ * come from openingNarrative.ts, one to three sentences each, and stay inside what their picture shows. The four exit
+ * pages are the journey after the workshop: two sentences at most, and only what their pictures show — the road out,
+ * the station, the night by the stele, the dim morning. Not in the V4 docs: written from 00-prologue.md at the user's
+ * request (2026-10-25).
  */
 const ILLUSTRATION_CAPTIONS: Readonly<Record<string, string>> = {
-  'ill_01-ben-suong': 'Bến Sương, chiều muộn. Nhinh học việc ở xưởng sửa đèn của mẹ bên bến thuyền, và cô mong một ngày mẹ giao cho mình những việc lớn hơn.',
-  'ill_02-leaving-ben-suong': 'Mẹ ở lại giữ đèn cho các chuyến thuyền và trạm bơm. Nhinh mang đèn bảo trì và bản đồ, theo đường ven sông đi về phía rừng.',
-  'ill_03-maintenance-station': 'Trời nhá nhem khi Nhinh tới trạm ở bìa rừng. Trạm không có gì nguy hiểm, nhưng hướng dẫn trên bia đã cũ.',
-  'ill_04-waiting-for-morning': 'Đi tiếp trong bóng tối thì liều quá. Nhinh đặt đèn cạnh bia, tựa vào gốc cây và chờ trời sáng.',
-  'ill_05-morning-without-dawn': 'Đồng hồ đã sang buổi sáng. Nhưng sương không tan, và khu rừng vẫn chạng vạng như lúc cô thiếp đi.',
+  ...Object.fromEntries(OPENING_PAGES.map((page) => [page.key, page.caption])),
+  'ill_02-leaving-ben-suong': 'Được mẹ giao việc, Nhinh mang bản đồ và đèn bảo trì theo đường ven sông. Sau lưng cô, mẹ còn giữ đèn cho thuyền và trạm bơm.',
+  'ill_03-maintenance-station': 'Trạm bìa rừng hiện ra lúc nhá nhem. Dấu bảo trì giống ở xưởng, nhưng những dòng hướng dẫn trên bia đã cũ.',
+  'ill_04-waiting-for-morning': 'Nhinh muốn kiểm tra tiếp, rồi nhớ lời mẹ dặn đừng đi khi trời tối. Cô đặt đèn cạnh bia, tựa vào gốc cây và chờ sáng.',
+  'ill_05-morning-without-dawn': 'Giờ này Bến Sương đã sáng. Đồng hồ của Nhinh cũng sang ngày mới, nhưng sương trong rừng không tan — buổi sáng ở Elaria vẫn như chiều tối.',
 };
 /** The level the south door leads to. */
 const NEXT_LEVEL_ID = 'forest-edge';
@@ -187,6 +193,11 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
   private panelClock = 0;
   /** Mother shows her map while the diagnosis dialogue plays. */
   private showingMap = false;
+  /**
+   * The payment lines are on screen, so the boatman's sprite stays up although the save already has him gone. Not
+   * saved: presentation only, cleared when the payment ends and his walk starts.
+   */
+  private paying = false;
   /** Milliseconds since the harbour lamp blinked, or null when no blink is running. */
   private harborBlink: number | null = null;
   /** Mother's call, held until the boatman is gone and the harbour lamp has blinked (00-prologue.md). */
@@ -207,6 +218,10 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
 
   illustrationCaption(key: string): string | null {
     return ILLUSTRATION_CAPTIONS[key] ?? null;
+  }
+
+  tutorial(): readonly TutorialStep[] {
+    return WORKSHOP_TUTORIAL;
   }
 
   defaultState(): WorkshopState {
@@ -457,10 +472,15 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
       return;
     }
     if (id === 'diagnosis') this.showingMap = true;
+    // He is already "returned" in the save while he pays: keep his sprite at the door until the payment lines end.
+    if (id === 'payment') this.paying = true;
     this.refresh();
     this.host.say(WORKSHOP_DIALOGUE[id], () => {
       if (id === 'diagnosis') this.showingMap = false;
-      if (id === 'payment') this.startBoatmanWalk();
+      if (id === 'payment') {
+        this.paying = false;
+        this.startBoatmanWalk();
+      }
       onDone();
     });
   }
@@ -520,7 +540,7 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
     if (!s.localLineRepaired) showTexture(this.panel, spriteKey('panel-loose'));
     this.mother?.setTexture(spriteKey(this.showingMap ? 'mother-map' : 'mother-work'));
     if (this.boatman && !this.boatmanWalking) {
-      this.boatman.setVisible(!s.boatmanReturned);
+      this.boatman.setVisible(!s.boatmanReturned || this.paying);
       this.boatman.setTexture(spriteKey('boatman-front'));
     }
     if (this.carriedLamp) this.carriedLamp.setVisible(s.held === 'lamp' && !s.boatmanReturned);

@@ -70,6 +70,12 @@ const TOAST_PAD_X = 10;
 const TOAST_PAD_Y = 4;
 const TOAST_DEFAULT_MS = 2600;
 const TOAST_MAX_WIDTH = 520;
+// The first-play lesson panel: centred, its bottom just above the key row.
+const COACH_MAX_WIDTH = 460;
+const COACH_PAD_X = 10;
+const COACH_PAD_Y = 5;
+const COACH_BOTTOM = KEYS_Y - CHIP_HEIGHT / 2 - 9;
+const COACH_STROKE = 0xd8b869;
 // Three faceted crystal pips, drawn inside the top panel's right edge (WorldScene only).
 const CRYSTAL_GUTTER = 54;
 const CRYSTAL_INSET = 12;
@@ -112,6 +118,8 @@ export class CampaignHud {
   private readonly pulseLabel: Phaser.GameObjects.Text;
   private readonly toastGraphics: Phaser.GameObjects.Graphics;
   private readonly toastText: Phaser.GameObjects.Text;
+  private readonly coachGraphics: Phaser.GameObjects.Graphics;
+  private readonly coachText: Phaser.GameObjects.Text;
   private keyVisibility: Record<HudKeyId, boolean> = {
     move: false, run: false, interact: false, lantern: false, pulse: false, journal: false, hint: false, pause: false,
   };
@@ -174,7 +182,37 @@ export class CampaignHud {
     this.toastText.setWordWrapWidth(TOAST_MAX_WIDTH - TOAST_PAD_X * 2, true);
     this.toastLayer.add([this.toastGraphics, this.toastText]);
 
+    // The first-play lesson sits just above the key row, so the keys it names are right below it. It lives in the
+    // panel layer: hidden with the rest of the HUD while a line is read or the pause menu is open.
+    this.coachGraphics = scene.add.graphics();
+    this.coachText = this.makeText(TOAST_X, COACH_BOTTOM, '', 10.5, AMBER, true).setOrigin(0.5, 1).setAlign('center')
+      .setVisible(false);
+    this.coachText.setWordWrapWidth(COACH_MAX_WIDTH - COACH_PAD_X * 2, true).setLineSpacing(2);
+    this.panelLayer.add([this.coachGraphics, this.coachText]);
+
     this.redrawPanels();
+  }
+
+  /** The current first-play lesson (a Vietnamese catalog key), or null for none. */
+  public setCoach(text: string | null): void {
+    const localized = text === null ? '' : tr(text);
+    if (this.coachText.text === localized) return;
+    this.coachText.setText(localized);
+    const graphics = this.coachGraphics;
+    graphics.clear();
+    if (localized === '') {
+      this.coachText.setVisible(false);
+      return;
+    }
+    const width = Math.ceil(this.coachText.width) + COACH_PAD_X * 2;
+    const height = Math.ceil(this.coachText.height) + COACH_PAD_Y * 2;
+    const x = Math.round(TOAST_X - width / 2);
+    const y = COACH_BOTTOM + COACH_PAD_Y - height;
+    graphics.fillStyle(PANEL_FILL, 0.94);
+    graphics.fillRoundedRect(x, y, width, height, PANEL_RADIUS);
+    graphics.lineStyle(1, COACH_STROKE, 0.95);
+    graphics.strokeRoundedRect(x, y, width, height, PANEL_RADIUS);
+    this.coachText.setVisible(true);
   }
 
   public setTitle(text: string): void {

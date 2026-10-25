@@ -6,6 +6,7 @@ import type { Point, Rect } from '../core/geometry';
 import type { LanternState } from '../core/lantern';
 import type { LumoMode } from '../core/lumo';
 import type { PulseMark } from '../core/pulse';
+import type { TutorialStep } from '../core/tutorial';
 import type { Footprint, LightMark, Room, SpillDecl } from '../core/light';
 import type { LanternLightingProfile } from '../../systems/LanternSystem';
 import type { ChoicePlacement } from '../../ui/ChoiceBox';
@@ -60,6 +61,8 @@ export interface V4LevelRuntime<S> {
   intro?(): readonly string[];
   /** The narration shown under one of this level's illustrations (intro or exit), Vietnamese catalog key. Optional. */
   illustrationCaption?(key: string): string | null;
+  /** First-play control lessons, shown one at a time above the key row (see core/tutorial). Optional. */
+  tutorial?(): readonly TutorialStep[];
   /** Draws the room and creates its solids. Called once per scene start. */
   build(host: LevelHost, state: S): void;
   interactables(): Interactable[];

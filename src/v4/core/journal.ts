@@ -9,3 +9,14 @@ export function addJournalEntry(
   if (entries.includes(id)) return { entries, added: false };
   return { entries: [...entries, id], added: true };
 }
+
+/** Resolves only collected entries, in order. Readers put the current level first for legacy local ids. */
+export function journalTexts(entries: readonly string[], readers: readonly ((id: string) => string)[]): string[] {
+  return entries.flatMap((id) => {
+    for (const read of readers) {
+      const text = read(id);
+      if (text !== '') return [text];
+    }
+    return [];
+  });
+}
