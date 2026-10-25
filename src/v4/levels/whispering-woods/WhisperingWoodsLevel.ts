@@ -37,6 +37,7 @@ import {
   defaultWhisperingWoodsState,
   deriveWhisperingWoods,
   inExitZone,
+  newlyMatchedRings,
   parseWhisperingWoodsState,
   turnCrank,
   whisperingWoodsBlockers,
@@ -144,7 +145,8 @@ interface GroveArt {
 
 /**
  * The whispering grove: four steles, three cranks and a gate. The rings are computed from the crank counters, the gate
- * opens once every ring faces its mouth, and a catch holds it open afterwards. Drawn with Graphics; solids are static zones.
+ * opens once every ring faces its mouth, and a catch holds it open afterwards. Drawn with sprites over a Graphics wall;
+ * solids are static zones.
  */
 export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState> {
   readonly id = 'whispering-woods';
@@ -158,11 +160,9 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
   private statics: Phaser.GameObjects.GameObject[] = [];
   /** When the gate started opening, for the half-raised frame. Zero means it was already open. */
   private gateOpenedAt = 0;
-  /** Steles, cranks, gate and catch: redrawn each frame from the view. */
-  private fixtures: Phaser.GameObjects.Graphics | null = null;
+  /** Every sprite of the grove, built once per build and redrawn each frame from the view. */
   private art: GroveArt | null = null;
-  /** The light marks (mouths) and the Pulse-revealed axles and crank marks, drawn above the darkness. */
-  /** The view drawn last frame, so the gate sounds play only on a change. */
+  /** The view drawn last frame, so the gate sounds and the ring flashes play only on a change. */
   private shown: WhisperingWoodsView | null = null;
   /** The opening line plays on the first frame, not during build. */
   private openingPending = true;
@@ -194,7 +194,6 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
     for (const wall of WHISPERING_WOODS.walls) walls.fillRect(wall.x, wall.y, wall.width, wall.height);
     this.statics.push(walls);
 
-    this.fixtures = scene.add.graphics().setDepth(3.4);
     this.art = this.createArt();
 
     // Solids: walls, steles and cranks always; the gate while closed (its zone follows the view in update).
@@ -310,8 +309,6 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
   destroy(): void {
     for (const graphics of this.statics) graphics.destroy();
     this.statics = [];
-    this.fixtures?.destroy();
-    this.fixtures = null;
     this.destroyArt();
     this.gateZone = null;
   }
@@ -336,7 +333,8 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
   /** Applies the zone and the drawing for a view. Used by build and by every frame. */
   private refresh(view: WhisperingWoodsView): void {
     if (this.gateZone) this.setZoneEnabled(this.gateZone, !view.gateOpen);
-    this.drawFixtures(view);
+    this.drawArt(view);
+    this.drawPulseReveals();
     this.drawMarks(view);
     this.shown = view;
   }
@@ -416,13 +414,10 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
     this.art = null;
   }
 
-  private drawFixtures(view: WhisperingWoodsView): void {
-    const g = this.fixtures;
+  /** Pulse-revealed: the axle bars under the moss, and the match mark under each crank. */
+  private drawPulseReveals(): void {
     const art = this.art;
-    if (!g || !art) return;
-    g.clear();
-    this.drawArt(view, art);
-    // Pulse-revealed: the axle bars under the moss, and the match mark under each crank.
+    if (!art) return;
     for (const crank of CRANKS) {
       art.axles[crank].setAlpha(this.host.hasJournal(AXLE_ID[crank]) ? 1 : 0);
       art.marks[crank].setAlpha(this.host.hasJournal(MARK_ID[crank]) ? 1 : 0);
@@ -463,17 +458,19 @@ export class WhisperingWoodsLevel implements V4LevelRuntime<WhisperingWoodsState
    * The view on the sprites: each ring turns to its direction and glows only when it matches its own mouth; the gate
    * shows its leaf or its open frame; the catch is lit once it holds.
    */
-  private drawArt(view: WhisperingWoodsView, art: GroveArt): void {
+  private drawArt(view: WhisperingWoodsView): void {
+    const art = this.art;
+    if (!art) return;
     for (const ring of RINGS) {
       const image = art.rings[ring];
       image.setRotation(RING_ANGLE[view.rings[ring]]);
       if (view.matched[ring]) image.setTint(COLOR.ringMatched);
       else image.clearTint();
-      // A ring that has just found its mouth flashes once.
-      if (view.matched[ring] && !this.shown?.matched[ring]) {
-        const centre = rectCenter(WHISPERING_WOODS.steles[ring]);
-        this.spawnGlow(centre.x, centre.y - 4, EFFECT_DEPTH);
-      }
+    }
+    // A ring that has just found its mouth flashes once; rings already matched on the first draw do not.
+    for (const ring of newlyMatchedRings(this.shown, view)) {
+      const centre = rectCenter(WHISPERING_WOODS.steles[ring]);
+      this.spawnGlow(centre.x, centre.y - 4, EFFECT_DEPTH);
     }
     const now = this.host.scene.time.now;
     let gateKey: string = GROVE_SPRITE_KEYS.gateClosed;
