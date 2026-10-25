@@ -12,7 +12,7 @@ import { ChoiceBox } from '../../ui/ChoiceBox';
 import { CampaignHud } from '../../ui/CampaignHud';
 import { PauseMenu } from '../../ui/PauseMenu';
 import type { DialogueLine, Interactable } from '../../types/gameTypes';
-import { addJournalEntry } from '../core/journal';
+import { addJournalEntry, journalTexts } from '../core/journal';
 import { pointInRect, rectCenter } from '../core/geometry';
 import type { Rect } from '../core/geometry';
 import { NO_HINT_CURSOR, nextHint } from '../core/hints';
@@ -425,9 +425,9 @@ export class V4Scene extends Phaser.Scene {
   }
 
   private openJournal(): void {
-    const lines: DialogueLine[] = this.save.journal
-      .map((id) => this.level.journalText(id))
-      .filter((text) => text !== '')
+    const levels = [this.level, ...allLevelFactories().map((factory) => factory())];
+    const readers = levels.map((level) => (id: string) => level.journalText(id));
+    const lines: DialogueLine[] = journalTexts(this.save.journal, readers)
       .map((text) => ({ speaker: 'Hệ thống', text }));
     this.dialogue.startDialogue(lines.length > 0 ? lines : [{ speaker: 'Hệ thống', text: TOAST_JOURNAL_EMPTY }]);
   }

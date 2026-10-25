@@ -28,12 +28,11 @@ export interface WorkshopState {
 /** The step the player is on. */
 export type WorkshopStage = 'repair' | 'deliver' | 'panel' | 'depart';
 
-/** The dialogue scripts, one per beat. */
-export type WorkshopDialogueId = 'opening' | 'inspect' | 'payment' | 'incident' | 'diagnosis';
+/** The dialogue scripts, one per beat. `mother-work` is optional: Mẹ's own script while the lamp work goes on. */
+export type WorkshopDialogueId = 'opening' | 'inspect' | 'payment' | 'incident' | 'diagnosis' | 'mother-work';
 
 /** The journal entries the workshop writes. */
 export type WorkshopJournalId = 'elaria-signal' | 'assignment';
-
 /** What the host should do after an action. */
 export type WorkshopEffect =
   | { readonly kind: 'dialogue'; readonly id: WorkshopDialogueId }
@@ -50,8 +49,10 @@ export interface WorkshopResult {
 /** Dialogue lines from docs/scenario-v4/00-prologue.md, copied word for word. Speaker ids are the labels shown. */
 export const WORKSHOP_DIALOGUE: Record<WorkshopDialogueId, DialogueLine[]> = {
   // Not in the V4 docs: added at the user's request (2026-10-25) so a new player knows where to start.
+  // The second line says what the evening holds, so the lamps of the harbour have a reason from the first frame.
   opening: [
     { speaker: 'Lái đò', text: 'Cô thợ ơi, chiếc đèn bác để trên bàn rồi đấy. Xem giúp bác với.' },
+    { speaker: 'Lái đò', text: 'Tối nay bác có chuyến qua sương; đèn sáng thì bác nhìn ra lối vào bến.' },
   ],
   inspect: [
     { speaker: 'Nhinh', text: 'Lõi lệch rồi. Bác có làm rơi nó không?' },
@@ -63,21 +64,35 @@ export const WORKSHOP_DIALOGUE: Record<WorkshopDialogueId, DialogueLine[]> = {
     { speaker: 'Lái đò', text: 'Thế bác còn phải sửa đèn ở đây lâu đấy.' },
   ],
   incident: [
-    { speaker: 'Mẹ', text: 'Nhinh, xem trạm cửa sổ với mẹ.' },
+    { speaker: 'Mẹ', text: 'Nhinh, xem bảng kiểm với mẹ.' },
   ],
+  // The five doc lines keep their wording and order; the three lines marked (added) explain where the harbour power
+  // comes from, why Mẹ stays behind, and what the maintenance lamp can and cannot do.
   diagnosis: [
     { speaker: 'Nhinh', text: 'Đường trong xưởng thông rồi. Nhánh này vẫn yếu.' },
     { speaker: 'Mẹ', text: 'Từ Elaria. Lâu lắm trạm ấy mới gửi tín hiệu.' },
+    // (added) where the harbour source runs.
+    { speaker: 'Mẹ', text: 'Nguồn của bến đi từ rừng Elaria xuống, qua tuyến bảo trì cũ và trạm ở bìa rừng.' },
     { speaker: 'Nhinh', text: 'Con biết đọc mốc bảo trì. Con tới trạm ngoài rừng xem.' },
+    // (added) why Mẹ cannot go herself.
+    { speaker: 'Mẹ', text: 'Mẹ phải ở lại giữ bơm và đón thuyền. Ngoài kia còn người đợi đèn để về.' },
     { speaker: 'Mẹ', text: 'Mang bản đồ. Nếu đường hỏng thì quay về; đừng cố đi khi trời tối.' },
     { speaker: 'Nhinh', text: 'Lần này mẹ cứ để con sửa.' },
+    // (added) the maintenance lamp is a test source, not the harbour's own.
+    { speaker: 'Mẹ', text: 'Cầm đèn bảo trì. Nó chỉ cấp nguồn thử cho máy, không thay được nguồn của bến.' },
+  ],
+  // Optional, never required: Mẹ's own work in the workshop while the boatman's lamp is being fixed.
+  'mother-work': [
+    { speaker: 'Mẹ', text: 'Chiếc đèn nhỏ trên bàn này con thử giúp mẹ nhé.' },
+    { speaker: 'Nhinh', text: 'Mẹ cho con thử việc ở trạm một lần. Con đọc được mốc bảo trì rồi.' },
+    { speaker: 'Mẹ', text: 'Làm kỹ vào. Ngoài kia còn người cần đèn để về.' },
   ],
 };
 
 /** Journal text for the two entries. Written here (not in V4 docs), per 00-workshop.md. */
 export const WORKSHOP_JOURNAL: Record<WorkshopJournalId, string> = {
   'elaria-signal': 'Tín hiệu bảo trì cũ từ Elaria: đường trong xưởng đã thông, đầu nguồn vẫn đứt nhịp.',
-  assignment: 'Mẹ giao: kiểm tra trạm ngoài bìa rừng. Nếu đường hỏng thì quay về; đừng cố đi khi trời tối.',
+  assignment: 'Mẹ giữ bến, Nhinh kiểm tra trạm bìa rừng. Đường hỏng thì quay về, không đi đêm. Đèn bảo trì chỉ thử máy, không cấp nguồn cho bến.',
 };
 
 /** Display names of the parts, for the choice box. */
@@ -89,7 +104,7 @@ export const PART_LABELS: Record<WorkshopPart, string> = {
 const OBJECTIVES: Record<WorkshopStage, string> = {
   repair: 'Sửa chiếc đèn của bác lái đò.',
   deliver: 'Mang đèn ra cửa cho bác lái đò.',
-  panel: 'Xem trạm cửa sổ với mẹ.',
+  panel: 'Xem bảng kiểm với mẹ.',
   depart: 'Đi tới trạm ở bìa rừng.',
 };
 
@@ -132,6 +147,15 @@ const HINTS: Record<WorkshopStage, HintLadder> = {
       'Đi ra cửa phía nam.',
     ],
   },
+};
+
+const ASSIGNMENT_HINT: HintLadder = {
+  key: 'workshop:assignment',
+  steps: [
+    'Đường trong xưởng đã thông, nhưng mẹ còn lời dặn trước khi lên đường.',
+    'Quay lại bảng kiểm để nhận đèn bảo trì và bản đồ.',
+    'Nhấn E ở bảng kiểm để tiếp tục cuộc nói chuyện với mẹ.',
+  ],
 };
 
 function result(state: WorkshopState, effects: readonly WorkshopEffect[] = []): WorkshopResult {
@@ -285,15 +309,17 @@ export function panelPrompt(s: WorkshopState): string | null {
 }
 
 /**
- * E at the panel. Before the incident it reads normal. After it, the first use repairs the local line, plays
- * the diagnosis and writes the journal. While the assignment is still pending, a repeat plays the diagnosis
- * again without granting anything; completeAssignment() grants it once the dialogue ends.
+ * E at the panel. Before the incident it reads normal. After it, the first use repairs the local line, writes the
+ * signal note and plays the diagnosis. The note is written BEFORE the dialogue starts, so a reload in the middle of
+ * the diagnosis cannot lose it. While the assignment is still pending, a repeat plays the diagnosis again and
+ * re-emits the note (the host's addJournal ignores an id it already holds); completeAssignment() grants the order
+ * once that dialogue ends.
  */
 export function usePanel(s: WorkshopState): WorkshopResult {
   if (s.assignmentReceived) return result(s);
   if (!s.boatmanReturned) return result(s, [toast('Bảng kiểm vẫn bình thường.')]);
-  if (s.localLineRepaired) return result(s, [dialogue('diagnosis')]);
-  return result({ ...s, localLineRepaired: true }, [dialogue('diagnosis'), { kind: 'journal', id: 'elaria-signal' }]);
+  const state = s.localLineRepaired ? s : { ...s, localLineRepaired: true };
+  return result(state, [{ kind: 'journal', id: 'elaria-signal' }, dialogue('diagnosis')]);
 }
 
 /**
@@ -313,10 +339,10 @@ export function motherPrompt(_s: WorkshopState): string | null {
   return 'E: nói chuyện';
 }
 
-/** E at Mẹ: a toast that depends on the step. */
+/** E at Mẹ: her optional script while the lamp work goes on, then a toast that depends on the step. */
 export function useMother(s: WorkshopState): WorkshopResult {
   const stage = workshopStage(s);
-  if (stage === 'repair' || stage === 'deliver') return result(s, [toast('Mẹ đang sửa dở một chiếc đèn.')]);
+  if (stage === 'repair' || stage === 'deliver') return result(s, [dialogue('mother-work')]);
   if (stage === 'panel') return result(s, [toast('Mẹ đang đợi ở bảng kiểm.')]);
   return result(s, [toast('Mẹ: “Mang bản đồ. Nếu đường hỏng thì quay về.”')]);
 }
@@ -324,7 +350,7 @@ export function useMother(s: WorkshopState): WorkshopResult {
 /**
  * The interactable to mark next (the host's focus marker). The workshop is the first room of the game, so it points
  * the way at every step: the bench, the tray, the bench again with the ring, the boatman, then the panel once Mẹ has
- * called. A held spring points back to the tray. Nothing is marked while Mẹ's call is pending or after the diagnosis.
+ * called. A held spring points back to the tray. The panel stays marked until the assignment is received.
  */
 export function workshopFocus(s: WorkshopState): readonly string[] {
   switch (workshopStage(s)) {
@@ -335,7 +361,7 @@ export function workshopFocus(s: WorkshopState): readonly string[] {
     case 'deliver':
       return [BOATMAN_ID];
     case 'panel':
-      return s.incidentCalled && !s.localLineRepaired ? [PANEL_ID] : [];
+      return s.incidentCalled ? [PANEL_ID] : [];
     case 'depart':
       return [];
   }
@@ -349,15 +375,15 @@ export function exitOpen(s: WorkshopState): boolean {
 /** The HUD lines: the objective of the stage and what Nhinh holds. */
 export function workshopHud(s: WorkshopState): HudText {
   return {
-    objective: OBJECTIVES[workshopStage(s)],
+    objective: s.localLineRepaired && !s.assignmentReceived ? 'Nghe mẹ dặn ở bảng kiểm.' : OBJECTIVES[workshopStage(s)],
     status: s.held === null ? '' : HELD_STATUS[s.held],
   };
 }
 
-/** The hint ladder for the current step. Null when nothing is left to hint (the panel after its repair). */
+/** The hint ladder for the current step, including a diagnosis interrupted by a reload. */
 export function workshopHint(s: WorkshopState): HintLadder | null {
   const stage = workshopStage(s);
-  if (stage === 'panel') return s.localLineRepaired ? null : HINTS.panel;
+  if (stage === 'panel' && s.localLineRepaired) return ASSIGNMENT_HINT;
   return HINTS[stage];
 }
 

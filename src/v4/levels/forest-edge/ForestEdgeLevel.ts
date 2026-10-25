@@ -29,6 +29,7 @@ import {
   SPROUT_ID,
 } from './forestEdgeLayout';
 import {
+  AGREEMENT_JOURNAL_ID,
   CUE_EVENT,
   CUE_LINES,
   FOREST_EDGE_JOURNAL_TEXT,
@@ -338,6 +339,8 @@ export class ForestEdgeLevel implements V4LevelRuntime<ForestEdgeState> {
       });
       if (cue) {
         this.host.markEvent(CUE_EVENT[cue]);
+        // The deal is written down as it starts, so a skipped line or a reload still keeps who Lumo is and the trade.
+        if (cue === 'agreement') this.host.addJournal(AGREEMENT_JOURNAL_ID);
         this.speaking = true;
         this.host.say([...CUE_LINES[cue]], () => {
           this.speaking = false;
