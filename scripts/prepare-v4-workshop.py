@@ -42,6 +42,9 @@ SPECK_MIN = 20      # components smaller than this many pixels are ignored
 GAME_SCALE = 2      # runtime art is 2x the in-game pixel size (game draws at 0.5)
 BG_SIZE = (1280, 720)
 WALK_FRAMES = 3     # boatman-walk-south.png is three cells side by side
+# Mẹ and the boatman are drawn with adult proportions (small head, slim body), Nhinh as a chibi child (big head,
+# wide cape). At Nhinh's height the adults read smaller than her, so they stand this much taller.
+ADULT_SCALE = 1.3
 
 ART_ROOT = ROOT / 'assets' / 'prologue'
 
@@ -169,17 +172,22 @@ def export_family(assets, summary, members):
         write(assets, summary, OUT_SPR, f'{name}.png', out, src, 'sprite', 'bottom-center')
 
 
-def export_walk(assets, summary, src):
-    """Splits the three-cell walk strip into one sprite per frame, all cut to the same foot line."""
+def export_walk(assets, summary, src, body_h):
+    """Splits the three-cell walk strip into one sprite per frame, scaled together so the tallest frame's body is
+    body_h output pixels, all cut to the same foot line."""
     with Image.open(src) as im:
         strip = im.convert('RGBA')
     if strip.width % WALK_FRAMES:
         raise SystemExit(f'{rel(src)}: width {strip.width} is not {WALK_FRAMES} equal cells')
     cell_w = strip.width // WALK_FRAMES
     cells = [strip.crop((i * cell_w, 0, (i + 1) * cell_w, strip.height)) for i in range(WALK_FRAMES)]
-    for i, cell in enumerate(cells):
-        if alpha_bottom(cell) == 0:
+    boxes = [visible_bbox(cell) for cell in cells]
+    for i, box in enumerate(boxes):
+        if box is None:
             raise SystemExit(f'{rel(src)}: walk cell {i} is empty')
+    factor = body_h / max(box[3] - box[1] for box in boxes)
+    size = (round(cell_w * factor), round(strip.height * factor))
+    cells = [cell.resize(size, Image.LANCZOS) for cell in cells]
     bottom = max(alpha_bottom(cell) for cell in cells)
     for i, cell in enumerate(cells):
         out = cell.crop((0, 0, cell.width, bottom))
@@ -204,8 +212,8 @@ def main():
     with Image.open(NHINH) as nh:
         nhinh_bbox = visible_bbox(nh.convert('RGBA'))
     nhinh_h = nhinh_bbox[3] - nhinh_bbox[1]
-    mother_h = nhinh_h + 2     # in-game visible height, plan value 30
-    boatman_h = nhinh_h + 1    # in-game visible height, plan value 29
+    mother_h = round((nhinh_h + 2) * ADULT_SCALE)     # in-game visible height: 39 for Nhinh's 28
+    boatman_h = round((nhinh_h + 1) * ADULT_SCALE)    # 38
 
     assets = {}
     summary = []
@@ -240,7 +248,7 @@ def main():
     ])
 
     # Boatman walking south, pass 2.
-    export_walk(assets, summary, ws_v2 / '07-boatman-walk-south.png')
+    export_walk(assets, summary, ws_v2 / '07-boatman-walk-south.png', boatman_h * GAME_SCALE)
 
     # Characters, pass 1, 2x2 row-major.
     chars = [

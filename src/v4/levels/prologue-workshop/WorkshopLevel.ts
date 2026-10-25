@@ -54,6 +54,7 @@ import {
   useMother,
   usePanel,
   useTray,
+  workshopFocus,
   workshopHint,
   workshopHud,
   workshopSolids,
@@ -269,6 +270,10 @@ export class WorkshopLevel implements V4LevelRuntime<WorkshopState> {
 
   interactables(): Interactable[] {
     return this.items;
+  }
+
+  focus(): readonly string[] {
+    return workshopFocus(this.state);
   }
 
   update(dt: number, foot: Rect): void {

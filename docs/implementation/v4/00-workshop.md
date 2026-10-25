@@ -78,6 +78,10 @@ Nhân vật mẹ và bác lái đò ở đợt 1 dùng tiếp được. Art đ�
 
 **Tích hợp đợt 2 (đã làm):** nền, bàn, khay, đèn khách, bảng kiểm, lớp đèn bến và ba khung đi của bác lái đò lấy từ đợt 2. Đèn khách hỏng là `customer-lamp-open` trên bàn; đèn đã sửa được cầm và hiện `customer-lamp-lit`. Bảng kiểm lỏng là `panel-loose`; sau khi nối nó nhấp nháy giữa `panel-fault` và `panel-off`. Đèn bến là hai lớp: sáng cho tới khi Mẹ gọi, chớp khi bác lái đò tới cửa rồi tắt. `customer-lamp-closed` đã xuất nhưng chưa được dùng, vì logic không có bước khép vỏ riêng để hiện trạng thái này. Vị trí: bàn, khay, bảng kiểm và cửa được đo lại theo chân của art đợt 2; khe cửa nam mở 272–368.
 
+**Tỉ lệ người lớn:** Nhinh vẽ kiểu chibi (đầu to, áo choàng rộng), mẹ và bác lái đò vẽ tỉ lệ người lớn. Ở cùng chiều cao (~28–30 px), hai người lớn trông nhỏ hơn cô bé, nên script xuất họ cao gấp 1,3 (mẹ 39 px, bác lái đò 38 px, kể cả ba khung đi). Muốn hết hẳn chênh lệch phong cách thì phải vẽ lại hai nhân vật theo tỉ lệ chibi của Nhinh.
+
+**Chỉ dẫn:** xưởng là phòng đầu tiên của game, nên dùng focus marker của host (`workshopFocus`) để chỉ bước kế tiếp: bàn → khay → bàn (khi cầm vòng) → bác lái đò → bảng kiểm (sau khi Mẹ gọi). Cầm lò xo thì chỉ về khay. Không đánh dấu gì khi đang chờ Mẹ gọi và sau khi chẩn đoán.
+
 ## 2. Kế hoạch dựng (cho worker)
 
 Quy tắc chung như mục "Rules for every worker" của plan nền tảng. Level id: `prologue-workshop`. Thư mục: `src/v4/levels/prologue-workshop/`.

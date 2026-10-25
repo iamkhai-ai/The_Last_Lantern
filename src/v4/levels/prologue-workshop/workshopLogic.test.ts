@@ -24,6 +24,7 @@ import {
   useMother,
   usePanel,
   useTray,
+  workshopFocus,
   workshopHint,
   workshopHud,
   workshopItems,
@@ -31,7 +32,7 @@ import {
   workshopStage,
 } from './workshopLogic';
 import type { WorkshopEffect, WorkshopState } from './workshopLogic';
-import { WORKSHOP, WORKSHOP_SPAWN } from './workshopLayout';
+import { BENCH_ID, BOATMAN_ID, PANEL_ID, TRAY_ID, WORKSHOP, WORKSHOP_SPAWN } from './workshopLayout';
 
 const START: WorkshopState = defaultWorkshopState();
 
@@ -307,6 +308,30 @@ describe('reload invariants', () => {
     const mid = takePart(START, 'ring').state;
     expect(parseWorkshopState(JSON.parse(JSON.stringify(mid)))).toEqual(mid);
     expect(parseWorkshopState(JSON.parse(JSON.stringify(PANEL)))).toEqual(PANEL);
+  });
+});
+
+describe('focus marker', () => {
+  it('points at the bench first, then the tray, then the bench again with the ring', () => {
+    expect(workshopFocus(START)).toEqual([BENCH_ID]);
+    const inspected = useBench(START).state;
+    expect(workshopFocus(inspected)).toEqual([TRAY_ID]);
+    expect(workshopFocus(takePart(inspected, 'ring').state)).toEqual([BENCH_ID]);
+  });
+
+  it('points a held spring back to the tray', () => {
+    expect(workshopFocus(takePart(useBench(START).state, 'spring').state)).toEqual([TRAY_ID]);
+  });
+
+  it('points at the boatman with the lamp, and at the panel only once Mẹ has called', () => {
+    expect(workshopFocus(DELIVER)).toEqual([BOATMAN_ID]);
+    expect(workshopFocus(WALKED_OFF)).toEqual([]);
+    expect(workshopFocus(PANEL)).toEqual([PANEL_ID]);
+  });
+
+  it('marks nothing once the local line is repaired', () => {
+    expect(workshopFocus({ ...PANEL, localLineRepaired: true })).toEqual([]);
+    expect(workshopFocus(DEPART)).toEqual([]);
   });
 });
 

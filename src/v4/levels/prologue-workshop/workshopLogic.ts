@@ -3,7 +3,7 @@ import type { Rect } from '../../core/geometry';
 import type { HintLadder } from '../../core/hints';
 import type { HudText } from '../../core/level';
 import type { AuditItem } from '../../core/reachAudit';
-import { BOATMAN_ID, WORKSHOP, WORKSHOP_ITEMS } from './workshopLayout';
+import { BENCH_ID, BOATMAN_ID, PANEL_ID, TRAY_ID, WORKSHOP, WORKSHOP_ITEMS } from './workshopLayout';
 
 /** What Nhinh holds. A repaired lamp is held until she gives it to the boatman. */
 export type HeldItem = 'ring' | 'spring' | 'lamp' | null;
@@ -300,6 +300,26 @@ export function useMother(s: WorkshopState): WorkshopResult {
   if (stage === 'repair' || stage === 'deliver') return result(s, [toast('Mẹ đang sửa dở một chiếc đèn.')]);
   if (stage === 'panel') return result(s, [toast('Mẹ đang đợi ở bảng kiểm.')]);
   return result(s, [toast('Mẹ: “Mang bản đồ. Nếu đường hỏng thì quay về.”')]);
+}
+
+/**
+ * The interactable to mark next (the host's focus marker). The workshop is the first room of the game, so it points
+ * the way at every step: the bench, the tray, the bench again with the ring, the boatman, then the panel once Mẹ has
+ * called. A held spring points back to the tray. Nothing is marked while Mẹ's call is pending or after the diagnosis.
+ */
+export function workshopFocus(s: WorkshopState): readonly string[] {
+  switch (workshopStage(s)) {
+    case 'repair':
+      if (s.held === 'ring') return [BENCH_ID];
+      if (s.held === 'spring') return [TRAY_ID];
+      return s.lampInspected ? [TRAY_ID] : [BENCH_ID];
+    case 'deliver':
+      return [BOATMAN_ID];
+    case 'panel':
+      return s.incidentCalled && !s.localLineRepaired ? [PANEL_ID] : [];
+    case 'depart':
+      return [];
+  }
 }
 
 /** The south exit opens once the assignment is received. */

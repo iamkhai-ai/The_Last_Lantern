@@ -92,12 +92,12 @@
       "source": "story-v4-art-v1/workshop/03-boatman-poses.png",
       "source_cell": 1,
       "output_size": [
-        27,
-        58
+        36,
+        76
       ],
       "in_game_size": [
-        13.5,
-        29.0
+        18.0,
+        38.0
       ],
       "anchor": "bottom-center"
     },
@@ -106,12 +106,12 @@
       "source": "story-v4-art-v1/workshop/03-boatman-poses.png",
       "source_cell": 0,
       "output_size": [
-        28,
-        58
+        36,
+        76
       ],
       "in_game_size": [
-        14.0,
-        29.0
+        18.0,
+        38.0
       ],
       "anchor": "bottom-center"
     },
@@ -120,12 +120,12 @@
       "source": "story-v4-art-v1/workshop/03-boatman-poses.png",
       "source_cell": 2,
       "output_size": [
-        28,
-        58
+        37,
+        76
       ],
       "in_game_size": [
-        14.0,
-        29.0
+        18.5,
+        38.0
       ],
       "anchor": "bottom-center"
     },
@@ -134,12 +134,12 @@
       "source": "story-v4-art-v2/workshop/07-boatman-walk-south.png",
       "source_cell": 0,
       "output_size": [
-        72,
-        78
+        94,
+        103
       ],
       "in_game_size": [
-        36.0,
-        39.0
+        47.0,
+        51.5
       ],
       "anchor": "bottom-center"
     },
@@ -148,12 +148,12 @@
       "source": "story-v4-art-v2/workshop/07-boatman-walk-south.png",
       "source_cell": 1,
       "output_size": [
-        72,
-        78
+        94,
+        103
       ],
       "in_game_size": [
-        36.0,
-        39.0
+        47.0,
+        51.5
       ],
       "anchor": "bottom-center"
     },
@@ -162,12 +162,12 @@
       "source": "story-v4-art-v2/workshop/07-boatman-walk-south.png",
       "source_cell": 2,
       "output_size": [
-        72,
-        78
+        94,
+        103
       ],
       "in_game_size": [
-        36.0,
-        39.0
+        47.0,
+        51.5
       ],
       "anchor": "bottom-center"
     },
@@ -246,12 +246,12 @@
       "source": "story-v4-art-v1/workshop/02-mother-poses.png",
       "source_cell": 1,
       "output_size": [
-        27,
-        60
+        35,
+        78
       ],
       "in_game_size": [
-        13.5,
-        30.0
+        17.5,
+        39.0
       ],
       "anchor": "bottom-center"
     },
@@ -260,12 +260,12 @@
       "source": "story-v4-art-v1/workshop/02-mother-poses.png",
       "source_cell": 0,
       "output_size": [
-        26,
-        60
+        34,
+        78
       ],
       "in_game_size": [
-        13.0,
-        30.0
+        17.0,
+        39.0
       ],
       "anchor": "bottom-center"
     },
@@ -274,12 +274,12 @@
       "source": "story-v4-art-v1/workshop/02-mother-poses.png",
       "source_cell": 2,
       "output_size": [
-        35,
-        60
+        45,
+        78
       ],
       "in_game_size": [
-        17.5,
-        30.0
+        22.5,
+        39.0
       ],
       "anchor": "bottom-center"
     },
@@ -288,12 +288,12 @@
       "source": "story-v4-art-v1/workshop/02-mother-poses.png",
       "source_cell": 3,
       "output_size": [
-        30,
-        60
+        39,
+        78
       ],
       "in_game_size": [
-        15.0,
-        30.0
+        19.5,
+        39.0
       ],
       "anchor": "bottom-center"
     },
